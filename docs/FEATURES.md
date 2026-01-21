@@ -293,10 +293,35 @@
 
 > These could add value but need careful implementation. Better to skip than do poorly.
 
-| Feature          | Notes                                                                                                                          |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Predicted issues | Based on crowd-sourced data: "Civic owners often report X at your mileage." Only show when confidence is high. Don't cry wolf. |
-| Service patterns | Learn when user typically services (e.g., Saturdays, March). Use to pre-fill defaults, not to nag.                             |
+| Feature                | Notes                                                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Predicted issues       | Based on crowd-sourced data: "Civic owners often report X at your mileage." Only show when confidence is high. Don't cry wolf. |
+| Service patterns       | Learn when user typically services (e.g., Saturdays, March). Use to pre-fill defaults, not to nag.                             |
+| Vehicle health diagram | Visual schematic showing vehicle areas color-coded by status. Two toggleable views (see below).                                |
+
+##### Vehicle Health Diagram
+
+> A visual schematic of the vehicle with color-coded areas. Users can toggle between two views.
+
+**Views:**
+
+| View                        | Default | What it shows                                                                 |
+| --------------------------- | ------- | ----------------------------------------------------------------------------- |
+| **Health Status** (default) | Yes     | Current maintenance state per area: green = up-to-date, yellow = due soon, red = overdue |
+| **Repair History**          | No      | Areas with most unplanned repairs, highlighting chronic problem spots         |
+
+**Why two views:**
+
+- Health Status is forward-looking and actionable ("what needs attention now")
+- Repair History is backward-looking and informational ("where has money gone")
+- Combining them into one view would be confusing (frequent maintenance ≠ problems)
+
+**Implementation notes:**
+
+- Generic vehicle schematic (not make/model specific) with labeled zones: engine, transmission, brakes, suspension, electrical, tires, body/exterior
+- Services must map to zones (oil change → engine, brake pads → brakes, etc.)
+- Only show Repair History view if there's enough data to be meaningful
+- Best suited for enthusiast mode — casual users may find it overwhelming
 
 **Philosophy:** These are v2+ features. Ship without them, add later when we have enough data and can do them well.
 
