@@ -87,32 +87,37 @@ Functional colors that communicate maintenance status at a glance.
 
 ### Font Family
 
-**Primary:** System San Francisco (SF Pro) for native iOS feel, or a custom font for more distinction.
+**Primary:** SF Pro (iOS system font) — native feel, excellent readability, automatic Dynamic Type support.
 
-**Recommended custom option:** Satoshi or General Sans
-
-- Geometric, modern, highly readable
-- Works at small sizes (data labels) and large sizes (headlines)
-- Has enough character to not feel generic
+SF Pro provides:
+- Optimal rendering on all iOS devices
+- Built-in support for all weights and optical sizes
+- Automatic adaptation for accessibility settings
+- Monospaced variants for numerical data (SF Mono)
+- Rounded variants for friendly number displays
 
 ### Type Scale
 
-| Name             | Size | Weight         | Line Height | Usage                                   |
-| ---------------- | ---- | -------------- | ----------- | --------------------------------------- |
-| `headline-large` | 28pt | Semibold (600) | 34pt        | Screen titles                           |
-| `headline`       | 22pt | Semibold (600) | 28pt        | Section headers, "Next Up" service name |
-| `title`          | 17pt | Semibold (600) | 22pt        | Card titles, emphasis                   |
-| `body`           | 17pt | Regular (400)  | 22pt        | Primary content                         |
-| `body-secondary` | 15pt | Regular (400)  | 20pt        | Supporting content                      |
-| `caption`        | 13pt | Regular (400)  | 18pt        | Labels, metadata                        |
-| `caption-small`  | 11pt | Medium (500)   | 14pt        | Timestamps, tertiary info               |
+| Name             | Size | Weight        | Design    | Usage                           |
+| ---------------- | ---- | ------------- | --------- | ------------------------------- |
+| `display-large`  | 34pt | Bold          | Rounded   | Hero numbers, large displays    |
+| `headline-large` | 28pt | Bold          | Default   | Screen titles, vehicle name     |
+| `headline`       | 24pt | Semibold      | Default   | Service names in hero card      |
+| `title`          | 17pt | Semibold      | Default   | Card titles, list item names    |
+| `body`           | 17pt | Regular       | Default   | Primary content                 |
+| `body-secondary` | 15pt | Regular       | Default   | Supporting content              |
+| `caption`        | 14pt | Regular       | Default   | Labels, due date text           |
+| `caption-small`  | 12pt | Semibold      | Default   | Section headers, metadata       |
+| `mono-large`     | 42pt | Light         | Monospace | Mileage displays (deprecated)   |
+| `mono-body`      | 15pt | Medium/Semibold | Rounded | Inline mileage numbers          |
 
 ### Typography Rules
 
 - **Hierarchy through weight and size only** — no italics, no decorative treatments
 - **Sentence case for UI text** — "Oil change due" not "Oil Change Due"
-- **No all-caps** except for very short labels (e.g., "OVERDUE" status pill)
-- **Numbers: tabular figures** — for alignment in data displays
+- **All-caps for section headers** — "NEXT UP", "UPCOMING" with letter-spacing
+- **Negative tracking on headlines** — -0.5pt for tighter, more confident feel
+- **Numbers: use rounded design** — for friendlier mileage displays
 
 ---
 
@@ -130,15 +135,16 @@ Consistent spacing creates visual rhythm without explicit grids.
 | `space-sm`  | 8pt   | Related elements                   |
 | `space-md`  | 16pt  | Standard padding, between sections |
 | `space-lg`  | 24pt  | Section separation                 |
-| `space-xl`  | 32pt  | Major sections, screen padding     |
-| `space-2xl` | 48pt  | Hero spacing, top of screen        |
+| `space-xl`  | 32pt  | Major sections, between cards      |
+| `space-2xl` | 48pt  | Hero spacing, bottom padding       |
 
 ### Layout Guidelines
 
-- **Screen horizontal padding:** 20pt (allows content to breathe while maximizing space)
-- **Card internal padding:** 16pt
-- **Between list items:** 12pt
+- **Screen horizontal padding:** 20pt
+- **Card internal padding:** 20pt (increased from 16pt)
+- **Between list items:** 14pt vertical padding
 - **Between sections:** 32pt
+- **Divider inset:** 56pt from leading edge (aligns with text after status dot)
 
 ---
 
@@ -156,11 +162,11 @@ Cards are used sparingly — not everything needs a container.
 
 **Card styling:**
 
-- Background: `background-elevated`
-- Corner radius: 16pt
-- Border: None by default, or 1pt `border-subtle` if needed for definition
-- Shadow: None (Liquid Glass handles elevation) or very subtle in light mode
-- Padding: 16pt internal
+- Background: `background-elevated` with subtle top gradient (white at 3% opacity)
+- Corner radius: **20pt** with continuous corners (`.continuous`)
+- Border: Gradient stroke from `border-subtle` at 50% to 20% opacity (top-left to bottom-right)
+- Shadow: None
+- Padding: **20pt** internal
 
 **When NOT to use a card:**
 
@@ -172,15 +178,17 @@ Cards are used sparingly — not everything needs a container.
 
 **Primary button:**
 
-- Background: `accent` (#E89B3C)
+- Background: `accent` (#E89B3C) with subtle top gradient (white at 15% opacity)
 - Text: `#121212` (dark text on amber)
-- Corner radius: 12pt
-- Height: 50pt
-- Font: `body` weight semibold
+- Corner radius: **14pt** with continuous corners
+- Height: **52pt**
+- Font: 16pt semibold
+- Press state: Scale to 0.98, opacity 0.9
 
 **Secondary button:**
 
 - Background: `background-subtle`
+- Border: `border-subtle` at 50% opacity
 - Text: `text-primary`
 - Same dimensions as primary
 
@@ -192,58 +200,126 @@ Cards are used sparingly — not everything needs a container.
 
 ### Status Indicators
 
-**Status dot:**
+**Status dot (in lists):**
 
-- 8pt circle
-- Filled with status color
+- 10pt filled circle (status color)
+- 7pt padding with 15% opacity background circle
+- Total touch target: 24pt diameter
 - Appears to the left of related text
 
-**Status pill:**
+**Status pill (in hero card):**
 
-- Small rounded rectangle
-- Background: status color at 15% opacity
-- Text: status color at full opacity
-- Font: `caption` or `caption-small`, medium weight
-- Example: light coral background with coral "OVERDUE" text
+- Capsule shape
+- Background: status color at 12% opacity
+- 6pt filled dot + label text
+- Text: status color at full opacity, 10pt bold, 1.2pt letter-spacing
+- Padding: 10pt horizontal, 5pt vertical
 
 ---
 
 ## Signature Elements
 
-### The "Next Up" Card
+### Dashboard Header
 
-The centerpiece of the app. Shows the single most important upcoming service.
+The header establishes context and allows vehicle switching.
 
 **Anatomy:**
 
-1. **Status dot** — Color indicates urgency (top left)
-2. **Service name** — Large, `headline` size (e.g., "Oil Change")
-3. **Due indicator** — `body-secondary`, uses accent color (e.g., "Due in 12 days")
-4. **Mileage context** — `caption`, secondary text (e.g., "or 500 miles")
-5. **Quick action** — Subtle button or tap target to log completion
+1. **Vehicle name** — 28pt bold, `text-primary`, -0.5pt tracking
+2. **Info line** — Mileage • Year Make Model (15pt, mileage in `text-secondary`, model in `text-tertiary`)
+3. **Chevron** — 14pt semibold, `text-tertiary`, right-aligned
+
+**Behavior:**
+
+- Entire header is tappable (opens vehicle picker sheet)
+- No background — seamlessly integrated with screen
+- No separate odometer display — mileage is inline with vehicle info
+
+**Example:**
+```
+Daily Driver                                    ⌄
+32,500 mi • 2022 Toyota Camry
+```
+
+### The "Next Up" Card
+
+The centerpiece of the app. Shows the single most important upcoming service with vehicle visualization.
+
+**Anatomy:**
+
+1. **Status pill** — Top left, shows urgency (OVERDUE, DUE SOON, GOOD, SCHEDULED)
+2. **Service name** — 24pt semibold, `text-primary`, -0.5pt tracking
+3. **Countdown** — Large number (40pt light rounded) in status color + "days remaining/overdue" label
+4. **Car silhouette** — Right side, `car.side.fill` SF Symbol (52pt) with gradient and status-colored glow
+5. **Divider** — `border-subtle` at 50% opacity
+6. **Mileage section** — "CURRENT" and "DUE AT" labels (10pt semibold, `text-tertiary`) with monospaced values
+
+**Card styling:**
+
+- Uses standard card styling (20pt padding, 20pt radius, gradient border)
+- Car visualization has radial gradient glow matching status color
 
 **Behavior:**
 
 - Single tap opens service detail
 - Visual weight draws eye immediately on app launch
-- Animates subtly when status changes
+- Status color propagates to pill, countdown number, due mileage, and car glow
 
-### Vehicle Selector
+### Service Row (Upcoming List)
 
-Top-center dropdown showing current vehicle.
+Compact row for secondary services.
 
 **Anatomy:**
 
-1. **Vehicle name** — `title` weight, centered
-2. **Dropdown indicator** — Subtle chevron
-3. **Tap target** — Generous, full width of label area
+1. **Status indicator** — 10pt dot with 24pt background circle
+2. **Service info** — Name (17pt semibold) + due text (14pt regular)
+3. **Miles remaining** — Right-aligned, 15pt semibold rounded
+4. **Chevron** — 13pt medium, `text-tertiary` at 60% opacity
+
+**Styling:**
+
+- Horizontal padding: 16pt
+- Vertical padding: 14pt
+- Dividers: `border-subtle` at 30% opacity, 56pt leading inset
 
 **Behavior:**
 
-- Tap reveals vehicle list (sheet or dropdown)
+- Full row tappable
+- Due text shows "In X days", "Due today", "Due tomorrow", or "X days overdue"
+- Miles shows remaining miles or "Overdue" in status color
+
+### Vehicle Selector (Sheet)
+
+Bottom sheet for switching vehicles.
+
+**Anatomy:**
+
+1. **Vehicle list** — Each vehicle shows name and year/make/model
+2. **Current vehicle** — Has checkmark indicator
+3. **Add Vehicle** — Option at bottom
+
+**Behavior:**
+
+- Tap reveals vehicle list as sheet
 - Current vehicle has checkmark
 - "Add Vehicle" option at bottom
 - Smooth transition when switching
+
+---
+
+## Section Headers
+
+Small uppercase labels that organize content.
+
+**Styling:**
+
+- Font: 12pt semibold
+- Color: `text-tertiary`
+- Letter-spacing: 1.2pt
+- Transform: Uppercase
+- Margin bottom: 8pt
+
+**Examples:** "NEXT UP", "UPCOMING"
 
 ---
 
@@ -275,18 +351,19 @@ Top-center dropdown showing current vehicle.
 ### Principles
 
 - **Purposeful** — Animation communicates state change, not decoration
-- **Quick** — 200-300ms for most transitions
-- **Natural** — iOS spring curves, not linear
+- **Quick** — 150-200ms for most transitions
+- **Natural** — iOS spring curves, ease-out timing
 
 ### Key Moments
 
-| Action             | Animation                                           |
-| ------------------ | --------------------------------------------------- |
-| Screen transitions | Standard iOS push/present                           |
-| Card press         | Subtle scale down (0.98) on press                   |
-| Status change      | Color crossfade, 200ms                              |
-| Service logged     | Checkmark + card dismissal, satisfying confirmation |
-| Vehicle switch     | Crossfade content, 250ms                            |
+| Action             | Animation                                  |
+| ------------------ | ------------------------------------------ |
+| Screen transitions | Standard iOS push/present                  |
+| Card press         | Scale to 0.98, opacity 0.9, 150ms ease-out |
+| Button press       | Scale to 0.98, opacity 0.9, 150ms ease-out |
+| Status change      | Color crossfade, 200ms                     |
+| Service logged     | Checkmark + card dismissal                 |
+| Vehicle switch     | Crossfade content, 250ms                   |
 
 ### What NOT to Animate
 
@@ -302,15 +379,16 @@ Top-center dropdown showing current vehicle.
 
 - **SF Symbols** as the primary icon set (native, consistent)
 - Weight: Regular or Medium, matching text weight
-- Size: Typically 17-22pt, optically aligned with text
+- Size: Typically 13-17pt for UI, up to 52pt for hero elements
 
-### Custom Icons
+### Key Icons Used
 
-If custom icons are needed:
-
-- Match SF Symbols stroke weight (~1.5pt at 24pt size)
-- Simple, geometric forms
-- No fill by default, filled variant for selected states
+| Icon               | Usage                          |
+| ------------------ | ------------------------------ |
+| `car.side.fill`    | Vehicle visualization, empty states |
+| `chevron.down`     | Dropdown indicator             |
+| `chevron.right`    | List disclosure                |
+| `checkmark`        | Success states, selection      |
 
 ---
 
@@ -327,22 +405,35 @@ If custom icons are needed:
 
 - Never use color alone to convey information
 - Status always includes text label, not just colored dot
-- Icons accompany color indicators where possible
+- Due dates shown as text alongside status indicator
 
 ---
 
-## File & Asset Naming
+## Implementation Notes
 
-### Convention
+### Asset Catalog Colors
 
-```
-[component]-[variant]-[state].[extension]
+All colors are defined in `Assets.xcassets/Colors/` with light/dark variants:
+- BackgroundPrimary
+- BackgroundElevated
+- BackgroundSubtle
+- TextPrimary
+- TextSecondary
+- TextTertiary
+- BorderSubtle
+- Accent
+- AccentMuted
+- StatusOverdue
+- StatusDueSoon
+- StatusGood
+- StatusNeutral
 
-Examples:
-- button-primary-default.png
-- icon-service-oil.svg
-- card-next-up-overdue.png
-```
+### Design System Files
+
+Located in `checkpoint/DesignSystem/`:
+- `Theme.swift` — Color references, layout constants, card/button styles
+- `Typography.swift` — Font scale, text style modifiers
+- `Spacing.swift` — Spacing tokens, screen padding modifier
 
 ---
 
@@ -353,7 +444,7 @@ Examples:
 | **Feeling**    | Confident calm — everything's handled           |
 | **Mode**       | Dark-first, light fully supported               |
 | **Accent**     | Amber (#E89B3C) — warm, automotive, distinctive |
-| **Typography** | Clean sans-serif, hierarchy through weight/size |
+| **Typography** | SF Pro, hierarchy through weight/size           |
 | **Density**    | Generous but purposeful spacing                 |
 | **Decoration** | None — every element earns its place            |
 | **Animation**  | Subtle, quick, purposeful                       |
