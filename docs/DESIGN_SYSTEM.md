@@ -19,6 +19,7 @@ The app should feel like everything is under control. Not anxious, not clinical 
 - **Restraint** — When in doubt, leave it out
 
 **Inspiration:**
+
 - Tesla's UI philosophy: clean, elegant, utilitarian, UX-first
 - Not a clone — takes the principles, not the skin
 
@@ -30,36 +31,36 @@ The app should feel like everything is under control. Not anxious, not clinical 
 
 Dark mode is the hero. Most users check car info in garages, parking lots, and low-light environments.
 
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `background-primary` | `#121212` | Main app background |
-| `background-elevated` | `#1C1C1C` | Cards, sheets, elevated surfaces |
-| `background-subtle` | `#252525` | Subtle differentiation, hover states |
-| `text-primary` | `#FFFFFF` | Headlines, primary content |
-| `text-secondary` | `#A0A0A0` | Supporting text, labels |
-| `text-tertiary` | `#666666` | Disabled, placeholder text |
-| `border-subtle` | `#2A2A2A` | Dividers, subtle borders (use sparingly) |
+| Token                 | Hex       | Usage                                    |
+| --------------------- | --------- | ---------------------------------------- |
+| `background-primary`  | `#121212` | Main app background                      |
+| `background-elevated` | `#1C1C1C` | Cards, sheets, elevated surfaces         |
+| `background-subtle`   | `#252525` | Subtle differentiation, hover states     |
+| `text-primary`        | `#FFFFFF` | Headlines, primary content               |
+| `text-secondary`      | `#A0A0A0` | Supporting text, labels                  |
+| `text-tertiary`       | `#666666` | Disabled, placeholder text               |
+| `border-subtle`       | `#2A2A2A` | Dividers, subtle borders (use sparingly) |
 
 ### Light Mode
 
 Light mode is fully supported but follows dark mode's lead. Same structure, inverted values, consistent accent.
 
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `background-primary` | `#F8F7F4` | Main app background (warm off-white) |
-| `background-elevated` | `#FFFFFF` | Cards, sheets, elevated surfaces |
-| `background-subtle` | `#EFEEEB` | Subtle differentiation |
-| `text-primary` | `#121212` | Headlines, primary content |
-| `text-secondary` | `#666666` | Supporting text, labels |
-| `text-tertiary` | `#A0A0A0` | Disabled, placeholder text |
-| `border-subtle` | `#E0DFDC` | Dividers, subtle borders |
+| Token                 | Hex       | Usage                                |
+| --------------------- | --------- | ------------------------------------ |
+| `background-primary`  | `#F8F7F4` | Main app background (warm off-white) |
+| `background-elevated` | `#FFFFFF` | Cards, sheets, elevated surfaces     |
+| `background-subtle`   | `#EFEEEB` | Subtle differentiation               |
+| `text-primary`        | `#121212` | Headlines, primary content           |
+| `text-secondary`      | `#666666` | Supporting text, labels              |
+| `text-tertiary`       | `#A0A0A0` | Disabled, placeholder text           |
+| `border-subtle`       | `#E0DFDC` | Dividers, subtle borders             |
 
 ### Accent Color
 
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `accent` | `#E89B3C` | Primary accent, interactive elements, brand color |
-| `accent-muted` | `#E89B3C` at 20% opacity | Backgrounds, subtle highlights |
+| Token          | Hex                      | Usage                                             |
+| -------------- | ------------------------ | ------------------------------------------------- |
+| `accent`       | `#E89B3C`                | Primary accent, interactive elements, brand color |
+| `accent-muted` | `#E89B3C` at 20% opacity | Backgrounds, subtle highlights                    |
 
 Amber is the signature color — warm, automotive (evokes indicator lights), distinctive without being aggressive. Consistent across both light and dark modes.
 
@@ -67,14 +68,15 @@ Amber is the signature color — warm, automotive (evokes indicator lights), dis
 
 Functional colors that communicate maintenance status at a glance.
 
-| Token | Hex | Meaning |
-|-------|-----|---------|
-| `status-overdue` | `#E85C4C` | Coral red — service is past due |
+| Token             | Hex       | Meaning                            |
+| ----------------- | --------- | ---------------------------------- |
+| `status-overdue`  | `#E85C4C` | Coral red — service is past due    |
 | `status-due-soon` | `#E89B3C` | Amber (accent) — service coming up |
-| `status-good` | `#4CABA8` | Soft teal — no action needed |
-| `status-neutral` | `#666666` | Gray — informational, no urgency |
+| `status-good`     | `#4CABA8` | Soft teal — no action needed       |
+| `status-neutral`  | `#666666` | Gray — informational, no urgency   |
 
 **Usage rules:**
+
 - Status colors appear as dots, pills, or text color — not large fills
 - Never use status colors for decoration
 - Red is reserved for overdue items only — don't dilute its meaning
@@ -88,21 +90,22 @@ Functional colors that communicate maintenance status at a glance.
 **Primary:** System San Francisco (SF Pro) for native iOS feel, or a custom font for more distinction.
 
 **Recommended custom option:** Satoshi or General Sans
+
 - Geometric, modern, highly readable
 - Works at small sizes (data labels) and large sizes (headlines)
 - Has enough character to not feel generic
 
 ### Type Scale
 
-| Name | Size | Weight | Line Height | Usage |
-|------|------|--------|-------------|-------|
-| `headline-large` | 28pt | Semibold (600) | 34pt | Screen titles |
-| `headline` | 22pt | Semibold (600) | 28pt | Section headers, "Next Up" service name |
-| `title` | 17pt | Semibold (600) | 22pt | Card titles, emphasis |
-| `body` | 17pt | Regular (400) | 22pt | Primary content |
-| `body-secondary` | 15pt | Regular (400) | 20pt | Supporting content |
-| `caption` | 13pt | Regular (400) | 18pt | Labels, metadata |
-| `caption-small` | 11pt | Medium (500) | 14pt | Timestamps, tertiary info |
+| Name             | Size | Weight         | Line Height | Usage                                   |
+| ---------------- | ---- | -------------- | ----------- | --------------------------------------- |
+| `headline-large` | 28pt | Semibold (600) | 34pt        | Screen titles                           |
+| `headline`       | 22pt | Semibold (600) | 28pt        | Section headers, "Next Up" service name |
+| `title`          | 17pt | Semibold (600) | 22pt        | Card titles, emphasis                   |
+| `body`           | 17pt | Regular (400)  | 22pt        | Primary content                         |
+| `body-secondary` | 15pt | Regular (400)  | 20pt        | Supporting content                      |
+| `caption`        | 13pt | Regular (400)  | 18pt        | Labels, metadata                        |
+| `caption-small`  | 11pt | Medium (500)   | 14pt        | Timestamps, tertiary info               |
 
 ### Typography Rules
 
@@ -121,14 +124,14 @@ Consistent spacing creates visual rhythm without explicit grids.
 
 `4pt` base unit. All spacing derives from this.
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `space-xs` | 4pt | Tight gaps, icon-to-text |
-| `space-sm` | 8pt | Related elements |
-| `space-md` | 16pt | Standard padding, between sections |
-| `space-lg` | 24pt | Section separation |
-| `space-xl` | 32pt | Major sections, screen padding |
-| `space-2xl` | 48pt | Hero spacing, top of screen |
+| Token       | Value | Usage                              |
+| ----------- | ----- | ---------------------------------- |
+| `space-xs`  | 4pt   | Tight gaps, icon-to-text           |
+| `space-sm`  | 8pt   | Related elements                   |
+| `space-md`  | 16pt  | Standard padding, between sections |
+| `space-lg`  | 24pt  | Section separation                 |
+| `space-xl`  | 32pt  | Major sections, screen padding     |
+| `space-2xl` | 48pt  | Hero spacing, top of screen        |
 
 ### Layout Guidelines
 
@@ -146,11 +149,13 @@ Consistent spacing creates visual rhythm without explicit grids.
 Cards are used sparingly — not everything needs a container.
 
 **When to use a card:**
+
 - To group related actions (e.g., "Next Up" service)
 - To create a tappable surface
 - To elevate content in a sheet or modal
 
 **Card styling:**
+
 - Background: `background-elevated`
 - Corner radius: 16pt
 - Border: None by default, or 1pt `border-subtle` if needed for definition
@@ -158,6 +163,7 @@ Cards are used sparingly — not everything needs a container.
 - Padding: 16pt internal
 
 **When NOT to use a card:**
+
 - Simple lists of information
 - Single-value displays
 - When content can stand alone on the background
@@ -165,6 +171,7 @@ Cards are used sparingly — not everything needs a container.
 ### Buttons
 
 **Primary button:**
+
 - Background: `accent` (#E89B3C)
 - Text: `#121212` (dark text on amber)
 - Corner radius: 12pt
@@ -172,11 +179,13 @@ Cards are used sparingly — not everything needs a container.
 - Font: `body` weight semibold
 
 **Secondary button:**
+
 - Background: `background-subtle`
 - Text: `text-primary`
 - Same dimensions as primary
 
 **Text button:**
+
 - No background
 - Text: `accent`
 - Used for less prominent actions
@@ -184,11 +193,13 @@ Cards are used sparingly — not everything needs a container.
 ### Status Indicators
 
 **Status dot:**
+
 - 8pt circle
 - Filled with status color
 - Appears to the left of related text
 
 **Status pill:**
+
 - Small rounded rectangle
 - Background: status color at 15% opacity
 - Text: status color at full opacity
@@ -204,6 +215,7 @@ Cards are used sparingly — not everything needs a container.
 The centerpiece of the app. Shows the single most important upcoming service.
 
 **Anatomy:**
+
 1. **Status dot** — Color indicates urgency (top left)
 2. **Service name** — Large, `headline` size (e.g., "Oil Change")
 3. **Due indicator** — `body-secondary`, uses accent color (e.g., "Due in 12 days")
@@ -211,6 +223,7 @@ The centerpiece of the app. Shows the single most important upcoming service.
 5. **Quick action** — Subtle button or tap target to log completion
 
 **Behavior:**
+
 - Single tap opens service detail
 - Visual weight draws eye immediately on app launch
 - Animates subtly when status changes
@@ -220,11 +233,13 @@ The centerpiece of the app. Shows the single most important upcoming service.
 Top-center dropdown showing current vehicle.
 
 **Anatomy:**
+
 1. **Vehicle name** — `title` weight, centered
 2. **Dropdown indicator** — Subtle chevron
 3. **Tap target** — Generous, full width of label area
 
 **Behavior:**
+
 - Tap reveals vehicle list (sheet or dropdown)
 - Current vehicle has checkmark
 - "Add Vehicle" option at bottom
@@ -265,13 +280,13 @@ Top-center dropdown showing current vehicle.
 
 ### Key Moments
 
-| Action | Animation |
-|--------|-----------|
-| Screen transitions | Standard iOS push/present |
-| Card press | Subtle scale down (0.98) on press |
-| Status change | Color crossfade, 200ms |
-| Service logged | Checkmark + card dismissal, satisfying confirmation |
-| Vehicle switch | Crossfade content, 250ms |
+| Action             | Animation                                           |
+| ------------------ | --------------------------------------------------- |
+| Screen transitions | Standard iOS push/present                           |
+| Card press         | Subtle scale down (0.98) on press                   |
+| Status change      | Color crossfade, 200ms                              |
+| Service logged     | Checkmark + card dismissal, satisfying confirmation |
+| Vehicle switch     | Crossfade content, 250ms                            |
 
 ### What NOT to Animate
 
@@ -292,6 +307,7 @@ Top-center dropdown showing current vehicle.
 ### Custom Icons
 
 If custom icons are needed:
+
 - Match SF Symbols stroke weight (~1.5pt at 24pt size)
 - Simple, geometric forms
 - No fill by default, filled variant for selected states
@@ -332,15 +348,15 @@ Examples:
 
 ## Summary
 
-| Aspect | Direction |
-|--------|-----------|
-| **Feeling** | Confident calm — everything's handled |
-| **Mode** | Dark-first, light fully supported |
-| **Accent** | Amber (#E89B3C) — warm, automotive, distinctive |
+| Aspect         | Direction                                       |
+| -------------- | ----------------------------------------------- |
+| **Feeling**    | Confident calm — everything's handled           |
+| **Mode**       | Dark-first, light fully supported               |
+| **Accent**     | Amber (#E89B3C) — warm, automotive, distinctive |
 | **Typography** | Clean sans-serif, hierarchy through weight/size |
-| **Density** | Generous but purposeful spacing |
-| **Decoration** | None — every element earns its place |
-| **Animation** | Subtle, quick, purposeful |
+| **Density**    | Generous but purposeful spacing                 |
+| **Decoration** | None — every element earns its place            |
+| **Animation**  | Subtle, quick, purposeful                       |
 
 ---
 
