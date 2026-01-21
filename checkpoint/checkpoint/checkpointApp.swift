@@ -12,7 +12,8 @@ import SwiftData
 struct checkpointApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Vehicle.self,
+            Service.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
