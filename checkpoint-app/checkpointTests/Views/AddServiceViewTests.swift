@@ -24,7 +24,7 @@ final class AddServiceViewTests: XCTestCase {
 
     func testServiceMode_HasCorrectRawValues() {
         // Then: Raw values should match expected labels
-        XCTAssertEqual(ServiceMode.log.rawValue, "Log Service")
+        XCTAssertEqual(ServiceMode.log.rawValue, "Log")
         XCTAssertEqual(ServiceMode.schedule.rawValue, "Schedule")
     }
 

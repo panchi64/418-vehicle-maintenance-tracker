@@ -42,7 +42,7 @@ struct ServiceRow: View {
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: Spacing.md) {
-                // Status indicator (square - brutalist)
+                // Status indicator (square - brutalist) with glow for urgent
                 ZStack {
                     Rectangle()
                         .fill(status.color.opacity(0.15))
@@ -51,6 +51,7 @@ struct ServiceRow: View {
                     Rectangle()
                         .fill(status.color)
                         .frame(width: 8, height: 8)
+                        .statusGlow(color: status.color, isActive: isUrgent)
                         .pulseAnimation(isActive: isUrgent)
                 }
 

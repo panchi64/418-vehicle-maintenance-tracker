@@ -43,6 +43,7 @@ struct InstrumentTextField: View {
                             lineWidth: Theme.borderWidth
                         )
                 )
+                .focusGlow(isActive: isFocused)
                 .animation(.easeOut(duration: Theme.animationFast), value: isFocused)
         }
     }
@@ -97,12 +98,13 @@ struct InstrumentNumberField: View {
             .background(Theme.surfaceInstrument)
             .clipShape(Rectangle())
             .overlay(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                Rectangle()
                     .strokeBorder(
                         isFocused ? Theme.accent : Theme.gridLine,
-                        lineWidth: isFocused ? 2 : 1
+                        lineWidth: Theme.borderWidth
                     )
             )
+            .focusGlow(isActive: isFocused)
             .animation(.easeOut(duration: Theme.animationFast), value: isFocused)
         }
     }
@@ -162,8 +164,8 @@ struct InstrumentToggle: View {
         .background(Theme.surfaceInstrument)
         .clipShape(Rectangle())
         .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .strokeBorder(Theme.gridLine, lineWidth: 1)
+            Rectangle()
+                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
         )
     }
 }
@@ -207,12 +209,13 @@ struct InstrumentTextEditor: View {
             .background(Theme.surfaceInstrument)
             .clipShape(Rectangle())
             .overlay(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                Rectangle()
                     .strokeBorder(
                         isFocused ? Theme.accent : Theme.gridLine,
-                        lineWidth: isFocused ? 2 : 1
+                        lineWidth: Theme.borderWidth
                     )
             )
+            .focusGlow(isActive: isFocused)
             .animation(.easeOut(duration: Theme.animationFast), value: isFocused)
         }
     }

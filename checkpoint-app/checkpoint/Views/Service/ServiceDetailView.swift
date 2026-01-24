@@ -66,47 +66,48 @@ struct ServiceDetailView: View {
 
     private var statusCard: some View {
         VStack(spacing: Spacing.md) {
-            // Status badge
+            // Status badge (brutalist: square indicator, rectangle background)
             HStack {
-                Circle()
+                Rectangle()
                     .fill(status.color)
-                    .frame(width: 12, height: 12)
+                    .frame(width: 8, height: 8)
+                    .statusGlow(color: status.color, isActive: status == .overdue || status == .dueSoon)
                 Text(status.label)
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.brutalistLabel)
                     .foregroundStyle(status.color)
+                    .textCase(.uppercase)
+                    .tracking(1.5)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
             .background(status.color.opacity(0.15))
-            .clipShape(Capsule())
+            .clipShape(Rectangle())
 
-            // Main urgency display
+            // Main urgency display (brutalist hero font)
             if let description = service.dueDescription {
                 Text(description)
-                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                    .font(.brutalistHero)
                     .foregroundStyle(Theme.textPrimary)
             }
 
             // Mileage info
             if let mileageDesc = service.mileageDescription {
                 Text(mileageDesc)
-                    .font(.bodySecondary)
+                    .font(.brutalistSecondary)
                     .foregroundStyle(Theme.textSecondary)
             }
         }
         .frame(maxWidth: .infinity)
         .padding(Spacing.xl)
-        .cardStyle()
+        .glassCardStyle(intensity: .subtle, padding: 0)
+        .padding(Spacing.xl)
     }
 
     // MARK: - Due Info Section
 
     private var dueInfoSection: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
-            Text("SCHEDULE")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1.2)
+            InstrumentSectionHeader(title: "Schedule")
 
             VStack(spacing: 0) {
                 if let dueDate = service.dueDate {
@@ -128,19 +129,24 @@ struct ServiceDetailView: View {
                     infoRow(title: "Or Every", value: formatMileage(intervalMiles))
                 }
             }
-            .background(Theme.backgroundElevated)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .background(Theme.surfaceInstrument)
+            .clipShape(Rectangle())
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+            )
         }
     }
 
     private func infoRow(title: String, value: String) -> some View {
         HStack {
-            Text(title)
-                .font(.bodyText)
-                .foregroundStyle(Theme.textSecondary)
+            Text(title.uppercased())
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(1)
             Spacer()
             Text(value)
-                .font(.bodyText)
+                .font(.brutalistBody)
                 .foregroundStyle(Theme.textPrimary)
         }
         .padding(Spacing.md)
@@ -166,10 +172,7 @@ struct ServiceDetailView: View {
 
     private var historySection: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
-            Text("HISTORY")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1.2)
+            InstrumentSectionHeader(title: "History")
 
             VStack(spacing: 0) {
                 ForEach(service.logs.sorted(by: { $0.performedDate > $1.performedDate })) { log in
@@ -181,8 +184,12 @@ struct ServiceDetailView: View {
                     }
                 }
             }
-            .background(Theme.backgroundElevated)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .background(Theme.surfaceInstrument)
+            .clipShape(Rectangle())
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+            )
         }
     }
 
@@ -190,19 +197,19 @@ struct ServiceDetailView: View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text(formatDate(log.performedDate))
-                    .font(.bodyText)
+                    .font(.brutalistBody)
                     .foregroundStyle(Theme.textPrimary)
 
                 Text("\(formatMileage(log.mileageAtService))")
-                    .font(.caption)
-                    .foregroundStyle(Theme.textSecondary)
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.textTertiary)
             }
 
             Spacer()
 
             if let cost = log.formattedCost {
                 Text(cost)
-                    .font(.bodyText)
+                    .font(.brutalistBody)
                     .foregroundStyle(Theme.textSecondary)
             }
         }
@@ -234,40 +241,59 @@ struct MarkServiceDoneSheet: View {
     let vehicle: Vehicle
 
     @State private var performedDate: Date = Date()
-    @State private var mileage: String = ""
+    @State private var mileage: Int? = nil
     @State private var cost: String = ""
     @State private var notes: String = ""
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Service Details") {
-                    DatePicker("Date Performed", selection: $performedDate, displayedComponents: .date)
+            ZStack {
+                // Glass background
+                Theme.backgroundPrimary
+                    .ignoresSafeArea()
 
-                    HStack {
-                        Text("Mileage")
-                        Spacer()
-                        TextField("Required", text: $mileage)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
-                        Text("mi")
-                            .foregroundStyle(Theme.textSecondary)
+                ScrollView {
+                    VStack(spacing: Spacing.lg) {
+                        // Service Details Section
+                        VStack(alignment: .leading, spacing: Spacing.md) {
+                            InstrumentSectionHeader(title: "Service Details")
+
+                            InstrumentDatePicker(
+                                label: "Date Performed",
+                                date: $performedDate
+                            )
+
+                            InstrumentNumberField(
+                                label: "Mileage",
+                                value: $mileage,
+                                placeholder: "Required",
+                                suffix: "mi"
+                            )
+                        }
+
+                        // Optional Section
+                        VStack(alignment: .leading, spacing: Spacing.md) {
+                            InstrumentSectionHeader(title: "Optional")
+
+                            InstrumentTextField(
+                                label: "Cost",
+                                text: $cost,
+                                placeholder: "$0.00",
+                                keyboardType: .decimalPad
+                            )
+
+                            InstrumentTextEditor(
+                                label: "Notes",
+                                text: $notes,
+                                placeholder: "Add notes...",
+                                minHeight: 80
+                            )
+                        }
+
+                        Spacer(minLength: Spacing.xl)
                     }
-                }
-
-                Section("Optional") {
-                    HStack {
-                        Text("Cost")
-                        Spacer()
-                        Text("$")
-                            .foregroundStyle(Theme.textSecondary)
-                        TextField("0.00", text: $cost)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                    }
-
-                    TextField("Notes", text: $notes, axis: .vertical)
-                        .lineLimit(3...6)
+                    .padding(.horizontal, Spacing.screenHorizontal)
+                    .padding(.vertical, Spacing.lg)
                 }
             }
             .navigationTitle("Mark as Done")
@@ -275,20 +301,22 @@ struct MarkServiceDoneSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                        .font(.brutalistBody)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") { markAsDone() }
-                        .disabled(mileage.isEmpty)
+                        .font(.brutalistBody)
+                        .disabled(mileage == nil)
                 }
             }
             .onAppear {
-                mileage = String(vehicle.currentMileage)
+                mileage = vehicle.currentMileage
             }
         }
     }
 
     private func markAsDone() {
-        let mileageInt = Int(mileage) ?? vehicle.currentMileage
+        let mileageInt = mileage ?? vehicle.currentMileage
 
         // Create service log
         let log = ServiceLog(

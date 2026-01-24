@@ -3,6 +3,7 @@
 //  CheckpointWidget
 //
 //  Small widget showing next service due
+//  Brutalist-Tech-Modernist aesthetic
 //
 
 import SwiftUI
@@ -13,33 +14,35 @@ struct SmallWidgetView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Vehicle name
-            Text(entry.vehicleName)
-                .font(.caption)
-                .foregroundStyle(WidgetColors.textSecondary)
+            // Vehicle name - monospace label
+            Text(entry.vehicleName.uppercased())
+                .font(.widgetLabel)
+                .foregroundStyle(WidgetColors.textTertiary)
+                .tracking(1)
 
             if let service = entry.services.first {
-                // Service name
-                Text(service.name)
-                    .font(.headline)
+                // Service name - monospace headline
+                Text(service.name.uppercased())
+                    .font(.widgetHeadline)
                     .foregroundStyle(WidgetColors.textPrimary)
                     .lineLimit(2)
 
                 Spacer()
 
-                // Status indicator
-                HStack(spacing: 4) {
-                    Circle()
+                // Status indicator - square (brutalist)
+                HStack(spacing: 6) {
+                    Rectangle()
                         .fill(service.status.color)
                         .frame(width: 8, height: 8)
 
-                    Text(service.dueDescription)
-                        .font(.caption)
+                    Text(service.dueDescription.uppercased())
+                        .font(.widgetLabel)
                         .foregroundStyle(service.status.color)
+                        .tracking(0.5)
                 }
             } else {
-                Text("No services scheduled")
-                    .font(.subheadline)
+                Text("NO SERVICES")
+                    .font(.widgetBody)
                     .foregroundStyle(WidgetColors.textSecondary)
 
                 Spacer()
@@ -47,6 +50,13 @@ struct SmallWidgetView: View {
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .containerBackground(for: .widget) {
+            ZStack {
+                WidgetColors.backgroundPrimary
+                // Subtle glass overlay
+                Color.white.opacity(0.05)
+            }
+        }
     }
 }
 

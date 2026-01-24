@@ -56,11 +56,17 @@ enum Theme {
     static let revealStagger: Double = 0.05
     static let pulseAnimationDuration: Double = 1.5
 
-    // MARK: - Removed (brutalism doesn't use glows)
-    static let glowRadius: CGFloat = 0
-    static let glowOpacity: Double = 0
-    static let statusGlowRadius: CGFloat = 0
-    static let statusGlowOpacity: Double = 0
+    // MARK: - Liquid Glass Effects
+    static let glassBlurRadius: CGFloat = 20
+    static let glassTintOpacity: Double = 0.08
+
+    // MARK: - Glow Effects (Re-enabled for glass accents)
+    static let glowRadius: CGFloat = 8
+    static let glowOpacity: Double = 0.3
+    static let statusGlowRadius: CGFloat = 12
+    static let statusGlowOpacity: Double = 0.4
+    static let focusGlowRadius: CGFloat = 6
+    static let focusGlowOpacity: Double = 0.5
 }
 
 // MARK: - Brutalist Card Style
@@ -154,7 +160,7 @@ extension View {
     }
 }
 
-// MARK: - Status Indicator (no glow in brutalist)
+// MARK: - Status Glow (Liquid Glass accent on brutalist base)
 
 struct StatusGlowModifier: ViewModifier {
     let color: Color
@@ -162,13 +168,99 @@ struct StatusGlowModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-        // No glow effects in brutalist design - structural honesty
+            .background(
+                Group {
+                    if isActive {
+                        Rectangle()
+                            .fill(color)
+                            .blur(radius: Theme.statusGlowRadius)
+                            .opacity(Theme.statusGlowOpacity)
+                    }
+                }
+            )
     }
 }
 
 extension View {
     func statusGlow(color: Color, isActive: Bool = true) -> some View {
         modifier(StatusGlowModifier(color: color, isActive: isActive))
+    }
+}
+
+// MARK: - Focus Glow (for input fields)
+
+struct FocusGlowModifier: ViewModifier {
+    let color: Color
+    let isActive: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .shadow(
+                color: isActive ? color.opacity(Theme.focusGlowOpacity) : .clear,
+                radius: isActive ? Theme.focusGlowRadius : 0
+            )
+    }
+}
+
+extension View {
+    func focusGlow(color: Color = Theme.accent, isActive: Bool) -> some View {
+        modifier(FocusGlowModifier(color: color, isActive: isActive))
+    }
+}
+
+// MARK: - Glass Card Style (blur + translucency + brutalist border)
+
+enum GlassIntensity {
+    case subtle
+    case medium
+    case strong
+
+    var blurRadius: CGFloat {
+        switch self {
+        case .subtle: return 10
+        case .medium: return Theme.glassBlurRadius
+        case .strong: return 30
+        }
+    }
+
+    var tintOpacity: Double {
+        switch self {
+        case .subtle: return 0.05
+        case .medium: return Theme.glassTintOpacity
+        case .strong: return 0.12
+        }
+    }
+}
+
+struct GlassCardStyle: ViewModifier {
+    var intensity: GlassIntensity = .medium
+    var padding: CGFloat = Theme.cardPadding
+
+    func body(content: Content) -> some View {
+        content
+            .padding(padding)
+            .background(
+                ZStack {
+                    // Frosted glass effect
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        .opacity(0.5)
+
+                    // Tint overlay
+                    Rectangle()
+                        .fill(Color.white.opacity(intensity.tintOpacity))
+                }
+            )
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+            )
+    }
+}
+
+extension View {
+    func glassCardStyle(intensity: GlassIntensity = .medium, padding: CGFloat = Theme.cardPadding) -> some View {
+        modifier(GlassCardStyle(intensity: intensity, padding: padding))
     }
 }
 

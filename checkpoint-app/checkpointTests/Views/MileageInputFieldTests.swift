@@ -136,8 +136,8 @@ final class MileageInputFieldTests: XCTestCase {
         // When
         let numericOnly = input.filter { $0.isNumber }
 
-        // Then
-        XCTAssertEqual(numericOnly, "12345")
+        // Then - All digits are kept including those after decimal
+        XCTAssertEqual(numericOnly, "1234567")
     }
 
     func testStripAllNonNumeric() {

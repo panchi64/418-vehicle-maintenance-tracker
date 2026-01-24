@@ -36,10 +36,11 @@ struct NextUpCard: View {
             VStack(alignment: .leading, spacing: 0) {
                 // Header row: status + service name
                 HStack(alignment: .top) {
-                    // Status indicator (square, not circle - brutalist)
+                    // Status indicator (square, not circle - brutalist) with glow
                     Rectangle()
                         .fill(status.color)
                         .frame(width: 8, height: 8)
+                        .statusGlow(color: status.color, isActive: isUrgent)
                         .pulseAnimation(isActive: isUrgent)
 
                     VStack(alignment: .leading, spacing: 2) {
@@ -121,12 +122,7 @@ struct NextUpCard: View {
                 }
                 .padding(.top, 12)
             }
-            .padding(Theme.cardPadding)
-            .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+            .glassCardStyle(intensity: .subtle)
             .contentShape(Rectangle())
         }
         .buttonStyle(CardButtonStyle())
