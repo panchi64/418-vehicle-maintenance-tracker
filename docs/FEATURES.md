@@ -442,6 +442,57 @@
 
 ## UI/UX Principles
 
+### App Navigation Structure
+
+> Three-tab architecture with persistent vehicle context and global quick-add action.
+
+| Tab | Purpose | Key Content |
+|-----|---------|-------------|
+| **Home** | Glanceable "what's next" | Next Up card, quick stats, recent activity summary (last 3) |
+| **Services** | Maintenance timeline & logging | Full service history, timeline view, search/filter, service details |
+| **Costs** | Expense tracking & analytics | Cost history, categories, monthly/yearly summaries, cost-per-mile |
+
+**Navigation Principles:**
+
+| Element | Behavior |
+|---------|----------|
+| **Vehicle header** | Persistent at top of ALL tabs — vehicle selector always accessible |
+| **Quick-add button (+)** | Floating action button visible on ALL tabs — supersedes all views for consistent access |
+| **Tab switching** | Should feel fluid and intuitive, not disruptive to user flow |
+| **Recent Activity (Home)** | Glanceable summary only (last 3 items) — tapping navigates to Services tab for full history |
+
+**Tab Content Details:**
+
+**Home Tab:**
+- Vehicle header with mileage and specs
+- "Next Up" hero card (most urgent service)
+- Quick stats bar (year-to-date summary)
+- Recent Activity feed (last 3 completed services, links to Services tab)
+- Minimal, focused — answer "what needs attention?" at a glance
+
+**Services Tab:**
+- Vehicle header (same as Home)
+- Full maintenance timeline (past and upcoming)
+- Complete service history with search/filter capabilities
+- Service logging and scheduling
+- Detailed service views with full completion history
+
+**Costs Tab:**
+- Vehicle header (same as Home)
+- Expense history list
+- Cost categorization (maintenance vs repairs)
+- Monthly/yearly spending summaries
+- Cost-per-mile calculation
+- Spending trends and analytics
+
+**Implementation Considerations:**
+- Use native iOS TabView for familiar navigation patterns
+- Consider swipe gestures between tabs for fluid transitions
+- Maintain scroll position when switching tabs (don't reset to top)
+- Tab bar should use iOS 26 Liquid Glass styling for consistency
+
+---
+
 ### Adaptive Layouts by Persona
 
 > Same features for everyone. Different layouts surface what's most relevant first. Users can switch modes anytime.
