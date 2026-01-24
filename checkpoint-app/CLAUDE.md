@@ -159,36 +159,59 @@ Uses App Groups (`group.com.checkpoint.shared`) for shared SwiftData access:
 
 ## Testing
 
-Run tests with:
+### Running Tests
+
+Run all tests (unit + UI) on a single simulator:
 ```bash
 xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPhone 17'
 ```
 
-Test coverage targets:
+Run only unit tests:
+```bash
+xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPhone 17' \
+  -only-testing:checkpointTests
+```
+
+Run only UI tests:
+```bash
+xcrun simctl shutdown all && \
+xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPhone 17' \
+  -only-testing:checkpointUITests
+```
+
+Run specific test classes:
+```bash
+xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPhone 17' \
+  -only-testing:checkpointTests/AppStateTests \
+  -only-testing:checkpointTests/HomeTabTests
+```
+
+### Test Coverage Targets
 - Models: 90%+ (computed properties, validation, relationships)
 - Services: 80%+ (mocked dependencies)
 - Views: Key interactions tested
 
 ### Simulator Usage Guidelines
 
-**Do not spawn multiple simulators simultaneously.** Running parallel test commands or multiple xcodebuild processes creates many simulator instances, which:
+**CRITICAL: Do not spawn multiple simulators simultaneously.** Running parallel test commands or multiple xcodebuild processes creates many simulator instances, which:
 - Consumes excessive system resources
 - Causes "Invalid device state" and "server died" errors
+- Causes app crashes on launch during UI tests
 - Slows down the entire system
 
 Best practices:
+- **Always shut down simulators before running UI tests:** `xcrun simctl shutdown all`
 - Run one `xcodebuild test` command at a time
 - Wait for the previous test run to complete before starting another
-- If running specific test classes, combine them in a single command:
+- Use `-only-testing:` flags to target specific test bundles in a single command
+- **Never run multiple xcodebuild commands in parallel:**
   ```bash
-  # Good: Single command with multiple test targets
-  xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPhone 17' \
-    -only-testing:checkpointTests/AppStateTests \
-    -only-testing:checkpointTests/HomeTabTests
+  # BAD: Multiple parallel commands (spawns multiple simulators, causes crashes)
+  xcodebuild test -only-testing:checkpointTests ... &
+  xcodebuild test -only-testing:checkpointUITests ... &
 
-  # Bad: Multiple parallel commands (spawns multiple simulators)
-  xcodebuild test ... &
-  xcodebuild test ... &
+  # GOOD: Single command, or sequential commands
+  xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPhone 17'
   ```
 - If simulators get stuck, reset them: `xcrun simctl shutdown all`
 
