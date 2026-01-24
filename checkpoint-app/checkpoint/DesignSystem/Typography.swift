@@ -2,126 +2,146 @@
 //  Typography.swift
 //  checkpoint
 //
-//  Design system typography using SF Pro (system font) and Barlow (instrument cluster)
+//  Brutalist-Tech-Modernist typography system
+//  Monospace-forward, terminal aesthetic, structural honesty
 //
 
 import SwiftUI
 
-// MARK: - Custom Font Names
-
-private enum FontName {
-    static let barlowLight = "Barlow-Light"
-    static let barlowRegular = "Barlow-Regular"
-    static let barlowSemiBold = "Barlow-SemiBold"
-}
-
 extension Font {
-    // MARK: - Barlow Instrument Cluster Fonts
+    // MARK: - Brutalist Monospace Type Scale
 
-    /// 48pt Barlow Light - Hero numbers, large instrument displays
-    static var instrumentLarge: Font {
-        .custom(FontName.barlowLight, size: 48)
+    /// 56pt Mono Light - Hero data displays
+    static var brutalistHero: Font {
+        .system(size: 56, weight: .light, design: .monospaced)
     }
 
-    /// 28pt Barlow SemiBold - Service names, medium displays
-    static var instrumentMedium: Font {
-        .custom(FontName.barlowSemiBold, size: 28)
+    /// 32pt Mono Medium - Primary headings
+    static var brutalistTitle: Font {
+        .system(size: 32, weight: .medium, design: .monospaced)
     }
 
-    /// 11pt Barlow SemiBold - Labels, all caps with tracking
-    static var instrumentLabel: Font {
-        .custom(FontName.barlowSemiBold, size: 11)
+    /// 20pt Mono Medium - Section titles, service names
+    static var brutalistHeading: Font {
+        .system(size: 20, weight: .medium, design: .monospaced)
     }
 
-    /// 14pt Barlow SemiBold - Section headers
-    static var instrumentSection: Font {
-        .custom(FontName.barlowSemiBold, size: 14)
-    }
-
-    /// 17pt Barlow Regular - Body text in instrument style
-    static var instrumentBody: Font {
-        .custom(FontName.barlowRegular, size: 17)
-    }
-
-    /// Monospaced Barlow for mileage displays
-    static var instrumentMono: Font {
-        .custom(FontName.barlowLight, size: 15).monospacedDigit()
-    }
-
-    // MARK: - Type Scale (SF Pro - Apple's system font)
-
-    /// 34pt Bold - Hero numbers, large displays
-    static var displayLarge: Font {
-        .system(size: 34, weight: .bold, design: .rounded)
-    }
-
-    /// 28pt Semibold - Screen titles
-    static var headlineLarge: Font {
-        .system(size: 28, weight: .semibold, design: .default)
-    }
-
-    /// 22pt Semibold - Section headers, "Next Up" service name
-    static var headline: Font {
-        .system(size: 22, weight: .semibold, design: .default)
-    }
-
-    /// 17pt Semibold - Card titles, emphasis
-    static var title: Font {
-        .system(size: 17, weight: .semibold, design: .default)
-    }
-
-    /// 17pt Regular - Primary content
-    static var bodyText: Font {
-        .system(size: 17, weight: .regular, design: .default)
-    }
-
-    /// 15pt Regular - Supporting content
-    static var bodySecondary: Font {
-        .system(size: 15, weight: .regular, design: .default)
-    }
-
-    /// 13pt Medium - Labels, metadata
-    static var caption: Font {
-        .system(size: 13, weight: .medium, design: .default)
-    }
-
-    /// 11pt Medium - Timestamps, tertiary info
-    static var captionSmall: Font {
-        .system(size: 11, weight: .medium, design: .default)
-    }
-
-    /// Monospaced numbers for mileage displays
-    static var monoLarge: Font {
-        .system(size: 42, weight: .light, design: .monospaced)
-    }
-
-    /// Monospaced for inline numbers
-    static var monoBody: Font {
+    /// 15pt Mono Regular - Body text
+    static var brutalistBody: Font {
         .system(size: 15, weight: .regular, design: .monospaced)
     }
+
+    /// 13pt Mono Regular - Secondary content
+    static var brutalistSecondary: Font {
+        .system(size: 13, weight: .regular, design: .monospaced)
+    }
+
+    /// 11pt Mono Medium - Labels, all caps
+    static var brutalistLabel: Font {
+        .system(size: 11, weight: .medium, design: .monospaced)
+    }
+
+    /// 11pt Mono Bold - Emphasized labels
+    static var brutalistLabelBold: Font {
+        .system(size: 11, weight: .bold, design: .monospaced)
+    }
+
+    // MARK: - Legacy Aliases (for compatibility)
+
+    static var instrumentLarge: Font { brutalistHero }
+    static var instrumentMedium: Font { brutalistTitle }
+    static var instrumentLabel: Font { brutalistLabel }
+    static var instrumentSection: Font { brutalistLabel }
+    static var instrumentBody: Font { brutalistBody }
+    static var instrumentMono: Font { brutalistSecondary }
+
+    static var displayLarge: Font { brutalistHero }
+    static var headlineLarge: Font { brutalistTitle }
+    static var headline: Font { brutalistHeading }
+    static var title: Font { brutalistHeading }
+    static var bodyText: Font { brutalistBody }
+    static var bodySecondary: Font { brutalistSecondary }
+    static var caption: Font { brutalistSecondary }
+    static var captionSmall: Font { brutalistLabel }
+    static var monoLarge: Font { brutalistHero }
+    static var monoBody: Font { brutalistBody }
 }
 
-// MARK: - Text Style Modifiers
+// MARK: - Brutalist Text Style Modifiers
 
-// MARK: Instrument Cluster Styles
+struct BrutalistHeroStyle: ViewModifier {
+    var color: Color = Theme.textPrimary
+
+    func body(content: Content) -> some View {
+        content
+            .font(.brutalistHero)
+            .foregroundStyle(color)
+    }
+}
+
+struct BrutalistTitleStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.brutalistTitle)
+            .foregroundStyle(Theme.textPrimary)
+            .textCase(.uppercase)
+    }
+}
+
+struct BrutalistHeadingStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.brutalistHeading)
+            .foregroundStyle(Theme.textPrimary)
+    }
+}
+
+struct BrutalistBodyStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.brutalistBody)
+            .foregroundStyle(Theme.textPrimary)
+    }
+}
+
+struct BrutalistSecondaryStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.brutalistSecondary)
+            .foregroundStyle(Theme.textSecondary)
+    }
+}
+
+struct BrutalistLabelStyle: ViewModifier {
+    var color: Color = Theme.textTertiary
+
+    func body(content: Content) -> some View {
+        content
+            .font(.brutalistLabel)
+            .foregroundStyle(color)
+            .textCase(.uppercase)
+            .tracking(1.5)
+    }
+}
+
+// MARK: - Legacy Style Modifiers (for compatibility)
 
 struct InstrumentLargeStyle: ViewModifier {
     var color: Color = Theme.textPrimary
 
     func body(content: Content) -> some View {
         content
-            .font(.instrumentLarge)
+            .font(.brutalistHero)
             .foregroundStyle(color)
-            .tracking(-1)
     }
 }
 
 struct InstrumentMediumStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .font(.instrumentMedium)
+            .font(.brutalistTitle)
             .foregroundStyle(Theme.textPrimary)
-            .tracking(-0.5)
+            .textCase(.uppercase)
     }
 }
 
@@ -130,7 +150,7 @@ struct InstrumentLabelStyle: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .font(.instrumentLabel)
+            .font(.brutalistLabel)
             .foregroundStyle(color)
             .textCase(.uppercase)
             .tracking(1.5)
@@ -140,37 +160,33 @@ struct InstrumentLabelStyle: ViewModifier {
 struct InstrumentSectionStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .font(.instrumentSection)
+            .font(.brutalistLabel)
             .foregroundStyle(Theme.textSecondary)
             .textCase(.uppercase)
             .tracking(2)
     }
 }
 
-// MARK: SF Pro Styles
-
 struct HeadlineLargeStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .font(.headlineLarge)
+            .font(.brutalistTitle)
             .foregroundStyle(Theme.textPrimary)
-            .tracking(-0.5)
     }
 }
 
 struct HeadlineStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .font(.headline)
+            .font(.brutalistHeading)
             .foregroundStyle(Theme.textPrimary)
-            .tracking(-0.3)
     }
 }
 
 struct TitleStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .font(.title)
+            .font(.brutalistHeading)
             .foregroundStyle(Theme.textPrimary)
     }
 }
@@ -178,7 +194,7 @@ struct TitleStyle: ViewModifier {
 struct BodyStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .font(.bodyText)
+            .font(.brutalistBody)
             .foregroundStyle(Theme.textPrimary)
     }
 }
@@ -186,7 +202,7 @@ struct BodyStyle: ViewModifier {
 struct BodySecondaryStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .font(.bodySecondary)
+            .font(.brutalistSecondary)
             .foregroundStyle(Theme.textSecondary)
     }
 }
@@ -194,13 +210,39 @@ struct BodySecondaryStyle: ViewModifier {
 struct CaptionStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .font(.caption)
+            .font(.brutalistSecondary)
             .foregroundStyle(Theme.textSecondary)
     }
 }
 
 extension View {
-    // MARK: - Instrument Cluster Styles
+    // MARK: - Brutalist Styles
+
+    func brutalistHeroStyle(color: Color = Theme.textPrimary) -> some View {
+        modifier(BrutalistHeroStyle(color: color))
+    }
+
+    func brutalistTitleStyle() -> some View {
+        modifier(BrutalistTitleStyle())
+    }
+
+    func brutalistHeadingStyle() -> some View {
+        modifier(BrutalistHeadingStyle())
+    }
+
+    func brutalistBodyStyle() -> some View {
+        modifier(BrutalistBodyStyle())
+    }
+
+    func brutalistSecondaryStyle() -> some View {
+        modifier(BrutalistSecondaryStyle())
+    }
+
+    func brutalistLabelStyle(color: Color = Theme.textTertiary) -> some View {
+        modifier(BrutalistLabelStyle(color: color))
+    }
+
+    // MARK: - Legacy Styles (for compatibility)
 
     func instrumentLargeStyle(color: Color = Theme.textPrimary) -> some View {
         modifier(InstrumentLargeStyle(color: color))
@@ -217,8 +259,6 @@ extension View {
     func instrumentSectionStyle() -> some View {
         modifier(InstrumentSectionStyle())
     }
-
-    // MARK: - SF Pro Styles
 
     func headlineLargeStyle() -> some View {
         modifier(HeadlineLargeStyle())

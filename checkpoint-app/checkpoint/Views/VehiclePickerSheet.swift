@@ -97,7 +97,7 @@ struct VehiclePickerSheet: View {
             dismiss()
         } label: {
             HStack(spacing: Spacing.md) {
-                // Vehicle icon with status
+                // Vehicle icon
                 ZStack {
                     Circle()
                         .fill(Theme.accent.opacity(0.1))

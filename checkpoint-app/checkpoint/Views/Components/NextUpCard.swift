@@ -2,7 +2,7 @@
 //  NextUpCard.swift
 //  checkpoint
 //
-//  Data-focused hero card with instrument cluster aesthetic
+//  Brutalist-Tech-Modernist hero card - terminal data display
 //
 
 import SwiftUI
@@ -31,90 +31,102 @@ struct NextUpCard: View {
         status == .overdue || status == .dueSoon
     }
 
-    private var progressValue: Double {
-        guard let dueMileage = service.dueMileage,
-              let lastMileage = service.lastMileage,
-              dueMileage > lastMileage else { return 0 }
-        let total = Double(dueMileage - lastMileage)
-        let elapsed = Double(currentMileage - lastMileage)
-        return min(max(elapsed / total, 0), 1)
-    }
-
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: Spacing.lg) {
-                // Top section: Status pill
-                HStack {
-                    statusPill
+            VStack(alignment: .leading, spacing: 0) {
+                // Header row: status + service name
+                HStack(alignment: .top) {
+                    // Status indicator (square, not circle - brutalist)
+                    Rectangle()
+                        .fill(status.color)
+                        .frame(width: 8, height: 8)
+                        .pulseAnimation(isActive: isUrgent)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(status.label.isEmpty ? "SCHEDULED" : status.label)
+                            .font(.brutalistLabel)
+                            .foregroundStyle(status.color)
+                            .textCase(.uppercase)
+                            .tracking(1.5)
+
+                        Text(service.name)
+                            .font(.brutalistHeading)
+                            .foregroundStyle(Theme.textPrimary)
+                            .textCase(.uppercase)
+                    }
+
                     Spacer()
                 }
+                .padding(.bottom, 16)
 
-                // Service name
-                Text(service.name.uppercased())
-                    .font(.instrumentMedium)
-                    .foregroundStyle(Theme.textPrimary)
-                    .tracking(1)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                // Divider
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: 1)
 
-                // Hero countdown number
+                // Hero data display
                 if let days = daysUntilDue {
-                    VStack(spacing: 4) {
+                    VStack(alignment: .leading, spacing: 4) {
                         Text("\(abs(days))")
-                            .font(.instrumentLarge)
+                            .font(.brutalistHero)
                             .foregroundStyle(status.color)
                             .contentTransition(.numericText())
-                            .statusGlow(color: status.color, isActive: isUrgent)
 
-                        Text(days < 0 ? "DAYS OVERDUE" : "DAYS REMAINING")
-                            .font(.instrumentLabel)
+                        Text(days < 0 ? "DAYS_OVERDUE" : "DAYS_REMAINING")
+                            .font(.brutalistLabel)
                             .foregroundStyle(Theme.textTertiary)
                             .tracking(1.5)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Spacing.md)
+                    .padding(.vertical, 20)
                 }
 
-                // Progress bar section
-                if let dueMileage = service.dueMileage {
-                    VStack(spacing: Spacing.md) {
-                        // Progress track
-                        progressBar
+                // Divider
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: 1)
 
-                        // Mileage labels
+                // Data rows
+                VStack(spacing: 8) {
+                    if let dueMileage = service.dueMileage {
                         HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("CURRENT")
-                                    .font(.instrumentLabel)
-                                    .foregroundStyle(Theme.textTertiary)
-
-                                Text(formatMileage(currentMileage))
-                                    .font(.instrumentMono)
-                                    .foregroundStyle(Theme.textPrimary)
-                            }
+                            Text("CURRENT")
+                                .font(.brutalistLabel)
+                                .foregroundStyle(Theme.textTertiary)
+                                .tracking(1)
 
                             Spacer()
 
-                            VStack(alignment: .trailing, spacing: 2) {
-                                Text("DUE AT")
-                                    .font(.instrumentLabel)
-                                    .foregroundStyle(Theme.textTertiary)
-
-                                Text(formatMileage(dueMileage))
-                                    .font(.instrumentMono)
-                                    .foregroundStyle(status.color)
-                            }
+                            Text(formatMileage(currentMileage))
+                                .font(.brutalistBody)
+                                .foregroundStyle(Theme.accent)
                         }
+
+                        HStack {
+                            Text("DUE_AT")
+                                .font(.brutalistLabel)
+                                .foregroundStyle(Theme.textTertiary)
+                                .tracking(1)
+
+                            Spacer()
+
+                            Text(formatMileage(dueMileage))
+                                .font(.brutalistBody)
+                                .foregroundStyle(status.color)
+                        }
+
+                        // Progress bar (simple, geometric)
+                        progressBar
+                            .padding(.top, 8)
                     }
                 }
+                .padding(.top, 12)
             }
-            .padding(Spacing.lg)
-            .background(cardBackground)
-            .clipShape(RoundedRectangle(cornerRadius: Theme.instrumentCornerRadius, style: .continuous))
+            .padding(Theme.cardPadding)
+            .background(Theme.surfaceInstrument)
             .overlay(
-                RoundedRectangle(cornerRadius: Theme.instrumentCornerRadius, style: .continuous)
-                    .strokeBorder(Theme.gridLine, lineWidth: 1)
+                Rectangle()
+                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
             )
-            .shadow(color: status.color.opacity(isUrgent ? 0.2 : 0), radius: 8, x: 0, y: 0)
             .contentShape(Rectangle())
         }
         .buttonStyle(CardButtonStyle())
@@ -123,88 +135,32 @@ struct NextUpCard: View {
         .accessibilityHint(service.dueDescription ?? "")
     }
 
-    // MARK: - Subviews
-
-    private var statusPill: some View {
-        HStack(spacing: 6) {
-            Circle()
-                .fill(status.color)
-                .frame(width: 8, height: 8)
-                .pulseAnimation(isActive: isUrgent)
-
-            Text(status.label.isEmpty ? "SCHEDULED" : status.label)
-                .font(.instrumentLabel)
-                .foregroundStyle(status.color)
-                .tracking(1.5)
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 8)
-        .background(
-            ZStack {
-                status.color.opacity(0.15)
-
-                // Inner glow effect
-                RoundedRectangle(cornerRadius: 20)
-                    .strokeBorder(status.color.opacity(0.3), lineWidth: 1)
-            }
-        )
-        .clipShape(Capsule())
-    }
+    // MARK: - Progress Bar
 
     private var progressBar: some View {
-        GeometryReader { geo in
+        let progressValue: Double = {
+            guard let dueMileage = service.dueMileage,
+                  let lastMileage = service.lastMileage,
+                  dueMileage > lastMileage else { return 0 }
+            let total = Double(dueMileage - lastMileage)
+            let elapsed = Double(currentMileage - lastMileage)
+            return min(max(elapsed / total, 0), 1)
+        }()
+
+        return GeometryReader { geo in
             ZStack(alignment: .leading) {
-                // Track background
-                RoundedRectangle(cornerRadius: 4)
+                // Track
+                Rectangle()
                     .fill(Theme.gridLine)
-                    .frame(height: 4)
+                    .frame(height: 2)
 
-                // Progress fill
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Theme.accent,
-                                status.color
-                            ],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .frame(width: geo.size.width * progressValue, height: 4)
-
-                // End markers
-                HStack {
-                    Circle()
-                        .fill(Theme.accent)
-                        .frame(width: 8, height: 8)
-
-                    Spacer()
-
-                    Circle()
-                        .fill(status.color)
-                        .frame(width: 8, height: 8)
-                }
+                // Fill
+                Rectangle()
+                    .fill(status.color)
+                    .frame(width: geo.size.width * progressValue, height: 2)
             }
         }
-        .frame(height: 8)
-    }
-
-    private var cardBackground: some View {
-        ZStack {
-            Theme.surfaceInstrument
-
-            // Subtle vertical gradient overlay
-            LinearGradient(
-                colors: [
-                    Color.white.opacity(0.02),
-                    Color.clear,
-                    Color.black.opacity(0.1)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        }
+        .frame(height: 2)
     }
 
     // MARK: - Helpers
@@ -212,7 +168,7 @@ struct NextUpCard: View {
     private func formatMileage(_ miles: Int) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
-        return (formatter.string(from: NSNumber(value: miles)) ?? "\(miles)") + " mi"
+        return (formatter.string(from: NSNumber(value: miles)) ?? "\(miles)") + "_MI"
     }
 }
 
@@ -221,8 +177,7 @@ struct NextUpCard: View {
 struct CardButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
-            .brightness(configuration.isPressed ? 0.03 : 0)
+            .opacity(configuration.isPressed ? 0.7 : 1.0)
             .animation(.easeOut(duration: Theme.animationFast), value: configuration.isPressed)
     }
 }
@@ -234,7 +189,7 @@ struct CardButtonStyle: ButtonStyle {
     return ZStack {
         AtmosphericBackground()
 
-        VStack(spacing: Spacing.lg) {
+        VStack(spacing: 16) {
             ForEach(services.prefix(2), id: \.name) { service in
                 NextUpCard(
                     service: service,
@@ -245,7 +200,7 @@ struct CardButtonStyle: ButtonStyle {
                 }
             }
         }
-        .screenPadding()
+        .padding(Theme.screenHorizontalPadding)
     }
     .preferredColorScheme(.dark)
 }

@@ -177,48 +177,45 @@ struct DashboardView: View {
         Button {
             showVehiclePicker = true
         } label: {
-            VStack(alignment: .leading, spacing: Spacing.sm) {
-                HStack(spacing: 0) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        // Vehicle name - Barlow SemiBold, all caps
-                        Text(currentVehicle?.displayName.uppercased() ?? "SELECT VEHICLE")
-                            .font(.instrumentMedium)
-                            .foregroundStyle(Theme.textPrimary)
+            VStack(alignment: .leading, spacing: 0) {
+                // Vehicle name - brutalist monospace
+                Text(currentVehicle?.displayName.uppercased() ?? "SELECT_VEHICLE")
+                    .font(.brutalistTitle)
+                    .foregroundStyle(Theme.textPrimary)
+
+                // Mileage + model info
+                if let vehicle = currentVehicle {
+                    HStack(spacing: 0) {
+                        Text(formatMileage(vehicle.currentMileage))
+                            .font(.brutalistBody)
+                            .foregroundStyle(Theme.accent)
+
+                        Text(" // ")
+                            .font(.brutalistSecondary)
+                            .foregroundStyle(Theme.textTertiary)
+
+                        Text("\(String(vehicle.year))_\(vehicle.make)_\(vehicle.model)".uppercased())
+                            .font(.brutalistSecondary)
+                            .foregroundStyle(Theme.textTertiary)
+
+                        Spacer()
+
+                        Text("[SELECT]")
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.accent)
                             .tracking(1)
-
-                        // Mileage + model info
-                        if let vehicle = currentVehicle {
-                            HStack(spacing: 8) {
-                                Text(formatMileage(vehicle.currentMileage))
-                                    .font(.instrumentMono)
-                                    .foregroundStyle(Theme.accent)
-
-                                Text("•")
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(Theme.textTertiary)
-
-                                Text("\(String(vehicle.year)) \(vehicle.make) \(vehicle.model)")
-                                    .font(.instrumentBody)
-                                    .foregroundStyle(Theme.textTertiary)
-                            }
-                        }
                     }
-
-                    Spacer()
-
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Theme.textTertiary)
-                        .padding(.trailing, 4)
+                    .padding(.top, 4)
                 }
 
-                // Thin amber accent line
+                // Border
                 Rectangle()
-                    .fill(Theme.accent.opacity(0.4))
-                    .frame(height: 1)
+                    .fill(Theme.gridLine)
+                    .frame(height: Theme.borderWidth)
+                    .padding(.top, 12)
             }
-            .padding(.horizontal, Spacing.screenHorizontal)
-            .padding(.vertical, Spacing.md)
+            .padding(.horizontal, Theme.screenHorizontalPadding)
+            .padding(.vertical, 12)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
