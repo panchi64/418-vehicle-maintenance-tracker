@@ -36,30 +36,30 @@ struct QuickSpecsCard: View {
 
                     // Quick preview when collapsed (if has data)
                     if !isExpanded && hasAnySpecs {
-                        HStack(spacing: Spacing.xs) {
+                        HStack(spacing: Spacing.sm) {
                             if let truncatedVIN = vehicle.truncatedVIN {
-                                Text("VIN: \(truncatedVIN)")
+                                Text(truncatedVIN)
                                     .font(.brutalistSecondary)
-                                    .foregroundStyle(Theme.textTertiary)
+                                    .foregroundStyle(Theme.textSecondary)
                             }
 
                             if vehicle.tireSize != nil {
-                                Text("|")
+                                Text("•")
                                     .font(.brutalistSecondary)
                                     .foregroundStyle(Theme.gridLine)
 
                                 Text(vehicle.tireSize!)
                                     .font(.brutalistSecondary)
-                                    .foregroundStyle(Theme.textTertiary)
+                                    .foregroundStyle(Theme.textSecondary)
                             }
                         }
                     }
 
-                    // Expand/collapse indicator
-                    Image(systemName: isExpanded ? "minus" : "plus")
-                        .font(.brutalistLabel)
+                    // Chevron indicator with rotation
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(Theme.accent)
-                        .frame(width: 20, height: 20)
+                        .rotationEffect(.degrees(isExpanded ? 180 : 0))
                 }
                 .padding(Spacing.md)
                 .background(Theme.surfaceInstrument)
@@ -74,44 +74,74 @@ struct QuickSpecsCard: View {
                         .fill(Theme.gridLine)
                         .frame(height: 1)
 
-                    VStack(spacing: 0) {
-                        if let vin = vehicle.vin {
-                            specRow(label: "VIN", value: vin)
-                            Rectangle()
-                                .fill(Theme.gridLine)
-                                .frame(height: 1)
-                                .padding(.leading, Spacing.md)
-                        }
-
-                        if let tireSize = vehicle.tireSize {
-                            specRow(label: "TIRE SIZE", value: tireSize)
-                            if vehicle.oilType != nil {
-                                Rectangle()
-                                    .fill(Theme.gridLine)
-                                    .frame(height: 1)
-                                    .padding(.leading, Spacing.md)
+                    // Specs grid - values first, labels below
+                    VStack(spacing: Spacing.lg) {
+                        // Main specs in a horizontal layout
+                        HStack(alignment: .top, spacing: Spacing.lg) {
+                            // VIN (takes more space)
+                            if let vin = vehicle.vin {
+                                specBlock(
+                                    value: vin,
+                                    label: "VIN",
+                                    isMonospace: true
+                                )
+                                .frame(maxWidth: .infinity, alignment: .leading)
                             }
                         }
 
-                        if let oilType = vehicle.oilType {
-                            specRow(label: "OIL TYPE", value: oilType)
+                        // Tire and Oil side by side
+                        if vehicle.tireSize != nil || vehicle.oilType != nil {
+                            HStack(alignment: .top, spacing: Spacing.lg) {
+                                if let tireSize = vehicle.tireSize {
+                                    specBlock(
+                                        value: tireSize,
+                                        label: "TIRES",
+                                        isMonospace: false
+                                    )
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+
+                                if let oilType = vehicle.oilType {
+                                    specBlock(
+                                        value: oilType,
+                                        label: "OIL",
+                                        isMonospace: false
+                                    )
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                            }
                         }
 
-                        // Edit button
-                        Button {
-                            onEdit()
-                        } label: {
-                            HStack {
-                                Image(systemName: "pencil")
-                                    .font(.system(size: 12))
-                                Text("EDIT SPECS")
-                                    .font(.brutalistLabel)
-                                    .tracking(1)
-                            }
-                            .foregroundStyle(Theme.accent)
-                            .frame(maxWidth: .infinity)
-                            .padding(Spacing.md)
+                        // Empty state
+                        if !hasAnySpecs {
+                            Text("No specifications added")
+                                .font(.brutalistSecondary)
+                                .foregroundStyle(Theme.textTertiary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
                         }
+                    }
+                    .padding(Spacing.md)
+                    .padding(.bottom, Spacing.xs)
+
+                    // Divider before edit button
+                    Rectangle()
+                        .fill(Theme.gridLine)
+                        .frame(height: 1)
+
+                    // Edit button - more subtle
+                    Button {
+                        onEdit()
+                    } label: {
+                        HStack(spacing: Spacing.xs) {
+                            Image(systemName: "pencil")
+                                .font(.system(size: 11, weight: .medium))
+                            Text(hasAnySpecs ? "EDIT" : "ADD SPECS")
+                                .font(.brutalistLabel)
+                                .tracking(1)
+                        }
+                        .foregroundStyle(Theme.accent)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, Spacing.sm)
                     }
                 }
                 .background(Theme.surfaceInstrument)
@@ -125,21 +155,22 @@ struct QuickSpecsCard: View {
         .clipped()
     }
 
-    private func specRow(label: String, value: String) -> some View {
-        HStack {
+    /// Spec block with large value and small label below
+    private func specBlock(value: String, label: String, isMonospace: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            // Value - prominent
+            Text(value)
+                .font(isMonospace ? .brutalistBody : .brutalistHeading)
+                .foregroundStyle(Theme.textPrimary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+
+            // Label - secondary
             Text(label)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1)
-
-            Spacer()
-
-            Text(value)
-                .font(.brutalistBody)
-                .foregroundStyle(Theme.textPrimary)
-                .lineLimit(1)
         }
-        .padding(Spacing.md)
     }
 }
 
@@ -147,51 +178,53 @@ struct QuickSpecsCard: View {
     ZStack {
         AtmosphericBackground()
 
-        VStack(spacing: Spacing.lg) {
-            // With all specs
-            QuickSpecsCard(
-                vehicle: Vehicle(
-                    name: "Daily Driver",
-                    make: "Toyota",
-                    model: "Camry",
-                    year: 2022,
-                    currentMileage: 32500,
-                    vin: "1HGBH41JXMN109186",
-                    tireSize: "225/45R17",
-                    oilType: "0W-20 Synthetic"
-                )
-            ) {
-                print("Edit tapped")
-            }
+        ScrollView {
+            VStack(spacing: Spacing.lg) {
+                // With all specs - expanded
+                QuickSpecsCard(
+                    vehicle: Vehicle(
+                        name: "Daily Driver",
+                        make: "Toyota",
+                        model: "Camry",
+                        year: 2022,
+                        currentMileage: 32500,
+                        vin: "1HGBH41JXMN109186",
+                        tireSize: "225/45R17",
+                        oilType: "0W-20 Synthetic"
+                    )
+                ) {
+                    print("Edit tapped")
+                }
 
-            // With partial specs
-            QuickSpecsCard(
-                vehicle: Vehicle(
-                    name: "Weekend Car",
-                    make: "Mazda",
-                    model: "MX-5",
-                    year: 2020,
-                    currentMileage: 18200,
-                    vin: "JM1NDAL79L0123456"
-                )
-            ) {
-                print("Edit tapped")
-            }
+                // With partial specs
+                QuickSpecsCard(
+                    vehicle: Vehicle(
+                        name: "Weekend Car",
+                        make: "Mazda",
+                        model: "MX-5",
+                        year: 2020,
+                        currentMileage: 18200,
+                        vin: "JM1NDAL79L0123456"
+                    )
+                ) {
+                    print("Edit tapped")
+                }
 
-            // With no specs
-            QuickSpecsCard(
-                vehicle: Vehicle(
-                    name: "New Car",
-                    make: "Honda",
-                    model: "Civic",
-                    year: 2024,
-                    currentMileage: 1500
-                )
-            ) {
-                print("Edit tapped")
+                // With no specs
+                QuickSpecsCard(
+                    vehicle: Vehicle(
+                        name: "New Car",
+                        make: "Honda",
+                        model: "Civic",
+                        year: 2024,
+                        currentMileage: 1500
+                    )
+                ) {
+                    print("Edit tapped")
+                }
             }
+            .padding(Spacing.screenHorizontal)
         }
-        .padding(Spacing.screenHorizontal)
     }
     .preferredColorScheme(.dark)
 }
