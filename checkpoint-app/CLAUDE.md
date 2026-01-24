@@ -161,13 +161,36 @@ Uses App Groups (`group.com.checkpoint.shared`) for shared SwiftData access:
 
 Run tests with:
 ```bash
-xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPhone 16'
+xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPhone 17'
 ```
 
 Test coverage targets:
 - Models: 90%+ (computed properties, validation, relationships)
 - Services: 80%+ (mocked dependencies)
 - Views: Key interactions tested
+
+### Simulator Usage Guidelines
+
+**Do not spawn multiple simulators simultaneously.** Running parallel test commands or multiple xcodebuild processes creates many simulator instances, which:
+- Consumes excessive system resources
+- Causes "Invalid device state" and "server died" errors
+- Slows down the entire system
+
+Best practices:
+- Run one `xcodebuild test` command at a time
+- Wait for the previous test run to complete before starting another
+- If running specific test classes, combine them in a single command:
+  ```bash
+  # Good: Single command with multiple test targets
+  xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPhone 17' \
+    -only-testing:checkpointTests/AppStateTests \
+    -only-testing:checkpointTests/HomeTabTests
+
+  # Bad: Multiple parallel commands (spawns multiple simulators)
+  xcodebuild test ... &
+  xcodebuild test ... &
+  ```
+- If simulators get stuck, reset them: `xcrun simctl shutdown all`
 
 ## Common Tasks
 

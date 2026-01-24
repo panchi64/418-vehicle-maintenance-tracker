@@ -446,20 +446,20 @@
 
 > Three-tab architecture with persistent vehicle context and global quick-add action.
 
-| Tab | Purpose | Key Content |
-|-----|---------|-------------|
-| **Home** | Glanceable "what's next" | Next Up card, quick stats, recent activity summary (last 3) |
-| **Services** | Maintenance timeline & logging | Full service history, timeline view, search/filter, service details |
-| **Costs** | Expense tracking & analytics | Cost history, categories, monthly/yearly summaries, cost-per-mile |
+| Tab | Purpose | Key Content | Status |
+|-----|---------|-------------|--------|
+| **Home** | Glanceable "what's next" | Next Up card, quick stats, recent activity summary (last 3) | ✅ |
+| **Services** | Maintenance timeline & logging | Full service history, timeline view, search/filter, service details | ✅ |
+| **Costs** | Expense tracking & analytics | Cost history, categories, monthly/yearly summaries, cost-per-mile | ✅ |
 
 **Navigation Principles:**
 
-| Element | Behavior |
-|---------|----------|
-| **Vehicle header** | Persistent at top of ALL tabs — vehicle selector always accessible |
-| **Quick-add button (+)** | Floating action button visible on ALL tabs — supersedes all views for consistent access |
-| **Tab switching** | Should feel fluid and intuitive, not disruptive to user flow |
-| **Recent Activity (Home)** | Glanceable summary only (last 3 items) — tapping navigates to Services tab for full history |
+| Element | Behavior | Status |
+|---------|----------|--------|
+| **Vehicle header** | Persistent at top of ALL tabs — vehicle selector always accessible | ✅ |
+| **Quick-add button (+)** | Floating action button visible on ALL tabs — supersedes all views for consistent access | ✅ |
+| **Tab switching** | Should feel fluid and intuitive, not disruptive to user flow | ✅ |
+| **Recent Activity (Home)** | Glanceable summary only (last 3 items) — tapping navigates to Services tab for full history | ✅ |
 
 **Tab Content Details:**
 
@@ -486,10 +486,10 @@
 - Spending trends and analytics
 
 **Implementation Considerations:**
-- Use native iOS TabView for familiar navigation patterns
-- Consider swipe gestures between tabs for fluid transitions
-- Maintain scroll position when switching tabs (don't reset to top)
-- Tab bar should use iOS 26 Liquid Glass styling for consistency
+- ✅ Use native iOS TabView for familiar navigation patterns
+- ✅ Consider swipe gestures between tabs for fluid transitions (using `.page` style TabView)
+- ✅ Custom BrutalistTabBar for consistent brutalist design aesthetic
+- ✅ AppState with @Observable for centralized state management
 
 ---
 
