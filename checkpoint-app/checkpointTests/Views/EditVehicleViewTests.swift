@@ -201,4 +201,103 @@ final class EditVehicleViewTests: XCTestCase {
         XCTAssertEqual(vehicleWithName.displayName, "My Ride")
         XCTAssertEqual(vehicleWithoutName.displayName, "2020 Nissan Altima")
     }
+
+    // MARK: - Notes Field Tests
+
+    func testInitialStateWithNotes() {
+        // Given
+        let vehicle = Vehicle(
+            name: "Test Car",
+            make: "Honda",
+            model: "Civic",
+            year: 2021,
+            currentMileage: 15000,
+            notes: "Vehicle has minor scratch on bumper"
+        )
+        modelContext.insert(vehicle)
+
+        // When
+        let view = EditVehicleView(vehicle: vehicle)
+
+        // Then
+        XCTAssertEqual(view.vehicle.notes, "Vehicle has minor scratch on bumper")
+    }
+
+    func testInitialStateWithNoNotes() {
+        // Given
+        let vehicle = Vehicle(
+            name: "No Notes Car",
+            make: "Toyota",
+            model: "Corolla",
+            year: 2020,
+            currentMileage: 10000,
+            notes: nil
+        )
+        modelContext.insert(vehicle)
+
+        // When
+        let view = EditVehicleView(vehicle: vehicle)
+
+        // Then
+        XCTAssertNil(view.vehicle.notes)
+    }
+
+    func testNotesCanBeUpdated() {
+        // Given
+        let vehicle = Vehicle(
+            name: "Test Car",
+            make: "Honda",
+            model: "Civic",
+            year: 2021,
+            currentMileage: 15000,
+            notes: "Original notes"
+        )
+        modelContext.insert(vehicle)
+
+        // When
+        vehicle.notes = "Updated notes with new information"
+
+        // Then
+        XCTAssertEqual(vehicle.notes, "Updated notes with new information")
+    }
+
+    func testNotesCanBeCleared() {
+        // Given
+        let vehicle = Vehicle(
+            name: "Test Car",
+            make: "Honda",
+            model: "Civic",
+            year: 2021,
+            currentMileage: 15000,
+            notes: "Some notes to clear"
+        )
+        modelContext.insert(vehicle)
+
+        // When - simulating clearing notes in edit view
+        let emptyNotes = ""
+        vehicle.notes = emptyNotes.isEmpty ? nil : emptyNotes
+
+        // Then
+        XCTAssertNil(vehicle.notes)
+    }
+
+    func testNotesPreserveSpecialCharacters() {
+        // Given
+        let specialNotes = "Oil: 0W-20 @ $45.99 | Tire: 225/45R17 (Front & Rear)"
+        let vehicle = Vehicle(
+            name: "Test Car",
+            make: "Honda",
+            model: "Civic",
+            year: 2021,
+            currentMileage: 15000,
+            notes: specialNotes
+        )
+        modelContext.insert(vehicle)
+
+        // When
+        let view = EditVehicleView(vehicle: vehicle)
+
+        // Then
+        XCTAssertEqual(view.vehicle.notes, specialNotes)
+    }
 }

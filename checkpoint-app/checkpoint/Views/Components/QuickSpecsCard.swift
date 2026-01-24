@@ -15,7 +15,20 @@ struct QuickSpecsCard: View {
     @State private var isExpanded = false
 
     private var hasAnySpecs: Bool {
-        vehicle.vin != nil || vehicle.tireSize != nil || vehicle.oilType != nil
+        vehicle.vin != nil || vehicle.tireSize != nil || vehicle.oilType != nil || (vehicle.notes != nil && !vehicle.notes!.isEmpty)
+    }
+
+    private var hasNotes: Bool {
+        vehicle.notes != nil && !vehicle.notes!.isEmpty
+    }
+
+    /// Truncated notes for preview display (first ~50 chars)
+    private var truncatedNotes: String? {
+        guard let notes = vehicle.notes, !notes.isEmpty else { return nil }
+        if notes.count <= 50 {
+            return notes
+        }
+        return String(notes.prefix(50)) + "..."
     }
 
     var body: some View {
@@ -109,6 +122,30 @@ struct QuickSpecsCard: View {
                                     )
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                 }
+                            }
+                        }
+
+                        // Notes section
+                        if hasNotes {
+                            VStack(alignment: .leading, spacing: 0) {
+                                // Separator
+                                Rectangle()
+                                    .fill(Color.white.opacity(0.2))
+                                    .frame(height: 2)
+                                    .padding(.bottom, Spacing.sm)
+
+                                // Notes label
+                                Text("NOTES")
+                                    .font(.brutalistLabel)
+                                    .foregroundStyle(Theme.textTertiary)
+                                    .tracking(1)
+                                    .padding(.bottom, 4)
+
+                                // Notes content
+                                Text(truncatedNotes ?? "")
+                                    .font(.brutalistBody)
+                                    .foregroundStyle(Theme.textPrimary)
+                                    .lineLimit(3)
                             }
                         }
 

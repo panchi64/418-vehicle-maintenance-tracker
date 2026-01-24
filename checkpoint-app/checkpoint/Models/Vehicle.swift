@@ -22,6 +22,9 @@ final class Vehicle: Identifiable {
     var tireSize: String?
     var oilType: String?
 
+    // Notes
+    var notes: String?
+
     // Mileage tracking
     var mileageUpdatedAt: Date?
 
@@ -87,6 +90,7 @@ final class Vehicle: Identifiable {
         vin: String? = nil,
         tireSize: String? = nil,
         oilType: String? = nil,
+        notes: String? = nil,
         mileageUpdatedAt: Date? = nil
     ) {
         self.name = name
@@ -97,6 +101,7 @@ final class Vehicle: Identifiable {
         self.vin = vin
         self.tireSize = tireSize
         self.oilType = oilType
+        self.notes = notes
         self.mileageUpdatedAt = mileageUpdatedAt
     }
 }

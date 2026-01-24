@@ -224,4 +224,65 @@ final class AddVehicleViewTests: XCTestCase {
         // Then: Should default to 0
         XCTAssertEqual(mileageInt, 0, "Empty mileage should default to 0")
     }
+
+    // MARK: - Notes Field Tests
+
+    func testVehicleCreation_WithNotes() {
+        // Given: All fields including notes
+        let name = "Daily Driver"
+        let make = "Toyota"
+        let model = "Camry"
+        let year = "2022"
+        let notes = "Bought used from dealer, needs new tires soon"
+
+        // When: Creating a vehicle
+        let vehicle = Vehicle(
+            name: name,
+            make: make,
+            model: model,
+            year: Int(year) ?? 0,
+            notes: notes.isEmpty ? nil : notes
+        )
+
+        // Then: Vehicle should have notes
+        XCTAssertEqual(vehicle.notes, "Bought used from dealer, needs new tires soon")
+    }
+
+    func testVehicleCreation_WithEmptyNotes() {
+        // Given: Empty notes field
+        let notes = ""
+
+        // When: Creating a vehicle (simulating saveVehicle logic)
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            notes: notes.isEmpty ? nil : notes
+        )
+
+        // Then: Notes should be nil (not empty string)
+        XCTAssertNil(vehicle.notes, "Empty notes should be saved as nil")
+    }
+
+    func testVehicleCreation_WithMultilineNotes() {
+        // Given: Multiline notes
+        let notes = """
+        Vehicle quirks:
+        - Slight rattle at highway speeds
+        - A/C needs recharge
+        - Last oil change: Dec 2024
+        """
+
+        // When: Creating a vehicle
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            notes: notes.isEmpty ? nil : notes
+        )
+
+        // Then: Notes should preserve newlines
+        XCTAssertEqual(vehicle.notes, notes)
+        XCTAssertTrue(vehicle.notes?.contains("\n") ?? false, "Notes should contain newlines")
+    }
 }

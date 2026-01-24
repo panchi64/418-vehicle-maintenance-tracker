@@ -18,7 +18,13 @@ struct CheckpointWidget: Widget {
         }
         .configurationDisplayName("Checkpoint")
         .description("View upcoming vehicle maintenance")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([
+            .systemSmall,
+            .systemMedium,
+            .accessoryInline,
+            .accessoryCircular,
+            .accessoryRectangular
+        ])
     }
 }
 
@@ -34,6 +40,12 @@ struct CheckpointWidgetEntryView: View {
             SmallWidgetView(entry: entry)
         case .systemMedium:
             MediumWidgetView(entry: entry)
+        case .accessoryInline:
+            AccessoryInlineView(entry: entry)
+        case .accessoryCircular:
+            AccessoryCircularView(entry: entry)
+        case .accessoryRectangular:
+            AccessoryRectangularView(entry: entry)
         default:
             SmallWidgetView(entry: entry)
         }
@@ -50,6 +62,27 @@ struct CheckpointWidgetEntryView: View {
 }
 
 #Preview(as: .systemMedium) {
+    CheckpointWidget()
+} timeline: {
+    ServiceEntry.placeholder
+    ServiceEntry.empty
+}
+
+#Preview(as: .accessoryInline) {
+    CheckpointWidget()
+} timeline: {
+    ServiceEntry.placeholder
+    ServiceEntry.empty
+}
+
+#Preview(as: .accessoryCircular) {
+    CheckpointWidget()
+} timeline: {
+    ServiceEntry.placeholder
+    ServiceEntry.empty
+}
+
+#Preview(as: .accessoryRectangular) {
     CheckpointWidget()
 } timeline: {
     ServiceEntry.placeholder

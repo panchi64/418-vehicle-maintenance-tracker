@@ -52,6 +52,16 @@ enum WidgetServiceStatus: String, Codable {
         case .neutral: return WidgetColors.statusNeutral
         }
     }
+
+    /// Color for accessory (lock screen) widgets - uses system colors for tinting
+    var accessoryColor: Color {
+        switch self {
+        case .overdue: return .red
+        case .dueSoon: return .yellow
+        case .good: return .green
+        case .neutral: return .gray
+        }
+    }
 }
 
 // MARK: - Shared Data Structure

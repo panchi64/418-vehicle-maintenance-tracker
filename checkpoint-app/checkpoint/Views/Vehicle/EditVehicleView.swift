@@ -25,6 +25,7 @@ struct EditVehicleView: View {
     @State private var vin: String
     @State private var tireSize: String
     @State private var oilType: String
+    @State private var notes: String
 
     init(vehicle: Vehicle) {
         self.vehicle = vehicle
@@ -36,6 +37,7 @@ struct EditVehicleView: View {
         _vin = State(initialValue: vehicle.vin ?? "")
         _tireSize = State(initialValue: vehicle.tireSize ?? "")
         _oilType = State(initialValue: vehicle.oilType ?? "")
+        _notes = State(initialValue: vehicle.notes ?? "")
     }
 
     private var isFormValid: Bool {
@@ -130,6 +132,17 @@ struct EditVehicleView: View {
                             }
                         }
 
+                        // Notes Section
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                            InstrumentSectionHeader(title: "Notes")
+
+                            InstrumentTextEditor(
+                                label: "Notes",
+                                text: $notes,
+                                placeholder: "Vehicle quirks, history, reminders..."
+                            )
+                        }
+
                         // Save button
                         Button("Save Changes") {
                             saveChanges()
@@ -194,6 +207,7 @@ struct EditVehicleView: View {
         vehicle.vin = vin.isEmpty ? nil : vin
         vehicle.tireSize = tireSize.isEmpty ? nil : tireSize
         vehicle.oilType = oilType.isEmpty ? nil : oilType
+        vehicle.notes = notes.isEmpty ? nil : notes
         dismiss()
     }
 

@@ -21,6 +21,7 @@ struct AddVehicleView: View {
     @State private var vin: String = ""
     @State private var tireSize: String = ""
     @State private var oilType: String = ""
+    @State private var notes: String = ""
 
     // Validation
     private var isFormValid: Bool {
@@ -115,6 +116,17 @@ struct AddVehicleView: View {
                             }
                         }
 
+                        // Notes Section
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                            InstrumentSectionHeader(title: "Notes")
+
+                            InstrumentTextEditor(
+                                label: "Notes",
+                                text: $notes,
+                                placeholder: "Vehicle quirks, history, reminders..."
+                            )
+                        }
+
                         // Save button
                         Button("Add Vehicle") {
                             saveVehicle()
@@ -152,6 +164,7 @@ struct AddVehicleView: View {
             vin: vin.isEmpty ? nil : vin,
             tireSize: tireSize.isEmpty ? nil : tireSize,
             oilType: oilType.isEmpty ? nil : oilType,
+            notes: notes.isEmpty ? nil : notes,
             mileageUpdatedAt: .now
         )
         modelContext.insert(vehicle)
