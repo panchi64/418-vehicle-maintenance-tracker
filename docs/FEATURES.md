@@ -152,7 +152,7 @@
 | VIN decoding          | High     | ⏳     | Auto-populate year/make/model/engine                       |
 | Vehicle photos        | Medium   | ⏳     | AI-stylized vehicle portrait (see details below)           |
 | Odometer tracking     | High     | ✅     | Manual entry + smart estimation                            |
-| Vehicle notes         | Medium   | ⏳     | Freeform notes area for quirks, history, or reminders      |
+| Vehicle notes         | Medium   | ✅     | Freeform notes area for quirks, history, or reminders      |
 
 #### AI-Stylized Vehicle Photos
 
@@ -411,7 +411,7 @@
 | Feature                      | Priority | Status | Notes                                          |
 | ---------------------------- | -------- | ------ | ---------------------------------------------- |
 | Home Screen Widget           | High     | ✅     | Small/medium widget showing "Next Up" service  |
-| Lock Screen Widget           | High     | ⏳     | Glance at what's due without unlocking         |
+| Lock Screen Widget           | High     | ✅     | Glance at what's due without unlocking         |
 | One-tap notification actions | High     | ✅     | "Did you do your oil change?" → Yes/No buttons |
 | Siri integration             | Medium   | ⏳     | "Hey Siri, what's due on my car?"              |
 
