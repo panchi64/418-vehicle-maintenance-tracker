@@ -29,10 +29,6 @@ final class Vehicle: Identifiable {
     // Mileage tracking
     var mileageUpdatedAt: Date?
 
-    // Vehicle photo (stored as compressed JPEG data)
-    @Attribute(.externalStorage)
-    var photoData: Data?
-
     @Relationship(deleteRule: .cascade, inverse: \Service.vehicle)
     var services: [Service] = []
 
@@ -47,21 +43,6 @@ final class Vehicle: Identifiable {
             return "\(year) \(make) \(model)"
         }
         return name
-    }
-
-    /// Returns a SwiftUI Image from the stored photo data
-    var photo: Image? {
-        guard let data = photoData,
-              let uiImage = UIImage(data: data) else {
-            return nil
-        }
-        return Image(uiImage: uiImage)
-    }
-
-    /// Returns a UIImage from the stored photo data
-    var uiImage: UIImage? {
-        guard let data = photoData else { return nil }
-        return UIImage(data: data)
     }
 
     /// Calculate daily miles pace from mileage snapshots

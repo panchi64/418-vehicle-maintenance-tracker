@@ -16,9 +16,6 @@ struct VehicleHeader: View {
             onTap()
         } label: {
             HStack(spacing: Spacing.md) {
-                // Vehicle photo
-                VehiclePhotoView(vehicle: vehicle, size: .small)
-
                 VStack(alignment: .leading, spacing: 0) {
                     // Vehicle name - brutalist monospace
                     Text(vehicle?.displayName.uppercased() ?? "SELECT_VEHICLE")

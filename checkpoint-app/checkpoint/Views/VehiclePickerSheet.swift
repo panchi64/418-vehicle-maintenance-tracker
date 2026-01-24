@@ -97,9 +97,6 @@ struct VehiclePickerSheet: View {
             dismiss()
         } label: {
             HStack(spacing: Spacing.md) {
-                // Vehicle photo
-                VehiclePhotoView(vehicle: vehicle, size: .small)
-
                 VStack(alignment: .leading, spacing: 4) {
                     Text(vehicle.displayName.uppercased())
                         .font(.custom("Barlow-SemiBold", size: 16))
