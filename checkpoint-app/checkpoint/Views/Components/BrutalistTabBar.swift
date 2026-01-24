@@ -3,6 +3,7 @@
 //  checkpoint
 //
 //  Custom tab bar with brutalist monospace aesthetic
+//  Following AESTHETIC.md: underline indicators, no animations
 //
 
 import SwiftUI
@@ -10,48 +11,44 @@ import SwiftUI
 struct BrutalistTabBar: View {
     @Binding var selectedTab: AppState.Tab
 
-    @Namespace private var namespace
-
     var body: some View {
-        HStack(spacing: 0) {
-            ForEach(AppState.Tab.allCases, id: \.self) { tab in
-                tabButton(for: tab)
-            }
-        }
-        .padding(.top, Spacing.sm)
-        .padding(.bottom, Spacing.md)
-        .background(Theme.surfaceInstrument)
-        .overlay(alignment: .top) {
+        VStack(spacing: 0) {
+            // Top border
             Rectangle()
                 .fill(Theme.gridLine)
-                .frame(height: Theme.borderWidth)
+                .frame(height: 2)
+
+            // Tab buttons
+            HStack(spacing: 0) {
+                ForEach(AppState.Tab.allCases, id: \.self) { tab in
+                    tabButton(for: tab)
+                }
+            }
+            .frame(height: 44)
         }
+        .background(Theme.surfaceInstrument.ignoresSafeArea(edges: .bottom))
     }
 
     private func tabButton(for tab: AppState.Tab) -> some View {
         let isSelected = selectedTab == tab
 
         return Button {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                selectedTab = tab
-            }
+            selectedTab = tab
         } label: {
-            VStack(spacing: Spacing.xs) {
-                // Icon
-                Image(systemName: tab.icon)
-                    .font(.system(size: 20, weight: isSelected ? .semibold : .regular))
-                    .foregroundStyle(isSelected ? Theme.accent : Theme.textTertiary)
+            VStack(spacing: 0) {
+                Spacer()
 
-                // Label
                 Text(tab.title)
                     .font(.brutalistLabel)
                     .foregroundStyle(isSelected ? Theme.accent : Theme.textTertiary)
-                    .tracking(1)
+                    .tracking(2)
 
-                // Selection indicator
+                Spacer()
+
+                // Underline indicator at bottom
                 Rectangle()
                     .fill(isSelected ? Theme.accent : Color.clear)
-                    .frame(width: 24, height: 2)
+                    .frame(height: 2)
             }
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())

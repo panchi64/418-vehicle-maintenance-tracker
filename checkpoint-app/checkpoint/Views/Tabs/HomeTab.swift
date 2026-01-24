@@ -9,13 +9,13 @@ import SwiftUI
 import SwiftData
 
 struct HomeTab: View {
-    @Environment(\.appState) private var appState
+    @Bindable var appState: AppState
     @Environment(\.modelContext) private var modelContext
     @Query private var services: [Service]
     @Query private var serviceLogs: [ServiceLog]
 
     private var vehicle: Vehicle? {
-        appState?.selectedVehicle
+        appState.selectedVehicle
     }
 
     private var vehicleServices: [Service] {
@@ -44,7 +44,7 @@ struct HomeTab: View {
                 // Quick Specs Card
                 if let vehicle = vehicle {
                     QuickSpecsCard(vehicle: vehicle) {
-                        appState?.showEditVehicle = true
+                        appState.showEditVehicle = true
                     }
                     .revealAnimation(delay: 0.1)
                 }
@@ -68,7 +68,7 @@ struct HomeTab: View {
                             vehicleName: vehicle.displayName,
                             dailyMilesPace: vehicle.dailyMilesPace
                         ) {
-                            appState?.selectedService = nextUp
+                            appState.selectedService = nextUp
                         }
                     }
                     .revealAnimation(delay: 0.2)
@@ -82,7 +82,7 @@ struct HomeTab: View {
                             Spacer()
                             if remainingServices.count > 3 {
                                 Button {
-                                    appState?.navigateToServices()
+                                    appState.navigateToServices()
                                 } label: {
                                     Text("VIEW_ALL")
                                         .font(.brutalistLabel)
@@ -98,7 +98,7 @@ struct HomeTab: View {
                                     service: service,
                                     currentMileage: vehicle.currentMileage
                                 ) {
-                                    appState?.selectedService = service
+                                    appState.selectedService = service
                                 }
                                 .staggeredReveal(index: index, baseDelay: 0.25)
 
@@ -126,7 +126,7 @@ struct HomeTab: View {
                             Spacer()
                             if vehicleServiceLogs.count > 3 {
                                 Button {
-                                    appState?.navigateToServices()
+                                    appState.navigateToServices()
                                 } label: {
                                     Text("VIEW_ALL")
                                         .font(.brutalistLabel)
@@ -168,7 +168,7 @@ struct HomeTab: View {
                 }
 
                 // Empty states
-                if appState?.selectedVehicle == nil {
+                if appState.selectedVehicle == nil {
                     emptyVehicleState
                         .revealAnimation(delay: 0.2)
                 } else if vehicleServices.isEmpty && vehicle != nil {
@@ -240,7 +240,7 @@ struct HomeTab: View {
             }
 
             Button("ADD_VEHICLE") {
-                appState?.showAddVehicle = true
+                appState.showAddVehicle = true
             }
             .buttonStyle(.primary)
             .frame(width: 160)
@@ -310,9 +310,8 @@ struct HomeTab: View {
 
     return ZStack {
         AtmosphericBackground()
-        HomeTab()
+        HomeTab(appState: appState)
     }
-    .environment(\.appState, appState)
     .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self], inMemory: true)
     .preferredColorScheme(.dark)
 }

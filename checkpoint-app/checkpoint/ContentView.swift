@@ -30,20 +30,20 @@ struct ContentView: View {
                 .padding(.top, Spacing.sm)
                 .revealAnimation(delay: 0.1)
 
-                // Tab content with swipe navigation
-                TabView(selection: $appState.selectedTab) {
-                    HomeTab()
-                        .tag(AppState.Tab.home)
-
-                    ServicesTab()
-                        .tag(AppState.Tab.services)
-
-                    CostsTab()
-                        .tag(AppState.Tab.costs)
+                // Tab content - simple view switch
+                Group {
+                    switch appState.selectedTab {
+                    case .home:
+                        HomeTab(appState: appState)
+                    case .services:
+                        ServicesTab(appState: appState)
+                    case .costs:
+                        CostsTab(appState: appState)
+                    }
                 }
-                .tabViewStyle(.page(indexDisplayMode: .never))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                // Custom tab bar
+                // Custom tab bar - pinned to bottom
                 BrutalistTabBar(selectedTab: $appState.selectedTab)
             }
 
@@ -63,7 +63,6 @@ struct ContentView: View {
                 }
             }
         }
-        .environment(\.appState, appState)
         .onAppear {
             // Sync selected vehicle on appear
             if appState.selectedVehicle == nil {

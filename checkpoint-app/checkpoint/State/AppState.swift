@@ -62,15 +62,3 @@ final class AppState {
     }
 }
 
-// MARK: - Environment Key
-
-private struct AppStateKey: EnvironmentKey {
-    static let defaultValue: AppState? = nil
-}
-
-extension EnvironmentValues {
-    var appState: AppState? {
-        get { self[AppStateKey.self] }
-        set { self[AppStateKey.self] = newValue }
-    }
-}

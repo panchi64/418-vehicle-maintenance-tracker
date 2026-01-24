@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct CostsTab: View {
-    @Environment(\.appState) private var appState
+    @Bindable var appState: AppState
     @Query private var serviceLogs: [ServiceLog]
 
     @State private var periodFilter: PeriodFilter = .ytd
@@ -36,7 +36,7 @@ struct CostsTab: View {
     }
 
     private var vehicle: Vehicle? {
-        appState?.selectedVehicle
+        appState.selectedVehicle
     }
 
     private var vehicleServiceLogs: [ServiceLog] {
@@ -91,7 +91,7 @@ struct CostsTab: View {
 
     /// Calculate cost per mile for the filtered period
     private var costPerMile: Double? {
-        guard let vehicle = vehicle,
+        guard vehicle != nil,
               logsWithCosts.count >= 2 else { return nil }
 
         // Get oldest and newest logs in period
@@ -360,9 +360,8 @@ struct CostsTab: View {
 
     return ZStack {
         AtmosphericBackground()
-        CostsTab()
+        CostsTab(appState: appState)
     }
-    .environment(\.appState, appState)
     .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self], inMemory: true)
     .preferredColorScheme(.dark)
 }

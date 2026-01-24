@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct ServicesTab: View {
-    @Environment(\.appState) private var appState
+    @Bindable var appState: AppState
     @Query private var services: [Service]
     @Query private var serviceLogs: [ServiceLog]
 
@@ -24,7 +24,7 @@ struct ServicesTab: View {
     }
 
     private var vehicle: Vehicle? {
-        appState?.selectedVehicle
+        appState.selectedVehicle
     }
 
     private var vehicleServices: [Service] {
@@ -76,103 +76,98 @@ struct ServicesTab: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: Spacing.lg) {
-                    // Search field
-                    searchField
-                        .revealAnimation(delay: 0.1)
+        ScrollView {
+            VStack(spacing: Spacing.lg) {
+                // Search field
+                searchField
+                    .revealAnimation(delay: 0.1)
 
-                    // Status filter
-                    InstrumentSegmentedControl(
-                        options: StatusFilter.allCases,
-                        selection: $statusFilter
-                    ) { filter in
-                        filter.rawValue
-                    }
-                    .revealAnimation(delay: 0.15)
+                // Status filter
+                InstrumentSegmentedControl(
+                    options: StatusFilter.allCases,
+                    selection: $statusFilter
+                ) { filter in
+                    filter.rawValue
+                }
+                .revealAnimation(delay: 0.15)
 
-                    // Upcoming services section
-                    if !filteredServices.isEmpty, let vehicle = vehicle {
-                        VStack(alignment: .leading, spacing: Spacing.sm) {
-                            InstrumentSectionHeader(title: "Scheduled Services")
+                // Upcoming services section
+                if !filteredServices.isEmpty, let vehicle = vehicle {
+                    VStack(alignment: .leading, spacing: Spacing.sm) {
+                        InstrumentSectionHeader(title: "Scheduled Services")
 
-                            VStack(spacing: 0) {
-                                ForEach(Array(filteredServices.enumerated()), id: \.element.id) { index, service in
-                                    NavigationLink(value: service) {
-                                        ServiceRow(
-                                            service: service,
-                                            currentMileage: vehicle.currentMileage
-                                        ) {
-                                            // Empty - navigation handled by NavigationLink
-                                        }
-                                    }
-                                    .buttonStyle(.plain)
-                                    .staggeredReveal(index: index, baseDelay: 0.2)
-
-                                    if index < filteredServices.count - 1 {
-                                        Rectangle()
-                                            .fill(Theme.gridLine)
-                                            .frame(height: 1)
-                                            .padding(.leading, 56)
+                        VStack(spacing: 0) {
+                            ForEach(Array(filteredServices.enumerated()), id: \.element.id) { index, service in
+                                Button {
+                                    appState.selectedService = service
+                                } label: {
+                                    ServiceRow(
+                                        service: service,
+                                        currentMileage: vehicle.currentMileage
+                                    ) {
+                                        appState.selectedService = service
                                     }
                                 }
-                            }
-                            .background(Theme.surfaceInstrument)
-                            .overlay(
-                                Rectangle()
-                                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                            )
-                        }
-                    }
+                                .buttonStyle(.plain)
+                                .staggeredReveal(index: index, baseDelay: 0.2)
 
-                    // Service History section
-                    if !filteredLogs.isEmpty {
-                        VStack(alignment: .leading, spacing: Spacing.sm) {
-                            InstrumentSectionHeader(title: "Service History")
-
-                            VStack(spacing: 0) {
-                                ForEach(Array(filteredLogs.enumerated()), id: \.element.id) { index, log in
-                                    historyRow(log: log)
-                                        .staggeredReveal(index: index, baseDelay: 0.3)
-
-                                    if index < filteredLogs.count - 1 {
-                                        Rectangle()
-                                            .fill(Theme.gridLine)
-                                            .frame(height: 1)
-                                            .padding(.leading, 28)
-                                    }
+                                if index < filteredServices.count - 1 {
+                                    Rectangle()
+                                        .fill(Theme.gridLine)
+                                        .frame(height: 1)
+                                        .padding(.leading, 56)
                                 }
                             }
-                            .background(Theme.surfaceInstrument)
-                            .overlay(
-                                Rectangle()
-                                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                            )
                         }
-                    }
-
-                    // Empty state
-                    if filteredServices.isEmpty && filteredLogs.isEmpty && vehicle != nil {
-                        emptyState
-                            .revealAnimation(delay: 0.2)
-                    }
-
-                    // No vehicle state
-                    if vehicle == nil {
-                        noVehicleState
-                            .revealAnimation(delay: 0.2)
+                        .background(Theme.surfaceInstrument)
+                        .overlay(
+                            Rectangle()
+                                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+                        )
                     }
                 }
-                .padding(.horizontal, Spacing.screenHorizontal)
-                .padding(.top, Spacing.md)
-                .padding(.bottom, Spacing.xxl + 56)
-            }
-            .navigationDestination(for: Service.self) { service in
-                if let vehicle = vehicle {
-                    ServiceDetailView(service: service, vehicle: vehicle)
+
+                // Service History section
+                if !filteredLogs.isEmpty {
+                    VStack(alignment: .leading, spacing: Spacing.sm) {
+                        InstrumentSectionHeader(title: "Service History")
+
+                        VStack(spacing: 0) {
+                            ForEach(Array(filteredLogs.enumerated()), id: \.element.id) { index, log in
+                                historyRow(log: log)
+                                    .staggeredReveal(index: index, baseDelay: 0.3)
+
+                                if index < filteredLogs.count - 1 {
+                                    Rectangle()
+                                        .fill(Theme.gridLine)
+                                        .frame(height: 1)
+                                        .padding(.leading, 28)
+                                }
+                            }
+                        }
+                        .background(Theme.surfaceInstrument)
+                        .overlay(
+                            Rectangle()
+                                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+                        )
+                    }
+                }
+
+                // Empty state
+                if filteredServices.isEmpty && filteredLogs.isEmpty && vehicle != nil {
+                    emptyState
+                        .revealAnimation(delay: 0.2)
+                }
+
+                // No vehicle state
+                if vehicle == nil {
+                    noVehicleState
+                        .revealAnimation(delay: 0.2)
                 }
             }
+            .padding(.horizontal, Spacing.screenHorizontal)
+            .padding(.top, Spacing.md)
+            .padding(.bottom, Spacing.xxl + 56)
         }
     }
 
@@ -326,9 +321,8 @@ struct ServicesTab: View {
 
     return ZStack {
         AtmosphericBackground()
-        ServicesTab()
+        ServicesTab(appState: appState)
     }
-    .environment(\.appState, appState)
     .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self], inMemory: true)
     .preferredColorScheme(.dark)
 }
