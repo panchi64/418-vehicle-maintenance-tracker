@@ -15,45 +15,49 @@ struct VehicleHeader: View {
         Button {
             onTap()
         } label: {
-            VStack(alignment: .leading, spacing: 0) {
-                // Vehicle name - brutalist monospace
-                Text(vehicle?.displayName.uppercased() ?? "SELECT_VEHICLE")
-                    .font(.brutalistTitle)
-                    .foregroundStyle(Theme.textPrimary)
+            HStack(spacing: Spacing.md) {
+                // Vehicle photo
+                VehiclePhotoView(vehicle: vehicle, size: .small)
 
-                // Mileage + model info
-                if let vehicle = vehicle {
-                    HStack(spacing: 0) {
-                        Text(formatMileage(vehicle.currentMileage))
-                            .font(.brutalistBody)
-                            .foregroundStyle(Theme.accent)
+                VStack(alignment: .leading, spacing: 0) {
+                    // Vehicle name - brutalist monospace
+                    Text(vehicle?.displayName.uppercased() ?? "SELECT_VEHICLE")
+                        .font(.brutalistTitle)
+                        .foregroundStyle(Theme.textPrimary)
 
-                        Text(" // ")
-                            .font(.brutalistSecondary)
-                            .foregroundStyle(Theme.textTertiary)
+                    // Mileage + model info
+                    if let vehicle = vehicle {
+                        HStack(spacing: 0) {
+                            Text(formatMileage(vehicle.currentMileage))
+                                .font(.brutalistBody)
+                                .foregroundStyle(Theme.accent)
 
-                        Text("\(String(vehicle.year))_\(vehicle.make)_\(vehicle.model)".uppercased())
-                            .font(.brutalistSecondary)
-                            .foregroundStyle(Theme.textTertiary)
+                            Text(" // ")
+                                .font(.brutalistSecondary)
+                                .foregroundStyle(Theme.textTertiary)
 
-                        Spacer()
+                            Text("\(String(vehicle.year))_\(vehicle.make)_\(vehicle.model)".uppercased())
+                                .font(.brutalistSecondary)
+                                .foregroundStyle(Theme.textTertiary)
 
-                        Text("[SELECT]")
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.accent)
-                            .tracking(1)
+                            Spacer()
+
+                            Text("[SELECT]")
+                                .font(.brutalistLabel)
+                                .foregroundStyle(Theme.accent)
+                                .tracking(1)
+                        }
+                        .padding(.top, 4)
                     }
-                    .padding(.top, 4)
                 }
-
-                // Border
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
-                    .padding(.top, 12)
             }
             .padding(.horizontal, Theme.screenHorizontalPadding)
             .padding(.vertical, 12)
+            .overlay(alignment: .bottom) {
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: Theme.borderWidth)
+            }
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

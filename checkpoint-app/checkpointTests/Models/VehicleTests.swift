@@ -297,4 +297,88 @@ final class VehicleTests: XCTestCase {
         // Then
         XCTAssertEqual(vehicle.mileageUpdateDescription, "Updated today")
     }
+
+    // MARK: - Photo Data Tests
+
+    func testPhotoData_InitiallyNil() {
+        // Given
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022
+        )
+
+        // Then
+        XCTAssertNil(vehicle.photoData)
+    }
+
+    func testPhotoData_CanBeSet() {
+        // Given
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022
+        )
+        let testData = Data([0x00, 0x01, 0x02, 0x03])
+
+        // When
+        vehicle.photoData = testData
+
+        // Then
+        XCTAssertNotNil(vehicle.photoData)
+        XCTAssertEqual(vehicle.photoData, testData)
+    }
+
+    func testPhotoData_CanBeCleared() {
+        // Given
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022
+        )
+        vehicle.photoData = Data([0x00, 0x01, 0x02, 0x03])
+
+        // When
+        vehicle.photoData = nil
+
+        // Then
+        XCTAssertNil(vehicle.photoData)
+    }
+
+    func testPhoto_ReturnsNilWhenNoData() {
+        // Given
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022
+        )
+
+        // Then
+        XCTAssertNil(vehicle.photo)
+    }
+
+    func testUIImage_ReturnsNilWhenNoData() {
+        // Given
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022
+        )
+
+        // Then
+        XCTAssertNil(vehicle.uiImage)
+    }
+
+    func testUIImage_ReturnsNilForInvalidData() {
+        // Given
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022
+        )
+        vehicle.photoData = Data([0x00, 0x01, 0x02, 0x03]) // Invalid image data
+
+        // Then
+        XCTAssertNil(vehicle.uiImage)
+    }
 }

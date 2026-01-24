@@ -150,7 +150,7 @@
 | --------------------- | -------- | ------ | ---------------------------------------------------------- |
 | Multi-vehicle support | High     | ✅     | Families, enthusiasts, collectors                          |
 | VIN decoding          | High     | ⏳     | Auto-populate year/make/model/engine                       |
-| Vehicle photos        | Medium   | ⏳     | AI-stylized vehicle portrait (see details below)           |
+| Vehicle photos        | Medium   | ✅     | Photo picker with compression, displayed in headers        |
 | Odometer tracking     | High     | ✅     | Manual entry + smart estimation                            |
 | Vehicle notes         | Medium   | ✅     | Freeform notes area for quirks, history, or reminders      |
 
@@ -263,9 +263,9 @@
 | Feature                   | Priority | Status | Notes                  |
 | ------------------------- | -------- | ------ | ---------------------- |
 | Per-service costs         | High     | ✅     | Track what you spend   |
-| Cost categorization       | Medium   | ⏳     | Maintenance vs repairs |
-| Monthly/yearly summaries  | Medium   | ⏳     | Spending trends        |
-| Cost-per-mile calculation | Medium   | ⏳     | True cost of ownership |
+| Cost categorization       | Medium   | ✅     | Maintenance vs repairs vs upgrades |
+| Monthly/yearly summaries  | Medium   | ✅     | Spending trends with monthly breakdown |
+| Cost-per-mile calculation | Medium   | ✅     | True cost of ownership with period filtering |
 
 ---
 

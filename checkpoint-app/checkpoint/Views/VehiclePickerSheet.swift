@@ -97,16 +97,8 @@ struct VehiclePickerSheet: View {
             dismiss()
         } label: {
             HStack(spacing: Spacing.md) {
-                // Vehicle icon
-                ZStack {
-                    Circle()
-                        .fill(Theme.accent.opacity(0.1))
-                        .frame(width: 44, height: 44)
-
-                    Image(systemName: "car.side.fill")
-                        .font(.system(size: 18))
-                        .foregroundStyle(Theme.accent)
-                }
+                // Vehicle photo
+                VehiclePhotoView(vehicle: vehicle, size: .small)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(vehicle.displayName.uppercased())

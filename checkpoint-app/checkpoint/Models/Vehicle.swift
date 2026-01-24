@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftData
+import SwiftUI
 
 @Model
 final class Vehicle: Identifiable {
@@ -28,6 +29,10 @@ final class Vehicle: Identifiable {
     // Mileage tracking
     var mileageUpdatedAt: Date?
 
+    // Vehicle photo (stored as compressed JPEG data)
+    @Attribute(.externalStorage)
+    var photoData: Data?
+
     @Relationship(deleteRule: .cascade, inverse: \Service.vehicle)
     var services: [Service] = []
 
@@ -42,6 +47,21 @@ final class Vehicle: Identifiable {
             return "\(year) \(make) \(model)"
         }
         return name
+    }
+
+    /// Returns a SwiftUI Image from the stored photo data
+    var photo: Image? {
+        guard let data = photoData,
+              let uiImage = UIImage(data: data) else {
+            return nil
+        }
+        return Image(uiImage: uiImage)
+    }
+
+    /// Returns a UIImage from the stored photo data
+    var uiImage: UIImage? {
+        guard let data = photoData else { return nil }
+        return UIImage(data: data)
     }
 
     /// Calculate daily miles pace from mileage snapshots
@@ -115,7 +135,12 @@ extension Vehicle {
             make: "Toyota",
             model: "Camry",
             year: 2022,
-            currentMileage: 32500
+            currentMileage: 32500,
+            vin: "4T1BF1FK5CU123456",
+            tireSize: "215/55R17",
+            oilType: "0W-20 Synthetic",
+            notes: "Purchased certified pre-owned. Runs great!",
+            mileageUpdatedAt: Calendar.current.date(byAdding: .day, value: -3, to: .now)
         )
         return vehicle
     }
@@ -127,14 +152,24 @@ extension Vehicle {
                 make: "Toyota",
                 model: "Camry",
                 year: 2022,
-                currentMileage: 32500
+                currentMileage: 32500,
+                vin: "4T1BF1FK5CU123456",
+                tireSize: "215/55R17",
+                oilType: "0W-20 Synthetic",
+                notes: "Purchased certified pre-owned. Runs great!",
+                mileageUpdatedAt: Calendar.current.date(byAdding: .day, value: -3, to: .now)
             ),
             Vehicle(
                 name: "Weekend Car",
                 make: "Mazda",
                 model: "MX-5",
                 year: 2020,
-                currentMileage: 18200
+                currentMileage: 18200,
+                vin: "JM1NDAD75L0123789",
+                tireSize: "205/45R17",
+                oilType: "0W-20 Synthetic",
+                notes: "Garage kept. Summer tires only.",
+                mileageUpdatedAt: Calendar.current.date(byAdding: .day, value: -14, to: .now)
             )
         ]
     }

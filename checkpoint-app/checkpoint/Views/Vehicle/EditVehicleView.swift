@@ -26,6 +26,8 @@ struct EditVehicleView: View {
     @State private var tireSize: String
     @State private var oilType: String
     @State private var notes: String
+    @State private var photoData: Data?
+    @State private var photoChanged: Bool = false
 
     init(vehicle: Vehicle) {
         self.vehicle = vehicle
@@ -38,6 +40,7 @@ struct EditVehicleView: View {
         _tireSize = State(initialValue: vehicle.tireSize ?? "")
         _oilType = State(initialValue: vehicle.oilType ?? "")
         _notes = State(initialValue: vehicle.notes ?? "")
+        _photoData = State(initialValue: vehicle.photoData)
     }
 
     private var isFormValid: Bool {
@@ -51,6 +54,28 @@ struct EditVehicleView: View {
 
                 ScrollView {
                     VStack(spacing: Spacing.lg) {
+                        // Vehicle Photo Section
+                        VStack(alignment: .center, spacing: Spacing.sm) {
+                            PhotoPickerButton(
+                                selectedImageData: Binding(
+                                    get: { photoChanged ? photoData : nil },
+                                    set: { newValue in
+                                        photoData = newValue
+                                        photoChanged = true
+                                    }
+                                ),
+                                currentImage: photoChanged ? nil : vehicle.photo
+                            )
+
+                            if photoData != nil || (!photoChanged && vehicle.photoData != nil) {
+                                RemovePhotoButton {
+                                    photoData = nil
+                                    photoChanged = true
+                                }
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+
                         // Vehicle Details Section
                         VStack(alignment: .leading, spacing: Spacing.sm) {
                             InstrumentSectionHeader(title: "Vehicle Details")
@@ -208,6 +233,9 @@ struct EditVehicleView: View {
         vehicle.tireSize = tireSize.isEmpty ? nil : tireSize
         vehicle.oilType = oilType.isEmpty ? nil : oilType
         vehicle.notes = notes.isEmpty ? nil : notes
+        if photoChanged {
+            vehicle.photoData = photoData
+        }
         dismiss()
     }
 

@@ -31,6 +31,7 @@ struct AddServiceView: View {
     @State private var performedDate: Date = Date()
     @State private var mileageAtService: Int? = nil
     @State private var cost: String = ""
+    @State private var costCategory: CostCategory = .maintenance
     @State private var notes: String = ""
 
     // Schedule mode fields
@@ -144,23 +145,41 @@ struct AddServiceView: View {
         }
 
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "Optional")
+            InstrumentSectionHeader(title: "Cost")
 
             VStack(spacing: Spacing.md) {
                 InstrumentTextField(
-                    label: "Cost",
+                    label: "Amount",
                     text: $cost,
                     placeholder: "0.00",
                     keyboardType: .decimalPad
                 )
 
-                InstrumentTextEditor(
-                    label: "Notes",
-                    text: $notes,
-                    placeholder: "Add notes...",
-                    minHeight: 80
-                )
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    Text("CATEGORY")
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.textTertiary)
+                        .tracking(1)
+
+                    InstrumentSegmentedControl(
+                        options: CostCategory.allCases,
+                        selection: $costCategory
+                    ) { category in
+                        category.displayName
+                    }
+                }
             }
+        }
+
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            InstrumentSectionHeader(title: "Notes")
+
+            InstrumentTextEditor(
+                label: "Notes",
+                text: $notes,
+                placeholder: "Add notes...",
+                minHeight: 80
+            )
         }
     }
 
@@ -249,6 +268,7 @@ struct AddServiceView: View {
             performedDate: performedDate,
             mileageAtService: mileage,
             cost: costDecimal,
+            costCategory: costDecimal != nil ? costCategory : nil,
             notes: notes.isEmpty ? nil : notes
         )
         modelContext.insert(log)

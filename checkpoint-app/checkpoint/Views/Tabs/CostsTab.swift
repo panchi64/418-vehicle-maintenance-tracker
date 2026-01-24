@@ -13,6 +13,7 @@ struct CostsTab: View {
     @Query private var serviceLogs: [ServiceLog]
 
     @State private var periodFilter: PeriodFilter = .ytd
+    @State private var categoryFilter: CategoryFilter = .all
 
     enum PeriodFilter: String, CaseIterable {
         case month = "Month"
@@ -35,6 +36,22 @@ struct CostsTab: View {
         }
     }
 
+    enum CategoryFilter: String, CaseIterable {
+        case all = "All"
+        case maintenance = "Maint"
+        case repair = "Repair"
+        case upgrade = "Upgrade"
+
+        var costCategory: CostCategory? {
+            switch self {
+            case .all: return nil
+            case .maintenance: return .maintenance
+            case .repair: return .repair
+            case .upgrade: return .upgrade
+            }
+        }
+    }
+
     private var vehicle: Vehicle? {
         appState.selectedVehicle
     }
@@ -47,10 +64,19 @@ struct CostsTab: View {
     }
 
     private var filteredLogs: [ServiceLog] {
-        guard let startDate = periodFilter.startDate else {
-            return vehicleServiceLogs
+        var logs = vehicleServiceLogs
+
+        // Filter by period
+        if let startDate = periodFilter.startDate {
+            logs = logs.filter { $0.performedDate >= startDate }
         }
-        return vehicleServiceLogs.filter { $0.performedDate >= startDate }
+
+        // Filter by category
+        if let category = categoryFilter.costCategory {
+            logs = logs.filter { $0.costCategory == category }
+        }
+
+        return logs
     }
 
     private var logsWithCosts: [ServiceLog] {
@@ -91,7 +117,7 @@ struct CostsTab: View {
 
     /// Calculate cost per mile for the filtered period
     private var costPerMile: Double? {
-        guard vehicle != nil,
+        guard let vehicle = vehicle,
               logsWithCosts.count >= 2 else { return nil }
 
         // Get oldest and newest logs in period
@@ -106,9 +132,74 @@ struct CostsTab: View {
         return NSDecimalNumber(decimal: totalSpent).doubleValue / Double(milesDriven)
     }
 
+    /// Calculate lifetime cost per mile
+    private var lifetimeCostPerMile: Double? {
+        guard let vehicle = vehicle else { return nil }
+
+        // Get all logs with costs for this vehicle (no period filter)
+        let allLogs = vehicleServiceLogs.filter { $0.cost != nil && $0.cost! > 0 }
+        guard allLogs.count >= 2 else { return nil }
+
+        let sortedLogs = allLogs.sorted { $0.performedDate < $1.performedDate }
+        guard let oldest = sortedLogs.first,
+              let newest = sortedLogs.last,
+              newest.mileageAtService > oldest.mileageAtService else { return nil }
+
+        let milesDriven = newest.mileageAtService - oldest.mileageAtService
+        let totalCost = allLogs.compactMap { $0.cost }.reduce(0, +)
+        guard milesDriven > 0 else { return nil }
+
+        return NSDecimalNumber(decimal: totalCost).doubleValue / Double(milesDriven)
+    }
+
     private var formattedCostPerMile: String {
         guard let cpm = costPerMile else { return "-" }
         return String(format: "$%.2f/mi", cpm)
+    }
+
+    // MARK: - Category Breakdown
+
+    private var categoryBreakdown: [(category: CostCategory, amount: Decimal, percentage: Double)] {
+        guard totalSpent > 0 else { return [] }
+
+        var breakdown: [(CostCategory, Decimal, Double)] = []
+
+        for category in CostCategory.allCases {
+            let categoryLogs = logsWithCosts.filter { $0.costCategory == category }
+            let amount = categoryLogs.compactMap { $0.cost }.reduce(0, +)
+            if amount > 0 {
+                let percentage = NSDecimalNumber(decimal: amount).doubleValue / NSDecimalNumber(decimal: totalSpent).doubleValue * 100
+                breakdown.append((category, amount, percentage))
+            }
+        }
+
+        // Also include uncategorized
+        let uncategorizedLogs = logsWithCosts.filter { $0.costCategory == nil }
+        let uncategorizedAmount = uncategorizedLogs.compactMap { $0.cost }.reduce(0, +)
+        if uncategorizedAmount > 0 {
+            // We'll handle uncategorized separately in the view
+        }
+
+        return breakdown.sorted { $0.1 > $1.1 }
+    }
+
+    // MARK: - Monthly Breakdown
+
+    private var monthlyBreakdown: [(month: Date, amount: Decimal)] {
+        let calendar = Calendar.current
+
+        // Group logs by month
+        var monthlyTotals: [Date: Decimal] = [:]
+
+        for log in logsWithCosts {
+            let components = calendar.dateComponents([.year, .month], from: log.performedDate)
+            if let monthStart = calendar.date(from: components) {
+                monthlyTotals[monthStart, default: 0] += log.cost ?? 0
+            }
+        }
+
+        // Sort by date (most recent first)
+        return monthlyTotals.map { ($0.key, $0.value) }.sorted { $0.0 > $1.0 }
     }
 
     var body: some View {
@@ -122,6 +213,15 @@ struct CostsTab: View {
                     filter.rawValue
                 }
                 .revealAnimation(delay: 0.1)
+
+                // Category filter
+                InstrumentSegmentedControl(
+                    options: CategoryFilter.allCases,
+                    selection: $categoryFilter
+                ) { filter in
+                    filter.rawValue
+                }
+                .revealAnimation(delay: 0.12)
 
                 // Summary cards
                 VStack(spacing: Spacing.md) {
@@ -150,6 +250,18 @@ struct CostsTab: View {
                         )
                     }
                     .revealAnimation(delay: 0.2)
+                }
+
+                // Category breakdown (only show when "All" category is selected)
+                if categoryFilter == .all && !categoryBreakdown.isEmpty {
+                    categoryBreakdownSection
+                        .revealAnimation(delay: 0.22)
+                }
+
+                // Monthly summary (show for Year and All periods)
+                if (periodFilter == .year || periodFilter == .all) && monthlyBreakdown.count > 1 {
+                    monthlySummarySection
+                        .revealAnimation(delay: 0.24)
                 }
 
                 // Expense list
@@ -236,6 +348,100 @@ struct CostsTab: View {
         }
     }
 
+    // MARK: - Category Breakdown Section
+
+    private var categoryBreakdownSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            InstrumentSectionHeader(title: "By Category")
+
+            VStack(spacing: 0) {
+                ForEach(categoryBreakdown, id: \.category) { item in
+                    HStack(spacing: Spacing.sm) {
+                        Image(systemName: item.category.icon)
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(item.category.color)
+                            .frame(width: 20)
+
+                        Text(item.category.displayName)
+                            .font(.brutalistBody)
+                            .foregroundStyle(Theme.textPrimary)
+
+                        Spacer()
+
+                        Text(String(format: "%.0f%%", item.percentage))
+                            .font(.brutalistSecondary)
+                            .foregroundStyle(Theme.textTertiary)
+                            .frame(width: 40, alignment: .trailing)
+
+                        Text(formatCurrency(item.amount))
+                            .font(.brutalistBody)
+                            .foregroundStyle(item.category.color)
+                            .frame(width: 80, alignment: .trailing)
+                    }
+                    .padding(Spacing.md)
+
+                    if item.category != categoryBreakdown.last?.category {
+                        Rectangle()
+                            .fill(Theme.gridLine)
+                            .frame(height: 1)
+                            .padding(.leading, 28)
+                    }
+                }
+            }
+            .background(Theme.surfaceInstrument)
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+            )
+        }
+    }
+
+    // MARK: - Monthly Summary Section
+
+    private var monthlySummarySection: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            InstrumentSectionHeader(title: "Monthly Breakdown")
+
+            VStack(spacing: 0) {
+                ForEach(Array(monthlyBreakdown.prefix(6).enumerated()), id: \.element.month) { index, item in
+                    HStack(spacing: Spacing.sm) {
+                        Text(formatMonthYear(item.month))
+                            .font(.brutalistBody)
+                            .foregroundStyle(Theme.textPrimary)
+
+                        Spacer()
+
+                        // Simple bar indicator
+                        if let maxAmount = monthlyBreakdown.first?.amount, maxAmount > 0 {
+                            let barWidth = CGFloat(NSDecimalNumber(decimal: item.amount).doubleValue / NSDecimalNumber(decimal: maxAmount).doubleValue) * 60
+                            Rectangle()
+                                .fill(Theme.accent.opacity(0.3))
+                                .frame(width: max(barWidth, 4), height: 8)
+                        }
+
+                        Text(formatCurrency(item.amount))
+                            .font(.brutalistBody)
+                            .foregroundStyle(Theme.accent)
+                            .frame(width: 80, alignment: .trailing)
+                    }
+                    .padding(Spacing.md)
+
+                    if index < min(monthlyBreakdown.count, 6) - 1 {
+                        Rectangle()
+                            .fill(Theme.gridLine)
+                            .frame(height: 1)
+                            .padding(.leading, Spacing.md)
+                    }
+                }
+            }
+            .background(Theme.surfaceInstrument)
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+            )
+        }
+    }
+
     // MARK: - Stats Card
 
     private func statsCard(label: String, value: String, valueColor: Color) -> some View {
@@ -262,10 +468,18 @@ struct CostsTab: View {
 
     private func expenseRow(log: ServiceLog) -> some View {
         HStack(spacing: Spacing.sm) {
-            Image(systemName: "dollarsign.circle")
-                .font(.system(size: 16, weight: .medium))
-                .foregroundStyle(Theme.accent)
-                .frame(width: 20)
+            // Category icon or default
+            if let category = log.costCategory {
+                Image(systemName: category.icon)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(category.color)
+                    .frame(width: 20)
+            } else {
+                Image(systemName: "dollarsign.circle")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(Theme.accent)
+                    .frame(width: 20)
+            }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(log.service?.name ?? "Service")
@@ -273,9 +487,22 @@ struct CostsTab: View {
                     .foregroundStyle(Theme.textPrimary)
                     .lineLimit(1)
 
-                Text(formatDate(log.performedDate))
-                    .font(.brutalistSecondary)
-                    .foregroundStyle(Theme.textTertiary)
+                HStack(spacing: 4) {
+                    Text(formatDate(log.performedDate))
+                        .font(.brutalistSecondary)
+                        .foregroundStyle(Theme.textTertiary)
+
+                    if let category = log.costCategory {
+                        Text("//")
+                            .font(.brutalistSecondary)
+                            .foregroundStyle(Theme.textTertiary)
+
+                        Text(category.displayName.uppercased())
+                            .font(.brutalistLabel)
+                            .foregroundStyle(category.color)
+                            .tracking(0.5)
+                    }
+                }
             }
 
             Spacer()
@@ -283,7 +510,7 @@ struct CostsTab: View {
             if let cost = log.formattedCost {
                 Text(cost)
                     .font(.brutalistHeading)
-                    .foregroundStyle(Theme.accent)
+                    .foregroundStyle(log.costCategory?.color ?? Theme.accent)
             }
         }
         .padding(Spacing.md)
@@ -351,6 +578,21 @@ struct CostsTab: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM d, yyyy"
         return formatter.string(from: date)
+    }
+
+    private func formatMonthYear(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM yyyy"
+        return formatter.string(from: date)
+    }
+
+    private func formatCurrency(_ amount: Decimal) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = "USD"
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.maximumFractionDigits = 0
+        return formatter.string(from: amount as NSDecimalNumber) ?? "$0"
     }
 }
 

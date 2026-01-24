@@ -117,13 +117,25 @@ struct ContentView: View {
             make: "Toyota",
             model: "Camry",
             year: 2022,
-            currentMileage: 32500
+            currentMileage: 32500,
+            vin: "4T1BF1FK5CU123456",
+            tireSize: "215/55R17",
+            oilType: "0W-20 Synthetic",
+            notes: "Purchased certified pre-owned. Runs great!",
+            mileageUpdatedAt: Calendar.current.date(byAdding: .day, value: -3, to: .now)
         )
         modelContext.insert(vehicle)
 
+        // Add sample services
         let sampleServices = Service.sampleServices(for: vehicle)
         for service in sampleServices {
             modelContext.insert(service)
+        }
+
+        // Add sample service logs for the Costs tab
+        let sampleLogs = ServiceLog.sampleLogs(for: vehicle)
+        for log in sampleLogs {
+            modelContext.insert(log)
         }
 
         appState.selectedVehicle = vehicle

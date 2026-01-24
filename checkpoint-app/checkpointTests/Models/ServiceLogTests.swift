@@ -358,4 +358,54 @@ final class ServiceLogTests: XCTestCase {
         XCTAssertNotNil(log.notes)
         XCTAssertEqual(log.notes, longNotes)
     }
+
+    // MARK: - Cost Category Tests
+
+    func testCostCategoryInitialization() throws {
+        // Given
+        let log = ServiceLog(
+            performedDate: Date.now,
+            mileageAtService: 30000,
+            cost: Decimal(100),
+            costCategory: .maintenance
+        )
+
+        // Then
+        XCTAssertEqual(log.costCategory, .maintenance)
+    }
+
+    func testCostCategoryNil() throws {
+        // Given
+        let log = ServiceLog(
+            performedDate: Date.now,
+            mileageAtService: 30000
+        )
+
+        // Then
+        XCTAssertNil(log.costCategory)
+    }
+
+    func testCostCategoryAllTypes() throws {
+        // Given
+        let maintenanceLog = ServiceLog(
+            performedDate: Date.now,
+            mileageAtService: 30000,
+            costCategory: .maintenance
+        )
+        let repairLog = ServiceLog(
+            performedDate: Date.now,
+            mileageAtService: 30000,
+            costCategory: .repair
+        )
+        let upgradeLog = ServiceLog(
+            performedDate: Date.now,
+            mileageAtService: 30000,
+            costCategory: .upgrade
+        )
+
+        // Then
+        XCTAssertEqual(maintenanceLog.costCategory, .maintenance)
+        XCTAssertEqual(repairLog.costCategory, .repair)
+        XCTAssertEqual(upgradeLog.costCategory, .upgrade)
+    }
 }

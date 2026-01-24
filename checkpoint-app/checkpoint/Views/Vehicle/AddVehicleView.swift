@@ -22,6 +22,7 @@ struct AddVehicleView: View {
     @State private var tireSize: String = ""
     @State private var oilType: String = ""
     @State private var notes: String = ""
+    @State private var photoData: Data?
 
     // Validation
     private var isFormValid: Bool {
@@ -35,6 +36,21 @@ struct AddVehicleView: View {
 
                 ScrollView {
                     VStack(spacing: Spacing.lg) {
+                        // Vehicle Photo Section
+                        VStack(alignment: .center, spacing: Spacing.sm) {
+                            PhotoPickerButton(
+                                selectedImageData: $photoData,
+                                currentImage: nil
+                            )
+
+                            if photoData != nil {
+                                RemovePhotoButton {
+                                    photoData = nil
+                                }
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+
                         // Vehicle Details Section
                         VStack(alignment: .leading, spacing: Spacing.sm) {
                             InstrumentSectionHeader(title: "Vehicle Details")
@@ -167,6 +183,7 @@ struct AddVehicleView: View {
             notes: notes.isEmpty ? nil : notes,
             mileageUpdatedAt: .now
         )
+        vehicle.photoData = photoData
         modelContext.insert(vehicle)
         dismiss()
     }

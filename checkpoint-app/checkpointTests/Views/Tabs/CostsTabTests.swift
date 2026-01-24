@@ -326,4 +326,190 @@ final class CostsTabTests: XCTestCase {
         // Then
         XCTAssertEqual(serviceCount, 3)
     }
+
+    // MARK: - Category Filter Tests
+
+    func testCategoryFilter_AllCases() {
+        // Given
+        let allFilters = CostsTab.CategoryFilter.allCases
+
+        // Then
+        XCTAssertEqual(allFilters.count, 4)
+        XCTAssertTrue(allFilters.contains(.all))
+        XCTAssertTrue(allFilters.contains(.maintenance))
+        XCTAssertTrue(allFilters.contains(.repair))
+        XCTAssertTrue(allFilters.contains(.upgrade))
+    }
+
+    func testCategoryFilter_RawValues() {
+        // Then
+        XCTAssertEqual(CostsTab.CategoryFilter.all.rawValue, "All")
+        XCTAssertEqual(CostsTab.CategoryFilter.maintenance.rawValue, "Maint")
+        XCTAssertEqual(CostsTab.CategoryFilter.repair.rawValue, "Repair")
+        XCTAssertEqual(CostsTab.CategoryFilter.upgrade.rawValue, "Upgrade")
+    }
+
+    func testCategoryFilter_CostCategoryMapping() {
+        // Then
+        XCTAssertNil(CostsTab.CategoryFilter.all.costCategory)
+        XCTAssertEqual(CostsTab.CategoryFilter.maintenance.costCategory, .maintenance)
+        XCTAssertEqual(CostsTab.CategoryFilter.repair.costCategory, .repair)
+        XCTAssertEqual(CostsTab.CategoryFilter.upgrade.costCategory, .upgrade)
+    }
+
+    @MainActor
+    func testCategoryFilter_FiltersByCostCategory() {
+        // Given
+        let vehicle = Vehicle(
+            name: "Test Car",
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            currentMileage: 30000
+        )
+        modelContext.insert(vehicle)
+
+        let maintenanceLog = ServiceLog(
+            vehicle: vehicle,
+            performedDate: .now,
+            mileageAtService: 30000,
+            cost: Decimal(50.00),
+            costCategory: .maintenance
+        )
+        let repairLog = ServiceLog(
+            vehicle: vehicle,
+            performedDate: .now,
+            mileageAtService: 29500,
+            cost: Decimal(200.00),
+            costCategory: .repair
+        )
+        let upgradeLog = ServiceLog(
+            vehicle: vehicle,
+            performedDate: .now,
+            mileageAtService: 29000,
+            cost: Decimal(150.00),
+            costCategory: .upgrade
+        )
+
+        modelContext.insert(maintenanceLog)
+        modelContext.insert(repairLog)
+        modelContext.insert(upgradeLog)
+
+        // When filtering by maintenance
+        let logs = [maintenanceLog, repairLog, upgradeLog]
+        let maintenanceLogs = logs.filter { $0.costCategory == .maintenance }
+        let repairLogs = logs.filter { $0.costCategory == .repair }
+        let upgradeLogs = logs.filter { $0.costCategory == .upgrade }
+
+        // Then
+        XCTAssertEqual(maintenanceLogs.count, 1)
+        XCTAssertEqual(repairLogs.count, 1)
+        XCTAssertEqual(upgradeLogs.count, 1)
+        XCTAssertEqual(maintenanceLogs.first?.cost, Decimal(50.00))
+        XCTAssertEqual(repairLogs.first?.cost, Decimal(200.00))
+        XCTAssertEqual(upgradeLogs.first?.cost, Decimal(150.00))
+    }
+
+    @MainActor
+    func testCategoryBreakdown_CalculatesPercentages() {
+        // Given
+        let vehicle = Vehicle(
+            name: "Test Car",
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            currentMileage: 30000
+        )
+        modelContext.insert(vehicle)
+
+        let maintenanceLog = ServiceLog(
+            vehicle: vehicle,
+            performedDate: .now,
+            mileageAtService: 30000,
+            cost: Decimal(50.00),
+            costCategory: .maintenance
+        )
+        let repairLog = ServiceLog(
+            vehicle: vehicle,
+            performedDate: .now,
+            mileageAtService: 29500,
+            cost: Decimal(50.00),
+            costCategory: .repair
+        )
+
+        modelContext.insert(maintenanceLog)
+        modelContext.insert(repairLog)
+
+        // When
+        let logs = [maintenanceLog, repairLog]
+        let totalCost = logs.compactMap { $0.cost }.reduce(Decimal(0), +)
+        let maintenanceCost = logs.filter { $0.costCategory == .maintenance }.compactMap { $0.cost }.reduce(Decimal(0), +)
+        let maintenancePercentage = NSDecimalNumber(decimal: maintenanceCost).doubleValue / NSDecimalNumber(decimal: totalCost).doubleValue * 100
+
+        // Then
+        XCTAssertEqual(totalCost, Decimal(100.00))
+        XCTAssertEqual(maintenancePercentage, 50.0, accuracy: 0.1)
+    }
+
+    // MARK: - Monthly Breakdown Tests
+
+    @MainActor
+    func testMonthlyBreakdown_GroupsByMonth() {
+        // Given
+        let vehicle = Vehicle(
+            name: "Test Car",
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            currentMileage: 30000
+        )
+        modelContext.insert(vehicle)
+
+        let calendar = Calendar.current
+        let januaryDate = calendar.date(from: DateComponents(year: 2024, month: 1, day: 15))!
+        let februaryDate = calendar.date(from: DateComponents(year: 2024, month: 2, day: 15))!
+
+        let janLog = ServiceLog(
+            vehicle: vehicle,
+            performedDate: januaryDate,
+            mileageAtService: 30000,
+            cost: Decimal(100.00)
+        )
+        let febLog1 = ServiceLog(
+            vehicle: vehicle,
+            performedDate: februaryDate,
+            mileageAtService: 30500,
+            cost: Decimal(50.00)
+        )
+        let febLog2 = ServiceLog(
+            vehicle: vehicle,
+            performedDate: februaryDate,
+            mileageAtService: 31000,
+            cost: Decimal(75.00)
+        )
+
+        modelContext.insert(janLog)
+        modelContext.insert(febLog1)
+        modelContext.insert(febLog2)
+
+        // When - group by month
+        let logs = [janLog, febLog1, febLog2]
+        var monthlyTotals: [Date: Decimal] = [:]
+
+        for log in logs {
+            let components = calendar.dateComponents([.year, .month], from: log.performedDate)
+            if let monthStart = calendar.date(from: components) {
+                monthlyTotals[monthStart, default: 0] += log.cost ?? 0
+            }
+        }
+
+        // Then
+        XCTAssertEqual(monthlyTotals.count, 2)
+
+        let janStart = calendar.date(from: DateComponents(year: 2024, month: 1))!
+        let febStart = calendar.date(from: DateComponents(year: 2024, month: 2))!
+
+        XCTAssertEqual(monthlyTotals[janStart], Decimal(100.00))
+        XCTAssertEqual(monthlyTotals[febStart], Decimal(125.00))
+    }
 }
