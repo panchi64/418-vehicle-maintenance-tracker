@@ -150,9 +150,52 @@
 | --------------------- | -------- | ------ | ---------------------------------------------------------- |
 | Multi-vehicle support | High     | ✅     | Families, enthusiasts, collectors                          |
 | VIN decoding          | High     | ⏳     | Auto-populate year/make/model/engine                       |
-| Vehicle photos        | Medium   | ⏳     | Personalization                                            |
+| Vehicle photos        | Medium   | ⏳     | AI-stylized vehicle portrait (see details below)           |
 | Odometer tracking     | High     | ✅     | Manual entry + smart estimation                            |
 | Vehicle notes         | Medium   | ⏳     | Freeform notes area for quirks, history, or reminders      |
+
+#### AI-Stylized Vehicle Photos
+
+> Transform user-captured vehicle photos into consistent, stylized 3D-model-like portraits using Google's Nano Banana Pro AI model.
+
+**User Flow:**
+
+1. User taps "Add Photo" on their vehicle profile
+2. User chooses input method:
+   - **Take Photo** — Opens camera to capture a new photo of their vehicle
+   - **Choose from Library** — Opens photo picker to select an existing photo
+3. Selected/captured photo is sent to Google's Nano Banana Pro AI API for transformation
+4. AI returns a stylized version of the vehicle
+5. Stylized image becomes the vehicle's representation throughout the app
+
+**Visual Style:**
+
+| Attribute | Description |
+| --------- | ----------- |
+| **Aesthetic** | Simplified, 3D model-like — similar to vehicle icons in the Uber app |
+| **Color preservation** | Retains the actual color of the user's vehicle |
+| **Vehicle accuracy** | Matches the user's specific make/model/body style — not a generic icon |
+| **Consistency** | All vehicle portraits share the same visual language regardless of photo quality |
+
+**Technical Implementation:**
+
+- **API:** Google Nano Banana Pro AI model
+- **Input:** Raw photo from user's camera or photo library
+- **Output:** Stylized image with consistent dimensions and style
+- **Fallback:** If API fails, retain original photo with option to retry
+
+**Benefits:**
+
+- **Visual consistency** — Every vehicle in the app looks cohesive, regardless of lighting/angle of original photo
+- **Personalization** — The portrait actually looks like the user's car (color, body style) unlike generic icons
+- **Premium feel** — Elevates the app's aesthetic beyond typical photo storage
+- **Recognition** — Users can quickly identify their vehicles at a glance
+
+**Privacy Note:**
+
+- Vehicle photos are sent to Google's API for processing
+- Processed images are stored locally on device
+- Original photos are not retained after processing (unless user opts to keep)
 
 ---
 
