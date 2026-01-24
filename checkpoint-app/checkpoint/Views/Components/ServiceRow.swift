@@ -42,23 +42,23 @@ struct ServiceRow: View {
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: Spacing.md) {
-                // Status indicator with pulse animation for urgent
+                // Status indicator (square - brutalist)
                 ZStack {
-                    Circle()
+                    Rectangle()
                         .fill(status.color.opacity(0.15))
                         .frame(width: 32, height: 32)
 
-                    Circle()
+                    Rectangle()
                         .fill(status.color)
-                        .frame(width: 10, height: 10)
+                        .frame(width: 8, height: 8)
                         .pulseAnimation(isActive: isUrgent)
                 }
 
                 // Service info with progress
                 VStack(alignment: .leading, spacing: 6) {
-                    // Service name - Barlow
-                    Text(service.name)
-                        .font(.custom("Barlow-SemiBold", size: 17))
+                    // Service name - monospace
+                    Text(service.name.uppercased())
+                        .font(.brutalistBody)
                         .foregroundStyle(Theme.textPrimary)
 
                     // Mini progress bar + due info
@@ -107,16 +107,16 @@ struct ServiceRow: View {
     private var miniProgressBar: some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 2)
+                Rectangle()
                     .fill(Theme.gridLine)
-                    .frame(height: 3)
+                    .frame(height: 2)
 
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(status.color.opacity(0.8))
-                    .frame(width: geo.size.width * progressValue, height: 3)
+                Rectangle()
+                    .fill(status.color)
+                    .frame(width: geo.size.width * progressValue, height: 2)
             }
         }
-        .frame(width: 40, height: 3)
+        .frame(width: 40, height: 2)
     }
 
     // MARK: - Helpers
@@ -149,10 +149,10 @@ struct ServiceRowButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .background(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                Rectangle()
                     .fill(configuration.isPressed ? Theme.backgroundSubtle : Color.clear)
             )
-            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+            .opacity(configuration.isPressed ? 0.7 : 1.0)
             .animation(.easeOut(duration: Theme.animationFast), value: configuration.isPressed)
     }
 }
@@ -182,10 +182,9 @@ struct ServiceRowButtonStyle: ButtonStyle {
             }
         }
         .background(Theme.surfaceInstrument)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(Theme.gridLine, lineWidth: 1)
+            Rectangle()
+                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
         )
         .screenPadding()
     }

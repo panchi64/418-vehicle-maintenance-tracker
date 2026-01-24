@@ -44,7 +44,10 @@ enum Theme {
     static let cardPadding: CGFloat = 16
     static let buttonHeight: CGFloat = 48
     static let instrumentCornerRadius: CGFloat = 0
-    static let borderWidth: CGFloat = 1
+    static let borderWidth: CGFloat = 2           // 2px architectural dividers
+
+    // MARK: - The Frame (35px border around viewport)
+    static let frameWidth: CGFloat = 35
 
     // MARK: - Animation Timing (minimal, functional)
     static let animationFast: Double = 0.1
@@ -255,12 +258,35 @@ extension ButtonStyle where Self == InstrumentButtonStyle {
     static var instrument: InstrumentButtonStyle { InstrumentButtonStyle() }
 }
 
-// MARK: - Brutalist Background (pure black)
+// MARK: - Cerulean Background
 
 struct AtmosphericBackground: View {
     var body: some View {
-        Theme.surfaceInstrument
+        Theme.backgroundPrimary
             .ignoresSafeArea()
+    }
+}
+
+// MARK: - Framed Container (35px off-white border)
+
+struct FramedContainer<Content: View>: View {
+    let content: Content
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+
+    var body: some View {
+        ZStack {
+            // Off-white frame
+            Theme.accent
+                .ignoresSafeArea()
+
+            // Cerulean content area
+            content
+                .background(Theme.backgroundPrimary)
+                .padding(Theme.frameWidth)
+        }
     }
 }
 

@@ -22,10 +22,9 @@ struct InstrumentSegmentedControl<T: Hashable>: View {
         }
         .padding(4)
         .background(Theme.surfaceInstrument)
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(Theme.gridLine, lineWidth: 1)
+            Rectangle()
+                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
         )
     }
 
@@ -46,7 +45,7 @@ struct InstrumentSegmentedControl<T: Hashable>: View {
                 .frame(maxWidth: .infinity)
                 .background {
                     if isSelected {
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        Rectangle()
                             .fill(Theme.accent)
                             .matchedGeometryEffect(id: "segment", in: namespace)
                     }

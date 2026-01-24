@@ -35,12 +35,12 @@ struct InstrumentTextField: View {
                 .focused($isFocused)
                 .padding(16)
                 .background(Theme.surfaceInstrument)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .clipShape(Rectangle())
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    Rectangle()
                         .strokeBorder(
                             isFocused ? Theme.accent : Theme.gridLine,
-                            lineWidth: isFocused ? 2 : 1
+                            lineWidth: Theme.borderWidth
                         )
                 )
                 .animation(.easeOut(duration: Theme.animationFast), value: isFocused)
@@ -95,7 +95,7 @@ struct InstrumentNumberField: View {
             }
             .padding(16)
             .background(Theme.surfaceInstrument)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .clipShape(Rectangle())
             .overlay(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .strokeBorder(
@@ -131,10 +131,10 @@ struct InstrumentDatePicker: View {
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Theme.surfaceInstrument)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .clipShape(Rectangle())
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .strokeBorder(Theme.gridLine, lineWidth: 1)
+                    Rectangle()
+                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
                 )
         }
     }
@@ -160,7 +160,7 @@ struct InstrumentToggle: View {
         }
         .padding(16)
         .background(Theme.surfaceInstrument)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .clipShape(Rectangle())
         .overlay(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .strokeBorder(Theme.gridLine, lineWidth: 1)
@@ -205,7 +205,7 @@ struct InstrumentTextEditor: View {
             }
             .frame(minHeight: minHeight)
             .background(Theme.surfaceInstrument)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .clipShape(Rectangle())
             .overlay(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .strokeBorder(

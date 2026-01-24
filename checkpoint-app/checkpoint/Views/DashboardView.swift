@@ -96,10 +96,9 @@ struct DashboardView: View {
                                         }
                                     }
                                     .background(Theme.surfaceInstrument)
-                                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                                     .overlay(
-                                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                            .strokeBorder(Theme.gridLine, lineWidth: 1)
+                                        Rectangle()
+                                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
                                     )
                                 }
                             }
@@ -133,11 +132,9 @@ struct DashboardView: View {
                     } label: {
                         Image(systemName: "plus")
                             .font(.system(size: 22, weight: .semibold))
-                            .foregroundStyle(Color(red: 0.071, green: 0.071, blue: 0.071))
+                            .foregroundStyle(Theme.backgroundPrimary)
                             .frame(width: 56, height: 56)
                             .background(Theme.accent)
-                            .clipShape(Circle())
-                            .shadow(color: Theme.accent.opacity(0.4), radius: 12, x: 0, y: 4)
                     }
                     .revealAnimation(delay: 0.5)
                     .padding(.trailing, Spacing.screenHorizontal)
@@ -226,7 +223,7 @@ struct DashboardView: View {
     private var emptyState: some View {
         VStack(spacing: Spacing.lg) {
             ZStack {
-                Circle()
+                Rectangle()
                     .fill(Theme.accent.opacity(0.1))
                     .frame(width: 100, height: 100)
 
@@ -236,18 +233,18 @@ struct DashboardView: View {
             }
 
             VStack(spacing: Spacing.xs) {
-                Text("No vehicles yet")
-                    .font(.system(size: 20, weight: .semibold))
+                Text("NO_VEHICLES")
+                    .font(.brutalistHeading)
                     .foregroundStyle(Theme.textPrimary)
 
                 Text("Add your first vehicle to start\ntracking maintenance")
-                    .font(.system(size: 15, weight: .regular))
+                    .font(.brutalistSecondary)
                     .foregroundStyle(Theme.textSecondary)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
             }
 
-            Button("Add Vehicle") {
+            Button("ADD_VEHICLE") {
                 showAddVehicle = true
             }
             .buttonStyle(.primary)
@@ -260,22 +257,22 @@ struct DashboardView: View {
     private var noServicesState: some View {
         VStack(spacing: Spacing.lg) {
             ZStack {
-                Circle()
-                    .fill(Theme.statusGood.opacity(0.1))
+                Rectangle()
+                    .fill(Theme.accent.opacity(0.1))
                     .frame(width: 100, height: 100)
 
                 Image(systemName: "checkmark")
                     .font(.system(size: 40, weight: .light))
-                    .foregroundStyle(Theme.statusGood)
+                    .foregroundStyle(Theme.accent)
             }
 
             VStack(spacing: Spacing.xs) {
-                Text("All caught up")
-                    .font(.system(size: 20, weight: .semibold))
+                Text("ALL_CLEAR")
+                    .font(.brutalistHeading)
                     .foregroundStyle(Theme.textPrimary)
 
                 Text("No maintenance services scheduled\nfor this vehicle")
-                    .font(.system(size: 15, weight: .regular))
+                    .font(.brutalistSecondary)
                     .foregroundStyle(Theme.textSecondary)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
