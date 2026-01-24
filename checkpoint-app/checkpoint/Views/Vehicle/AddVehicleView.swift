@@ -19,6 +19,8 @@ struct AddVehicleView: View {
     @State private var year: Int? = nil
     @State private var currentMileage: Int? = nil
     @State private var vin: String = ""
+    @State private var tireSize: String = ""
+    @State private var oilType: String = ""
 
     // Validation
     private var isFormValid: Bool {
@@ -94,6 +96,25 @@ struct AddVehicleView: View {
                             }
                         }
 
+                        // Specifications Section
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                            InstrumentSectionHeader(title: "Specifications")
+
+                            VStack(spacing: Spacing.md) {
+                                InstrumentTextField(
+                                    label: "Tire Size",
+                                    text: $tireSize,
+                                    placeholder: "225/45R17 (Optional)"
+                                )
+
+                                InstrumentTextField(
+                                    label: "Oil Type",
+                                    text: $oilType,
+                                    placeholder: "0W-20 Synthetic (Optional)"
+                                )
+                            }
+                        }
+
                         // Save button
                         Button("Add Vehicle") {
                             saveVehicle()
@@ -128,7 +149,10 @@ struct AddVehicleView: View {
             model: model,
             year: year ?? 0,
             currentMileage: currentMileage ?? 0,
-            vin: vin.isEmpty ? nil : vin
+            vin: vin.isEmpty ? nil : vin,
+            tireSize: tireSize.isEmpty ? nil : tireSize,
+            oilType: oilType.isEmpty ? nil : oilType,
+            mileageUpdatedAt: .now
         )
         modelContext.insert(vehicle)
         dismiss()

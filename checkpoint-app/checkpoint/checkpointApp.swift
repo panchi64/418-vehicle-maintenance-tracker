@@ -20,6 +20,7 @@ struct checkpointApp: App {
             Service.self,
             ServiceLog.self,
             ServicePreset.self,
+            MileageSnapshot.self,
         ])
 
         // Use App Group container for shared access with widget

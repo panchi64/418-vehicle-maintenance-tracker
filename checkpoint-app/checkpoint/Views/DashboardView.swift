@@ -12,11 +12,13 @@ struct DashboardView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var vehicles: [Vehicle]
     @Query private var services: [Service]
+    @Query private var serviceLogs: [ServiceLog]
 
     @State private var selectedVehicle: Vehicle?
     @State private var showVehiclePicker = false
     @State private var showAddVehicle = false
     @State private var showAddService = false
+    @State private var showEditVehicle = false
     @State private var selectedService: Service?
 
     private var currentVehicle: Vehicle? {
@@ -38,6 +40,20 @@ struct DashboardView: View {
         Array(vehicleServices.dropFirst())
     }
 
+    /// Service logs for the current vehicle
+    private var vehicleServiceLogs: [ServiceLog] {
+        guard let vehicle = currentVehicle else { return [] }
+        return serviceLogs.filter { $0.vehicle?.id == vehicle.id }
+    }
+
+    /// Recent service logs (last 3) for the current vehicle
+    private var recentLogs: [ServiceLog] {
+        vehicleServiceLogs
+            .sorted { $0.performedDate > $1.performedDate }
+            .prefix(3)
+            .map { $0 }
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -53,6 +69,22 @@ struct DashboardView: View {
 
                         // Main content
                         VStack(spacing: Spacing.xl) {
+                            // Quick Specs Card (reference data at top)
+                            if let vehicle = currentVehicle {
+                                QuickSpecsCard(vehicle: vehicle) {
+                                    showEditVehicle = true
+                                }
+                                .revealAnimation(delay: 0.15)
+                            }
+
+                            // Quick Mileage Update Card
+                            if let vehicle = currentVehicle {
+                                QuickMileageUpdateCard(vehicle: vehicle) { newMileage in
+                                    updateMileage(newMileage, for: vehicle)
+                                }
+                                .revealAnimation(delay: 0.18)
+                            }
+
                             // Next Up hero card
                             if let nextUp = nextUpService, let vehicle = currentVehicle {
                                 VStack(alignment: .leading, spacing: Spacing.sm) {
@@ -62,7 +94,8 @@ struct DashboardView: View {
                                         NextUpCard(
                                             service: nextUp,
                                             currentMileage: vehicle.currentMileage,
-                                            vehicleName: vehicle.displayName
+                                            vehicleName: vehicle.displayName,
+                                            dailyMilesPace: vehicle.dailyMilesPace
                                         ) {
                                             selectedService = nextUp
                                         }
@@ -101,6 +134,18 @@ struct DashboardView: View {
                                             .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
                                     )
                                 }
+                            }
+
+                            // Recent Activity Feed
+                            if !recentLogs.isEmpty {
+                                RecentActivityFeed(serviceLogs: vehicleServiceLogs)
+                                    .revealAnimation(delay: 0.4)
+                            }
+
+                            // Quick Stats Bar (YTD insights at bottom)
+                            if currentVehicle != nil {
+                                QuickStatsBar(serviceLogs: vehicleServiceLogs)
+                                    .revealAnimation(delay: 0.45)
                             }
 
                             // Empty states
@@ -161,6 +206,11 @@ struct DashboardView: View {
                 NavigationStack {
                     ServiceDetailView(service: service, vehicle: vehicle)
                 }
+            }
+        }
+        .sheet(isPresented: $showEditVehicle) {
+            if let vehicle = currentVehicle {
+                EditVehicleView(vehicle: vehicle)
             }
         }
         .onAppear {
@@ -289,6 +339,27 @@ struct DashboardView: View {
         return (formatter.string(from: NSNumber(value: miles)) ?? "\(miles)") + " mi"
     }
 
+    /// Update mileage and create a snapshot (throttled to max 1 per day)
+    private func updateMileage(_ newMileage: Int, for vehicle: Vehicle) {
+        vehicle.currentMileage = newMileage
+        vehicle.mileageUpdatedAt = .now
+
+        // Create mileage snapshot (throttled: max 1 per day)
+        let shouldCreateSnapshot = !MileageSnapshot.hasSnapshotToday(
+            snapshots: vehicle.mileageSnapshots
+        )
+
+        if shouldCreateSnapshot {
+            let snapshot = MileageSnapshot(
+                vehicle: vehicle,
+                mileage: newMileage,
+                recordedAt: .now,
+                source: .manual
+            )
+            modelContext.insert(snapshot)
+        }
+    }
+
     // MARK: - Sample Data
 
     private func seedSampleDataIfNeeded() {
@@ -314,6 +385,6 @@ struct DashboardView: View {
 
 #Preview {
     DashboardView()
-        .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self, ServicePreset.self], inMemory: true)
+        .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self, ServicePreset.self, MileageSnapshot.self], inMemory: true)
         .preferredColorScheme(.dark)
 }

@@ -343,6 +343,22 @@ struct MarkServiceDoneSheet: View {
         // Update vehicle mileage if service mileage is higher
         if mileageInt > vehicle.currentMileage {
             vehicle.currentMileage = mileageInt
+            vehicle.mileageUpdatedAt = performedDate
+        }
+
+        // Create mileage snapshot for pace calculation (throttled: max 1 per day)
+        let shouldCreateSnapshot = !MileageSnapshot.hasSnapshotToday(
+            snapshots: vehicle.mileageSnapshots
+        )
+
+        if shouldCreateSnapshot {
+            let snapshot = MileageSnapshot(
+                vehicle: vehicle,
+                mileage: mileageInt,
+                recordedAt: performedDate,
+                source: .serviceCompletion
+            )
+            modelContext.insert(snapshot)
         }
 
         dismiss()
@@ -369,6 +385,6 @@ struct MarkServiceDoneSheet: View {
     NavigationStack {
         ServiceDetailView(service: service, vehicle: vehicle)
     }
-    .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self], inMemory: true)
+    .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self], inMemory: true)
     .preferredColorScheme(.dark)
 }

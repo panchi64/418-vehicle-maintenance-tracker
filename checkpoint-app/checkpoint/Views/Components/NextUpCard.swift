@@ -11,10 +11,23 @@ struct NextUpCard: View {
     let service: Service
     let currentMileage: Int
     let vehicleName: String
+    var dailyMilesPace: Double? = nil
     let onTap: () -> Void
 
     private var status: ServiceStatus {
         service.status(currentMileage: currentMileage)
+    }
+
+    /// Calculate days until due based on mileage pace
+    private var pacePredictedDays: Int? {
+        guard let pace = dailyMilesPace,
+              pace > 0,
+              let dueMileage = service.dueMileage else { return nil }
+
+        let milesRemaining = dueMileage - currentMileage
+        guard milesRemaining > 0 else { return nil }
+
+        return Int(ceil(Double(milesRemaining) / pace))
     }
 
     private var daysUntilDue: Int? {
@@ -77,6 +90,14 @@ struct NextUpCard: View {
                             .font(.brutalistLabel)
                             .foregroundStyle(Theme.textTertiary)
                             .tracking(1.5)
+
+                        // Pace prediction (only shown when sufficient data)
+                        if let paceDays = pacePredictedDays {
+                            Text("~\(paceDays) DAYS AT_YOUR_PACE")
+                                .font(.brutalistSecondary)
+                                .foregroundStyle(Theme.textSecondary)
+                                .padding(.top, 4)
+                        }
                     }
                     .padding(.vertical, 20)
                 }
@@ -190,7 +211,8 @@ struct CardButtonStyle: ButtonStyle {
                 NextUpCard(
                     service: service,
                     currentMileage: vehicle.currentMileage,
-                    vehicleName: vehicle.displayName
+                    vehicleName: vehicle.displayName,
+                    dailyMilesPace: 40.0  // ~40 miles per day
                 ) {
                     print("Tapped \(service.name)")
                 }

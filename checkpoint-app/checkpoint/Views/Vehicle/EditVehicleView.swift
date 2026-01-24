@@ -23,6 +23,8 @@ struct EditVehicleView: View {
     @State private var year: Int?
     @State private var currentMileage: Int?
     @State private var vin: String
+    @State private var tireSize: String
+    @State private var oilType: String
 
     init(vehicle: Vehicle) {
         self.vehicle = vehicle
@@ -32,6 +34,8 @@ struct EditVehicleView: View {
         _year = State(initialValue: vehicle.year)
         _currentMileage = State(initialValue: vehicle.currentMileage)
         _vin = State(initialValue: vehicle.vin ?? "")
+        _tireSize = State(initialValue: vehicle.tireSize ?? "")
+        _oilType = State(initialValue: vehicle.oilType ?? "")
     }
 
     private var isFormValid: Bool {
@@ -107,6 +111,25 @@ struct EditVehicleView: View {
                             }
                         }
 
+                        // Specifications Section
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                            InstrumentSectionHeader(title: "Specifications")
+
+                            VStack(spacing: Spacing.md) {
+                                InstrumentTextField(
+                                    label: "Tire Size",
+                                    text: $tireSize,
+                                    placeholder: "225/45R17 (Optional)"
+                                )
+
+                                InstrumentTextField(
+                                    label: "Oil Type",
+                                    text: $oilType,
+                                    placeholder: "0W-20 Synthetic (Optional)"
+                                )
+                            }
+                        }
+
                         // Save button
                         Button("Save Changes") {
                             saveChanges()
@@ -169,6 +192,8 @@ struct EditVehicleView: View {
         vehicle.year = year ?? vehicle.year
         vehicle.currentMileage = currentMileage ?? vehicle.currentMileage
         vehicle.vin = vin.isEmpty ? nil : vin
+        vehicle.tireSize = tireSize.isEmpty ? nil : tireSize
+        vehicle.oilType = oilType.isEmpty ? nil : oilType
         dismiss()
     }
 
@@ -185,7 +210,9 @@ struct EditVehicleView: View {
         model: "Camry",
         year: 2022,
         currentMileage: 32500,
-        vin: "1HGBH41JXMN109186"
+        vin: "1HGBH41JXMN109186",
+        tireSize: "225/45R17",
+        oilType: "0W-20 Synthetic"
     )
 
     EditVehicleView(vehicle: vehicle)
