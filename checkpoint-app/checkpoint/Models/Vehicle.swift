@@ -10,14 +10,19 @@ import SwiftData
 
 @Model
 final class Vehicle {
+    var id: UUID = UUID()
     var name: String
     var make: String
     var model: String
     var year: Int
     var currentMileage: Int
+    var vin: String?
 
     @Relationship(deleteRule: .cascade, inverse: \Service.vehicle)
     var services: [Service] = []
+
+    @Relationship(deleteRule: .cascade, inverse: \ServiceLog.vehicle)
+    var serviceLogs: [ServiceLog] = []
 
     var displayName: String {
         if name.isEmpty {
@@ -31,13 +36,15 @@ final class Vehicle {
         make: String,
         model: String,
         year: Int,
-        currentMileage: Int = 0
+        currentMileage: Int = 0,
+        vin: String? = nil
     ) {
         self.name = name
         self.make = make
         self.model = model
         self.year = year
         self.currentMileage = currentMileage
+        self.vin = vin
     }
 }
 

@@ -19,26 +19,26 @@
 
 ### 1. Dashboard / Home Screen
 
-| Feature              | Priority | Notes                                                                                                   |
-| -------------------- | -------- | ------------------------------------------------------------------------------------------------------- |
-| "Next Up" card       | High     | Single most important upcoming service, smart prioritization: overdue > safety-critical > mileage-based |
-| Quick-add button     | High     | One tap to log a service                                                                                |
-| Vehicle selector     | High     | Easy switching for multi-vehicle households                                                             |
-| Maintenance timeline | Medium   | Visual timeline of past/upcoming services                                                               |
+| Feature              | Priority | Status | Notes                                                                                                   |
+| -------------------- | -------- | ------ | ------------------------------------------------------------------------------------------------------- |
+| "Next Up" card       | High     | ✅     | Single most important upcoming service, smart prioritization: overdue > safety-critical > mileage-based |
+| Quick-add button     | High     | ✅     | One tap to log a service                                                                                |
+| Vehicle selector     | High     | ✅     | Easy switching for multi-vehicle households                                                             |
+| Maintenance timeline | Medium   | ⏳     | Visual timeline of past/upcoming services                                                               |
 
 ---
 
 ### 2. Service Logging
 
-| Feature                | Priority | Notes                                                |
-| ---------------------- | -------- | ---------------------------------------------------- |
-| Manual entry           | High     | Basic form: service type, date, mileage, cost, notes |
-| Receipt/invoice OCR    | High     | Photo → auto-populate fields (date, cost, services)  |
-| Service type presets   | High     | Oil change, tire rotation, brakes, etc.              |
-| Custom service types   | Medium   | User-defined categories                              |
-| Attachments            | Medium   | Photos, PDFs, receipts                               |
-| Location tagging       | Low      | Where was service performed                          |
-| Mechanic/shop tracking | Low      | Build history with specific shops                    |
+| Feature                | Priority | Status | Notes                                                |
+| ---------------------- | -------- | ------ | ---------------------------------------------------- |
+| Manual entry           | High     | ✅     | Basic form: service type, date, mileage, cost, notes |
+| Receipt/invoice OCR    | High     | ⏳     | Photo → auto-populate fields (date, cost, services)  |
+| Service type presets   | High     | ✅     | Oil change, tire rotation, brakes, etc.              |
+| Custom service types   | Medium   | ✅     | User-defined categories                              |
+| Attachments            | Medium   | ⏳     | Photos, PDFs, receipts                               |
+| Location tagging       | Low      | ⏳     | Where was service performed                          |
+| Mechanic/shop tracking | Low      | ⏳     | Build history with specific shops                    |
 
 #### On-Device Document Intelligence
 
@@ -73,17 +73,17 @@
 
 ### 3. Maintenance Schedules & Reminders
 
-| Feature                      | Priority | Notes                                                           |
-| ---------------------------- | -------- | --------------------------------------------------------------- |
-| Pre-loaded factory schedules | High     | VIN decode → manufacturer intervals (see Data Strategy section) |
-| Manual schedule entry        | High     | User inputs their own schedule from their owner's manual        |
-| Mileage-based reminders      | High     | "Due in 500 miles"                                              |
-| Date-based reminders         | High     | "Due in 2 weeks"                                                |
-| Smart notifications          | High     | Configurable timing (1 week before, day of, etc.)               |
-| Service clustering           | High     | Bundle nearby services into one visit                           |
-| Seasonal reminders           | Medium   | Location + season → contextual alerts                           |
-| Severe vs normal schedules   | Medium   | Different intervals based on driving conditions                 |
-| Custom reminder intervals    | Medium   | User-defined schedules                                          |
+| Feature                      | Priority | Status | Notes                                                           |
+| ---------------------------- | -------- | ------ | --------------------------------------------------------------- |
+| Pre-loaded factory schedules | High     | ⏳     | VIN decode → manufacturer intervals (see Data Strategy section) |
+| Manual schedule entry        | High     | ✅     | User inputs their own schedule from their owner's manual        |
+| Mileage-based reminders      | High     | ✅     | "Due in 500 miles"                                              |
+| Date-based reminders         | High     | ✅     | "Due in 2 weeks"                                                |
+| Smart notifications          | High     | ✅     | Configurable timing (1 week before, day of, etc.)               |
+| Service clustering           | High     | ⏳     | Bundle nearby services into one visit                           |
+| Seasonal reminders           | Medium   | ⏳     | Location + season → contextual alerts                           |
+| Severe vs normal schedules   | Medium   | ⏳     | Different intervals based on driving conditions                 |
+| Custom reminder intervals    | Medium   | ✅     | User-defined schedules                                          |
 
 #### Setup: Schedule Source Choice
 
@@ -146,13 +146,13 @@
 
 ### 4. Vehicle Management
 
-| Feature               | Priority | Notes                                                      |
-| --------------------- | -------- | ---------------------------------------------------------- |
-| Multi-vehicle support | High     | Families, enthusiasts, collectors                          |
-| VIN decoding          | High     | Auto-populate year/make/model/engine                       |
-| Vehicle photos        | Medium   | Personalization                                            |
-| Odometer tracking     | High     | Manual entry + smart estimation                            |
-| Vehicle notes         | Medium   | Freeform notes area for quirks, history, or reminders      |
+| Feature               | Priority | Status | Notes                                                      |
+| --------------------- | -------- | ------ | ---------------------------------------------------------- |
+| Multi-vehicle support | High     | ✅     | Families, enthusiasts, collectors                          |
+| VIN decoding          | High     | ⏳     | Auto-populate year/make/model/engine                       |
+| Vehicle photos        | Medium   | ⏳     | Personalization                                            |
+| Odometer tracking     | High     | ✅     | Manual entry + smart estimation                            |
+| Vehicle notes         | Medium   | ⏳     | Freeform notes area for quirks, history, or reminders      |
 
 ---
 
@@ -217,12 +217,12 @@
 
 ### 6. Cost & Expense Tracking
 
-| Feature                   | Priority | Notes                  |
-| ------------------------- | -------- | ---------------------- |
-| Per-service costs         | High     | Track what you spend   |
-| Cost categorization       | Medium   | Maintenance vs repairs |
-| Monthly/yearly summaries  | Medium   | Spending trends        |
-| Cost-per-mile calculation | Medium   | True cost of ownership |
+| Feature                   | Priority | Status | Notes                  |
+| ------------------------- | -------- | ------ | ---------------------- |
+| Per-service costs         | High     | ✅     | Track what you spend   |
+| Cost categorization       | Medium   | ⏳     | Maintenance vs repairs |
+| Monthly/yearly summaries  | Medium   | ⏳     | Spending trends        |
+| Cost-per-mile calculation | Medium   | ⏳     | True cost of ownership |
 
 ---
 
@@ -365,12 +365,12 @@
 
 > Surface information where the user already is — don't make them open the app for a quick glance.
 
-| Feature                      | Priority | Notes                                          |
-| ---------------------------- | -------- | ---------------------------------------------- |
-| Home Screen Widget           | High     | Small/medium widget showing "Next Up" service  |
-| Lock Screen Widget           | High     | Glance at what's due without unlocking         |
-| One-tap notification actions | High     | "Did you do your oil change?" → Yes/No buttons |
-| Siri integration             | Medium   | "Hey Siri, what's due on my car?"              |
+| Feature                      | Priority | Status | Notes                                          |
+| ---------------------------- | -------- | ------ | ---------------------------------------------- |
+| Home Screen Widget           | High     | ✅     | Small/medium widget showing "Next Up" service  |
+| Lock Screen Widget           | High     | ⏳     | Glance at what's due without unlocking         |
+| One-tap notification actions | High     | ✅     | "Did you do your oil change?" → Yes/No buttons |
+| Siri integration             | Medium   | ⏳     | "Hey Siri, what's due on my car?"              |
 
 **Notification philosophy:**
 

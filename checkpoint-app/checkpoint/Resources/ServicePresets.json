@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Oil Change",
+    "category": "engine",
+    "defaultIntervalMonths": 6,
+    "defaultIntervalMiles": 5000
+  },
+  {
+    "name": "Tire Rotation",
+    "category": "tires",
+    "defaultIntervalMonths": 6,
+    "defaultIntervalMiles": 5000
+  },
+  {
+    "name": "Brake Inspection",
+    "category": "brakes",
+    "defaultIntervalMonths": 12,
+    "defaultIntervalMiles": 12000
+  },
+  {
+    "name": "Air Filter",
+    "category": "engine",
+    "defaultIntervalMonths": 12,
+    "defaultIntervalMiles": 15000
+  },
+  {
+    "name": "Cabin Air Filter",
+    "category": "engine",
+    "defaultIntervalMonths": 12,
+    "defaultIntervalMiles": 15000
+  },
+  {
+    "name": "Transmission Fluid",
+    "category": "transmission",
+    "defaultIntervalMonths": 24,
+    "defaultIntervalMiles": 30000
+  },
+  {
+    "name": "Coolant Flush",
+    "category": "fluids",
+    "defaultIntervalMonths": 24,
+    "defaultIntervalMiles": 30000
+  },
+  {
+    "name": "Spark Plugs",
+    "category": "engine",
+    "defaultIntervalMonths": 36,
+    "defaultIntervalMiles": 30000
+  },
+  {
+    "name": "Battery Check",
+    "category": "electrical",
+    "defaultIntervalMonths": 12,
+    "defaultIntervalMiles": null
+  },
+  {
+    "name": "Wiper Blades",
+    "category": "body",
+    "defaultIntervalMonths": 12,
+    "defaultIntervalMiles": null
+  }
+]

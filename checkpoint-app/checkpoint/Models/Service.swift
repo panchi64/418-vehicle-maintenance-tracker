@@ -11,6 +11,7 @@ import SwiftUI
 
 @Model
 final class Service {
+    var id: UUID = UUID()
     var name: String
     var dueDate: Date?
     var dueMileage: Int?
@@ -18,8 +19,12 @@ final class Service {
     var lastMileage: Int?
     var intervalMonths: Int?
     var intervalMiles: Int?
+    var notificationID: String?
 
     var vehicle: Vehicle?
+
+    @Relationship(deleteRule: .cascade, inverse: \ServiceLog.service)
+    var logs: [ServiceLog] = []
 
     init(
         name: String,
@@ -28,7 +33,8 @@ final class Service {
         lastPerformed: Date? = nil,
         lastMileage: Int? = nil,
         intervalMonths: Int? = nil,
-        intervalMiles: Int? = nil
+        intervalMiles: Int? = nil,
+        notificationID: String? = nil
     ) {
         self.name = name
         self.dueDate = dueDate
@@ -37,6 +43,7 @@ final class Service {
         self.lastMileage = lastMileage
         self.intervalMonths = intervalMonths
         self.intervalMiles = intervalMiles
+        self.notificationID = notificationID
     }
 }
 

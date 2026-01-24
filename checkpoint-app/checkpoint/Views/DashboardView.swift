@@ -16,6 +16,8 @@ struct DashboardView: View {
     @State private var selectedVehicle: Vehicle?
     @State private var showVehiclePicker = false
     @State private var showAddVehicle = false
+    @State private var showAddService = false
+    @State private var selectedService: Service?
 
     private var currentVehicle: Vehicle? {
         selectedVehicle ?? vehicles.first
@@ -56,13 +58,16 @@ struct DashboardView: View {
                                 VStack(alignment: .leading, spacing: Spacing.sm) {
                                     sectionHeader("Next Up")
 
-                                    NextUpCard(
-                                        service: nextUp,
-                                        currentMileage: vehicle.currentMileage,
-                                        vehicleName: vehicle.displayName
-                                    ) {
-                                        // TODO: Navigate to service detail
+                                    NavigationLink(value: nextUp) {
+                                        NextUpCard(
+                                            service: nextUp,
+                                            currentMileage: vehicle.currentMileage,
+                                            vehicleName: vehicle.displayName
+                                        ) {
+                                            selectedService = nextUp
+                                        }
                                     }
+                                    .buttonStyle(.plain)
                                 }
                             }
 
@@ -77,7 +82,7 @@ struct DashboardView: View {
                                                 service: service,
                                                 currentMileage: vehicle.currentMileage
                                             ) {
-                                                // TODO: Navigate to service detail
+                                                selectedService = service
                                             }
 
                                             if service.name != remainingServices.last?.name {
@@ -110,12 +115,50 @@ struct DashboardView: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(for: Service.self) { service in
+                if let vehicle = currentVehicle {
+                    ServiceDetailView(service: service, vehicle: vehicle)
+                }
+            }
+            .overlay(alignment: .bottomTrailing) {
+                // Quick-add floating button
+                if currentVehicle != nil {
+                    Button {
+                        showAddService = true
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.system(size: 22, weight: .semibold))
+                            .foregroundStyle(Color(red: 0.071, green: 0.071, blue: 0.071))
+                            .frame(width: 56, height: 56)
+                            .background(Theme.accent)
+                            .clipShape(Circle())
+                            .shadow(color: Theme.accent.opacity(0.3), radius: 8, x: 0, y: 4)
+                    }
+                    .padding(.trailing, Spacing.screenHorizontal)
+                    .padding(.bottom, Spacing.lg)
+                }
+            }
         }
         .sheet(isPresented: $showVehiclePicker) {
             VehiclePickerSheet(
                 selectedVehicle: $selectedVehicle,
                 onAddVehicle: { showAddVehicle = true }
             )
+        }
+        .sheet(isPresented: $showAddVehicle) {
+            AddVehicleView()
+        }
+        .sheet(isPresented: $showAddService) {
+            if let vehicle = currentVehicle {
+                AddServiceView(vehicle: vehicle)
+            }
+        }
+        .sheet(item: $selectedService) { service in
+            if let vehicle = currentVehicle {
+                NavigationStack {
+                    ServiceDetailView(service: service, vehicle: vehicle)
+                }
+            }
         }
         .onAppear {
             seedSampleDataIfNeeded()
@@ -271,6 +314,6 @@ struct DashboardView: View {
 
 #Preview {
     DashboardView()
-        .modelContainer(for: [Vehicle.self, Service.self], inMemory: true)
+        .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self, ServicePreset.self], inMemory: true)
         .preferredColorScheme(.dark)
 }
