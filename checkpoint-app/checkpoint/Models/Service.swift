@@ -10,7 +10,7 @@ import SwiftData
 import SwiftUI
 
 @Model
-final class Service {
+final class Service: Identifiable {
     var id: UUID = UUID()
     var name: String
     var dueDate: Date?

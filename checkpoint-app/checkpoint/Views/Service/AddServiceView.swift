@@ -245,11 +245,14 @@ struct AddServiceView: View {
 }
 
 #Preview {
-    let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(for: Vehicle.self, Service.self, ServiceLog.self, configurations: config)
-    let vehicle = Vehicle(name: "Test Car", make: "Toyota", model: "Camry", year: 2022, currentMileage: 32500)
-    container.mainContext.insert(vehicle)
+    @Previewable @State var vehicle = Vehicle(
+        name: "Test Car",
+        make: "Toyota",
+        model: "Camry",
+        year: 2022,
+        currentMileage: 32500
+    )
 
-    return AddServiceView(vehicle: vehicle)
-        .modelContainer(container)
+    AddServiceView(vehicle: vehicle)
+        .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self], inMemory: true)
 }

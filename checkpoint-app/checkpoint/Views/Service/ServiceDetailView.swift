@@ -322,25 +322,25 @@ struct MarkServiceDoneSheet: View {
 }
 
 #Preview {
-    let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(for: Vehicle.self, Service.self, ServiceLog.self, configurations: config)
+    @Previewable @State var vehicle = Vehicle(
+        name: "Test Car",
+        make: "Toyota",
+        model: "Camry",
+        year: 2022,
+        currentMileage: 32500
+    )
 
-    let vehicle = Vehicle(name: "Test Car", make: "Toyota", model: "Camry", year: 2022, currentMileage: 32500)
-    container.mainContext.insert(vehicle)
-
-    let service = Service(
+    @Previewable @State var service = Service(
         name: "Oil Change",
         dueDate: Calendar.current.date(byAdding: .day, value: 12, to: .now),
         dueMileage: 33000,
         intervalMonths: 6,
         intervalMiles: 5000
     )
-    service.vehicle = vehicle
-    container.mainContext.insert(service)
 
-    return NavigationStack {
+    NavigationStack {
         ServiceDetailView(service: service, vehicle: vehicle)
     }
-    .modelContainer(container)
+    .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self], inMemory: true)
     .preferredColorScheme(.dark)
 }

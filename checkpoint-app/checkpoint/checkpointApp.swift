@@ -11,8 +11,6 @@ import UserNotifications
 
 @main
 struct checkpointApp: App {
-    @StateObject private var notificationService = NotificationService.shared
-
     // App Group identifier for sharing data with widget
     private static let appGroupID = "group.com.checkpoint.shared"
 
@@ -49,11 +47,12 @@ struct checkpointApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .preferredColorScheme(.dark)
                 .task {
                     // Request notification authorization on app launch
-                    await notificationService.checkAuthorizationStatus()
-                    if !notificationService.isAuthorized {
-                        _ = await notificationService.requestAuthorization()
+                    await NotificationService.shared.checkAuthorizationStatus()
+                    if !NotificationService.shared.isAuthorized {
+                        _ = await NotificationService.shared.requestAuthorization()
                     }
                 }
         }

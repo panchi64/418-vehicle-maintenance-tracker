@@ -114,10 +114,7 @@ struct EditVehicleView: View {
 }
 
 #Preview {
-    let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(for: Vehicle.self, configurations: config)
-
-    let vehicle = Vehicle(
+    @Previewable @State var vehicle = Vehicle(
         name: "Daily Driver",
         make: "Toyota",
         model: "Camry",
@@ -125,8 +122,7 @@ struct EditVehicleView: View {
         currentMileage: 32500,
         vin: "1HGBH41JXMN109186"
     )
-    container.mainContext.insert(vehicle)
 
-    return EditVehicleView(vehicle: vehicle)
-        .modelContainer(container)
+    EditVehicleView(vehicle: vehicle)
+        .modelContainer(for: Vehicle.self, inMemory: true)
 }

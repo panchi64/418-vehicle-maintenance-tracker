@@ -9,7 +9,8 @@ import Foundation
 import SwiftData
 
 @Model
-final class ServiceLog {
+final class ServiceLog: Identifiable {
+    var id: UUID = UUID()
     var service: Service?
     var vehicle: Vehicle?
     var performedDate: Date

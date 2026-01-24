@@ -192,3 +192,37 @@ Test coverage targets:
 - Widget requires App Group capability on both main app and widget targets
 - Notifications require authorization - check `isAuthorized` before scheduling
 - Service due status considers both date AND mileage thresholds
+
+## Xcode Setup Required
+
+Before building, configure the following in Xcode:
+
+### 1. Widget Extension Target
+1. File > New > Target > Widget Extension
+2. Name it "CheckpointWidget"
+3. Add the files from `CheckpointWidget/` directory to the new target
+
+### 2. App Groups Capability
+Add `group.com.checkpoint.shared` capability to BOTH targets:
+1. Select the main app target > Signing & Capabilities > + Capability > App Groups
+2. Add `group.com.checkpoint.shared`
+3. Repeat for the CheckpointWidget target
+
+### 3. Resources
+Ensure `ServicePresets.json` is added to "Copy Bundle Resources" in Build Phases
+
+### 4. SourceKit Indexing
+After opening the project in Xcode, some "Cannot find X in scope" errors may appear in the IDE. These are SourceKit indexing issues that resolve after:
+- Building the project (Cmd+B)
+- Giving Xcode time to index the project
+- Restarting Xcode if needed
+
+The project compiles successfully despite these transient warnings.
+
+## Widget Data Flow
+
+The widget uses UserDefaults (via App Groups) for data sharing:
+1. Main app calls `WidgetDataService.shared.updateWidget(for: vehicle)` when data changes
+2. Data is serialized to JSON and stored in shared UserDefaults
+3. Widget reads from UserDefaults via `WidgetProvider.loadEntry()`
+4. `WidgetCenter.shared.reloadAllTimelines()` triggers widget refresh

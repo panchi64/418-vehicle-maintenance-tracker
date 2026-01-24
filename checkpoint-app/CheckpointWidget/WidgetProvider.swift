@@ -2,12 +2,11 @@
 //  WidgetProvider.swift
 //  CheckpointWidget
 //
-//  Timeline provider for widget data
+//  Timeline provider for widget data using App Group shared data
 //
 
 import WidgetKit
 import SwiftUI
-import SwiftData
 
 // MARK: - Timeline Entry
 
@@ -42,7 +41,7 @@ struct WidgetService: Identifiable {
     let dueDescription: String
 }
 
-enum WidgetServiceStatus {
+enum WidgetServiceStatus: String, Codable {
     case overdue, dueSoon, good, neutral
 
     var color: Color {
@@ -55,11 +54,27 @@ enum WidgetServiceStatus {
     }
 }
 
+// MARK: - Shared Data Structure
+
+/// Data structure for sharing between main app and widget via UserDefaults
+struct WidgetData: Codable {
+    let vehicleName: String
+    let services: [SharedService]
+    let updatedAt: Date
+
+    struct SharedService: Codable {
+        let name: String
+        let status: WidgetServiceStatus
+        let dueDescription: String
+    }
+}
+
 // MARK: - Timeline Provider
 
 struct WidgetProvider: TimelineProvider {
     // App Group container identifier
     private let appGroupID = "group.com.checkpoint.shared"
+    private let widgetDataKey = "widgetData"
 
     func placeholder(in context: Context) -> ServiceEntry {
         ServiceEntry.placeholder
@@ -84,58 +99,31 @@ struct WidgetProvider: TimelineProvider {
     }
 
     private func loadEntry() -> ServiceEntry {
-        // Try to load from shared SwiftData container
-        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
+        // Load from UserDefaults in App Group
+        guard let userDefaults = UserDefaults(suiteName: appGroupID),
+              let data = userDefaults.data(forKey: widgetDataKey) else {
             return ServiceEntry.empty
         }
 
-        let storeURL = containerURL.appendingPathComponent("checkpoint.store")
-
         do {
-            let schema = Schema([Vehicle.self, Service.self, ServiceLog.self, ServicePreset.self])
-            let config = ModelConfiguration(schema: schema, url: storeURL)
-            let container = try ModelContainer(for: schema, configurations: [config])
+            let widgetData = try JSONDecoder().decode(WidgetData.self, from: data)
 
-            let context = ModelContext(container)
-            let descriptor = FetchDescriptor<Vehicle>()
-            let vehicles = try context.fetch(descriptor)
-
-            guard let vehicle = vehicles.first else {
-                return ServiceEntry.empty
-            }
-
-            // Sort services by urgency (most urgent first)
-            let sortedServices = vehicle.services.sorted {
-                $0.urgencyScore(currentMileage: vehicle.currentMileage) < $1.urgencyScore(currentMileage: vehicle.currentMileage)
-            }
-
-            // Map to widget services
-            let widgetServices = sortedServices.prefix(3).map { service in
-                let status = service.status(currentMileage: vehicle.currentMileage)
-                return WidgetService(
+            let widgetServices = widgetData.services.map { service in
+                WidgetService(
                     name: service.name,
-                    status: mapStatus(status),
-                    dueDescription: service.dueDescription ?? "Scheduled"
+                    status: service.status,
+                    dueDescription: service.dueDescription
                 )
             }
 
             return ServiceEntry(
                 date: Date(),
-                vehicleName: vehicle.displayName,
-                services: Array(widgetServices)
+                vehicleName: widgetData.vehicleName,
+                services: widgetServices
             )
         } catch {
-            print("Widget failed to load data: \(error)")
+            print("Widget failed to decode data: \(error)")
             return ServiceEntry.empty
-        }
-    }
-
-    private func mapStatus(_ status: ServiceStatus) -> WidgetServiceStatus {
-        switch status {
-        case .overdue: return .overdue
-        case .dueSoon: return .dueSoon
-        case .good: return .good
-        case .neutral: return .neutral
         }
     }
 }
