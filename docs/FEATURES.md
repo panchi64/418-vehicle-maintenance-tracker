@@ -146,12 +146,13 @@
 
 ### 4. Vehicle Management
 
-| Feature               | Priority | Notes                                |
-| --------------------- | -------- | ------------------------------------ |
-| Multi-vehicle support | High     | Families, enthusiasts, collectors    |
-| VIN decoding          | High     | Auto-populate year/make/model/engine |
-| Vehicle photos        | Medium   | Personalization                      |
-| Odometer tracking     | High     | Manual entry + smart estimation      |
+| Feature               | Priority | Notes                                                      |
+| --------------------- | -------- | ---------------------------------------------------------- |
+| Multi-vehicle support | High     | Families, enthusiasts, collectors                          |
+| VIN decoding          | High     | Auto-populate year/make/model/engine                       |
+| Vehicle photos        | Medium   | Personalization                                            |
+| Odometer tracking     | High     | Manual entry + smart estimation                            |
+| Vehicle notes         | Medium   | Freeform notes area for quirks, history, or reminders      |
 
 ---
 
