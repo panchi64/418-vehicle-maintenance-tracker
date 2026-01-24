@@ -78,15 +78,15 @@ struct NextUpCard: View {
                     .fill(Theme.gridLine)
                     .frame(height: 1)
 
-                // Hero data display
-                if let days = daysUntilDue {
+                // Hero data display - miles first, days as fallback
+                if let miles = milesUntilDue {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("\(abs(days))")
+                        Text("\(abs(miles))")
                             .font(.brutalistHero)
                             .foregroundStyle(status.color)
                             .contentTransition(.numericText())
 
-                        Text(days < 0 ? "DAYS_OVERDUE" : "DAYS_REMAINING")
+                        Text(miles < 0 ? "MILES_OVERDUE" : "MILES_REMAINING")
                             .font(.brutalistLabel)
                             .foregroundStyle(Theme.textTertiary)
                             .tracking(1.5)
@@ -98,6 +98,20 @@ struct NextUpCard: View {
                                 .foregroundStyle(Theme.textSecondary)
                                 .padding(.top, 4)
                         }
+                    }
+                    .padding(.vertical, 20)
+                } else if let days = daysUntilDue {
+                    // Fallback to days for date-only services (e.g., battery check, wiper blades)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("\(abs(days))")
+                            .font(.brutalistHero)
+                            .foregroundStyle(status.color)
+                            .contentTransition(.numericText())
+
+                        Text(days < 0 ? "DAYS_OVERDUE" : "DAYS_REMAINING")
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.textTertiary)
+                            .tracking(1.5)
                     }
                     .padding(.vertical, 20)
                 }

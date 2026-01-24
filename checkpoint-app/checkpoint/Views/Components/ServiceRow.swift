@@ -62,15 +62,20 @@ struct ServiceRow: View {
                         .font(.brutalistBody)
                         .foregroundStyle(Theme.textPrimary)
 
-                    // Mini progress bar + due info
+                    // Mini progress bar + due info - miles first
                     HStack(spacing: Spacing.sm) {
                         // Mini progress indicator
                         if service.dueMileage != nil {
                             miniProgressBar
                         }
 
-                        // Due date info
-                        if let days = daysUntilDue {
+                        // Miles info (primary) or days info (fallback for date-only services)
+                        if let miles = milesRemaining {
+                            Text(formatMilesText(miles))
+                                .font(.instrumentLabel)
+                                .foregroundStyle(status == .overdue ? status.color : Theme.textTertiary)
+                                .tracking(0.5)
+                        } else if let days = daysUntilDue {
                             Text(dueText(days: days))
                                 .font(.instrumentLabel)
                                 .foregroundStyle(status == .overdue ? status.color : Theme.textTertiary)
@@ -80,13 +85,6 @@ struct ServiceRow: View {
                 }
 
                 Spacer()
-
-                // Miles remaining - monospaced
-                if let miles = milesRemaining {
-                    Text(formatMiles(miles))
-                        .font(.instrumentMono)
-                        .foregroundStyle(miles < 0 ? status.color : Theme.textSecondary)
-                }
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .semibold))
@@ -131,6 +129,18 @@ struct ServiceRow: View {
             return "TOMORROW"
         } else {
             return "IN \(days) DAYS"
+        }
+    }
+
+    private func formatMilesText(_ miles: Int) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        if miles < 0 {
+            return "\(abs(miles)) MI OVERDUE"
+        } else if miles == 0 {
+            return "DUE NOW"
+        } else {
+            return "\(formatter.string(from: NSNumber(value: miles)) ?? "\(miles)") MI"
         }
     }
 

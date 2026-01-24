@@ -77,8 +77,8 @@
 | ---------------------------- | -------- | ------ | --------------------------------------------------------------- |
 | Pre-loaded factory schedules | High     | ⏳     | VIN decode → manufacturer intervals (see Data Strategy section) |
 | Manual schedule entry        | High     | ✅     | User inputs their own schedule from their owner's manual        |
-| Mileage-based reminders      | High     | ✅     | "Due in 500 miles"                                              |
-| Date-based reminders         | High     | ✅     | "Due in 2 weeks"                                                |
+| Mileage-based reminders      | High     | ✅     | "500 miles remaining" (primary method)                          |
+| Date-based reminders         | High     | ✅     | Fallback for non-mileage services (battery, wipers)             |
 | Smart notifications          | High     | ✅     | Configurable timing (1 week before, day of, etc.)               |
 | Service clustering           | High     | ⏳     | Bundle nearby services into one visit                           |
 | Seasonal reminders           | Medium   | ⏳     | Location + season → contextual alerts                           |
@@ -207,7 +207,7 @@
 | -------------------------------- | -------- | ----------------------------------------------------- |
 | Driving rate calculation         | High     | miles/month based on logged data points               |
 | Estimated current mileage        | High     | Extrapolate between manual entries                    |
-| Predictive service notifications | High     | "Oil change due in ~2 weeks based on your driving"    |
+| Predictive service notifications | High     | "Oil change due in ~500 miles based on your driving"  |
 | Dashboard OCR                    | High     | Photo of odometer → extract mileage automatically     |
 | Recency weighting                | Medium   | Recent behavior weighted more heavily (habits change) |
 
@@ -242,7 +242,7 @@
 2. Three months later, logs a service at 51K miles
 3. App calculates: ~1,333 miles/month
 4. App can now estimate current mileage without asking
-5. Reminders become time-based: "Based on your driving, brake service is ~6 weeks away"
+5. Reminders become mileage-based: "Based on your driving, brake service is ~1,200 miles away"
 
 **Data sources for mileage:**
 
@@ -426,10 +426,10 @@
 
 | Size        | Content                                               |
 | ----------- | ----------------------------------------------------- |
-| Small       | Single "Next Up" item with days/miles remaining       |
+| Small       | Single "Next Up" item with miles remaining            |
 | Medium      | Next 2-3 upcoming services                            |
 | Large       | Mini dashboard with vehicle photo + upcoming services |
-| Lock Screen | Compact: icon + "Oil change: 12 days"                 |
+| Lock Screen | Compact: icon + "Oil change: 500 mi"                  |
 
 **One-tap notification flow:**
 

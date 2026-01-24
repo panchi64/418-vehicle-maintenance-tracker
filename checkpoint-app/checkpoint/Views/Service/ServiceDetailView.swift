@@ -83,16 +83,16 @@ struct ServiceDetailView: View {
             .background(status.color.opacity(0.15))
             .clipShape(Rectangle())
 
-            // Main urgency display (brutalist hero font)
-            if let description = service.dueDescription {
+            // Main urgency display - miles first (brutalist hero font)
+            if let description = service.primaryDescription {
                 Text(description)
                     .font(.brutalistHero)
                     .foregroundStyle(Theme.textPrimary)
             }
 
-            // Mileage info
-            if let mileageDesc = service.mileageDescription {
-                Text(mileageDesc)
+            // Date info (secondary, only shown if mileage tracking exists)
+            if service.dueMileage != nil, let dateDesc = service.dueDescription {
+                Text(dateDesc)
                     .font(.brutalistSecondary)
                     .foregroundStyle(Theme.textSecondary)
             }

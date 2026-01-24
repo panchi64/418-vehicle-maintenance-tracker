@@ -135,6 +135,22 @@ extension Service {
         }
     }
 
+    /// Primary description prioritizing miles over days
+    /// Mileage is the default tracking method; date is fallback for services where mileage doesn't apply
+    var primaryDescription: String? {
+        if let dueMileage = dueMileage, let vehicle = vehicle {
+            let milesRemaining = dueMileage - vehicle.currentMileage
+            if milesRemaining < 0 {
+                return "\(abs(milesRemaining)) miles overdue"
+            } else if milesRemaining == 0 {
+                return "Due now"
+            } else {
+                return "\(milesRemaining) miles remaining"
+            }
+        }
+        return dueDescription  // Fallback to date-based for services without mileage tracking
+    }
+
     /// Returns urgency score for sorting (lower = more urgent)
     func urgencyScore(currentMileage: Int, currentDate: Date = .now) -> Int {
         var score = Int.max

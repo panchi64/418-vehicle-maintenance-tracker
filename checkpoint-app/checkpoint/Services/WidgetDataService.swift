@@ -70,7 +70,7 @@ class WidgetDataService {
             return (
                 name: service.name,
                 status: statusString,
-                dueDescription: service.dueDescription ?? "Scheduled"
+                dueDescription: service.primaryDescription ?? "Scheduled"
             )
         }
 
