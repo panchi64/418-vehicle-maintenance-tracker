@@ -21,11 +21,7 @@ final class ServiceLog: Identifiable {
 
     var formattedCost: String? {
         guard let cost = cost else { return nil }
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        formatter.locale = Locale(identifier: "en_US")
-        return formatter.string(from: cost as NSDecimalNumber)
+        return Formatters.currency.string(from: cost as NSDecimalNumber)
     }
 
     var daysSincePerformed: Int {

@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 @Observable
+@MainActor
 final class AppState {
     // MARK: - Navigation
 

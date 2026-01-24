@@ -197,7 +197,7 @@ struct HomeTab: View {
                     .foregroundStyle(Theme.textPrimary)
                     .lineLimit(1)
 
-                Text(formatDate(log.performedDate))
+                Text(Formatters.shortDate.string(from: log.performedDate))
                     .font(.brutalistSecondary)
                     .foregroundStyle(Theme.textTertiary)
             }
@@ -277,12 +277,6 @@ struct HomeTab: View {
     }
 
     // MARK: - Helpers
-
-    private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d"
-        return formatter.string(from: date)
-    }
 
     private func updateMileage(_ newMileage: Int, for vehicle: Vehicle) {
         vehicle.currentMileage = newMileage

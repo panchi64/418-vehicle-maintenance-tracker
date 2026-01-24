@@ -144,7 +144,7 @@ struct NextUpCard: View {
 
                             Spacer()
 
-                            Text(formatMileage(currentMileage))
+                            Text(Formatters.mileageDisplay(currentMileage))
                                 .font(.brutalistBody)
                                 .foregroundStyle(Theme.accent)
                         }
@@ -157,7 +157,7 @@ struct NextUpCard: View {
 
                             Spacer()
 
-                            Text(formatMileage(dueMileage))
+                            Text(Formatters.mileageDisplay(dueMileage))
                                 .font(.brutalistBody)
                                 .foregroundStyle(status.color)
                         }
@@ -206,13 +206,6 @@ struct NextUpCard: View {
         .frame(height: 2)
     }
 
-    // MARK: - Helpers
-
-    private func formatMileage(_ miles: Int) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        return (formatter.string(from: NSNumber(value: miles)) ?? "\(miles)") + "_MI"
-    }
 }
 
 // MARK: - Card Button Style

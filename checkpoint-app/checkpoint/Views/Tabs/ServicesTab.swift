@@ -219,7 +219,7 @@ struct ServicesTab: View {
                     .lineLimit(1)
 
                 HStack(spacing: Spacing.xs) {
-                    Text(formatDate(log.performedDate))
+                    Text(Formatters.mediumDate.string(from: log.performedDate))
                         .font(.brutalistSecondary)
                         .foregroundStyle(Theme.textTertiary)
 
@@ -227,7 +227,7 @@ struct ServicesTab: View {
                         .font(.brutalistSecondary)
                         .foregroundStyle(Theme.gridLine)
 
-                    Text(formatMileage(log.mileageAtService))
+                    Text(Formatters.mileage(log.mileageAtService))
                         .font(.brutalistSecondary)
                         .foregroundStyle(Theme.textTertiary)
                 }
@@ -300,19 +300,6 @@ struct ServicesTab: View {
         .padding(Spacing.xxl)
     }
 
-    // MARK: - Helpers
-
-    private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d, yyyy"
-        return formatter.string(from: date)
-    }
-
-    private func formatMileage(_ miles: Int) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        return (formatter.string(from: NSNumber(value: miles)) ?? "\(miles)") + " mi"
-    }
 }
 
 #Preview {
