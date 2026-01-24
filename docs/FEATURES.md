@@ -37,7 +37,6 @@
 | Service type presets   | High     | ✅     | Oil change, tire rotation, brakes, etc.              |
 | Custom service types   | Medium   | ✅     | User-defined categories                              |
 | Attachments            | Medium   | ⏳     | Photos, PDFs, receipts                               |
-| Location tagging       | Low      | ⏳     | Where was service performed                          |
 | Mechanic/shop tracking | Low      | ⏳     | Build history with specific shops                    |
 
 #### On-Device Document Intelligence
