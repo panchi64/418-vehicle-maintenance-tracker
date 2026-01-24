@@ -2,7 +2,7 @@
 //  NextUpCard.swift
 //  checkpoint
 //
-//  Hero card showing vehicle status with elegant car visualization
+//  Data-focused hero card with instrument cluster aesthetic
 //
 
 import SwiftUI
@@ -27,97 +27,94 @@ struct NextUpCard: View {
         return dueMileage - currentMileage
     }
 
+    private var isUrgent: Bool {
+        status == .overdue || status == .dueSoon
+    }
+
+    private var progressValue: Double {
+        guard let dueMileage = service.dueMileage,
+              let lastMileage = service.lastMileage,
+              dueMileage > lastMileage else { return 0 }
+        let total = Double(dueMileage - lastMileage)
+        let elapsed = Double(currentMileage - lastMileage)
+        return min(max(elapsed / total, 0), 1)
+    }
+
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: 0) {
-                // Top section: Service info + Car visualization
-                HStack(alignment: .top, spacing: Spacing.md) {
-                    // Left: Service details
-                    VStack(alignment: .leading, spacing: Spacing.sm) {
-                        // Status pill
-                        statusPill
-
-                        // Service name
-                        Text(service.name)
-                            .font(.system(size: 24, weight: .semibold))
-                            .foregroundStyle(Theme.textPrimary)
-                            .tracking(-0.5)
-
-                        // Due countdown
-                        if let days = daysUntilDue {
-                            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                                Text(days < 0 ? "\(abs(days))" : "\(days)")
-                                    .font(.system(size: 40, weight: .light, design: .rounded))
-                                    .foregroundStyle(status.color)
-                                    .contentTransition(.numericText())
-
-                                Text(days < 0 ? "days\noverdue" : "days\nremaining")
-                                    .font(.system(size: 12, weight: .medium))
-                                    .foregroundStyle(Theme.textSecondary)
-                                    .lineSpacing(2)
-                            }
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                    // Right: Car silhouette
-                    carVisualization
+            VStack(spacing: Spacing.lg) {
+                // Top section: Status pill
+                HStack {
+                    statusPill
+                    Spacer()
                 }
 
-                // Divider
-                Rectangle()
-                    .fill(Theme.borderSubtle.opacity(0.5))
-                    .frame(height: 1)
-                    .padding(.vertical, Spacing.md)
+                // Service name
+                Text(service.name.uppercased())
+                    .font(.instrumentMedium)
+                    .foregroundStyle(Theme.textPrimary)
+                    .tracking(1)
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
-                // Bottom: Mileage info
-                HStack {
-                    // Current mileage
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("CURRENT")
-                            .font(.system(size: 10, weight: .semibold))
+                // Hero countdown number
+                if let days = daysUntilDue {
+                    VStack(spacing: 4) {
+                        Text("\(abs(days))")
+                            .font(.instrumentLarge)
+                            .foregroundStyle(status.color)
+                            .contentTransition(.numericText())
+                            .statusGlow(color: status.color, isActive: isUrgent)
+
+                        Text(days < 0 ? "DAYS OVERDUE" : "DAYS REMAINING")
+                            .font(.instrumentLabel)
                             .foregroundStyle(Theme.textTertiary)
-                            .tracking(1)
-
-                        Text(formatMileage(currentMileage))
-                            .font(.system(size: 15, weight: .medium, design: .monospaced))
-                            .foregroundStyle(Theme.textPrimary)
+                            .tracking(1.5)
                     }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, Spacing.md)
+                }
 
-                    Spacer()
+                // Progress bar section
+                if let dueMileage = service.dueMileage {
+                    VStack(spacing: Spacing.md) {
+                        // Progress track
+                        progressBar
 
-                    // Due mileage
-                    if let dueMileage = service.dueMileage {
-                        VStack(alignment: .trailing, spacing: 2) {
-                            Text("DUE AT")
-                                .font(.system(size: 10, weight: .semibold))
-                                .foregroundStyle(Theme.textTertiary)
-                                .tracking(1)
+                        // Mileage labels
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("CURRENT")
+                                    .font(.instrumentLabel)
+                                    .foregroundStyle(Theme.textTertiary)
 
-                            Text(formatMileage(dueMileage))
-                                .font(.system(size: 15, weight: .medium, design: .monospaced))
-                                .foregroundStyle(status.color)
+                                Text(formatMileage(currentMileage))
+                                    .font(.instrumentMono)
+                                    .foregroundStyle(Theme.textPrimary)
+                            }
+
+                            Spacer()
+
+                            VStack(alignment: .trailing, spacing: 2) {
+                                Text("DUE AT")
+                                    .font(.instrumentLabel)
+                                    .foregroundStyle(Theme.textTertiary)
+
+                                Text(formatMileage(dueMileage))
+                                    .font(.instrumentMono)
+                                    .foregroundStyle(status.color)
+                            }
                         }
                     }
                 }
             }
             .padding(Spacing.lg)
             .background(cardBackground)
-            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: Theme.instrumentCornerRadius, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .strokeBorder(
-                        LinearGradient(
-                            colors: [
-                                Theme.borderSubtle.opacity(0.6),
-                                Theme.borderSubtle.opacity(0.2)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1
-                    )
+                RoundedRectangle(cornerRadius: Theme.instrumentCornerRadius, style: .continuous)
+                    .strokeBorder(Theme.gridLine, lineWidth: 1)
             )
+            .shadow(color: status.color.opacity(isUrgent ? 0.2 : 0), radius: 8, x: 0, y: 0)
             .contentShape(Rectangle())
         }
         .buttonStyle(CardButtonStyle())
@@ -132,67 +129,80 @@ struct NextUpCard: View {
         HStack(spacing: 6) {
             Circle()
                 .fill(status.color)
-                .frame(width: 6, height: 6)
+                .frame(width: 8, height: 8)
+                .pulseAnimation(isActive: isUrgent)
 
             Text(status.label.isEmpty ? "SCHEDULED" : status.label)
-                .font(.system(size: 10, weight: .bold))
-                .tracking(1.2)
+                .font(.instrumentLabel)
+                .foregroundStyle(status.color)
+                .tracking(1.5)
         }
-        .foregroundStyle(status.color)
-        .padding(.horizontal, 10)
-        .padding(.vertical, 5)
-        .background(status.color.opacity(0.12))
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(
+            ZStack {
+                status.color.opacity(0.15)
+
+                // Inner glow effect
+                RoundedRectangle(cornerRadius: 20)
+                    .strokeBorder(status.color.opacity(0.3), lineWidth: 1)
+            }
+        )
         .clipShape(Capsule())
     }
 
-    private var carVisualization: some View {
-        ZStack {
-            // Glow effect behind car
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [
-                            status.color.opacity(0.15),
-                            status.color.opacity(0.05),
-                            Color.clear
-                        ],
-                        center: .center,
-                        startRadius: 20,
-                        endRadius: 60
-                    )
-                )
-                .frame(width: 120, height: 120)
+    private var progressBar: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                // Track background
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Theme.gridLine)
+                    .frame(height: 4)
 
-            // Car icon
-            Image(systemName: "car.side.fill")
-                .font(.system(size: 52, weight: .light))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [
-                            Theme.textPrimary,
-                            Theme.textSecondary
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
+                // Progress fill
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Theme.accent,
+                                status.color
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
                     )
-                )
-                .shadow(color: status.color.opacity(0.3), radius: 10, x: 0, y: 5)
+                    .frame(width: geo.size.width * progressValue, height: 4)
+
+                // End markers
+                HStack {
+                    Circle()
+                        .fill(Theme.accent)
+                        .frame(width: 8, height: 8)
+
+                    Spacer()
+
+                    Circle()
+                        .fill(status.color)
+                        .frame(width: 8, height: 8)
+                }
+            }
         }
-        .frame(width: 120, height: 100)
+        .frame(height: 8)
     }
 
     private var cardBackground: some View {
         ZStack {
-            Theme.backgroundElevated
+            Theme.surfaceInstrument
 
-            // Subtle gradient overlay
+            // Subtle vertical gradient overlay
             LinearGradient(
                 colors: [
-                    Color.white.opacity(0.03),
-                    Color.clear
+                    Color.white.opacity(0.02),
+                    Color.clear,
+                    Color.black.opacity(0.1)
                 ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
+                startPoint: .top,
+                endPoint: .bottom
             )
         }
     }
@@ -211,9 +221,9 @@ struct NextUpCard: View {
 struct CardButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
-            .opacity(configuration.isPressed ? 0.9 : 1.0)
-            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .brightness(configuration.isPressed ? 0.03 : 0)
+            .animation(.easeOut(duration: Theme.animationFast), value: configuration.isPressed)
     }
 }
 
@@ -222,8 +232,7 @@ struct CardButtonStyle: ButtonStyle {
     let services = Service.sampleServices(for: vehicle)
 
     return ZStack {
-        Theme.backgroundPrimary
-            .ignoresSafeArea()
+        AtmosphericBackground()
 
         VStack(spacing: Spacing.lg) {
             ForEach(services.prefix(2), id: \.name) { service in

@@ -2,7 +2,7 @@
 //  EditVehicleView.swift
 //  checkpoint
 //
-//  Form to edit existing vehicles with delete option
+//  Form to edit existing vehicles with delete option and instrument cluster aesthetic
 //
 
 import SwiftUI
@@ -20,8 +20,8 @@ struct EditVehicleView: View {
     @State private var name: String
     @State private var make: String
     @State private var model: String
-    @State private var year: String
-    @State private var currentMileage: String
+    @State private var year: Int?
+    @State private var currentMileage: Int?
     @State private var vin: String
 
     init(vehicle: Vehicle) {
@@ -29,59 +29,124 @@ struct EditVehicleView: View {
         _name = State(initialValue: vehicle.name)
         _make = State(initialValue: vehicle.make)
         _model = State(initialValue: vehicle.model)
-        _year = State(initialValue: String(vehicle.year))
-        _currentMileage = State(initialValue: String(vehicle.currentMileage))
+        _year = State(initialValue: vehicle.year)
+        _currentMileage = State(initialValue: vehicle.currentMileage)
         _vin = State(initialValue: vehicle.vin ?? "")
     }
 
     private var isFormValid: Bool {
-        !make.isEmpty && !model.isEmpty && !year.isEmpty && Int(year) != nil
+        !make.isEmpty && !model.isEmpty && year != nil
     }
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Vehicle Details") {
-                    TextField("Nickname", text: $name)
-                    TextField("Make", text: $make)
-                    TextField("Model", text: $model)
-                    TextField("Year", text: $year)
-                        .keyboardType(.numberPad)
-                }
+            ZStack {
+                AtmosphericBackground()
 
-                Section("Odometer") {
-                    TextField("Current Mileage", text: $currentMileage)
-                        .keyboardType(.numberPad)
-                }
+                ScrollView {
+                    VStack(spacing: Spacing.lg) {
+                        // Vehicle Details Section
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                            InstrumentSectionHeader(title: "Vehicle Details")
 
-                Section {
-                    TextField("VIN", text: $vin)
-                } footer: {
-                    Text("17-character Vehicle Identification Number")
-                }
+                            VStack(spacing: Spacing.md) {
+                                InstrumentTextField(
+                                    label: "Nickname",
+                                    text: $name,
+                                    placeholder: "Optional"
+                                )
 
-                // Delete Section
-                Section {
-                    Button(role: .destructive) {
-                        showDeleteConfirmation = true
-                    } label: {
-                        HStack {
-                            Spacer()
-                            Text("Delete Vehicle")
-                            Spacer()
+                                InstrumentTextField(
+                                    label: "Make",
+                                    text: $make,
+                                    placeholder: "Toyota, Honda, Ford..."
+                                )
+
+                                InstrumentTextField(
+                                    label: "Model",
+                                    text: $model,
+                                    placeholder: "Camry, Civic, F-150..."
+                                )
+
+                                InstrumentNumberField(
+                                    label: "Year",
+                                    value: $year,
+                                    placeholder: "2024"
+                                )
+                            }
+                        }
+
+                        // Odometer Section
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                            InstrumentSectionHeader(title: "Odometer")
+
+                            InstrumentNumberField(
+                                label: "Current Mileage",
+                                value: $currentMileage,
+                                placeholder: "0",
+                                suffix: "mi"
+                            )
+                        }
+
+                        // VIN Section
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                            InstrumentSectionHeader(title: "Identification")
+
+                            VStack(alignment: .leading, spacing: 4) {
+                                InstrumentTextField(
+                                    label: "VIN",
+                                    text: $vin,
+                                    placeholder: "Optional",
+                                    autocapitalization: .characters
+                                )
+
+                                Text("17-character Vehicle Identification Number")
+                                    .font(.caption)
+                                    .foregroundStyle(Theme.textTertiary)
+                                    .padding(.leading, 4)
+                            }
+                        }
+
+                        // Save button
+                        Button("Save Changes") {
+                            saveChanges()
+                        }
+                        .buttonStyle(.primary)
+                        .disabled(!isFormValid)
+                        .padding(.top, Spacing.md)
+
+                        // Delete button
+                        Button {
+                            showDeleteConfirmation = true
+                        } label: {
+                            HStack {
+                                Image(systemName: "trash")
+                                Text("Delete Vehicle")
+                            }
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(Theme.statusOverdue)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: Theme.buttonHeight)
+                            .background(Theme.statusOverdue.opacity(0.1))
+                            .clipShape(RoundedRectangle(cornerRadius: Theme.buttonCornerRadius, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: Theme.buttonCornerRadius, style: .continuous)
+                                    .strokeBorder(Theme.statusOverdue.opacity(0.3), lineWidth: 1)
+                            )
                         }
                     }
+                    .padding(Spacing.screenHorizontal)
+                    .padding(.bottom, Spacing.xxl)
                 }
             }
             .navigationTitle("Edit Vehicle")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { saveChanges() }
-                        .disabled(!isFormValid)
+                        .foregroundStyle(Theme.accent)
                 }
             }
             .confirmationDialog(
@@ -101,8 +166,8 @@ struct EditVehicleView: View {
         vehicle.name = name
         vehicle.make = make
         vehicle.model = model
-        vehicle.year = Int(year) ?? vehicle.year
-        vehicle.currentMileage = Int(currentMileage) ?? vehicle.currentMileage
+        vehicle.year = year ?? vehicle.year
+        vehicle.currentMileage = currentMileage ?? vehicle.currentMileage
         vehicle.vin = vin.isEmpty ? nil : vin
         dismiss()
     }

@@ -41,22 +41,22 @@ struct DashboardView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Background
-                Theme.backgroundPrimary
-                    .ignoresSafeArea()
+                // Atmospheric Background
+                AtmosphericBackground()
 
                 ScrollView {
                     VStack(spacing: 0) {
                         // Header with vehicle info
                         headerSection
                             .padding(.top, Spacing.sm)
+                            .revealAnimation(delay: 0.1)
 
                         // Main content
                         VStack(spacing: Spacing.xl) {
                             // Next Up hero card
                             if let nextUp = nextUpService, let vehicle = currentVehicle {
                                 VStack(alignment: .leading, spacing: Spacing.sm) {
-                                    sectionHeader("Next Up")
+                                    InstrumentSectionHeader(title: "Next Up")
 
                                     NavigationLink(value: nextUp) {
                                         NextUpCard(
@@ -69,34 +69,37 @@ struct DashboardView: View {
                                     }
                                     .buttonStyle(.plain)
                                 }
+                                .revealAnimation(delay: 0.2)
                             }
 
                             // Upcoming services list
                             if !remainingServices.isEmpty, let vehicle = currentVehicle {
                                 VStack(alignment: .leading, spacing: Spacing.sm) {
-                                    sectionHeader("Upcoming")
+                                    InstrumentSectionHeader(title: "Upcoming")
 
                                     VStack(spacing: 0) {
-                                        ForEach(remainingServices, id: \.name) { service in
+                                        ForEach(Array(remainingServices.enumerated()), id: \.element.name) { index, service in
                                             ServiceRow(
                                                 service: service,
                                                 currentMileage: vehicle.currentMileage
                                             ) {
                                                 selectedService = service
                                             }
+                                            .staggeredReveal(index: index, baseDelay: 0.3)
 
                                             if service.name != remainingServices.last?.name {
-                                                Divider()
-                                                    .background(Theme.borderSubtle.opacity(0.3))
+                                                Rectangle()
+                                                    .fill(Theme.gridLine)
+                                                    .frame(height: 1)
                                                     .padding(.leading, 56)
                                             }
                                         }
                                     }
-                                    .background(Theme.backgroundElevated)
+                                    .background(Theme.surfaceInstrument)
                                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                            .strokeBorder(Theme.borderSubtle.opacity(0.2), lineWidth: 1)
+                                            .strokeBorder(Theme.gridLine, lineWidth: 1)
                                     )
                                 }
                             }
@@ -104,8 +107,10 @@ struct DashboardView: View {
                             // Empty states
                             if vehicles.isEmpty {
                                 emptyState
+                                    .revealAnimation(delay: 0.2)
                             } else if vehicleServices.isEmpty && currentVehicle != nil {
                                 noServicesState
+                                    .revealAnimation(delay: 0.2)
                             }
                         }
                         .padding(.horizontal, Spacing.screenHorizontal)
@@ -132,8 +137,9 @@ struct DashboardView: View {
                             .frame(width: 56, height: 56)
                             .background(Theme.accent)
                             .clipShape(Circle())
-                            .shadow(color: Theme.accent.opacity(0.3), radius: 8, x: 0, y: 4)
+                            .shadow(color: Theme.accent.opacity(0.4), radius: 12, x: 0, y: 4)
                     }
+                    .revealAnimation(delay: 0.5)
                     .padding(.trailing, Spacing.screenHorizontal)
                     .padding(.bottom, Spacing.lg)
                 }
@@ -171,51 +177,51 @@ struct DashboardView: View {
         Button {
             showVehiclePicker = true
         } label: {
-            HStack(spacing: 0) {
-                VStack(alignment: .leading, spacing: 2) {
-                    // Vehicle name
-                    Text(currentVehicle?.displayName ?? "Select Vehicle")
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundStyle(Theme.textPrimary)
-                        .tracking(-0.5)
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                HStack(spacing: 0) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        // Vehicle name - Barlow SemiBold, all caps
+                        Text(currentVehicle?.displayName.uppercased() ?? "SELECT VEHICLE")
+                            .font(.instrumentMedium)
+                            .foregroundStyle(Theme.textPrimary)
+                            .tracking(1)
 
-                    // Mileage + model info
-                    if let vehicle = currentVehicle {
-                        HStack(spacing: 6) {
-                            Text(formatMileage(vehicle.currentMileage))
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundStyle(Theme.textSecondary)
+                        // Mileage + model info
+                        if let vehicle = currentVehicle {
+                            HStack(spacing: 8) {
+                                Text(formatMileage(vehicle.currentMileage))
+                                    .font(.instrumentMono)
+                                    .foregroundStyle(Theme.accent)
 
-                            Text("•")
-                                .font(.system(size: 12))
-                                .foregroundStyle(Theme.textTertiary)
+                                Text("•")
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(Theme.textTertiary)
 
-                            Text("\(String(vehicle.year)) \(vehicle.make) \(vehicle.model)")
-                                .font(.system(size: 15, weight: .regular))
-                                .foregroundStyle(Theme.textTertiary)
+                                Text("\(String(vehicle.year)) \(vehicle.make) \(vehicle.model)")
+                                    .font(.instrumentBody)
+                                    .foregroundStyle(Theme.textTertiary)
+                            }
                         }
                     }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Theme.textTertiary)
+                        .padding(.trailing, 4)
                 }
 
-                Spacer()
-
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Theme.textTertiary)
-                    .padding(.trailing, 4)
+                // Thin amber accent line
+                Rectangle()
+                    .fill(Theme.accent.opacity(0.4))
+                    .frame(height: 1)
             }
             .padding(.horizontal, Spacing.screenHorizontal)
             .padding(.vertical, Spacing.md)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-    }
-
-    private func sectionHeader(_ title: String) -> some View {
-        Text(title.uppercased())
-            .font(.system(size: 12, weight: .semibold))
-            .foregroundStyle(Theme.textTertiary)
-            .tracking(1.2)
     }
 
     // MARK: - Empty States

@@ -2,12 +2,52 @@
 //  Typography.swift
 //  checkpoint
 //
-//  Design system typography using SF Pro (system font)
+//  Design system typography using SF Pro (system font) and Barlow (instrument cluster)
 //
 
 import SwiftUI
 
+// MARK: - Custom Font Names
+
+private enum FontName {
+    static let barlowLight = "Barlow-Light"
+    static let barlowRegular = "Barlow-Regular"
+    static let barlowSemiBold = "Barlow-SemiBold"
+}
+
 extension Font {
+    // MARK: - Barlow Instrument Cluster Fonts
+
+    /// 48pt Barlow Light - Hero numbers, large instrument displays
+    static var instrumentLarge: Font {
+        .custom(FontName.barlowLight, size: 48)
+    }
+
+    /// 28pt Barlow SemiBold - Service names, medium displays
+    static var instrumentMedium: Font {
+        .custom(FontName.barlowSemiBold, size: 28)
+    }
+
+    /// 11pt Barlow SemiBold - Labels, all caps with tracking
+    static var instrumentLabel: Font {
+        .custom(FontName.barlowSemiBold, size: 11)
+    }
+
+    /// 14pt Barlow SemiBold - Section headers
+    static var instrumentSection: Font {
+        .custom(FontName.barlowSemiBold, size: 14)
+    }
+
+    /// 17pt Barlow Regular - Body text in instrument style
+    static var instrumentBody: Font {
+        .custom(FontName.barlowRegular, size: 17)
+    }
+
+    /// Monospaced Barlow for mileage displays
+    static var instrumentMono: Font {
+        .custom(FontName.barlowLight, size: 15).monospacedDigit()
+    }
+
     // MARK: - Type Scale (SF Pro - Apple's system font)
 
     /// 34pt Bold - Hero numbers, large displays
@@ -63,6 +103,52 @@ extension Font {
 
 // MARK: - Text Style Modifiers
 
+// MARK: Instrument Cluster Styles
+
+struct InstrumentLargeStyle: ViewModifier {
+    var color: Color = Theme.textPrimary
+
+    func body(content: Content) -> some View {
+        content
+            .font(.instrumentLarge)
+            .foregroundStyle(color)
+            .tracking(-1)
+    }
+}
+
+struct InstrumentMediumStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.instrumentMedium)
+            .foregroundStyle(Theme.textPrimary)
+            .tracking(-0.5)
+    }
+}
+
+struct InstrumentLabelStyle: ViewModifier {
+    var color: Color = Theme.textTertiary
+
+    func body(content: Content) -> some View {
+        content
+            .font(.instrumentLabel)
+            .foregroundStyle(color)
+            .textCase(.uppercase)
+            .tracking(1.5)
+    }
+}
+
+struct InstrumentSectionStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.instrumentSection)
+            .foregroundStyle(Theme.textSecondary)
+            .textCase(.uppercase)
+            .tracking(2)
+    }
+}
+
+// MARK: SF Pro Styles
+
 struct HeadlineLargeStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
@@ -114,6 +200,26 @@ struct CaptionStyle: ViewModifier {
 }
 
 extension View {
+    // MARK: - Instrument Cluster Styles
+
+    func instrumentLargeStyle(color: Color = Theme.textPrimary) -> some View {
+        modifier(InstrumentLargeStyle(color: color))
+    }
+
+    func instrumentMediumStyle() -> some View {
+        modifier(InstrumentMediumStyle())
+    }
+
+    func instrumentLabelStyle(color: Color = Theme.textTertiary) -> some View {
+        modifier(InstrumentLabelStyle(color: color))
+    }
+
+    func instrumentSectionStyle() -> some View {
+        modifier(InstrumentSectionStyle())
+    }
+
+    // MARK: - SF Pro Styles
+
     func headlineLargeStyle() -> some View {
         modifier(HeadlineLargeStyle())
     }

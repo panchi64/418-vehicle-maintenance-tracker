@@ -2,7 +2,7 @@
 //  AddVehicleView.swift
 //  checkpoint
 //
-//  Form to add new vehicles to the app
+//  Form to add new vehicles with instrument cluster aesthetic
 //
 
 import SwiftUI
@@ -16,55 +16,106 @@ struct AddVehicleView: View {
     @State private var name: String = ""
     @State private var make: String = ""
     @State private var model: String = ""
-    @State private var year: String = ""
-    @State private var currentMileage: String = ""
+    @State private var year: Int? = nil
+    @State private var currentMileage: Int? = nil
     @State private var vin: String = ""
 
     // Validation
     private var isFormValid: Bool {
-        !make.isEmpty && !model.isEmpty && !year.isEmpty && Int(year) != nil
+        !make.isEmpty && !model.isEmpty && year != nil
     }
 
     var body: some View {
         NavigationStack {
-            Form {
-                // Basic Info Section
-                Section("Vehicle Details") {
-                    TextField("Nickname (optional)", text: $name)
-                    TextField("Make", text: $make)
-                    TextField("Model", text: $model)
-                    TextField("Year", text: $year)
-                        .keyboardType(.numberPad)
-                }
+            ZStack {
+                AtmosphericBackground()
 
-                // Mileage Section
-                Section("Odometer") {
-                    TextField("Current Mileage", text: $currentMileage)
-                        .keyboardType(.numberPad)
-                }
+                ScrollView {
+                    VStack(spacing: Spacing.lg) {
+                        // Vehicle Details Section
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                            InstrumentSectionHeader(title: "Vehicle Details")
 
-                // Optional VIN Section
-                Section {
-                    TextField("VIN (optional)", text: $vin)
-                } footer: {
-                    Text("17-character Vehicle Identification Number")
+                            VStack(spacing: Spacing.md) {
+                                InstrumentTextField(
+                                    label: "Nickname",
+                                    text: $name,
+                                    placeholder: "Optional"
+                                )
+
+                                InstrumentTextField(
+                                    label: "Make",
+                                    text: $make,
+                                    placeholder: "Toyota, Honda, Ford..."
+                                )
+
+                                InstrumentTextField(
+                                    label: "Model",
+                                    text: $model,
+                                    placeholder: "Camry, Civic, F-150..."
+                                )
+
+                                InstrumentNumberField(
+                                    label: "Year",
+                                    value: $year,
+                                    placeholder: "2024"
+                                )
+                            }
+                        }
+
+                        // Odometer Section
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                            InstrumentSectionHeader(title: "Odometer")
+
+                            InstrumentNumberField(
+                                label: "Current Mileage",
+                                value: $currentMileage,
+                                placeholder: "0",
+                                suffix: "mi"
+                            )
+                        }
+
+                        // VIN Section
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                            InstrumentSectionHeader(title: "Identification")
+
+                            VStack(alignment: .leading, spacing: 4) {
+                                InstrumentTextField(
+                                    label: "VIN",
+                                    text: $vin,
+                                    placeholder: "Optional",
+                                    autocapitalization: .characters
+                                )
+
+                                Text("17-character Vehicle Identification Number")
+                                    .font(.caption)
+                                    .foregroundStyle(Theme.textTertiary)
+                                    .padding(.leading, 4)
+                            }
+                        }
+
+                        // Save button
+                        Button("Add Vehicle") {
+                            saveVehicle()
+                        }
+                        .buttonStyle(.primary)
+                        .disabled(!isFormValid)
+                        .padding(.top, Spacing.md)
+                    }
+                    .padding(Spacing.screenHorizontal)
+                    .padding(.bottom, Spacing.xxl)
                 }
             }
             .navigationTitle("Add Vehicle")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
                     }
                     .foregroundStyle(Theme.accent)
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        saveVehicle()
-                    }
-                    .foregroundStyle(Theme.accent)
-                    .disabled(!isFormValid)
                 }
             }
         }
@@ -75,8 +126,8 @@ struct AddVehicleView: View {
             name: name,
             make: make,
             model: model,
-            year: Int(year) ?? 0,
-            currentMileage: Int(currentMileage) ?? 0,
+            year: year ?? 0,
+            currentMileage: currentMileage ?? 0,
             vin: vin.isEmpty ? nil : vin
         )
         modelContext.insert(vehicle)

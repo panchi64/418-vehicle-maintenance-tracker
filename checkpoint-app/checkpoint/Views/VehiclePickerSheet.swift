@@ -2,7 +2,7 @@
 //  VehiclePickerSheet.swift
 //  checkpoint
 //
-//  Sheet for selecting between vehicles
+//  Sheet for selecting between vehicles with instrument cluster aesthetic
 //
 
 import SwiftUI
@@ -17,62 +17,68 @@ struct VehiclePickerSheet: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                Section {
-                    ForEach(vehicles) { vehicle in
-                        Button {
-                            selectedVehicle = vehicle
-                            dismiss()
-                        } label: {
-                            HStack {
-                                VStack(alignment: .leading, spacing: Spacing.xs) {
-                                    Text(vehicle.displayName)
-                                        .font(.bodyText)
-                                        .foregroundStyle(Theme.textPrimary)
+            ZStack {
+                AtmosphericBackground()
 
-                                    Text("\(vehicle.year) \(vehicle.make) \(vehicle.model)")
-                                        .font(.caption)
-                                        .foregroundStyle(Theme.textSecondary)
-                                }
+                ScrollView {
+                    VStack(spacing: Spacing.md) {
+                        // Vehicles list
+                        VStack(spacing: 0) {
+                            ForEach(vehicles) { vehicle in
+                                vehicleRow(vehicle)
 
-                                Spacer()
-
-                                if selectedVehicle?.id == vehicle.id {
-                                    Image(systemName: "checkmark")
-                                        .font(.system(size: 14, weight: .semibold))
-                                        .foregroundStyle(Theme.accent)
+                                if vehicle.id != vehicles.last?.id {
+                                    Rectangle()
+                                        .fill(Theme.gridLine)
+                                        .frame(height: 1)
+                                        .padding(.leading, Spacing.md)
                                 }
                             }
-                            .contentShape(Rectangle())
                         }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel(vehicle.displayName)
-                        .accessibilityHint(selectedVehicle?.id == vehicle.id ? "Currently selected" : "Double tap to select")
-                    }
-                }
+                        .background(Theme.surfaceInstrument)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .strokeBorder(Theme.gridLine, lineWidth: 1)
+                        )
 
-                Section {
-                    Button {
-                        dismiss()
-                        onAddVehicle()
-                    } label: {
-                        HStack {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 20))
-                                .foregroundStyle(Theme.accent)
+                        // Add vehicle button
+                        Button {
+                            dismiss()
+                            onAddVehicle()
+                        } label: {
+                            HStack(spacing: Spacing.sm) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 20))
+                                    .foregroundStyle(Theme.accent)
 
-                            Text("Add vehicle")
-                                .font(.bodyText)
-                                .foregroundStyle(Theme.accent)
+                                Text("Add Vehicle")
+                                    .font(.instrumentBody)
+                                    .foregroundStyle(Theme.accent)
+
+                                Spacer()
+                            }
+                            .padding(Spacing.md)
+                            .background(Theme.surfaceInstrument)
+                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .strokeBorder(Theme.accent.opacity(0.3), lineWidth: 1)
+                            )
                         }
+                        .buttonStyle(.instrument)
+                        .accessibilityLabel("Add new vehicle")
                     }
-                    .accessibilityLabel("Add new vehicle")
+                    .padding(Spacing.screenHorizontal)
+                    .padding(.top, Spacing.md)
                 }
             }
-            .navigationTitle("Select vehicle")
+            .navigationTitle("Select Vehicle")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
+                ToolbarItem(placement: .confirmationAction) {
                     Button("Done") {
                         dismiss()
                     }
@@ -82,6 +88,64 @@ struct VehiclePickerSheet: View {
         }
         .presentationDetents([.medium])
         .presentationDragIndicator(.visible)
+        .applyGlassBackground()
+    }
+
+    private func vehicleRow(_ vehicle: Vehicle) -> some View {
+        Button {
+            selectedVehicle = vehicle
+            dismiss()
+        } label: {
+            HStack(spacing: Spacing.md) {
+                // Vehicle icon with status
+                ZStack {
+                    Circle()
+                        .fill(Theme.accent.opacity(0.1))
+                        .frame(width: 44, height: 44)
+
+                    Image(systemName: "car.side.fill")
+                        .font(.system(size: 18))
+                        .foregroundStyle(Theme.accent)
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(vehicle.displayName.uppercased())
+                        .font(.custom("Barlow-SemiBold", size: 16))
+                        .foregroundStyle(Theme.textPrimary)
+                        .tracking(0.5)
+
+                    Text("\(String(vehicle.year)) \(vehicle.make) \(vehicle.model)")
+                        .font(.instrumentLabel)
+                        .foregroundStyle(Theme.textTertiary)
+                }
+
+                Spacer()
+
+                if selectedVehicle?.id == vehicle.id {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 22))
+                        .foregroundStyle(Theme.accent)
+                }
+            }
+            .padding(Spacing.md)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(ServiceRowButtonStyle())
+        .accessibilityLabel(vehicle.displayName)
+        .accessibilityHint(selectedVehicle?.id == vehicle.id ? "Currently selected" : "Double tap to select")
+    }
+}
+
+// MARK: - Glass Background Modifier (iOS 26+)
+
+extension View {
+    @ViewBuilder
+    func applyGlassBackground() -> some View {
+        if #available(iOS 26, *) {
+            self.presentationBackground(.regularMaterial)
+        } else {
+            self
+        }
     }
 }
 

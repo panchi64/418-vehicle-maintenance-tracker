@@ -2,7 +2,7 @@
 //  ServiceRow.swift
 //  checkpoint
 //
-//  Compact row for service list with clear visual hierarchy
+//  Compact row for service list with instrument cluster aesthetic
 //
 
 import SwiftUI
@@ -26,68 +26,110 @@ struct ServiceRow: View {
         return dueMileage - currentMileage
     }
 
+    private var isUrgent: Bool {
+        status == .overdue || status == .dueSoon
+    }
+
+    private var progressValue: Double {
+        guard let dueMileage = service.dueMileage,
+              let lastMileage = service.lastMileage,
+              dueMileage > lastMileage else { return 0 }
+        let total = Double(dueMileage - lastMileage)
+        let elapsed = Double(currentMileage - lastMileage)
+        return min(max(elapsed / total, 0), 1)
+    }
+
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: Spacing.md) {
-                // Status indicator - larger and more prominent
-                Circle()
-                    .fill(status.color)
-                    .frame(width: 10, height: 10)
-                    .padding(7)
-                    .background(
-                        Circle()
-                            .fill(status.color.opacity(0.15))
-                    )
+                // Status indicator with pulse animation for urgent
+                ZStack {
+                    Circle()
+                        .fill(status.color.opacity(0.15))
+                        .frame(width: 32, height: 32)
 
-                // Service info - clear hierarchy
-                VStack(alignment: .leading, spacing: 3) {
+                    Circle()
+                        .fill(status.color)
+                        .frame(width: 10, height: 10)
+                        .pulseAnimation(isActive: isUrgent)
+                }
+
+                // Service info with progress
+                VStack(alignment: .leading, spacing: 6) {
+                    // Service name - Barlow
                     Text(service.name)
-                        .font(.system(size: 17, weight: .semibold))
+                        .font(.custom("Barlow-SemiBold", size: 17))
                         .foregroundStyle(Theme.textPrimary)
 
-                    // Due date info
-                    if let days = daysUntilDue {
-                        Text(dueText(days: days))
-                            .font(.system(size: 14, weight: .regular))
-                            .foregroundStyle(status == .overdue ? status.color : Theme.textSecondary)
+                    // Mini progress bar + due info
+                    HStack(spacing: Spacing.sm) {
+                        // Mini progress indicator
+                        if service.dueMileage != nil {
+                            miniProgressBar
+                        }
+
+                        // Due date info
+                        if let days = daysUntilDue {
+                            Text(dueText(days: days))
+                                .font(.instrumentLabel)
+                                .foregroundStyle(status == .overdue ? status.color : Theme.textTertiary)
+                                .tracking(0.5)
+                        }
                     }
                 }
 
                 Spacer()
 
-                // Miles remaining - more prominent
+                // Miles remaining - monospaced
                 if let miles = milesRemaining {
                     Text(formatMiles(miles))
-                        .font(.system(size: 15, weight: .semibold, design: .rounded))
-                        .foregroundStyle(miles < 0 ? status.color : Theme.textPrimary)
+                        .font(.instrumentMono)
+                        .foregroundStyle(miles < 0 ? status.color : Theme.textSecondary)
                 }
 
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(Theme.textTertiary.opacity(0.6))
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Theme.textTertiary.opacity(0.5))
             }
             .padding(.horizontal, Spacing.md)
-            .padding(.vertical, 14)
+            .padding(.vertical, Spacing.listItem)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(ServiceRowButtonStyle())
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(service.name)")
         .accessibilityValue(service.dueDescription ?? "No due date")
         .accessibilityHint("Double tap to view details")
     }
 
+    // MARK: - Subviews
+
+    private var miniProgressBar: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Theme.gridLine)
+                    .frame(height: 3)
+
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(status.color.opacity(0.8))
+                    .frame(width: geo.size.width * progressValue, height: 3)
+            }
+        }
+        .frame(width: 40, height: 3)
+    }
+
     // MARK: - Helpers
 
     private func dueText(days: Int) -> String {
         if days < 0 {
-            return "\(abs(days)) days overdue"
+            return "\(abs(days))D OVERDUE"
         } else if days == 0 {
-            return "Due today"
+            return "TODAY"
         } else if days == 1 {
-            return "Due tomorrow"
+            return "TOMORROW"
         } else {
-            return "In \(days) days"
+            return "IN \(days) DAYS"
         }
     }
 
@@ -95,9 +137,23 @@ struct ServiceRow: View {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         if miles < 0 {
-            return "Overdue"
+            return "OVER"
         }
         return (formatter.string(from: NSNumber(value: miles)) ?? "\(miles)") + " mi"
+    }
+}
+
+// MARK: - Service Row Button Style
+
+struct ServiceRowButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(configuration.isPressed ? Theme.backgroundSubtle : Color.clear)
+            )
+            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+            .animation(.easeOut(duration: Theme.animationFast), value: configuration.isPressed)
     }
 }
 
@@ -106,8 +162,7 @@ struct ServiceRow: View {
     let services = Service.sampleServices(for: vehicle)
 
     return ZStack {
-        Theme.backgroundPrimary
-            .ignoresSafeArea()
+        AtmosphericBackground()
 
         VStack(spacing: 0) {
             ForEach(services, id: \.name) { service in
@@ -119,14 +174,19 @@ struct ServiceRow: View {
                 }
 
                 if service.name != services.last?.name {
-                    Divider()
-                        .background(Theme.borderSubtle.opacity(0.3))
+                    Rectangle()
+                        .fill(Theme.gridLine)
+                        .frame(height: 1)
                         .padding(.leading, 56)
                 }
             }
         }
-        .background(Theme.backgroundElevated)
+        .background(Theme.surfaceInstrument)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .strokeBorder(Theme.gridLine, lineWidth: 1)
+        )
         .screenPadding()
     }
     .preferredColorScheme(.dark)
