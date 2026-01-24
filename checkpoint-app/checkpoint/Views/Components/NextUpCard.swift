@@ -81,12 +81,18 @@ struct NextUpCard: View {
                 // Hero data display - miles first, days as fallback
                 if let miles = milesUntilDue {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("\(abs(miles))")
-                            .font(.brutalistHero)
-                            .foregroundStyle(status.color)
-                            .contentTransition(.numericText())
+                        HStack(alignment: .lastTextBaseline, spacing: 4) {
+                            Text("\(abs(miles))")
+                                .font(.brutalistHero)
+                                .foregroundStyle(status.color)
+                                .contentTransition(.numericText())
 
-                        Text(miles < 0 ? "MILES_OVERDUE" : "MILES_REMAINING")
+                            Text("MI")
+                                .font(.brutalistHeading)
+                                .foregroundStyle(status.color)
+                        }
+
+                        Text(miles < 0 ? "OVERDUE" : "REMAINING")
                             .font(.brutalistLabel)
                             .foregroundStyle(Theme.textTertiary)
                             .tracking(1.5)
@@ -103,12 +109,18 @@ struct NextUpCard: View {
                 } else if let days = daysUntilDue {
                     // Fallback to days for date-only services (e.g., battery check, wiper blades)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("\(abs(days))")
-                            .font(.brutalistHero)
-                            .foregroundStyle(status.color)
-                            .contentTransition(.numericText())
+                        HStack(alignment: .lastTextBaseline, spacing: 4) {
+                            Text("\(abs(days))")
+                                .font(.brutalistHero)
+                                .foregroundStyle(status.color)
+                                .contentTransition(.numericText())
 
-                        Text(days < 0 ? "DAYS_OVERDUE" : "DAYS_REMAINING")
+                            Text("DAYS")
+                                .font(.brutalistHeading)
+                                .foregroundStyle(status.color)
+                        }
+
+                        Text(days < 0 ? "OVERDUE" : "REMAINING")
                             .font(.brutalistLabel)
                             .foregroundStyle(Theme.textTertiary)
                             .tracking(1.5)
