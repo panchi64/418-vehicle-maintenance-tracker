@@ -167,7 +167,7 @@ final class HomeTabTests: XCTestCase {
     // MARK: - Empty State Tests
 
     @MainActor
-    func testEmptyState_WhenNoVehicle() {
+    func testEmptyState_WhenNoVehicle() async {
         // Given - no vehicle in context
         // When - AppState with nil selectedVehicle
         let appState = AppState()

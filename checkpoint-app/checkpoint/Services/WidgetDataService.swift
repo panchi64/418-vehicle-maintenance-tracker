@@ -21,7 +21,8 @@ class WidgetDataService {
     /// - Parameters:
     ///   - vehicle: The current vehicle to display
     ///   - services: The services to display (should be sorted by urgency)
-    func updateWidgetData(vehicleName: String, services: [(name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?)]) {
+    ///   - currentMileage: The vehicle's current mileage for relative calculations
+    func updateWidgetData(vehicleName: String, currentMileage: Int, services: [(name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?)]) {
         guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
             print("Failed to access App Group UserDefaults")
             return
@@ -39,6 +40,7 @@ class WidgetDataService {
 
         let widgetData = WidgetSharedData(
             vehicleName: vehicleName,
+            currentMileage: currentMileage,
             services: Array(sharedServices),
             updatedAt: Date()
         )
@@ -84,7 +86,7 @@ class WidgetDataService {
             )
         }
 
-        updateWidgetData(vehicleName: vehicle.displayName, services: serviceData)
+        updateWidgetData(vehicleName: vehicle.displayName, currentMileage: vehicle.currentMileage, services: serviceData)
     }
 
     /// Clear widget data
@@ -109,6 +111,7 @@ class WidgetDataService {
 /// Data structure matching the widget's expected format
 struct WidgetSharedData: Codable {
     let vehicleName: String
+    let currentMileage: Int
     let services: [SharedService]
     let updatedAt: Date
 

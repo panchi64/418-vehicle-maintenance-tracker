@@ -12,6 +12,10 @@ import WidgetKit
 struct SmallWidgetView: View {
     let entry: ServiceEntry
 
+    private var displayMode: MileageDisplayMode {
+        entry.configuration.mileageDisplayMode
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             // Vehicle name - monospace label
@@ -31,7 +35,7 @@ struct SmallWidgetView: View {
 
                 // Large centered number display with unit to the right
                 VStack(spacing: 2) {
-                    Text("DUE @")
+                    Text(displayLabel(for: service))
                         .font(.widgetLabel)
                         .foregroundStyle(WidgetColors.textTertiary)
                         .tracking(1)
@@ -96,13 +100,35 @@ struct SmallWidgetView: View {
         return formatter.string(from: NSNumber(value: number)) ?? "\(number)"
     }
 
-    /// Get the display value (mileage or days)
+    /// Get the label text based on display mode and service type
+    private func displayLabel(for service: WidgetService) -> String {
+        if service.dueMileage != nil {
+            switch displayMode {
+            case .absolute:
+                return "DUE AT"
+            case .relative:
+                if let dueMileage = service.dueMileage, entry.currentMileage > dueMileage {
+                    return "OVERDUE BY"
+                }
+                return "REMAINING"
+            }
+        }
+        return "DUE IN"
+    }
+
+    /// Get the display value (mileage or days) based on display mode
     private func displayValue(for service: WidgetService) -> String {
         // Priority: dueMileage first, then daysRemaining
         if let dueMileage = service.dueMileage {
-            return formatNumber(dueMileage)
+            switch displayMode {
+            case .absolute:
+                return formatNumber(dueMileage)
+            case .relative:
+                let remaining = dueMileage - entry.currentMileage
+                return formatNumber(abs(remaining))
+            }
         } else if let days = service.daysRemaining {
-            return "\(days)"
+            return "\(abs(days))"
         }
         return "—"
     }

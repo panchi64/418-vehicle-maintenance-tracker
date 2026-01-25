@@ -7,28 +7,33 @@
 
 import WidgetKit
 import SwiftUI
+import AppIntents
 
 // MARK: - Timeline Entry
 
 struct ServiceEntry: TimelineEntry {
     let date: Date
     let vehicleName: String
+    let currentMileage: Int
     let services: [WidgetService]
+    let configuration: CheckpointWidgetConfigurationIntent
 
     static var placeholder: ServiceEntry {
         ServiceEntry(
             date: Date(),
             vehicleName: "My Vehicle",
+            currentMileage: 34500,
             services: [
                 WidgetService(name: "Oil Change", status: .dueSoon, dueDescription: "Due in 5 days", dueMileage: 35000, daysRemaining: 5),
                 WidgetService(name: "Tire Rotation", status: .good, dueDescription: "Due in 30 days", dueMileage: 38000, daysRemaining: 30),
                 WidgetService(name: "Brake Inspection", status: .overdue, dueDescription: "5 days overdue", dueMileage: 32000, daysRemaining: -5)
-            ]
+            ],
+            configuration: CheckpointWidgetConfigurationIntent()
         )
     }
 
     static var empty: ServiceEntry {
-        ServiceEntry(date: Date(), vehicleName: "No Vehicle", services: [])
+        ServiceEntry(date: Date(), vehicleName: "No Vehicle", currentMileage: 0, services: [], configuration: CheckpointWidgetConfigurationIntent())
     }
 }
 
@@ -71,6 +76,7 @@ enum WidgetServiceStatus: String, Codable {
 /// Data structure for sharing between main app and widget via UserDefaults
 struct WidgetData: Codable {
     let vehicleName: String
+    let currentMileage: Int
     let services: [SharedService]
     let updatedAt: Date
 
@@ -81,11 +87,27 @@ struct WidgetData: Codable {
         let dueMileage: Int?        // The mileage when service is due
         let daysRemaining: Int?     // Days until due (negative = overdue)
     }
+
+    /// Provide fallback for older data without currentMileage
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        vehicleName = try container.decode(String.self, forKey: .vehicleName)
+        currentMileage = try container.decodeIfPresent(Int.self, forKey: .currentMileage) ?? 0
+        services = try container.decode([SharedService].self, forKey: .services)
+        updatedAt = try container.decode(Date.self, forKey: .updatedAt)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case vehicleName, currentMileage, services, updatedAt
+    }
 }
 
 // MARK: - Timeline Provider
 
-struct WidgetProvider: TimelineProvider {
+struct WidgetProvider: AppIntentTimelineProvider {
+    typealias Entry = ServiceEntry
+    typealias Intent = CheckpointWidgetConfigurationIntent
+
     // App Group container identifier
     private let appGroupID = "group.com.418-studio.checkpoint.shared"
     private let widgetDataKey = "widgetData"
@@ -94,29 +116,33 @@ struct WidgetProvider: TimelineProvider {
         ServiceEntry.placeholder
     }
 
-    func getSnapshot(in context: Context, completion: @escaping (ServiceEntry) -> Void) {
+    func snapshot(for configuration: CheckpointWidgetConfigurationIntent, in context: Context) async -> ServiceEntry {
         if context.isPreview {
-            completion(ServiceEntry.placeholder)
+            return ServiceEntry.placeholder
         } else {
-            let entry = loadEntry()
-            completion(entry)
+            return loadEntry(configuration: configuration)
         }
     }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<ServiceEntry>) -> Void) {
-        let entry = loadEntry()
+    func timeline(for configuration: CheckpointWidgetConfigurationIntent, in context: Context) async -> Timeline<ServiceEntry> {
+        let entry = loadEntry(configuration: configuration)
 
         // Update every hour
         let nextUpdate = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date()
-        let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
-        completion(timeline)
+        return Timeline(entries: [entry], policy: .after(nextUpdate))
     }
 
-    private func loadEntry() -> ServiceEntry {
+    private func loadEntry(configuration: CheckpointWidgetConfigurationIntent) -> ServiceEntry {
         // Load from UserDefaults in App Group
         guard let userDefaults = UserDefaults(suiteName: appGroupID),
               let data = userDefaults.data(forKey: widgetDataKey) else {
-            return ServiceEntry.empty
+            return ServiceEntry(
+                date: Date(),
+                vehicleName: "No Vehicle",
+                currentMileage: 0,
+                services: [],
+                configuration: configuration
+            )
         }
 
         do {
@@ -135,11 +161,19 @@ struct WidgetProvider: TimelineProvider {
             return ServiceEntry(
                 date: Date(),
                 vehicleName: widgetData.vehicleName,
-                services: widgetServices
+                currentMileage: widgetData.currentMileage,
+                services: widgetServices,
+                configuration: configuration
             )
         } catch {
             print("Widget failed to decode data: \(error)")
-            return ServiceEntry.empty
+            return ServiceEntry(
+                date: Date(),
+                vehicleName: "No Vehicle",
+                currentMileage: 0,
+                services: [],
+                configuration: configuration
+            )
         }
     }
 }

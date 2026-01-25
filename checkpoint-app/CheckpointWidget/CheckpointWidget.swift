@@ -7,6 +7,7 @@
 
 import WidgetKit
 import SwiftUI
+import AppIntents
 
 // MARK: - Widget Entry View
 
@@ -38,7 +39,11 @@ struct CheckpointWidget: Widget {
     let kind: String = "CheckpointWidget"
 
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: WidgetProvider()) { entry in
+        AppIntentConfiguration(
+            kind: kind,
+            intent: CheckpointWidgetConfigurationIntent.self,
+            provider: WidgetProvider()
+        ) { entry in
             CheckpointWidgetEntryView(entry: entry)
                 .containerBackground(for: .widget) {
                     WidgetColors.backgroundPrimary
