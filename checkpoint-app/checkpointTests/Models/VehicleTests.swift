@@ -297,4 +297,74 @@ final class VehicleTests: XCTestCase {
         // Then
         XCTAssertEqual(vehicle.mileageUpdateDescription, "Updated today")
     }
+
+    // MARK: - Should Prompt Mileage Update Tests
+
+    func testShouldPromptMileageUpdate_NeverUpdated() {
+        // Given - vehicle with no mileage update date
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            mileageUpdatedAt: nil
+        )
+
+        // Then - should prompt because never updated
+        XCTAssertTrue(vehicle.shouldPromptMileageUpdate)
+    }
+
+    func testShouldPromptMileageUpdate_UpdatedToday() {
+        // Given - vehicle updated today
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            mileageUpdatedAt: Date()
+        )
+
+        // Then - should not prompt (updated recently)
+        XCTAssertFalse(vehicle.shouldPromptMileageUpdate)
+    }
+
+    func testShouldPromptMileageUpdate_Updated13DaysAgo() {
+        // Given - vehicle updated 13 days ago (just under threshold)
+        let thirteenDaysAgo = Calendar.current.date(byAdding: .day, value: -13, to: Date())!
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            mileageUpdatedAt: thirteenDaysAgo
+        )
+
+        // Then - should not prompt (under 14 day threshold)
+        XCTAssertFalse(vehicle.shouldPromptMileageUpdate)
+    }
+
+    func testShouldPromptMileageUpdate_Updated14DaysAgo() {
+        // Given - vehicle updated exactly 14 days ago (at threshold)
+        let fourteenDaysAgo = Calendar.current.date(byAdding: .day, value: -14, to: Date())!
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            mileageUpdatedAt: fourteenDaysAgo
+        )
+
+        // Then - should prompt (at 14 day threshold)
+        XCTAssertTrue(vehicle.shouldPromptMileageUpdate)
+    }
+
+    func testShouldPromptMileageUpdate_Updated30DaysAgo() {
+        // Given - vehicle updated 30 days ago (well past threshold)
+        let thirtyDaysAgo = Calendar.current.date(byAdding: .day, value: -30, to: Date())!
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            mileageUpdatedAt: thirtyDaysAgo
+        )
+
+        // Then - should prompt (past 14 day threshold)
+        XCTAssertTrue(vehicle.shouldPromptMileageUpdate)
+    }
 }

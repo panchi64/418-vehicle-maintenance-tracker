@@ -62,6 +62,14 @@ final class Vehicle: Identifiable {
         return Calendar.current.dateComponents([.day], from: updatedAt, to: .now).day
     }
 
+    /// Whether to show the mileage update prompt (never updated or 14+ days)
+    var shouldPromptMileageUpdate: Bool {
+        guard let days = daysSinceMileageUpdate else {
+            return true // Never updated
+        }
+        return days >= 14
+    }
+
     /// Formatted string for last mileage update
     var mileageUpdateDescription: String {
         guard let days = daysSinceMileageUpdate else {

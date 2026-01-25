@@ -49,8 +49,8 @@ struct HomeTab: View {
                     .revealAnimation(delay: 0.1)
                 }
 
-                // Quick Mileage Update Card
-                if let vehicle = vehicle {
+                // Quick Mileage Update Card (shown if never updated or 14+ days ago)
+                if let vehicle = vehicle, vehicle.shouldPromptMileageUpdate {
                     QuickMileageUpdateCard(vehicle: vehicle) { newMileage in
                         updateMileage(newMileage, for: vehicle)
                     }
