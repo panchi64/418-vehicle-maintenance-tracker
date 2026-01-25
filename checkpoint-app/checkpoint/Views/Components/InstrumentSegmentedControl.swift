@@ -40,7 +40,8 @@ struct InstrumentSegmentedControl<T: Hashable>: View {
                 .font(.instrumentLabel)
                 .foregroundStyle(isSelected ? Theme.surfaceInstrument : Theme.textSecondary)
                 .tracking(1)
-                .padding(.horizontal, 16)
+                .lineLimit(1)
+                .padding(.horizontal, 12)
                 .padding(.vertical, 12)
                 .frame(maxWidth: .infinity)
                 .background {
