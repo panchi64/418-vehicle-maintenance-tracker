@@ -408,4 +408,18 @@ final class ServiceLogTests: XCTestCase {
         XCTAssertEqual(repairLog.costCategory, .repair)
         XCTAssertEqual(upgradeLog.costCategory, .upgrade)
     }
+
+    // MARK: - Attachments Tests
+
+    func testAttachments_InitiallyEmpty() throws {
+        // Given
+        let log = ServiceLog(
+            performedDate: Date.now,
+            mileageAtService: 30000
+        )
+
+        // Then
+        XCTAssertNotNil(log.attachments)
+        XCTAssertTrue(log.attachments.isEmpty)
+    }
 }

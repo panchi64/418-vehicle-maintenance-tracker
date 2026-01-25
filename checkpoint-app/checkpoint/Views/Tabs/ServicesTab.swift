@@ -15,6 +15,12 @@ struct ServicesTab: View {
 
     @State private var searchText = ""
     @State private var statusFilter: StatusFilter = .all
+    @State private var viewMode: ViewMode = .list
+
+    enum ViewMode: String, CaseIterable {
+        case list = "List"
+        case timeline = "Timeline"
+    }
 
     enum StatusFilter: String, CaseIterable {
         case all = "All"
@@ -82,17 +88,41 @@ struct ServicesTab: View {
                 searchField
                     .revealAnimation(delay: 0.1)
 
-                // Status filter
+                // View mode toggle
                 InstrumentSegmentedControl(
-                    options: StatusFilter.allCases,
-                    selection: $statusFilter
-                ) { filter in
-                    filter.rawValue
+                    options: ViewMode.allCases,
+                    selection: $viewMode
+                ) { mode in
+                    mode.rawValue
                 }
-                .revealAnimation(delay: 0.15)
+                .revealAnimation(delay: 0.12)
 
-                // Upcoming services section
-                if !filteredServices.isEmpty, let vehicle = vehicle {
+                // Status filter (only show in list mode)
+                if viewMode == .list {
+                    InstrumentSegmentedControl(
+                        options: StatusFilter.allCases,
+                        selection: $statusFilter
+                    ) { filter in
+                        filter.rawValue
+                    }
+                    .revealAnimation(delay: 0.15)
+                }
+
+                // Content based on view mode
+                if viewMode == .timeline, let vehicle = vehicle {
+                    MaintenanceTimeline(
+                        services: vehicleServices,
+                        serviceLogs: vehicleServiceLogs,
+                        vehicle: vehicle,
+                        onServiceTap: { service in
+                            appState.selectedService = service
+                        }
+                    )
+                    .revealAnimation(delay: 0.2)
+                }
+
+                // Upcoming services section (list mode)
+                if viewMode == .list && !filteredServices.isEmpty, let vehicle = vehicle {
                     VStack(alignment: .leading, spacing: Spacing.sm) {
                         InstrumentSectionHeader(title: "Scheduled Services")
 
@@ -127,8 +157,8 @@ struct ServicesTab: View {
                     }
                 }
 
-                // Service History section
-                if !filteredLogs.isEmpty {
+                // Service History section (list mode only)
+                if viewMode == .list && !filteredLogs.isEmpty {
                     VStack(alignment: .leading, spacing: Spacing.sm) {
                         InstrumentSectionHeader(title: "Service History")
 
@@ -153,8 +183,8 @@ struct ServicesTab: View {
                     }
                 }
 
-                // Empty state
-                if filteredServices.isEmpty && filteredLogs.isEmpty && vehicle != nil {
+                // Empty state (only in list mode when no content)
+                if viewMode == .list && filteredServices.isEmpty && filteredLogs.isEmpty && vehicle != nil {
                     emptyState
                         .revealAnimation(delay: 0.2)
                 }

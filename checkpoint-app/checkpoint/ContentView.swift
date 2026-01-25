@@ -30,7 +30,7 @@ struct ContentView: View {
                 .padding(.top, Spacing.sm)
                 .revealAnimation(delay: 0.1)
 
-                // Tab content - simple view switch
+                // Tab content - simple view switch with swipe navigation
                 Group {
                     switch appState.selectedTab {
                     case .home:
@@ -42,6 +42,24 @@ struct ContentView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .gesture(
+                    DragGesture(minimumDistance: 50)
+                        .onEnded { value in
+                            let horizontalSwipe = value.translation.width
+                            let verticalSwipe = abs(value.translation.height)
+
+                            // Only trigger if horizontal movement dominates
+                            guard abs(horizontalSwipe) > verticalSwipe else { return }
+
+                            if horizontalSwipe > 0 {
+                                // Swipe right -> go to previous tab
+                                appState.selectedTab = appState.selectedTab.previous
+                            } else {
+                                // Swipe left -> go to next tab
+                                appState.selectedTab = appState.selectedTab.next
+                            }
+                        }
+                )
 
                 // Custom tab bar - pinned to bottom
                 BrutalistTabBar(selectedTab: $appState.selectedTab)

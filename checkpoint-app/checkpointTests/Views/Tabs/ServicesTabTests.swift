@@ -20,7 +20,7 @@ final class ServicesTabTests: XCTestCase {
         super.setUp()
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         modelContainer = try! ModelContainer(
-            for: Vehicle.self, Service.self, ServiceLog.self,
+            for: Vehicle.self, Service.self, ServiceLog.self, ServiceAttachment.self,
             configurations: config
         )
         modelContext = modelContainer.mainContext
@@ -30,6 +30,24 @@ final class ServicesTabTests: XCTestCase {
         modelContainer = nil
         modelContext = nil
         super.tearDown()
+    }
+
+    // MARK: - View Mode Tests
+
+    func testViewMode_AllCases() {
+        // Given
+        let allModes = ServicesTab.ViewMode.allCases
+
+        // Then
+        XCTAssertEqual(allModes.count, 2)
+        XCTAssertTrue(allModes.contains(.list))
+        XCTAssertTrue(allModes.contains(.timeline))
+    }
+
+    func testViewMode_RawValues() {
+        // Then
+        XCTAssertEqual(ServicesTab.ViewMode.list.rawValue, "List")
+        XCTAssertEqual(ServicesTab.ViewMode.timeline.rawValue, "Timeline")
     }
 
     // MARK: - Status Filter Tests

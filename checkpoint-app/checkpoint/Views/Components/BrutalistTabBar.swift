@@ -36,6 +36,11 @@ struct BrutalistTabBar: View {
             selectedTab = tab
         } label: {
             VStack(spacing: 0) {
+                // Highlight indicator at top
+                Rectangle()
+                    .fill(isSelected ? Theme.accent : Color.clear)
+                    .frame(height: 2)
+
                 Spacer()
 
                 Text(tab.title)
@@ -44,11 +49,6 @@ struct BrutalistTabBar: View {
                     .tracking(2)
 
                 Spacer()
-
-                // Underline indicator at bottom
-                Rectangle()
-                    .fill(isSelected ? Theme.accent : Color.clear)
-                    .frame(height: 2)
             }
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())

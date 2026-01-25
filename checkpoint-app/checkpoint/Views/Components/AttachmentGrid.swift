@@ -1,0 +1,123 @@
+//
+//  AttachmentGrid.swift
+//  checkpoint
+//
+//  Horizontal scrolling grid of attachment thumbnails
+//
+
+import SwiftUI
+import QuickLook
+
+struct AttachmentGrid: View {
+    let attachments: [ServiceAttachment]
+    @State private var selectedAttachment: ServiceAttachment?
+    @State private var previewURL: URL?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            if !attachments.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: Spacing.sm) {
+                        ForEach(attachments) { attachment in
+                            Button {
+                                openAttachment(attachment)
+                            } label: {
+                                AttachmentThumbnail(attachment: attachment)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
+        }
+        .quickLookPreview($previewURL)
+    }
+
+    private func openAttachment(_ attachment: ServiceAttachment) {
+        guard let data = attachment.data else { return }
+
+        // Create temporary file for QuickLook
+        let tempDir = FileManager.default.temporaryDirectory
+        let fileExtension = attachment.isPDF ? "pdf" : "jpg"
+        let tempURL = tempDir.appendingPathComponent("\(attachment.id).\(fileExtension)")
+
+        do {
+            try data.write(to: tempURL)
+            previewURL = tempURL
+        } catch {
+            print("Error writing temp file for preview: \(error)")
+        }
+    }
+}
+
+// MARK: - Attachment Section for Detail Views
+
+struct AttachmentSection: View {
+    let attachments: [ServiceAttachment]
+
+    var body: some View {
+        if !attachments.isEmpty {
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                InstrumentSectionHeader(title: "Attachments")
+
+                VStack(alignment: .leading, spacing: Spacing.sm) {
+                    HStack(spacing: Spacing.xs) {
+                        Image(systemName: "paperclip")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(Theme.textTertiary)
+
+                        Text("\(attachments.count) attachment\(attachments.count == 1 ? "" : "s")")
+                            .font(.brutalistSecondary)
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+
+                    AttachmentGrid(attachments: attachments)
+                }
+                .padding(Spacing.md)
+                .background(Theme.surfaceInstrument)
+                .overlay(
+                    Rectangle()
+                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+                )
+            }
+        }
+    }
+}
+
+#Preview {
+    let vehicle = Vehicle(
+        name: "Test Car",
+        make: "Toyota",
+        model: "Camry",
+        year: 2022,
+        currentMileage: 32500
+    )
+
+    let log = ServiceLog(
+        vehicle: vehicle,
+        performedDate: Date.now,
+        mileageAtService: 32500
+    )
+
+    // Create sample attachments
+    let sampleImage = UIImage(systemName: "car.fill")!
+    let attachment1 = ServiceAttachment.fromImage(sampleImage, fileName: "receipt.jpg", serviceLog: log)!
+    let attachment2 = ServiceAttachment(
+        serviceLog: log,
+        data: Data(),
+        fileName: "invoice.pdf",
+        mimeType: "application/pdf"
+    )
+
+    return ZStack {
+        AtmosphericBackground()
+
+        ScrollView {
+            VStack(spacing: Spacing.lg) {
+                AttachmentSection(attachments: [attachment1, attachment2])
+            }
+            .padding(Spacing.screenHorizontal)
+        }
+    }
+    .preferredColorScheme(.dark)
+}

@@ -20,6 +20,9 @@ final class ServiceLog: Identifiable {
     var notes: String?
     var createdAt: Date
 
+    @Relationship(deleteRule: .cascade, inverse: \ServiceAttachment.serviceLog)
+    var attachments: [ServiceAttachment] = []
+
     var formattedCost: String? {
         guard let cost = cost else { return nil }
         return Formatters.currency.string(from: cost as NSDecimalNumber)

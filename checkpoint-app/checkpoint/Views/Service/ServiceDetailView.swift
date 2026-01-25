@@ -38,6 +38,12 @@ struct ServiceDetailView: View {
                 if !service.logs.isEmpty {
                     historySection
                 }
+
+                // Attachments from most recent log
+                if let latestLog = service.logs.sorted(by: { $0.performedDate > $1.performedDate }).first,
+                   !latestLog.attachments.isEmpty {
+                    AttachmentSection(attachments: latestLog.attachments)
+                }
             }
             .padding(.horizontal, Spacing.screenHorizontal)
             .padding(.vertical, Spacing.lg)
@@ -245,6 +251,7 @@ struct MarkServiceDoneSheet: View {
     @State private var mileage: Int? = nil
     @State private var cost: String = ""
     @State private var notes: String = ""
+    @State private var pendingAttachments: [AttachmentPicker.AttachmentData] = []
 
     var body: some View {
         NavigationStack {
@@ -291,6 +298,13 @@ struct MarkServiceDoneSheet: View {
                             )
                         }
 
+                        // Attachments Section
+                        VStack(alignment: .leading, spacing: Spacing.md) {
+                            InstrumentSectionHeader(title: "Attachments")
+
+                            AttachmentPicker(attachments: $pendingAttachments)
+                        }
+
                         Spacer(minLength: Spacing.xl)
                     }
                     .padding(.horizontal, Spacing.screenHorizontal)
@@ -329,6 +343,17 @@ struct MarkServiceDoneSheet: View {
             notes: notes.isEmpty ? nil : notes
         )
         modelContext.insert(log)
+
+        // Save attachments
+        for attachmentData in pendingAttachments {
+            let attachment = ServiceAttachment(
+                serviceLog: log,
+                data: attachmentData.data,
+                fileName: attachmentData.fileName,
+                mimeType: attachmentData.mimeType
+            )
+            modelContext.insert(attachment)
+        }
 
         // Update service with new due dates
         service.lastPerformed = performedDate

@@ -33,6 +33,7 @@ struct AddServiceView: View {
     @State private var cost: String = ""
     @State private var costCategory: CostCategory = .maintenance
     @State private var notes: String = ""
+    @State private var pendingAttachments: [AttachmentPicker.AttachmentData] = []
 
     // Schedule mode fields
     @State private var dueDate: Date = Date().addingTimeInterval(86400 * 30) // 30 days from now
@@ -181,6 +182,12 @@ struct AddServiceView: View {
                 minHeight: 80
             )
         }
+
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            InstrumentSectionHeader(title: "Attachments")
+
+            AttachmentPicker(attachments: $pendingAttachments)
+        }
     }
 
     // MARK: - Schedule Mode Fields
@@ -272,6 +279,17 @@ struct AddServiceView: View {
             notes: notes.isEmpty ? nil : notes
         )
         modelContext.insert(log)
+
+        // Save attachments
+        for attachmentData in pendingAttachments {
+            let attachment = ServiceAttachment(
+                serviceLog: log,
+                data: attachmentData.data,
+                fileName: attachmentData.fileName,
+                mimeType: attachmentData.mimeType
+            )
+            modelContext.insert(attachment)
+        }
 
         // Update vehicle mileage if service mileage is higher
         if mileage > vehicle.currentMileage {

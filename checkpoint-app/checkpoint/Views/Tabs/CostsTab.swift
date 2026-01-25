@@ -202,6 +202,26 @@ struct CostsTab: View {
         return monthlyTotals.map { ($0.key, $0.value) }.sorted { $0.0 > $1.0 }
     }
 
+    // MARK: - Yearly Roundup
+
+    private var currentYear: Int {
+        Calendar.current.component(.year, from: Date.now)
+    }
+
+    private var previousYearLogs: [ServiceLog] {
+        guard let vehicle = vehicle else { return [] }
+        let calendar = Calendar.current
+        let previousYear = currentYear - 1
+
+        return serviceLogs
+            .filter { $0.vehicle?.id == vehicle.id }
+            .filter { calendar.component(.year, from: $0.performedDate) == previousYear }
+    }
+
+    private var shouldShowYearlyRoundup: Bool {
+        (periodFilter == .year || periodFilter == .all) && !logsWithCosts.isEmpty
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: Spacing.lg) {
@@ -258,10 +278,24 @@ struct CostsTab: View {
                         .revealAnimation(delay: 0.22)
                 }
 
+                // Yearly roundup card (show for Year and All periods)
+                if shouldShowYearlyRoundup {
+                    VStack(alignment: .leading, spacing: Spacing.sm) {
+                        InstrumentSectionHeader(title: "Yearly Summary")
+
+                        YearlyCostRoundupCard(
+                            year: currentYear,
+                            serviceLogs: vehicleServiceLogs,
+                            previousYearLogs: previousYearLogs
+                        )
+                    }
+                    .revealAnimation(delay: 0.24)
+                }
+
                 // Monthly summary (show for Year and All periods)
                 if (periodFilter == .year || periodFilter == .all) && monthlyBreakdown.count > 1 {
                     monthlySummarySection
-                        .revealAnimation(delay: 0.24)
+                        .revealAnimation(delay: 0.26)
                 }
 
                 // Expense list

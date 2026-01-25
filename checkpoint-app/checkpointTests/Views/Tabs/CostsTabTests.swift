@@ -20,7 +20,7 @@ final class CostsTabTests: XCTestCase {
         super.setUp()
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         modelContainer = try! ModelContainer(
-            for: Vehicle.self, Service.self, ServiceLog.self,
+            for: Vehicle.self, Service.self, ServiceLog.self, ServiceAttachment.self,
             configurations: config
         )
         modelContext = modelContainer.mainContext
@@ -449,6 +449,52 @@ final class CostsTabTests: XCTestCase {
         // Then
         XCTAssertEqual(totalCost, Decimal(100.00))
         XCTAssertEqual(maintenancePercentage, 50.0, accuracy: 0.1)
+    }
+
+    // MARK: - Yearly Roundup Visibility Tests
+
+    func testYearlyRoundup_ShouldShowForYearFilter() {
+        // Given
+        let periodFilter = CostsTab.PeriodFilter.year
+
+        // When
+        let shouldShow = periodFilter == .year || periodFilter == .all
+
+        // Then
+        XCTAssertTrue(shouldShow)
+    }
+
+    func testYearlyRoundup_ShouldShowForAllFilter() {
+        // Given
+        let periodFilter = CostsTab.PeriodFilter.all
+
+        // When
+        let shouldShow = periodFilter == .year || periodFilter == .all
+
+        // Then
+        XCTAssertTrue(shouldShow)
+    }
+
+    func testYearlyRoundup_ShouldNotShowForMonthFilter() {
+        // Given
+        let periodFilter = CostsTab.PeriodFilter.month
+
+        // When
+        let shouldShow = periodFilter == .year || periodFilter == .all
+
+        // Then
+        XCTAssertFalse(shouldShow)
+    }
+
+    func testYearlyRoundup_ShouldNotShowForYTDFilter() {
+        // Given
+        let periodFilter = CostsTab.PeriodFilter.ytd
+
+        // When
+        let shouldShow = periodFilter == .year || periodFilter == .all
+
+        // Then
+        XCTAssertFalse(shouldShow)
     }
 
     // MARK: - Monthly Breakdown Tests

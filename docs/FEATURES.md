@@ -24,7 +24,7 @@
 | "Next Up" card       | High     | ✅     | Single most important upcoming service, smart prioritization: overdue > safety-critical > mileage-based |
 | Quick-add button     | High     | ✅     | One tap to log a service                                                                                |
 | Vehicle selector     | High     | ✅     | Easy switching for multi-vehicle households                                                             |
-| Maintenance timeline | Medium   | ⏳     | Visual timeline of past/upcoming services                                                               |
+| Maintenance timeline | Medium   | ✅     | Visual timeline of past/upcoming services                                                               |
 
 ---
 
@@ -36,7 +36,7 @@
 | Receipt/invoice OCR    | High     | ⏳     | Photo → auto-populate fields (date, cost, services)  |
 | Service type presets   | High     | ✅     | Oil change, tire rotation, brakes, etc.              |
 | Custom service types   | Medium   | ✅     | User-defined categories                              |
-| Attachments            | Medium   | ⏳     | Photos, PDFs, receipts                               |
+| Attachments            | Medium   | ✅     | Photos, PDFs, receipts                               |
 | Mechanic/shop tracking | Low      | ⏳     | Build history with specific shops                    |
 
 #### On-Device Document Intelligence
