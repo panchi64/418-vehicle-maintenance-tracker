@@ -11,6 +11,7 @@ import SwiftData
 struct ServiceDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Query private var services: [Service]
 
     @Bindable var service: Service
     let vehicle: Vehicle
@@ -60,10 +61,10 @@ struct ServiceDetailView: View {
                 }
             }
         }
-        .sheet(isPresented: $showEditSheet) {
+        .sheet(isPresented: $showEditSheet, onDismiss: updateAppIcon) {
             EditServiceView(service: service, vehicle: vehicle)
         }
-        .sheet(isPresented: $showMarkDoneSheet) {
+        .sheet(isPresented: $showMarkDoneSheet, onDismiss: updateAppIcon) {
             MarkServiceDoneSheet(service: service, vehicle: vehicle)
         }
     }
@@ -223,6 +224,12 @@ struct ServiceDetailView: View {
         .padding(Spacing.md)
     }
 
+    // MARK: - App Icon
+
+    private func updateAppIcon() {
+        AppIconService.shared.updateIcon(for: vehicle, services: services)
+    }
+
     // MARK: - Helpers
 
     private func formatDate(_ date: Date) -> String {
@@ -243,6 +250,7 @@ struct ServiceDetailView: View {
 struct MarkServiceDoneSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Query private var services: [Service]
 
     let service: Service
     let vehicle: Vehicle
@@ -387,7 +395,12 @@ struct MarkServiceDoneSheet: View {
             modelContext.insert(snapshot)
         }
 
+        updateAppIcon()
         dismiss()
+    }
+
+    private func updateAppIcon() {
+        AppIconService.shared.updateIcon(for: vehicle, services: services)
     }
 }
 

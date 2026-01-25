@@ -11,6 +11,7 @@ import SwiftData
 struct EditServiceView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Query private var services: [Service]
 
     @Bindable var service: Service
     let vehicle: Vehicle
@@ -127,6 +128,7 @@ struct EditServiceView: View {
         service.intervalMonths = Int(intervalMonths)
         service.intervalMiles = Int(intervalMiles)
 
+        updateAppIcon()
         dismiss()
     }
 
@@ -134,7 +136,14 @@ struct EditServiceView: View {
 
     private func deleteService() {
         modelContext.delete(service)
+        updateAppIcon()
         dismiss()
+    }
+
+    // MARK: - App Icon
+
+    private func updateAppIcon() {
+        AppIconService.shared.updateIcon(for: vehicle, services: services)
     }
 }
 

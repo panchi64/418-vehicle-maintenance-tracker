@@ -295,6 +295,9 @@ struct HomeTab: View {
             )
             modelContext.insert(snapshot)
         }
+
+        // Update app icon based on new mileage affecting service status
+        AppIconService.shared.updateIcon(for: vehicle, services: services)
     }
 }
 

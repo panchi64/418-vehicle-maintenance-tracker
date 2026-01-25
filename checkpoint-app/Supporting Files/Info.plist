@@ -8,5 +8,32 @@
         <string>Barlow-Regular.ttf</string>
         <string>Barlow-SemiBold.ttf</string>
     </array>
+    <key>CFBundleIcons</key>
+    <dict>
+        <key>CFBundlePrimaryIcon</key>
+        <dict>
+            <key>CFBundleIconFiles</key>
+            <array>
+                <string>AppIcon</string>
+            </array>
+        </dict>
+        <key>CFBundleAlternateIcons</key>
+        <dict>
+            <key>AppIcon-Advisory</key>
+            <dict>
+                <key>CFBundleIconFiles</key>
+                <array>
+                    <string>AppIcon-Advisory</string>
+                </array>
+            </dict>
+            <key>AppIcon-Critical</key>
+            <dict>
+                <key>CFBundleIconFiles</key>
+                <array>
+                    <string>AppIcon-Critical</string>
+                </array>
+            </dict>
+        </dict>
+    </dict>
 </dict>
 </plist>

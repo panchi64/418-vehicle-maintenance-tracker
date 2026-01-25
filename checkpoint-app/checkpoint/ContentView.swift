@@ -10,9 +10,12 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
     @Query private var vehicles: [Vehicle]
+    @Query private var services: [Service]
 
     @State private var appState = AppState()
+    @State private var showMileageUpdate = false
 
     private var currentVehicle: Vehicle? {
         appState.selectedVehicle ?? vehicles.first
@@ -24,9 +27,15 @@ struct ContentView: View {
 
             VStack(spacing: 0) {
                 // Persistent vehicle header
-                VehicleHeader(vehicle: currentVehicle) {
-                    appState.showVehiclePicker = true
-                }
+                VehicleHeader(
+                    vehicle: currentVehicle,
+                    onTap: {
+                        appState.showVehiclePicker = true
+                    },
+                    onMileageTap: {
+                        showMileageUpdate = true
+                    }
+                )
                 .padding(.top, Spacing.sm)
                 .revealAnimation(delay: 0.1)
 
@@ -88,6 +97,17 @@ struct ContentView: View {
             }
             // Seed sample data if needed
             seedSampleDataIfNeeded()
+            // Update app icon based on service status
+            updateAppIcon()
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active || newPhase == .background {
+                // Update app icon when entering foreground or going to background
+                updateAppIcon()
+            }
+        }
+        .onChange(of: appState.selectedVehicle) { _, _ in
+            updateAppIcon()
         }
         .onChange(of: vehicles) { _, newVehicles in
             // Update selection if current vehicle was deleted
@@ -123,6 +143,47 @@ struct ContentView: View {
                 EditVehicleView(vehicle: vehicle)
             }
         }
+        .sheet(isPresented: $showMileageUpdate) {
+            if let vehicle = currentVehicle {
+                MileageUpdateSheet(
+                    currentMileage: vehicle.currentMileage,
+                    onSave: { newMileage in
+                        updateMileage(newMileage, for: vehicle)
+                    }
+                )
+                .presentationDetents([.height(280)])
+            }
+        }
+    }
+
+    // MARK: - App Icon
+
+    private func updateAppIcon() {
+        AppIconService.shared.updateIcon(for: currentVehicle, services: services)
+    }
+
+    // MARK: - Mileage Update
+
+    private func updateMileage(_ newMileage: Int, for vehicle: Vehicle) {
+        vehicle.currentMileage = newMileage
+        vehicle.mileageUpdatedAt = .now
+
+        let shouldCreateSnapshot = !MileageSnapshot.hasSnapshotToday(
+            snapshots: vehicle.mileageSnapshots
+        )
+
+        if shouldCreateSnapshot {
+            let snapshot = MileageSnapshot(
+                vehicle: vehicle,
+                mileage: newMileage,
+                recordedAt: .now,
+                source: .manual
+            )
+            modelContext.insert(snapshot)
+        }
+
+        // Update app icon based on new mileage affecting service status
+        updateAppIcon()
     }
 
     // MARK: - Sample Data

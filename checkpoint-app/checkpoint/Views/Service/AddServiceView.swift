@@ -17,6 +17,7 @@ enum ServiceMode: String, CaseIterable {
 struct AddServiceView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Query private var services: [Service]
 
     let vehicle: Vehicle
 
@@ -241,7 +242,14 @@ struct AddServiceView: View {
         } else {
             saveScheduledService()
         }
+        updateAppIcon()
         dismiss()
+    }
+
+    // MARK: - App Icon
+
+    private func updateAppIcon() {
+        AppIconService.shared.updateIcon(for: vehicle, services: services)
     }
 
     private func saveLoggedService() {
