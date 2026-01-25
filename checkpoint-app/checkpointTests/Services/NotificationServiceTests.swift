@@ -51,6 +51,13 @@ final class NotificationServiceTests: XCTestCase {
         XCTAssertEqual(NotificationService.snoozeActionID, "SNOOZE")
     }
 
+    // MARK: - Default Reminder Intervals Tests
+
+    func testDefaultReminderIntervalsContainsExpectedValues() {
+        let intervals = NotificationService.defaultReminderIntervals
+        XCTAssertEqual(intervals, [30, 7, 1, 0], "Default intervals should be 30, 7, 1, and 0 days before due")
+    }
+
     // MARK: - Schedule Notification Tests
 
     func testScheduleNotificationReturnsNilForNilDueDate() {
@@ -124,7 +131,7 @@ final class NotificationServiceTests: XCTestCase {
         serviceItem.vehicle = vehicle
         let notificationID = "test-notification-id"
 
-        // When
+        // When - legacy method defaults to daysBeforeDue: 0 (due date)
         let request = service.buildNotificationRequest(
             for: serviceItem,
             vehicle: vehicle,
@@ -132,12 +139,116 @@ final class NotificationServiceTests: XCTestCase {
             dueDate: futureDate
         )
 
-        // Then
+        // Then - on due date, title should say "Due Today"
         XCTAssertEqual(request.identifier, notificationID)
-        XCTAssertEqual(request.content.title, "Oil Change Due")
+        XCTAssertEqual(request.content.title, "Oil Change Due Today")
         XCTAssertEqual(request.content.body, "My Car - Oil Change is due for maintenance")
         XCTAssertEqual(request.content.categoryIdentifier, NotificationService.serviceDueCategoryID)
         XCTAssertNotNil(request.content.sound)
+    }
+
+    func testBuildNotificationRequestContent30DaysBefore() {
+        // Given
+        let vehicle = Vehicle(name: "My Car", make: "Toyota", model: "Camry", year: 2022)
+        let notificationDate = Calendar.current.date(byAdding: .day, value: 30, to: Date())!
+        let serviceItem = Service(name: "Oil Change")
+        serviceItem.vehicle = vehicle
+
+        // When
+        let request = service.buildNotificationRequest(
+            for: serviceItem,
+            vehicle: vehicle,
+            notificationID: "test-id",
+            notificationDate: notificationDate,
+            daysBeforeDue: 30
+        )
+
+        // Then
+        XCTAssertEqual(request.content.title, "Oil Change Coming Up")
+        XCTAssertEqual(request.content.body, "My Car - Oil Change is due in 30 days")
+    }
+
+    func testBuildNotificationRequestContent7DaysBefore() {
+        // Given
+        let vehicle = Vehicle(name: "My Car", make: "Toyota", model: "Camry", year: 2022)
+        let notificationDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
+        let serviceItem = Service(name: "Oil Change")
+        serviceItem.vehicle = vehicle
+
+        // When
+        let request = service.buildNotificationRequest(
+            for: serviceItem,
+            vehicle: vehicle,
+            notificationID: "test-id",
+            notificationDate: notificationDate,
+            daysBeforeDue: 7
+        )
+
+        // Then
+        XCTAssertEqual(request.content.title, "Oil Change Due in 1 Week")
+        XCTAssertEqual(request.content.body, "My Car - Oil Change is due in 7 days")
+    }
+
+    func testBuildNotificationRequestContent1DayBefore() {
+        // Given
+        let vehicle = Vehicle(name: "My Car", make: "Toyota", model: "Camry", year: 2022)
+        let notificationDate = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
+        let serviceItem = Service(name: "Oil Change")
+        serviceItem.vehicle = vehicle
+
+        // When
+        let request = service.buildNotificationRequest(
+            for: serviceItem,
+            vehicle: vehicle,
+            notificationID: "test-id",
+            notificationDate: notificationDate,
+            daysBeforeDue: 1
+        )
+
+        // Then
+        XCTAssertEqual(request.content.title, "Oil Change Due Tomorrow")
+        XCTAssertEqual(request.content.body, "My Car - Oil Change is due tomorrow")
+    }
+
+    func testBuildNotificationRequestContentOnDueDate() {
+        // Given
+        let vehicle = Vehicle(name: "My Car", make: "Toyota", model: "Camry", year: 2022)
+        let notificationDate = Calendar.current.date(byAdding: .day, value: 0, to: Date())!
+        let serviceItem = Service(name: "Oil Change")
+        serviceItem.vehicle = vehicle
+
+        // When
+        let request = service.buildNotificationRequest(
+            for: serviceItem,
+            vehicle: vehicle,
+            notificationID: "test-id",
+            notificationDate: notificationDate,
+            daysBeforeDue: 0
+        )
+
+        // Then
+        XCTAssertEqual(request.content.title, "Oil Change Due Today")
+        XCTAssertEqual(request.content.body, "My Car - Oil Change is due for maintenance")
+    }
+
+    func testBuildNotificationRequestUserInfoIncludesDaysBeforeDue() {
+        // Given
+        let vehicle = Vehicle(name: "My Car", make: "Toyota", model: "Camry", year: 2022)
+        let notificationDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
+        let serviceItem = Service(name: "Oil Change")
+        serviceItem.vehicle = vehicle
+
+        // When
+        let request = service.buildNotificationRequest(
+            for: serviceItem,
+            vehicle: vehicle,
+            notificationID: "test-id",
+            notificationDate: notificationDate,
+            daysBeforeDue: 7
+        )
+
+        // Then
+        XCTAssertEqual(request.content.userInfo["daysBeforeDue"] as? Int, 7)
     }
 
     func testBuildNotificationRequestUserInfoContainsIDs() {
@@ -449,16 +560,17 @@ final class NotificationServiceTests: XCTestCase {
         serviceItem.vehicle = vehicle
         let notificationID = "test-notification-id"
 
-        // When
+        // When - using 7 days before due for a clear message
         let request = service.buildNotificationRequest(
             for: serviceItem,
             vehicle: vehicle,
             notificationID: notificationID,
-            dueDate: futureDate
+            notificationDate: futureDate,
+            daysBeforeDue: 7
         )
 
         // Then - Vehicle without custom name should use "year make model"
-        XCTAssertEqual(request.content.body, "2023 Honda Civic - Oil Change is due for maintenance")
+        XCTAssertEqual(request.content.body, "2023 Honda Civic - Oil Change is due in 7 days")
     }
 
     func testBuildNotificationRequestUsesCustomVehicleName() {
@@ -469,15 +581,34 @@ final class NotificationServiceTests: XCTestCase {
         serviceItem.vehicle = vehicle
         let notificationID = "test-notification-id"
 
-        // When
+        // When - using 7 days before due for a clear message
         let request = service.buildNotificationRequest(
             for: serviceItem,
             vehicle: vehicle,
             notificationID: notificationID,
-            dueDate: futureDate
+            notificationDate: futureDate,
+            daysBeforeDue: 7
         )
 
         // Then
-        XCTAssertEqual(request.content.body, "Family Car - Brake Check is due for maintenance")
+        XCTAssertEqual(request.content.body, "Family Car - Brake Check is due in 7 days")
+    }
+
+    // MARK: - Cancel All Notifications for Base ID Tests
+
+    func testCancelAllNotificationsForBaseID() {
+        // Given
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
+        let futureDate = Calendar.current.date(byAdding: .day, value: 45, to: Date())!
+        let serviceItem = Service(name: "Oil Change", dueDate: futureDate)
+        serviceItem.vehicle = vehicle
+
+        let baseID = service.scheduleNotification(for: serviceItem, vehicle: vehicle)!
+
+        // When - should not crash
+        service.cancelAllNotifications(baseID: baseID)
+
+        // Then - verify method completes without error
+        XCTAssertTrue(true, "Cancel all notifications for base ID should complete without error")
     }
 }

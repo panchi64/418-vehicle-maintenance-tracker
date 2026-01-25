@@ -23,6 +23,21 @@ class NotificationService: NSObject, ObservableObject {
     static let markDoneActionID = "MARK_DONE"
     static let snoozeActionID = "SNOOZE"
 
+    // Default reminder intervals (days before due date)
+    // These are the advance warning intervals users receive
+    static let defaultReminderIntervals: [Int] = [30, 7, 1, 0]  // 30 days, 7 days, 1 day, due date
+
+    // Notification ID suffixes for each interval
+    private static func intervalSuffix(for days: Int) -> String {
+        switch days {
+        case 0: return "-due"
+        case 1: return "-1d"
+        case 7: return "-7d"
+        case 30: return "-30d"
+        default: return "-\(days)d"
+        }
+    }
+
     private override init() {
         super.init()
         setupNotificationCategories()
@@ -88,27 +103,47 @@ class NotificationService: NSObject, ObservableObject {
     ///   - service: The service to build notification for
     ///   - vehicle: The vehicle the service belongs to
     ///   - notificationID: The identifier to use for the notification
-    ///   - dueDate: The due date for the notification
+    ///   - notificationDate: The date to send the notification
+    ///   - daysBeforeDue: How many days before the due date (0 = due date, used for message)
     /// - Returns: The notification request
     func buildNotificationRequest(
         for service: Service,
         vehicle: Vehicle,
         notificationID: String,
-        dueDate: Date
+        notificationDate: Date,
+        daysBeforeDue: Int = 0
     ) -> UNNotificationRequest {
-        // Create content
+        // Create content with appropriate messaging based on timing
         let content = UNMutableNotificationContent()
-        content.title = "\(service.name) Due"
-        content.body = "\(vehicle.displayName) - \(service.name) is due for maintenance"
+
+        switch daysBeforeDue {
+        case 0:
+            content.title = "\(service.name) Due Today"
+            content.body = "\(vehicle.displayName) - \(service.name) is due for maintenance"
+        case 1:
+            content.title = "\(service.name) Due Tomorrow"
+            content.body = "\(vehicle.displayName) - \(service.name) is due tomorrow"
+        case 7:
+            content.title = "\(service.name) Due in 1 Week"
+            content.body = "\(vehicle.displayName) - \(service.name) is due in 7 days"
+        case 30:
+            content.title = "\(service.name) Coming Up"
+            content.body = "\(vehicle.displayName) - \(service.name) is due in 30 days"
+        default:
+            content.title = "\(service.name) Reminder"
+            content.body = "\(vehicle.displayName) - \(service.name) is due in \(daysBeforeDue) days"
+        }
+
         content.sound = .default
         content.categoryIdentifier = Self.serviceDueCategoryID
         content.userInfo = [
             "serviceID": service.id.uuidString,
-            "vehicleID": vehicle.id.uuidString
+            "vehicleID": vehicle.id.uuidString,
+            "daysBeforeDue": daysBeforeDue
         ]
 
-        // Create trigger for 9 AM on the due date
-        var dateComponents = Calendar.current.dateComponents([.year, .month, .day], from: dueDate)
+        // Create trigger for 9 AM on the notification date
+        var dateComponents = Calendar.current.dateComponents([.year, .month, .day], from: notificationDate)
         dateComponents.hour = 9
         dateComponents.minute = 0
 
@@ -118,6 +153,28 @@ class NotificationService: NSObject, ObservableObject {
             identifier: notificationID,
             content: content,
             trigger: trigger
+        )
+    }
+
+    /// Build a notification request for a service (legacy method for backwards compatibility)
+    /// - Parameters:
+    ///   - service: The service to build notification for
+    ///   - vehicle: The vehicle the service belongs to
+    ///   - notificationID: The identifier to use for the notification
+    ///   - dueDate: The due date for the notification
+    /// - Returns: The notification request
+    func buildNotificationRequest(
+        for service: Service,
+        vehicle: Vehicle,
+        notificationID: String,
+        dueDate: Date
+    ) -> UNNotificationRequest {
+        buildNotificationRequest(
+            for: service,
+            vehicle: vehicle,
+            notificationID: notificationID,
+            notificationDate: dueDate,
+            daysBeforeDue: 0
         )
     }
 
@@ -157,11 +214,11 @@ class NotificationService: NSObject, ObservableObject {
         )
     }
 
-    /// Schedule a notification for a service's due date
+    /// Schedule notifications for a service at default intervals (30, 7, 1 day before + due date)
     /// - Parameters:
     ///   - service: The service to schedule notification for
     ///   - vehicle: The vehicle the service belongs to
-    /// - Returns: The notification identifier if scheduled successfully
+    /// - Returns: The base notification identifier if scheduled successfully
     @discardableResult
     func scheduleNotification(for service: Service, vehicle: Vehicle) -> String? {
         guard let dueDate = service.dueDate else { return nil }
@@ -169,30 +226,43 @@ class NotificationService: NSObject, ObservableObject {
         // Don't schedule if due date is in the past
         guard dueDate > Date() else { return nil }
 
-        // Cancel existing notification if any
+        // Cancel existing notifications if any
         if let existingID = service.notificationID {
-            cancelNotification(id: existingID)
+            cancelAllNotifications(baseID: existingID)
         }
 
-        // Create unique identifier
-        let notificationID = "service-\(UUID().uuidString)"
+        // Create unique base identifier
+        let baseNotificationID = "service-\(UUID().uuidString)"
 
-        // Build and schedule the request
-        let request = buildNotificationRequest(
-            for: service,
-            vehicle: vehicle,
-            notificationID: notificationID,
-            dueDate: dueDate
-        )
+        // Schedule notifications for each interval
+        for daysBeforeDue in Self.defaultReminderIntervals {
+            guard let notificationDate = Calendar.current.date(
+                byAdding: .day,
+                value: -daysBeforeDue,
+                to: dueDate
+            ) else { continue }
 
-        // Schedule
-        notificationCenter.add(request) { error in
-            if let error = error {
-                print("Failed to schedule notification: \(error)")
+            // Only schedule if the notification date is in the future
+            guard notificationDate > Date() else { continue }
+
+            let notificationID = baseNotificationID + Self.intervalSuffix(for: daysBeforeDue)
+
+            let request = buildNotificationRequest(
+                for: service,
+                vehicle: vehicle,
+                notificationID: notificationID,
+                notificationDate: notificationDate,
+                daysBeforeDue: daysBeforeDue
+            )
+
+            notificationCenter.add(request) { error in
+                if let error = error {
+                    print("Failed to schedule notification (\(daysBeforeDue)d before): \(error)")
+                }
             }
         }
 
-        return notificationID
+        return baseNotificationID
     }
 
     /// Schedule notifications for all services of a vehicle
@@ -206,15 +276,22 @@ class NotificationService: NSObject, ObservableObject {
 
     // MARK: - Cancel Notifications
 
-    /// Cancel a specific notification
+    /// Cancel a specific notification by its exact ID
     func cancelNotification(id: String) {
         notificationCenter.removePendingNotificationRequests(withIdentifiers: [id])
+    }
+
+    /// Cancel all notifications for a base ID (including all interval variants)
+    func cancelAllNotifications(baseID: String) {
+        // Generate all possible notification IDs for this base ID
+        let allIDs = Self.defaultReminderIntervals.map { baseID + Self.intervalSuffix(for: $0) }
+        notificationCenter.removePendingNotificationRequests(withIdentifiers: allIDs)
     }
 
     /// Cancel all notifications for a service
     func cancelNotification(for service: Service) {
         if let notificationID = service.notificationID {
-            cancelNotification(id: notificationID)
+            cancelAllNotifications(baseID: notificationID)
             service.notificationID = nil
         }
     }

@@ -11,7 +11,7 @@
 - **The app comes to you** — Widgets, notifications, Siri — surface info where the user already is
 - **Zero-friction data entry** — Minimize manual typing at every opportunity. Smart defaults, OCR, confirm/correct flows.
 - **Modern, native feel** — Leverage iOS 26 Liquid Glass for a premium UI
-- **One-time purchase** — No subscriptions (major differentiator)
+- **Free with premium options** — Full-featured free app, no ads. Pay only for advanced features or server-based capabilities.
 
 ---
 
@@ -42,11 +42,18 @@
 
 > Use Apple's on-device ML to parse receipts, invoices, and service documents — then contextually prompt the user based on what was detected.
 
+**Two tiers of OCR:**
+
+| Tier | What's Included | Pricing |
+| ---- | --------------- | ------- |
+| **Basic OCR** | On-device Vision framework, text extraction, manual field selection | Free |
+| **AI-Powered OCR** | Server-side smart extraction, automatic field detection, high accuracy parsing | Subscription |
+
 | Feature                | Priority | Notes                                                   |
 | ---------------------- | -------- | ------------------------------------------------------- |
 | Document scanning      | High     | VisionKit for clean document capture                    |
-| On-device OCR          | High     | Vision framework, no cloud dependency                   |
-| Smart field extraction | High     | Date, vendor, line items, costs, vehicle info           |
+| On-device OCR          | High     | Vision framework, no cloud dependency (Free)            |
+| Smart field extraction | High     | Date, vendor, line items, costs, vehicle info (Subscription) |
 | Contextual prompts     | High     | Different flows for service receipts vs parts purchases |
 | Confidence indicators  | Low      | Show extraction confidence, let user correct errors     |
 
@@ -77,7 +84,7 @@
 | Manual schedule entry        | High     | ✅     | User inputs their own schedule from their owner's manual        |
 | Mileage-based reminders      | High     | ✅     | "500 miles remaining" (primary method)                          |
 | Date-based reminders         | High     | ✅     | Fallback for non-mileage services (battery, wipers)             |
-| Smart notifications          | High     | ✅     | Configurable timing (1 week before, day of, etc.)               |
+| Smart notifications          | High     | ✅     | Default intervals: 30 days, 7 days, 1 day before due (configurable) |
 | Service clustering           | High     | ⏳     | Bundle nearby services into one visit                           |
 | Seasonal reminders           | Medium   | ⏳     | Location + season → contextual alerts                           |
 | Severe vs normal schedules   | Medium   | ⏳     | Different intervals based on driving conditions                 |
@@ -163,6 +170,7 @@
 | Estimated current mileage        | High     | Extrapolate between manual entries                    |
 | Predictive service notifications | High     | "Oil change due in ~500 miles based on your driving"  |
 | Dashboard OCR                    | High     | Photo of odometer → extract mileage automatically     |
+| Biweekly mileage prompts         | Medium   | Gentle reminder to update mileage for better estimates |
 | Recency weighting                | Medium   | Recent behavior weighted more heavily (habits change) |
 
 #### Dashboard OCR for Mileage Capture
@@ -367,6 +375,7 @@
 | Home Screen Widget           | High     | ✅     | Small/medium widget showing "Next Up" service  |
 | Lock Screen Widget           | High     | ✅     | Glance at what's due without unlocking         |
 | One-tap notification actions | High     | ✅     | "Did you do your oil change?" → Yes/No buttons |
+| Apple Watch Complication     | High     | ⏳     | Quick mileage logging, glanceable "Next Up"    |
 | Siri integration             | Medium   | ⏳     | "Hey Siri, what's due on my car?"              |
 | CarPlay Dashboard Widget     | Medium   | ✅     | iOS 16+ compact widget on CarPlay home screen  |
 
@@ -400,12 +409,79 @@
 - Shares data via existing App Groups infrastructure
 - Only displays when vehicle is in park (safety requirement)
 
+**Apple Watch Complication:**
+
+| Element     | Content                                              |
+| ----------- | ---------------------------------------------------- |
+| Display     | "Next Up" service with miles/days remaining          |
+| Interaction | Tap to open Watch app for quick mileage logging      |
+| Families    | Circular, corner, inline (adapt to complication size)|
+
+**Watch app features:**
+- Quick mileage update (crown scroll or keypad entry)
+- View next 2-3 upcoming services
+- Mark service as complete (syncs to iPhone)
+- Minimal UI — optimized for glances, not data entry
+
 **One-tap notification flow:**
 
 1. Service becomes due (not before — no premature pings)
 2. Notification: "Oil change is due. Did you get it done?"
 3. User taps "Yes" → Log screen with fields pre-filled, just confirm
 4. User taps "Not yet" → Snooze options (remind in a week, remind in a month)
+
+---
+
+### 11. Premium Features (Subscription)
+
+> Server-based features that require ongoing infrastructure. These justify a subscription model.
+
+| Feature              | Priority | Status | Notes                                                    |
+| -------------------- | -------- | ------ | -------------------------------------------------------- |
+| AI-Powered OCR       | High     | ⏳     | Server-side smart extraction for receipts/invoices       |
+| Account Sync         | High     | ⏳     | Cross-device sync via cloud infrastructure               |
+| Family Sharing       | High     | ⏳     | Multi-user access to shared vehicles across Apple IDs    |
+| Desktop/Web Access   | Medium   | 🔮     | Browser-based access for professionals (future)          |
+
+#### Family Sharing
+
+> Share vehicles seamlessly with family members, each with their own Apple ID.
+
+**How it works:**
+- Primary user invites family members via Apple ID or email
+- Invited users see shared vehicles in their app alongside personal vehicles
+- Changes sync both ways — any family member can log services
+- Each user maintains their own notification preferences
+
+**Use cases:**
+- Couples sharing household vehicles
+- Parents tracking teen driver's car maintenance
+- Families coordinating who handles which service
+
+**Implementation notes:**
+- Uses CloudKit sharing for real-time sync
+- Requires subscription for all users who want write access
+- Read-only access could be free tier (view family vehicles but can't edit)
+
+#### Desktop/Web Access
+
+> Browser-based access for users who want to manage vehicle data from a computer.
+
+**Target users:**
+- Professionals managing multiple vehicles
+- Users who prefer keyboard for data entry
+- Anyone who wants to view/export data on a larger screen
+
+**Scope:**
+- View all vehicles and service history
+- Log new services
+- Generate and download reports
+- Manage schedules and reminders
+
+**Implementation notes:**
+- Requires backend infrastructure (database, API, web app)
+- Syncs with mobile app via cloud
+- Future feature (v2.0+) — focus on mobile-first for now
 
 ---
 
@@ -499,10 +575,11 @@
 | ------------------------- | -------------------------------------------------- |
 | Manual data entry fatigue | OCR receipts, VIN decode, smart mileage estimation |
 | Outdated UI               | Native iOS 26 Liquid Glass                         |
-| Subscription burnout      | One-time purchase                                  |
+| Subscription burnout      | Free full-featured app, no ads, pay only for extras |
 | No smart scheduling       | Factory intervals pre-loaded                       |
 | Abandoned apps            | Commitment to long-term support                    |
 | No "what's next" view     | Dashboard prioritizes urgency                      |
+| Limited Apple integration | Widgets, CarPlay, Apple Watch, Siri                |
 
 ---
 
@@ -623,10 +700,44 @@ If a vehicle isn't in our database yet:
 
 ---
 
+## Version Roadmap
+
+> Planned feature additions by version. Core v1.0 features are tracked throughout this document.
+
+### v1.5 — EV Support
+
+| Feature                     | Priority | Notes                                                    |
+| --------------------------- | -------- | -------------------------------------------------------- |
+| EV maintenance schedules    | High     | Battery health checks, coolant, brake fluid, cabin filter |
+| Battery health tracking     | High     | Log degradation over time, charging habits               |
+| Software update logging     | Medium   | Track OTA updates as "maintenance" events                |
+| Regenerative braking notes  | Medium   | Affects brake pad wear — surface in brake service reminders |
+| EV-specific service types   | High     | Presets: battery conditioning, thermal system, HV cables |
+
+**Why v1.5:**
+- EV market growing rapidly ($18B → $84B by 2033)
+- Existing apps built for ICE vehicles — EV owners underserved
+- Different maintenance cadence — worth dedicated attention after core app is solid
+
+### v2.0 — Education & DIY
+
+| Feature                     | Priority | Notes                                                    |
+| --------------------------- | -------- | -------------------------------------------------------- |
+| First-time owner education  | High     | "What does this mean?" explainers for every service type |
+| Video tutorial links        | Medium   | Curated YouTube links for common DIY tasks               |
+| Gamified progress           | Low      | "First Oil Change Complete!" badges — subtle, not annoying |
+| DIY mechanic mode           | High     | Parts inventory, projects in progress, tool checklists   |
+| DIY vs shop cost comparison | Medium   | Show savings from doing it yourself                      |
+
+**Why v2.0:**
+- 40% of Gen Z learns car care from YouTube — education gap is real
+- 47% of car owners now do basic DIY maintenance
+- Requires significant new UI/UX work — better to nail basics first
+
+---
+
 ## Open Questions
 
-- [ ] What's the MVP feature set for v1.0?
-- [ ] Pricing strategy — what's the right one-time price point?
 - [ ] How accurate can on-device OCR/ML be for mechanic invoices?
 - [ ] Should we support iPad / Mac via Catalyst?
 - [ ] How many vehicles should we seed the schedule database with before launch?
@@ -644,4 +755,4 @@ If a vehicle isn't in our database yet:
 
 ---
 
-_Last updated: January 2026_
+_Last updated: January 2026_ (Refined with market research insights)
