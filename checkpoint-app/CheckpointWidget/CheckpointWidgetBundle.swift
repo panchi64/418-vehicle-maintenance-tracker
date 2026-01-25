@@ -2,7 +2,7 @@
 //  CheckpointWidgetBundle.swift
 //  CheckpointWidget
 //
-//  Widget bundle entry point
+//  Widget bundle entry point for Checkpoint
 //
 
 import WidgetKit

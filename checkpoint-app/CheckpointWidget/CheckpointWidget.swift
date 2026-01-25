@@ -2,33 +2,13 @@
 //  CheckpointWidget.swift
 //  CheckpointWidget
 //
-//  Widget configuration and entry view
+//  Widget configuration for Checkpoint vehicle maintenance tracker
 //
 
 import WidgetKit
 import SwiftUI
 
-struct CheckpointWidget: Widget {
-    let kind: String = "CheckpointWidget"
-
-    var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: WidgetProvider()) { entry in
-            CheckpointWidgetEntryView(entry: entry)
-                .containerBackground(WidgetColors.backgroundPrimary, for: .widget)
-        }
-        .configurationDisplayName("Checkpoint")
-        .description("View upcoming vehicle maintenance")
-        .supportedFamilies([
-            .systemSmall,
-            .systemMedium,
-            .accessoryInline,
-            .accessoryCircular,
-            .accessoryRectangular
-        ])
-    }
-}
-
-// MARK: - Entry View
+// MARK: - Widget Entry View
 
 struct CheckpointWidgetEntryView: View {
     @Environment(\.widgetFamily) var family
@@ -52,39 +32,58 @@ struct CheckpointWidgetEntryView: View {
     }
 }
 
+// MARK: - Widget Configuration
+
+struct CheckpointWidget: Widget {
+    let kind: String = "CheckpointWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: WidgetProvider()) { entry in
+            CheckpointWidgetEntryView(entry: entry)
+                .containerBackground(for: .widget) {
+                    WidgetColors.background
+                }
+        }
+        .configurationDisplayName("Checkpoint")
+        .description("See your upcoming vehicle maintenance at a glance.")
+        .supportedFamilies([
+            .systemSmall,
+            .systemMedium,
+            .accessoryInline,
+            .accessoryCircular,
+            .accessoryRectangular
+        ])
+    }
+}
+
 // MARK: - Previews
 
-#Preview(as: .systemSmall) {
+#Preview("Small", as: .systemSmall) {
     CheckpointWidget()
 } timeline: {
     ServiceEntry.placeholder
-    ServiceEntry.empty
 }
 
-#Preview(as: .systemMedium) {
+#Preview("Medium", as: .systemMedium) {
     CheckpointWidget()
 } timeline: {
     ServiceEntry.placeholder
-    ServiceEntry.empty
 }
 
-#Preview(as: .accessoryInline) {
+#Preview("Inline", as: .accessoryInline) {
     CheckpointWidget()
 } timeline: {
     ServiceEntry.placeholder
-    ServiceEntry.empty
 }
 
-#Preview(as: .accessoryCircular) {
+#Preview("Circular", as: .accessoryCircular) {
     CheckpointWidget()
 } timeline: {
     ServiceEntry.placeholder
-    ServiceEntry.empty
 }
 
-#Preview(as: .accessoryRectangular) {
+#Preview("Rectangular", as: .accessoryRectangular) {
     CheckpointWidget()
 } timeline: {
     ServiceEntry.placeholder
-    ServiceEntry.empty
 }

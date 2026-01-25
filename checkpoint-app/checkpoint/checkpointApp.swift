@@ -12,7 +12,7 @@ import UserNotifications
 @main
 struct checkpointApp: App {
     // App Group identifier for sharing data with widget
-    private static let appGroupID = "group.com.checkpoint.shared"
+    private static let appGroupID = "group.com.418-studio.checkpoint.shared"
 
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([

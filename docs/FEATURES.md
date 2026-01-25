@@ -37,7 +37,6 @@
 | Service type presets   | High     | ✅     | Oil change, tire rotation, brakes, etc.              |
 | Custom service types   | Medium   | ✅     | User-defined categories                              |
 | Attachments            | Medium   | ✅     | Photos, PDFs, receipts                               |
-| Mechanic/shop tracking | Low      | ⏳     | Build history with specific shops                    |
 
 #### On-Device Document Intelligence
 
@@ -369,6 +368,7 @@
 | Lock Screen Widget           | High     | ✅     | Glance at what's due without unlocking         |
 | One-tap notification actions | High     | ✅     | "Did you do your oil change?" → Yes/No buttons |
 | Siri integration             | Medium   | ⏳     | "Hey Siri, what's due on my car?"              |
+| CarPlay Dashboard Widget     | Medium   | ✅     | iOS 16+ compact widget on CarPlay home screen  |
 
 **Notification philosophy:**
 
@@ -385,6 +385,20 @@
 | Medium      | Next 2-3 upcoming services                            |
 | Large       | Mini dashboard with vehicle photo + upcoming services |
 | Lock Screen | Compact: icon + "Oil change: 500 mi"                  |
+
+**CarPlay Dashboard Widget:**
+
+| Element     | Content                                              |
+| ----------- | ---------------------------------------------------- |
+| Display     | Single "Next Up" service with miles/days remaining   |
+| Update      | Refreshes when main app data changes                 |
+| Interaction | Read-only (tap opens main app when parked)           |
+
+**Implementation notes:**
+- Requires `com.apple.developer.carplay-driving-task` entitlement
+- Uses WidgetKit with CarPlay widget family (`.accessoryRectangular`)
+- Shares data via existing App Groups infrastructure
+- Only displays when vehicle is in park (safety requirement)
 
 **One-tap notification flow:**
 

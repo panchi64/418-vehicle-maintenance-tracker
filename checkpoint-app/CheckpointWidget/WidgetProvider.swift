@@ -83,7 +83,7 @@ struct WidgetData: Codable {
 
 struct WidgetProvider: TimelineProvider {
     // App Group container identifier
-    private let appGroupID = "group.com.checkpoint.shared"
+    private let appGroupID = "group.com.418-studio.checkpoint.shared"
     private let widgetDataKey = "widgetData"
 
     func placeholder(in context: Context) -> ServiceEntry {
