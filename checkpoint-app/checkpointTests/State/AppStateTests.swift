@@ -11,24 +11,7 @@ import SwiftData
 
 final class AppStateTests: XCTestCase {
 
-    // MARK: - Initialization Tests
-
-    @MainActor
-    func testAppState_DefaultInitialization() {
-        // Given/When
-        let appState = AppState()
-
-        // Then
-        XCTAssertNil(appState.selectedVehicle)
-        XCTAssertEqual(appState.selectedTab, .home)
-        XCTAssertFalse(appState.showVehiclePicker)
-        XCTAssertFalse(appState.showAddVehicle)
-        XCTAssertFalse(appState.showAddService)
-        XCTAssertFalse(appState.showEditVehicle)
-        XCTAssertNil(appState.selectedService)
-    }
-
-    // MARK: - Tab Enum Tests
+    // MARK: - Tab Enum Tests (No MainActor needed)
 
     func testTab_AllCases() {
         // Then
@@ -52,10 +35,27 @@ final class AppStateTests: XCTestCase {
         XCTAssertEqual(AppState.Tab.costs.icon, "dollarsign.circle.fill")
     }
 
+    // MARK: - Initialization Tests
+
+    @MainActor
+    func testAppState_DefaultInitialization() async {
+        // Given/When
+        let appState = AppState()
+
+        // Then
+        XCTAssertNil(appState.selectedVehicle)
+        XCTAssertEqual(appState.selectedTab, .home)
+        XCTAssertFalse(appState.showVehiclePicker)
+        XCTAssertFalse(appState.showAddVehicle)
+        XCTAssertFalse(appState.showAddService)
+        XCTAssertFalse(appState.showEditVehicle)
+        XCTAssertNil(appState.selectedService)
+    }
+
     // MARK: - Navigation Method Tests
 
     @MainActor
-    func testNavigateToServices() {
+    func testNavigateToServices() async {
         // Given
         let appState = AppState()
         XCTAssertEqual(appState.selectedTab, .home)
@@ -68,7 +68,7 @@ final class AppStateTests: XCTestCase {
     }
 
     @MainActor
-    func testNavigateToCosts() {
+    func testNavigateToCosts() async {
         // Given
         let appState = AppState()
         XCTAssertEqual(appState.selectedTab, .home)
@@ -81,7 +81,7 @@ final class AppStateTests: XCTestCase {
     }
 
     @MainActor
-    func testNavigateToHome() {
+    func testNavigateToHome() async {
         // Given
         let appState = AppState()
         appState.selectedTab = .costs
@@ -97,7 +97,7 @@ final class AppStateTests: XCTestCase {
     // MARK: - Sheet State Tests
 
     @MainActor
-    func testSheetStates_CanBeToggled() {
+    func testSheetStates_CanBeToggled() async {
         // Given
         let appState = AppState()
 
@@ -129,8 +129,15 @@ final class AppStateTests: XCTestCase {
     // MARK: - Vehicle Selection Tests
 
     @MainActor
-    func testSelectedVehicle_CanBeSet() {
+    func testSelectedVehicle_CanBeSet() async throws {
         // Given
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let modelContainer = try ModelContainer(
+            for: Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self, ServiceAttachment.self, ServicePreset.self,
+            configurations: config
+        )
+        let modelContext = modelContainer.mainContext
+
         let appState = AppState()
         let vehicle = Vehicle(
             name: "Test Car",
@@ -138,6 +145,7 @@ final class AppStateTests: XCTestCase {
             model: "Camry",
             year: 2022
         )
+        modelContext.insert(vehicle)
 
         // When
         appState.selectedVehicle = vehicle
@@ -145,11 +153,21 @@ final class AppStateTests: XCTestCase {
         // Then
         XCTAssertNotNil(appState.selectedVehicle)
         XCTAssertEqual(appState.selectedVehicle?.name, "Test Car")
+
+        // Cleanup: clear reference before test ends to avoid deallocation crash
+        appState.selectedVehicle = nil
     }
 
     @MainActor
-    func testSelectedVehicle_CanBeCleared() {
+    func testSelectedVehicle_CanBeCleared() async throws {
         // Given
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let modelContainer = try ModelContainer(
+            for: Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self, ServiceAttachment.self, ServicePreset.self,
+            configurations: config
+        )
+        let modelContext = modelContainer.mainContext
+
         let appState = AppState()
         let vehicle = Vehicle(
             name: "Test Car",
@@ -157,6 +175,7 @@ final class AppStateTests: XCTestCase {
             model: "Camry",
             year: 2022
         )
+        modelContext.insert(vehicle)
         appState.selectedVehicle = vehicle
 
         // When
@@ -169,7 +188,7 @@ final class AppStateTests: XCTestCase {
     // MARK: - Tab Selection Tests
 
     @MainActor
-    func testSelectedTab_CanBeChanged() {
+    func testSelectedTab_CanBeChanged() async {
         // Given
         let appState = AppState()
 

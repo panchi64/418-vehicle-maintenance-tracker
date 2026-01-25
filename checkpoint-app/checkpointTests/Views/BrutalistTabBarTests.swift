@@ -94,8 +94,8 @@ final class BrutalistTabBarTests: XCTestCase {
 
         // Then
         XCTAssertEqual(allTabs.count, 3)
-        XCTAssertEqual(allTabs[0], .home)
-        XCTAssertEqual(allTabs[1], .services)
+        XCTAssertEqual(allTabs[0], .services)
+        XCTAssertEqual(allTabs[1], .home)
         XCTAssertEqual(allTabs[2], .costs)
     }
 
