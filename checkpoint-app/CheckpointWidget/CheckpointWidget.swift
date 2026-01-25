@@ -41,7 +41,7 @@ struct CheckpointWidget: Widget {
         StaticConfiguration(kind: kind, provider: WidgetProvider()) { entry in
             CheckpointWidgetEntryView(entry: entry)
                 .containerBackground(for: .widget) {
-                    WidgetColors.background
+                    WidgetColors.backgroundPrimary
                 }
         }
         .configurationDisplayName("Checkpoint")
@@ -53,6 +53,7 @@ struct CheckpointWidget: Widget {
             .accessoryCircular,
             .accessoryRectangular
         ])
+        .contentMarginsDisabled()
     }
 }
 

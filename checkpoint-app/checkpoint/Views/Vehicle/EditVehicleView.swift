@@ -210,12 +210,14 @@ struct EditVehicleView: View {
         vehicle.oilType = oilType.isEmpty ? nil : oilType
         vehicle.notes = notes.isEmpty ? nil : notes
         updateAppIcon()
+        updateWidgetData()
         dismiss()
     }
 
     private func deleteVehicle() {
         modelContext.delete(vehicle)
         updateAppIcon()
+        WidgetDataService.shared.clearWidgetData()
         dismiss()
     }
 
@@ -223,6 +225,12 @@ struct EditVehicleView: View {
 
     private func updateAppIcon() {
         AppIconService.shared.updateIcon(for: vehicle, services: services)
+    }
+
+    // MARK: - Widget Data
+
+    private func updateWidgetData() {
+        WidgetDataService.shared.updateWidget(for: vehicle)
     }
 }
 

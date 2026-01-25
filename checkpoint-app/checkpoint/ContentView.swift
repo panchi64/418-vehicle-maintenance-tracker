@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
@@ -99,15 +100,20 @@ struct ContentView: View {
             seedSampleDataIfNeeded()
             // Update app icon based on service status
             updateAppIcon()
+            // Update widget data
+            updateWidgetData()
         }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active || newPhase == .background {
                 // Update app icon when entering foreground or going to background
                 updateAppIcon()
+                // Update widget data
+                updateWidgetData()
             }
         }
         .onChange(of: appState.selectedVehicle) { _, _ in
             updateAppIcon()
+            updateWidgetData()
         }
         .onChange(of: vehicles) { _, newVehicles in
             // Update selection if current vehicle was deleted
@@ -162,6 +168,16 @@ struct ContentView: View {
         AppIconService.shared.updateIcon(for: currentVehicle, services: services)
     }
 
+    // MARK: - Widget Data
+
+    private func updateWidgetData() {
+        if let vehicle = currentVehicle {
+            WidgetDataService.shared.updateWidget(for: vehicle)
+        } else {
+            WidgetDataService.shared.clearWidgetData()
+        }
+    }
+
     // MARK: - Mileage Update
 
     private func updateMileage(_ newMileage: Int, for vehicle: Vehicle) {
@@ -184,6 +200,8 @@ struct ContentView: View {
 
         // Update app icon based on new mileage affecting service status
         updateAppIcon()
+        // Update widget data
+        updateWidgetData()
     }
 
     // MARK: - Sample Data

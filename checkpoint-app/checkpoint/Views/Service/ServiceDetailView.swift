@@ -61,10 +61,10 @@ struct ServiceDetailView: View {
                 }
             }
         }
-        .sheet(isPresented: $showEditSheet, onDismiss: updateAppIcon) {
+        .sheet(isPresented: $showEditSheet, onDismiss: { updateAppIcon(); updateWidgetData() }) {
             EditServiceView(service: service, vehicle: vehicle)
         }
-        .sheet(isPresented: $showMarkDoneSheet, onDismiss: updateAppIcon) {
+        .sheet(isPresented: $showMarkDoneSheet, onDismiss: { updateAppIcon(); updateWidgetData() }) {
             MarkServiceDoneSheet(service: service, vehicle: vehicle)
         }
     }
@@ -228,6 +228,12 @@ struct ServiceDetailView: View {
 
     private func updateAppIcon() {
         AppIconService.shared.updateIcon(for: vehicle, services: services)
+    }
+
+    // MARK: - Widget Data
+
+    private func updateWidgetData() {
+        WidgetDataService.shared.updateWidget(for: vehicle)
     }
 
     // MARK: - Helpers
@@ -396,11 +402,16 @@ struct MarkServiceDoneSheet: View {
         }
 
         updateAppIcon()
+        updateWidgetData()
         dismiss()
     }
 
     private func updateAppIcon() {
         AppIconService.shared.updateIcon(for: vehicle, services: services)
+    }
+
+    private func updateWidgetData() {
+        WidgetDataService.shared.updateWidget(for: vehicle)
     }
 }
 

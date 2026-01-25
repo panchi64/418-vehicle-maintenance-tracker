@@ -243,6 +243,7 @@ struct AddServiceView: View {
             saveScheduledService()
         }
         updateAppIcon()
+        updateWidgetData()
         dismiss()
     }
 
@@ -250,6 +251,12 @@ struct AddServiceView: View {
 
     private func updateAppIcon() {
         AppIconService.shared.updateIcon(for: vehicle, services: services)
+    }
+
+    // MARK: - Widget Data
+
+    private func updateWidgetData() {
+        WidgetDataService.shared.updateWidget(for: vehicle)
     }
 
     private func saveLoggedService() {

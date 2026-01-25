@@ -129,6 +129,7 @@ struct EditServiceView: View {
         service.intervalMiles = Int(intervalMiles)
 
         updateAppIcon()
+        updateWidgetData()
         dismiss()
     }
 
@@ -137,6 +138,7 @@ struct EditServiceView: View {
     private func deleteService() {
         modelContext.delete(service)
         updateAppIcon()
+        updateWidgetData()
         dismiss()
     }
 
@@ -144,6 +146,12 @@ struct EditServiceView: View {
 
     private func updateAppIcon() {
         AppIconService.shared.updateIcon(for: vehicle, services: services)
+    }
+
+    // MARK: - Widget Data
+
+    private func updateWidgetData() {
+        WidgetDataService.shared.updateWidget(for: vehicle)
     }
 }
 
