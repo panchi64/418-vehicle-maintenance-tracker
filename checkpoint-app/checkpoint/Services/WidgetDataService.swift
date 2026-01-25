@@ -21,7 +21,7 @@ class WidgetDataService {
     /// - Parameters:
     ///   - vehicle: The current vehicle to display
     ///   - services: The services to display (should be sorted by urgency)
-    func updateWidgetData(vehicleName: String, services: [(name: String, status: String, dueDescription: String)]) {
+    func updateWidgetData(vehicleName: String, services: [(name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?)]) {
         guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
             print("Failed to access App Group UserDefaults")
             return
@@ -31,7 +31,9 @@ class WidgetDataService {
             WidgetSharedData.SharedService(
                 name: service.name,
                 status: mapStatus(service.status),
-                dueDescription: service.dueDescription
+                dueDescription: service.dueDescription,
+                dueMileage: service.dueMileage,
+                daysRemaining: service.daysRemaining
             )
         }
 
@@ -58,7 +60,7 @@ class WidgetDataService {
             $0.urgencyScore(currentMileage: vehicle.currentMileage) < $1.urgencyScore(currentMileage: vehicle.currentMileage)
         }
 
-        let serviceData = sortedServices.map { service -> (name: String, status: String, dueDescription: String) in
+        let serviceData = sortedServices.map { service -> (name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?) in
             let status = service.status(currentMileage: vehicle.currentMileage)
             let statusString: String
             switch status {
@@ -67,10 +69,18 @@ class WidgetDataService {
             case .good: statusString = "good"
             case .neutral: statusString = "neutral"
             }
+
+            // Calculate days remaining from due date
+            let daysRemaining: Int? = service.dueDate.map {
+                Calendar.current.dateComponents([.day], from: .now, to: $0).day ?? 0
+            }
+
             return (
                 name: service.name,
                 status: statusString,
-                dueDescription: service.primaryDescription ?? "Scheduled"
+                dueDescription: service.primaryDescription ?? "Scheduled",
+                dueMileage: service.dueMileage,
+                daysRemaining: daysRemaining
             )
         }
 
@@ -106,6 +116,8 @@ struct WidgetSharedData: Codable {
         let name: String
         let status: ServiceStatus
         let dueDescription: String
+        let dueMileage: Int?        // The mileage when service is due (e.g., 35000)
+        let daysRemaining: Int?     // Days until due (negative = overdue)
     }
 
     enum ServiceStatus: String, Codable {

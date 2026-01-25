@@ -20,9 +20,9 @@ struct ServiceEntry: TimelineEntry {
             date: Date(),
             vehicleName: "My Vehicle",
             services: [
-                WidgetService(name: "Oil Change", status: .dueSoon, dueDescription: "Due in 5 days"),
-                WidgetService(name: "Tire Rotation", status: .good, dueDescription: "Due in 30 days"),
-                WidgetService(name: "Brake Inspection", status: .overdue, dueDescription: "5 days overdue")
+                WidgetService(name: "Oil Change", status: .dueSoon, dueDescription: "Due in 5 days", dueMileage: 35000, daysRemaining: 5),
+                WidgetService(name: "Tire Rotation", status: .good, dueDescription: "Due in 30 days", dueMileage: 38000, daysRemaining: 30),
+                WidgetService(name: "Brake Inspection", status: .overdue, dueDescription: "5 days overdue", dueMileage: 32000, daysRemaining: -5)
             ]
         )
     }
@@ -39,6 +39,8 @@ struct WidgetService: Identifiable {
     let name: String
     let status: WidgetServiceStatus
     let dueDescription: String
+    let dueMileage: Int?        // The mileage when service is due
+    let daysRemaining: Int?     // Days until due (negative = overdue)
 }
 
 enum WidgetServiceStatus: String, Codable {
@@ -76,6 +78,8 @@ struct WidgetData: Codable {
         let name: String
         let status: WidgetServiceStatus
         let dueDescription: String
+        let dueMileage: Int?        // The mileage when service is due
+        let daysRemaining: Int?     // Days until due (negative = overdue)
     }
 }
 
@@ -122,7 +126,9 @@ struct WidgetProvider: TimelineProvider {
                 WidgetService(
                     name: service.name,
                     status: service.status,
-                    dueDescription: service.dueDescription
+                    dueDescription: service.dueDescription,
+                    dueMileage: service.dueMileage,
+                    daysRemaining: service.daysRemaining
                 )
             }
 

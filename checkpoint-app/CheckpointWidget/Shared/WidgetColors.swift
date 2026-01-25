@@ -54,4 +54,26 @@ extension Font {
     static var widgetCaption: Font {
         .system(size: 9, weight: .regular, design: .monospaced)
     }
+
+    /// 36pt Mono Bold - Large widget display number (small widget)
+    /// Optimized for small widget where space is limited but still glanceable
+    static var widgetDisplayLarge: Font {
+        .system(size: 36, weight: .bold, design: .monospaced)
+    }
+
+    /// 40pt Mono Bold - Extra large widget display number
+    static var widgetDisplayXLarge: Font {
+        .system(size: 40, weight: .bold, design: .monospaced)
+    }
+
+    /// 48pt Mono Bold - Hero display number (medium widget)
+    /// Larger since medium widget has more space
+    static var widgetDisplayHero: Font {
+        .system(size: 48, weight: .bold, design: .monospaced)
+    }
+
+    /// 10pt Mono Medium - Unit labels ("MI", "DAYS")
+    static var widgetUnit: Font {
+        .system(size: 10, weight: .medium, design: .monospaced)
+    }
 }

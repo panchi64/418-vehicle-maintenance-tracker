@@ -12,44 +12,131 @@ import WidgetKit
 struct MediumWidgetView: View {
     let entry: ServiceEntry
 
+    /// Services excluding the first one (for the right panel)
+    private var otherServices: [WidgetService] {
+        Array(entry.services.dropFirst().prefix(3))
+    }
+
     var body: some View {
-        HStack(spacing: 16) {
-            // Left side - vehicle info
-            VStack(alignment: .leading, spacing: 4) {
-                Text(entry.vehicleName.uppercased())
-                    .font(.widgetHeadline)
-                    .foregroundStyle(WidgetColors.textPrimary)
+        HStack(spacing: 0) {
+            // Left side - Next up focus with large number
+            leftPanel
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                Text("MAINTENANCE")
-                    .font(.widgetLabel)
-                    .foregroundStyle(WidgetColors.textTertiary)
-                    .tracking(1)
-
-                Spacer()
-
-                if let firstService = entry.services.first {
-                    HStack(spacing: 6) {
-                        Rectangle()
-                            .fill(firstService.status.color)
-                            .frame(width: 8, height: 8)
-
-                        Text(firstService.dueDescription.uppercased())
-                            .font(.widgetCaption)
-                            .foregroundStyle(firstService.status.color)
-                            .tracking(0.5)
-                    }
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-
-            // Vertical divider (brutalist)
+            // Vertical divider (brutalist - 2px solid line)
             Rectangle()
                 .fill(WidgetColors.gridLine)
                 .frame(width: WidgetColors.borderWidth)
 
-            // Right side - service list
-            VStack(alignment: .leading, spacing: 8) {
-                ForEach(entry.services.prefix(3)) { service in
+            // Right side - other services list
+            rightPanel
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .padding()
+        .containerBackground(for: .widget) {
+            ZStack {
+                WidgetColors.backgroundPrimary
+                // Subtle glass overlay
+                Color.white.opacity(0.05)
+            }
+        }
+    }
+
+    // MARK: - Left Panel (Next Up Focus)
+
+    @ViewBuilder
+    private var leftPanel: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            // Vehicle name
+            Text(entry.vehicleName.uppercased())
+                .font(.widgetHeadline)
+                .foregroundStyle(WidgetColors.textPrimary)
+                .lineLimit(1)
+
+            // "MAINTENANCE" subtitle
+            Text("MAINTENANCE")
+                .font(.widgetLabel)
+                .foregroundStyle(WidgetColors.textTertiary)
+                .tracking(1)
+
+            if let service = entry.services.first {
+                Spacer()
+
+                // Large centered number display with unit to the right
+                VStack(spacing: 2) {
+                    Text("DUE @")
+                        .font(.widgetLabel)
+                        .foregroundStyle(WidgetColors.textTertiary)
+                        .tracking(1)
+
+                    HStack(alignment: .firstTextBaseline, spacing: 4) {
+                        Text(displayValue(for: service))
+                            .font(.widgetDisplayHero)
+                            .foregroundStyle(WidgetColors.textPrimary)
+                            .minimumScaleFactor(0.5)
+                            .lineLimit(1)
+
+                        Text(displayUnit(for: service))
+                            .font(.widgetUnit)
+                            .foregroundStyle(WidgetColors.textTertiary)
+                            .tracking(1)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+
+                Spacer()
+
+                // Service name
+                Text(service.name.uppercased())
+                    .font(.widgetBody)
+                    .foregroundStyle(WidgetColors.textPrimary)
+                    .lineLimit(1)
+
+                // Status indicator
+                HStack(spacing: 6) {
+                    Rectangle()
+                        .fill(service.status.color)
+                        .frame(width: 8, height: 8)
+
+                    Text(statusLabel(for: service.status))
+                        .font(.widgetCaption)
+                        .foregroundStyle(service.status.color)
+                        .tracking(0.5)
+                }
+            } else {
+                Spacer()
+
+                Text("NO SERVICES")
+                    .font(.widgetBody)
+                    .foregroundStyle(WidgetColors.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+
+                Spacer()
+            }
+        }
+        .padding(.trailing, 12)
+    }
+
+    // MARK: - Right Panel (Other Services)
+
+    @ViewBuilder
+    private var rightPanel: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if otherServices.isEmpty {
+                Spacer()
+                Text("ALL CAUGHT UP")
+                    .font(.widgetBody)
+                    .foregroundStyle(WidgetColors.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                Spacer()
+            } else {
+                // "UPCOMING" header
+                Text("UPCOMING")
+                    .font(.widgetLabel)
+                    .foregroundStyle(WidgetColors.textTertiary)
+                    .tracking(1)
+
+                ForEach(otherServices) { service in
                     HStack(spacing: 8) {
                         Rectangle()
                             .fill(service.status.color)
@@ -62,21 +149,49 @@ struct MediumWidgetView: View {
                     }
                 }
 
-                if entry.services.isEmpty {
-                    Text("ALL CAUGHT UP")
-                        .font(.widgetBody)
-                        .foregroundStyle(WidgetColors.textSecondary)
-                }
+                Spacer()
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding()
-        .containerBackground(for: .widget) {
-            ZStack {
-                WidgetColors.backgroundPrimary
-                // Subtle glass overlay
-                Color.white.opacity(0.05)
-            }
+        .padding(.leading, 12)
+    }
+
+    // MARK: - Display Helpers
+
+    /// Format large number with comma separators
+    private func formatNumber(_ number: Int) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        return formatter.string(from: NSNumber(value: number)) ?? "\(number)"
+    }
+
+    /// Get the display value (mileage or days)
+    private func displayValue(for service: WidgetService) -> String {
+        // Priority: dueMileage first, then daysRemaining
+        if let dueMileage = service.dueMileage {
+            return formatNumber(dueMileage)
+        } else if let days = service.daysRemaining {
+            return "\(days)"
+        }
+        return "—"
+    }
+
+    /// Get the unit label based on what we're displaying
+    private func displayUnit(for service: WidgetService) -> String {
+        if service.dueMileage != nil {
+            return "MI"
+        } else if service.daysRemaining != nil {
+            return "DAYS"
+        }
+        return ""
+    }
+
+    /// Get status label text
+    private func statusLabel(for status: WidgetServiceStatus) -> String {
+        switch status {
+        case .overdue: return "OVERDUE"
+        case .dueSoon: return "DUE SOON"
+        case .good: return "GOOD"
+        case .neutral: return ""
         }
     }
 }
