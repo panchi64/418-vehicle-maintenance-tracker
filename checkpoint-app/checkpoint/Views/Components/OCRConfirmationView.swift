@@ -236,47 +236,7 @@ struct OCRConfirmationView: View {
     }
 }
 
-// MARK: - Confidence Level
-
-enum ConfidenceLevel {
-    case high
-    case medium
-    case low
-
-    var color: Color {
-        switch self {
-        case .high: return Theme.statusGood
-        case .medium: return Theme.statusDueSoon
-        case .low: return Theme.statusOverdue
-        }
-    }
-}
-
-// MARK: - Confidence Bar
-
-/// Brutalist-style segmented confidence bar
-struct ConfidenceBar: View {
-    let confidence: Float
-    let level: ConfidenceLevel
-
-    /// Number of segments in the bar
-    private let segmentCount = 10
-
-    /// How many segments should be filled
-    private var filledSegments: Int {
-        Int(ceil(confidence * Float(segmentCount)))
-    }
-
-    var body: some View {
-        HStack(spacing: 2) {
-            ForEach(0..<segmentCount, id: \.self) { index in
-                Rectangle()
-                    .fill(index < filledSegments ? level.color : Theme.gridLine)
-                    .frame(height: 8)
-            }
-        }
-    }
-}
+// Note: ConfidenceLevel and ConfidenceBar are now in ConfidenceIndicator.swift
 
 // MARK: - Preview
 

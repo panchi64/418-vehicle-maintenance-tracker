@@ -35,6 +35,31 @@ final class MileageSnapshot: Identifiable {
     }
 }
 
+// MARK: - Pace Result
+
+/// Result of pace calculation including confidence metadata
+struct PaceResult {
+    let milesPerDay: Double
+    let confidence: ConfidenceLevel
+    let dataPointCount: Int
+    let dateRange: DateInterval
+
+    /// Minimum days of data required
+    static let minimumDays = 7
+
+    /// Days for high confidence (30+ days)
+    static let highConfidenceDays = 30
+
+    /// Days for medium confidence (14-29 days)
+    static let mediumConfidenceDays = 14
+
+    /// Minimum snapshots for high confidence
+    static let highConfidenceSnapshots = 5
+
+    /// Minimum snapshots for medium confidence
+    static let mediumConfidenceSnapshots = 3
+}
+
 // MARK: - Pace Calculation Helpers
 
 extension MileageSnapshot {
@@ -117,6 +142,55 @@ extension MileageSnapshot {
         return snapshots.contains { snapshot in
             calendar.startOfDay(for: snapshot.recordedAt) == today
         }
+    }
+
+    /// Calculate pace result with confidence level from snapshots
+    /// - Parameter snapshots: Array of mileage snapshots
+    /// - Returns: PaceResult with pace, confidence, and metadata, or nil if insufficient data
+    static func calculatePaceResult(from snapshots: [MileageSnapshot]) -> PaceResult? {
+        guard snapshots.count >= 2 else { return nil }
+
+        // Sort by date ascending
+        let sorted = snapshots.sorted { $0.recordedAt < $1.recordedAt }
+
+        guard let oldest = sorted.first,
+              let newest = sorted.last else { return nil }
+
+        let calendar = Calendar.current
+        let totalDaysBetween = calendar.dateComponents(
+            [.day],
+            from: oldest.recordedAt,
+            to: newest.recordedAt
+        ).day ?? 0
+
+        // Require at least minimum days of data
+        guard totalDaysBetween >= PaceResult.minimumDays else { return nil }
+
+        // Calculate the pace using existing EWMA method
+        guard let pace = calculateDailyPace(from: snapshots) else { return nil }
+
+        // Determine confidence level based on data quality
+        let snapshotCount = sorted.count
+        let confidence: ConfidenceLevel
+
+        if totalDaysBetween >= PaceResult.highConfidenceDays &&
+           snapshotCount >= PaceResult.highConfidenceSnapshots {
+            confidence = .high
+        } else if totalDaysBetween >= PaceResult.mediumConfidenceDays &&
+                  snapshotCount >= PaceResult.mediumConfidenceSnapshots {
+            confidence = .medium
+        } else {
+            confidence = .low
+        }
+
+        let dateRange = DateInterval(start: oldest.recordedAt, end: newest.recordedAt)
+
+        return PaceResult(
+            milesPerDay: pace,
+            confidence: confidence,
+            dataPointCount: snapshotCount,
+            dateRange: dateRange
+        )
     }
 }
 

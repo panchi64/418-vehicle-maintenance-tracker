@@ -15,50 +15,93 @@ struct QuickMileageUpdateCard: View {
 
     @State private var showMileageSheet = false
 
+    /// Display mileage: use estimated if available, otherwise actual
+    private var displayMileage: Int {
+        vehicle.isUsingEstimatedMileage ? (vehicle.estimatedMileage ?? vehicle.currentMileage) : vehicle.currentMileage
+    }
+
     private var formattedMileage: String {
-        Formatters.mileageNumber(vehicle.currentMileage)
+        let unit = DistanceSettings.shared.unit
+        let displayValue = unit.fromMiles(displayMileage)
+        return Formatters.mileageNumber(displayValue)
     }
 
     private var unitAbbreviation: String {
         DistanceSettings.shared.unit.uppercaseAbbreviation
     }
 
+    /// Description text including estimated status
+    private var mileageDescription: String {
+        if vehicle.isUsingEstimatedMileage {
+            return "Estimated • \(vehicle.mileageUpdateDescription)"
+        }
+        return vehicle.mileageUpdateDescription
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             InstrumentSectionHeader(title: "Odometer")
 
-            HStack(alignment: .center) {
-                // Mileage display
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(alignment: .firstTextBaseline, spacing: 4) {
-                        Text(formattedMileage)
-                            .font(.brutalistTitle)
-                            .foregroundStyle(Theme.accent)
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                HStack(alignment: .center) {
+                    // Mileage display
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(alignment: .firstTextBaseline, spacing: 4) {
+                            Text(formattedMileage)
+                                .font(.brutalistTitle)
+                                .foregroundStyle(Theme.accent)
 
-                        Text(unitAbbreviation)
+                            Text(unitAbbreviation)
+                                .font(.brutalistLabel)
+                                .foregroundStyle(Theme.textTertiary)
+                                .tracking(1)
+
+                            // Subtle estimated indicator
+                            if vehicle.isUsingEstimatedMileage {
+                                Text("EST")
+                                    .font(.brutalistLabel)
+                                    .foregroundStyle(Theme.textSecondary)
+                                    .tracking(1)
+                            }
+                        }
+
+                        Text(mileageDescription)
+                            .font(.brutalistSecondary)
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+
+                    Spacer()
+
+                    // Update button
+                    Button {
+                        showMileageSheet = true
+                    } label: {
+                        Text("UPDATE")
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.surfaceInstrument)
+                            .tracking(1.5)
+                            .padding(.horizontal, Spacing.md)
+                            .padding(.vertical, Spacing.sm)
+                            .background(Theme.accent)
+                    }
+                }
+
+                // Subtle confidence indicator (only when estimated, metadata style)
+                if vehicle.isUsingEstimatedMileage, let confidence = vehicle.paceConfidence {
+                    HStack(spacing: Spacing.xs) {
+                        Text("PACE_CONFIDENCE")
                             .font(.brutalistLabel)
                             .foregroundStyle(Theme.textTertiary)
                             .tracking(1)
+
+                        CompactConfidenceBar(level: confidence)
+
+                        Text(confidence.label)
+                            .font(.brutalistLabel)
+                            .foregroundStyle(confidence.color)
+                            .tracking(1)
                     }
-
-                    Text(vehicle.mileageUpdateDescription)
-                        .font(.brutalistSecondary)
-                        .foregroundStyle(Theme.textTertiary)
-                }
-
-                Spacer()
-
-                // Update button
-                Button {
-                    showMileageSheet = true
-                } label: {
-                    Text("UPDATE")
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.surfaceInstrument)
-                        .tracking(1.5)
-                        .padding(.horizontal, Spacing.md)
-                        .padding(.vertical, Spacing.sm)
-                        .background(Theme.accent)
+                    .padding(.top, Spacing.xs)
                 }
             }
             .padding(Spacing.md)

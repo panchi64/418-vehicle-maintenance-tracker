@@ -56,6 +56,41 @@ final class Vehicle: Identifiable {
         dailyMilesPace != nil
     }
 
+    /// Pace result with confidence metadata
+    var paceResult: PaceResult? {
+        MileageSnapshot.calculatePaceResult(from: mileageSnapshots)
+    }
+
+    /// Confidence level of the pace data
+    var paceConfidence: ConfidenceLevel? {
+        paceResult?.confidence
+    }
+
+    /// Maximum days since last update before we stop trusting estimates
+    private static let maxEstimationDays = 60
+
+    /// Estimated current mileage based on driving pace (in miles)
+    /// Returns nil if insufficient pace data or stale data (>60 days)
+    var estimatedMileage: Int? {
+        guard let pace = dailyMilesPace,
+              let daysSince = daysSinceMileageUpdate,
+              daysSince <= Self.maxEstimationDays,
+              daysSince > 0 else { return nil }
+
+        let estimatedDriven = pace * Double(daysSince)
+        return currentMileage + Int(round(estimatedDriven))
+    }
+
+    /// Returns estimated mileage if available, otherwise actual mileage (in miles)
+    var effectiveMileage: Int {
+        estimatedMileage ?? currentMileage
+    }
+
+    /// Whether the mileage displayed is estimated (vs actual)
+    var isUsingEstimatedMileage: Bool {
+        estimatedMileage != nil
+    }
+
     /// Days since mileage was last updated
     var daysSinceMileageUpdate: Int? {
         guard let updatedAt = mileageUpdatedAt else { return nil }

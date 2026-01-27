@@ -12,6 +12,7 @@ struct NextUpCard: View {
     let currentMileage: Int
     let vehicleName: String
     var dailyMilesPace: Double? = nil
+    var isEstimatedMileage: Bool = false
     let onTap: () -> Void
 
     private var status: ServiceStatus {
@@ -144,9 +145,18 @@ struct NextUpCard: View {
 
                             Spacer()
 
-                            Text(Formatters.mileageDisplay(currentMileage))
-                                .font(.brutalistBody)
-                                .foregroundStyle(Theme.accent)
+                            HStack(spacing: 4) {
+                                Text(Formatters.mileageDisplay(currentMileage))
+                                    .font(.brutalistBody)
+                                    .foregroundStyle(Theme.accent)
+
+                                if isEstimatedMileage {
+                                    Text("(EST)")
+                                        .font(.brutalistLabel)
+                                        .foregroundStyle(Theme.textSecondary)
+                                        .tracking(0.5)
+                                }
+                            }
                         }
 
                         HStack {

@@ -20,9 +20,11 @@ struct HomeTab: View {
 
     private var vehicleServices: [Service] {
         guard let vehicle = vehicle else { return [] }
+        let effectiveMileage = vehicle.effectiveMileage
+        let pace = vehicle.dailyMilesPace
         return services
             .filter { $0.vehicle?.id == vehicle.id }
-            .sorted { $0.urgencyScore(currentMileage: vehicle.currentMileage) < $1.urgencyScore(currentMileage: vehicle.currentMileage) }
+            .sorted { $0.urgencyScore(currentMileage: effectiveMileage, dailyPace: pace) < $1.urgencyScore(currentMileage: effectiveMileage, dailyPace: pace) }
     }
 
     private var nextUpService: Service? {
@@ -64,9 +66,10 @@ struct HomeTab: View {
 
                         NextUpCard(
                             service: nextUp,
-                            currentMileage: vehicle.currentMileage,
+                            currentMileage: vehicle.effectiveMileage,
                             vehicleName: vehicle.displayName,
-                            dailyMilesPace: vehicle.dailyMilesPace
+                            dailyMilesPace: vehicle.dailyMilesPace,
+                            isEstimatedMileage: vehicle.isUsingEstimatedMileage
                         ) {
                             appState.selectedService = nextUp
                         }
@@ -96,7 +99,8 @@ struct HomeTab: View {
                             ForEach(Array(remainingServices.prefix(3).enumerated()), id: \.element.id) { index, service in
                                 ServiceRow(
                                     service: service,
-                                    currentMileage: vehicle.currentMileage
+                                    currentMileage: vehicle.effectiveMileage,
+                                    isEstimatedMileage: vehicle.isUsingEstimatedMileage
                                 ) {
                                     appState.selectedService = service
                                 }
@@ -304,6 +308,9 @@ struct HomeTab: View {
 
         // Reschedule mileage reminder for 14 days from now
         NotificationService.shared.scheduleMileageReminder(for: vehicle, lastUpdateDate: .now)
+
+        // Reschedule service notifications with updated pace data
+        NotificationService.shared.rescheduleNotifications(for: vehicle)
     }
 }
 

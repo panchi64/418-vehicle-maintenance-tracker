@@ -367,4 +367,219 @@ final class VehicleTests: XCTestCase {
         // Then - should prompt (past 14 day threshold)
         XCTAssertTrue(vehicle.shouldPromptMileageUpdate)
     }
+
+    // MARK: - Estimated Mileage Tests
+
+    func testEstimatedMileage_NoPaceData_ReturnsNil() {
+        // Given: Vehicle with no mileage snapshots
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            currentMileage: 50000,
+            mileageUpdatedAt: Calendar.current.date(byAdding: .day, value: -5, to: .now)
+        )
+
+        // When/Then
+        XCTAssertNil(vehicle.estimatedMileage, "Should return nil when no pace data available")
+    }
+
+    @MainActor
+    func testEstimatedMileage_WithPaceData_CalculatesCorrectly() {
+        // Given: Vehicle with pace data (40 mi/day) and 5 days since update
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            currentMileage: 50000,
+            mileageUpdatedAt: Calendar.current.date(byAdding: .day, value: -5, to: .now)
+        )
+
+        // Add snapshots to create pace data (40 mi/day)
+        let calendar = Calendar.current
+        let snapshots = [
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 49200,
+                recordedAt: calendar.date(byAdding: .day, value: -25, to: .now)!
+            ),
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 49600,
+                recordedAt: calendar.date(byAdding: .day, value: -15, to: .now)!
+            ),
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 50000,
+                recordedAt: calendar.date(byAdding: .day, value: -5, to: .now)!
+            )
+        ]
+        vehicle.mileageSnapshots = snapshots
+
+        // When
+        let estimated = vehicle.estimatedMileage
+
+        // Then
+        // 5 days * ~40 mi/day = ~200 miles, so estimated should be ~50200
+        XCTAssertNotNil(estimated)
+        XCTAssertEqual(estimated!, 50200, accuracy: 20, "Estimated should be about 200 miles more")
+    }
+
+    func testEstimatedMileage_StaleData_ReturnsNil() {
+        // Given: Vehicle with mileage updated 65 days ago (> 60 day limit)
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            currentMileage: 50000,
+            mileageUpdatedAt: Calendar.current.date(byAdding: .day, value: -65, to: .now)
+        )
+
+        // Even with pace data available
+        let calendar = Calendar.current
+        let snapshots = [
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 48000,
+                recordedAt: calendar.date(byAdding: .day, value: -100, to: .now)!
+            ),
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 50000,
+                recordedAt: calendar.date(byAdding: .day, value: -65, to: .now)!
+            )
+        ]
+        vehicle.mileageSnapshots = snapshots
+
+        // When/Then
+        XCTAssertNil(vehicle.estimatedMileage, "Should return nil when data is stale (>60 days)")
+    }
+
+    func testEstimatedMileage_UpdatedToday_ReturnsNil() {
+        // Given: Vehicle updated today (0 days since update)
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            currentMileage: 50000,
+            mileageUpdatedAt: .now
+        )
+
+        // Add pace data
+        let calendar = Calendar.current
+        let snapshots = [
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 49600,
+                recordedAt: calendar.date(byAdding: .day, value: -10, to: .now)!
+            ),
+            MileageSnapshot(vehicle: vehicle, mileage: 50000, recordedAt: .now)
+        ]
+        vehicle.mileageSnapshots = snapshots
+
+        // When/Then
+        XCTAssertNil(vehicle.estimatedMileage, "Should return nil when updated today (no need to estimate)")
+    }
+
+    func testEffectiveMileage_FallsBackToActual() {
+        // Given: Vehicle with no pace data
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            currentMileage: 50000
+        )
+
+        // When/Then
+        XCTAssertEqual(vehicle.effectiveMileage, 50000, "Should return actual mileage when no estimation available")
+        XCTAssertFalse(vehicle.isUsingEstimatedMileage)
+    }
+
+    @MainActor
+    func testEffectiveMileage_UsesEstimated() {
+        // Given: Vehicle with pace data and days since update
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            currentMileage: 50000,
+            mileageUpdatedAt: Calendar.current.date(byAdding: .day, value: -5, to: .now)
+        )
+
+        let calendar = Calendar.current
+        let snapshots = [
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 49200,
+                recordedAt: calendar.date(byAdding: .day, value: -25, to: .now)!
+            ),
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 49600,
+                recordedAt: calendar.date(byAdding: .day, value: -15, to: .now)!
+            ),
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 50000,
+                recordedAt: calendar.date(byAdding: .day, value: -5, to: .now)!
+            )
+        ]
+        vehicle.mileageSnapshots = snapshots
+
+        // When
+        let effective = vehicle.effectiveMileage
+
+        // Then
+        XCTAssertGreaterThan(effective, 50000, "Effective should be greater than actual when estimated")
+        XCTAssertTrue(vehicle.isUsingEstimatedMileage)
+    }
+
+    @MainActor
+    func testPaceConfidence_ReturnsCorrectLevel() {
+        // Given: Vehicle with high-confidence pace data
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            currentMileage: 50000,
+            mileageUpdatedAt: Calendar.current.date(byAdding: .day, value: -5, to: .now)
+        )
+
+        let calendar = Calendar.current
+        let snapshots = [
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 48000,
+                recordedAt: calendar.date(byAdding: .day, value: -50, to: .now)!
+            ),
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 48500,
+                recordedAt: calendar.date(byAdding: .day, value: -40, to: .now)!
+            ),
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 49000,
+                recordedAt: calendar.date(byAdding: .day, value: -30, to: .now)!
+            ),
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 49500,
+                recordedAt: calendar.date(byAdding: .day, value: -20, to: .now)!
+            ),
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 50000,
+                recordedAt: calendar.date(byAdding: .day, value: -5, to: .now)!
+            )
+        ]
+        vehicle.mileageSnapshots = snapshots
+
+        // When
+        let confidence = vehicle.paceConfidence
+
+        // Then
+        XCTAssertNotNil(confidence)
+        XCTAssertEqual(confidence, .high, "Should be high confidence with 50 days and 5 snapshots")
+    }
 }

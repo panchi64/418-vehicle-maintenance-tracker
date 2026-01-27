@@ -318,4 +318,164 @@ final class MileageSnapshotTests: XCTestCase {
         // Then
         XCTAssertFalse(hasToday, "Should return false for empty array")
     }
+
+    // MARK: - Pace Result Tests
+
+    func testCalculatePaceResult_InsufficientData_ReturnsNil() {
+        // Given: Less than 2 snapshots
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
+        let snapshot = MileageSnapshot(vehicle: vehicle, mileage: 10000, recordedAt: .now)
+
+        // When
+        let result = MileageSnapshot.calculatePaceResult(from: [snapshot])
+
+        // Then
+        XCTAssertNil(result, "Should return nil for insufficient data")
+    }
+
+    func testCalculatePaceResult_LessThan7Days_ReturnsNil() {
+        // Given: Only 5 days of data
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
+        let calendar = Calendar.current
+
+        let snapshot1 = MileageSnapshot(
+            vehicle: vehicle,
+            mileage: 10000,
+            recordedAt: calendar.date(byAdding: .day, value: -5, to: .now)!
+        )
+        let snapshot2 = MileageSnapshot(
+            vehicle: vehicle,
+            mileage: 10200,
+            recordedAt: .now
+        )
+
+        // When
+        let result = MileageSnapshot.calculatePaceResult(from: [snapshot1, snapshot2])
+
+        // Then
+        XCTAssertNil(result, "Should return nil for less than 7 days of data")
+    }
+
+    func testCalculatePaceResult_LowConfidence_7to14Days() {
+        // Given: 10 days of data with 2 snapshots (minimum for low confidence)
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
+        let calendar = Calendar.current
+
+        let snapshot1 = MileageSnapshot(
+            vehicle: vehicle,
+            mileage: 10000,
+            recordedAt: calendar.date(byAdding: .day, value: -10, to: .now)!
+        )
+        let snapshot2 = MileageSnapshot(
+            vehicle: vehicle,
+            mileage: 10400,
+            recordedAt: .now
+        )
+
+        // When
+        let result = MileageSnapshot.calculatePaceResult(from: [snapshot1, snapshot2])
+
+        // Then
+        XCTAssertNotNil(result, "Should return result for 10 days of data")
+        XCTAssertEqual(result?.confidence, .low, "Should be low confidence with 7-14 days and 2 snapshots")
+        XCTAssertEqual(result?.dataPointCount, 2)
+        XCTAssertEqual(result?.milesPerDay ?? 0, 40.0, accuracy: 0.5)
+    }
+
+    func testCalculatePaceResult_MediumConfidence_14to30Days() {
+        // Given: 20 days of data with 3+ snapshots
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
+        let calendar = Calendar.current
+
+        let snapshots = [
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 10000,
+                recordedAt: calendar.date(byAdding: .day, value: -20, to: .now)!
+            ),
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 10400,
+                recordedAt: calendar.date(byAdding: .day, value: -10, to: .now)!
+            ),
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 10800,
+                recordedAt: .now
+            )
+        ]
+
+        // When
+        let result = MileageSnapshot.calculatePaceResult(from: snapshots)
+
+        // Then
+        XCTAssertNotNil(result, "Should return result for 20 days of data")
+        XCTAssertEqual(result?.confidence, .medium, "Should be medium confidence with 14-30 days and 3+ snapshots")
+        XCTAssertEqual(result?.dataPointCount, 3)
+    }
+
+    func testCalculatePaceResult_HighConfidence_30PlusDays() {
+        // Given: 45 days of data with 5+ snapshots
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
+        let calendar = Calendar.current
+
+        let snapshots = [
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 10000,
+                recordedAt: calendar.date(byAdding: .day, value: -45, to: .now)!
+            ),
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 10400,
+                recordedAt: calendar.date(byAdding: .day, value: -35, to: .now)!
+            ),
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 10800,
+                recordedAt: calendar.date(byAdding: .day, value: -25, to: .now)!
+            ),
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 11200,
+                recordedAt: calendar.date(byAdding: .day, value: -15, to: .now)!
+            ),
+            MileageSnapshot(
+                vehicle: vehicle,
+                mileage: 11600,
+                recordedAt: .now
+            )
+        ]
+
+        // When
+        let result = MileageSnapshot.calculatePaceResult(from: snapshots)
+
+        // Then
+        XCTAssertNotNil(result, "Should return result for 45 days of data")
+        XCTAssertEqual(result?.confidence, .high, "Should be high confidence with 30+ days and 5+ snapshots")
+        XCTAssertEqual(result?.dataPointCount, 5)
+    }
+
+    func testCalculatePaceResult_IncludesDateRange() {
+        // Given
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
+        let calendar = Calendar.current
+        let startDate = calendar.date(byAdding: .day, value: -14, to: .now)!
+
+        let snapshots = [
+            MileageSnapshot(vehicle: vehicle, mileage: 10000, recordedAt: startDate),
+            MileageSnapshot(vehicle: vehicle, mileage: 10560, recordedAt: .now)
+        ]
+
+        // When
+        let result = MileageSnapshot.calculatePaceResult(from: snapshots)
+
+        // Then
+        XCTAssertNotNil(result?.dateRange)
+        XCTAssertEqual(
+            Calendar.current.isDate(result!.dateRange.start, inSameDayAs: startDate),
+            true,
+            "Date range should start at first snapshot"
+        )
+    }
 }

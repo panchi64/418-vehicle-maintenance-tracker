@@ -10,6 +10,7 @@ import SwiftUI
 struct ServiceRow: View {
     let service: Service
     let currentMileage: Int
+    var isEstimatedMileage: Bool = false
     let onTap: () -> Void
 
     private var status: ServiceStatus {

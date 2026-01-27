@@ -35,15 +35,18 @@ struct ServicesTab: View {
 
     private var vehicleServices: [Service] {
         guard let vehicle = vehicle else { return [] }
+        let effectiveMileage = vehicle.effectiveMileage
+        let pace = vehicle.dailyMilesPace
         return services
             .filter { $0.vehicle?.id == vehicle.id }
-            .sorted { $0.urgencyScore(currentMileage: vehicle.currentMileage) < $1.urgencyScore(currentMileage: vehicle.currentMileage) }
+            .sorted { $0.urgencyScore(currentMileage: effectiveMileage, dailyPace: pace) < $1.urgencyScore(currentMileage: effectiveMileage, dailyPace: pace) }
     }
 
     private var filteredServices: [Service] {
         guard let vehicle = vehicle else { return [] }
 
         var filtered = vehicleServices
+        let effectiveMileage = vehicle.effectiveMileage
 
         // Apply search filter
         if !searchText.isEmpty {
@@ -55,11 +58,11 @@ struct ServicesTab: View {
         case .all:
             break
         case .overdue:
-            filtered = filtered.filter { $0.status(currentMileage: vehicle.currentMileage) == .overdue }
+            filtered = filtered.filter { $0.status(currentMileage: effectiveMileage) == .overdue }
         case .dueSoon:
-            filtered = filtered.filter { $0.status(currentMileage: vehicle.currentMileage) == .dueSoon }
+            filtered = filtered.filter { $0.status(currentMileage: effectiveMileage) == .dueSoon }
         case .good:
-            filtered = filtered.filter { $0.status(currentMileage: vehicle.currentMileage) == .good }
+            filtered = filtered.filter { $0.status(currentMileage: effectiveMileage) == .good }
         }
 
         return filtered
@@ -133,7 +136,8 @@ struct ServicesTab: View {
                                 } label: {
                                     ServiceRow(
                                         service: service,
-                                        currentMileage: vehicle.currentMileage
+                                        currentMileage: vehicle.effectiveMileage,
+                                        isEstimatedMileage: vehicle.isUsingEstimatedMileage
                                     ) {
                                         appState.selectedService = service
                                     }

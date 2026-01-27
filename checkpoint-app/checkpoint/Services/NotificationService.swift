@@ -329,6 +329,85 @@ class NotificationService: NSObject, ObservableObject {
         }
     }
 
+    /// Schedule notification using effective due date (considers pace prediction)
+    /// - Parameters:
+    ///   - service: The service to schedule notification for
+    ///   - vehicle: The vehicle the service belongs to
+    ///   - dailyPace: Optional daily driving pace for mileage-based predictions
+    /// - Returns: The base notification identifier if scheduled successfully
+    @discardableResult
+    func scheduleNotificationWithPace(
+        for service: Service,
+        vehicle: Vehicle,
+        dailyPace: Double? = nil
+    ) -> String? {
+        // Calculate effective due date considering pace prediction
+        let effectiveDate = service.effectiveDueDate(
+            currentMileage: vehicle.currentMileage,
+            dailyPace: dailyPace
+        )
+
+        guard let dueDate = effectiveDate, dueDate > Date() else { return nil }
+
+        // Cancel existing notifications if any
+        if let existingID = service.notificationID {
+            cancelAllNotifications(baseID: existingID)
+        }
+
+        // Create unique base identifier
+        let baseNotificationID = "service-\(UUID().uuidString)"
+
+        // Schedule notifications for each interval
+        for daysBeforeDue in Self.defaultReminderIntervals {
+            guard let notificationDate = Calendar.current.date(
+                byAdding: .day,
+                value: -daysBeforeDue,
+                to: dueDate
+            ) else { continue }
+
+            // Only schedule if the notification date is in the future
+            guard notificationDate > Date() else { continue }
+
+            let notificationID = baseNotificationID + Self.intervalSuffix(for: daysBeforeDue)
+
+            let request = buildNotificationRequest(
+                for: service,
+                vehicle: vehicle,
+                notificationID: notificationID,
+                notificationDate: notificationDate,
+                daysBeforeDue: daysBeforeDue
+            )
+
+            notificationCenter.add(request) { error in
+                if let error = error {
+                    print("Failed to schedule notification (\(daysBeforeDue)d before): \(error)")
+                }
+            }
+        }
+
+        return baseNotificationID
+    }
+
+    /// Reschedule all notifications for a vehicle using current pace data
+    /// Call this after mileage updates to adjust notification timing
+    func rescheduleNotifications(for vehicle: Vehicle) {
+        let pace = vehicle.dailyMilesPace
+
+        for service in vehicle.services {
+            // Cancel existing notifications
+            cancelNotification(for: service)
+
+            // Reschedule with pace-aware timing
+            if let notificationID = scheduleNotificationWithPace(
+                for: service,
+                vehicle: vehicle,
+                dailyPace: pace
+            ) {
+                service.notificationID = notificationID
+            }
+        }
+    }
+
     // MARK: - Cancel Notifications
 
     /// Cancel a specific notification by its exact ID

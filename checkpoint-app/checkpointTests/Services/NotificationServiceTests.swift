@@ -904,4 +904,140 @@ final class NotificationServiceTests: XCTestCase {
             "navigateToCostsFromNotification"
         )
     }
+
+    // MARK: - Pace-Based Notification Tests
+
+    func testScheduleNotificationWithPace_UsesPredictedDate() {
+        // Given: Service with due mileage 1000 miles away at 40 mi/day = 25 days
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022, currentMileage: 50000)
+        let serviceItem = Service(name: "Oil Change", dueMileage: 51000)
+        serviceItem.vehicle = vehicle
+
+        // When
+        let notificationID = service.scheduleNotificationWithPace(
+            for: serviceItem,
+            vehicle: vehicle,
+            dailyPace: 40.0
+        )
+
+        // Then
+        XCTAssertNotNil(notificationID, "Should schedule notification based on predicted mileage date")
+        XCTAssertTrue(notificationID?.hasPrefix("service-") ?? false)
+
+        // Cleanup
+        if let id = notificationID {
+            service.cancelAllNotifications(baseID: id)
+        }
+    }
+
+    func testScheduleNotificationWithPace_NoPace_ReturnsNil() {
+        // Given: Service with only mileage (no date), no pace data
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022, currentMileage: 50000)
+        let serviceItem = Service(name: "Oil Change", dueMileage: 51000)
+        serviceItem.vehicle = vehicle
+
+        // When - no pace and no due date
+        let notificationID = service.scheduleNotificationWithPace(
+            for: serviceItem,
+            vehicle: vehicle,
+            dailyPace: nil
+        )
+
+        // Then
+        XCTAssertNil(notificationID, "Should return nil when no effective due date")
+    }
+
+    func testScheduleNotificationWithPace_UsesDueDateWhenEarlier() {
+        // Given: Due date in 10 days, mileage won't be reached for 50 days
+        let calendar = Calendar.current
+        let dueDate = calendar.date(byAdding: .day, value: 10, to: .now)!
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022, currentMileage: 50000)
+        let serviceItem = Service(name: "Oil Change", dueDate: dueDate, dueMileage: 52000)  // 2000 miles at 40/day = 50 days
+        serviceItem.vehicle = vehicle
+
+        // When
+        let notificationID = service.scheduleNotificationWithPace(
+            for: serviceItem,
+            vehicle: vehicle,
+            dailyPace: 40.0
+        )
+
+        // Then
+        XCTAssertNotNil(notificationID, "Should schedule based on due date (earlier)")
+
+        // Cleanup
+        if let id = notificationID {
+            service.cancelAllNotifications(baseID: id)
+        }
+    }
+
+    func testRescheduleNotifications_UpdatesAll() {
+        // Given
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022, currentMileage: 50000)
+        let futureDate = Calendar.current.date(byAdding: .day, value: 30, to: .now)!
+
+        let service1 = Service(name: "Oil Change", dueDate: futureDate, dueMileage: 51000)
+        let service2 = Service(name: "Tire Rotation", dueDate: futureDate, dueMileage: 52000)
+        service1.vehicle = vehicle
+        service2.vehicle = vehicle
+        vehicle.services = [service1, service2]
+
+        // When
+        service.rescheduleNotifications(for: vehicle)
+
+        // Then
+        XCTAssertNotNil(service1.notificationID, "Service 1 should have notification ID after reschedule")
+        XCTAssertNotNil(service2.notificationID, "Service 2 should have notification ID after reschedule")
+
+        // Cleanup
+        service.cancelNotifications(for: vehicle)
+    }
+
+    func testScheduleNotificationWithPace_CancelsExisting() {
+        // Given
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022, currentMileage: 50000)
+        let serviceItem = Service(name: "Oil Change", dueMileage: 51000)
+        serviceItem.vehicle = vehicle
+
+        // First schedule
+        let firstID = service.scheduleNotificationWithPace(
+            for: serviceItem,
+            vehicle: vehicle,
+            dailyPace: 40.0
+        )
+        serviceItem.notificationID = firstID
+
+        // When - schedule again
+        let secondID = service.scheduleNotificationWithPace(
+            for: serviceItem,
+            vehicle: vehicle,
+            dailyPace: 40.0
+        )
+
+        // Then
+        XCTAssertNotEqual(firstID, secondID, "Should create new notification ID")
+        XCTAssertNotNil(secondID)
+
+        // Cleanup
+        if let id = secondID {
+            service.cancelAllNotifications(baseID: id)
+        }
+    }
+
+    func testScheduleNotificationWithPace_AlreadyPastDue_ReturnsNil() {
+        // Given: Service already past due
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022, currentMileage: 52000)
+        let serviceItem = Service(name: "Oil Change", dueMileage: 51000)  // Already past
+        serviceItem.vehicle = vehicle
+
+        // When
+        let notificationID = service.scheduleNotificationWithPace(
+            for: serviceItem,
+            vehicle: vehicle,
+            dailyPace: 40.0
+        )
+
+        // Then
+        XCTAssertNil(notificationID, "Should not schedule for past-due service")
+    }
 }

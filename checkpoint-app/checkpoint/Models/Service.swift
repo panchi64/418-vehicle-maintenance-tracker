@@ -158,7 +158,11 @@ extension Service {
     }
 
     /// Returns urgency score for sorting (lower = more urgent)
-    func urgencyScore(currentMileage: Int, currentDate: Date = .now) -> Int {
+    /// - Parameters:
+    ///   - currentMileage: Current vehicle mileage
+    ///   - currentDate: Current date (defaults to now)
+    ///   - dailyPace: Optional daily driving pace in miles; falls back to 40 mi/day if not provided
+    func urgencyScore(currentMileage: Int, currentDate: Date = .now, dailyPace: Double? = nil) -> Int {
         var score = Int.max
 
         // Date-based urgency
@@ -167,14 +171,48 @@ extension Service {
             score = min(score, days)
         }
 
-        // Mileage-based urgency (convert to days equivalent, assuming 40 miles/day average)
+        // Mileage-based urgency (use actual pace or default 40 miles/day)
         if let dueMileage = dueMileage {
             let milesRemaining = dueMileage - currentMileage
-            let daysEquivalent = milesRemaining / 40
+            let effectivePace = dailyPace ?? 40.0
+            let daysEquivalent = Int(Double(milesRemaining) / effectivePace)
             score = min(score, daysEquivalent)
         }
 
         return score
+    }
+
+    /// Predict when mileage threshold will be reached based on driving pace
+    /// - Parameters:
+    ///   - currentMileage: Current vehicle mileage
+    ///   - dailyPace: Daily driving pace in miles
+    /// - Returns: Predicted date when due mileage will be reached, or nil if not applicable
+    func predictedDueDate(currentMileage: Int, dailyPace: Double?) -> Date? {
+        guard let pace = dailyPace, pace > 0,
+              let dueMileage = dueMileage else { return nil }
+
+        let milesRemaining = dueMileage - currentMileage
+        guard milesRemaining > 0 else { return nil }
+
+        let daysUntilDue = Int(ceil(Double(milesRemaining) / pace))
+        return Calendar.current.date(byAdding: .day, value: daysUntilDue, to: .now)
+    }
+
+    /// Returns the earlier of due date or predicted mileage date
+    /// - Parameters:
+    ///   - currentMileage: Current vehicle mileage
+    ///   - dailyPace: Daily driving pace in miles
+    /// - Returns: The effective due date (whichever comes first), or nil if neither is set
+    func effectiveDueDate(currentMileage: Int, dailyPace: Double?) -> Date? {
+        let calendarDate = dueDate
+        let predictedDate = predictedDueDate(currentMileage: currentMileage, dailyPace: dailyPace)
+
+        switch (calendarDate, predictedDate) {
+        case (nil, nil): return nil
+        case (let date?, nil): return date
+        case (nil, let predicted?): return predicted
+        case (let date?, let predicted?): return min(date, predicted)
+        }
     }
 }
 
