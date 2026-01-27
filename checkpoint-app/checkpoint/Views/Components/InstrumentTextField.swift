@@ -57,6 +57,12 @@ struct InstrumentNumberField: View {
     var placeholder: String = ""
     var suffix: String = ""
 
+    /// Show camera button accessory
+    var showCameraButton: Bool = false
+
+    /// Callback when camera button is tapped
+    var onCameraTap: (() -> Void)?
+
     @State private var textValue: String = ""
     @FocusState private var isFocused: Bool
 
@@ -68,34 +74,54 @@ struct InstrumentNumberField: View {
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1.5)
 
-            // Input field
-            HStack(spacing: 8) {
-                TextField(placeholder, text: $textValue)
-                    .font(.instrumentBody)
-                    .foregroundStyle(Theme.textPrimary)
-                    .keyboardType(.numberPad)
-                    .focused($isFocused)
-                    .onChange(of: textValue) { _, newValue in
-                        let filtered = newValue.filter { $0.isNumber }
-                        if filtered != newValue {
-                            textValue = filtered
+            // Input field with optional camera accessory
+            HStack(spacing: 0) {
+                // Main input area
+                HStack(spacing: 8) {
+                    TextField(placeholder, text: $textValue)
+                        .font(.instrumentBody)
+                        .foregroundStyle(Theme.textPrimary)
+                        .keyboardType(.numberPad)
+                        .focused($isFocused)
+                        .onChange(of: textValue) { _, newValue in
+                            let filtered = newValue.filter { $0.isNumber }
+                            if filtered != newValue {
+                                textValue = filtered
+                            }
+                            value = Int(filtered)
                         }
-                        value = Int(filtered)
-                    }
-                    .onAppear {
-                        if let value = value {
-                            textValue = String(value)
+                        .onAppear {
+                            if let value = value {
+                                textValue = String(value)
+                            }
                         }
-                    }
 
-                if !suffix.isEmpty {
-                    Text(suffix)
-                        .font(.instrumentLabel)
-                        .foregroundStyle(Theme.textTertiary)
+                    if !suffix.isEmpty {
+                        Text(suffix)
+                            .font(.instrumentLabel)
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+                }
+                .padding(16)
+                .background(Theme.surfaceInstrument)
+
+                // Camera button accessory
+                if showCameraButton, let onCameraTap = onCameraTap {
+                    Button {
+                        onCameraTap()
+                    } label: {
+                        Image(systemName: "camera.fill")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundStyle(Theme.accent)
+                            .frame(width: 52, height: 52)
+                            .background(Theme.surfaceInstrument)
+                    }
+                    .overlay(
+                        Rectangle()
+                            .strokeBorder(isFocused ? Theme.accent : Theme.gridLine, lineWidth: Theme.borderWidth)
+                    )
                 }
             }
-            .padding(16)
-            .background(Theme.surfaceInstrument)
             .clipShape(Rectangle())
             .overlay(
                 Rectangle()

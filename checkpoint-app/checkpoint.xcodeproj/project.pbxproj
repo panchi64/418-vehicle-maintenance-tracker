@@ -514,7 +514,7 @@
 				CODE_SIGN_ENTITLEMENTS = checkpoint/checkpoint.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = WU2PJ8AT65;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Supporting Files/Info.plist";
@@ -548,7 +548,7 @@
 				CODE_SIGN_ENTITLEMENTS = checkpoint/checkpoint.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = WU2PJ8AT65;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Supporting Files/Info.plist";
@@ -662,7 +662,7 @@
 				CODE_SIGN_ENTITLEMENTS = CheckpointWidget/CheckpointWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = WU2PJ8AT65;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CheckpointWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = CheckpointWidget;
@@ -693,7 +693,7 @@
 				CODE_SIGN_ENTITLEMENTS = CheckpointWidget/CheckpointWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = WU2PJ8AT65;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CheckpointWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = CheckpointWidget;
