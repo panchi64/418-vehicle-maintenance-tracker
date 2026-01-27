@@ -14,6 +14,7 @@ struct MaintenanceTimeline: View {
     let serviceLogs: [ServiceLog]
     let vehicle: Vehicle
     let onServiceTap: (Service) -> Void
+    var onLogTap: ((ServiceLog) -> Void)?
 
     private var calendar: Calendar { Calendar.current }
 
@@ -201,7 +202,9 @@ struct MaintenanceTimeline: View {
                     .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
             )
             .onTapGesture {
-                if let service = item.service {
+                if item.type == .completed, let log = item.serviceLog, let onLogTap {
+                    onLogTap(log)
+                } else if let service = item.service {
                     onServiceTap(service)
                 }
             }

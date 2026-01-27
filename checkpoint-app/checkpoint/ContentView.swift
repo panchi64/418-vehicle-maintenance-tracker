@@ -151,6 +151,11 @@ struct ContentView: View {
                 }
             }
         }
+        .sheet(item: $appState.selectedServiceLog) { log in
+            NavigationStack {
+                ServiceLogDetailView(log: log)
+            }
+        }
         .sheet(isPresented: $appState.showEditVehicle) {
             if let vehicle = currentVehicle {
                 EditVehicleView(vehicle: vehicle)

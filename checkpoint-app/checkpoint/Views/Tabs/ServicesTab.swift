@@ -119,6 +119,9 @@ struct ServicesTab: View {
                         vehicle: vehicle,
                         onServiceTap: { service in
                             appState.selectedService = service
+                        },
+                        onLogTap: { log in
+                            appState.selectedServiceLog = log
                         }
                     )
                     .revealAnimation(delay: 0.2)
@@ -168,8 +171,13 @@ struct ServicesTab: View {
 
                         VStack(spacing: 0) {
                             ForEach(Array(filteredLogs.enumerated()), id: \.element.id) { index, log in
-                                historyRow(log: log)
-                                    .staggeredReveal(index: index, baseDelay: 0.3)
+                                Button {
+                                    appState.selectedServiceLog = log
+                                } label: {
+                                    historyRow(log: log)
+                                }
+                                .buttonStyle(.plain)
+                                .staggeredReveal(index: index, baseDelay: 0.3)
 
                                 if index < filteredLogs.count - 1 {
                                     Rectangle()
@@ -274,6 +282,10 @@ struct ServicesTab: View {
                     .font(.brutalistBody)
                     .foregroundStyle(Theme.accent)
             }
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Theme.textTertiary)
         }
         .padding(Spacing.md)
     }
@@ -293,7 +305,7 @@ struct ServicesTab: View {
             }
 
             VStack(spacing: Spacing.xs) {
-                Text(searchText.isEmpty ? "NO_SERVICES" : "NO_RESULTS")
+                Text(searchText.isEmpty ? "No Services" : "No Results")
                     .font(.brutalistHeading)
                     .foregroundStyle(Theme.textPrimary)
 
@@ -320,7 +332,7 @@ struct ServicesTab: View {
             }
 
             VStack(spacing: Spacing.xs) {
-                Text("NO_VEHICLE_SELECTED")
+                Text("No Vehicle")
                     .font(.brutalistHeading)
                     .foregroundStyle(Theme.textPrimary)
 

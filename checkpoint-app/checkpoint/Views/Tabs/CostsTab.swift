@@ -305,8 +305,13 @@ struct CostsTab: View {
 
                         VStack(spacing: 0) {
                             ForEach(Array(logsWithCosts.enumerated()), id: \.element.id) { index, log in
-                                expenseRow(log: log)
-                                    .staggeredReveal(index: index, baseDelay: 0.25)
+                                Button {
+                                    appState.selectedServiceLog = log
+                                } label: {
+                                    expenseRow(log: log)
+                                }
+                                .buttonStyle(.plain)
+                                .staggeredReveal(index: index, baseDelay: 0.25)
 
                                 if index < logsWithCosts.count - 1 {
                                     Rectangle()
@@ -346,7 +351,7 @@ struct CostsTab: View {
 
     private var totalSpentCard: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text("TOTAL_SPENT")
+            Text("Total Spent")
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(2)
@@ -546,6 +551,10 @@ struct CostsTab: View {
                     .font(.brutalistHeading)
                     .foregroundStyle(log.costCategory?.color ?? Theme.accent)
             }
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Theme.textTertiary)
         }
         .padding(Spacing.md)
     }
@@ -565,7 +574,7 @@ struct CostsTab: View {
             }
 
             VStack(spacing: Spacing.xs) {
-                Text("NO_EXPENSES")
+                Text("No Expenses")
                     .font(.brutalistHeading)
                     .foregroundStyle(Theme.textPrimary)
 
@@ -592,7 +601,7 @@ struct CostsTab: View {
             }
 
             VStack(spacing: Spacing.xs) {
-                Text("NO_VEHICLE_SELECTED")
+                Text("No Vehicle")
                     .font(.brutalistHeading)
                     .foregroundStyle(Theme.textPrimary)
 

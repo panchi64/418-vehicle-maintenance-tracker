@@ -50,6 +50,7 @@ final class AppStateTests: XCTestCase {
         XCTAssertFalse(appState.showAddService)
         XCTAssertFalse(appState.showEditVehicle)
         XCTAssertNil(appState.selectedService)
+        XCTAssertNil(appState.selectedServiceLog)
     }
 
     // MARK: - Navigation Method Tests
@@ -92,6 +93,71 @@ final class AppStateTests: XCTestCase {
 
         // Then
         XCTAssertEqual(appState.selectedTab, .home)
+    }
+
+    // MARK: - Selected Service Log Tests
+
+    @MainActor
+    func testSelectedServiceLog_DefaultsToNil() async {
+        // Given/When
+        let appState = AppState()
+
+        // Then
+        XCTAssertNil(appState.selectedServiceLog)
+    }
+
+    @MainActor
+    func testSelectedServiceLog_CanBeSet() async throws {
+        // Given
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let modelContainer = try ModelContainer(
+            for: Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self, ServiceAttachment.self, ServicePreset.self,
+            configurations: config
+        )
+        let modelContext = modelContainer.mainContext
+
+        let appState = AppState()
+        let log = ServiceLog(
+            performedDate: Date.now,
+            mileageAtService: 32000,
+            cost: 45.99
+        )
+        modelContext.insert(log)
+
+        // When
+        appState.selectedServiceLog = log
+
+        // Then
+        XCTAssertNotNil(appState.selectedServiceLog)
+        XCTAssertEqual(appState.selectedServiceLog?.mileageAtService, 32000)
+
+        // Cleanup
+        appState.selectedServiceLog = nil
+    }
+
+    @MainActor
+    func testSelectedServiceLog_CanBeCleared() async throws {
+        // Given
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let modelContainer = try ModelContainer(
+            for: Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self, ServiceAttachment.self, ServicePreset.self,
+            configurations: config
+        )
+        let modelContext = modelContainer.mainContext
+
+        let appState = AppState()
+        let log = ServiceLog(
+            performedDate: Date.now,
+            mileageAtService: 32000
+        )
+        modelContext.insert(log)
+        appState.selectedServiceLog = log
+
+        // When
+        appState.selectedServiceLog = nil
+
+        // Then
+        XCTAssertNil(appState.selectedServiceLog)
     }
 
     // MARK: - Sheet State Tests

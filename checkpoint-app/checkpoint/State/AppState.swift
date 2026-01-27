@@ -23,6 +23,7 @@ final class AppState {
     var showAddService = false
     var showEditVehicle = false
     var selectedService: Service?
+    var selectedServiceLog: ServiceLog?
 
     // MARK: - Tab Enum
 

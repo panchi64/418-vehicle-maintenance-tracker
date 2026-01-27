@@ -87,7 +87,7 @@ struct HomeTab: View {
                                 Button {
                                     appState.navigateToServices()
                                 } label: {
-                                    Text("VIEW_ALL")
+                                    Text("View All")
                                         .font(.brutalistLabel)
                                         .foregroundStyle(Theme.accent)
                                         .tracking(1)
@@ -132,7 +132,7 @@ struct HomeTab: View {
                                 Button {
                                     appState.navigateToServices()
                                 } label: {
-                                    Text("VIEW_ALL")
+                                    Text("View All")
                                         .font(.brutalistLabel)
                                         .foregroundStyle(Theme.accent)
                                         .tracking(1)
@@ -146,7 +146,12 @@ struct HomeTab: View {
                                 .prefix(3)
 
                             ForEach(Array(recentLogs.enumerated()), id: \.element.id) { index, log in
-                                activityRow(log: log)
+                                Button {
+                                    appState.selectedServiceLog = log
+                                } label: {
+                                    activityRow(log: log)
+                                }
+                                .buttonStyle(.plain)
 
                                 if index < recentLogs.count - 1 {
                                     Rectangle()
@@ -213,6 +218,10 @@ struct HomeTab: View {
                     .font(.brutalistBody)
                     .foregroundStyle(Theme.accent)
             }
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Theme.textTertiary)
         }
         .padding(Spacing.md)
     }
@@ -232,7 +241,7 @@ struct HomeTab: View {
             }
 
             VStack(spacing: Spacing.xs) {
-                Text("NO_VEHICLES")
+                Text("No Vehicles")
                     .font(.brutalistHeading)
                     .foregroundStyle(Theme.textPrimary)
 
@@ -243,7 +252,7 @@ struct HomeTab: View {
                     .lineSpacing(4)
             }
 
-            Button("ADD_VEHICLE") {
+            Button("Add Vehicle") {
                 appState.showAddVehicle = true
             }
             .buttonStyle(.primary)
@@ -266,7 +275,7 @@ struct HomeTab: View {
             }
 
             VStack(spacing: Spacing.xs) {
-                Text("ALL_CLEAR")
+                Text("All Clear")
                     .font(.brutalistHeading)
                     .foregroundStyle(Theme.textPrimary)
 

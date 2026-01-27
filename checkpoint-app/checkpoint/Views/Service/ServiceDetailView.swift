@@ -18,6 +18,7 @@ struct ServiceDetailView: View {
 
     @State private var showEditSheet = false
     @State private var showMarkDoneSheet = false
+    @State private var selectedLog: ServiceLog?
 
     private var status: ServiceStatus {
         service.status(currentMileage: vehicle.currentMileage)
@@ -40,10 +41,12 @@ struct ServiceDetailView: View {
                     historySection
                 }
 
-                // Attachments from most recent log
-                if let latestLog = service.logs.sorted(by: { $0.performedDate > $1.performedDate }).first,
-                   !latestLog.attachments.isEmpty {
-                    AttachmentSection(attachments: latestLog.attachments)
+                // Attachments from all logs
+                let allAttachments = service.logs
+                    .sorted(by: { $0.performedDate > $1.performedDate })
+                    .flatMap { $0.attachments }
+                if !allAttachments.isEmpty {
+                    AttachmentSection(attachments: allAttachments)
                 }
             }
             .padding(.horizontal, Spacing.screenHorizontal)
@@ -66,6 +69,11 @@ struct ServiceDetailView: View {
         }
         .sheet(isPresented: $showMarkDoneSheet, onDismiss: { updateAppIcon(); updateWidgetData() }) {
             MarkServiceDoneSheet(service: service, vehicle: vehicle)
+        }
+        .sheet(item: $selectedLog) { log in
+            NavigationStack {
+                ServiceLogDetailView(log: log)
+            }
         }
     }
 
@@ -183,10 +191,16 @@ struct ServiceDetailView: View {
             InstrumentSectionHeader(title: "History")
 
             VStack(spacing: 0) {
-                ForEach(service.logs.sorted(by: { $0.performedDate > $1.performedDate })) { log in
-                    historyRow(log: log)
+                let sortedLogs = service.logs.sorted(by: { $0.performedDate > $1.performedDate })
+                ForEach(sortedLogs) { log in
+                    Button {
+                        selectedLog = log
+                    } label: {
+                        historyRow(log: log)
+                    }
+                    .buttonStyle(.plain)
 
-                    if log.id != service.logs.sorted(by: { $0.performedDate > $1.performedDate }).last?.id {
+                    if log.id != sortedLogs.last?.id {
                         Divider()
                             .padding(.leading, Spacing.md)
                     }
@@ -204,9 +218,17 @@ struct ServiceDetailView: View {
     private func historyRow(log: ServiceLog) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text(formatDate(log.performedDate))
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textPrimary)
+                HStack(spacing: Spacing.xs) {
+                    Text(formatDate(log.performedDate))
+                        .font(.brutalistBody)
+                        .foregroundStyle(Theme.textPrimary)
+
+                    if !log.attachments.isEmpty {
+                        Image(systemName: "paperclip")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+                }
 
                 Text("\(formatMileage(log.mileageAtService))")
                     .font(.brutalistLabel)
@@ -220,6 +242,10 @@ struct ServiceDetailView: View {
                     .font(.brutalistBody)
                     .foregroundStyle(Theme.textSecondary)
             }
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Theme.textTertiary)
         }
         .padding(Spacing.md)
     }
@@ -245,9 +271,7 @@ struct ServiceDetailView: View {
     }
 
     private func formatMileage(_ miles: Int) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        return (formatter.string(from: NSNumber(value: miles)) ?? "\(miles)") + " mi"
+        Formatters.mileage(miles)
     }
 }
 
