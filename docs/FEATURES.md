@@ -37,6 +37,7 @@
 | Service type presets   | High     | ✅     | Oil change, tire rotation, brakes, etc.              |
 | Custom service types   | Medium   | ✅     | User-defined categories                              |
 | Attachments            | Medium   | ✅     | Photos, PDFs, receipts                               |
+| Service log detail     | Medium   | ✅     | Tap any history/activity/expense row to view full log details |
 
 #### On-Device Document Intelligence
 
@@ -505,7 +506,7 @@
 | **Vehicle header** | Persistent at top of ALL tabs — vehicle selector always accessible | ✅ |
 | **Quick-add button (+)** | Floating action button visible on ALL tabs — supersedes all views for consistent access | ✅ |
 | **Tab switching** | Should feel fluid and intuitive, not disruptive to user flow | ✅ |
-| **Recent Activity (Home)** | Glanceable summary only (last 3 items) — tapping navigates to Services tab for full history | ✅ |
+| **Recent Activity (Home)** | Glanceable summary only (last 3 items) — tapping opens service log detail sheet | ✅ |
 
 **Tab Content Details:**
 
@@ -513,7 +514,7 @@
 - Vehicle header with mileage and specs
 - "Next Up" hero card (most urgent service)
 - Quick stats bar (year-to-date summary)
-- Recent Activity feed (last 3 completed services, links to Services tab)
+- Recent Activity feed (last 3 completed services, tappable to view log details)
 - Minimal, focused — answer "what needs attention?" at a glance
 
 **Services Tab:**
