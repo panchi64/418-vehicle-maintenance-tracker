@@ -164,14 +164,14 @@
 
 > Learn driving patterns from mileage entries over time. Predict current mileage and proactively notify users about upcoming services.
 
-| Feature                          | Priority | Notes                                                 |
-| -------------------------------- | -------- | ----------------------------------------------------- |
-| Driving rate calculation         | High     | miles/month based on logged data points               |
-| Estimated current mileage        | High     | Extrapolate between manual entries                    |
-| Predictive service notifications | High     | "Oil change due in ~500 miles based on your driving"  |
-| Dashboard OCR                    | High     | Photo of odometer → extract mileage automatically     |
-| Biweekly mileage prompts         | Medium   | Gentle reminder to update mileage for better estimates |
-| Recency weighting                | Medium   | Recent behavior weighted more heavily (habits change) |
+| Feature                          | Priority | Status | Notes                                                 |
+| -------------------------------- | -------- | ------ | ----------------------------------------------------- |
+| Driving rate calculation         | High     | ✅     | miles/month based on logged data points               |
+| Estimated current mileage        | High     | ✅     | Extrapolate between manual entries                    |
+| Predictive service notifications | High     | ✅     | "Oil change due in ~500 miles based on your driving"  |
+| Dashboard OCR                    | High     |        | Photo of odometer → extract mileage automatically     |
+| Biweekly mileage prompts         | Medium   | ✅     | Push notification every 14 days to update mileage     |
+| Recency weighting                | Medium   | ✅     | EWMA with 30-day half-life for pace calculation       |
 
 #### Dashboard OCR for Mileage Capture
 
@@ -269,10 +269,10 @@
 
 ### 8. Smart Features (Differentiators)
 
-| Feature             | Priority | Notes                                                 |
-| ------------------- | -------- | ----------------------------------------------------- |
-| Recall alerts       | High     | NHTSA recall notifications — safety critical          |
-| Yearly cost roundup | Medium   | Annual summary of what you spent maintaining your car |
+| Feature             | Priority | Status | Notes                                                 |
+| ------------------- | -------- | ------ | ----------------------------------------------------- |
+| Recall alerts       | High     |        | NHTSA recall notifications — safety critical          |
+| Yearly cost roundup | Medium   | ✅     | Annual summary push notification on January 2nd       |
 
 #### Yearly Cost Roundup
 

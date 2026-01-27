@@ -298,6 +298,9 @@ struct HomeTab: View {
 
         // Update app icon based on new mileage affecting service status
         AppIconService.shared.updateIcon(for: vehicle, services: services)
+
+        // Reschedule mileage reminder for 14 days from now
+        NotificationService.shared.scheduleMileageReminder(for: vehicle, lastUpdateDate: .now)
     }
 }
 

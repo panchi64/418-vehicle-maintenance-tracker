@@ -38,7 +38,12 @@ final class MileageSnapshot: Identifiable {
 // MARK: - Pace Calculation Helpers
 
 extension MileageSnapshot {
-    /// Calculate daily miles pace from an array of snapshots
+    /// Half-life for recency weighting (in days)
+    /// Snapshots older than this have weight reduced by half
+    private static let recencyHalfLifeDays: Double = 30.0
+
+    /// Calculate daily miles pace from an array of snapshots using recency-weighted averaging
+    /// Recent snapshots are weighted more heavily using exponential decay (EWMA)
     /// Requires at least 7 days of data to return a meaningful pace
     static func calculateDailyPace(from snapshots: [MileageSnapshot]) -> Double? {
         guard snapshots.count >= 2 else { return nil }
@@ -49,19 +54,59 @@ extension MileageSnapshot {
         guard let oldest = sorted.first,
               let newest = sorted.last else { return nil }
 
-        let daysBetween = Calendar.current.dateComponents(
+        let totalDaysBetween = Calendar.current.dateComponents(
             [.day],
             from: oldest.recordedAt,
             to: newest.recordedAt
         ).day ?? 0
 
         // Require at least 7 days of data for meaningful pace
-        guard daysBetween >= 7 else { return nil }
+        guard totalDaysBetween >= 7 else { return nil }
 
-        let milesDriven = newest.mileage - oldest.mileage
-        guard milesDriven > 0 else { return nil }
+        // Calculate weighted pace using consecutive snapshot pairs
+        var weightedPaceSum: Double = 0
+        var weightSum: Double = 0
+        let now = Date.now
 
-        return Double(milesDriven) / Double(daysBetween)
+        for i in 0..<(sorted.count - 1) {
+            let earlier = sorted[i]
+            let later = sorted[i + 1]
+
+            // Calculate pace for this pair
+            let daysBetweenPair = Calendar.current.dateComponents(
+                [.day],
+                from: earlier.recordedAt,
+                to: later.recordedAt
+            ).day ?? 0
+
+            guard daysBetweenPair > 0 else { continue }
+
+            let milesDriven = later.mileage - earlier.mileage
+            guard milesDriven > 0 else { continue }
+
+            let pace = Double(milesDriven) / Double(daysBetweenPair)
+
+            // Calculate weight based on midpoint recency
+            // Use the midpoint of the interval to determine recency
+            let midpointDate = earlier.recordedAt.addingTimeInterval(
+                later.recordedAt.timeIntervalSince(earlier.recordedAt) / 2
+            )
+            let daysAgo = Calendar.current.dateComponents(
+                [.day],
+                from: midpointDate,
+                to: now
+            ).day ?? 0
+
+            // Exponential decay: weight = e^(-daysAgo / halfLife)
+            let weight = exp(-Double(daysAgo) / recencyHalfLifeDays)
+
+            weightedPaceSum += pace * weight
+            weightSum += weight
+        }
+
+        // Return weighted average
+        guard weightSum > 0 else { return nil }
+        return weightedPaceSum / weightSum
     }
 
     /// Check if there's already a snapshot for today (for throttling)

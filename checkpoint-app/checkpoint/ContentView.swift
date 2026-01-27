@@ -14,6 +14,7 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Query private var vehicles: [Vehicle]
     @Query private var services: [Service]
+    @Query private var serviceLogs: [ServiceLog]
 
     @State private var appState = AppState()
     @State private var showMileageUpdate = false
@@ -102,6 +103,8 @@ struct ContentView: View {
             updateAppIcon()
             // Update widget data
             updateWidgetData()
+            // Schedule mileage reminders and yearly roundups for all vehicles
+            schedulePeriodicNotifications()
         }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active || newPhase == .background {
@@ -160,6 +163,43 @@ struct ContentView: View {
                 .presentationDetents([.height(280)])
             }
         }
+        // Handle mileage update notification navigation
+        .onReceive(NotificationCenter.default.publisher(for: .navigateToMileageUpdateFromNotification)) { notification in
+            if let vehicleIDString = notification.userInfo?["vehicleID"] as? String,
+               let vehicleID = UUID(uuidString: vehicleIDString) {
+                // Select the vehicle if it matches, otherwise find it
+                if currentVehicle?.id != vehicleID {
+                    if let vehicle = vehicles.first(where: { $0.id == vehicleID }) {
+                        appState.selectedVehicle = vehicle
+                    }
+                }
+                // Navigate to home and show mileage update
+                appState.selectedTab = .home
+                showMileageUpdate = true
+            }
+        }
+        // Handle snooze mileage reminder
+        .onReceive(NotificationCenter.default.publisher(for: .mileageReminderSnoozedFromNotification)) { notification in
+            if let vehicleIDString = notification.userInfo?["vehicleID"] as? String,
+               let vehicleID = UUID(uuidString: vehicleIDString),
+               let vehicle = vehicles.first(where: { $0.id == vehicleID }) {
+                NotificationService.shared.snoozeMileageReminder(for: vehicle)
+            }
+        }
+        // Handle yearly roundup navigation to costs
+        .onReceive(NotificationCenter.default.publisher(for: .navigateToCostsFromNotification)) { notification in
+            if let vehicleIDString = notification.userInfo?["vehicleID"] as? String,
+               let vehicleID = UUID(uuidString: vehicleIDString) {
+                // Select the vehicle if it matches, otherwise find it
+                if currentVehicle?.id != vehicleID {
+                    if let vehicle = vehicles.first(where: { $0.id == vehicleID }) {
+                        appState.selectedVehicle = vehicle
+                    }
+                }
+                // Navigate to costs tab
+                appState.selectedTab = .costs
+            }
+        }
     }
 
     // MARK: - App Icon
@@ -202,6 +242,41 @@ struct ContentView: View {
         updateAppIcon()
         // Update widget data
         updateWidgetData()
+        // Reschedule mileage reminder for 14 days from now
+        NotificationService.shared.scheduleMileageReminder(for: vehicle, lastUpdateDate: .now)
+    }
+
+    // MARK: - Periodic Notifications
+
+    private func schedulePeriodicNotifications() {
+        let calendar = Calendar.current
+        let currentYear = calendar.component(.year, from: Date.now)
+        let previousYear = currentYear - 1
+
+        for vehicle in vehicles {
+            // Schedule mileage reminder if needed
+            if let lastUpdate = vehicle.mileageUpdatedAt {
+                // Schedule based on last update date
+                NotificationService.shared.scheduleMileageReminder(for: vehicle, lastUpdateDate: lastUpdate)
+            } else {
+                // Never updated - schedule from now
+                NotificationService.shared.scheduleMileageReminder(for: vehicle, lastUpdateDate: .now)
+            }
+
+            // Calculate previous year's total cost for yearly roundup
+            let vehicleLogs = serviceLogs.filter { $0.vehicle?.id == vehicle.id }
+            let previousYearLogs = vehicleLogs.filter {
+                calendar.component(.year, from: $0.performedDate) == previousYear
+            }
+            let previousYearCost = previousYearLogs.compactMap { $0.cost }.reduce(0, +)
+
+            // Schedule yearly roundup if there's data
+            NotificationService.shared.scheduleYearlyRoundup(
+                for: vehicle,
+                previousYearCost: previousYearCost,
+                previousYear: previousYear
+            )
+        }
     }
 
     // MARK: - Sample Data

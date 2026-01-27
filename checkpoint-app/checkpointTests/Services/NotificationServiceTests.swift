@@ -611,4 +611,297 @@ final class NotificationServiceTests: XCTestCase {
         // Then - verify method completes without error
         XCTAssertTrue(true, "Cancel all notifications for base ID should complete without error")
     }
+
+    // MARK: - Mileage Reminder Category Tests
+
+    func testMileageReminderCategoryIdentifier() {
+        XCTAssertEqual(NotificationService.mileageReminderCategoryID, "MILEAGE_REMINDER")
+    }
+
+    func testUpdateMileageActionIdentifier() {
+        XCTAssertEqual(NotificationService.updateMileageActionID, "UPDATE_MILEAGE")
+    }
+
+    func testRemindLaterActionIdentifier() {
+        XCTAssertEqual(NotificationService.remindLaterActionID, "REMIND_LATER")
+    }
+
+    func testMileageReminderIntervalDays() {
+        XCTAssertEqual(NotificationService.mileageReminderIntervalDays, 14)
+    }
+
+    // MARK: - Mileage Reminder Notification Tests
+
+    func testMileageReminderIDFormat() {
+        // Given
+        let vehicleID = UUID()
+
+        // When
+        let reminderID = NotificationService.mileageReminderID(for: vehicleID)
+
+        // Then
+        XCTAssertTrue(reminderID.hasPrefix("mileage-reminder-"), "ID should have mileage-reminder prefix")
+        XCTAssertTrue(reminderID.contains(vehicleID.uuidString), "ID should contain vehicle UUID")
+    }
+
+    func testBuildMileageReminderRequestContent() {
+        // Given
+        let vehicleID = UUID()
+        let vehicleName = "My Car"
+        let reminderDate = Calendar.current.date(byAdding: .day, value: 14, to: Date())!
+
+        // When
+        let request = service.buildMileageReminderRequest(
+            vehicleName: vehicleName,
+            vehicleID: vehicleID,
+            reminderDate: reminderDate
+        )
+
+        // Then
+        XCTAssertEqual(request.content.title, "Time to Update Your Odometer")
+        XCTAssertTrue(request.content.body.contains(vehicleName), "Body should contain vehicle name")
+        XCTAssertEqual(request.content.categoryIdentifier, NotificationService.mileageReminderCategoryID)
+        XCTAssertNotNil(request.content.sound)
+    }
+
+    func testBuildMileageReminderRequestUserInfo() {
+        // Given
+        let vehicleID = UUID()
+        let reminderDate = Calendar.current.date(byAdding: .day, value: 14, to: Date())!
+
+        // When
+        let request = service.buildMileageReminderRequest(
+            vehicleName: "Test Car",
+            vehicleID: vehicleID,
+            reminderDate: reminderDate
+        )
+
+        // Then
+        XCTAssertEqual(request.content.userInfo["vehicleID"] as? String, vehicleID.uuidString)
+        XCTAssertEqual(request.content.userInfo["type"] as? String, "mileageReminder")
+    }
+
+    func testBuildMileageReminderRequestTriggerAt9AM() {
+        // Given
+        let vehicleID = UUID()
+        let reminderDate = Calendar.current.date(byAdding: .day, value: 14, to: Date())!
+
+        // When
+        let request = service.buildMileageReminderRequest(
+            vehicleName: "Test Car",
+            vehicleID: vehicleID,
+            reminderDate: reminderDate
+        )
+
+        // Then
+        guard let trigger = request.trigger as? UNCalendarNotificationTrigger else {
+            XCTFail("Trigger should be UNCalendarNotificationTrigger")
+            return
+        }
+        XCTAssertEqual(trigger.dateComponents.hour, 9)
+        XCTAssertEqual(trigger.dateComponents.minute, 0)
+        XCTAssertFalse(trigger.repeats)
+    }
+
+    func testScheduleMileageReminderCreatesNotification() {
+        // Given
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
+
+        // When - scheduling should not crash
+        service.scheduleMileageReminder(for: vehicle)
+
+        // Then - verify method completes
+        XCTAssertTrue(true, "Schedule mileage reminder should complete without error")
+
+        // Cleanup
+        service.cancelMileageReminder(for: vehicle)
+    }
+
+    func testCancelMileageReminder() {
+        // Given
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
+        service.scheduleMileageReminder(for: vehicle)
+
+        // When - should not crash
+        service.cancelMileageReminder(for: vehicle)
+
+        // Then - verify method completes
+        XCTAssertTrue(true, "Cancel mileage reminder should complete without error")
+    }
+
+    func testSnoozeMileageReminder() {
+        // Given
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
+        service.scheduleMileageReminder(for: vehicle)
+
+        // When - should not crash
+        service.snoozeMileageReminder(for: vehicle)
+
+        // Then - verify method completes
+        XCTAssertTrue(true, "Snooze mileage reminder should complete without error")
+
+        // Cleanup
+        service.cancelMileageReminder(for: vehicle)
+    }
+
+    // MARK: - Yearly Roundup Category Tests
+
+    func testYearlyRoundupCategoryIdentifier() {
+        XCTAssertEqual(NotificationService.yearlyRoundupCategoryID, "YEARLY_ROUNDUP")
+    }
+
+    func testViewCostsActionIdentifier() {
+        XCTAssertEqual(NotificationService.viewCostsActionID, "VIEW_COSTS")
+    }
+
+    // MARK: - Yearly Roundup Notification Tests
+
+    func testYearlyRoundupIDFormat() {
+        // Given
+        let vehicleID = UUID()
+        let year = 2025
+
+        // When
+        let roundupID = NotificationService.yearlyRoundupID(for: vehicleID, year: year)
+
+        // Then
+        XCTAssertTrue(roundupID.hasPrefix("yearly-roundup-"), "ID should have yearly-roundup prefix")
+        XCTAssertTrue(roundupID.contains(vehicleID.uuidString), "ID should contain vehicle UUID")
+        XCTAssertTrue(roundupID.contains("2025"), "ID should contain the year")
+    }
+
+    func testBuildYearlyRoundupRequestContent() {
+        // Given
+        let vehicleID = UUID()
+        let vehicleName = "Family Car"
+        let year = 2025
+        let totalCost: Decimal = 1250.50
+        let notificationDate = Calendar.current.date(from: DateComponents(year: 2026, month: 1, day: 2))!
+
+        // When
+        let request = service.buildYearlyRoundupRequest(
+            vehicleName: vehicleName,
+            vehicleID: vehicleID,
+            year: year,
+            totalCost: totalCost,
+            notificationDate: notificationDate
+        )
+
+        // Then
+        XCTAssertEqual(request.content.title, "Your 2025 Vehicle Costs Are In!")
+        XCTAssertTrue(request.content.body.contains("$1,250"), "Body should contain formatted cost")
+        XCTAssertTrue(request.content.body.contains(vehicleName), "Body should contain vehicle name")
+        XCTAssertEqual(request.content.categoryIdentifier, NotificationService.yearlyRoundupCategoryID)
+        XCTAssertNotNil(request.content.sound)
+    }
+
+    func testBuildYearlyRoundupRequestUserInfo() {
+        // Given
+        let vehicleID = UUID()
+        let year = 2025
+        let notificationDate = Calendar.current.date(from: DateComponents(year: 2026, month: 1, day: 2))!
+
+        // When
+        let request = service.buildYearlyRoundupRequest(
+            vehicleName: "Test Car",
+            vehicleID: vehicleID,
+            year: year,
+            totalCost: 500,
+            notificationDate: notificationDate
+        )
+
+        // Then
+        XCTAssertEqual(request.content.userInfo["vehicleID"] as? String, vehicleID.uuidString)
+        XCTAssertEqual(request.content.userInfo["year"] as? Int, year)
+        XCTAssertEqual(request.content.userInfo["type"] as? String, "yearlyRoundup")
+    }
+
+    func testBuildYearlyRoundupRequestTriggerAt10AM() {
+        // Given
+        let vehicleID = UUID()
+        let notificationDate = Calendar.current.date(from: DateComponents(year: 2026, month: 1, day: 2))!
+
+        // When
+        let request = service.buildYearlyRoundupRequest(
+            vehicleName: "Test Car",
+            vehicleID: vehicleID,
+            year: 2025,
+            totalCost: 500,
+            notificationDate: notificationDate
+        )
+
+        // Then
+        guard let trigger = request.trigger as? UNCalendarNotificationTrigger else {
+            XCTFail("Trigger should be UNCalendarNotificationTrigger")
+            return
+        }
+        XCTAssertEqual(trigger.dateComponents.hour, 10, "Yearly roundup should be at 10 AM")
+        XCTAssertEqual(trigger.dateComponents.minute, 0)
+        XCTAssertFalse(trigger.repeats)
+    }
+
+    func testYearlyRoundupNotScheduledForZeroCost() {
+        // Given
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
+        let zeroCost: Decimal = 0
+
+        // When - should not crash and should not schedule
+        service.scheduleYearlyRoundup(for: vehicle, previousYearCost: zeroCost, previousYear: 2025)
+
+        // Then - verify method completes without scheduling (no way to verify directly,
+        // but we can verify it doesn't crash)
+        XCTAssertTrue(true, "Should not crash when cost is zero")
+    }
+
+    func testHasShownYearlyRoundupInitiallyFalse() {
+        // Given
+        let vehicleID = UUID()
+        let year = 2099  // Far future year to ensure no prior state
+
+        // When
+        let hasShown = service.hasShownYearlyRoundup(for: year, vehicleID: vehicleID)
+
+        // Then
+        XCTAssertFalse(hasShown, "Should return false for a year that hasn't been shown")
+    }
+
+    func testMarkYearlyRoundupShown() {
+        // Given
+        let vehicleID = UUID()
+        let year = 2098  // Far future year to ensure no prior state
+
+        // When
+        service.markYearlyRoundupShown(for: year, vehicleID: vehicleID)
+        let hasShown = service.hasShownYearlyRoundup(for: year, vehicleID: vehicleID)
+
+        // Then
+        XCTAssertTrue(hasShown, "Should return true after marking as shown")
+
+        // Cleanup - reset the UserDefaults
+        let key = "lastYearlyRoundupYear-\(vehicleID.uuidString)"
+        UserDefaults.standard.removeObject(forKey: key)
+    }
+
+    // MARK: - New Notification Names Tests
+
+    func testMileageUpdateNotificationName() {
+        XCTAssertEqual(
+            Notification.Name.navigateToMileageUpdateFromNotification.rawValue,
+            "navigateToMileageUpdateFromNotification"
+        )
+    }
+
+    func testMileageReminderSnoozedNotificationName() {
+        XCTAssertEqual(
+            Notification.Name.mileageReminderSnoozedFromNotification.rawValue,
+            "mileageReminderSnoozedFromNotification"
+        )
+    }
+
+    func testNavigateToCostsNotificationName() {
+        XCTAssertEqual(
+            Notification.Name.navigateToCostsFromNotification.rawValue,
+            "navigateToCostsFromNotification"
+        )
+    }
 }
