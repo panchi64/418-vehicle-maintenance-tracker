@@ -12,7 +12,7 @@ struct AttachmentThumbnail: View {
 
     var body: some View {
         ZStack {
-            if attachment.isImage, let image = attachment.thumbnailImage {
+            if let image = attachment.thumbnailImage {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFill()

@@ -8,6 +8,7 @@
 import XCTest
 import SwiftData
 import UIKit
+import PDFKit
 @testable import checkpoint
 
 final class ServiceAttachmentTests: XCTestCase {
@@ -52,6 +53,19 @@ final class ServiceAttachmentTests: XCTestCase {
         super.tearDown()
     }
 
+    // MARK: - Helper: Create real PDF data
+
+    private func createTestPDFData() -> Data {
+        let renderer = UIGraphicsPDFRenderer(bounds: CGRect(x: 0, y: 0, width: 200, height: 200))
+        return renderer.pdfData { context in
+            context.beginPage()
+            let text = "Test PDF" as NSString
+            text.draw(at: CGPoint(x: 20, y: 20), withAttributes: [
+                .font: UIFont.systemFont(ofSize: 24)
+            ])
+        }
+    }
+
     // MARK: - Initialization Tests
 
     @MainActor
@@ -78,6 +92,24 @@ final class ServiceAttachmentTests: XCTestCase {
         XCTAssertEqual(attachment.fileName, fileName)
         XCTAssertEqual(attachment.mimeType, mimeType)
         XCTAssertEqual(attachment.createdAt, createdAt)
+    }
+
+    @MainActor
+    func testInitialization_WithThumbnailData() {
+        // Given
+        let data = "test data".data(using: .utf8)!
+        let thumbData = "thumb".data(using: .utf8)!
+
+        // When
+        let attachment = ServiceAttachment(
+            data: data,
+            thumbnailData: thumbData,
+            fileName: "file.jpg",
+            mimeType: "image/jpeg"
+        )
+
+        // Then
+        XCTAssertEqual(attachment.thumbnailData, thumbData)
     }
 
     @MainActor
@@ -201,6 +233,19 @@ final class ServiceAttachmentTests: XCTestCase {
     }
 
     @MainActor
+    func testFromImage_IncludesThumbnailData() {
+        // Given
+        let image = UIImage(systemName: "car.fill")!
+
+        // When
+        let attachment = ServiceAttachment.fromImage(image)
+
+        // Then
+        XCTAssertNotNil(attachment)
+        XCTAssertNotNil(attachment?.thumbnailData)
+    }
+
+    @MainActor
     func testFromImage_DefaultFileName() {
         // Given
         let image = UIImage(systemName: "car.fill")!
@@ -217,7 +262,7 @@ final class ServiceAttachmentTests: XCTestCase {
     @MainActor
     func testFromPDF_CreatesAttachment() {
         // Given
-        let pdfData = "PDF content".data(using: .utf8)!
+        let pdfData = createTestPDFData()
 
         // When
         let attachment = ServiceAttachment.fromPDF(pdfData, fileName: "invoice.pdf", serviceLog: serviceLog)
@@ -290,10 +335,26 @@ final class ServiceAttachmentTests: XCTestCase {
     }
 
     @MainActor
-    func testThumbnailImage_ReturnsNilForPDF() {
+    func testThumbnailImage_ReturnsThumbnailForValidPDF() {
         // Given
-        let pdfData = "PDF content".data(using: .utf8)!
+        let pdfData = createTestPDFData()
         let attachment = ServiceAttachment.fromPDF(pdfData)
+
+        // When
+        let thumbnail = attachment.thumbnailImage
+
+        // Then
+        XCTAssertNotNil(thumbnail, "Valid PDF should produce a thumbnail via thumbnailData")
+    }
+
+    @MainActor
+    func testThumbnailImage_ReturnsNilForInvalidPDFWithoutThumbnail() {
+        // Given: invalid PDF data, no thumbnailData
+        let attachment = ServiceAttachment(
+            data: "not a pdf".data(using: .utf8),
+            fileName: "bad.pdf",
+            mimeType: "application/pdf"
+        )
 
         // When
         let thumbnail = attachment.thumbnailImage
@@ -316,6 +377,80 @@ final class ServiceAttachmentTests: XCTestCase {
 
         // Then
         XCTAssertNil(thumbnail)
+    }
+
+    @MainActor
+    func testThumbnailImage_PrefersThumbnailDataOverFullData() {
+        // Given: an image attachment with explicit thumbnailData
+        let image = UIImage(systemName: "car.fill")!
+        let fullData = ServiceAttachment.compressedImageData(from: image)!
+        let tinyThumb = UIImage(systemName: "star.fill")!.jpegData(compressionQuality: 0.5)!
+
+        let attachment = ServiceAttachment(
+            data: fullData,
+            thumbnailData: tinyThumb,
+            fileName: "photo.jpg",
+            mimeType: "image/jpeg"
+        )
+
+        // When
+        let thumbnail = attachment.thumbnailImage
+
+        // Then: should use thumbnailData, not full data
+        XCTAssertNotNil(thumbnail)
+        // The thumbnail data size should match what we provided
+        let regenerated = thumbnail?.jpegData(compressionQuality: 0.5)
+        XCTAssertNotNil(regenerated)
+    }
+
+    // MARK: - generateThumbnailData Tests
+
+    @MainActor
+    func testGenerateThumbnailData_ReturnsDataForImage() {
+        // Given
+        let image = UIImage(systemName: "car.fill")!
+        guard let imageData = image.pngData() else {
+            XCTFail("Failed to create PNG data from system image")
+            return
+        }
+
+        // When
+        let thumbData = ServiceAttachment.generateThumbnailData(from: imageData, mimeType: "image/png")
+
+        // Then
+        XCTAssertNotNil(thumbData, "Thumbnail data should not be nil for a valid image")
+        if let thumbData = thumbData, let thumbImage = UIImage(data: thumbData) {
+            XCTAssertLessThanOrEqual(thumbImage.size.width, 120)
+            XCTAssertLessThanOrEqual(thumbImage.size.height, 120)
+        }
+    }
+
+    @MainActor
+    func testGenerateThumbnailData_ReturnsDataForPDF() {
+        // Given
+        let pdfData = createTestPDFData()
+
+        // When
+        let thumbData = ServiceAttachment.generateThumbnailData(from: pdfData, mimeType: "application/pdf")
+
+        // Then
+        XCTAssertNotNil(thumbData, "Thumbnail data should not be nil for a valid PDF")
+        if let thumbData = thumbData, let thumbImage = UIImage(data: thumbData) {
+            XCTAssertLessThanOrEqual(thumbImage.size.width, 120)
+            XCTAssertLessThanOrEqual(thumbImage.size.height, 120)
+        }
+    }
+
+    @MainActor
+    func testGenerateThumbnailData_ReturnsNilForUnknownType() {
+        // Given
+        let textData = "Hello world".data(using: .utf8)!
+
+        // When
+        let thumbData = ServiceAttachment.generateThumbnailData(from: textData, mimeType: "text/plain")
+
+        // Then
+        XCTAssertNil(thumbData)
     }
 
     // MARK: - Relationship Tests

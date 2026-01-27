@@ -137,11 +137,15 @@ struct AttachmentPicker: View {
 
         do {
             let data = try Data(contentsOf: url)
+            var thumbnail: UIImage? = nil
+            if let thumbData = ServiceAttachment.generateThumbnailData(from: data, mimeType: "application/pdf") {
+                thumbnail = UIImage(data: thumbData)
+            }
             let attachment = AttachmentData(
                 data: data,
                 fileName: url.lastPathComponent,
                 mimeType: "application/pdf",
-                thumbnailImage: nil
+                thumbnailImage: thumbnail
             )
             attachments.append(attachment)
         } catch {
