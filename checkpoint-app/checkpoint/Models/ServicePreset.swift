@@ -54,6 +54,7 @@ final class ServicePreset {
         self.isCustom = isCustom
     }
 
+    @MainActor
     var intervalDescription: String? {
         let hasMonths = defaultIntervalMonths != nil
         let hasMiles = defaultIntervalMiles != nil
@@ -68,8 +69,10 @@ final class ServicePreset {
         }
 
         if let miles = defaultIntervalMiles {
-            let formattedMiles = NumberFormatter.localizedString(from: NSNumber(value: miles), number: .decimal)
-            components.append("\(formattedMiles) miles")
+            let unit = DistanceSettings.shared.unit
+            let displayValue = unit.fromMiles(miles)
+            let formattedDistance = NumberFormatter.localizedString(from: NSNumber(value: displayValue), number: .decimal)
+            components.append("\(formattedDistance) \(unit.fullName)")
         }
 
         if components.count == 2 {

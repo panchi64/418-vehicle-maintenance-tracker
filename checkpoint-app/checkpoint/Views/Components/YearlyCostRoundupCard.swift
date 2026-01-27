@@ -88,9 +88,11 @@ struct YearlyCostRoundupCard: View {
     }
 
     private func formatMiles(_ miles: Int) -> String {
+        let unit = DistanceSettings.shared.unit
+        let displayValue = unit.fromMiles(miles)
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
-        return "~" + (formatter.string(from: NSNumber(value: miles)) ?? "\(miles)")
+        return "~" + (formatter.string(from: NSNumber(value: displayValue)) ?? "\(displayValue)")
     }
 
     // MARK: - Body
@@ -231,7 +233,7 @@ struct YearlyCostRoundupCard: View {
             Spacer()
 
             VStack(alignment: .trailing, spacing: 2) {
-                Text("MILES")
+                Text(DistanceSettings.shared.unit.fullName.uppercased())
                     .font(.brutalistLabel)
                     .foregroundStyle(Theme.textTertiary)
                     .tracking(1)

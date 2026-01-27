@@ -18,6 +18,7 @@ struct ContentView: View {
 
     @State private var appState = AppState()
     @State private var showMileageUpdate = false
+    @State private var showSettings = false
 
     private var currentVehicle: Vehicle? {
         appState.selectedVehicle ?? vehicles.first
@@ -36,6 +37,9 @@ struct ContentView: View {
                     },
                     onMileageTap: {
                         showMileageUpdate = true
+                    },
+                    onSettingsTap: {
+                        showSettings = true
                     }
                 )
                 .padding(.top, Spacing.sm)
@@ -162,6 +166,9 @@ struct ContentView: View {
                 )
                 .presentationDetents([.height(280)])
             }
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
         }
         // Handle mileage update notification navigation
         .onReceive(NotificationCenter.default.publisher(for: .navigateToMileageUpdateFromNotification)) { notification in

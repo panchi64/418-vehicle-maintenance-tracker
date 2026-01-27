@@ -16,6 +16,10 @@ struct MediumWidgetView: View {
         entry.configuration.mileageDisplayMode
     }
 
+    private var distanceUnit: WidgetDistanceUnit {
+        WidgetDistanceUnit.current()
+    }
+
     /// Services excluding the first one (for the right panel)
     private var otherServices: [WidgetService] {
         Array(entry.services.dropFirst().prefix(3))
@@ -168,6 +172,12 @@ struct MediumWidgetView: View {
         return formatter.string(from: NSNumber(value: number)) ?? "\(number)"
     }
 
+    /// Format mileage in user's preferred unit
+    private func formatMileage(_ miles: Int) -> String {
+        let displayValue = distanceUnit.fromMiles(miles)
+        return formatNumber(displayValue)
+    }
+
     /// Get the label text based on display mode and service type
     private func displayLabel(for service: WidgetService) -> String {
         if service.dueMileage != nil {
@@ -190,10 +200,10 @@ struct MediumWidgetView: View {
         if let dueMileage = service.dueMileage {
             switch displayMode {
             case .absolute:
-                return formatNumber(dueMileage)
+                return formatMileage(dueMileage)
             case .relative:
                 let remaining = dueMileage - entry.currentMileage
-                return formatNumber(abs(remaining))
+                return formatMileage(abs(remaining))
             }
         } else if let days = service.daysRemaining {
             return "\(abs(days))"
@@ -204,7 +214,7 @@ struct MediumWidgetView: View {
     /// Get the unit label based on what we're displaying
     private func displayUnit(for service: WidgetService) -> String {
         if service.dueMileage != nil {
-            return "MI"
+            return distanceUnit.uppercaseAbbreviation
         } else if service.daysRemaining != nil {
             return "DAYS"
         }

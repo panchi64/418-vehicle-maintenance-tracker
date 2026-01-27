@@ -39,15 +39,50 @@ enum Formatters {
         return formatter
     }()
 
-    // MARK: - Convenience Methods
+    // MARK: - Mileage/Distance Methods
 
-    /// Format mileage with suffix: "12,345 mi"
+    /// Format mileage with suffix using user's preferred unit: "12,345 mi" or "19,867 km"
+    /// Automatically converts from internal miles to user's preferred display unit
+    @MainActor
     static func mileage(_ miles: Int) -> String {
-        (decimal.string(from: NSNumber(value: miles)) ?? "\(miles)") + " mi"
+        let unit = DistanceSettings.shared.unit
+        let displayValue = unit.fromMiles(miles)
+        return (decimal.string(from: NSNumber(value: displayValue)) ?? "\(displayValue)") + " " + unit.abbreviation
     }
 
-    /// Format mileage with underscore suffix (for display): "12,345_MI"
+    /// Format mileage with underscore suffix (for display): "12,345_MI" or "19,867_KM"
+    /// Automatically converts from internal miles to user's preferred display unit
+    @MainActor
     static func mileageDisplay(_ miles: Int) -> String {
-        (decimal.string(from: NSNumber(value: miles)) ?? "\(miles)") + "_MI"
+        let unit = DistanceSettings.shared.unit
+        let displayValue = unit.fromMiles(miles)
+        return (decimal.string(from: NSNumber(value: displayValue)) ?? "\(displayValue)") + "_" + unit.uppercaseAbbreviation
+    }
+
+    /// Format mileage number only (no suffix): "19,867"
+    /// Automatically converts from internal miles to user's preferred display unit
+    @MainActor
+    static func mileageNumber(_ miles: Int) -> String {
+        let unit = DistanceSettings.shared.unit
+        let displayValue = unit.fromMiles(miles)
+        return decimal.string(from: NSNumber(value: displayValue)) ?? "\(displayValue)"
+    }
+
+    /// Format mileage with explicit unit (for widget/non-MainActor contexts)
+    static func mileage(_ miles: Int, unit: DistanceUnit) -> String {
+        let displayValue = unit.fromMiles(miles)
+        return (decimal.string(from: NSNumber(value: displayValue)) ?? "\(displayValue)") + " " + unit.abbreviation
+    }
+
+    /// Format mileage display with explicit unit (for widget/non-MainActor contexts)
+    static func mileageDisplay(_ miles: Int, unit: DistanceUnit) -> String {
+        let displayValue = unit.fromMiles(miles)
+        return (decimal.string(from: NSNumber(value: displayValue)) ?? "\(displayValue)") + "_" + unit.uppercaseAbbreviation
+    }
+
+    /// Format mileage number only with explicit unit (for widget/non-MainActor contexts)
+    static func mileageNumber(_ miles: Int, unit: DistanceUnit) -> String {
+        let displayValue = unit.fromMiles(miles)
+        return decimal.string(from: NSNumber(value: displayValue)) ?? "\(displayValue)"
     }
 }

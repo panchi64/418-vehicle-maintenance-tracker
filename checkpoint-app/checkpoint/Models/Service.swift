@@ -125,27 +125,33 @@ extension Service {
         return nil
     }
 
+    @MainActor
     var mileageDescription: String? {
         guard let dueMileage = dueMileage, let vehicle = vehicle else { return nil }
         let milesRemaining = dueMileage - vehicle.currentMileage
+        let unit = DistanceSettings.shared.unit
+        let displayRemaining = unit.fromMiles(abs(milesRemaining))
         if milesRemaining < 0 {
-            return "\(abs(milesRemaining)) miles overdue"
+            return "\(displayRemaining) \(unit.fullName) overdue"
         } else {
-            return "or \(milesRemaining) miles"
+            return "or \(displayRemaining) \(unit.fullName)"
         }
     }
 
     /// Primary description prioritizing miles over days
     /// Mileage is the default tracking method; date is fallback for services where mileage doesn't apply
+    @MainActor
     var primaryDescription: String? {
         if let dueMileage = dueMileage, let vehicle = vehicle {
             let milesRemaining = dueMileage - vehicle.currentMileage
+            let unit = DistanceSettings.shared.unit
+            let displayRemaining = unit.fromMiles(abs(milesRemaining))
             if milesRemaining < 0 {
-                return "\(abs(milesRemaining)) miles overdue"
+                return "\(displayRemaining) \(unit.fullName) overdue"
             } else if milesRemaining == 0 {
                 return "Due now"
             } else {
-                return "\(milesRemaining) miles remaining"
+                return "\(displayRemaining) \(unit.fullName) remaining"
             }
         }
         return dueDescription  // Fallback to date-based for services without mileage tracking

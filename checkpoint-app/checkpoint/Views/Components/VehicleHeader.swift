@@ -11,6 +11,7 @@ struct VehicleHeader: View {
     let vehicle: Vehicle?
     var onTap: () -> Void
     var onMileageTap: (() -> Void)? = nil
+    var onSettingsTap: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: Spacing.md) {
@@ -32,7 +33,7 @@ struct VehicleHeader: View {
                         Button {
                             onMileageTap?()
                         } label: {
-                            Text(formatMileage(vehicle.currentMileage))
+                            Text(Formatters.mileage(vehicle.currentMileage))
                                 .font(.brutalistBody)
                                 .foregroundStyle(Theme.accent)
                                 .underline(onMileageTap != nil, color: Theme.accent.opacity(0.5))
@@ -65,6 +66,20 @@ struct VehicleHeader: View {
                     .padding(.top, 4)
                 }
             }
+
+            // Settings button
+            if let onSettingsTap = onSettingsTap {
+                Button {
+                    onSettingsTap()
+                } label: {
+                    Image(systemName: "gearshape.fill")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundStyle(Theme.textTertiary)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
         }
         .padding(.horizontal, Theme.screenHorizontalPadding)
         .padding(.vertical, 12)
@@ -75,11 +90,6 @@ struct VehicleHeader: View {
         }
     }
 
-    private func formatMileage(_ miles: Int) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        return (formatter.string(from: NSNumber(value: miles)) ?? "\(miles)") + " mi"
-    }
 }
 
 #Preview {

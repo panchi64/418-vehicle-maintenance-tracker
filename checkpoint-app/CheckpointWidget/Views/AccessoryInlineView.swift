@@ -26,20 +26,21 @@ struct AccessoryInlineView: View {
         }
     }
 
-    /// Abbreviate due description for inline: "500 miles remaining" → "500 MI"
+    /// Abbreviate due description for inline: "500 miles remaining" → "500 MI" or "500 KM"
     private func formatDue(_ description: String) -> String {
+        let unit = WidgetDistanceUnit.current()
         let upper = description.uppercased()
-        if upper.contains("MILES") {
+        if upper.contains("MILES") || upper.contains("KILOMETERS") {
             // Extract number
             let number = upper.components(separatedBy: CharacterSet.decimalDigits.inverted)
                 .filter { !$0.isEmpty }
                 .first ?? ""
             if upper.contains("OVERDUE") {
-                return "\(number) MI OVER"
+                return "\(number) \(unit.uppercaseAbbreviation) OVER"
             } else if upper.contains("REMAINING") {
-                return "\(number) MI"
+                return "\(number) \(unit.uppercaseAbbreviation)"
             } else {
-                return "\(number) MI"
+                return "\(number) \(unit.uppercaseAbbreviation)"
             }
         }
         // Fallback: abbreviate days

@@ -133,24 +133,16 @@ struct ServiceRow: View {
     }
 
     private func formatMilesText(_ miles: Int) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
+        let unit = DistanceSettings.shared.unit
+        let displayValue = unit.fromMiles(abs(miles))
+        let formatted = Formatters.decimal.string(from: NSNumber(value: displayValue)) ?? "\(displayValue)"
         if miles < 0 {
-            return "\(abs(miles)) MI OVERDUE"
+            return "\(formatted) \(unit.uppercaseAbbreviation) OVERDUE"
         } else if miles == 0 {
             return "DUE NOW"
         } else {
-            return "\(formatter.string(from: NSNumber(value: miles)) ?? "\(miles)") MI"
+            return "\(formatted) \(unit.uppercaseAbbreviation)"
         }
-    }
-
-    private func formatMiles(_ miles: Int) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        if miles < 0 {
-            return "OVER"
-        }
-        return (formatter.string(from: NSNumber(value: miles)) ?? "\(miles)") + " mi"
     }
 }
 

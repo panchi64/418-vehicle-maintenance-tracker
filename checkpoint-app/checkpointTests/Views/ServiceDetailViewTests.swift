@@ -9,6 +9,7 @@ import XCTest
 import SwiftData
 @testable import checkpoint
 
+@MainActor
 final class ServiceDetailViewTests: XCTestCase {
 
     // MARK: - Status Display Tests

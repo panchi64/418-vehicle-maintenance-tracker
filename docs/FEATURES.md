@@ -55,7 +55,7 @@
 | On-device OCR          | High     | Vision framework, no cloud dependency (Free)            |
 | Smart field extraction | High     | Date, vendor, line items, costs, vehicle info (Subscription) |
 | Contextual prompts     | High     | Different flows for service receipts vs parts purchases |
-| Confidence indicators  | Low      | Show extraction confidence, let user correct errors     |
+| Confidence indicators  | Low      | ✅ | Show extraction confidence, let user correct errors     |
 
 **Contextual prompt logic:**
 
@@ -156,6 +156,7 @@
 | Multi-vehicle support | High     | ✅     | Families, enthusiasts, collectors                          |
 | VIN decoding          | High     | ⏳     | Auto-populate year/make/model/engine                       |
 | Odometer tracking     | High     | ✅     | Manual entry + smart estimation                            |
+| Distance unit support | Medium   | ✅     | Miles or kilometers preference (global setting)            |
 | Vehicle notes         | Medium   | ✅     | Freeform notes area for quirks, history, or reminders      |
 
 ---
@@ -169,7 +170,7 @@
 | Driving rate calculation         | High     | ✅     | miles/month based on logged data points               |
 | Estimated current mileage        | High     | ✅     | Extrapolate between manual entries                    |
 | Predictive service notifications | High     | ✅     | "Oil change due in ~500 miles based on your driving"  |
-| Dashboard OCR                    | High     |        | Photo of odometer → extract mileage automatically     |
+| Dashboard OCR                    | High     | ✅     | Photo of odometer → extract mileage automatically     |
 | Biweekly mileage prompts         | Medium   | ✅     | Push notification every 14 days to update mileage     |
 | Recency weighting                | Medium   | ✅     | EWMA with 30-day half-life for pace calculation       |
 

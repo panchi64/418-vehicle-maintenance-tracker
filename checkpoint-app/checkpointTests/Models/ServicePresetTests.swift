@@ -9,7 +9,20 @@ import XCTest
 import SwiftData
 @testable import checkpoint
 
+@MainActor
 final class ServicePresetTests: XCTestCase {
+
+    override func setUp() {
+        super.setUp()
+        // Ensure tests run with miles as the default
+        DistanceSettings.shared.unit = .miles
+    }
+
+    override func tearDown() {
+        // Reset to miles after tests
+        DistanceSettings.shared.unit = .miles
+        super.tearDown()
+    }
 
     // MARK: - ServiceCategory Enum Tests
 

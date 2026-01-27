@@ -16,6 +16,10 @@ struct SmallWidgetView: View {
         entry.configuration.mileageDisplayMode
     }
 
+    private var distanceUnit: WidgetDistanceUnit {
+        WidgetDistanceUnit.current()
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             // Vehicle name - monospace label
@@ -100,6 +104,12 @@ struct SmallWidgetView: View {
         return formatter.string(from: NSNumber(value: number)) ?? "\(number)"
     }
 
+    /// Format mileage in user's preferred unit
+    private func formatMileage(_ miles: Int) -> String {
+        let displayValue = distanceUnit.fromMiles(miles)
+        return formatNumber(displayValue)
+    }
+
     /// Get the label text based on display mode and service type
     private func displayLabel(for service: WidgetService) -> String {
         if service.dueMileage != nil {
@@ -122,10 +132,10 @@ struct SmallWidgetView: View {
         if let dueMileage = service.dueMileage {
             switch displayMode {
             case .absolute:
-                return formatNumber(dueMileage)
+                return formatMileage(dueMileage)
             case .relative:
                 let remaining = dueMileage - entry.currentMileage
-                return formatNumber(abs(remaining))
+                return formatMileage(abs(remaining))
             }
         } else if let days = service.daysRemaining {
             return "\(abs(days))"
@@ -136,7 +146,7 @@ struct SmallWidgetView: View {
     /// Get the unit label based on what we're displaying
     private func displayUnit(for service: WidgetService) -> String {
         if service.dueMileage != nil {
-            return "MI"
+            return distanceUnit.uppercaseAbbreviation
         } else if service.daysRemaining != nil {
             return "DAYS"
         }

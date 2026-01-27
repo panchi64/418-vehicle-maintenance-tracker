@@ -82,12 +82,12 @@ struct NextUpCard: View {
                 if let miles = milesUntilDue {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack(alignment: .lastTextBaseline, spacing: 4) {
-                            Text("\(abs(miles))")
+                            Text(Formatters.mileageNumber(abs(miles)))
                                 .font(.brutalistHero)
                                 .foregroundStyle(status.color)
                                 .contentTransition(.numericText())
 
-                            Text("MI")
+                            Text(DistanceSettings.shared.unit.uppercaseAbbreviation)
                                 .font(.brutalistHeading)
                                 .foregroundStyle(status.color)
                         }
