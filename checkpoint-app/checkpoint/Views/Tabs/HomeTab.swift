@@ -296,6 +296,9 @@ struct HomeTab: View {
             modelContext.insert(snapshot)
         }
 
+        // Force immediate save to trigger SwiftUI observation for dependent views
+        try? modelContext.save()
+
         // Update app icon based on new mileage affecting service status
         AppIconService.shared.updateIcon(for: vehicle, services: services)
 

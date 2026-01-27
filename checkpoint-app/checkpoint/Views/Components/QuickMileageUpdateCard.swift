@@ -3,9 +3,11 @@
 //  checkpoint
 //
 //  Large odometer display with UPDATE button and last updated tracking
+//  Includes camera-based OCR for mileage capture
 //
 
 import SwiftUI
+import UIKit
 
 struct QuickMileageUpdateCard: View {
     let vehicle: Vehicle
@@ -14,9 +16,11 @@ struct QuickMileageUpdateCard: View {
     @State private var showMileageSheet = false
 
     private var formattedMileage: String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        return (formatter.string(from: NSNumber(value: vehicle.currentMileage)) ?? "\(vehicle.currentMileage)")
+        Formatters.mileageNumber(vehicle.currentMileage)
+    }
+
+    private var unitAbbreviation: String {
+        DistanceSettings.shared.unit.uppercaseAbbreviation
     }
 
     var body: some View {
@@ -31,7 +35,7 @@ struct QuickMileageUpdateCard: View {
                             .font(.brutalistTitle)
                             .foregroundStyle(Theme.accent)
 
-                        Text("MI")
+                        Text(unitAbbreviation)
                             .font(.brutalistLabel)
                             .foregroundStyle(Theme.textTertiary)
                             .tracking(1)
@@ -71,7 +75,7 @@ struct QuickMileageUpdateCard: View {
                     onUpdate(newMileage)
                 }
             )
-            .presentationDetents([.height(280)])
+            .presentationDetents([.height(340)])
         }
     }
 }
@@ -85,6 +89,16 @@ struct MileageUpdateSheet: View {
     let onSave: (Int) -> Void
 
     @State private var newMileage: Int?
+    @State private var showCamera = false
+    @State private var showOCRConfirmation = false
+    @State private var ocrResult: OdometerOCRService.OCRResult?
+    @State private var isProcessingOCR = false
+    @State private var ocrError: String?
+
+    /// Check if camera is available (requires physical device)
+    private var isCameraAvailable: Bool {
+        UIImagePickerController.isSourceTypeAvailable(.camera)
+    }
 
     var body: some View {
         NavigationStack {
@@ -93,12 +107,18 @@ struct MileageUpdateSheet: View {
                     .ignoresSafeArea()
 
                 VStack(spacing: Spacing.lg) {
-                    InstrumentNumberField(
-                        label: "Current Mileage",
-                        value: $newMileage,
-                        placeholder: "\(currentMileage)",
-                        suffix: "mi"
-                    )
+                    // Mileage input with camera button
+                    mileageInputSection
+
+                    // OCR error message
+                    if let error = ocrError {
+                        ocrErrorView(error)
+                    }
+
+                    // Processing indicator
+                    if isProcessingOCR {
+                        processingView
+                    }
 
                     Button("Save") {
                         if let mileage = newMileage, mileage > 0 {
@@ -107,7 +127,7 @@ struct MileageUpdateSheet: View {
                         }
                     }
                     .buttonStyle(.primary)
-                    .disabled(newMileage == nil || newMileage! <= 0)
+                    .disabled(newMileage == nil || newMileage! <= 0 || isProcessingOCR)
 
                     Spacer()
                 }
@@ -125,6 +145,169 @@ struct MileageUpdateSheet: View {
         }
         .onAppear {
             newMileage = currentMileage
+        }
+        .fullScreenCover(isPresented: $showCamera) {
+            OdometerCameraSheet { image in
+                processOCR(image: image)
+            }
+        }
+        .sheet(isPresented: $showOCRConfirmation) {
+            if let result = ocrResult {
+                OCRConfirmationView(
+                    extractedMileage: result.mileage,
+                    confidence: result.confidence,
+                    onConfirm: { mileage in
+                        newMileage = mileage
+                    },
+                    currentMileage: currentMileage,
+                    detectedUnit: result.detectedUnit
+                )
+                .presentationDetents([.medium])
+            }
+        }
+    }
+
+    // MARK: - Mileage Input Section
+
+    private var mileageInputSection: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            // Label
+            Text("CURRENT MILEAGE")
+                .font(.instrumentLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(1.5)
+
+            // Input with camera button
+            HStack(spacing: 0) {
+                // Number input
+                HStack(spacing: 8) {
+                    TextField("\(currentMileage)", text: mileageBinding)
+                        .font(.instrumentBody)
+                        .foregroundStyle(Theme.textPrimary)
+                        .keyboardType(.numberPad)
+
+                    Text(DistanceSettings.shared.unit.abbreviation)
+                        .font(.instrumentLabel)
+                        .foregroundStyle(Theme.textTertiary)
+                }
+                .padding(16)
+                .background(Theme.surfaceInstrument)
+
+                // Camera button
+                if isCameraAvailable {
+                    Button {
+                        ocrError = nil
+                        showCamera = true
+                    } label: {
+                        Image(systemName: "camera.fill")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundStyle(Theme.accent)
+                            .frame(width: 52, height: 52)
+                            .background(Theme.surfaceInstrument)
+                    }
+                    .overlay(
+                        Rectangle()
+                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+                    )
+                }
+            }
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+            )
+        }
+    }
+
+    // MARK: - Mileage Binding
+
+    private var mileageBinding: Binding<String> {
+        Binding(
+            get: {
+                if let mileage = newMileage {
+                    return String(mileage)
+                }
+                return ""
+            },
+            set: { newValue in
+                let filtered = newValue.filter { $0.isNumber }
+                newMileage = Int(filtered)
+            }
+        )
+    }
+
+    // MARK: - OCR Error View
+
+    private func ocrErrorView(_ error: String) -> some View {
+        HStack(spacing: Spacing.sm) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(Theme.statusOverdue)
+
+            Text(error.uppercased())
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.statusOverdue)
+                .tracking(1)
+
+            Spacer()
+
+            Button {
+                ocrError = nil
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(Theme.textTertiary)
+            }
+        }
+        .padding(Spacing.md)
+        .background(Theme.statusOverdue.opacity(0.1))
+        .overlay(
+            Rectangle()
+                .strokeBorder(Theme.statusOverdue.opacity(0.5), lineWidth: Theme.borderWidth)
+        )
+    }
+
+    // MARK: - Processing View
+
+    private var processingView: some View {
+        HStack(spacing: Spacing.sm) {
+            ProgressView()
+                .tint(Theme.accent)
+
+            Text("SCANNING ODOMETER...")
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textSecondary)
+                .tracking(1)
+        }
+        .padding(Spacing.md)
+        .frame(maxWidth: .infinity)
+        .background(Theme.surfaceInstrument)
+        .overlay(
+            Rectangle()
+                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+        )
+    }
+
+    // MARK: - OCR Processing
+
+    private func processOCR(image: UIImage) {
+        isProcessingOCR = true
+        ocrError = nil
+
+        Task {
+            do {
+                let result = try await OdometerOCRService.shared.recognizeMileage(from: image)
+
+                await MainActor.run {
+                    isProcessingOCR = false
+                    ocrResult = result
+                    showOCRConfirmation = true
+                }
+            } catch {
+                await MainActor.run {
+                    isProcessingOCR = false
+                    ocrError = error.localizedDescription
+                }
+            }
         }
     }
 }

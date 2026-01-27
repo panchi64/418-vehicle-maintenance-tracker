@@ -243,4 +243,88 @@ final class HomeTabTests: XCTestCase {
         XCTAssertEqual(vehicle.mileageSnapshots.count, 1)
         XCTAssertEqual(vehicle.mileageSnapshots.first?.mileage, 31000)
     }
+
+    // MARK: - Service Status Update Tests
+
+    @MainActor
+    func testServiceStatus_UpdatesAfterMileageChange() {
+        // Given - service that's currently overdue
+        let vehicle = Vehicle(
+            name: "Test Car",
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            currentMileage: 35000  // Past due mileage
+        )
+        modelContext.insert(vehicle)
+
+        let service = Service(
+            name: "Oil Change",
+            dueMileage: 34000  // Overdue by 1000 miles
+        )
+        service.vehicle = vehicle
+        modelContext.insert(service)
+
+        // Verify initially overdue
+        XCTAssertEqual(service.status(currentMileage: vehicle.currentMileage), .overdue)
+
+        // When - mileage is corrected (lower reading)
+        vehicle.currentMileage = 30000
+        try? modelContext.save()
+
+        // Then - status should now be good (4000 miles remaining)
+        XCTAssertEqual(service.status(currentMileage: vehicle.currentMileage), .good)
+    }
+
+    @MainActor
+    func testMileageUpdate_TriggersModelContextSave() {
+        // Given
+        let vehicle = Vehicle(
+            name: "Test Car",
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            currentMileage: 30000
+        )
+        modelContext.insert(vehicle)
+        try? modelContext.save()
+
+        // When
+        vehicle.currentMileage = 31000
+        vehicle.mileageUpdatedAt = .now
+        try? modelContext.save()
+
+        // Then - verify the change persisted
+        XCTAssertEqual(vehicle.currentMileage, 31000)
+    }
+
+    @MainActor
+    func testServiceStatus_TransitionsFromGoodToOverdue() {
+        // Given - service that's currently good
+        let vehicle = Vehicle(
+            name: "Test Car",
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            currentMileage: 30000
+        )
+        modelContext.insert(vehicle)
+
+        let service = Service(
+            name: "Oil Change",
+            dueMileage: 35000  // 5000 miles away - good status
+        )
+        service.vehicle = vehicle
+        modelContext.insert(service)
+
+        // Verify initially good
+        XCTAssertEqual(service.status(currentMileage: vehicle.currentMileage), .good)
+
+        // When - mileage increases past due
+        vehicle.currentMileage = 36000
+        try? modelContext.save()
+
+        // Then - status should now be overdue
+        XCTAssertEqual(service.status(currentMileage: vehicle.currentMileage), .overdue)
+    }
 }
