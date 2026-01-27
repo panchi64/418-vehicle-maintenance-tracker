@@ -48,12 +48,12 @@ struct OCRConfirmationView: View {
         }
     }
 
-    /// Binding for the mileage text field
+    /// Binding for the mileage text field (limited to 7 digits)
     private var mileageTextBinding: Binding<String> {
         Binding(
             get: { String(editedMileage ?? extractedMileage) },
             set: { newValue in
-                let filtered = newValue.filter { $0.isNumber }
+                let filtered = String(newValue.filter { $0.isNumber }.prefix(7))
                 editedMileage = Int(filtered)
             }
         )

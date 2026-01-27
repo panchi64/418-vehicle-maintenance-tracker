@@ -69,15 +69,21 @@ actor OdometerOCRService {
     /// Medium confidence threshold (suggest review)
     static let mediumConfidenceThreshold: Float = 0.50
 
+    /// Confidence boost for values found in multiple preprocessed images
+    private let multiImageConfidenceBoost: Float = 0.15
+
     // MARK: - Shared Instance
 
     static let shared = OdometerOCRService()
+
+    /// Image preprocessor for enhanced OCR
+    private let preprocessor = OdometerImagePreprocessor()
 
     private init() {}
 
     // MARK: - Public API
 
-    /// Recognizes mileage from an odometer image
+    /// Recognizes mileage from an odometer image using multi-image preprocessing
     /// - Parameter image: UIImage of the odometer display
     /// - Returns: OCRResult containing the extracted mileage and confidence
     /// - Throws: OCRError if recognition fails
@@ -86,17 +92,35 @@ actor OdometerOCRService {
             throw OCRError.imageProcessingFailed
         }
 
-        // Perform text recognition
-        let observations = try await performTextRecognition(on: cgImage)
+        // Preprocess image to get multiple enhanced versions
+        let preprocessedImages = preprocessor.preprocess(cgImage)
 
-        guard !observations.isEmpty else {
+        // Collect candidates from all preprocessed images
+        var allCandidates: [OCRResult] = []
+        var hasAnyObservations = false
+
+        for preprocessed in preprocessedImages {
+            do {
+                let observations = try await performTextRecognition(on: preprocessed.image)
+                if !observations.isEmpty {
+                    hasAnyObservations = true
+                    let candidates = extractMileageCandidates(from: observations)
+                    allCandidates.append(contentsOf: candidates)
+                }
+            } catch {
+                // Continue with other preprocessed images if one fails
+                continue
+            }
+        }
+
+        guard hasAnyObservations else {
             throw OCRError.noTextFound
         }
 
-        // Extract and validate mileage candidates
-        let candidates = extractMileageCandidates(from: observations)
+        // Aggregate candidates: boost confidence for values found multiple times
+        let aggregatedCandidates = aggregateCandidates(allCandidates)
 
-        guard let bestCandidate = selectBestCandidate(from: candidates) else {
+        guard let bestCandidate = selectBestCandidate(from: aggregatedCandidates) else {
             throw OCRError.noValidMileageFound
         }
 
@@ -104,6 +128,39 @@ actor OdometerOCRService {
         try validateMileage(bestCandidate.mileage)
 
         return bestCandidate
+    }
+
+    /// Aggregates candidates by boosting confidence for values found multiple times
+    private func aggregateCandidates(_ candidates: [OCRResult]) -> [OCRResult] {
+        // Count occurrences of each mileage value
+        var mileageCounts: [Int: Int] = [:]
+        var mileageToCandidate: [Int: OCRResult] = [:]
+
+        for candidate in candidates {
+            mileageCounts[candidate.mileage, default: 0] += 1
+            // Keep the candidate with highest confidence for each mileage value
+            if let existing = mileageToCandidate[candidate.mileage] {
+                if candidate.confidence > existing.confidence {
+                    mileageToCandidate[candidate.mileage] = candidate
+                }
+            } else {
+                mileageToCandidate[candidate.mileage] = candidate
+            }
+        }
+
+        // Create aggregated results with boosted confidence for repeated values
+        return mileageToCandidate.map { mileage, candidate in
+            let count = mileageCounts[mileage] ?? 1
+            let boost = count > 1 ? multiImageConfidenceBoost * Float(count - 1) : 0
+            let boostedConfidence = min(1.0, candidate.confidence + boost)
+
+            return OCRResult(
+                mileage: candidate.mileage,
+                confidence: boostedConfidence,
+                rawText: candidate.rawText,
+                detectedUnit: candidate.detectedUnit
+            )
+        }
     }
 
     // MARK: - Private Methods
@@ -129,6 +186,17 @@ actor OdometerOCRService {
             request.recognitionLevel = .accurate
             request.usesLanguageCorrection = false // Numbers don't need language correction
             request.recognitionLanguages = ["en-US"]
+
+            // Filter out small text noise (minimum 2% of image height)
+            request.minimumTextHeight = 0.02
+
+            // Custom words to help recognize odometer-related text
+            request.customWords = ["km", "mi", "miles", "KM", "MI", "ODO", "ODOMETER"]
+
+            // Use latest revision for best accuracy (iOS 16+)
+            if #available(iOS 16.0, *) {
+                request.revision = VNRecognizeTextRequestRevision3
+            }
 
             let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
 
@@ -200,15 +268,34 @@ actor OdometerOCRService {
     private func extractNumericSequences(from text: String) -> [Int] {
         var numbers: [Int] = []
 
-        // Remove common separators and clean the text
-        let cleanedText = text
+        // Common OCR character misreads for digits
+        // Each tuple: (misread character, correct digit)
+        let corrections: [(String, String)] = [
+            // Zero misreads
+            ("O", "0"), ("o", "0"), ("Q", "0"), ("D", "0"),
+            // One misreads
+            ("l", "1"), ("I", "1"), ("i", "1"), ("|", "1"),
+            // Two misreads
+            ("Z", "2"), ("z", "2"),
+            // Five misreads
+            ("S", "5"), ("s", "5"),
+            // Six misreads
+            ("G", "6"), ("b", "6"),
+            // Eight misreads
+            ("B", "8"),
+            // Nine misreads
+            ("g", "9"), ("q", "9"),
+        ]
+
+        // Remove common separators and apply character corrections
+        var cleanedText = text
             .replacingOccurrences(of: ",", with: "")
             .replacingOccurrences(of: ".", with: "")
             .replacingOccurrences(of: " ", with: "")
-            .replacingOccurrences(of: "O", with: "0") // Common OCR mistake
-            .replacingOccurrences(of: "o", with: "0")
-            .replacingOccurrences(of: "l", with: "1") // Common OCR mistake
-            .replacingOccurrences(of: "I", with: "1")
+
+        for (misread, correct) in corrections {
+            cleanedText = cleanedText.replacingOccurrences(of: misread, with: correct)
+        }
 
         // Pattern to match sequences of digits (3+ digits for mileage)
         let pattern = "[0-9]{3,}"
@@ -239,18 +326,45 @@ actor OdometerOCRService {
         return numbers
     }
 
-    /// Selects the best mileage candidate based on confidence and reasonableness
+    /// Scores a candidate using multi-factor analysis
+    /// Weighs digit count (40%), range plausibility (25%), and OCR confidence (35%)
+    private func scoreCandidate(_ candidate: OCRResult) -> Float {
+        let digitCount = String(candidate.mileage).count
+
+        // Digit count score (5-7 digits typical for odometers)
+        let digitCountScore: Float = switch digitCount {
+        case 6: 1.0   // Most common (100,000 - 999,999)
+        case 5: 0.9   // Common (10,000 - 99,999)
+        case 7: 0.8   // High mileage (1,000,000+)
+        case 4: 0.5   // Low mileage (1,000 - 9,999)
+        case 3: 0.2   // Very low (100 - 999)
+        default: 0.1  // Unlikely (1-2 digits or 8+)
+        }
+
+        // Range score - typical odometer values
+        let rangeScore: Float = switch candidate.mileage {
+        case 10_000...300_000: 1.0    // Most common range
+        case 1_000..<10_000: 0.7      // Low but valid
+        case 300_001...500_000: 0.6   // High mileage
+        case 500_001...999_999: 0.4   // Very high mileage
+        case 100..<1_000: 0.3         // Very low
+        default: 0.1                   // Unlikely
+        }
+
+        // Weighted combination: digit count matters most for filtering OCR errors
+        return (digitCountScore * 0.40) + (rangeScore * 0.25) + (candidate.confidence * 0.35)
+    }
+
+    /// Selects the best mileage candidate using multi-factor scoring
     private func selectBestCandidate(from candidates: [OCRResult]) -> OCRResult? {
         guard !candidates.isEmpty else { return nil }
 
-        // Sort by confidence (highest first)
-        let sorted = candidates.sorted { $0.confidence > $1.confidence }
+        // Score each candidate and sort by score (highest first)
+        let scored = candidates
+            .map { (candidate: $0, score: scoreCandidate($0)) }
+            .sorted { $0.score > $1.score }
 
-        // Prefer candidates with typical mileage ranges (1000 - 500000)
-        // but don't exclude others
-        let preferred = sorted.filter { $0.mileage >= 1000 && $0.mileage <= 500_000 }
-
-        return preferred.first ?? sorted.first
+        return scored.first?.candidate
     }
 
     /// Validates that the mileage is within reasonable bounds

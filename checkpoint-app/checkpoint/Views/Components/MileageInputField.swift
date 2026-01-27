@@ -28,10 +28,14 @@ struct MileageInputField: View {
                 .font(.bodyText)
                 .foregroundStyle(Theme.textPrimary)
                 .onChange(of: textValue) { _, newValue in
-                    // Strip non-numeric characters and update binding
-                    let numericOnly = newValue.filter { $0.isNumber }
+                    // Strip non-numeric characters and limit to 7 digits
+                    let numericOnly = String(newValue.filter { $0.isNumber }.prefix(7))
                     if let intValue = Int(numericOnly), intValue > 0 {
                         value = intValue
+                        // Update textValue if it was truncated
+                        if numericOnly != newValue.filter({ $0.isNumber }) {
+                            textValue = numericOnly
+                        }
                     } else if numericOnly.isEmpty {
                         value = nil
                     }
