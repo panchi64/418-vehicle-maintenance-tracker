@@ -31,137 +31,95 @@ final class OdometerOCRServiceTests: XCTestCase {
     // MARK: - OCRResult Tests
 
     func testOCRResultStoresValues() {
-        // Given
         let mileage = 50000
         let confidence: Float = 0.95
         let rawText = "50,000"
 
-        // When
         let result = OdometerOCRService.OCRResult(
             mileage: mileage,
             confidence: confidence,
             rawText: rawText
         )
 
-        // Then
         XCTAssertEqual(result.mileage, mileage)
         XCTAssertEqual(result.confidence, confidence)
         XCTAssertEqual(result.rawText, rawText)
-        XCTAssertNil(result.detectedUnit)  // Default is nil
+        XCTAssertNil(result.detectedUnit)
     }
 
     func testOCRResult_WithDetectedUnit() {
-        // Given
-        let mileage = 50000
-        let confidence: Float = 0.95
-        let rawText = "50,000 km"
-
-        // When
         let result = OdometerOCRService.OCRResult(
-            mileage: mileage,
-            confidence: confidence,
-            rawText: rawText,
+            mileage: 50000,
+            confidence: 0.95,
+            rawText: "50,000 km",
             detectedUnit: .kilometers
         )
-
-        // Then
         XCTAssertEqual(result.detectedUnit, .kilometers)
     }
 
     func testOCRResult_WithNoDetectedUnit() {
-        // Given
         let result = OdometerOCRService.OCRResult(
             mileage: 50000,
             confidence: 0.95,
             rawText: "50000",
             detectedUnit: nil
         )
-
-        // Then
         XCTAssertNil(result.detectedUnit)
     }
 
     // MARK: - OCR Error Tests
 
     func testNoTextFoundError() {
-        // Given
         let error = OdometerOCRService.OCRError.noTextFound
-
-        // Then
         XCTAssertEqual(error.errorDescription, "No text could be recognized in the image")
     }
 
     func testNoValidMileageFoundError() {
-        // Given
         let error = OdometerOCRService.OCRError.noValidMileageFound
-
-        // Then
         XCTAssertEqual(error.errorDescription, "No valid mileage number was found")
     }
 
     func testImageProcessingFailedError() {
-        // Given
         let error = OdometerOCRService.OCRError.imageProcessingFailed
-
-        // Then
         XCTAssertEqual(error.errorDescription, "Failed to process the image")
     }
 
     func testInvalidMileageError() {
-        // Given
         let reason = "Mileage cannot be negative"
         let error = OdometerOCRService.OCRError.invalidMileage(reason: reason)
-
-        // Then
         XCTAssertEqual(error.errorDescription, "Invalid mileage: \(reason)")
     }
 
     // MARK: - OCR Recognition Tests
 
     func testRecognizeMileageThrowsForInvalidImage() async {
-        // Given - create an image without a valid cgImage
         let service = await OdometerOCRService.shared
 
-        // Create a 1x1 blank image that is valid but has no readable text
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: 1, height: 1))
         let blankImage = renderer.image { context in
             UIColor.black.setFill()
             context.fill(CGRect(x: 0, y: 0, width: 1, height: 1))
         }
 
-        // When/Then - should throw because no text can be recognized
         do {
             _ = try await service.recognizeMileage(from: blankImage)
             XCTFail("Should throw an error for image with no recognizable text")
         } catch {
-            // Expected - either noTextFound or noValidMileageFound
-            XCTAssertTrue(
-                error is OdometerOCRService.OCRError,
-                "Should throw OCRError"
-            )
+            XCTAssertTrue(error is OdometerOCRService.OCRError, "Should throw OCRError")
         }
     }
 
     func testRecognizeMileageWithValidOdometerImage() async {
-        // This test requires a real odometer image to work properly
-        // In a real test suite, we would use test fixtures
-        // For now, we test that the method exists and handles errors properly
-
         let service = await OdometerOCRService.shared
-
-        // Create a test image with text "32500"
         let testImage = createTestImageWithText("32500")
 
         do {
             let result = try await service.recognizeMileage(from: testImage)
-            // If OCR succeeds, verify the result structure
             XCTAssertGreaterThan(result.mileage, 0)
             XCTAssertGreaterThanOrEqual(result.confidence, 0)
             XCTAssertLessThanOrEqual(result.confidence, 1)
             XCTAssertFalse(result.rawText.isEmpty)
         } catch {
-            // OCR might fail on programmatically generated images
-            // This is expected behavior - real odometer photos work better
             XCTAssertTrue(error is OdometerOCRService.OCRError)
         }
     }
@@ -169,252 +127,293 @@ final class OdometerOCRServiceTests: XCTestCase {
     // MARK: - Mileage Validation Tests
 
     func testValidMileageRanges() {
-        // Test various mileage values that should be valid
         let validMileages = [0, 100, 1000, 50000, 150000, 500000, 999999]
-
         for mileage in validMileages {
-            // These values should be within the valid range
-            XCTAssertGreaterThanOrEqual(mileage, 0, "Mileage \(mileage) should be non-negative")
-            XCTAssertLessThanOrEqual(mileage, 1_000_000, "Mileage \(mileage) should be under 1 million")
+            XCTAssertGreaterThanOrEqual(mileage, 0)
+            XCTAssertLessThanOrEqual(mileage, 1_000_000)
         }
     }
 
-    // MARK: - Candidate Scoring Tests
+    // MARK: - Candidate Scoring Tests (using static method)
 
     func testCandidateScoring_SixDigitBeatsTwoDigit() {
-        // Given - the problem case: "235977" should beat "52"
         let sixDigitCandidate = OdometerOCRService.OCRResult(
-            mileage: 235977,
-            confidence: 0.70,  // Lower confidence
-            rawText: "235977km"
+            mileage: 235977, confidence: 0.70, rawText: "235977km"
         )
         let twoDigitCandidate = OdometerOCRService.OCRResult(
-            mileage: 52,
-            confidence: 0.95,  // Higher confidence
-            rawText: "52mi"
+            mileage: 52, confidence: 0.95, rawText: "52mi"
         )
 
-        // When
-        let sixDigitScore = scoreCandidate(sixDigitCandidate)
-        let twoDigitScore = scoreCandidate(twoDigitCandidate)
+        let sixDigitScore = OdometerOCRService.scoreCandidate(sixDigitCandidate)
+        let twoDigitScore = OdometerOCRService.scoreCandidate(twoDigitCandidate)
 
-        // Then - 6-digit should score higher despite lower confidence
-        XCTAssertGreaterThan(
-            sixDigitScore,
-            twoDigitScore,
-            "6-digit mileage should score higher than 2-digit"
-        )
+        XCTAssertGreaterThan(sixDigitScore, twoDigitScore, "6-digit mileage should score higher than 2-digit")
     }
 
     func testCandidateScoring_TypicalMileageRange() {
-        // Given
         let typicalMileage = OdometerOCRService.OCRResult(
-            mileage: 150000,  // 6 digits, typical range
-            confidence: 0.80,
-            rawText: "150000"
+            mileage: 150000, confidence: 0.80, rawText: "150000"
         )
         let unusualMileage = OdometerOCRService.OCRResult(
-            mileage: 999,  // 3 digits, very low
-            confidence: 0.90,
-            rawText: "999"
+            mileage: 999, confidence: 0.90, rawText: "999"
         )
 
-        // When
-        let typicalScore = scoreCandidate(typicalMileage)
-        let unusualScore = scoreCandidate(unusualMileage)
+        let typicalScore = OdometerOCRService.scoreCandidate(typicalMileage)
+        let unusualScore = OdometerOCRService.scoreCandidate(unusualMileage)
 
-        // Then
-        XCTAssertGreaterThan(
-            typicalScore,
-            unusualScore,
-            "Typical mileage should score higher"
-        )
+        XCTAssertGreaterThan(typicalScore, unusualScore, "Typical mileage should score higher")
     }
 
     func testCandidateScoring_FiveDigitsIsValid() {
-        // Given
         let fiveDigitCandidate = OdometerOCRService.OCRResult(
-            mileage: 45000,
-            confidence: 0.85,
-            rawText: "45000"
+            mileage: 45000, confidence: 0.85, rawText: "45000"
         )
-
-        // When
-        let score = scoreCandidate(fiveDigitCandidate)
-
-        // Then - 5 digits in common range should score well
+        let score = OdometerOCRService.scoreCandidate(fiveDigitCandidate)
         XCTAssertGreaterThan(score, 0.8, "5-digit mileage in range should score high")
     }
 
     func testCandidateScoring_HighMileageAccepted() {
-        // Given
         let highMileage = OdometerOCRService.OCRResult(
-            mileage: 450000,
-            confidence: 0.85,
-            rawText: "450000"
+            mileage: 450000, confidence: 0.85, rawText: "450000"
         )
-
-        // When
-        let score = scoreCandidate(highMileage)
-
-        // Then - high mileage should still be valid (score > 0.5)
+        let score = OdometerOCRService.scoreCandidate(highMileage)
         XCTAssertGreaterThan(score, 0.5, "High mileage should be acceptable")
     }
 
-    // MARK: - OCR Character Correction Tests
+    // MARK: - Phase 1: Character Correction Tests (using static methods)
 
-    func testOCRCorrections_ZeroMisreads() {
-        // Given
-        let inputs = ["O", "o", "Q", "D"]
-        let expected = "0"
-
-        for input in inputs {
-            // When
-            let corrected = applyOCRCorrections(input)
-
-            // Then
-            XCTAssertEqual(corrected, expected, "'\(input)' should correct to '\(expected)'")
-        }
+    func testCorrections_DoesNotCorruptODO() {
+        // "ODO 50000" — "ODO" has no real digits, should stay as "ODO"; "50000" has digits
+        let numbers = OdometerOCRService.extractNumericSequences(from: "ODO 50000")
+        XCTAssertTrue(numbers.contains(50000), "Should extract 50000")
+        // Should NOT contain 000 (ODO corrupted)
+        XCTAssertFalse(numbers.contains(0), "Should not corrupt ODO to 000")
     }
 
-    func testOCRCorrections_OneMisreads() {
-        // Given
-        let inputs = ["l", "I", "i", "|"]
-        let expected = "1"
-
-        for input in inputs {
-            // When
-            let corrected = applyOCRCorrections(input)
-
-            // Then
-            XCTAssertEqual(corrected, expected, "'\(input)' should correct to '\(expected)'")
-        }
+    func testCorrections_DoesNotCorruptMILES() {
+        // "MILES" alone has no real digits — should produce no numeric candidates
+        let numbers = OdometerOCRService.extractNumericSequences(from: "MILES")
+        XCTAssertTrue(numbers.isEmpty, "MILES should produce no digits")
     }
 
-    func testOCRCorrections_TwoMisreads() {
-        // Given
-        let inputs = ["Z", "z"]
-        let expected = "2"
-
-        for input in inputs {
-            // When
-            let corrected = applyOCRCorrections(input)
-
-            // Then
-            XCTAssertEqual(corrected, expected, "'\(input)' should correct to '\(expected)'")
-        }
-    }
-
-    func testOCRCorrections_FiveMisreads() {
-        // Given
-        let inputs = ["S", "s"]
-        let expected = "5"
-
-        for input in inputs {
-            // When
-            let corrected = applyOCRCorrections(input)
-
-            // Then
-            XCTAssertEqual(corrected, expected, "'\(input)' should correct to '\(expected)'")
-        }
-    }
-
-    func testOCRCorrections_SixMisreads() {
-        // Given
-        let inputs = ["G", "b"]
-        let expected = "6"
-
-        for input in inputs {
-            // When
-            let corrected = applyOCRCorrections(input)
-
-            // Then
-            XCTAssertEqual(corrected, expected, "'\(input)' should correct to '\(expected)'")
-        }
-    }
-
-    func testOCRCorrections_EightMisreads() {
-        // Given
-        let input = "B"
-        let expected = "8"
-
-        // When
-        let corrected = applyOCRCorrections(input)
-
-        // Then
-        XCTAssertEqual(corrected, expected, "'\(input)' should correct to '\(expected)'")
-    }
-
-    func testOCRCorrections_NineMisreads() {
-        // Given
-        let inputs = ["g", "q"]
-        let expected = "9"
-
-        for input in inputs {
-            // When
-            let corrected = applyOCRCorrections(input)
-
-            // Then
-            XCTAssertEqual(corrected, expected, "'\(input)' should correct to '\(expected)'")
-        }
+    func testCorrections_FixesMixedCluster() {
+        // "5O000" has a real digit (5), so O should correct to 0 → "50000"
+        let numbers = OdometerOCRService.extractNumericSequences(from: "5O000")
+        XCTAssertTrue(numbers.contains(50000), "5O000 should correct to 50000")
     }
 
     func testOCRCorrections_ComplexMileage() {
-        // Given - simulating misread "235977" as something like "Z3S977"
-        let input = "Z3S977"
-        let expected = "235977"
+        // "Z3S977" — Z and S are adjacent to real digits, should correct
+        let corrected = OdometerOCRService.applyClusterCorrections("Z3S977")
+        XCTAssertEqual(corrected, "235977", "Complex misread should be corrected")
+    }
 
-        // When
-        let corrected = applyOCRCorrections(input)
+    func testClusterCorrections_PureLettersUntouched() {
+        let corrected = OdometerOCRService.applyClusterCorrections("ODO")
+        XCTAssertEqual(corrected, "ODO", "Pure letter cluster should be untouched")
+    }
 
-        // Then
-        XCTAssertEqual(corrected, expected, "Complex misread should be corrected")
+    func testClusterCorrections_DigitAdjacentCorrected() {
+        // "5O" — has digit 5, so O should become 0
+        let corrected = OdometerOCRService.applyClusterCorrections("5O")
+        XCTAssertEqual(corrected, "50")
     }
 
     // MARK: - Unit Detection Tests
 
     func testDetectUnit_FindsKilometers() {
-        // Given
         let texts = ["50000 km", "50,000 KM", "50000 kilometers", "50000km"]
-
         for text in texts {
-            // When
             let unit = detectUnit(from: text)
-
-            // Then
             XCTAssertEqual(unit, .kilometers, "Should detect km in '\(text)'")
         }
     }
 
     func testDetectUnit_FindsMiles() {
-        // Given
         let texts = ["50000 mi", "50,000 MI", "50000 miles", "50000mi"]
-
         for text in texts {
-            // When
             let unit = detectUnit(from: text)
-
-            // Then
             XCTAssertEqual(unit, .miles, "Should detect miles in '\(text)'")
         }
     }
 
     func testDetectUnit_ReturnsNilForNoUnit() {
-        // Given
         let texts = ["50000", "50,000", "50 000"]
-
         for text in texts {
-            // When
             let unit = detectUnit(from: text)
-
-            // Then
             XCTAssertNil(unit, "Should return nil for '\(text)'")
+        }
+    }
+
+    // MARK: - Phase 2: Prior Scoring Tests
+
+    func testScoring_WithPrior_FavorsSlightlyAbove() {
+        let goodCandidate = OdometerOCRService.OCRResult(
+            mileage: 52000, confidence: 0.80, rawText: "52000"
+        )
+        let farCandidate = OdometerOCRService.OCRResult(
+            mileage: 150000, confidence: 0.80, rawText: "150000"
+        )
+
+        let goodScore = OdometerOCRService.scoreCandidate(goodCandidate, currentMileage: 50000)
+        let farScore = OdometerOCRService.scoreCandidate(farCandidate, currentMileage: 50000)
+
+        XCTAssertGreaterThan(goodScore, farScore, "52,000 with prior 50,000 should beat 150,000")
+    }
+
+    func testScoring_WithPrior_PenalizesBelowCurrent() {
+        let belowCandidate = OdometerOCRService.OCRResult(
+            mileage: 30000, confidence: 0.90, rawText: "30000"
+        )
+        let aboveCandidate = OdometerOCRService.OCRResult(
+            mileage: 52000, confidence: 0.80, rawText: "52000"
+        )
+
+        let belowScore = OdometerOCRService.scoreCandidate(belowCandidate, currentMileage: 50000)
+        let aboveScore = OdometerOCRService.scoreCandidate(aboveCandidate, currentMileage: 50000)
+
+        XCTAssertGreaterThan(aboveScore, belowScore, "Below-current should be penalized")
+    }
+
+    func testScoring_WithNilPrior_UsesOriginalWeights() {
+        let candidate = OdometerOCRService.OCRResult(
+            mileage: 150000, confidence: 0.80, rawText: "150000"
+        )
+
+        let score = OdometerOCRService.scoreCandidate(candidate, currentMileage: nil)
+
+        // Original formula: digit(40%) + range(25%) + confidence(35%)
+        // 6-digit: 1.0, range 10k-300k: 1.0, confidence: 0.80
+        let expected: Float = (1.0 * 0.40) + (1.0 * 0.25) + (0.80 * 0.35)
+        XCTAssertEqual(score, expected, accuracy: 0.001, "Nil prior should use original weights")
+    }
+
+    // MARK: - Phase 3: Spatial Filtering Tests
+
+    func testSpatialFilter_DiscardsSmallBoundingBoxes() {
+        let small = (
+            OdometerOCRService.OCRResult(mileage: 123, confidence: 0.9, rawText: "123"),
+            OdometerOCRService.ObservationMetadata(
+                boundingBox: CGRect(x: 0.1, y: 0.5, width: 0.1, height: 0.02), // height < 3%
+                area: 0.002
+            ) as OdometerOCRService.ObservationMetadata?
+        )
+        let large = (
+            OdometerOCRService.OCRResult(mileage: 50000, confidence: 0.8, rawText: "50000"),
+            OdometerOCRService.ObservationMetadata(
+                boundingBox: CGRect(x: 0.1, y: 0.5, width: 0.5, height: 0.1),
+                area: 0.05
+            ) as OdometerOCRService.ObservationMetadata?
+        )
+
+        let filtered = OdometerOCRService.filterBySpatialPlausibility([small, large])
+        let mileages = filtered.map { $0.0.mileage }
+
+        XCTAssertTrue(mileages.contains(50000), "Should keep large bounding box")
+        XCTAssertFalse(mileages.contains(123), "Should discard small bounding box")
+    }
+
+    func testSpatialFilter_KeepsDominantYCluster() {
+        // Two candidates at similar Y, one at a different Y
+        let a = (
+            OdometerOCRService.OCRResult(mileage: 50000, confidence: 0.8, rawText: "50000"),
+            OdometerOCRService.ObservationMetadata(
+                boundingBox: CGRect(x: 0.1, y: 0.5, width: 0.3, height: 0.05),
+                area: 0.015
+            ) as OdometerOCRService.ObservationMetadata?
+        )
+        let b = (
+            OdometerOCRService.OCRResult(mileage: 50001, confidence: 0.8, rawText: "50001"),
+            OdometerOCRService.ObservationMetadata(
+                boundingBox: CGRect(x: 0.5, y: 0.52, width: 0.3, height: 0.05), // same Y-band as a
+                area: 0.015
+            ) as OdometerOCRService.ObservationMetadata?
+        )
+        let outlier = (
+            OdometerOCRService.OCRResult(mileage: 999, confidence: 0.9, rawText: "999"),
+            OdometerOCRService.ObservationMetadata(
+                boundingBox: CGRect(x: 0.1, y: 0.1, width: 0.2, height: 0.05), // different Y-band
+                area: 0.01
+            ) as OdometerOCRService.ObservationMetadata?
+        )
+
+        let filtered = OdometerOCRService.filterBySpatialPlausibility([a, b, outlier])
+        let mileages = filtered.map { $0.0.mileage }
+
+        XCTAssertTrue(mileages.contains(50000), "Should keep dominant band candidate a")
+        XCTAssertTrue(mileages.contains(50001), "Should keep dominant band candidate b")
+        XCTAssertFalse(mileages.contains(999), "Should discard outlier Y-band")
+    }
+
+    func testAreaWeighting_LargerTextScoresHigher() {
+        let candidate = OdometerOCRService.OCRResult(
+            mileage: 50000, confidence: 0.8, rawText: "50000"
+        )
+        let largeMeta = OdometerOCRService.ObservationMetadata(
+            boundingBox: CGRect(x: 0, y: 0, width: 0.5, height: 0.1), area: 0.05
+        )
+        let smallMeta = OdometerOCRService.ObservationMetadata(
+            boundingBox: CGRect(x: 0, y: 0, width: 0.1, height: 0.05), area: 0.005
+        )
+
+        let largeScore = OdometerOCRService.scoreCandidate(
+            candidate, metadata: largeMeta, maxArea: 0.05
+        )
+        let smallScore = OdometerOCRService.scoreCandidate(
+            candidate, metadata: smallMeta, maxArea: 0.05
+        )
+
+        XCTAssertGreaterThan(largeScore, smallScore, "Larger area should score higher")
+    }
+
+    // MARK: - Phase 4: Trip Meter Discard Tests
+
+    func testTripMeterDiscard_RemovesSmallReading() {
+        let candidates: [(OdometerOCRService.OCRResult, OdometerOCRService.ObservationMetadata?)] = [
+            (OdometerOCRService.OCRResult(mileage: 52347, confidence: 0.9, rawText: "52347"), nil),
+            (OdometerOCRService.OCRResult(mileage: 234, confidence: 0.9, rawText: "234"), nil),
+        ]
+
+        let filtered = OdometerOCRService.discardTripMeterReadings(candidates)
+        let mileages = filtered.map { $0.0.mileage }
+
+        XCTAssertTrue(mileages.contains(52347), "Should keep 52347")
+        XCTAssertFalse(mileages.contains(234), "Should discard 234 (trip meter)")
+    }
+
+    func testTripMeterDiscard_KeepsSimilarValues() {
+        let candidates: [(OdometerOCRService.OCRResult, OdometerOCRService.ObservationMetadata?)] = [
+            (OdometerOCRService.OCRResult(mileage: 52347, confidence: 0.9, rawText: "52347"), nil),
+            (OdometerOCRService.OCRResult(mileage: 52350, confidence: 0.8, rawText: "52350"), nil),
+        ]
+
+        let filtered = OdometerOCRService.discardTripMeterReadings(candidates)
+        XCTAssertEqual(filtered.count, 2, "Should keep both similar values")
+    }
+
+    // MARK: - Phase 6: ROI Tests
+
+    func testROI_NilFallsBackToFullFrame() async {
+        // When no text regions are detected, recognition should still work (full frame)
+        let service = await OdometerOCRService.shared
+
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 1, height: 1))
+        let blankImage = renderer.image { context in
+            UIColor.black.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 1, height: 1))
+        }
+
+        // Should not crash — falls back to full frame processing
+        do {
+            _ = try await service.recognizeMileage(from: blankImage)
+        } catch {
+            // Expected: no text found on blank image, but should not crash
+            XCTAssertTrue(error is OdometerOCRService.OCRError)
         }
     }
 
     // MARK: - Helper Methods
 
-    /// Replicates the unit detection logic from OdometerOCRService
     private func detectUnit(from text: String) -> DistanceUnit? {
         let lowercased = text.lowercased()
         if lowercased.contains("km") || lowercased.contains("kilometer") {
@@ -426,73 +425,14 @@ final class OdometerOCRServiceTests: XCTestCase {
         return nil
     }
 
-    /// Replicates the candidate scoring logic from OdometerOCRService
-    /// Weighs digit count (40%), range (25%), and confidence (35%)
-    private func scoreCandidate(_ candidate: OdometerOCRService.OCRResult) -> Float {
-        let digitCount = String(candidate.mileage).count
-
-        // Digit count score (5-7 digits typical for odometers)
-        let digitCountScore: Float = switch digitCount {
-        case 6: 1.0   // Most common (100,000 - 999,999)
-        case 5: 0.9   // Common (10,000 - 99,999)
-        case 7: 0.8   // High mileage (1,000,000+)
-        case 4: 0.5   // Low mileage (1,000 - 9,999)
-        case 3: 0.2   // Very low (100 - 999)
-        default: 0.1  // Unlikely (1-2 digits or 8+)
-        }
-
-        // Range score - typical odometer values
-        let rangeScore: Float = switch candidate.mileage {
-        case 10_000...300_000: 1.0    // Most common range
-        case 1_000..<10_000: 0.7      // Low but valid
-        case 300_001...500_000: 0.6   // High mileage
-        case 500_001...999_999: 0.4   // Very high mileage
-        case 100..<1_000: 0.3         // Very low
-        default: 0.1                   // Unlikely
-        }
-
-        // Weighted combination
-        return (digitCountScore * 0.40) + (rangeScore * 0.25) + (candidate.confidence * 0.35)
-    }
-
-    /// Replicates the OCR character corrections from OdometerOCRService
-    private func applyOCRCorrections(_ text: String) -> String {
-        let corrections: [(String, String)] = [
-            // Zero misreads
-            ("O", "0"), ("o", "0"), ("Q", "0"), ("D", "0"),
-            // One misreads
-            ("l", "1"), ("I", "1"), ("i", "1"), ("|", "1"),
-            // Two misreads
-            ("Z", "2"), ("z", "2"),
-            // Five misreads
-            ("S", "5"), ("s", "5"),
-            // Six misreads
-            ("G", "6"), ("b", "6"),
-            // Eight misreads
-            ("B", "8"),
-            // Nine misreads
-            ("g", "9"), ("q", "9"),
-        ]
-
-        var result = text
-        for (misread, correct) in corrections {
-            result = result.replacingOccurrences(of: misread, with: correct)
-        }
-        return result
-    }
-
-    /// Creates a test image with the specified text
-    /// Note: This is primarily for testing the API, not actual OCR accuracy
     private func createTestImageWithText(_ text: String) -> UIImage {
         let size = CGSize(width: 200, height: 100)
         let renderer = UIGraphicsImageRenderer(size: size)
 
         return renderer.image { context in
-            // White background
             UIColor.white.setFill()
             context.fill(CGRect(origin: .zero, size: size))
 
-            // Draw text
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: UIFont.monospacedSystemFont(ofSize: 36, weight: .bold),
                 .foregroundColor: UIColor.black

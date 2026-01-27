@@ -27,6 +27,7 @@ struct OdometerImagePreprocessor: Sendable {
         case contrastEnhanced = "Contrast Enhanced"
         case grayscaleSharpened = "Grayscale Sharpened"
         case documentEnhanced = "Document Enhanced"
+        case adaptiveBinarized = "Adaptive Binarized"
     }
 
     // MARK: - Initialization
@@ -65,6 +66,12 @@ struct OdometerImagePreprocessor: Sendable {
         if let docEnhanced = applyDocumentEnhancement(to: ciImage),
            let cgResult = context.createCGImage(docEnhanced, from: docEnhanced.extent) {
             results.append(PreprocessedImage(image: cgResult, method: .documentEnhanced))
+        }
+
+        // Adaptive binarization (Phase 5: good for LCD/mechanical in mixed lighting)
+        if let binarized = applyAdaptiveBinarization(to: ciImage),
+           let cgResult = context.createCGImage(binarized, from: binarized.extent) {
+            results.append(PreprocessedImage(image: cgResult, method: .adaptiveBinarized))
         }
 
         return results
@@ -124,5 +131,36 @@ struct OdometerImagePreprocessor: Sendable {
         contrastFilter.setValue(0.0, forKey: kCIInputSaturationKey)  // Full grayscale
 
         return contrastFilter.outputImage
+    }
+
+    /// Applies adaptive binarization for LCD displays and mechanical odometers in mixed lighting
+    /// Converts to grayscale, applies very high contrast, then uses color matrix to threshold mid-grays
+    nonisolated private func applyAdaptiveBinarization(to image: CIImage) -> CIImage? {
+        // Step 1: Grayscale conversion
+        guard let grayscaleFilter = CIFilter(name: "CIColorMonochrome") else { return nil }
+        grayscaleFilter.setValue(image, forKey: kCIInputImageKey)
+        grayscaleFilter.setValue(CIColor(red: 0.7, green: 0.7, blue: 0.7), forKey: kCIInputColorKey)
+        grayscaleFilter.setValue(1.0, forKey: kCIInputIntensityKey)
+
+        guard let grayscale = grayscaleFilter.outputImage else { return nil }
+
+        // Step 2: Very high contrast to push pixels toward black/white
+        guard let contrastFilter = CIFilter(name: "CIColorControls") else { return nil }
+        contrastFilter.setValue(grayscale, forKey: kCIInputImageKey)
+        contrastFilter.setValue(3.0, forKey: kCIInputContrastKey)
+        contrastFilter.setValue(0.0, forKey: kCIInputSaturationKey)
+
+        guard let highContrast = contrastFilter.outputImage else { return nil }
+
+        // Step 3: Color matrix to amplify channels and threshold mid-grays
+        guard let matrixFilter = CIFilter(name: "CIColorMatrix") else { return nil }
+        matrixFilter.setValue(highContrast, forKey: kCIInputImageKey)
+        matrixFilter.setValue(CIVector(x: 1.5, y: 0, z: 0, w: 0), forKey: "inputRVector")
+        matrixFilter.setValue(CIVector(x: 0, y: 1.5, z: 0, w: 0), forKey: "inputGVector")
+        matrixFilter.setValue(CIVector(x: 0, y: 0, z: 1.5, w: 0), forKey: "inputBVector")
+        matrixFilter.setValue(CIVector(x: 0, y: 0, z: 0, w: 1), forKey: "inputAVector")
+        matrixFilter.setValue(CIVector(x: -0.3, y: -0.3, z: -0.3, w: 0), forKey: "inputBiasVector")
+
+        return matrixFilter.outputImage
     }
 }

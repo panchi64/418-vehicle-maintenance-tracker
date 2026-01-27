@@ -338,7 +338,10 @@ struct MileageUpdateSheet: View {
 
         Task {
             do {
-                let result = try await OdometerOCRService.shared.recognizeMileage(from: image)
+                let result = try await OdometerOCRService.shared.recognizeMileage(
+                    from: image,
+                    currentMileage: currentMileage
+                )
 
                 await MainActor.run {
                     isProcessingOCR = false
