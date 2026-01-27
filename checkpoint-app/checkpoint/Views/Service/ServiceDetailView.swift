@@ -384,9 +384,14 @@ struct MarkServiceDoneSheet: View {
 
         // Save attachments
         for attachmentData in pendingAttachments {
+            let thumbnailData = ServiceAttachment.generateThumbnailData(
+                from: attachmentData.data,
+                mimeType: attachmentData.mimeType
+            )
             let attachment = ServiceAttachment(
                 serviceLog: log,
                 data: attachmentData.data,
+                thumbnailData: thumbnailData,
                 fileName: attachmentData.fileName,
                 mimeType: attachmentData.mimeType
             )
