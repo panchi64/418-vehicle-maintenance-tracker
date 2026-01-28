@@ -380,6 +380,7 @@
 | Apple Watch Complication     | High     | ⏳     | Quick mileage logging, glanceable "Next Up"    |
 | Siri integration             | Medium   | ⏳     | "Hey Siri, what's due on my car?"              |
 | CarPlay Dashboard Widget     | Medium   | ✅     | iOS 16+ compact widget on CarPlay home screen  |
+| Dynamic App Icon             | Medium   | ✅     | Icon changes based on service urgency (configurable in Settings) |
 
 **Notification philosophy:**
 

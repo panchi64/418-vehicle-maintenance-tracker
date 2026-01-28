@@ -20,13 +20,21 @@ final class AppIconService {
         case critical = "AppIcon-Critical"
     }
 
-    /// Updates the app icon based on the most urgent service status
+    /// Updates the app icon based on the most urgent service status.
+    /// Respects the user's auto-change preference in `AppIconSettings`.
     /// - Parameters:
     ///   - vehicle: The currently selected vehicle
     ///   - services: All services to evaluate
     func updateIcon(for vehicle: Vehicle?, services: [Service]) {
         guard UIApplication.shared.supportsAlternateIcons else {
             print("[AppIcon] Alternate icons not supported")
+            return
+        }
+
+        // When auto-change is disabled, always revert to the default icon
+        guard AppIconSettings.shared.autoChangeEnabled else {
+            print("[AppIcon] Auto-change disabled")
+            resetToDefaultIcon()
             return
         }
 
@@ -79,6 +87,19 @@ final class AppIconService {
             return AppIconName.advisory.rawValue
         case .good, .neutral:
             return nil // Default (nominal) icon
+        }
+    }
+
+    /// Resets the app icon to the default if an alternate is currently set
+    func resetToDefaultIcon() {
+        guard UIApplication.shared.alternateIconName != nil else { return }
+
+        UIApplication.shared.setAlternateIconName(nil) { error in
+            if let error = error {
+                print("[AppIcon] Failed to reset: \(error.localizedDescription)")
+            } else {
+                print("[AppIcon] Reset to default icon")
+            }
         }
     }
 }
