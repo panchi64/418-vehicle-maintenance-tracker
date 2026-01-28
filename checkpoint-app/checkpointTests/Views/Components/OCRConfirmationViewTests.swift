@@ -338,8 +338,8 @@ final class OCRConfirmationViewTests: XCTestCase {
         // Given
         let originalMiles = 50000
 
-        // When - convert to km and back
-        let km = DistanceUnit.miles.fromMiles(originalMiles)  // Display in km
+        // When - convert miles to km display, then back to miles
+        let km = DistanceUnit.kilometers.fromMiles(originalMiles)  // Display in km
         let backToMiles = DistanceUnit.kilometers.toMiles(km)
 
         // Then - should be close to original (some rounding error acceptable)
