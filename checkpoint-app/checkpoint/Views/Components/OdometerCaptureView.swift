@@ -15,11 +15,15 @@ import AVFoundation
 struct OdometerCaptureView: UIViewControllerRepresentable {
     let onImageCaptured: (UIImage) -> Void
     let onCancel: () -> Void
+    var guideText: String = "ALIGN ODOMETER HERE"
+    var viewfinderAspectRatio: CGFloat = 3.0  // width / height
 
     func makeUIViewController(context: Context) -> OdometerCaptureViewController {
         let controller = OdometerCaptureViewController()
         controller.onImageCaptured = onImageCaptured
         controller.onCancel = onCancel
+        controller.guideText = guideText
+        controller.viewfinderAspectRatio = viewfinderAspectRatio
         return controller
     }
 
@@ -33,6 +37,8 @@ class OdometerCaptureViewController: UIViewController {
 
     var onImageCaptured: ((UIImage) -> Void)?
     var onCancel: (() -> Void)?
+    var guideText: String = "ALIGN ODOMETER HERE"
+    var viewfinderAspectRatio: CGFloat = 3.0  // width / height
 
     private let captureSession = AVCaptureSession()
     private var photoOutput = AVCapturePhotoOutput()
@@ -122,7 +128,7 @@ class OdometerCaptureViewController: UIViewController {
         view.layer.addSublayer(viewfinderBorder)
 
         // Guide label
-        guideLabel.text = "ALIGN ODOMETER HERE"
+        guideLabel.text = guideText
         guideLabel.textColor = accentOffWhite
         guideLabel.font = .systemFont(ofSize: 13, weight: .bold)
         guideLabel.textAlignment = .center
@@ -133,9 +139,9 @@ class OdometerCaptureViewController: UIViewController {
     private func updateViewfinderLayout() {
         let bounds = view.bounds
 
-        // 80% screen width, ~3:1 aspect ratio, center-lower third
+        // 80% screen width, configurable aspect ratio, center-lower third
         let width = bounds.width * 0.80
-        let height = width / 3.0
+        let height = width / viewfinderAspectRatio
         let x = (bounds.width - width) / 2
         let y = bounds.height * 0.5 - height / 2 + bounds.height * 0.05
 

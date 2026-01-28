@@ -95,6 +95,12 @@ struct InstrumentNumberField: View {
                                 textValue = String(value)
                             }
                         }
+                        .onChange(of: value) { _, newValue in
+                            let newText = newValue.map { String($0) } ?? ""
+                            if newText != textValue {
+                                textValue = newText
+                            }
+                        }
 
                     if !suffix.isEmpty {
                         Text(suffix)

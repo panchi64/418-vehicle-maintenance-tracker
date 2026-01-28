@@ -155,7 +155,7 @@
 | Feature               | Priority | Status | Notes                                                      |
 | --------------------- | -------- | ------ | ---------------------------------------------------------- |
 | Multi-vehicle support | High     | ✅     | Families, enthusiasts, collectors                          |
-| VIN decoding          | High     | ⏳     | Auto-populate year/make/model/engine                       |
+| VIN decoding          | High     | ✅     | Auto-populate year/make/model/engine via NHTSA vPIC API    |
 | Odometer tracking     | High     | ✅     | Manual entry + smart estimation                            |
 | Distance unit support | Medium   | ✅     | Miles or kilometers preference (global setting)            |
 | Vehicle notes         | Medium   | ✅     | Freeform notes area for quirks, history, or reminders      |
@@ -273,7 +273,7 @@
 
 | Feature             | Priority | Status | Notes                                                 |
 | ------------------- | -------- | ------ | ----------------------------------------------------- |
-| Recall alerts       | High     |        | NHTSA recall notifications — safety critical          |
+| Recall alerts       | High     | ✅     | NHTSA recall notifications — safety critical          |
 | Yearly cost roundup | Medium   | ✅     | Annual summary push notification on January 2nd       |
 
 #### Yearly Cost Roundup

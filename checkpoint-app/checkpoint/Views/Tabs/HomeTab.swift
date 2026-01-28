@@ -14,6 +14,9 @@ struct HomeTab: View {
     @Query private var services: [Service]
     @Query private var serviceLogs: [ServiceLog]
 
+    // Recall alert state
+    @State private var recalls: [RecallInfo] = []
+
     private var vehicle: Vehicle? {
         appState.selectedVehicle
     }
@@ -43,6 +46,12 @@ struct HomeTab: View {
     var body: some View {
         ScrollView {
             VStack(spacing: Spacing.xl) {
+                // Recall Alert Card (safety-critical, shown above everything)
+                if !recalls.isEmpty {
+                    RecallAlertCard(recalls: recalls)
+                        .revealAnimation(delay: 0.05)
+                }
+
                 // Quick Specs Card
                 if let vehicle = vehicle {
                     QuickSpecsCard(vehicle: vehicle) {
@@ -189,6 +198,9 @@ struct HomeTab: View {
             .padding(.top, Spacing.lg)
             .padding(.bottom, Spacing.xxl + 56) // Extra padding for FAB and tab bar
         }
+        .task(id: vehicle?.id) {
+            await fetchRecalls()
+        }
     }
 
     // MARK: - Activity Row
@@ -287,6 +299,29 @@ struct HomeTab: View {
             }
         }
         .padding(Spacing.xxl)
+    }
+
+    // MARK: - Recall Fetch
+
+    private func fetchRecalls() async {
+        guard let vehicle = vehicle,
+              !vehicle.make.isEmpty,
+              !vehicle.model.isEmpty,
+              vehicle.year > 0 else {
+            recalls = []
+            return
+        }
+
+        do {
+            recalls = try await NHTSAService.shared.fetchRecalls(
+                make: vehicle.make,
+                model: vehicle.model,
+                year: vehicle.year
+            )
+        } catch {
+            // Silently fail — recalls are supplementary info
+            recalls = []
+        }
     }
 
     // MARK: - Helpers

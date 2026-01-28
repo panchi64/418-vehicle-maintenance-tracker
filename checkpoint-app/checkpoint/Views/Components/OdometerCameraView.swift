@@ -81,6 +81,12 @@ struct OdometerCameraSheet: View {
     /// Callback when an image is captured
     let onImageCaptured: (UIImage) -> Void
 
+    /// Guide text shown below the viewfinder
+    var guideText: String = "ALIGN ODOMETER HERE"
+
+    /// Viewfinder aspect ratio (width / height)
+    var viewfinderAspectRatio: CGFloat = 3.0
+
     var body: some View {
         #if targetEnvironment(simulator)
         // Simulator fallback: use UIImagePickerController
@@ -103,7 +109,9 @@ struct OdometerCameraSheet: View {
             },
             onCancel: {
                 dismiss()
-            }
+            },
+            guideText: guideText,
+            viewfinderAspectRatio: viewfinderAspectRatio
         )
         .ignoresSafeArea()
         #endif
