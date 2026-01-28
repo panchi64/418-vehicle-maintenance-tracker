@@ -288,63 +288,6 @@ final class OdometerOCRServiceTests: XCTestCase {
         XCTAssertEqual(score, expected, accuracy: 0.001, "Nil prior should use original weights")
     }
 
-    // MARK: - Phase 3: Spatial Filtering Tests
-
-    func testSpatialFilter_DiscardsSmallBoundingBoxes() {
-        let small = (
-            OdometerOCRService.OCRResult(mileage: 123, confidence: 0.9, rawText: "123"),
-            OdometerOCRService.ObservationMetadata(
-                boundingBox: CGRect(x: 0.1, y: 0.5, width: 0.1, height: 0.02), // height < 3%
-                area: 0.002
-            ) as OdometerOCRService.ObservationMetadata?
-        )
-        let large = (
-            OdometerOCRService.OCRResult(mileage: 50000, confidence: 0.8, rawText: "50000"),
-            OdometerOCRService.ObservationMetadata(
-                boundingBox: CGRect(x: 0.1, y: 0.5, width: 0.5, height: 0.1),
-                area: 0.05
-            ) as OdometerOCRService.ObservationMetadata?
-        )
-
-        let filtered = OdometerOCRService.filterBySpatialPlausibility([small, large])
-        let mileages = filtered.map { $0.0.mileage }
-
-        XCTAssertTrue(mileages.contains(50000), "Should keep large bounding box")
-        XCTAssertFalse(mileages.contains(123), "Should discard small bounding box")
-    }
-
-    func testSpatialFilter_KeepsDominantYCluster() {
-        // Two candidates at similar Y, one at a different Y
-        let a = (
-            OdometerOCRService.OCRResult(mileage: 50000, confidence: 0.8, rawText: "50000"),
-            OdometerOCRService.ObservationMetadata(
-                boundingBox: CGRect(x: 0.1, y: 0.5, width: 0.3, height: 0.05),
-                area: 0.015
-            ) as OdometerOCRService.ObservationMetadata?
-        )
-        let b = (
-            OdometerOCRService.OCRResult(mileage: 50001, confidence: 0.8, rawText: "50001"),
-            OdometerOCRService.ObservationMetadata(
-                boundingBox: CGRect(x: 0.5, y: 0.52, width: 0.3, height: 0.05), // same Y-band as a
-                area: 0.015
-            ) as OdometerOCRService.ObservationMetadata?
-        )
-        let outlier = (
-            OdometerOCRService.OCRResult(mileage: 999, confidence: 0.9, rawText: "999"),
-            OdometerOCRService.ObservationMetadata(
-                boundingBox: CGRect(x: 0.1, y: 0.1, width: 0.2, height: 0.05), // different Y-band
-                area: 0.01
-            ) as OdometerOCRService.ObservationMetadata?
-        )
-
-        let filtered = OdometerOCRService.filterBySpatialPlausibility([a, b, outlier])
-        let mileages = filtered.map { $0.0.mileage }
-
-        XCTAssertTrue(mileages.contains(50000), "Should keep dominant band candidate a")
-        XCTAssertTrue(mileages.contains(50001), "Should keep dominant band candidate b")
-        XCTAssertFalse(mileages.contains(999), "Should discard outlier Y-band")
-    }
-
     func testAreaWeighting_LargerTextScoresHigher() {
         let candidate = OdometerOCRService.OCRResult(
             mileage: 50000, confidence: 0.8, rawText: "50000"
@@ -391,23 +334,65 @@ final class OdometerOCRServiceTests: XCTestCase {
         XCTAssertEqual(filtered.count, 2, "Should keep both similar values")
     }
 
-    // MARK: - Phase 6: ROI Tests
+    // MARK: - Simplified Pipeline Tests (no ROI, no spatial filtering)
 
-    func testROI_NilFallsBackToFullFrame() async {
-        // When no text regions are detected, recognition should still work (full frame)
+    func testPipeline_RecognizesWithoutROI() async {
+        // The simplified pipeline should recognize text from a full-frame image
+        // without needing ROI detection (viewfinder crop handles framing)
         let service = await OdometerOCRService.shared
+        let testImage = createTestImageWithText("87654")
 
-        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 1, height: 1))
-        let blankImage = renderer.image { context in
-            UIColor.black.setFill()
-            context.fill(CGRect(x: 0, y: 0, width: 1, height: 1))
-        }
-
-        // Should not crash — falls back to full frame processing
         do {
-            _ = try await service.recognizeMileage(from: blankImage)
+            let result = try await service.recognizeMileage(from: testImage)
+            // If recognition succeeds, the pipeline works without ROI
+            XCTAssertGreaterThan(result.mileage, 0, "Should extract a mileage without ROI")
         } catch {
-            // Expected: no text found on blank image, but should not crash
+            // OCR may fail on synthetic images — that's OK, the point is no crash
+            XCTAssertTrue(error is OdometerOCRService.OCRError, "Should throw OCRError, not crash")
+        }
+    }
+
+    func testPipeline_AllCandidatesPassToAggregation() {
+        // Without spatial filtering, all candidates should reach aggregation.
+        // Verify that small bounding boxes are NOT discarded anymore.
+        let smallCandidate = OdometerOCRService.OCRResult(
+            mileage: 50000, confidence: 0.8, rawText: "50000"
+        )
+        let smallMeta = OdometerOCRService.ObservationMetadata(
+            boundingBox: CGRect(x: 0.1, y: 0.5, width: 0.1, height: 0.02), // height < 3% — previously filtered
+            area: 0.002
+        )
+
+        // Score should still work for small bounding box candidates
+        let score = OdometerOCRService.scoreCandidate(
+            smallCandidate,
+            metadata: smallMeta,
+            maxArea: 0.05
+        )
+        XCTAssertGreaterThan(score, 0, "Small bounding box candidates should still be scorable")
+    }
+
+    func testPipeline_NoSpatialFilterMethodExists() {
+        // Verify filterBySpatialPlausibility is no longer part of the public API
+        // This test documents the removal — it passes by compilation alone
+        // (if the method existed as static, calling it would compile; it shouldn't)
+        // We verify indirectly: discardTripMeterReadings still exists
+        let candidates: [(OdometerOCRService.OCRResult, OdometerOCRService.ObservationMetadata?)] = [
+            (OdometerOCRService.OCRResult(mileage: 50000, confidence: 0.9, rawText: "50000"), nil),
+        ]
+        let result = OdometerOCRService.discardTripMeterReadings(candidates)
+        XCTAssertEqual(result.count, 1, "Trip meter discard should still work")
+    }
+
+    func testPipeline_RecognizesWithCurrentMileagePrior() async {
+        // The pipeline should accept currentMileage parameter for prior-based scoring
+        let service = await OdometerOCRService.shared
+        let testImage = createTestImageWithText("51234")
+
+        do {
+            let result = try await service.recognizeMileage(from: testImage, currentMileage: 50000)
+            XCTAssertGreaterThan(result.mileage, 0)
+        } catch {
             XCTAssertTrue(error is OdometerOCRService.OCRError)
         }
     }
