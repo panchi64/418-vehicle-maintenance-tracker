@@ -41,6 +41,10 @@ class OdometerCaptureViewController: UIViewController {
     // Viewfinder guide rect in view coordinates
     private var viewfinderRect: CGRect = .zero
 
+    // Theme colors (matches cerulean design system)
+    private let ceruleanPrimary = UIColor(red: 0.0, green: 0.2, blue: 0.745, alpha: 1.0)
+    private let accentOffWhite = UIColor(red: 0.961, green: 0.941, blue: 0.863, alpha: 1.0)
+
     // UI elements
     private let viewfinderBorder = CAShapeLayer()
     private let maskLayer = CAShapeLayer()
@@ -106,20 +110,20 @@ class OdometerCaptureViewController: UIViewController {
     // MARK: - Viewfinder Overlay
 
     private func setupViewfinderOverlay() {
-        // Semi-transparent dark mask
+        // Semi-transparent cerulean mask
         maskLayer.fillRule = .evenOdd
-        maskLayer.fillColor = UIColor.black.withAlphaComponent(0.6).cgColor
+        maskLayer.fillColor = ceruleanPrimary.withAlphaComponent(0.75).cgColor
         view.layer.addSublayer(maskLayer)
 
-        // Amber border rectangle
-        viewfinderBorder.strokeColor = UIColor(red: 232/255, green: 155/255, blue: 60/255, alpha: 1.0).cgColor
+        // Accent border rectangle
+        viewfinderBorder.strokeColor = accentOffWhite.cgColor
         viewfinderBorder.fillColor = UIColor.clear.cgColor
         viewfinderBorder.lineWidth = 2
         view.layer.addSublayer(viewfinderBorder)
 
         // Guide label
         guideLabel.text = "ALIGN ODOMETER HERE"
-        guideLabel.textColor = UIColor(red: 232/255, green: 155/255, blue: 60/255, alpha: 1.0)
+        guideLabel.textColor = accentOffWhite
         guideLabel.font = .systemFont(ofSize: 13, weight: .bold)
         guideLabel.textAlignment = .center
         guideLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -159,19 +163,17 @@ class OdometerCaptureViewController: UIViewController {
 
     private func setupControls() {
         // Capture button
-        let amberColor = UIColor(red: 232/255, green: 155/255, blue: 60/255, alpha: 1.0)
-
         captureButton.setTitle("CAPTURE", for: .normal)
-        captureButton.setTitleColor(.black, for: .normal)
+        captureButton.setTitleColor(ceruleanPrimary, for: .normal)
         captureButton.titleLabel?.font = .systemFont(ofSize: 15, weight: .bold)
-        captureButton.backgroundColor = amberColor
+        captureButton.backgroundColor = accentOffWhite
         captureButton.translatesAutoresizingMaskIntoConstraints = false
         captureButton.addTarget(self, action: #selector(capturePhoto), for: .touchUpInside)
         view.addSubview(captureButton)
 
         // Cancel button
         cancelButton.setTitle("Cancel", for: .normal)
-        cancelButton.setTitleColor(.white, for: .normal)
+        cancelButton.setTitleColor(accentOffWhite, for: .normal)
         cancelButton.titleLabel?.font = .systemFont(ofSize: 17, weight: .medium)
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
         cancelButton.addTarget(self, action: #selector(cancelCapture), for: .touchUpInside)

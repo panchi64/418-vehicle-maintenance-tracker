@@ -100,9 +100,6 @@ actor OdometerOCRService {
             throw OCRError.imageProcessingFailed
         }
 
-        // Phase 6: Detect text regions for focused recognition
-        let regionOfInterest = await detectBestRegionOfInterest(in: cgImage)
-
         // Preprocess image to get multiple enhanced versions
         let preprocessedImages = preprocessor.preprocess(cgImage)
 
@@ -112,10 +109,7 @@ actor OdometerOCRService {
 
         for preprocessed in preprocessedImages {
             do {
-                let observations = try await performTextRecognition(
-                    on: preprocessed.image,
-                    regionOfInterest: regionOfInterest
-                )
+                let observations = try await performTextRecognition(on: preprocessed.image)
                 if !observations.isEmpty {
                     hasAnyObservations = true
                     let candidates = extractMileageCandidates(from: observations)
@@ -130,19 +124,16 @@ actor OdometerOCRService {
             throw OCRError.noTextFound
         }
 
-        // Phase 3: Spatial filtering
-        let spatiallyFiltered = Self.filterBySpatialPlausibility(allCandidates)
-
         // Aggregate candidates: boost confidence for values found multiple times
-        let aggregatedCandidates = aggregateCandidates(spatiallyFiltered)
+        let aggregatedCandidates = aggregateCandidates(allCandidates)
 
-        // Phase 4: Trip meter discard
+        // Trip meter discard: remove likely trip meter readings
         let filteredCandidates = Self.discardTripMeterReadings(aggregatedCandidates)
 
         guard let bestCandidate = selectBestCandidate(
             from: filteredCandidates,
             currentMileage: currentMileage,
-            hasAreaData: spatiallyFiltered.contains { $0.1 != nil }
+            hasAreaData: allCandidates.contains { $0.1 != nil }
         ) else {
             throw OCRError.noValidMileageFound
         }
@@ -185,63 +176,11 @@ actor OdometerOCRService {
         }
     }
 
-    // MARK: - Text Detection (Phase 6)
-
-    /// Detects text regions in the image using VNDetectTextRectanglesRequest
-    private func detectTextRegions(in cgImage: CGImage) async -> [CGRect] {
-        await withCheckedContinuation { continuation in
-            let request = VNDetectTextRectanglesRequest { request, _ in
-                guard let results = request.results as? [VNTextObservation] else {
-                    continuation.resume(returning: [])
-                    return
-                }
-                let boxes = results.map { $0.boundingBox }
-                    .sorted { ($0.width * $0.height) > ($1.width * $1.height) }
-                continuation.resume(returning: boxes)
-            }
-            request.reportCharacterBoxes = false
-
-            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-            do {
-                try handler.perform([request])
-            } catch {
-                continuation.resume(returning: [])
-            }
-        }
-    }
-
-    /// Detects the best region of interest by finding the largest text region and expanding it
-    private func detectBestRegionOfInterest(in cgImage: CGImage) async -> CGRect? {
-        let regions = await detectTextRegions(in: cgImage)
-        guard let largest = regions.first else { return nil }
-
-        // Expand by 20% padding
-        let padX = largest.width * 0.2
-        let padY = largest.height * 0.2
-        let expanded = CGRect(
-            x: max(0, largest.origin.x - padX),
-            y: max(0, largest.origin.y - padY),
-            width: min(1.0, largest.width + padX * 2),
-            height: min(1.0, largest.height + padY * 2)
-        )
-        // Clamp to normalized coordinates
-        return CGRect(
-            x: expanded.origin.x,
-            y: expanded.origin.y,
-            width: min(expanded.width, 1.0 - expanded.origin.x),
-            height: min(expanded.height, 1.0 - expanded.origin.y)
-        )
-    }
-
     // MARK: - Private Methods
 
     /// Performs Vision text recognition on the image
-    /// - Parameters:
-    ///   - cgImage: The image to recognize text in
-    ///   - regionOfInterest: Optional ROI in normalized coordinates (0-1). Falls back to full frame if nil.
     private func performTextRecognition(
-        on cgImage: CGImage,
-        regionOfInterest: CGRect? = nil
+        on cgImage: CGImage
     ) async throws -> [VNRecognizedTextObservation] {
         try await withCheckedThrowingContinuation { continuation in
             let request = VNRecognizeTextRequest { request, error in
@@ -272,11 +211,6 @@ actor OdometerOCRService {
             // Use latest revision for best accuracy (iOS 16+)
             if #available(iOS 16.0, *) {
                 request.revision = VNRecognizeTextRequestRevision3
-            }
-
-            // Phase 6: Apply region of interest if available
-            if let roi = regionOfInterest {
-                request.regionOfInterest = roi
             }
 
             let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
@@ -453,72 +387,7 @@ actor OdometerOCRService {
         return numbers
     }
 
-    // MARK: - Spatial Filtering (Phase 3)
-
-    /// Filters candidates by spatial plausibility based on bounding box data
-    static func filterBySpatialPlausibility(
-        _ candidates: [(OCRResult, ObservationMetadata?)]
-    ) -> [(OCRResult, ObservationMetadata?)] {
-        // Only filter if we have metadata
-        let withMetadata = candidates.filter { $0.1 != nil }
-        guard !withMetadata.isEmpty else { return candidates }
-
-        // Discard observations with bounding box height < 3% of image
-        let sizeFiltered = candidates.filter { entry in
-            guard let meta = entry.1 else { return true } // Keep entries without metadata
-            return meta.boundingBox.height >= 0.03
-        }
-
-        guard !sizeFiltered.isEmpty else { return candidates }
-
-        // Cluster by centerY (tolerance 0.05), keep dominant band
-        let withMeta = sizeFiltered.filter { $0.1 != nil }
-        guard withMeta.count > 1 else { return sizeFiltered }
-
-        // Group into Y-bands
-        var bands: [[Int]] = []
-        let sorted = withMeta.enumerated().sorted {
-            ($0.element.1?.boundingBox.midY ?? 0) < ($1.element.1?.boundingBox.midY ?? 0)
-        }
-
-        for (idx, entry) in sorted {
-            let centerY = entry.1?.boundingBox.midY ?? 0
-            var placed = false
-            for bandIdx in bands.indices {
-                let bandCenterY = withMeta[bands[bandIdx][0]].1?.boundingBox.midY ?? 0
-                if abs(centerY - bandCenterY) <= 0.05 {
-                    bands[bandIdx].append(idx)
-                    placed = true
-                    break
-                }
-            }
-            if !placed {
-                bands.append([idx])
-            }
-        }
-
-        // Find dominant band (most candidates)
-        guard let dominantBand = bands.max(by: { $0.count < $1.count }) else {
-            return sizeFiltered
-        }
-        let dominantIndices = Set(dominantBand)
-
-        // Keep candidates from dominant band + those without metadata
-        var result: [(OCRResult, ObservationMetadata?)] = []
-        let sizeFilteredWithMeta = sizeFiltered.filter { $0.1 != nil }
-        let sizeFilteredWithoutMeta = sizeFiltered.filter { $0.1 == nil }
-
-        for (idx, entry) in sizeFilteredWithMeta.enumerated() {
-            if dominantIndices.contains(idx) {
-                result.append(entry)
-            }
-        }
-        result.append(contentsOf: sizeFilteredWithoutMeta)
-
-        return result.isEmpty ? sizeFiltered : result
-    }
-
-    // MARK: - Trip Meter Discard (Phase 4)
+    // MARK: - Trip Meter Discard
 
     /// Discards likely trip meter readings when values differ by 10x or more
     static func discardTripMeterReadings(
@@ -544,7 +413,7 @@ actor OdometerOCRService {
         return candidates.filter { Double($0.0.mileage) >= threshold }
     }
 
-    // MARK: - Scoring (Phase 2 + Phase 3)
+    // MARK: - Scoring
 
     /// Scores a candidate using multi-factor analysis
     /// When currentMileage is provided: digit 30%, range 15%, confidence 30%, prior 25%
