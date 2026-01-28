@@ -376,6 +376,7 @@
 | ---------------------------- | -------- | ------ | ---------------------------------------------- |
 | Home Screen Widget           | High     | ✅     | Small/medium widget showing "Next Up" service  |
 | Lock Screen Widget           | High     | ✅     | Glance at what's due without unlocking         |
+| Widget Vehicle Selection     | High     | ✅     | Long-press widget to choose which vehicle to display |
 | One-tap notification actions | High     | ✅     | "Did you do your oil change?" → Yes/No buttons |
 | Apple Watch Complication     | High     | ⏳     | Quick mileage logging, glanceable "Next Up"    |
 | Siri integration             | Medium   | ⏳     | "Hey Siri, what's due on my car?"              |

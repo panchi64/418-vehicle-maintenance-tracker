@@ -122,11 +122,17 @@ struct ContentView: View {
             updateAppIcon()
             updateWidgetData()
         }
-        .onChange(of: vehicles) { _, newVehicles in
+        .onChange(of: vehicles) { oldVehicles, newVehicles in
             // Update selection if current vehicle was deleted
             if let selected = appState.selectedVehicle,
                !newVehicles.contains(where: { $0.id == selected.id }) {
+                // Clean up widget data for deleted vehicle
+                WidgetDataService.shared.removeWidgetData(for: selected.id.uuidString)
                 appState.selectedVehicle = newVehicles.first
+            }
+            // Update vehicle list when vehicles are added or removed
+            if oldVehicles.count != newVehicles.count {
+                WidgetDataService.shared.updateVehicleList(newVehicles)
             }
         }
         // Centralized sheets
@@ -223,6 +229,9 @@ struct ContentView: View {
     // MARK: - Widget Data
 
     private func updateWidgetData() {
+        // Update vehicle list for widget configuration picker
+        WidgetDataService.shared.updateVehicleList(vehicles)
+
         if let vehicle = currentVehicle {
             WidgetDataService.shared.updateWidget(for: vehicle)
         } else {

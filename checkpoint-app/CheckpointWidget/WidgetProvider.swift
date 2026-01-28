@@ -111,6 +111,7 @@ struct WidgetProvider: AppIntentTimelineProvider {
     // App Group container identifier
     private let appGroupID = "group.com.418-studio.checkpoint.shared"
     private let widgetDataKey = "widgetData"
+    private let vehicleListKey = "vehicleList"
 
     func placeholder(in context: Context) -> ServiceEntry {
         ServiceEntry.placeholder
@@ -133,18 +134,51 @@ struct WidgetProvider: AppIntentTimelineProvider {
     }
 
     private func loadEntry(configuration: CheckpointWidgetConfigurationIntent) -> ServiceEntry {
-        // Load from UserDefaults in App Group
-        guard let userDefaults = UserDefaults(suiteName: appGroupID),
-              let data = userDefaults.data(forKey: widgetDataKey) else {
-            return ServiceEntry(
-                date: Date(),
-                vehicleName: "No Vehicle",
-                currentMileage: 0,
-                services: [],
-                configuration: configuration
-            )
+        guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
+            return makeEmptyEntry(configuration: configuration)
         }
 
+        // Determine which vehicle to load:
+        // 1. Use configured vehicle if available
+        // 2. Fall back to first vehicle in list
+        // 3. Fall back to legacy widgetData key
+        let vehicleID: String?
+        if let configuredVehicle = configuration.vehicle {
+            vehicleID = configuredVehicle.id
+        } else {
+            vehicleID = loadFirstVehicleID(from: userDefaults)
+        }
+
+        // Try vehicle-specific key first
+        if let vehicleID = vehicleID {
+            let vehicleKey = "widgetData_\(vehicleID)"
+            if let data = userDefaults.data(forKey: vehicleKey),
+               let entry = decodeEntry(from: data, configuration: configuration) {
+                return entry
+            }
+        }
+
+        // Fall back to legacy key
+        if let data = userDefaults.data(forKey: widgetDataKey),
+           let entry = decodeEntry(from: data, configuration: configuration) {
+            return entry
+        }
+
+        return makeEmptyEntry(configuration: configuration)
+    }
+
+    private func loadFirstVehicleID(from userDefaults: UserDefaults) -> String? {
+        guard let data = userDefaults.data(forKey: vehicleListKey) else { return nil }
+        do {
+            let items = try JSONDecoder().decode([VehicleListItem].self, from: data)
+            return items.first?.id
+        } catch {
+            print("Widget failed to decode vehicle list: \(error)")
+            return nil
+        }
+    }
+
+    private func decodeEntry(from data: Data, configuration: CheckpointWidgetConfigurationIntent) -> ServiceEntry? {
         do {
             let widgetData = try JSONDecoder().decode(WidgetData.self, from: data)
 
@@ -167,13 +201,17 @@ struct WidgetProvider: AppIntentTimelineProvider {
             )
         } catch {
             print("Widget failed to decode data: \(error)")
-            return ServiceEntry(
-                date: Date(),
-                vehicleName: "No Vehicle",
-                currentMileage: 0,
-                services: [],
-                configuration: configuration
-            )
+            return nil
         }
+    }
+
+    private func makeEmptyEntry(configuration: CheckpointWidgetConfigurationIntent) -> ServiceEntry {
+        ServiceEntry(
+            date: Date(),
+            vehicleName: "No Vehicle",
+            currentMileage: 0,
+            services: [],
+            configuration: configuration
+        )
     }
 }

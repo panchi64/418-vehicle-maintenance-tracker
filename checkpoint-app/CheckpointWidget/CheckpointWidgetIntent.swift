@@ -36,16 +36,21 @@ enum MileageDisplayMode: String, CaseIterable, AppEnum {
 
 struct CheckpointWidgetConfigurationIntent: WidgetConfigurationIntent {
     static var title: LocalizedStringResource = "Checkpoint Widget"
-    static var description = IntentDescription("Configure how mileage is displayed")
+    static var description = IntentDescription("Configure which vehicle to display and how mileage is shown")
+
+    @Parameter(title: "Vehicle")
+    var vehicle: VehicleEntity?
 
     @Parameter(title: "Mileage Display", default: .absolute)
     var mileageDisplayMode: MileageDisplayMode
 
     init() {
+        self.vehicle = nil
         self.mileageDisplayMode = .absolute
     }
 
-    init(mileageDisplayMode: MileageDisplayMode) {
+    init(vehicle: VehicleEntity?, mileageDisplayMode: MileageDisplayMode) {
+        self.vehicle = vehicle
         self.mileageDisplayMode = mileageDisplayMode
     }
 }

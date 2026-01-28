@@ -14,17 +14,25 @@ class WidgetDataService {
 
     private let appGroupID = "group.com.418-studio.checkpoint.shared"
     private let widgetDataKey = "widgetData"
+    private let vehicleListKey = "vehicleList"
 
     private init() {}
 
+    /// Returns the vehicle-specific widget data key
+    private func widgetDataKey(for vehicleID: String) -> String {
+        "widgetData_\(vehicleID)"
+    }
+
     /// Update the widget with current vehicle and service data
     /// - Parameters:
-    ///   - vehicle: The current vehicle to display
-    ///   - services: The services to display (should be sorted by urgency)
+    ///   - vehicleID: The vehicle's UUID string for vehicle-specific storage
+    ///   - vehicleName: The vehicle's display name
     ///   - currentMileage: The vehicle's current mileage for relative calculations
     ///   - estimatedMileage: Optional estimated mileage based on pace data
     ///   - isEstimated: Whether the displayed mileage is estimated
+    ///   - services: The services to display (should be sorted by urgency)
     func updateWidgetData(
+        vehicleID: String,
         vehicleName: String,
         currentMileage: Int,
         estimatedMileage: Int? = nil,
@@ -57,6 +65,9 @@ class WidgetDataService {
 
         do {
             let data = try JSONEncoder().encode(widgetData)
+            // Store with vehicle-specific key
+            userDefaults.set(data, forKey: widgetDataKey(for: vehicleID))
+            // Also store with legacy key for backward compatibility
             userDefaults.set(data, forKey: widgetDataKey)
 
             // Reload widget timelines
@@ -103,6 +114,7 @@ class WidgetDataService {
         }
 
         updateWidgetData(
+            vehicleID: vehicle.id.uuidString,
             vehicleName: vehicle.displayName,
             currentMileage: vehicle.currentMileage,
             estimatedMileage: vehicle.estimatedMileage,
@@ -111,10 +123,39 @@ class WidgetDataService {
         )
     }
 
-    /// Clear widget data
+    /// Update the list of vehicles available for widget selection
+    /// - Parameter vehicles: All vehicles to make available in widget configuration
+    func updateVehicleList(_ vehicles: [Vehicle]) {
+        guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
+            print("Failed to access App Group UserDefaults")
+            return
+        }
+
+        let items = vehicles.map { vehicle in
+            VehicleListItem(id: vehicle.id.uuidString, displayName: vehicle.displayName)
+        }
+
+        do {
+            let data = try JSONEncoder().encode(items)
+            userDefaults.set(data, forKey: vehicleListKey)
+        } catch {
+            print("Failed to encode vehicle list: \(error)")
+        }
+    }
+
+    /// Remove widget data for a deleted vehicle
+    /// - Parameter vehicleID: The UUID string of the deleted vehicle
+    func removeWidgetData(for vehicleID: String) {
+        guard let userDefaults = UserDefaults(suiteName: appGroupID) else { return }
+        userDefaults.removeObject(forKey: widgetDataKey(for: vehicleID))
+        WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    /// Clear all widget data
     func clearWidgetData() {
         guard let userDefaults = UserDefaults(suiteName: appGroupID) else { return }
         userDefaults.removeObject(forKey: widgetDataKey)
+        userDefaults.removeObject(forKey: vehicleListKey)
         WidgetCenter.shared.reloadAllTimelines()
     }
 
@@ -150,5 +191,11 @@ struct WidgetSharedData: Codable {
     enum ServiceStatus: String, Codable {
         case overdue, dueSoon, good, neutral
     }
+}
+
+/// Lightweight vehicle data for widget configuration stored in App Group UserDefaults
+struct VehicleListItem: Codable, Sendable {
+    let id: String
+    let displayName: String
 }
 
