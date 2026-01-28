@@ -360,6 +360,8 @@ struct CostsTab: View {
                 .font(.brutalistHero)
                 .foregroundStyle(Theme.accent)
                 .contentTransition(.numericText())
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
 
             Text(periodLabel)
                 .font(.brutalistSecondary)
@@ -415,7 +417,9 @@ struct CostsTab: View {
                         Text(formatCurrency(item.amount))
                             .font(.brutalistBody)
                             .foregroundStyle(item.category.color)
-                            .frame(width: 80, alignment: .trailing)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                            .frame(minWidth: 60, alignment: .trailing)
                     }
                     .padding(Spacing.md)
 
@@ -447,6 +451,7 @@ struct CostsTab: View {
                         Text(formatMonthYear(item.month))
                             .font(.brutalistBody)
                             .foregroundStyle(Theme.textPrimary)
+                            .lineLimit(1)
 
                         Spacer()
 
@@ -461,7 +466,9 @@ struct CostsTab: View {
                         Text(formatCurrency(item.amount))
                             .font(.brutalistBody)
                             .foregroundStyle(Theme.accent)
-                            .frame(width: 80, alignment: .trailing)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                            .frame(minWidth: 60, alignment: .trailing)
                     }
                     .padding(Spacing.md)
 
@@ -493,6 +500,8 @@ struct CostsTab: View {
             Text(value)
                 .font(.brutalistHeading)
                 .foregroundStyle(valueColor)
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Spacing.md)
@@ -550,6 +559,8 @@ struct CostsTab: View {
                 Text(cost)
                     .font(.brutalistHeading)
                     .foregroundStyle(log.costCategory?.color ?? Theme.accent)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
             }
 
             Image(systemName: "chevron.right")
