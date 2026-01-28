@@ -456,8 +456,9 @@ struct CostsTab: View {
                         Spacer()
 
                         // Simple bar indicator
-                        if let maxAmount = monthlyBreakdown.first?.amount, maxAmount > 0 {
-                            let barWidth = CGFloat(NSDecimalNumber(decimal: item.amount).doubleValue / NSDecimalNumber(decimal: maxAmount).doubleValue) * 60
+                        if let maxAmount = monthlyBreakdown.prefix(6).map(\.amount).max(), maxAmount > 0 {
+                            let ratio = CGFloat(NSDecimalNumber(decimal: item.amount).doubleValue / NSDecimalNumber(decimal: maxAmount).doubleValue)
+                            let barWidth = min(ratio * 60, 60)
                             Rectangle()
                                 .fill(Theme.accent.opacity(0.3))
                                 .frame(width: max(barWidth, 4), height: 8)
