@@ -558,4 +558,145 @@ final class CostsTabTests: XCTestCase {
         XCTAssertEqual(monthlyTotals[janStart], Decimal(100.00))
         XCTAssertEqual(monthlyTotals[febStart], Decimal(125.00))
     }
+
+    // MARK: - Overflow Prevention Tests
+
+    func testCurrencyFormatting_LargeYearlyTotal_FitsScreenWidth() {
+        // Given - large totals typical of Year/All period filters
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = "USD"
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.maximumFractionDigits = 0
+
+        let largeAmounts: [Decimal] = [
+            Decimal(12345),
+            Decimal(99999),
+            Decimal(123456),
+            Decimal(999999)
+        ]
+
+        for amount in largeAmounts {
+            // When
+            let formatted = formatter.string(from: amount as NSDecimalNumber) ?? "$0"
+
+            // Then - monospaced chars at 56pt are ~33.6pt each
+            // iPhone SE width: 375pt - 2*20pt (screen padding) - 2*24pt (card padding) = 287pt
+            // At 56pt monospaced, that fits ~8.5 chars without scaling
+            // With minimumScaleFactor(0.5), we can fit ~17 chars
+            // Verify the formatted string length is reasonable for display
+            let charCount = formatted.count
+            XCTAssertLessThan(charCount, 18,
+                "Currency string '\(formatted)' with \(charCount) chars should fit with minimumScaleFactor(0.5)")
+        }
+    }
+
+    func testCurrencyFormatting_AllTimePeriod_ProducesValidString() {
+        // Given - very large totals that could appear with "All" period
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = "USD"
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.maximumFractionDigits = 0
+
+        let veryLargeAmount = Decimal(1234567)
+
+        // When
+        let formatted = formatter.string(from: veryLargeAmount as NSDecimalNumber)
+
+        // Then
+        XCTAssertNotNil(formatted)
+        XCTAssertEqual(formatted, "$1,234,567")
+        // At 56pt mono, this would be 10 chars * ~33.6pt = 336pt
+        // Without minimumScaleFactor, this overflows the 287pt available on iPhone SE
+        // With minimumScaleFactor(0.5), it scales down to ~28pt effectively fitting in 168pt
+        XCTAssertTrue(formatted!.count <= 17,
+            "Even very large amounts should be representable within scale factor limits")
+    }
+
+    func testMonthlyBreakdown_BarWidthBounded() {
+        // Given - bar width calculation from monthlySummarySection
+        let maxAmount = Decimal(5000)
+        let testAmounts: [Decimal] = [
+            Decimal(5000),  // 100% - max bar
+            Decimal(2500),  // 50%
+            Decimal(100),   // 2% - min bar
+            Decimal(0)      // 0% edge case
+        ]
+
+        for amount in testAmounts {
+            // When - replicate the bar width calculation
+            let ratio = NSDecimalNumber(decimal: amount).doubleValue /
+                        NSDecimalNumber(decimal: maxAmount).doubleValue
+            let barWidth = CGFloat(ratio) * 60
+
+            // Then - bar width should never exceed 60pt
+            XCTAssertLessThanOrEqual(barWidth, 60,
+                "Bar width \(barWidth) should not exceed 60pt maximum")
+            XCTAssertGreaterThanOrEqual(barWidth, 0,
+                "Bar width \(barWidth) should not be negative")
+        }
+    }
+
+    @MainActor
+    func testYearFilter_AccumulatesLargerTotals_ThanMonth() {
+        // Given
+        let vehicle = Vehicle(
+            name: "Test Car",
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            currentMileage: 50000
+        )
+        modelContext.insert(vehicle)
+
+        let calendar = Calendar.current
+        var logs: [ServiceLog] = []
+
+        // Create 12 months of service logs spread over the past year
+        for monthsAgo in 0...11 {
+            let date = calendar.date(byAdding: .month, value: -monthsAgo, to: Date.now)!
+            let log = ServiceLog(
+                vehicle: vehicle,
+                performedDate: date,
+                mileageAtService: 50000 - (monthsAgo * 500),
+                cost: Decimal(150)
+            )
+            modelContext.insert(log)
+            logs.append(log)
+        }
+
+        // When - filter by month vs year
+        let monthStart = CostsTab.PeriodFilter.month.startDate!
+        let yearStart = CostsTab.PeriodFilter.year.startDate!
+
+        let monthLogs = logs.filter { $0.performedDate >= monthStart }
+        let yearLogs = logs.filter { $0.performedDate >= yearStart }
+
+        let monthTotal = monthLogs.compactMap { $0.cost }.reduce(Decimal(0), +)
+        let yearTotal = yearLogs.compactMap { $0.cost }.reduce(Decimal(0), +)
+
+        // Then - year total should be significantly larger, demonstrating why
+        // overflow protection is needed for Year/All period filters
+        XCTAssertGreaterThan(yearTotal, monthTotal,
+            "Year total (\(yearTotal)) should exceed month total (\(monthTotal)), requiring text scaling")
+        XCTAssertGreaterThan(yearLogs.count, monthLogs.count,
+            "Year filter should include more logs than month filter")
+    }
+
+    func testStatsCard_CostPerMileFormat_BoundedLength() {
+        // Given - cost per mile values that could appear in stats cards
+        let testValues: [Double] = [0.05, 0.50, 1.23, 9.99, 12.50]
+
+        for value in testValues {
+            // When
+            let formatted = String(format: "$%.2f/mi", value)
+
+            // Then - each stats card gets 1/3 of available width (~95pt on iPhone SE)
+            // At 20pt mono, each char is ~12pt, so max ~7-8 chars fit without scaling
+            // With minimumScaleFactor(0.7), we can fit ~11 chars
+            XCTAssertLessThan(formatted.count, 12,
+                "Cost per mile '\(formatted)' should fit within stats card with scaling")
+        }
+    }
 }

@@ -162,6 +162,8 @@ struct YearlyCostRoundupCard: View {
             Text(formatCurrency(totalSpent))
                 .font(.brutalistHero)
                 .foregroundStyle(Theme.accent)
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
 
             if let change = yearOverYearChange {
                 HStack(spacing: 4) {

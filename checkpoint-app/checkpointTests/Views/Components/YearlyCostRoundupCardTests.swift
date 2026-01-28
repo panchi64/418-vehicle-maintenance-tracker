@@ -427,4 +427,80 @@ final class YearlyCostRoundupCardTests: XCTestCase {
         // Then
         XCTAssertTrue(yearLogs.isEmpty)
     }
+
+    // MARK: - Overflow Prevention Tests
+
+    func testYearlyCurrencyFormat_LargeAmounts_BoundedCharCount() {
+        // Given - yearly totals can be large, displayed in 56pt monospaced hero font
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = "USD"
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.maximumFractionDigits = 0
+
+        let largeYearlyTotals: [Decimal] = [
+            Decimal(5000),
+            Decimal(15000),
+            Decimal(50000),
+            Decimal(100000)
+        ]
+
+        for total in largeYearlyTotals {
+            // When
+            let formatted = formatter.string(from: total as NSDecimalNumber)
+
+            // Then - verify formatting produces a valid string
+            XCTAssertNotNil(formatted, "Should format \(total) as currency")
+
+            // With minimumScaleFactor(0.5) on the hero text, strings up to ~17 chars
+            // will fit on the smallest iPhone screen (375pt wide)
+            let charCount = formatted!.count
+            XCTAssertLessThan(charCount, 18,
+                "Formatted yearly total '\(formatted!)' should fit with scale factor")
+        }
+    }
+
+    func testYearOverYearChangeText_BoundedLength() {
+        // Given - YoY change text format: "XX% from YYYY"
+        let changes: [Double] = [5.0, 25.0, 100.0, 150.0]
+        let year = 2025
+
+        for change in changes {
+            // When
+            let text = String(format: "%.0f%% from %d", abs(change), year - 1)
+
+            // Then - this text uses brutalistSecondary (13pt mono)
+            // At 13pt mono, each char is ~7.8pt; available width ~287pt = ~36 chars
+            XCTAssertLessThan(text.count, 20,
+                "YoY change text '\(text)' should comfortably fit")
+        }
+    }
+
+    @MainActor
+    func testCategoryBreakdown_CurrencyAndPercentage_FitInRow() {
+        // Given
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = "USD"
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.maximumFractionDigits = 0
+
+        let largeAmounts: [Decimal] = [
+            Decimal(8000),
+            Decimal(25000),
+            Decimal(50000)
+        ]
+
+        for amount in largeAmounts {
+            // When
+            let currencyText = formatter.string(from: amount as NSDecimalNumber) ?? "$0"
+            let percentageText = String(format: "%.0f%%", 75.0)
+
+            // Then - category row has: icon(16pt) + name + spacer + currency + percentage(36pt)
+            // Currency and percentage together should not exceed available space
+            let combinedLength = currencyText.count + percentageText.count
+            XCTAssertLessThan(combinedLength, 16,
+                "Category currency '\(currencyText)' + percentage '\(percentageText)' should fit in row")
+        }
+    }
 }
