@@ -27,6 +27,12 @@ struct OCRConfirmationView: View {
     /// Detected distance unit from OCR (nil if no unit indicator found)
     let detectedUnit: DistanceUnit?
 
+    /// Raw text recognized by Vision (for debugging)
+    let rawText: String
+
+    /// Cropped image sent to Vision (for debugging)
+    let debugImage: UIImage?
+
     @State private var editedMileage: Int?
     @State private var sourceUnit: DistanceUnit = .miles
 
@@ -65,13 +71,17 @@ struct OCRConfirmationView: View {
         confidence: Float,
         onConfirm: @escaping (Int) -> Void,
         currentMileage: Int,
-        detectedUnit: DistanceUnit? = nil
+        detectedUnit: DistanceUnit? = nil,
+        rawText: String = "",
+        debugImage: UIImage? = nil
     ) {
         self.extractedMileage = extractedMileage
         self.confidence = confidence
         self.onConfirm = onConfirm
         self.currentMileage = currentMileage
         self.detectedUnit = detectedUnit
+        self.rawText = rawText
+        self.debugImage = debugImage
     }
 
     var body: some View {
@@ -91,6 +101,12 @@ struct OCRConfirmationView: View {
                     if confidenceLevel == .low {
                         lowConfidenceWarning
                     }
+
+                    // Debug: raw OCR text and cropped image preview
+                    // Uncomment to diagnose camera/OCR issues:
+                    // #if DEBUG
+                    // rawTextDebugView
+                    // #endif
 
                     Spacer()
 
@@ -212,6 +228,56 @@ struct OCRConfirmationView: View {
                 .strokeBorder(Theme.statusOverdue.opacity(0.5), lineWidth: Theme.borderWidth)
         )
     }
+
+    // MARK: - Debug: Raw OCR Text
+
+    #if DEBUG
+    private var rawTextDebugView: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            Text("RAW OCR TEXT")
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(1.5)
+
+            HStack {
+                Text(rawText.isEmpty ? "(empty)" : rawText)
+                    .font(.system(.caption, design: .monospaced))
+                    .foregroundStyle(Theme.textSecondary)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                Button {
+                    UIPasteboard.general.string = rawText
+                } label: {
+                    Image(systemName: "doc.on.doc")
+                        .font(.system(size: 14))
+                        .foregroundStyle(Theme.accent)
+                }
+            }
+
+            if let img = debugImage {
+                Text("CROPPED IMAGE")
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.textTertiary)
+                    .tracking(1.5)
+                    .padding(.top, Spacing.xs)
+
+                Image(uiImage: img)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxHeight: 120)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .padding(Spacing.md)
+        .background(Theme.surfaceInstrument)
+        .overlay(
+            Rectangle()
+                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+        )
+    }
+    #endif
 
     // MARK: - Action Buttons
 

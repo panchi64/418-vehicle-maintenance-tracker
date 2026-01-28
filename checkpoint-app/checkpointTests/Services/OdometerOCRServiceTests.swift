@@ -397,6 +397,29 @@ final class OdometerOCRServiceTests: XCTestCase {
         }
     }
 
+    // MARK: - Orientation Mapping Tests
+
+    func testCGImagePropertyOrientation_FromUIImageOrientation() {
+        let mappings: [(UIImage.Orientation, CGImagePropertyOrientation)] = [
+            (.up, .up),
+            (.upMirrored, .upMirrored),
+            (.down, .down),
+            (.downMirrored, .downMirrored),
+            (.left, .left),
+            (.leftMirrored, .leftMirrored),
+            (.right, .right),
+            (.rightMirrored, .rightMirrored),
+        ]
+
+        for (uiOrientation, expected) in mappings {
+            let result = CGImagePropertyOrientation(uiOrientation)
+            XCTAssertEqual(
+                result, expected,
+                "UIImage.Orientation rawValue \(uiOrientation.rawValue) should map to CGImagePropertyOrientation rawValue \(expected.rawValue)"
+            )
+        }
+    }
+
     // MARK: - Helper Methods
 
     private func detectUnit(from text: String) -> DistanceUnit? {

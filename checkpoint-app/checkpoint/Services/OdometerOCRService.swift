@@ -6,6 +6,7 @@
 //  All processing happens on-device for privacy
 //
 
+import os
 import UIKit
 import Vision
 
@@ -85,6 +86,8 @@ actor OdometerOCRService {
     /// Image preprocessor for enhanced OCR
     private let preprocessor = OdometerImagePreprocessor()
 
+    private let logger = Logger(subsystem: "com.checkpoint.ocr", category: "OdometerOCR")
+
     private init() {}
 
     // MARK: - Public API
@@ -100,8 +103,13 @@ actor OdometerOCRService {
             throw OCRError.imageProcessingFailed
         }
 
+        // Convert UIImage orientation to CGImagePropertyOrientation for Vision
+        let cgOrientation = CGImagePropertyOrientation(image.imageOrientation)
+        logger.debug("Starting OCR, image orientation: \(image.imageOrientation.rawValue) -> cgOrientation: \(cgOrientation.rawValue)")
+
         // Preprocess image to get multiple enhanced versions
         let preprocessedImages = preprocessor.preprocess(cgImage)
+        logger.debug("Preprocessing produced \(preprocessedImages.count) images")
 
         // Collect candidates from all preprocessed images
         var allCandidates: [(OCRResult, ObservationMetadata?)] = []
@@ -109,9 +117,20 @@ actor OdometerOCRService {
 
         for preprocessed in preprocessedImages {
             do {
-                let observations = try await performTextRecognition(on: preprocessed.image)
+                let observations = try await performTextRecognition(
+                    on: preprocessed.image,
+                    orientation: cgOrientation
+                )
                 if !observations.isEmpty {
                     hasAnyObservations = true
+
+                    // Log raw text from each preprocessing method
+                    for obs in observations {
+                        if let top = obs.topCandidates(1).first {
+                            logger.debug("[\(preprocessed.method.rawValue)] raw: '\(top.string)' conf=\(top.confidence)")
+                        }
+                    }
+
                     let candidates = extractMileageCandidates(from: observations)
                     allCandidates.append(contentsOf: candidates)
                 }
@@ -127,6 +146,10 @@ actor OdometerOCRService {
         // Aggregate candidates: boost confidence for values found multiple times
         let aggregatedCandidates = aggregateCandidates(allCandidates)
 
+        for (result, _) in aggregatedCandidates {
+            logger.debug("Aggregated candidate: \(result.mileage) conf=\(result.confidence) raw='\(result.rawText)'")
+        }
+
         // Trip meter discard: remove likely trip meter readings
         let filteredCandidates = Self.discardTripMeterReadings(aggregatedCandidates)
 
@@ -141,6 +164,7 @@ actor OdometerOCRService {
         // Validate the mileage is reasonable
         try validateMileage(bestCandidate.mileage)
 
+        logger.debug("Selected best candidate: \(bestCandidate.mileage) conf=\(bestCandidate.confidence)")
         return bestCandidate
     }
 
@@ -180,7 +204,8 @@ actor OdometerOCRService {
 
     /// Performs Vision text recognition on the image
     private func performTextRecognition(
-        on cgImage: CGImage
+        on cgImage: CGImage,
+        orientation: CGImagePropertyOrientation = .up
     ) async throws -> [VNRecognizedTextObservation] {
         try await withCheckedThrowingContinuation { continuation in
             let request = VNRecognizeTextRequest { request, error in
@@ -213,7 +238,7 @@ actor OdometerOCRService {
                 request.revision = VNRecognizeTextRequestRevision3
             }
 
-            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+            let handler = VNImageRequestHandler(cgImage: cgImage, orientation: orientation, options: [:])
 
             do {
                 try handler.perform([request])
@@ -234,7 +259,7 @@ actor OdometerOCRService {
         let detectedUnit = detectUnit(from: allText)
 
         for observation in observations {
-            let topCandidatesList = observation.topCandidates(3)
+            let topCandidatesList = observation.topCandidates(1)
             let metadata = ObservationMetadata(
                 boundingBox: observation.boundingBox,
                 area: observation.boundingBox.width * observation.boundingBox.height
@@ -515,6 +540,24 @@ actor OdometerOCRService {
 
         if mileage > maximumMileage {
             throw OCRError.invalidMileage(reason: "Mileage exceeds maximum reasonable value")
+        }
+    }
+}
+
+// MARK: - UIImage Orientation to CGImagePropertyOrientation
+
+extension CGImagePropertyOrientation {
+    init(_ uiOrientation: UIImage.Orientation) {
+        switch uiOrientation {
+        case .up: self = .up
+        case .upMirrored: self = .upMirrored
+        case .down: self = .down
+        case .downMirrored: self = .downMirrored
+        case .left: self = .left
+        case .leftMirrored: self = .leftMirrored
+        case .right: self = .right
+        case .rightMirrored: self = .rightMirrored
+        @unknown default: self = .up
         }
     }
 }

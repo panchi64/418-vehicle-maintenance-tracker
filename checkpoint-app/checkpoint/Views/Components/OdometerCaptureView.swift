@@ -216,7 +216,12 @@ class OdometerCaptureViewController: UIViewController {
         viewfinderRect: CGRect,
         previewLayerSize: CGSize
     ) -> UIImage {
-        guard let cgImage = image.cgImage else { return image }
+        // Normalize the image so pixel layout matches the displayed orientation.
+        // Camera sensor captures in landscape; portrait photos have .right orientation.
+        // Without normalizing, the crop maps portrait screen coordinates onto a
+        // landscape pixel buffer, cutting a vertical strip instead of horizontal.
+        let normalized = Self.normalizeOrientation(image)
+        guard let cgImage = normalized.cgImage else { return image }
 
         let imageWidth = CGFloat(cgImage.width)
         let imageHeight = CGFloat(cgImage.height)
@@ -249,7 +254,20 @@ class OdometerCaptureViewController: UIViewController {
             return image
         }
 
-        return UIImage(cgImage: cropped, scale: image.scale, orientation: image.imageOrientation)
+        return UIImage(cgImage: cropped)
+    }
+
+    /// Renders the UIImage into a new bitmap with orientation applied,
+    /// so the CGImage pixel layout matches the visual display.
+    private static func normalizeOrientation(_ image: UIImage) -> UIImage {
+        guard image.imageOrientation != .up else { return image }
+
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = image.scale
+        let renderer = UIGraphicsImageRenderer(size: image.size, format: format)
+        return renderer.image { _ in
+            image.draw(at: .zero)
+        }
     }
 }
 

@@ -135,6 +135,7 @@ struct MileageUpdateSheet: View {
     @State private var showCamera = false
     @State private var showOCRConfirmation = false
     @State private var ocrResult: OdometerOCRService.OCRResult?
+    @State private var ocrDebugImage: UIImage?
     @State private var isProcessingOCR = false
     @State private var ocrError: String?
 
@@ -203,7 +204,9 @@ struct MileageUpdateSheet: View {
                         newMileage = mileage
                     },
                     currentMileage: currentMileage,
-                    detectedUnit: result.detectedUnit
+                    detectedUnit: result.detectedUnit,
+                    rawText: result.rawText,
+                    debugImage: ocrDebugImage
                 )
                 .presentationDetents([.medium])
             }
@@ -335,6 +338,7 @@ struct MileageUpdateSheet: View {
     private func processOCR(image: UIImage) {
         isProcessingOCR = true
         ocrError = nil
+        ocrDebugImage = image
 
         Task {
             do {
