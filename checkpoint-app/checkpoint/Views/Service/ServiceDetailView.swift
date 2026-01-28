@@ -18,6 +18,7 @@ struct ServiceDetailView: View {
 
     @State private var showEditSheet = false
     @State private var showMarkDoneSheet = false
+    @State private var didCompleteMark = false
     @State private var selectedLog: ServiceLog?
 
     private var status: ServiceStatus {
@@ -67,8 +68,17 @@ struct ServiceDetailView: View {
         .sheet(isPresented: $showEditSheet, onDismiss: { updateAppIcon(); updateWidgetData() }) {
             EditServiceView(service: service, vehicle: vehicle)
         }
-        .sheet(isPresented: $showMarkDoneSheet, onDismiss: { updateAppIcon(); updateWidgetData() }) {
-            MarkServiceDoneSheet(service: service, vehicle: vehicle)
+        .sheet(isPresented: $showMarkDoneSheet, onDismiss: {
+            updateAppIcon()
+            updateWidgetData()
+            if didCompleteMark {
+                didCompleteMark = false
+                dismiss()
+            }
+        }) {
+            MarkServiceDoneSheet(service: service, vehicle: vehicle, onSaved: {
+                didCompleteMark = true
+            })
         }
         .sheet(item: $selectedLog) { log in
             NavigationStack {
@@ -284,6 +294,7 @@ struct MarkServiceDoneSheet: View {
 
     let service: Service
     let vehicle: Vehicle
+    var onSaved: (() -> Void)? = nil
 
     @State private var performedDate: Date = Date()
     @State private var mileage: Int? = nil
@@ -432,6 +443,7 @@ struct MarkServiceDoneSheet: View {
 
         updateAppIcon()
         updateWidgetData()
+        onSaved?()
         dismiss()
     }
 

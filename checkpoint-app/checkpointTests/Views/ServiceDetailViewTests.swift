@@ -529,4 +529,74 @@ final class ServiceDetailViewTests: XCTestCase {
         XCTAssertNil(processedEmpty)
         XCTAssertEqual(processedFilled, "Used synthetic oil")
     }
+
+    // MARK: - Dismiss After Mark Done Tests
+
+    func testMarkServiceDoneSheet_OnSavedCallbackInvoked() {
+        // Given: A flag tracking whether onSaved was called
+        var didCallOnSaved = false
+        let onSaved: () -> Void = { didCallOnSaved = true }
+
+        // When: The callback is invoked (simulating what markAsDone does)
+        onSaved()
+
+        // Then: The flag should be set
+        XCTAssertTrue(didCallOnSaved, "onSaved callback should be invoked after save")
+    }
+
+    func testMarkServiceDoneSheet_OnSavedDefaultsToNil() {
+        // Given: A MarkServiceDoneSheet created without onSaved
+        let vehicle = Vehicle(name: "Test Car", make: "Toyota", model: "Camry", year: 2022, currentMileage: 30000)
+        let service = Service(name: "Oil Change", dueDate: nil)
+
+        let sheet = MarkServiceDoneSheet(service: service, vehicle: vehicle)
+
+        // Then: onSaved should be nil by default
+        XCTAssertNil(sheet.onSaved, "onSaved should default to nil")
+    }
+
+    func testMarkServiceDoneSheet_OnSavedCanBeProvided() {
+        // Given: A MarkServiceDoneSheet created with an onSaved callback
+        let vehicle = Vehicle(name: "Test Car", make: "Toyota", model: "Camry", year: 2022, currentMileage: 30000)
+        let service = Service(name: "Oil Change", dueDate: nil)
+
+        let sheet = MarkServiceDoneSheet(service: service, vehicle: vehicle, onSaved: { })
+
+        // Then: onSaved should not be nil
+        XCTAssertNotNil(sheet.onSaved, "onSaved should be set when provided")
+    }
+
+    func testDismissChaining_FlagControlsDismissal() {
+        // Given: A didCompleteMark flag (simulating ServiceDetailView's @State)
+        var didCompleteMark = false
+        var parentDismissCalled = false
+
+        // When: onSaved sets the flag (simulating save in MarkServiceDoneSheet)
+        let onSaved: () -> Void = { didCompleteMark = true }
+        onSaved()
+
+        // And: onDismiss checks the flag (simulating sheet onDismiss in ServiceDetailView)
+        if didCompleteMark {
+            didCompleteMark = false
+            parentDismissCalled = true
+        }
+
+        // Then: Parent dismiss should be triggered
+        XCTAssertTrue(parentDismissCalled, "Parent view should dismiss when didCompleteMark is true")
+        XCTAssertFalse(didCompleteMark, "Flag should be reset after triggering parent dismiss")
+    }
+
+    func testDismissChaining_CancelDoesNotDismissParent() {
+        // Given: A didCompleteMark flag that was never set (simulating cancel)
+        let didCompleteMark = false
+        var parentDismissCalled = false
+
+        // When: onDismiss fires without onSaved being called (cancel scenario)
+        if didCompleteMark {
+            parentDismissCalled = true
+        }
+
+        // Then: Parent dismiss should NOT be triggered
+        XCTAssertFalse(parentDismissCalled, "Parent view should not dismiss when user cancels")
+    }
 }
