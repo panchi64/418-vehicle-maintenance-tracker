@@ -72,6 +72,57 @@ Checkpoint aims to be the **definitive iOS vehicle maintenance companion** — a
 | Pre-loaded Factory Schedules | High | ⏳ Planned |
 | Service Clustering | High | ⏳ Planned |
 
+### Reports & Export
+
+Core reporting functionality for vehicle documentation and data portability.
+
+| Feature | Priority | Description |
+|---------|----------|-------------|
+| **Service History PDF** | High | Professional document for resale, warranty claims |
+| **Data Backup** | High | iCloud sync for data safety |
+| **Shareable Reports** | Medium | Send to mechanic, buyer, etc. |
+| **Maintenance Cost Reports** | Medium | Graphs and breakdowns |
+
+> See [FEATURES.md → Reports & Export](./FEATURES.md#7-reports--export) for PDF contents, use cases, and format details.
+
+### Schedule Setup & Automation
+
+Intelligent scheduling features that reduce manual effort.
+
+| Feature | Priority | Description |
+|---------|----------|-------------|
+| **Schedule Source Choice** | High | "Use recommended" vs "I'll enter my own" during setup |
+| **Service Clustering** | High | Bundle nearby services into one shop visit |
+| **Seasonal Reminders** | Medium | Location + season → contextual alerts |
+
+> See [FEATURES.md → Maintenance Schedules & Reminders](./FEATURES.md#3-maintenance-schedules--reminders) for setup flow options, clustering logic, and seasonal reminder details.
+
+### UI/UX Principles
+
+Foundation design decisions that shape the user experience.
+
+| Principle | Summary |
+|-----------|---------|
+| **Three-Tab Architecture** | Home (glanceable), Services (timeline), Costs (analytics) |
+| **Persistent Vehicle Context** | Vehicle selector at top of all tabs |
+| **Adaptive Layouts** | Casual vs Enthusiast modes surface different priorities |
+| **iOS 26 Liquid Glass** | Glass effects for navigation layer only, never stacked |
+
+> See [FEATURES.md → UI/UX Principles](./FEATURES.md#uiux-principles) for navigation structure, tab content details, and design goals checklist.
+
+### Platform Integration Details
+
+Deep Apple ecosystem integration beyond basic widget support.
+
+| Element | Details |
+|---------|---------|
+| **Widget Sizes** | Small (1 item), Medium (2-3 items), Large (mini dashboard), Lock Screen |
+| **Watch App** | Crown scroll entry, view services, mark complete |
+| **Notification Flow** | 4-step one-tap flow with snooze options |
+| **Notification Philosophy** | Monthly at most — no engagement spam |
+
+> See [FEATURES.md → Platform Integrations](./FEATURES.md#10-platform-integrations-the-app-comes-to-you) for widget content breakdown, Watch app features, and notification flow details.
+
 ### Data Reliability (Non-Negotiable)
 
 - Local-first architecture — device is source of truth
@@ -162,6 +213,19 @@ These features require ongoing infrastructure and justify a subscription model (
 
 > Crowd-sourced data, predictive maintenance, and professional tools.
 
+### On-Device Document Intelligence
+
+Advanced document processing for receipts and invoices.
+
+| Tier | What's Included | Pricing |
+|------|-----------------|---------|
+| **Basic OCR** | On-device Vision framework, text extraction, manual field selection | Free |
+| **AI-Powered OCR** | Server-side smart extraction, automatic field detection, high accuracy | Subscription |
+
+**Contextual Prompt Logic:** App detects document type (service invoice, parts receipt, ambiguous) and responds with appropriate logging flow.
+
+> See [FEATURES.md → On-Device Document Intelligence](./FEATURES.md#on-device-document-intelligence) for contextual prompt logic table, Apple technologies breakdown, and privacy benefits.
+
 ### Crowd-Sourced Reliability Data (Opt-In)
 
 | Feature | Priority | Description |
@@ -232,6 +296,22 @@ These features require ongoing infrastructure and justify a subscription model (
 - Parts purchase logging distinct from service logging
 - Time-to-complete estimates for DIY jobs
 - Difficulty ratings for each service type
+
+---
+
+## Nice-to-Haves Philosophy
+
+> Features that could add value but need careful implementation. Better to skip than do poorly.
+
+| Feature | Guideline |
+|---------|-----------|
+| **Predicted Issues** | Only show when confidence is high — don't cry wolf |
+| **Service Patterns** | Learn user habits for smart defaults, not for nagging |
+| **Vehicle Health Diagram** | Two toggleable views (Health Status vs Repair History) — requires enough data to be meaningful |
+
+**Principle:** These are v2+ features. Ship without them, add later when we have enough data and can do them well. No empty states — features don't appear until data exists to make them useful.
+
+> See [FEATURES.md → Nice-to-Haves](./FEATURES.md#nice-to-haves-get-right-or-dont-do) for Vehicle Health Diagram views, implementation notes, and philosophy details.
 
 ---
 
@@ -327,6 +407,18 @@ These features require ongoing infrastructure and justify a subscription model (
 - [ ] What's the review/verification process for crowdsourced schedules?
 - [ ] Regional pricing considerations for Pro and Subscription?
 - [ ] Should Pro bundle be included in Subscription, or separate?
+
+---
+
+## Research Sources
+
+Reference materials used for feature planning and market research.
+
+- [Car Maintenance App Features (carexcel.com)](https://carexcel.com/maintenance-tips/1767416-car-maintenance-app)
+- [Tacoma Forum - App Recommendations](https://www.tacoma4g.com/forum/threads/vehicle-maintenance-records-app-recommendations.9942/)
+- [SmartCar - Auto Repair Features Drivers Want](https://smartcar.com/blog/auto-repair-features)
+- [Apple Developer - Liquid Glass](https://developer.apple.com/documentation/SwiftUI/Applying-Liquid-Glass-to-custom-views)
+- [Liquid Glass SwiftUI Reference (GitHub)](https://github.com/conorluddy/LiquidGlassReference)
 
 ---
 
