@@ -40,13 +40,8 @@ class WidgetDataService {
         .store(in: &cancellables)
     }
 
-    /// Handle remote changes by notifying SyncStatusService and reloading widgets
+    /// Handle remote changes by reloading widgets
     private func handleRemoteChange() {
-        // Update sync status
-        Task { @MainActor in
-            SyncStatusService.shared.didReceiveRemoteChanges()
-        }
-
         // Reload all widget timelines to reflect remote changes
         WidgetCenter.shared.reloadAllTimelines()
     }
