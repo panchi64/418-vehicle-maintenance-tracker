@@ -18,6 +18,9 @@ struct SettingsView: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: Spacing.lg) {
+                        // iCloud Sync Section
+                        SyncSettingsSection()
+
                         // App Icon Section
                         appIconSection
 

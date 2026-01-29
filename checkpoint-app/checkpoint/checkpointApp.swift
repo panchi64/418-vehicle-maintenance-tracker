@@ -14,6 +14,9 @@ struct checkpointApp: App {
     // App Group identifier for sharing data with widget
     private static let appGroupID = "group.com.418-studio.checkpoint.shared"
 
+    // CloudKit container identifier for iCloud sync
+    private static let cloudKitContainerID = "iCloud.com.418-studio.checkpoint"
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Vehicle.self,
@@ -24,14 +27,29 @@ struct checkpointApp: App {
             ServiceAttachment.self,
         ])
 
-        // Use App Group container for shared access with widget
         let modelConfiguration: ModelConfiguration
-        if let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) {
-            let storeURL = containerURL.appendingPathComponent("checkpoint.store")
-            modelConfiguration = ModelConfiguration(schema: schema, url: storeURL)
+
+        // Check if user has iCloud sync enabled
+        // Note: We read directly from UserDefaults here since SyncSettings
+        // may not be initialized yet during static property initialization
+        let syncEnabled = UserDefaults.standard.object(forKey: "iCloudSyncEnabled") as? Bool ?? true
+
+        if syncEnabled {
+            // CloudKit-enabled configuration (syncs via user's iCloud account)
+            // Note: CloudKit configuration cannot use custom URL, so we use default location
+            modelConfiguration = ModelConfiguration(
+                schema: schema,
+                cloudKitDatabase: .automatic
+            )
         } else {
-            // Fallback to default location if app group is not available
-            modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+            // Local-only configuration using App Group for widget access
+            if let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) {
+                let storeURL = containerURL.appendingPathComponent("checkpoint.store")
+                modelConfiguration = ModelConfiguration(schema: schema, url: storeURL)
+            } else {
+                // Fallback to default location
+                modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+            }
         }
 
         do {
@@ -45,6 +63,7 @@ struct checkpointApp: App {
         // Register UserDefaults defaults
         DistanceSettings.registerDefaults()
         AppIconSettings.registerDefaults()
+        SyncSettings.registerDefaults()
 
         // Set up notification delegate
         UNUserNotificationCenter.current().delegate = NotificationService.shared
@@ -60,6 +79,9 @@ struct checkpointApp: App {
                     if !NotificationService.shared.isAuthorized {
                         _ = await NotificationService.shared.requestAuthorization()
                     }
+
+                    // Check iCloud account status
+                    await SyncStatusService.shared.checkAccountStatus()
                 }
         }
         .modelContainer(sharedModelContainer)
