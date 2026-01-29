@@ -235,12 +235,34 @@
 
 ### 7. Reports & Export
 
-| Feature                  | Priority | Notes                                                    |
-| ------------------------ | -------- | -------------------------------------------------------- |
-| Service history PDF      | High     | Complete maintenance history for resale, warranty claims |
-| Data backup              | High     | iCloud sync                                              |
-| Shareable reports        | Medium   | Send to mechanic, buyer, etc.                            |
-| Maintenance cost reports | Medium   | Graphs and breakdowns                                    |
+| Feature                  | Priority | Status | Notes                                                    |
+| ------------------------ | -------- | ------ | -------------------------------------------------------- |
+| Service history PDF      | High     |      | Complete maintenance history for resale, warranty claims |
+| iCloud Sync              | High     |      | Free native sync across iOS devices via CloudKit         |
+| Shareable reports        | Medium   |      | Send to mechanic, buyer, etc.                            |
+| Maintenance cost reports | Medium   |      | Graphs and breakdowns                                    |
+
+#### iCloud Sync (Free Feature)
+
+> Native Apple CloudKit sync for data safety and multi-device access — no account required.
+
+**What syncs:**
+- Vehicles and metadata
+- Service records and history
+- Maintenance schedules
+- MileageSnapshots
+- Service attachments (photos/PDFs via CloudKit Assets)
+
+**What doesn't sync:**
+- App state (current tab, scroll position)
+
+**Key principles:**
+- Local-first: App works fully offline, cloud is additive
+- Free: Uses Apple's CloudKit (no server cost to us)
+- Automatic: Syncs via user's existing iCloud account
+- User control: Can disable in Settings if preferred
+
+> **Note:** This is separate from the v1.5 "Web/Desktop Access" subscription feature which adds a custom backend for browser and non-Apple device access.
 
 #### Vehicle Maintenance History PDF
 
