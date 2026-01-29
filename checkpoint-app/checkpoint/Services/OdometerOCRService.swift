@@ -547,7 +547,7 @@ actor OdometerOCRService {
 // MARK: - UIImage Orientation to CGImagePropertyOrientation
 
 extension CGImagePropertyOrientation {
-    init(_ uiOrientation: UIImage.Orientation) {
+    nonisolated init(_ uiOrientation: UIImage.Orientation) {
         switch uiOrientation {
         case .up: self = .up
         case .upMirrored: self = .upMirrored

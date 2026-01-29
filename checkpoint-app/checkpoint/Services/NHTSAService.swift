@@ -62,12 +62,14 @@ struct RecallInfo: Identifiable, Sendable {
 }
 
 // MARK: - API Response Decodables
+// Note: These DTOs are marked nonisolated to opt out of the project's default @MainActor
+// isolation, allowing them to be decoded within the NHTSAService actor.
 
-private struct VINDecodeResponse: Decodable, Sendable {
+private nonisolated struct VINDecodeResponse: Decodable, Sendable {
     let Results: [VINDecodeResultJSON]
 }
 
-private struct VINDecodeResultJSON: Decodable, Sendable {
+private nonisolated struct VINDecodeResultJSON: Decodable, Sendable {
     let Make: String?
     let Model: String?
     let ModelYear: String?
@@ -81,12 +83,12 @@ private struct VINDecodeResultJSON: Decodable, Sendable {
     let EngineHP: String?
 }
 
-private struct RecallsResponse: Decodable, Sendable {
+private nonisolated struct RecallsResponse: Decodable, Sendable {
     let Count: Int
     let results: [RecallResultJSON]
 }
 
-private struct RecallResultJSON: Decodable, Sendable {
+private nonisolated struct RecallResultJSON: Decodable, Sendable {
     let NHTSACampaignNumber: String?
     let Component: String?
     let Summary: String?
