@@ -238,7 +238,7 @@
 | Feature                  | Priority | Status | Notes                                                    |
 | ------------------------ | -------- | ------ | -------------------------------------------------------- |
 | Service history PDF      | High     |      | Complete maintenance history for resale, warranty claims |
-| iCloud Sync              | High     |      | Free native sync across iOS devices via CloudKit         |
+| iCloud Sync              | High     | ✅     | Free native sync across iOS devices via CloudKit         |
 | Shareable reports        | Medium   |      | Send to mechanic, buyer, etc.                            |
 | Maintenance cost reports | Medium   |      | Graphs and breakdowns                                    |
 
