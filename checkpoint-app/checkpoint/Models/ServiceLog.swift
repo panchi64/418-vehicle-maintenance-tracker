@@ -13,15 +13,15 @@ final class ServiceLog: Identifiable {
     var id: UUID = UUID()
     var service: Service?
     var vehicle: Vehicle?
-    var performedDate: Date
-    var mileageAtService: Int
+    var performedDate: Date = Date.now
+    var mileageAtService: Int = 0
     var cost: Decimal?
     var costCategory: CostCategory?
     var notes: String?
-    var createdAt: Date
+    var createdAt: Date = Date.now
 
     @Relationship(deleteRule: .cascade, inverse: \ServiceAttachment.serviceLog)
-    var attachments: [ServiceAttachment] = []
+    var attachments: [ServiceAttachment]? = []
 
     var formattedCost: String? {
         guard let cost = cost else { return nil }

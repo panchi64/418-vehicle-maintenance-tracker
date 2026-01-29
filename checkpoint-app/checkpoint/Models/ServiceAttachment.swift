@@ -21,9 +21,9 @@ final class ServiceAttachment: Identifiable {
     @Attribute(.externalStorage)
     var thumbnailData: Data?
 
-    var fileName: String
-    var mimeType: String  // "image/jpeg", "image/png", "application/pdf"
-    var createdAt: Date
+    var fileName: String = ""
+    var mimeType: String = "image/jpeg"  // "image/jpeg", "image/png", "application/pdf"
+    var createdAt: Date = Date.now
 
     /// Computed property to check if this is an image
     var isImage: Bool {

@@ -491,7 +491,7 @@ final class ServiceAttachmentTests: XCTestCase {
         modelContext.insert(attachment2)
 
         // Then
-        XCTAssertEqual(serviceLog.attachments.count, 2)
+        XCTAssertEqual((serviceLog.attachments ?? []).count, 2)
     }
 
     // MARK: - File Extension Tests

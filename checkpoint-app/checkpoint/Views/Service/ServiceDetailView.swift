@@ -38,14 +38,14 @@ struct ServiceDetailView: View {
                 actionButtons
 
                 // Service history
-                if !service.logs.isEmpty {
+                if !(service.logs ?? []).isEmpty {
                     historySection
                 }
 
                 // Attachments from all logs
-                let allAttachments = service.logs
+                let allAttachments = (service.logs ?? [])
                     .sorted(by: { $0.performedDate > $1.performedDate })
-                    .flatMap { $0.attachments }
+                    .flatMap { $0.attachments ?? [] }
                 if !allAttachments.isEmpty {
                     AttachmentSection(attachments: allAttachments)
                 }
@@ -201,7 +201,7 @@ struct ServiceDetailView: View {
             InstrumentSectionHeader(title: "History")
 
             VStack(spacing: 0) {
-                let sortedLogs = service.logs.sorted(by: { $0.performedDate > $1.performedDate })
+                let sortedLogs = (service.logs ?? []).sorted(by: { $0.performedDate > $1.performedDate })
                 ForEach(sortedLogs) { log in
                     Button {
                         selectedLog = log
@@ -233,7 +233,7 @@ struct ServiceDetailView: View {
                         .font(.brutalistBody)
                         .foregroundStyle(Theme.textPrimary)
 
-                    if !log.attachments.isEmpty {
+                    if !(log.attachments ?? []).isEmpty {
                         Image(systemName: "paperclip")
                             .font(.system(size: 11, weight: .medium))
                             .foregroundStyle(Theme.textTertiary)
@@ -429,7 +429,7 @@ struct MarkServiceDoneSheet: View {
 
         // Create mileage snapshot for pace calculation (throttled: max 1 per day)
         let shouldCreateSnapshot = !MileageSnapshot.hasSnapshotToday(
-            snapshots: vehicle.mileageSnapshots
+            snapshots: vehicle.mileageSnapshots ?? []
         )
 
         if shouldCreateSnapshot {

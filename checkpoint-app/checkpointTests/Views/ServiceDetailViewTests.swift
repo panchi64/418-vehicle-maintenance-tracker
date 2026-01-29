@@ -159,8 +159,8 @@ final class ServiceDetailViewTests: XCTestCase {
         service.logs = [log1, log2]
 
         // Then: Logs should be accessible
-        XCTAssertEqual(service.logs.count, 2, "Service should have 2 logs")
-        XCTAssertFalse(service.logs.isEmpty, "Service logs should not be empty")
+        XCTAssertEqual((service.logs ?? []).count, 2, "Service should have 2 logs")
+        XCTAssertFalse((service.logs ?? []).isEmpty, "Service logs should not be empty")
     }
 
     func testHistorySection_SortsByDateDescending() {
@@ -185,7 +185,7 @@ final class ServiceDetailViewTests: XCTestCase {
         service.logs = [olderLog, newerLog]
 
         // When: Sorting by date descending
-        let sortedLogs = service.logs.sorted(by: { $0.performedDate > $1.performedDate })
+        let sortedLogs = (service.logs ?? []).sorted(by: { $0.performedDate > $1.performedDate })
 
         // Then: Newer log should come first
         XCTAssertEqual(sortedLogs.first?.mileageAtService, 34000, "Newer log should be first when sorted descending")
@@ -197,7 +197,7 @@ final class ServiceDetailViewTests: XCTestCase {
         let service = Service(name: "Brake Inspection", dueDate: nil)
 
         // Then: Logs array should be empty
-        XCTAssertTrue(service.logs.isEmpty, "New service should have no logs")
+        XCTAssertTrue((service.logs ?? []).isEmpty, "New service should have no logs")
     }
 
     // MARK: - Mark As Done Tests

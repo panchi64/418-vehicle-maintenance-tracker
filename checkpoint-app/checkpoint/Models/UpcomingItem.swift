@@ -81,7 +81,7 @@ extension Service: UpcomingItem {
 extension Vehicle {
     /// All upcoming items (services + marbete if configured), sorted by urgency
     var allUpcomingItems: [any UpcomingItem] {
-        var items: [any UpcomingItem] = services.map { $0 as any UpcomingItem }
+        var items: [any UpcomingItem] = (services ?? []).map { $0 as any UpcomingItem }
 
         // Include marbete if configured
         if hasMarbeteExpiration {

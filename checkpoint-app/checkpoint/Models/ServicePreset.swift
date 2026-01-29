@@ -34,11 +34,16 @@ enum ServiceCategory: String, Codable, CaseIterable {
 
 @Model
 final class ServicePreset {
-    var name: String
-    var category: ServiceCategory
+    var name: String = ""
+    private var categoryRawValue: String = ServiceCategory.other.rawValue
     var defaultIntervalMonths: Int?
     var defaultIntervalMiles: Int?
-    var isCustom: Bool
+    var isCustom: Bool = false
+
+    var category: ServiceCategory {
+        get { ServiceCategory(rawValue: categoryRawValue) ?? .other }
+        set { categoryRawValue = newValue.rawValue }
+    }
 
     init(
         name: String,

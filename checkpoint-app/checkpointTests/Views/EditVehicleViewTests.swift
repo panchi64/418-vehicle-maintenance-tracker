@@ -176,7 +176,7 @@ final class EditVehicleViewTests: XCTestCase {
         let view = EditVehicleView(vehicle: vehicle)
 
         // Then
-        XCTAssertEqual(view.vehicle.services.count, 0, "New vehicle should have no services")
+        XCTAssertEqual((view.vehicle.services ?? []).count, 0, "New vehicle should have no services")
     }
 
     func testVehicleDisplayName() {

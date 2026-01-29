@@ -345,7 +345,7 @@ class NotificationService: NSObject, ObservableObject {
 
     /// Schedule notifications for all services of a vehicle
     func scheduleNotifications(for vehicle: Vehicle) {
-        for service in vehicle.services {
+        for service in vehicle.services ?? [] {
             if let notificationID = scheduleNotification(for: service, vehicle: vehicle) {
                 service.notificationID = notificationID
             }
@@ -416,7 +416,7 @@ class NotificationService: NSObject, ObservableObject {
     func rescheduleNotifications(for vehicle: Vehicle) {
         let pace = vehicle.dailyMilesPace
 
-        for service in vehicle.services {
+        for service in vehicle.services ?? [] {
             // Cancel existing notifications
             cancelNotification(for: service)
 
@@ -455,7 +455,7 @@ class NotificationService: NSObject, ObservableObject {
 
     /// Cancel all notifications for a vehicle
     func cancelNotifications(for vehicle: Vehicle) {
-        for service in vehicle.services {
+        for service in vehicle.services ?? [] {
             cancelNotification(for: service)
         }
     }

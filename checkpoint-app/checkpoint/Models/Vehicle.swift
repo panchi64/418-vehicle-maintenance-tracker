@@ -12,11 +12,11 @@ import SwiftUI
 @Model
 final class Vehicle: Identifiable {
     var id: UUID = UUID()
-    var name: String
-    var make: String
-    var model: String
-    var year: Int
-    var currentMileage: Int
+    var name: String = ""
+    var make: String = ""
+    var model: String = ""
+    var year: Int = 0
+    var currentMileage: Int = 0
     var vin: String?
 
     // Specifications
@@ -35,13 +35,13 @@ final class Vehicle: Identifiable {
     var marbeteNotificationID: String?
 
     @Relationship(deleteRule: .cascade, inverse: \Service.vehicle)
-    var services: [Service] = []
+    var services: [Service]? = []
 
     @Relationship(deleteRule: .cascade, inverse: \ServiceLog.vehicle)
-    var serviceLogs: [ServiceLog] = []
+    var serviceLogs: [ServiceLog]? = []
 
     @Relationship(deleteRule: .cascade, inverse: \MileageSnapshot.vehicle)
-    var mileageSnapshots: [MileageSnapshot] = []
+    var mileageSnapshots: [MileageSnapshot]? = []
 
     var displayName: String {
         if name.isEmpty {
@@ -53,7 +53,7 @@ final class Vehicle: Identifiable {
     /// Calculate daily miles pace from mileage snapshots
     /// Returns nil if insufficient data (less than 7 days)
     var dailyMilesPace: Double? {
-        MileageSnapshot.calculateDailyPace(from: mileageSnapshots)
+        MileageSnapshot.calculateDailyPace(from: mileageSnapshots ?? [])
     }
 
     /// Check if we have enough data for pace calculation (7+ days)
@@ -63,7 +63,7 @@ final class Vehicle: Identifiable {
 
     /// Pace result with confidence metadata
     var paceResult: PaceResult? {
-        MileageSnapshot.calculatePaceResult(from: mileageSnapshots)
+        MileageSnapshot.calculatePaceResult(from: mileageSnapshots ?? [])
     }
 
     /// Confidence level of the pace data

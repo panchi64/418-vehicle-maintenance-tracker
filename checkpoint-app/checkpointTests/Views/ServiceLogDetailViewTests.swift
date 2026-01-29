@@ -63,7 +63,7 @@ final class ServiceLogDetailViewTests: XCTestCase {
         XCTAssertNil(log.costCategory)
         XCTAssertNil(log.notes)
         XCTAssertNil(log.formattedCost)
-        XCTAssertTrue(log.attachments.isEmpty)
+        XCTAssertTrue((log.attachments ?? []).isEmpty)
     }
 
     func testServiceLogDetail_MileageIsAccessible() {
@@ -97,7 +97,7 @@ final class ServiceLogDetailViewTests: XCTestCase {
         )
 
         // Then: Attachments array should exist and be empty
-        XCTAssertTrue(log.attachments.isEmpty)
+        XCTAssertTrue((log.attachments ?? []).isEmpty)
     }
 
     // MARK: - AppState selectedServiceLog Tests

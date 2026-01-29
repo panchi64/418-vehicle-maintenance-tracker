@@ -420,6 +420,6 @@ final class ServiceLogTests: XCTestCase {
 
         // Then
         XCTAssertNotNil(log.attachments)
-        XCTAssertTrue(log.attachments.isEmpty)
+        XCTAssertTrue((log.attachments ?? []).isEmpty)
     }
 }

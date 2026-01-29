@@ -12,7 +12,7 @@ import SwiftUI
 @Model
 final class Service: Identifiable {
     var id: UUID = UUID()
-    var name: String
+    var name: String = ""
     var dueDate: Date?
     var dueMileage: Int?
     var lastPerformed: Date?
@@ -24,7 +24,7 @@ final class Service: Identifiable {
     var vehicle: Vehicle?
 
     @Relationship(deleteRule: .cascade, inverse: \ServiceLog.service)
-    var logs: [ServiceLog] = []
+    var logs: [ServiceLog]? = []
 
     init(
         name: String,

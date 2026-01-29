@@ -189,7 +189,7 @@ final class HomeTabTests: XCTestCase {
         modelContext.insert(vehicle)
 
         // When - vehicle has no services
-        let services = vehicle.services
+        let services = vehicle.services ?? []
 
         // Then
         XCTAssertTrue(services.isEmpty)
@@ -240,8 +240,8 @@ final class HomeTabTests: XCTestCase {
         modelContext.insert(snapshot)
 
         // Then
-        XCTAssertEqual(vehicle.mileageSnapshots.count, 1)
-        XCTAssertEqual(vehicle.mileageSnapshots.first?.mileage, 31000)
+        XCTAssertEqual((vehicle.mileageSnapshots ?? []).count, 1)
+        XCTAssertEqual((vehicle.mileageSnapshots ?? []).first?.mileage, 31000)
     }
 
     // MARK: - Service Status Update Tests

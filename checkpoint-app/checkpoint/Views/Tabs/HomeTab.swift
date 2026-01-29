@@ -357,7 +357,7 @@ struct HomeTab: View {
         vehicle.mileageUpdatedAt = .now
 
         let shouldCreateSnapshot = !MileageSnapshot.hasSnapshotToday(
-            snapshots: vehicle.mileageSnapshots
+            snapshots: vehicle.mileageSnapshots ?? []
         )
 
         if shouldCreateSnapshot {

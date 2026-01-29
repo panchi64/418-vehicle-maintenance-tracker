@@ -28,8 +28,8 @@ struct ServiceLogDetailView: View {
                 }
 
                 // Attachments
-                if !log.attachments.isEmpty {
-                    AttachmentSection(attachments: log.attachments)
+                if !(log.attachments ?? []).isEmpty {
+                    AttachmentSection(attachments: log.attachments ?? [])
                 }
             }
             .padding(.horizontal, Spacing.screenHorizontal)

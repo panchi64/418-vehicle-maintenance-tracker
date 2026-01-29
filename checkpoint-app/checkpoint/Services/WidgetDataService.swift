@@ -111,7 +111,7 @@ class WidgetDataService {
         let pace = vehicle.dailyMilesPace
 
         // Create service items
-        var allItems: [(name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?, urgencyScore: Int)] = vehicle.services.map { service in
+        var allItems: [(name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?, urgencyScore: Int)] = (vehicle.services ?? []).map { service in
             let status = service.status(currentMileage: effectiveMileage)
             let statusString: String
             switch status {

@@ -18,9 +18,14 @@ enum MileageSource: String, Codable {
 final class MileageSnapshot: Identifiable {
     var id: UUID = UUID()
     var vehicle: Vehicle?
-    var mileage: Int
-    var recordedAt: Date
-    var source: MileageSource
+    var mileage: Int = 0
+    var recordedAt: Date = Date.now
+    private var sourceRawValue: String = MileageSource.manual.rawValue
+
+    var source: MileageSource {
+        get { MileageSource(rawValue: sourceRawValue) ?? .manual }
+        set { sourceRawValue = newValue.rawValue }
+    }
 
     init(
         vehicle: Vehicle? = nil,

@@ -133,11 +133,11 @@ final class VehicleHeaderTests: XCTestCase {
     @MainActor
     func testMileageUpdate_CreatesSnapshotWhenNoneExistsToday() {
         // Given
-        XCTAssertTrue(vehicle.mileageSnapshots.isEmpty, "Vehicle should start with no snapshots")
+        XCTAssertTrue((vehicle.mileageSnapshots ?? []).isEmpty, "Vehicle should start with no snapshots")
 
         // When - simulate mileage update logic
         let newMileage = 35000
-        let shouldCreateSnapshot = !MileageSnapshot.hasSnapshotToday(snapshots: vehicle.mileageSnapshots)
+        let shouldCreateSnapshot = !MileageSnapshot.hasSnapshotToday(snapshots: vehicle.mileageSnapshots ?? [])
 
         if shouldCreateSnapshot {
             let snapshot = MileageSnapshot(
