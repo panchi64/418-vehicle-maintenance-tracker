@@ -15,7 +15,7 @@ struct QuickSpecsCard: View {
     @State private var isExpanded = false
 
     private var hasAnySpecs: Bool {
-        vehicle.vin != nil || vehicle.tireSize != nil || vehicle.oilType != nil || (vehicle.notes != nil && !vehicle.notes!.isEmpty)
+        vehicle.vin != nil || vehicle.tireSize != nil || vehicle.oilType != nil || (vehicle.notes != nil && !vehicle.notes!.isEmpty) || vehicle.hasMarbeteExpiration
     }
 
     private var hasNotes: Bool {
@@ -125,6 +125,11 @@ struct QuickSpecsCard: View {
                             }
                         }
 
+                        // Marbete expiration (if set)
+                        if vehicle.hasMarbeteExpiration, let formatted = vehicle.marbeteExpirationFormatted {
+                            marbeteBlock(expiration: formatted, status: vehicle.marbeteStatus)
+                        }
+
                         // Notes section
                         if hasNotes {
                             VStack(alignment: .leading, spacing: 0) {
@@ -208,6 +213,40 @@ struct QuickSpecsCard: View {
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1)
         }
+    }
+
+    /// Marbete block with status-colored expiration display
+    private func marbeteBlock(expiration: String, status: ServiceStatus) -> some View {
+        HStack(spacing: Spacing.sm) {
+            // Status indicator
+            Rectangle()
+                .fill(status.color)
+                .frame(width: 8, height: 8)
+
+            VStack(alignment: .leading, spacing: 2) {
+                // Expiration date in status color
+                Text(expiration)
+                    .font(.brutalistHeading)
+                    .foregroundStyle(status.color)
+
+                // Label
+                Text("MARBETE")
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.textTertiary)
+                    .tracking(1)
+            }
+
+            Spacer()
+
+            // Status label
+            if status != .neutral {
+                Text(status.label)
+                    .font(.brutalistLabel)
+                    .foregroundStyle(status.color)
+                    .tracking(1)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

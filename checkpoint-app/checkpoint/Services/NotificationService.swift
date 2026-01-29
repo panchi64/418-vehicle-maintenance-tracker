@@ -32,6 +32,13 @@ class NotificationService: NSObject, ObservableObject {
     static let yearlyRoundupCategoryID = "YEARLY_ROUNDUP"
     static let viewCostsActionID = "VIEW_COSTS"
 
+    // Marbete (PR vehicle registration tag) category
+    static let marbeteDueCategoryID = "MARBETE_DUE"
+    static let marbeteSnoozeActionID = "MARBETE_SNOOZE"
+
+    // Marbete reminder intervals (days before expiration)
+    static let marbeteReminderIntervals: [Int] = [60, 30, 7, 1]
+
     // Mileage reminder interval (14 days)
     static let mileageReminderIntervalDays = 14
 
@@ -144,10 +151,26 @@ class NotificationService: NSObject, ObservableObject {
             options: []
         )
 
+        // Marbete snooze action (snooze only, no "mark done" since renewal is external)
+        let marbeteSnoozeAction = UNNotificationAction(
+            identifier: Self.marbeteSnoozeActionID,
+            title: "Remind Tomorrow",
+            options: []
+        )
+
+        // Marbete due category
+        let marbeteDueCategory = UNNotificationCategory(
+            identifier: Self.marbeteDueCategoryID,
+            actions: [marbeteSnoozeAction],
+            intentIdentifiers: [],
+            options: []
+        )
+
         notificationCenter.setNotificationCategories([
             serviceDueCategory,
             mileageReminderCategory,
-            yearlyRoundupCategory
+            yearlyRoundupCategory,
+            marbeteDueCategory
         ])
     }
 
@@ -681,6 +704,142 @@ class NotificationService: NSObject, ObservableObject {
             withIdentifiers: [Self.yearlyRoundupID(for: vehicle.id, year: year)]
         )
     }
+
+    // MARK: - Marbete Notifications
+
+    /// Notification ID for marbete reminders (per vehicle)
+    static func marbeteReminderID(for vehicleID: UUID, daysBeforeDue: Int) -> String {
+        "marbete-\(vehicleID.uuidString)-\(daysBeforeDue)d"
+    }
+
+    /// Base notification ID for marbete (for cancellation)
+    static func marbeteBaseID(for vehicleID: UUID) -> String {
+        "marbete-\(vehicleID.uuidString)"
+    }
+
+    /// Build a marbete notification request
+    func buildMarbeteNotificationRequest(
+        vehicleName: String,
+        vehicleID: UUID,
+        notificationDate: Date,
+        daysBeforeDue: Int
+    ) -> UNNotificationRequest {
+        let content = UNMutableNotificationContent()
+
+        // Vary message based on urgency
+        switch daysBeforeDue {
+        case 60:
+            content.title = "Marbete Renewal Coming Up"
+            content.body = "\(vehicleName) - Time to plan your marbete renewal (expires in 2 months)"
+        case 30:
+            content.title = "Marbete Renewal Reminder"
+            content.body = "\(vehicleName) - Don't forget to renew your marbete (expires in 1 month)"
+        case 7:
+            content.title = "Marbete Renewal Due Soon!"
+            content.body = "\(vehicleName) - Your marbete expires in 1 week"
+        case 1:
+            content.title = "Marbete Expires Tomorrow!"
+            content.body = "\(vehicleName) - Renew your marbete today to avoid fines"
+        default:
+            content.title = "Marbete Renewal Reminder"
+            content.body = "\(vehicleName) - Your marbete expires in \(daysBeforeDue) days"
+        }
+
+        content.sound = .default
+        content.categoryIdentifier = Self.marbeteDueCategoryID
+        content.userInfo = [
+            "vehicleID": vehicleID.uuidString,
+            "type": "marbeteReminder",
+            "daysBeforeDue": daysBeforeDue
+        ]
+
+        // Schedule at 9 AM
+        var dateComponents = Calendar.current.dateComponents([.year, .month, .day], from: notificationDate)
+        dateComponents.hour = 9
+        dateComponents.minute = 0
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
+
+        return UNNotificationRequest(
+            identifier: Self.marbeteReminderID(for: vehicleID, daysBeforeDue: daysBeforeDue),
+            content: content,
+            trigger: trigger
+        )
+    }
+
+    /// Schedule marbete notifications for a vehicle at default intervals (60, 30, 7, 1 days before)
+    /// - Parameter vehicle: The vehicle with marbete expiration set
+    /// - Returns: The base notification identifier if scheduled successfully
+    @discardableResult
+    func scheduleMarbeteNotifications(for vehicle: Vehicle) -> String? {
+        guard let expirationDate = vehicle.marbeteExpirationDate else { return nil }
+
+        // Don't schedule if already expired
+        guard expirationDate > Date() else { return nil }
+
+        // Cancel existing notifications
+        cancelMarbeteNotifications(for: vehicle)
+
+        let baseNotificationID = Self.marbeteBaseID(for: vehicle.id)
+
+        // Schedule notifications for each interval
+        for daysBeforeDue in Self.marbeteReminderIntervals {
+            guard let notificationDate = Calendar.current.date(
+                byAdding: .day,
+                value: -daysBeforeDue,
+                to: expirationDate
+            ) else { continue }
+
+            // Only schedule if the notification date is in the future
+            guard notificationDate > Date() else { continue }
+
+            let request = buildMarbeteNotificationRequest(
+                vehicleName: vehicle.displayName,
+                vehicleID: vehicle.id,
+                notificationDate: notificationDate,
+                daysBeforeDue: daysBeforeDue
+            )
+
+            notificationCenter.add(request) { error in
+                if let error = error {
+                    print("Failed to schedule marbete notification (\(daysBeforeDue)d before): \(error)")
+                }
+            }
+        }
+
+        vehicle.marbeteNotificationID = baseNotificationID
+        return baseNotificationID
+    }
+
+    /// Cancel all marbete notifications for a vehicle
+    func cancelMarbeteNotifications(for vehicle: Vehicle) {
+        // Generate all possible notification IDs for this vehicle
+        let allIDs = Self.marbeteReminderIntervals.map {
+            Self.marbeteReminderID(for: vehicle.id, daysBeforeDue: $0)
+        }
+        notificationCenter.removePendingNotificationRequests(withIdentifiers: allIDs)
+        vehicle.marbeteNotificationID = nil
+    }
+
+    /// Snooze marbete reminder for 1 day
+    func snoozeMarbeteReminder(for vehicle: Vehicle) {
+        cancelMarbeteNotifications(for: vehicle)
+
+        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+
+        let request = buildMarbeteNotificationRequest(
+            vehicleName: vehicle.displayName,
+            vehicleID: vehicle.id,
+            notificationDate: tomorrow,
+            daysBeforeDue: 0  // Snoozed notification
+        )
+
+        notificationCenter.add(request) { error in
+            if let error = error {
+                print("Failed to snooze marbete reminder: \(error)")
+            }
+        }
+    }
 }
 
 // MARK: - UNUserNotificationCenterDelegate
@@ -755,6 +914,37 @@ extension NotificationService: UNUserNotificationCenterDelegate {
             return
         }
 
+        // Handle marbete reminder notifications
+        if notificationType == "marbeteReminder" {
+            guard let vehicleIDString = userInfo["vehicleID"] as? String else { return }
+
+            switch response.actionIdentifier {
+            case Self.marbeteSnoozeActionID:
+                // Snooze marbete reminder
+                await MainActor.run {
+                    NotificationCenter.default.post(
+                        name: .marbeteReminderSnoozedFromNotification,
+                        object: nil,
+                        userInfo: ["vehicleID": vehicleIDString]
+                    )
+                }
+
+            case UNNotificationDefaultActionIdentifier:
+                // Navigate to edit vehicle (to update marbete)
+                await MainActor.run {
+                    NotificationCenter.default.post(
+                        name: .navigateToEditVehicleFromNotification,
+                        object: nil,
+                        userInfo: ["vehicleID": vehicleIDString]
+                    )
+                }
+
+            default:
+                break
+            }
+            return
+        }
+
         // Handle service due notifications (original behavior)
         guard let serviceIDString = userInfo["serviceID"] as? String,
               let _ = userInfo["vehicleID"] as? String else {
@@ -811,4 +1001,8 @@ extension Notification.Name {
 
     // Yearly roundup notifications
     static let navigateToCostsFromNotification = Notification.Name("navigateToCostsFromNotification")
+
+    // Marbete reminder notifications
+    static let marbeteReminderSnoozedFromNotification = Notification.Name("marbeteReminderSnoozedFromNotification")
+    static let navigateToEditVehicleFromNotification = Notification.Name("navigateToEditVehicleFromNotification")
 }
