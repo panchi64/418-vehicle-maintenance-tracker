@@ -228,6 +228,111 @@ struct CardButtonStyle: ButtonStyle {
     }
 }
 
+// MARK: - Marbete Next Up Card
+
+/// Specialized NextUpCard for marbete renewal display
+struct MarbeteNextUpCard: View {
+    let marbeteItem: MarbeteUpcomingItem
+    let vehicleName: String
+    let onTap: () -> Void
+
+    private var status: ServiceStatus { marbeteItem.itemStatus }
+    private var daysUntilDue: Int? { marbeteItem.daysRemaining }
+
+    private var isUrgent: Bool {
+        status == .overdue || status == .dueSoon
+    }
+
+    var body: some View {
+        Button(action: onTap) {
+            VStack(alignment: .leading, spacing: 0) {
+                // Header row: status + item name
+                HStack(alignment: .top) {
+                    // Status indicator (square, brutalist) with glow
+                    Rectangle()
+                        .fill(status.color)
+                        .frame(width: 8, height: 8)
+                        .statusGlow(color: status.color, isActive: isUrgent)
+                        .pulseAnimation(isActive: isUrgent)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(status.label.isEmpty ? "SCHEDULED" : status.label)
+                            .font(.brutalistLabel)
+                            .foregroundStyle(status.color)
+                            .textCase(.uppercase)
+                            .tracking(1.5)
+
+                        Text(marbeteItem.itemName)
+                            .font(.brutalistHeading)
+                            .foregroundStyle(Theme.textPrimary)
+                            .textCase(.uppercase)
+                    }
+
+                    Spacer()
+                }
+                .padding(.bottom, 16)
+
+                // Divider
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: 1)
+
+                // Hero data display - days only for marbete
+                if let days = daysUntilDue {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(alignment: .lastTextBaseline, spacing: 4) {
+                            Text("\(abs(days))")
+                                .font(.brutalistHero)
+                                .foregroundStyle(status.color)
+                                .contentTransition(.numericText())
+
+                            Text("DAYS")
+                                .font(.brutalistHeading)
+                                .foregroundStyle(status.color)
+                        }
+
+                        Text(days < 0 ? "EXPIRED" : "REMAINING")
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.textTertiary)
+                            .tracking(1.5)
+                    }
+                    .padding(.vertical, 20)
+                }
+
+                // Divider
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: 1)
+
+                // Expiration info
+                VStack(spacing: 8) {
+                    HStack {
+                        Text("EXPIRES")
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.textTertiary)
+                            .tracking(1)
+
+                        Spacer()
+
+                        if let formatted = marbeteItem.expirationFormatted {
+                            Text(formatted)
+                                .font(.brutalistBody)
+                                .foregroundStyle(status.color)
+                        }
+                    }
+                }
+                .padding(.top, 12)
+            }
+            .glassCardStyle(intensity: .subtle)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(CardButtonStyle())
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Marbete renewal, \(status.label)")
+        .accessibilityHint(marbeteItem.expirationFormatted ?? "")
+    }
+}
+
 #Preview {
     let vehicle = Vehicle.sampleVehicle
     let services = Service.sampleServices(for: vehicle)

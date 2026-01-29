@@ -30,12 +30,21 @@ struct HomeTab: View {
             .sorted { $0.urgencyScore(currentMileage: effectiveMileage, dailyPace: pace) < $1.urgencyScore(currentMileage: effectiveMileage, dailyPace: pace) }
     }
 
+    /// The most urgent upcoming item (service or marbete)
+    private var nextUpItem: (any UpcomingItem)? {
+        vehicle?.nextUpItem
+    }
+
     private var nextUpService: Service? {
         vehicleServices.first
     }
 
     private var remainingServices: [Service] {
-        Array(vehicleServices.dropFirst())
+        // If marbete is the most urgent, don't drop a service from remaining
+        if let nextUp = nextUpItem, nextUp.itemType == .marbete {
+            return vehicleServices
+        }
+        return Array(vehicleServices.dropFirst())
     }
 
     private var vehicleServiceLogs: [ServiceLog] {
@@ -68,19 +77,35 @@ struct HomeTab: View {
                     .revealAnimation(delay: 0.15)
                 }
 
-                // Next Up hero card
-                if let nextUp = nextUpService, let vehicle = vehicle {
+                // Next Up hero card (service or marbete, whichever is more urgent)
+                if let nextUp = nextUpItem, let vehicle = vehicle {
                     VStack(alignment: .leading, spacing: Spacing.sm) {
                         InstrumentSectionHeader(title: "Next Up")
 
-                        NextUpCard(
-                            service: nextUp,
-                            currentMileage: vehicle.effectiveMileage,
-                            vehicleName: vehicle.displayName,
-                            dailyMilesPace: vehicle.dailyMilesPace,
-                            isEstimatedMileage: vehicle.isUsingEstimatedMileage
-                        ) {
-                            appState.selectedService = nextUp
+                        // Display appropriate card based on item type
+                        switch nextUp.itemType {
+                        case .service:
+                            if let service = nextUp as? Service {
+                                NextUpCard(
+                                    service: service,
+                                    currentMileage: vehicle.effectiveMileage,
+                                    vehicleName: vehicle.displayName,
+                                    dailyMilesPace: vehicle.dailyMilesPace,
+                                    isEstimatedMileage: vehicle.isUsingEstimatedMileage
+                                ) {
+                                    appState.selectedService = service
+                                }
+                            }
+                        case .marbete:
+                            if let marbeteItem = nextUp as? MarbeteUpcomingItem {
+                                MarbeteNextUpCard(
+                                    marbeteItem: marbeteItem,
+                                    vehicleName: vehicle.displayName
+                                ) {
+                                    // Navigate to EditVehicleView to update marbete
+                                    appState.showEditVehicle = true
+                                }
+                            }
                         }
                     }
                     .revealAnimation(delay: 0.2)

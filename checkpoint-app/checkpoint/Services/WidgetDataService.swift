@@ -7,6 +7,8 @@
 
 import Foundation
 import WidgetKit
+import Combine
+import CoreData
 
 /// Service for updating widget data in the shared App Group container
 class WidgetDataService {
@@ -16,7 +18,38 @@ class WidgetDataService {
     private let widgetDataKey = "widgetData"
     private let vehicleListKey = "vehicleList"
 
-    private init() {}
+    /// Cancellables for observation
+    private var cancellables = Set<AnyCancellable>()
+
+    private init() {
+        // Observe remote change notifications from CloudKit sync
+        setupRemoteChangeObserver()
+    }
+
+    // MARK: - CloudKit Remote Change Handling
+
+    /// Set up observer for remote changes from CloudKit
+    private func setupRemoteChangeObserver() {
+        NotificationCenter.default.publisher(
+            for: .NSPersistentStoreRemoteChange
+        )
+        .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
+        .sink { [weak self] _ in
+            self?.handleRemoteChange()
+        }
+        .store(in: &cancellables)
+    }
+
+    /// Handle remote changes by notifying SyncStatusService and reloading widgets
+    private func handleRemoteChange() {
+        // Update sync status
+        Task { @MainActor in
+            SyncStatusService.shared.didReceiveRemoteChanges()
+        }
+
+        // Reload all widget timelines to reflect remote changes
+        WidgetCenter.shared.reloadAllTimelines()
+    }
 
     /// Returns the vehicle-specific widget data key
     private func widgetDataKey(for vehicleID: String) -> String {
@@ -77,16 +110,13 @@ class WidgetDataService {
         }
     }
 
-    /// Update widget from a Vehicle and its services
+    /// Update widget from a Vehicle and its services (including marbete if configured)
     func updateWidget(for vehicle: Vehicle) {
         let effectiveMileage = vehicle.effectiveMileage
         let pace = vehicle.dailyMilesPace
 
-        let sortedServices = vehicle.services.sorted {
-            $0.urgencyScore(currentMileage: effectiveMileage, dailyPace: pace) < $1.urgencyScore(currentMileage: effectiveMileage, dailyPace: pace)
-        }
-
-        let serviceData = sortedServices.map { service -> (name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?) in
+        // Create service items
+        var allItems: [(name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?, urgencyScore: Int)] = vehicle.services.map { service in
             let status = service.status(currentMileage: effectiveMileage)
             let statusString: String
             switch status {
@@ -109,8 +139,54 @@ class WidgetDataService {
                 status: statusString,
                 dueDescription: service.primaryDescription ?? "Scheduled",
                 dueMileage: service.dueMileage,
-                daysRemaining: daysRemaining
+                daysRemaining: daysRemaining,
+                urgencyScore: service.urgencyScore(currentMileage: effectiveMileage, dailyPace: pace)
             )
+        }
+
+        // Add marbete if configured
+        if vehicle.hasMarbeteExpiration {
+            let marbeteStatus = vehicle.marbeteStatus
+            let statusString: String
+            switch marbeteStatus {
+            case .overdue: statusString = "overdue"
+            case .dueSoon: statusString = "dueSoon"
+            case .good: statusString = "good"
+            case .neutral: statusString = "neutral"
+            }
+
+            let daysRemaining = vehicle.daysUntilMarbeteExpiration
+            let dueDescription: String
+            if let days = daysRemaining {
+                if days < 0 {
+                    dueDescription = "\(abs(days)) days expired"
+                } else if days == 0 {
+                    dueDescription = "Expires today"
+                } else if days == 1 {
+                    dueDescription = "Expires tomorrow"
+                } else {
+                    dueDescription = "\(days) days remaining"
+                }
+            } else {
+                dueDescription = vehicle.marbeteExpirationFormatted ?? "Set"
+            }
+
+            allItems.append((
+                name: "Marbete Renewal",
+                status: statusString,
+                dueDescription: dueDescription,
+                dueMileage: nil,  // Marbete has no mileage component
+                daysRemaining: daysRemaining,
+                urgencyScore: vehicle.marbeteUrgencyScore
+            ))
+        }
+
+        // Sort all items by urgency score
+        let sortedItems = allItems.sorted { $0.urgencyScore < $1.urgencyScore }
+
+        // Convert to service data format (dropping urgencyScore)
+        let serviceData = sortedItems.map { item in
+            (name: item.name, status: item.status, dueDescription: item.dueDescription, dueMileage: item.dueMileage, daysRemaining: item.daysRemaining)
         }
 
         updateWidgetData(
