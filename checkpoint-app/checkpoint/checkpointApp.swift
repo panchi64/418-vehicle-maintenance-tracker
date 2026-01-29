@@ -24,14 +24,22 @@ struct checkpointApp: App {
             ServiceAttachment.self,
         ])
 
-        // Use App Group container for shared access with widget
+        // Use App Group container for shared access with widget, with CloudKit sync
         let modelConfiguration: ModelConfiguration
         if let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) {
             let storeURL = containerURL.appendingPathComponent("checkpoint.store")
-            modelConfiguration = ModelConfiguration(schema: schema, url: storeURL)
+            modelConfiguration = ModelConfiguration(
+                schema: schema,
+                url: storeURL,
+                cloudKitDatabase: .private("iCloud.com.418-studio.checkpoint")
+            )
         } else {
-            // Fallback to default location if app group is not available
-            modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+            // Fallback to default location with CloudKit if app group is not available
+            modelConfiguration = ModelConfiguration(
+                schema: schema,
+                isStoredInMemoryOnly: false,
+                cloudKitDatabase: .private("iCloud.com.418-studio.checkpoint")
+            )
         }
 
         do {
