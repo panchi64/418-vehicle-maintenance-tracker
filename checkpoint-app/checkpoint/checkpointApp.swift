@@ -27,33 +27,37 @@ struct checkpointApp: App {
             ServiceAttachment.self,
         ])
 
-        let modelConfiguration: ModelConfiguration
-
         // Check if user has iCloud sync enabled
         // Note: We read directly from UserDefaults here since SyncSettings
         // may not be initialized yet during static property initialization
         let syncEnabled = UserDefaults.standard.object(forKey: "iCloudSyncEnabled") as? Bool ?? true
 
         if syncEnabled {
-            // CloudKit-enabled configuration (syncs via user's iCloud account)
-            // Note: CloudKit configuration cannot use custom URL, so we use default location
-            modelConfiguration = ModelConfiguration(
-                schema: schema,
-                cloudKitDatabase: .automatic
-            )
-        } else {
-            // Local-only configuration using App Group for widget access
-            if let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) {
-                let storeURL = containerURL.appendingPathComponent("checkpoint.store")
-                modelConfiguration = ModelConfiguration(schema: schema, url: storeURL)
-            } else {
-                // Fallback to default location
-                modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+            // Try CloudKit-enabled configuration first
+            do {
+                let cloudConfig = ModelConfiguration(
+                    schema: schema,
+                    cloudKitDatabase: .private(cloudKitContainerID)
+                )
+                return try ModelContainer(for: schema, configurations: [cloudConfig])
+            } catch {
+                // CloudKit failed - fall back to local storage
+                print("CloudKit initialization failed: \(error). Falling back to local storage.")
             }
         }
 
+        // Local-only configuration (either by user preference or CloudKit failure)
+        let localConfig: ModelConfiguration
+        if let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) {
+            let storeURL = containerURL.appendingPathComponent("checkpoint.store")
+            localConfig = ModelConfiguration(schema: schema, url: storeURL)
+        } else {
+            // Fallback to default location
+            localConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        }
+
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            return try ModelContainer(for: schema, configurations: [localConfig])
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }

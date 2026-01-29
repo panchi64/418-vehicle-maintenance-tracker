@@ -189,7 +189,7 @@ struct ConflictResolutionView: View {
                 .lineLimit(3)
 
             Text(formatDate(modifiedAt))
-                .font(.brutalistCaption)
+                .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
