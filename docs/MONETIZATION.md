@@ -26,11 +26,18 @@
 | -------- | -------- |
 | **Vehicles** | Unlimited vehicles |
 | **Core Features** | Service logging, reminders, mileage tracking, cost tracking |
+| **iCloud Sync** | Native CloudKit sync across iOS devices (iPhone, iPad) |
 | **Widgets** | Home Screen, Lock Screen, CarPlay Dashboard |
 | **Apple Watch** | Complication and Watch app |
 | **OCR** | Basic on-device OCR (Vision framework) |
 | **Notifications** | Full reminder system (30/7/1-day defaults) |
 | **Export** | Basic data export |
+
+**Why iCloud sync is free:**
+- Uses Apple's CloudKit — no server cost to us
+- Essential for data safety (primary user request)
+- Differentiator vs competitors who paywall basic sync
+- Builds trust and reduces data loss anxiety
 
 **Why unlimited vehicles free:**
 - No server cost to us — it's all local storage

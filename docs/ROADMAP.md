@@ -43,6 +43,7 @@ Checkpoint aims to be the **definitive iOS vehicle maintenance companion** — a
 | **Schedules** | Manual schedule entry, mileage-based reminders, date-based reminders, smart notifications, custom intervals | ✅ |
 | **Mileage** | Driving rate calculation, estimated current mileage, predictive notifications, dashboard OCR, biweekly prompts, EWMA recency weighting | ✅ |
 | **Costs** | Per-service costs, cost categorization, monthly/yearly summaries, cost-per-mile calculation | ✅ |
+| **iCloud Sync** | Free native sync across iOS devices via CloudKit — local-first with cloud backup | ✅ |
 
 ### Platform Integrations
 

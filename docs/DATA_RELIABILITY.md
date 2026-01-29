@@ -116,9 +116,9 @@ One user review captured the sentiment perfectly:
 
 ---
 
-## iCloud Sync (Subscription Feature)
+## iCloud Sync (Free Feature)
 
-> Cloud sync adds convenience but must never compromise reliability.
+> Native Apple CloudKit sync adds convenience but must never compromise reliability. This is a **free base feature** included in v1.0 — no subscription required.
 
 ### Architecture Principles
 
@@ -126,6 +126,7 @@ One user review captured the sentiment perfectly:
 - **Sync is eventually consistent** — not real-time, and that's okay
 - **Offline edits queue and sync later** — no data loss during outages
 - **User can disable sync anytime** — local data preserved
+- **Uses Apple's CloudKit** — no custom server infrastructure, no cost to us
 
 ### Sync Guarantees
 
@@ -134,20 +135,28 @@ One user review captured the sentiment perfectly:
 | No internet | App works normally, changes queued |
 | Sync conflict | Both versions preserved, user resolves |
 | iCloud quota full | Warning shown, local data unaffected |
-| Subscription lapses | Sync stops, all local data remains accessible |
-| Re-subscribe | Sync resumes, merges cleanly |
+| User disables iCloud | Sync stops, all local data remains accessible |
+| User re-enables iCloud | Sync resumes, merges cleanly |
 
 ### What We Sync
 
 - Vehicles and their metadata
 - Service records and history
 - Maintenance schedules
-- User preferences (opt-in)
+- MileageSnapshots
+- ServiceAttachments (photos/PDFs via CloudKit Assets)
 
-### What We Don't Sync (Initially)
+### What We Don't Sync
 
-- Attachment photos (storage concerns — may add later)
 - App state (current tab, scroll position)
+- User preferences (local-only for now)
+
+### Implementation Notes
+
+- Uses SwiftData CloudKit integration (`ModelConfiguration(cloudKitContainerIdentifier:)`)
+- Attachments use `@Attribute(.externalStorage)` which CloudKit handles as Assets
+- Widget data continues using App Groups + UserDefaults (separate from CloudKit sync)
+- Remote change notifications trigger widget updates
 
 ---
 
