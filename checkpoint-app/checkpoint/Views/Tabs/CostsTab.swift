@@ -117,7 +117,7 @@ struct CostsTab: View {
 
     /// Calculate cost per mile for the filtered period
     private var costPerMile: Double? {
-        guard let vehicle = vehicle,
+        guard vehicle != nil,
               logsWithCosts.count >= 2 else { return nil }
 
         // Get oldest and newest logs in period
@@ -134,7 +134,7 @@ struct CostsTab: View {
 
     /// Calculate lifetime cost per mile
     private var lifetimeCostPerMile: Double? {
-        guard let vehicle = vehicle else { return nil }
+        guard vehicle != nil else { return nil }
 
         // Get all logs with costs for this vehicle (no period filter)
         let allLogs = vehicleServiceLogs.filter { $0.cost != nil && $0.cost! > 0 }
