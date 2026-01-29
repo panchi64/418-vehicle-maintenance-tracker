@@ -569,6 +569,7 @@ struct CostsTab: View {
                 .foregroundStyle(Theme.textTertiary)
         }
         .padding(Spacing.md)
+        .contentShape(Rectangle())
     }
 
     // MARK: - Empty States

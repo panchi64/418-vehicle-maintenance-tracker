@@ -258,6 +258,7 @@ struct ServiceDetailView: View {
                 .foregroundStyle(Theme.textTertiary)
         }
         .padding(Spacing.md)
+        .contentShape(Rectangle())
     }
 
     // MARK: - App Icon

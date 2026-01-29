@@ -57,7 +57,7 @@ struct ContentView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .gesture(
+                .simultaneousGesture(
                     DragGesture(minimumDistance: 50)
                         .onEnded { value in
                             let horizontalSwipe = value.translation.width
@@ -66,12 +66,17 @@ struct ContentView: View {
                             // Only trigger if horizontal movement dominates
                             guard abs(horizontalSwipe) > verticalSwipe else { return }
 
-                            if horizontalSwipe > 0 {
-                                // Swipe right -> go to previous tab
-                                appState.selectedTab = appState.selectedTab.previous
-                            } else {
-                                // Swipe left -> go to next tab
-                                appState.selectedTab = appState.selectedTab.next
+                            // Soft haptic feedback for tab switch
+                            UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+
+                            withAnimation(.easeOut(duration: Theme.animationMedium)) {
+                                if horizontalSwipe > 0 {
+                                    // Swipe right -> go to previous tab
+                                    appState.selectedTab = appState.selectedTab.previous
+                                } else {
+                                    // Swipe left -> go to next tab
+                                    appState.selectedTab = appState.selectedTab.next
+                                }
                             }
                         }
                 )

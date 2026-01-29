@@ -23,6 +23,7 @@ struct VehicleHeader: View {
                     Text(vehicle?.displayName.uppercased() ?? "SELECT_VEHICLE")
                         .font(.brutalistTitle)
                         .foregroundStyle(Theme.textPrimary)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
 
@@ -37,6 +38,7 @@ struct VehicleHeader: View {
                                 .font(.brutalistBody)
                                 .foregroundStyle(Theme.accent)
                                 .underline(onMileageTap != nil, color: Theme.accent.opacity(0.5))
+                                .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
 
@@ -60,6 +62,7 @@ struct VehicleHeader: View {
                                     .foregroundStyle(Theme.accent)
                                     .tracking(1)
                             }
+                            .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
                     }

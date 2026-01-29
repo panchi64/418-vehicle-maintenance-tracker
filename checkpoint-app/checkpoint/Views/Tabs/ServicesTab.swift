@@ -144,6 +144,7 @@ struct ServicesTab: View {
                                     ) {
                                         appState.selectedService = service
                                     }
+                                    .contentShape(Rectangle())
                                 }
                                 .buttonStyle(.plain)
                                 .staggeredReveal(index: index, baseDelay: 0.2)
@@ -175,6 +176,7 @@ struct ServicesTab: View {
                                     appState.selectedServiceLog = log
                                 } label: {
                                     historyRow(log: log)
+                                        .contentShape(Rectangle())
                                 }
                                 .buttonStyle(.plain)
                                 .staggeredReveal(index: index, baseDelay: 0.3)

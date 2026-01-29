@@ -26,6 +26,8 @@ struct RecallAlertCard: View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
             Button {
+                // Soft haptic feedback for expand/collapse
+                UIImpactFeedbackGenerator(style: .soft).impactOccurred()
                 withAnimation(.easeOut(duration: Theme.animationMedium)) {
                     isExpanded.toggle()
                 }
@@ -57,6 +59,7 @@ struct RecallAlertCard: View {
                         .foregroundStyle(Theme.statusOverdue)
                 }
                 .padding(Spacing.md)
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
 

@@ -201,7 +201,10 @@ struct MaintenanceTimeline: View {
                 Rectangle()
                     .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
             )
+            .contentShape(Rectangle())
             .onTapGesture {
+                // Selection haptic for row tap
+                UISelectionFeedbackGenerator().selectionChanged()
                 if item.type == .completed, let log = item.serviceLog, let onLogTap {
                     onLogTap(log)
                 } else if let service = item.service {
