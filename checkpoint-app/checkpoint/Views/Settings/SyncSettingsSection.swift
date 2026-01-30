@@ -3,19 +3,21 @@
 //  checkpoint
 //
 //  iCloud sync settings section for SettingsView
+//  Combines sync toggle with detailed status display and error actions
 //
 
 import SwiftUI
 
 struct SyncSettingsSection: View {
     @State private var syncService = SyncStatusService.shared
+    @State private var cloudSyncService = CloudSyncStatusService.shared
     @State private var isEnabled: Bool = SyncSettings.shared.iCloudSyncEnabled
     @State private var showRestartAlert = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             // Section header
-            Text("DATA & SYNC")
+            Text("ICLOUD SYNC")
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(2)
@@ -28,7 +30,7 @@ struct SyncSettingsSection: View {
                     .fill(Theme.gridLine)
                     .frame(height: Theme.borderWidth)
 
-                // Sync status row
+                // Sync status row with detailed icons and actions
                 syncStatusRow
             }
             .background(Theme.surfaceInstrument)
@@ -91,68 +93,83 @@ struct SyncSettingsSection: View {
     private var syncStatusRow: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Status")
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textPrimary)
+                HStack(spacing: Spacing.sm) {
+                    // Status icon from CloudSyncStatusService
+                    statusIcon
 
-                HStack(spacing: Spacing.xs) {
-                    statusIndicator
-                    Text(syncService.syncState.displayText)
+                    Text(statusDisplayText)
+                        .font(.brutalistBody)
+                        .foregroundStyle(Theme.textPrimary)
+                }
+
+                // Last sync time
+                if let lastSync = cloudSyncService.lastSyncDate {
+                    Text("Last synced \(lastSync.formatted(.relative(presentation: .named)))")
                         .font(.brutalistSecondary)
-                        .foregroundStyle(statusColor)
+                        .foregroundStyle(Theme.textTertiary)
                 }
             }
 
             Spacer()
 
-            if let lastSync = syncService.lastSyncDescription {
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text("Last synced")
-                        .font(.brutalistSecondary)
-                        .foregroundStyle(Theme.textTertiary)
-                    Text(lastSync)
-                        .font(.brutalistSecondary)
-                        .foregroundStyle(Theme.textSecondary)
+            // Action button for errors
+            if let error = cloudSyncService.currentError, let actionLabel = error.actionLabel, isEnabled {
+                Button {
+                    handleErrorAction(error)
+                } label: {
+                    Text(actionLabel)
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.accent)
+                        .tracking(1)
                 }
             }
         }
         .padding(Spacing.md)
     }
 
-    // MARK: - Status Indicator
+    // MARK: - Status Icon
 
     @ViewBuilder
-    private var statusIndicator: some View {
-        switch syncService.syncState {
-        case .syncing:
-            ProgressView()
-                .scaleEffect(0.7)
-                .tint(Theme.accent)
-        case .synced, .idle:
-            Circle()
-                .fill(Theme.statusGood)
-                .frame(width: 8, height: 8)
-        case .error, .noAccount:
-            Circle()
-                .fill(Theme.statusOverdue)
-                .frame(width: 8, height: 8)
-        case .disabled:
-            Circle()
-                .fill(Theme.textTertiary)
-                .frame(width: 8, height: 8)
+    private var statusIcon: some View {
+        if !isEnabled {
+            // Sync disabled
+            Image(systemName: "icloud.slash")
+                .foregroundStyle(Theme.textTertiary)
+        } else {
+            switch cloudSyncService.status {
+            case .idle:
+                Image(systemName: "checkmark.icloud")
+                    .foregroundStyle(Theme.statusGood)
+            case .syncing:
+                Image(systemName: "arrow.triangle.2.circlepath.icloud")
+                    .foregroundStyle(Theme.accent)
+                    .symbolEffect(.rotate, options: .repeating)
+            case .error(let error):
+                Image(systemName: error.systemImage)
+                    .foregroundStyle(error.iconColor)
+            }
         }
     }
 
-    private var statusColor: Color {
-        switch syncService.syncState {
-        case .synced, .idle:
-            return Theme.statusGood
-        case .syncing:
-            return Theme.accent
-        case .error, .noAccount:
-            return Theme.statusOverdue
-        case .disabled:
-            return Theme.textTertiary
+    // MARK: - Status Display Text
+
+    private var statusDisplayText: String {
+        if !isEnabled {
+            return "Sync disabled"
+        }
+        return cloudSyncService.statusDisplayText
+    }
+
+    // MARK: - Error Actions
+
+    private func handleErrorAction(_ error: CloudSyncStatusService.CloudSyncError) {
+        switch error {
+        case .notSignedIn:
+            cloudSyncService.openSettings()
+        case .quotaExceeded:
+            cloudSyncService.openStorageSettings()
+        default:
+            break
         }
     }
 }
