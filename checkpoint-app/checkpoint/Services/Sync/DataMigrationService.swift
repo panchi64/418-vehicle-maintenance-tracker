@@ -104,7 +104,7 @@ final class DataMigrationService {
                 destContext.insert(newVehicle)
 
                 // Migrate services
-                for service in vehicle.services {
+                for service in vehicle.services ?? [] {
                     let newService = Service(
                         name: service.name,
                         dueDate: service.dueDate,
@@ -122,7 +122,7 @@ final class DataMigrationService {
                 }
 
                 // Migrate service logs
-                for log in vehicle.serviceLogs {
+                for log in vehicle.serviceLogs ?? [] {
                     let newLog = ServiceLog(
                         service: log.service != nil ? nil : nil, // Service relationship needs separate handling
                         vehicle: newVehicle,
@@ -137,7 +137,7 @@ final class DataMigrationService {
                     destContext.insert(newLog)
 
                     // Migrate attachments
-                    for attachment in log.attachments {
+                    for attachment in log.attachments ?? [] {
                         let newAttachment = ServiceAttachment(
                             serviceLog: newLog,
                             data: attachment.data,
@@ -151,7 +151,7 @@ final class DataMigrationService {
                 }
 
                 // Migrate mileage snapshots
-                for snapshot in vehicle.mileageSnapshots {
+                for snapshot in vehicle.mileageSnapshots ?? [] {
                     let newSnapshot = MileageSnapshot(
                         vehicle: newVehicle,
                         mileage: snapshot.mileage,

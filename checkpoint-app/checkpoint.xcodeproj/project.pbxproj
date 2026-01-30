@@ -61,6 +61,16 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		5AAAA9532F2084330002A8C6 /* Exceptions for "checkpoint" folder in "checkpoint" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				DesignSystem/CLAUDE.md,
+				Models/CLAUDE.md,
+				Services/CLAUDE.md,
+				Views/CLAUDE.md,
+			);
+			target = 5AAAA9262F2084320002A8C6 /* checkpoint */;
+		};
 		5AB669762F2687FD0036D71B /* Exceptions for "CheckpointWidget" folder in "CheckpointWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -73,6 +83,9 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		5AAAA9292F2084320002A8C6 /* checkpoint */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				5AAAA9532F2084330002A8C6 /* Exceptions for "checkpoint" folder in "checkpoint" target */,
+			);
 			path = checkpoint;
 			sourceTree = "<group>";
 		};
