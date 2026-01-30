@@ -53,6 +53,7 @@ struct checkpointApp: App {
         // Register UserDefaults defaults
         DistanceSettings.registerDefaults()
         AppIconSettings.registerDefaults()
+        WidgetSettingsManager.registerDefaults()
 
         // Set up notification delegate
         UNUserNotificationCenter.current().delegate = NotificationService.shared

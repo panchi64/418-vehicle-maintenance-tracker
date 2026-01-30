@@ -2,13 +2,15 @@
 //  SettingsView.swift
 //  checkpoint
 //
-//  Settings screen with distance unit picker and app icon preferences
+//  Settings screen with distance unit picker, app icon preferences, and widget settings
 //
 
 import SwiftUI
+import SwiftData
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @Query private var vehicles: [Vehicle]
 
     var body: some View {
         NavigationStack {
@@ -23,6 +25,9 @@ struct SettingsView: View {
 
                         // Distance Unit Section
                         distanceUnitSection
+
+                        // Widget Settings Section
+                        widgetSettingsSection
 
                         Spacer()
                     }
@@ -67,6 +72,79 @@ struct SettingsView: View {
             // Unit picker
             DistanceUnitPicker()
         }
+    }
+
+    // MARK: - Widget Settings Section
+
+    private var widgetSettingsSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            // Section header
+            Text("WIDGETS")
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(2)
+
+            VStack(spacing: 0) {
+                // Default Vehicle
+                NavigationLink {
+                    WidgetVehiclePicker(vehicles: vehicles)
+                } label: {
+                    widgetSettingRow(
+                        title: "Default Vehicle",
+                        value: selectedVehicleName
+                    )
+                }
+                .buttonStyle(.plain)
+
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: Theme.borderWidth)
+
+                // Mileage Display Mode
+                NavigationLink {
+                    WidgetMileageModePicker()
+                } label: {
+                    widgetSettingRow(
+                        title: "Mileage Display",
+                        value: WidgetSettingsManager.shared.mileageDisplayMode.displayName
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+            .background(Theme.surfaceInstrument)
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+            )
+        }
+    }
+
+    private var selectedVehicleName: String {
+        if let vehicleID = WidgetSettingsManager.shared.defaultVehicleID,
+           let vehicle = vehicles.first(where: { $0.id.uuidString == vehicleID }) {
+            return vehicle.name
+        }
+        return "First Vehicle"
+    }
+
+    private func widgetSettingRow(title: String, value: String) -> some View {
+        HStack {
+            Text(title)
+                .font(.brutalistBody)
+                .foregroundStyle(Theme.textPrimary)
+
+            Spacer()
+
+            Text(value)
+                .font(.brutalistSecondary)
+                .foregroundStyle(Theme.textTertiary)
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Theme.textTertiary)
+        }
+        .padding(Spacing.md)
+        .contentShape(Rectangle())
     }
 }
 

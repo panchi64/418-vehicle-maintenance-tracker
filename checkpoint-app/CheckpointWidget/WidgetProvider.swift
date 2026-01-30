@@ -138,33 +138,57 @@ struct WidgetProvider: AppIntentTimelineProvider {
             return makeEmptyEntry(configuration: configuration)
         }
 
+        // Load shared settings as fallback
+        let sharedSettings = SharedWidgetSettings.load()
+
         // Determine which vehicle to load:
-        // 1. Use configured vehicle if available
-        // 2. Fall back to first vehicle in list
-        // 3. Fall back to legacy widgetData key
+        // 1. Use configured vehicle if available (explicit per-widget config)
+        // 2. Fall back to shared settings default vehicle
+        // 3. Fall back to first vehicle in list
+        // 4. Fall back to legacy widgetData key
         let vehicleID: String?
+        let usesExplicitConfig: Bool
+
         if let configuredVehicle = configuration.vehicle {
             vehicleID = configuredVehicle.id
+            usesExplicitConfig = true
+        } else if let sharedVehicleID = sharedSettings.vehicleID {
+            vehicleID = sharedVehicleID
+            usesExplicitConfig = false
         } else {
             vehicleID = loadFirstVehicleID(from: userDefaults)
+            usesExplicitConfig = false
+        }
+
+        // Build effective configuration:
+        // - If widget has explicit config, use it
+        // - Otherwise, use shared settings for mileage display mode
+        let effectiveConfig: CheckpointWidgetConfigurationIntent
+        if usesExplicitConfig {
+            effectiveConfig = configuration
+        } else {
+            effectiveConfig = CheckpointWidgetConfigurationIntent(
+                vehicle: configuration.vehicle,
+                mileageDisplayMode: sharedSettings.displayMode
+            )
         }
 
         // Try vehicle-specific key first
         if let vehicleID = vehicleID {
             let vehicleKey = "widgetData_\(vehicleID)"
             if let data = userDefaults.data(forKey: vehicleKey),
-               let entry = decodeEntry(from: data, configuration: configuration) {
+               let entry = decodeEntry(from: data, configuration: effectiveConfig) {
                 return entry
             }
         }
 
         // Fall back to legacy key
         if let data = userDefaults.data(forKey: widgetDataKey),
-           let entry = decodeEntry(from: data, configuration: configuration) {
+           let entry = decodeEntry(from: data, configuration: effectiveConfig) {
             return entry
         }
 
-        return makeEmptyEntry(configuration: configuration)
+        return makeEmptyEntry(configuration: effectiveConfig)
     }
 
     private func loadFirstVehicleID(from userDefaults: UserDefaults) -> String? {
