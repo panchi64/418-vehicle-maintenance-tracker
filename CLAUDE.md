@@ -58,10 +58,11 @@ xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPh
 - **MileageSnapshot:** driving pattern analysis for mileage estimation
 
 ### Key Services (in `Services/`)
-- **NotificationService:** local notifications at 9 AM on due dates, actions for "Mark Done" / "Remind Tomorrow"
-- **OdometerOCRService / VINOCRService:** Vision framework OCR for camera capture
-- **NHTSAService:** VIN decoding and recall alerts via NHTSA API
-- **WidgetDataService:** App Groups data sharing with widget
+- **Notifications/NotificationService:** local notifications at 9 AM on due dates, actions for "Mark Done" / "Remind Tomorrow"
+- **OCR/OdometerOCRService, VINOCRService:** Vision framework OCR for camera capture
+- **Utilities/NHTSAService:** VIN decoding and recall alerts via NHTSA API
+- **Widget/WidgetDataService:** App Groups data sharing with widget
+- **Sync/CloudSyncStatusService, SyncStatusService:** iCloud sync status monitoring
 
 ### Widget Extension
 - Uses App Groups: `group.com.418-studio.checkpoint.shared`
@@ -74,19 +75,32 @@ xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPh
 ```
 checkpoint-app/
 ├── checkpoint/
-│   ├── Models/           # SwiftData entities
+│   ├── Models/           # SwiftData entities (see Models/CLAUDE.md)
 │   ├── Views/
 │   │   ├── Tabs/         # Home, Services, Costs tabs
 │   │   ├── Vehicle/      # Vehicle CRUD views
 │   │   ├── Service/      # Service CRUD views
-│   │   └── Components/   # 40+ reusable UI components
-│   ├── DesignSystem/     # Theme, Typography, Spacing tokens
-│   ├── Services/         # Business logic services
+│   │   ├── Settings/     # Settings views
+│   │   └── Components/   # Reusable UI components (see Views/CLAUDE.md)
+│   │       ├── Attachments/  # Photo/document handling
+│   │       ├── Camera/       # Vision framework OCR views
+│   │       ├── Cards/        # Dashboard cards
+│   │       ├── Inputs/       # Form input controls
+│   │       ├── Lists/        # List/timeline components
+│   │       ├── Navigation/   # Navigation & structural
+│   │       └── Sync/         # Data sync UI
+│   ├── DesignSystem/     # Theme, Typography, Spacing tokens (see DesignSystem/CLAUDE.md)
+│   ├── Services/         # Business logic services (see Services/CLAUDE.md)
+│   │   ├── Notifications/    # Local notification management
+│   │   ├── OCR/              # Vision framework services
+│   │   ├── Sync/             # iCloud & data sync
+│   │   ├── Utilities/        # Single-purpose services
+│   │   └── Widget/           # Widget data sharing
 │   ├── State/            # AppState (@Observable)
 │   ├── Utilities/        # Formatters, Settings, helpers
 │   └── Resources/        # ServicePresets.json
-├── CheckpointWidget/     # WidgetKit extension
-├── checkpointTests/      # Unit tests
+├── CheckpointWidget/     # WidgetKit extension (see CheckpointWidget/CLAUDE.md)
+├── checkpointTests/      # Unit tests (see checkpointTests/CLAUDE.md)
 └── checkpointUITests/    # UI tests
 ```
 
@@ -120,3 +134,9 @@ Feature implementation status is tracked in `docs/FEATURES.md`. When implementin
 - `docs/AESTHETIC.md` - Design language and visual philosophy
 - `docs/DATA_RELIABILITY.md` - Data strategy and mileage estimation
 - `checkpoint-app/CLAUDE.md` - Detailed iOS development patterns
+- `checkpoint-app/checkpoint/Models/CLAUDE.md` - Entity relationships and data patterns
+- `checkpoint-app/checkpoint/Services/CLAUDE.md` - Service layer architecture
+- `checkpoint-app/checkpoint/Views/CLAUDE.md` - View components and UI patterns
+- `checkpoint-app/checkpoint/DesignSystem/CLAUDE.md` - Design tokens and modifiers
+- `checkpoint-app/CheckpointWidget/CLAUDE.md` - Widget extension guide
+- `checkpoint-app/checkpointTests/CLAUDE.md` - Testing patterns and setup

@@ -26,52 +26,34 @@ checkpoint-app/
 ├── checkpoint/                          # Main app bundle
 │   ├── checkpointApp.swift              # App entry point with SwiftData setup
 │   ├── ContentView.swift                # Root content view
-│   ├── Models/                          # SwiftData models
-│   │   ├── Vehicle.swift                # Vehicle entity
-│   │   ├── Service.swift                # Service entity with status logic
-│   │   ├── ServiceLog.swift             # Completed service records
-│   │   └── ServicePreset.swift          # Bundled service type presets
-│   ├── DesignSystem/                    # Theme and design tokens
-│   │   ├── Theme.swift                  # Colors, button styles, card styles
-│   │   ├── Typography.swift             # SF Pro font hierarchy
-│   │   └── Spacing.swift                # 4pt base unit spacing system
-│   ├── Views/
-│   │   ├── DashboardView.swift          # Main dashboard screen
-│   │   ├── VehiclePickerSheet.swift     # Vehicle selection modal
-│   │   ├── Vehicle/
-│   │   │   ├── AddVehicleView.swift     # Add new vehicle form
-│   │   │   └── EditVehicleView.swift    # Edit/delete vehicle form
-│   │   ├── Service/
-│   │   │   ├── AddServiceView.swift     # Dual-mode: log or schedule service
-│   │   │   ├── ServiceDetailView.swift  # Service details with history
-│   │   │   └── EditServiceView.swift    # Edit/delete service form
-│   │   └── Components/
-│   │       ├── NextUpCard.swift         # Hero service card
-│   │       ├── ServiceRow.swift         # Service list item
-│   │       ├── StatusDot.swift          # Status indicator
-│   │       ├── VehicleSelector.swift    # Vehicle selector button
-│   │       ├── ServiceTypePicker.swift  # Preset picker component
-│   │       └── MileageInputField.swift  # Formatted mileage input
-│   ├── Services/
-│   │   ├── NotificationService.swift    # Local notification management
-│   │   └── PresetDataService.swift      # Load bundled presets
-│   ├── Resources/
-│   │   └── ServicePresets.json          # 10 bundled service presets
+│   ├── Models/                          # SwiftData models (see Models/CLAUDE.md)
+│   ├── DesignSystem/                    # Theme and design tokens (see DesignSystem/CLAUDE.md)
+│   ├── Views/                           # UI layer (see Views/CLAUDE.md)
+│   │   ├── Tabs/                        # Home, Services, Costs tabs
+│   │   ├── Vehicle/                     # Vehicle CRUD views
+│   │   ├── Service/                     # Service CRUD views
+│   │   ├── Settings/                    # Settings views
+│   │   └── Components/                  # Reusable UI components
+│   │       ├── Attachments/             # Photo/document handling
+│   │       ├── Camera/                  # Vision framework OCR views
+│   │       ├── Cards/                   # Dashboard cards
+│   │       ├── Inputs/                  # Form input controls
+│   │       ├── Lists/                   # List/timeline components
+│   │       ├── Navigation/              # Navigation & structural
+│   │       └── Sync/                    # Data sync UI
+│   ├── Services/                        # Business logic (see Services/CLAUDE.md)
+│   │   ├── Notifications/               # Local notification management
+│   │   ├── OCR/                         # Vision framework services
+│   │   ├── Sync/                        # iCloud & data sync
+│   │   ├── Utilities/                   # Single-purpose services
+│   │   └── Widget/                      # Widget data sharing
+│   ├── State/                           # AppState (@Observable)
+│   ├── Utilities/                       # Formatters, Settings, helpers
+│   ├── Resources/                       # ServicePresets.json
 │   └── Assets.xcassets/                 # Colors and app icons
-├── checkpointTests/                     # Unit tests
-│   ├── Models/                          # Model tests
-│   ├── Views/                           # View tests
-│   └── Services/                        # Service tests
+├── checkpointTests/                     # Unit tests (see checkpointTests/CLAUDE.md)
 ├── checkpointUITests/                   # UI tests
-└── CheckpointWidget/                    # Home screen widget extension
-    ├── CheckpointWidget.swift           # Widget configuration
-    ├── CheckpointWidgetBundle.swift     # Widget bundle
-    ├── WidgetProvider.swift             # Timeline provider
-    ├── Views/
-    │   ├── SmallWidgetView.swift        # Small widget
-    │   └── MediumWidgetView.swift       # Medium widget
-    └── Shared/
-        └── WidgetColors.swift           # Widget color definitions
+└── CheckpointWidget/                    # Widget extension (see CheckpointWidget/CLAUDE.md)
 ```
 
 ## Key Models
@@ -140,7 +122,7 @@ DashboardView (root)
 
 ## Notifications
 
-`NotificationService` handles:
+`Services/Notifications/NotificationService` handles:
 - Permission requests
 - Scheduling at 9 AM on due date
 - Actions: "Mark as Done", "Remind Tomorrow"
@@ -268,7 +250,7 @@ The project compiles successfully despite these transient warnings.
 ## Widget Data Flow
 
 The widget uses UserDefaults (via App Groups) for data sharing:
-1. Main app calls `WidgetDataService.shared.updateWidget(for: vehicle)` when data changes
+1. Main app calls `Services/Widget/WidgetDataService.shared.updateWidget(for: vehicle)` when data changes
 2. Data is serialized to JSON and stored in shared UserDefaults
 3. Widget reads from UserDefaults via `WidgetProvider.loadEntry()`
 4. `WidgetCenter.shared.reloadAllTimelines()` triggers widget refresh
