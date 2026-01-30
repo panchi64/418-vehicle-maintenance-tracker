@@ -7,13 +7,20 @@
 
 import SwiftUI
 import SwiftData
+import WidgetKit
+import UserNotifications
 
 struct VehiclePickerSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @Query private var vehicles: [Vehicle]
 
     @Binding var selectedVehicle: Vehicle?
     let onAddVehicle: () -> Void
+
+    // State for delete confirmation
+    @State private var vehicleToDelete: Vehicle?
+    @State private var showDeleteConfirmation = false
 
     var body: some View {
         NavigationStack {
@@ -26,6 +33,14 @@ struct VehiclePickerSheet: View {
                         VStack(spacing: 0) {
                             ForEach(vehicles) { vehicle in
                                 vehicleRow(vehicle)
+                                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                        Button(role: .destructive) {
+                                            vehicleToDelete = vehicle
+                                            showDeleteConfirmation = true
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                    }
 
                                 if vehicle.id != vehicles.last?.id {
                                     Rectangle()
@@ -89,6 +104,61 @@ struct VehiclePickerSheet: View {
         .presentationDetents([.medium])
         .presentationDragIndicator(.visible)
         .applyGlassBackground()
+        .alert("Delete Vehicle?", isPresented: $showDeleteConfirmation, presenting: vehicleToDelete) { vehicle in
+            Button("Cancel", role: .cancel) {
+                vehicleToDelete = nil
+            }
+            Button("Delete", role: .destructive) {
+                deleteVehicle(vehicle)
+            }
+        } message: { vehicle in
+            if vehicles.count == 1 {
+                Text("This is your only vehicle. Deleting it will remove all associated services and maintenance history. You'll need to add a new vehicle to continue using Checkpoint.")
+            } else {
+                Text("This will permanently delete \"\(vehicle.displayName)\" and all its services and maintenance history.")
+            }
+        }
+    }
+
+    // MARK: - Delete Vehicle
+
+    private func deleteVehicle(_ vehicle: Vehicle) {
+        let vehicleID = vehicle.id.uuidString
+        let isSelectedVehicle = selectedVehicle?.id == vehicle.id
+
+        // Cancel all notifications for this vehicle's services
+        if let services = vehicle.services {
+            for service in services {
+                if let notificationID = service.notificationID {
+                    UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [notificationID])
+                }
+            }
+        }
+
+        // Cancel mileage reminder notification
+        let mileageReminderID = "mileage-reminder-\(vehicleID)"
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [mileageReminderID])
+
+        // Cancel yearly roundup notification
+        let yearlyRoundupID = "yearly-roundup-\(vehicleID)"
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [yearlyRoundupID])
+
+        // Remove widget data for this vehicle
+        WidgetDataService.shared.removeWidgetData(for: vehicleID)
+
+        // Delete the vehicle from SwiftData (cascade deletes services, logs, snapshots)
+        modelContext.delete(vehicle)
+
+        // Clear selection if the deleted vehicle was selected
+        // ContentView's onChange(of: vehicles) will handle setting a new selection
+        if isSelectedVehicle {
+            selectedVehicle = nil
+        }
+
+        // Reload widget timelines
+        WidgetCenter.shared.reloadAllTimelines()
+
+        vehicleToDelete = nil
     }
 
     private func vehicleRow(_ vehicle: Vehicle) -> some View {

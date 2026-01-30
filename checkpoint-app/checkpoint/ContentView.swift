@@ -20,6 +20,11 @@ struct ContentView: View {
     @State private var showMileageUpdate = false
     @State private var showSettings = false
 
+    // MARK: - Vehicle Selection Persistence
+
+    private static let selectedVehicleIDKey = "appSelectedVehicleID"
+    private static let appGroupID = "group.com.418-studio.checkpoint.shared"
+
     private var currentVehicle: Vehicle? {
         appState.selectedVehicle ?? vehicles.first
     }
@@ -102,10 +107,8 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            // Sync selected vehicle on appear
-            if appState.selectedVehicle == nil {
-                appState.selectedVehicle = vehicles.first
-            }
+            // Restore persisted vehicle selection
+            restoreSelectedVehicle()
             // Seed sample data if needed
             seedSampleDataIfNeeded()
             // Update app icon based on service status
@@ -123,9 +126,11 @@ struct ContentView: View {
                 updateWidgetData()
             }
         }
-        .onChange(of: appState.selectedVehicle) { _, _ in
+        .onChange(of: appState.selectedVehicle) { _, newVehicle in
             updateAppIcon()
             updateWidgetData()
+            // Persist selected vehicle ID
+            persistSelectedVehicle(newVehicle)
         }
         .onChange(of: vehicles) { oldVehicles, newVehicles in
             // Update selection if current vehicle was deleted
@@ -223,6 +228,53 @@ struct ContentView: View {
                 appState.selectedTab = .costs
             }
         }
+    }
+
+    // MARK: - Vehicle Selection Persistence
+
+    /// Restore the previously selected vehicle from UserDefaults
+    private func restoreSelectedVehicle() {
+        // Try to load saved vehicle ID from standard UserDefaults
+        guard let savedIDString = UserDefaults.standard.string(forKey: Self.selectedVehicleIDKey),
+              let savedID = UUID(uuidString: savedIDString) else {
+            // No saved selection, fall back to first vehicle
+            if appState.selectedVehicle == nil {
+                appState.selectedVehicle = vehicles.first
+            }
+            return
+        }
+
+        // Find the matching vehicle
+        if let matchingVehicle = vehicles.first(where: { $0.id == savedID }) {
+            appState.selectedVehicle = matchingVehicle
+        } else {
+            // Saved vehicle no longer exists, fall back to first vehicle
+            appState.selectedVehicle = vehicles.first
+        }
+    }
+
+    /// Persist the selected vehicle ID to both standard and App Group UserDefaults
+    private func persistSelectedVehicle(_ vehicle: Vehicle?) {
+        let vehicleIDString = vehicle?.id.uuidString
+
+        // Save to standard UserDefaults (for app persistence)
+        if let idString = vehicleIDString {
+            UserDefaults.standard.set(idString, forKey: Self.selectedVehicleIDKey)
+        } else {
+            UserDefaults.standard.removeObject(forKey: Self.selectedVehicleIDKey)
+        }
+
+        // Save to shared App Group UserDefaults (for widget access)
+        if let sharedDefaults = UserDefaults(suiteName: Self.appGroupID) {
+            if let idString = vehicleIDString {
+                sharedDefaults.set(idString, forKey: Self.selectedVehicleIDKey)
+            } else {
+                sharedDefaults.removeObject(forKey: Self.selectedVehicleIDKey)
+            }
+        }
+
+        // Reload widget timelines so widgets can pick up the new selection
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     // MARK: - App Icon

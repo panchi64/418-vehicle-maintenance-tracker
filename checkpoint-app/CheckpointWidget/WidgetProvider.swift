@@ -143,19 +143,27 @@ struct WidgetProvider: AppIntentTimelineProvider {
 
         // Determine which vehicle to load:
         // 1. Use configured vehicle if available (explicit per-widget config)
-        // 2. Fall back to shared settings default vehicle
-        // 3. Fall back to first vehicle in list
-        // 4. Fall back to legacy widgetData key
+        // 2. Fall back to app's currently selected vehicle (syncs with main app)
+        // 3. Fall back to shared settings default vehicle (legacy)
+        // 4. Fall back to first vehicle in list
+        // 5. Fall back to legacy widgetData key
         let vehicleID: String?
         let usesExplicitConfig: Bool
 
         if let configuredVehicle = configuration.vehicle {
+            // User explicitly configured this widget with a specific vehicle
             vehicleID = configuredVehicle.id
             usesExplicitConfig = true
+        } else if let appSelectedID = sharedSettings.appSelectedVehicleID {
+            // Follow the app's currently selected vehicle
+            vehicleID = appSelectedID
+            usesExplicitConfig = false
         } else if let sharedVehicleID = sharedSettings.vehicleID {
+            // Legacy: widget-specific default vehicle
             vehicleID = sharedVehicleID
             usesExplicitConfig = false
         } else {
+            // Fall back to first vehicle
             vehicleID = loadFirstVehicleID(from: userDefaults)
             usesExplicitConfig = false
         }
