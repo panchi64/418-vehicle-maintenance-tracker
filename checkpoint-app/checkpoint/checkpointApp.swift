@@ -57,6 +57,9 @@ struct checkpointApp: App {
 
         // Set up notification delegate
         UNUserNotificationCenter.current().delegate = NotificationService.shared
+
+        // Initialize CloudSyncStatusService to start monitoring
+        _ = CloudSyncStatusService.shared
     }
 
     var body: some Scene {

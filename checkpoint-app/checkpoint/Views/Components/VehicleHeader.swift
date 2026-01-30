@@ -13,6 +13,10 @@ struct VehicleHeader: View {
     var onMileageTap: (() -> Void)? = nil
     var onSettingsTap: (() -> Void)? = nil
 
+    private var syncService: CloudSyncStatusService {
+        CloudSyncStatusService.shared
+    }
+
     var body: some View {
         HStack(spacing: Spacing.md) {
             VStack(alignment: .leading, spacing: 0) {
@@ -68,6 +72,20 @@ struct VehicleHeader: View {
                     }
                     .padding(.top, 4)
                 }
+            }
+
+            // Sync error indicator (only shown on error)
+            if let error = syncService.currentError {
+                Button {
+                    onSettingsTap?()
+                } label: {
+                    Image(systemName: error.systemImage)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(error.iconColor)
+                        .frame(width: 32, height: 32)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
             }
 
             // Settings button

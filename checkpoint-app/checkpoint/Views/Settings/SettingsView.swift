@@ -20,6 +20,9 @@ struct SettingsView: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: Spacing.lg) {
+                        // iCloud Sync Section
+                        iCloudSyncSection
+
                         // App Icon Section
                         appIconSection
 
@@ -44,6 +47,83 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+
+    // MARK: - iCloud Sync Section
+
+    private var iCloudSyncSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            Text("ICLOUD SYNC")
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(2)
+
+            VStack(spacing: 0) {
+                iCloudSyncStatusRow
+            }
+            .background(Theme.surfaceInstrument)
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+            )
+        }
+    }
+
+    private var iCloudSyncStatusRow: some View {
+        let syncService = CloudSyncStatusService.shared
+
+        return HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: Spacing.sm) {
+                    // Status icon
+                    switch syncService.status {
+                    case .idle:
+                        Image(systemName: "checkmark.icloud")
+                            .foregroundStyle(Theme.statusGood)
+                    case .syncing:
+                        Image(systemName: "arrow.triangle.2.circlepath.icloud")
+                            .foregroundStyle(Theme.accent)
+                            .symbolEffect(.rotate, options: .repeating)
+                    case .error(let error):
+                        Image(systemName: error.systemImage)
+                            .foregroundStyle(error.iconColor)
+                    }
+
+                    Text(syncService.statusDisplayText)
+                        .font(.brutalistBody)
+                        .foregroundStyle(Theme.textPrimary)
+                }
+
+                // Last sync time
+                if let lastSync = syncService.lastSyncDate {
+                    Text("Last synced \(lastSync.formatted(.relative(presentation: .named)))")
+                        .font(.brutalistSecondary)
+                        .foregroundStyle(Theme.textTertiary)
+                }
+            }
+
+            Spacer()
+
+            // Action button for errors
+            if let error = syncService.currentError, let actionLabel = error.actionLabel {
+                Button {
+                    switch error {
+                    case .notSignedIn:
+                        syncService.openSettings()
+                    case .quotaExceeded:
+                        syncService.openStorageSettings()
+                    default:
+                        break
+                    }
+                } label: {
+                    Text(actionLabel)
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.accent)
+                        .tracking(1)
+                }
+            }
+        }
+        .padding(Spacing.md)
     }
 
     // MARK: - App Icon Section

@@ -17,6 +17,10 @@ struct HomeTab: View {
     // Recall alert state
     @State private var recalls: [RecallInfo] = []
 
+    private var syncService: CloudSyncStatusService {
+        CloudSyncStatusService.shared
+    }
+
     private var vehicle: Vehicle? {
         appState.selectedVehicle
     }
@@ -212,8 +216,13 @@ struct HomeTab: View {
 
                 // Empty states
                 if appState.selectedVehicle == nil {
-                    emptyVehicleState
-                        .revealAnimation(delay: 0.2)
+                    if case .syncing = syncService.status {
+                        syncingDataState
+                            .revealAnimation(delay: 0.2)
+                    } else {
+                        emptyVehicleState
+                            .revealAnimation(delay: 0.2)
+                    }
                 } else if vehicleServices.isEmpty && vehicle != nil {
                     noServicesState
                         .revealAnimation(delay: 0.2)
@@ -265,6 +274,38 @@ struct HomeTab: View {
     }
 
     // MARK: - Empty States
+
+    private var syncingDataState: some View {
+        VStack(spacing: Spacing.lg) {
+            ZStack {
+                Rectangle()
+                    .fill(Theme.accent.opacity(0.1))
+                    .frame(width: 100, height: 100)
+
+                Image(systemName: "icloud.and.arrow.down")
+                    .font(.system(size: 40, weight: .light))
+                    .foregroundStyle(Theme.accent)
+                    .symbolEffect(.pulse, options: .repeating)
+            }
+
+            VStack(spacing: Spacing.xs) {
+                Text("Syncing Your Data")
+                    .font(.brutalistHeading)
+                    .foregroundStyle(Theme.textPrimary)
+
+                Text("Restoring your vehicles and maintenance\nhistory from iCloud")
+                    .font(.brutalistSecondary)
+                    .foregroundStyle(Theme.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+            }
+
+            ProgressView()
+                .tint(Theme.accent)
+                .padding(.top, Spacing.sm)
+        }
+        .padding(Spacing.xxl)
+    }
 
     private var emptyVehicleState: some View {
         VStack(spacing: Spacing.lg) {
