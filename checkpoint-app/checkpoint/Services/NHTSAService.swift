@@ -6,7 +6,7 @@
 //  Uses free, no-auth NHTSA APIs (vPIC for VIN, recalls API for safety recalls)
 //
 
-import Foundation
+@preconcurrency import Foundation
 
 // MARK: - Error Types
 
@@ -99,6 +99,14 @@ private nonisolated struct RecallResultJSON: Decodable, Sendable {
     let parkOutSide: Bool?
 }
 
+// MARK: - JSON Decoding Helper
+
+/// Nonisolated JSON decoding to avoid Swift 6 actor isolation warnings
+/// Must be at file scope (not inside actor) to properly break isolation
+private nonisolated func decodeNHTSAJSON<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
+    try JSONDecoder().decode(type, from: data)
+}
+
 // MARK: - Service
 
 actor NHTSAService {
@@ -160,7 +168,7 @@ actor NHTSAService {
 
         let decoded: VINDecodeResponse
         do {
-            decoded = try JSONDecoder().decode(VINDecodeResponse.self, from: data)
+            decoded = try decodeNHTSAJSON(VINDecodeResponse.self, from: data)
         } catch {
             throw NHTSAError.decodingFailed
         }
@@ -230,7 +238,7 @@ actor NHTSAService {
 
         let decoded: RecallsResponse
         do {
-            decoded = try JSONDecoder().decode(RecallsResponse.self, from: data)
+            decoded = try decodeNHTSAJSON(RecallsResponse.self, from: data)
         } catch {
             throw NHTSAError.decodingFailed
         }

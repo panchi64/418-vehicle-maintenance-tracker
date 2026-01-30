@@ -14,6 +14,9 @@ struct checkpointApp: App {
     // App Group identifier for sharing data with widget
     private static let appGroupID = "group.com.418-studio.checkpoint.shared"
 
+    // CloudKit container identifier for iCloud sync
+    private static let cloudKitContainerID = "iCloud.com.418-studio.checkpoint"
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Vehicle.self,
@@ -24,26 +27,49 @@ struct checkpointApp: App {
             ServiceAttachment.self,
         ])
 
-        // Use App Group container for shared access with widget, with CloudKit sync
-        let modelConfiguration: ModelConfiguration
-        if let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) {
-            let storeURL = containerURL.appendingPathComponent("checkpoint.store")
-            modelConfiguration = ModelConfiguration(
-                schema: schema,
-                url: storeURL,
-                cloudKitDatabase: .private("iCloud.com.418-studio.checkpoint")
-            )
+        // Check if user has iCloud sync enabled
+        // Note: We read directly from UserDefaults here since SyncSettings
+        // may not be initialized yet during static property initialization
+        let syncEnabled = UserDefaults.standard.object(forKey: "iCloudSyncEnabled") as? Bool ?? true
+
+        // Use App Group container for shared access with widget
+        let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)
+        let storeURL = containerURL?.appendingPathComponent("checkpoint.store")
+
+        if syncEnabled {
+            // Try CloudKit-enabled configuration first
+            do {
+                let cloudConfig: ModelConfiguration
+                if let storeURL = storeURL {
+                    cloudConfig = ModelConfiguration(
+                        schema: schema,
+                        url: storeURL,
+                        cloudKitDatabase: .private(cloudKitContainerID)
+                    )
+                } else {
+                    cloudConfig = ModelConfiguration(
+                        schema: schema,
+                        cloudKitDatabase: .private(cloudKitContainerID)
+                    )
+                }
+                return try ModelContainer(for: schema, configurations: [cloudConfig])
+            } catch {
+                // CloudKit failed - fall back to local storage
+                print("CloudKit initialization failed: \(error). Falling back to local storage.")
+            }
+        }
+
+        // Local-only configuration (either by user preference or CloudKit failure)
+        let localConfig: ModelConfiguration
+        if let storeURL = storeURL {
+            localConfig = ModelConfiguration(schema: schema, url: storeURL)
         } else {
-            // Fallback to default location with CloudKit if app group is not available
-            modelConfiguration = ModelConfiguration(
-                schema: schema,
-                isStoredInMemoryOnly: false,
-                cloudKitDatabase: .private("iCloud.com.418-studio.checkpoint")
-            )
+            // Fallback to default location
+            localConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
         }
 
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            return try ModelContainer(for: schema, configurations: [localConfig])
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }
@@ -54,6 +80,7 @@ struct checkpointApp: App {
         DistanceSettings.registerDefaults()
         AppIconSettings.registerDefaults()
         WidgetSettingsManager.registerDefaults()
+        SyncSettings.registerDefaults()
 
         // Set up notification delegate
         UNUserNotificationCenter.current().delegate = NotificationService.shared
@@ -72,6 +99,9 @@ struct checkpointApp: App {
                     if !NotificationService.shared.isAuthorized {
                         _ = await NotificationService.shared.requestAuthorization()
                     }
+
+                    // Check iCloud account status
+                    await SyncStatusService.shared.checkAccountStatus()
                 }
         }
         .modelContainer(sharedModelContainer)
