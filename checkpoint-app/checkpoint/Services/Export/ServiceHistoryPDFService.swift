@@ -9,6 +9,13 @@
 import UIKit
 import PDFKit
 
+/// Export options for PDF generation
+struct ExportOptions: Sendable {
+    var includeAttachments: Bool = false
+    var includeTotal: Bool = true
+    var includeCostPerMile: Bool = false
+}
+
 @MainActor
 final class ServiceHistoryPDFService {
     static let shared = ServiceHistoryPDFService()
@@ -45,12 +52,16 @@ final class ServiceHistoryPDFService {
         static let cost = UIFont.monospacedSystemFont(ofSize: 10, weight: .medium)
     }
 
-    // MARK: - Public API
-
-    struct ExportOptions {
-        var includeAttachments: Bool = false
-        var includeTotal: Bool = true
-        var includeCostPerMile: Bool = false
+    /// Generates a PDF document with the vehicle's service history using default options
+    /// - Parameters:
+    ///   - vehicle: The vehicle to generate the report for
+    ///   - serviceLogs: The service logs to include (should be pre-sorted)
+    /// - Returns: URL to the generated PDF file, or nil if generation fails
+    func generatePDF(
+        for vehicle: Vehicle,
+        serviceLogs: [ServiceLog]
+    ) -> URL? {
+        generatePDF(for: vehicle, serviceLogs: serviceLogs, options: ExportOptions())
     }
 
     /// Generates a PDF document with the vehicle's service history
@@ -62,7 +73,7 @@ final class ServiceHistoryPDFService {
     func generatePDF(
         for vehicle: Vehicle,
         serviceLogs: [ServiceLog],
-        options: ExportOptions = ExportOptions()
+        options: ExportOptions
     ) -> URL? {
         let sortedLogs = serviceLogs.sorted { $0.performedDate > $1.performedDate }
 

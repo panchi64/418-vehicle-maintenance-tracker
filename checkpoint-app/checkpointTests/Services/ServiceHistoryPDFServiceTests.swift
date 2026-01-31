@@ -209,7 +209,7 @@ final class ServiceHistoryPDFServiceTests: XCTestCase {
         let log3 = createTestServiceLog(service: service, vehicle: vehicle, cost: 25.25)
         // Total should be 175.75
 
-        let options = ServiceHistoryPDFService.ExportOptions(includeTotal: true)
+        let options = ExportOptions(includeTotal: true)
 
         // When
         let url = sut.generatePDF(for: vehicle, serviceLogs: [log1, log2, log3], options: options)
@@ -229,7 +229,7 @@ final class ServiceHistoryPDFServiceTests: XCTestCase {
         let service = createTestService(vehicle: vehicle)
         let log = createTestServiceLog(service: service, vehicle: vehicle, cost: 100.00)
 
-        let options = ServiceHistoryPDFService.ExportOptions(includeTotal: false)
+        let options = ExportOptions(includeTotal: false)
 
         // When
         let url = sut.generatePDF(for: vehicle, serviceLogs: [log], options: options)

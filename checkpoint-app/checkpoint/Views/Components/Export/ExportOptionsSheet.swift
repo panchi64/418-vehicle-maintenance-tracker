@@ -112,7 +112,7 @@ struct ExportOptionsSheet: View {
         exportError = nil
 
         // Generate PDF on main thread (service is @MainActor)
-        let options = ServiceHistoryPDFService.ExportOptions(
+        let options = ExportOptions(
             includeAttachments: false,
             includeTotal: includeTotal,
             includeCostPerMile: false

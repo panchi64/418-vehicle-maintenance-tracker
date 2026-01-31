@@ -14,13 +14,13 @@ struct ServiceClusteringService {
     /// - Parameters:
     ///   - vehicle: The vehicle whose services to cluster
     ///   - services: All services for the vehicle
-    ///   - settings: Clustering settings (defaults to shared singleton)
+    ///   - settings: Clustering settings
     /// - Returns: Array of clusters with 2+ services each
     @MainActor
     static func detectClusters(
         for vehicle: Vehicle,
         services: [Service],
-        settings: ClusteringSettings = .shared
+        settings: ClusteringSettings
     ) -> [ServiceCluster] {
         // Bail early if clustering disabled
         guard settings.isEnabled else { return [] }
@@ -137,8 +137,28 @@ struct ServiceClusteringService {
     static func primaryCluster(
         for vehicle: Vehicle,
         services: [Service],
-        settings: ClusteringSettings = .shared
+        settings: ClusteringSettings
     ) -> ServiceCluster? {
         detectClusters(for: vehicle, services: services, settings: settings).first
+    }
+
+    // MARK: - Convenience Overloads (use shared settings)
+
+    /// Detect clusters using shared settings
+    @MainActor
+    static func detectClusters(
+        for vehicle: Vehicle,
+        services: [Service]
+    ) -> [ServiceCluster] {
+        detectClusters(for: vehicle, services: services, settings: .shared)
+    }
+
+    /// Get primary cluster using shared settings
+    @MainActor
+    static func primaryCluster(
+        for vehicle: Vehicle,
+        services: [Service]
+    ) -> ServiceCluster? {
+        primaryCluster(for: vehicle, services: services, settings: .shared)
     }
 }

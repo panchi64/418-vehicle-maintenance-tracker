@@ -92,7 +92,7 @@ final class CloudSyncStatusService {
     private(set) var iCloudAvailable: Bool = false
 
     private let container = CKContainer(identifier: "iCloud.com.418-studio.checkpoint")
-    private nonisolated(unsafe) var networkMonitor: NWPathMonitor?
+    private var networkMonitor: NWPathMonitor?
     private var cancellables = Set<AnyCancellable>()
     private var isNetworkAvailable = true
 
@@ -231,8 +231,9 @@ final class CloudSyncStatusService {
     private func setupNetworkMonitor() {
         networkMonitor = NWPathMonitor()
         networkMonitor?.pathUpdateHandler = { [weak self] path in
+            guard let self else { return }
             Task { @MainActor in
-                self?.handleNetworkChange(path)
+                self.handleNetworkChange(path)
             }
         }
         networkMonitor?.start(queue: DispatchQueue.global(qos: .utility))
@@ -268,7 +269,4 @@ final class CloudSyncStatusService {
         .store(in: &cancellables)
     }
 
-    nonisolated deinit {
-        networkMonitor?.cancel()
-    }
 }
