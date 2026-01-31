@@ -220,6 +220,7 @@ Best practices:
 - Widget requires App Group capability on both main app and widget targets
 - Notifications require authorization - check `isAuthorized` before scheduling
 - Service due status considers both date AND mileage thresholds
+- App is portrait-only (configured via `UISupportedInterfaceOrientations` in Info.plist). The `UIRequiresFullScreen` key was removed as it's deprecated in iOS 26 - orientation restrictions via `UISupportedInterfaceOrientations` are sufficient.
 
 ## Xcode Setup Required
 
