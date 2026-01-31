@@ -33,7 +33,7 @@
 | Feature                | Priority | Status | Notes                                                |
 | ---------------------- | -------- | ------ | ---------------------------------------------------- |
 | Manual entry           | High     | ✅     | Basic form: service type, date, mileage, cost, notes |
-| Receipt/invoice capture| High     | ⏳     | Photo capture and text extraction for reference      |
+| Receipt/invoice capture| High     | ✅     | Photo capture and text extraction for reference      |
 | Service type presets   | High     | ✅     | Oil change, tire rotation, brakes, etc.              |
 | Custom service types   | Medium   | ✅     | User-defined categories                              |
 | Attachments            | Medium   | ✅     | Photos, PDFs, receipts                               |

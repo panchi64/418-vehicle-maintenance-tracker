@@ -125,7 +125,8 @@ struct MarkServiceDoneSheet: View {
                 data: attachmentData.data,
                 thumbnailData: thumbnailData,
                 fileName: attachmentData.fileName,
-                mimeType: attachmentData.mimeType
+                mimeType: attachmentData.mimeType,
+                extractedText: attachmentData.extractedText
             )
             modelContext.insert(attachment)
         }

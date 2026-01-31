@@ -81,14 +81,6 @@ struct AddServiceView: View {
                         } else {
                             scheduleModeFields
                         }
-
-                        // Save button
-                        Button("Save") {
-                            saveService()
-                        }
-                        .buttonStyle(.primary)
-                        .disabled(!isFormValid)
-                        .padding(.top, Spacing.md)
                     }
                     .padding(Spacing.screenHorizontal)
                     .padding(.bottom, Spacing.xxl)
@@ -102,6 +94,11 @@ struct AddServiceView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                         .foregroundStyle(Theme.accent)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") { saveService() }
+                        .font(.brutalistBody)
+                        .disabled(!isFormValid)
                 }
             }
             .onChange(of: selectedPreset) { _, newPreset in
@@ -306,7 +303,8 @@ struct AddServiceView: View {
                 data: attachmentData.data,
                 thumbnailData: thumbnailData,
                 fileName: attachmentData.fileName,
-                mimeType: attachmentData.mimeType
+                mimeType: attachmentData.mimeType,
+                extractedText: attachmentData.extractedText
             )
             modelContext.insert(attachment)
         }

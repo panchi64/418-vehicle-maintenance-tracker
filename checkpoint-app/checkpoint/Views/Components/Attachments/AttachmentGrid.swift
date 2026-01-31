@@ -12,6 +12,7 @@ struct AttachmentGrid: View {
     let attachments: [ServiceAttachment]
     @State private var selectedAttachment: ServiceAttachment?
     @State private var previewURL: URL?
+    @State private var selectedForOCRView: ServiceAttachment?
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
@@ -31,9 +32,23 @@ struct AttachmentGrid: View {
             }
         }
         .quickLookPreview($previewURL)
+        .sheet(item: $selectedForOCRView) { attachment in
+            if let text = attachment.extractedText {
+                ReceiptTextView(
+                    text: text,
+                    image: attachment.data.flatMap { UIImage(data: $0) }
+                )
+            }
+        }
     }
 
     private func openAttachment(_ attachment: ServiceAttachment) {
+        // If attachment has extracted text, show the OCR view
+        if attachment.extractedText != nil {
+            selectedForOCRView = attachment
+            return
+        }
+
         guard let data = attachment.data else { return }
 
         // Create temporary file for QuickLook

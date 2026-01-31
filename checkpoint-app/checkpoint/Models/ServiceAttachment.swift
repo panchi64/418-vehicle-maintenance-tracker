@@ -25,6 +25,9 @@ final class ServiceAttachment: Identifiable {
     var mimeType: String = "image/jpeg"  // "image/jpeg", "image/png", "application/pdf"
     var createdAt: Date = Date.now
 
+    /// OCR-extracted text from receipt/invoice (nil if not scanned)
+    var extractedText: String?
+
     /// Computed property to check if this is an image
     var isImage: Bool {
         mimeType.hasPrefix("image/")
@@ -134,7 +137,8 @@ final class ServiceAttachment: Identifiable {
         thumbnailData: Data? = nil,
         fileName: String,
         mimeType: String,
-        createdAt: Date = Date.now
+        createdAt: Date = Date.now,
+        extractedText: String? = nil
     ) {
         self.serviceLog = serviceLog
         self.data = data
@@ -142,6 +146,7 @@ final class ServiceAttachment: Identifiable {
         self.fileName = fileName
         self.mimeType = mimeType
         self.createdAt = createdAt
+        self.extractedText = extractedText
     }
 
     /// Create from UIImage

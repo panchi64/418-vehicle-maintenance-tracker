@@ -83,7 +83,23 @@ struct ServicesTab: View {
             return vehicleServiceLogs
         }
         return vehicleServiceLogs.filter { log in
-            log.service?.name.localizedCaseInsensitiveContains(searchText) ?? false
+            // Search service name
+            if log.service?.name.localizedCaseInsensitiveContains(searchText) ?? false {
+                return true
+            }
+            // Search notes
+            if log.notes?.localizedCaseInsensitiveContains(searchText) ?? false {
+                return true
+            }
+            // Search extracted text from attachments (receipt OCR)
+            if let attachments = log.attachments {
+                for attachment in attachments {
+                    if attachment.extractedText?.localizedCaseInsensitiveContains(searchText) ?? false {
+                        return true
+                    }
+                }
+            }
+            return false
         }
     }
 

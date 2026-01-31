@@ -14,6 +14,8 @@ struct AttachmentPicker: View {
 
     @State private var showPhotoPicker = false
     @State private var showDocumentPicker = false
+    @State private var showReceiptScanner = false
+    @State private var isProcessingOCR = false
     @State private var selectedPhotoItem: PhotosPickerItem?
 
     /// Temporary data structure for new attachments before saving
@@ -23,6 +25,7 @@ struct AttachmentPicker: View {
         let fileName: String
         let mimeType: String
         var thumbnailImage: UIImage?
+        var extractedText: String?
     }
 
     var body: some View {
@@ -75,6 +78,43 @@ struct AttachmentPicker: View {
                     DocumentPicker(onDocumentPicked: { url in
                         loadDocument(from: url)
                     })
+                }
+
+                Button {
+                    showReceiptScanner = true
+                } label: {
+                    HStack(spacing: 6) {
+                        if isProcessingOCR {
+                            ProgressView()
+                                .tint(Theme.textPrimary)
+                                .scaleEffect(0.8)
+                        } else {
+                            Image(systemName: "receipt")
+                                .font(.system(size: 14, weight: .medium))
+                        }
+                        Text("RECEIPT")
+                            .font(.brutalistLabel)
+                            .tracking(1)
+                    }
+                    .foregroundStyle(Theme.textPrimary)
+                    .padding(.horizontal, Spacing.md)
+                    .padding(.vertical, Spacing.sm)
+                    .background(Theme.surfaceInstrument)
+                    .overlay(
+                        Rectangle()
+                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+                    )
+                }
+                .disabled(isProcessingOCR)
+                .sheet(isPresented: $showReceiptScanner) {
+                    ReceiptScannerView(
+                        onImagesScanned: { images in
+                            Task {
+                                await processScannedImages(images)
+                            }
+                        },
+                        onCancel: {}
+                    )
                 }
 
                 Spacer()
@@ -150,6 +190,48 @@ struct AttachmentPicker: View {
             attachments.append(attachment)
         } catch {
             print("Error loading document: \(error)")
+        }
+    }
+
+    // MARK: - Receipt Scanning
+
+    @MainActor
+    private func processScannedImages(_ images: [UIImage]) async {
+        isProcessingOCR = true
+        defer { isProcessingOCR = false }
+
+        for (index, image) in images.enumerated() {
+            // Compress the image
+            guard let compressedData = ServiceAttachment.compressedImageData(from: image) else {
+                continue
+            }
+
+            // Extract text via OCR
+            var extractedText: String? = nil
+            do {
+                let result = try await ReceiptOCRService.shared.extractText(from: image)
+                extractedText = result.text
+            } catch {
+                print("OCR failed for page \(index + 1): \(error)")
+                // Continue without extracted text - still save the image
+            }
+
+            // Generate thumbnail
+            let thumbnailImage: UIImage?
+            if let thumbData = ServiceAttachment.generateThumbnailData(from: compressedData, mimeType: "image/jpeg") {
+                thumbnailImage = UIImage(data: thumbData)
+            } else {
+                thumbnailImage = image
+            }
+
+            let attachment = AttachmentData(
+                data: compressedData,
+                fileName: "receipt_\(Date.now.timeIntervalSince1970)_\(index + 1).jpg",
+                mimeType: "image/jpeg",
+                thumbnailImage: thumbnailImage,
+                extractedText: extractedText
+            )
+            attachments.append(attachment)
         }
     }
 }
