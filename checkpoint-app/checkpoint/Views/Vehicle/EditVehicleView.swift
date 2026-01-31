@@ -285,14 +285,6 @@ struct EditVehicleView: View {
                             )
                         }
 
-                        // Save button
-                        Button("Save Changes") {
-                            saveChanges()
-                        }
-                        .buttonStyle(.primary)
-                        .disabled(!isFormValid)
-                        .padding(.top, Spacing.md)
-
                         // Delete button
                         Button {
                             showDeleteConfirmation = true
@@ -325,6 +317,11 @@ struct EditVehicleView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                         .foregroundStyle(Theme.accent)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") { saveChanges() }
+                        .foregroundStyle(Theme.accent)
+                        .disabled(!isFormValid)
                 }
             }
             .confirmationDialog(
