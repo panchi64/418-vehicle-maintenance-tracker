@@ -16,6 +16,9 @@ struct ServicesTab: View {
     @State private var searchText = ""
     @State private var statusFilter: StatusFilter = .all
     @State private var viewMode: ViewMode = .list
+    @State private var showExportOptions = false
+    @State private var exportPDFURL: URL?
+    @State private var isExporting = false
 
     enum ViewMode: String, CaseIterable {
         case list = "List"
@@ -165,7 +168,20 @@ struct ServicesTab: View {
                 // Service History section (list mode only)
                 if viewMode == .list && !filteredLogs.isEmpty {
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        InstrumentSectionHeader(title: "Service History")
+                        InstrumentSectionHeader(title: "Service History") {
+                            Button {
+                                showExportOptions = true
+                            } label: {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "square.and.arrow.up")
+                                        .font(.system(size: 11, weight: .medium))
+                                    Text("EXPORT")
+                                        .font(.brutalistLabel)
+                                        .tracking(1)
+                                }
+                                .foregroundStyle(Theme.accent)
+                            }
+                        }
 
                         VStack(spacing: 0) {
                             ForEach(Array(filteredLogs.enumerated()), id: \.element.id) { index, log in
@@ -206,6 +222,20 @@ struct ServicesTab: View {
             .padding(.horizontal, Spacing.screenHorizontal)
             .padding(.top, Spacing.md)
             .padding(.bottom, Spacing.xxl + 56)
+        }
+        .sheet(isPresented: $showExportOptions) {
+            ExportOptionsSheet(
+                vehicle: vehicle!,
+                serviceLogs: vehicleServiceLogs,
+                isExporting: $isExporting
+            ) { url in
+                exportPDFURL = url
+            }
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.visible)
+        }
+        .sheet(item: $exportPDFURL) { url in
+            ShareSheet(items: [url])
         }
     }
 

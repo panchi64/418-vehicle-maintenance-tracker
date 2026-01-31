@@ -69,9 +69,9 @@ Checkpoint aims to be the **definitive iOS vehicle maintenance companion** — a
 |---------|----------|--------|
 | Apple Watch Complication | High | ⏳ In Progress |
 | Siri Integration | Medium | ⏳ Planned |
-| Receipt/Invoice OCR (Basic) | High | ⏳ Planned |
+| Receipt/Invoice Capture | High | ⏳ Planned |
 | Pre-loaded Factory Schedules | High | ⏳ Planned |
-| Service Clustering | High | ⏳ Planned |
+| Service Clustering | High | ✅ Complete |
 
 ### Reports & Export
 
@@ -79,9 +79,8 @@ Core reporting functionality for vehicle documentation and data portability.
 
 | Feature | Priority | Description |
 |---------|----------|-------------|
-| **Service History PDF** | High | Professional document for resale, warranty claims |
+| **Service History PDF** | High | ✅ Professional document for resale, warranty claims; shareable via iOS share sheet |
 | **Data Backup** | High | iCloud sync for data safety |
-| **Shareable Reports** | Medium | Send to mechanic, buyer, etc. |
 | **Maintenance Cost Reports** | Medium | Graphs and breakdowns |
 
 > See [FEATURES.md → Reports & Export](./FEATURES.md#7-reports--export) for PDF contents, use cases, and format details.
@@ -197,16 +196,17 @@ These features require ongoing infrastructure and justify a subscription model (
 
 #### AI-Powered OCR
 
-**Basic OCR (Free):**
+**Basic OCR (Free, v1.0):**
 - On-device Vision framework
-- Text extraction with manual field selection
+- Text extraction for viewing receipts
+- Receipt image storage as attachments
 - Privacy-preserving, no cloud dependency
 
-**AI-Powered OCR (Subscription):**
-- Server-side smart extraction
-- Automatic field detection
-- High accuracy parsing of mechanic invoices
+**AI-Powered OCR (Subscription, v1.5+):**
+- Apple Intelligence smart extraction
+- Auto-populate fields (date, cost, services)
 - Contextual prompts (service invoice vs parts receipt)
+- Confidence indicators with correction flow
 
 ---
 

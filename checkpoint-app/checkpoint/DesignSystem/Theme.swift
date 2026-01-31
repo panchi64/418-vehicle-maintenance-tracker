@@ -384,16 +384,35 @@ struct FramedContainer<Content: View>: View {
 
 // MARK: - Brutalist Section Header
 
-struct InstrumentSectionHeader: View {
+struct InstrumentSectionHeader<TrailingContent: View>: View {
     let title: String
+    let trailingContent: TrailingContent?
+
+    init(title: String) where TrailingContent == EmptyView {
+        self.title = title
+        self.trailingContent = nil
+    }
+
+    init(title: String, @ViewBuilder trailing: () -> TrailingContent) {
+        self.title = title
+        self.trailingContent = trailing()
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(title)
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .textCase(.uppercase)
-                .tracking(2)
+            HStack {
+                Text(title)
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.textTertiary)
+                    .textCase(.uppercase)
+                    .tracking(2)
+
+                Spacer()
+
+                if let trailingContent {
+                    trailingContent
+                }
+            }
 
             Rectangle()
                 .fill(Theme.gridLine)

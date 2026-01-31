@@ -6,6 +6,8 @@ This directory contains all service classes that handle business logic, external
 
 ```
 Services/
+├── Export/              # Document export services
+│   └── ServiceHistoryPDFService.swift  # PDF generation for service history
 ├── Notifications/       # Local notification management (modular architecture)
 │   ├── NotificationService.swift           # Core: authorization, categories, singleton
 │   ├── NotificationService+Delegate.swift  # UNUserNotificationCenterDelegate
@@ -32,6 +34,37 @@ Services/
 ```
 
 ## Service Inventory
+
+### Export/ServiceHistoryPDFService
+Generates professional PDF documents with vehicle service history.
+
+**Key Features:**
+- Brutalist aesthetic: monospace fonts, uppercase labels, 2px borders
+- Amber accent (#E89B3C) for headers and branding
+- US Letter format (612x792 points)
+- Multi-page support with pagination
+
+**Usage:**
+```swift
+let options = ServiceHistoryPDFService.ExportOptions(
+    includeAttachments: false,
+    includeTotal: true
+)
+if let url = ServiceHistoryPDFService.shared.generatePDF(
+    for: vehicle,
+    serviceLogs: logs,
+    options: options
+) {
+    // Share via UIActivityViewController
+}
+```
+
+**PDF Contents:**
+- App branding header
+- Vehicle info (name, VIN, mileage, year, make/model)
+- Chronological service history (date, mileage, cost, notes)
+- Total spent (optional)
+- Footer with generation timestamp and page numbers
 
 ### Notifications/ (Modular Architecture)
 Manages local notifications with focused, single-responsibility schedulers.
