@@ -9,7 +9,8 @@ Views/
 ├── Tabs/                # Main tab views
 │   ├── HomeTab.swift
 │   ├── ServicesTab.swift
-│   └── CostsTab.swift
+│   ├── CostsTab.swift
+│   └── CostsTab+Analytics.swift  # Analytics computed properties extension
 ├── Vehicle/             # Vehicle CRUD views
 │   ├── AddVehicleView.swift
 │   ├── EditVehicleView.swift
@@ -45,30 +46,39 @@ Views/
 |-----------|---------|
 | `ConfidenceIndicator.swift` | OCR confidence level display |
 | `OCRConfirmationView.swift` | Confirm/edit OCR results |
+| `OCRProcessingIndicator.swift` | Processing state during OCR operations |
 | `OdometerCameraView.swift` | Camera viewfinder for odometer |
 | `OdometerCaptureView.swift` | Full capture flow with guidance |
 
 ### Components/Cards/
 | Component | Purpose |
 |-----------|---------|
+| `CategoryBreakdownCard.swift` | Cost breakdown by category |
+| `CostSummaryCard.swift` | Total spent hero card |
+| `MonthlyBreakdownCard.swift` | Monthly cost summary with bars |
 | `NextUpCard.swift` | Hero card for most urgent service |
 | `QuickMileageUpdateCard.swift` | Inline mileage entry card |
 | `QuickSpecsCard.swift` | Vehicle specs display |
 | `QuickStatsBar.swift` | Summary statistics bar |
 | `RecallAlertCard.swift` | NHTSA recall warning |
+| `StatsCard.swift` | Compact stat display (label + value) |
 | `YearlyCostRoundupCard.swift` | Annual cost summary |
 
 ### Components/Inputs/
 | Component | Purpose |
 |-----------|---------|
+| `ErrorMessageRow.swift` | Inline error message with dismiss button |
 | `InstrumentSegmentedControl.swift` | Styled segmented control |
 | `InstrumentTextField.swift` | Styled text field |
+| `MarbetePicker.swift` | Month/year picker for PR registration |
 | `MileageInputField.swift` | Formatted mileage input with commas |
 | `ServiceTypePicker.swift` | Service preset selector |
 
 ### Components/Lists/
 | Component | Purpose |
 |-----------|---------|
+| `ExpenseRow.swift` | Service log expense item display |
+| `ListDivider.swift` | Consistent list divider with configurable padding |
 | `MaintenanceTimeline.swift` | Chronological service history |
 | `RecentActivityFeed.swift` | Recent actions list |
 | `ServiceRow.swift` | Service list item with status |
@@ -77,6 +87,7 @@ Views/
 | Component | Purpose |
 |-----------|---------|
 | `BrutalistTabBar.swift` | Custom tab bar |
+| `EmptyStateView.swift` | Standardized empty state with icon, title, message |
 | `FloatingActionButton.swift` | FAB for quick add |
 | `StatusDot.swift` | Colored status indicator |
 | `VehicleHeader.swift` | Vehicle info header |

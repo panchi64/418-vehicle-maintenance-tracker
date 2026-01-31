@@ -58,10 +58,10 @@ xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPh
 - **MileageSnapshot:** driving pattern analysis for mileage estimation
 
 ### Key Services (in `Services/`)
-- **Notifications/NotificationService:** local notifications at 9 AM on due dates, actions for "Mark Done" / "Remind Tomorrow"
+- **Notifications/:** modular architecture with focused schedulers (Service, Mileage, Marbete, YearlyRoundup); core `NotificationService` uses `@Observable @MainActor`
 - **OCR/OdometerOCRService, VINOCRService:** Vision framework OCR for camera capture
 - **Utilities/NHTSAService:** VIN decoding and recall alerts via NHTSA API
-- **Widget/WidgetDataService:** App Groups data sharing with widget
+- **Widget/WidgetDataService:** App Groups data sharing with widget (`@MainActor`)
 - **Sync/CloudSyncStatusService, SyncStatusService:** iCloud sync status monitoring
 
 ### Widget Extension

@@ -6,8 +6,15 @@ This directory contains all service classes that handle business logic, external
 
 ```
 Services/
-├── Notifications/       # Local notification management
-│   └── NotificationService.swift
+├── Notifications/       # Local notification management (modular architecture)
+│   ├── NotificationService.swift           # Core: authorization, categories, singleton
+│   ├── NotificationService+Delegate.swift  # UNUserNotificationCenterDelegate
+│   ├── NotificationService+Scheduling.swift # Backwards-compatible delegation methods
+│   ├── ServiceNotificationScheduler.swift  # Service due notifications
+│   ├── MileageReminderScheduler.swift      # Mileage reminder notifications
+│   ├── MarbeteNotificationScheduler.swift  # Marbete expiration notifications
+│   ├── YearlyRoundupScheduler.swift        # Annual cost roundup notifications
+│   └── NotificationNames.swift             # Notification.Name extensions
 ├── OCR/                 # Vision framework services
 │   ├── OdometerImagePreprocessor.swift
 │   ├── OdometerOCRService.swift
@@ -26,14 +33,19 @@ Services/
 
 ## Service Inventory
 
-### Notifications/NotificationService
-Manages local notifications for service due dates.
+### Notifications/ (Modular Architecture)
+Manages local notifications with focused, single-responsibility schedulers.
 
-**Key Features:**
-- Schedules notifications at 9 AM on due dates
-- Action buttons: "Mark as Done", "Remind Tomorrow"
-- Handles foreground display and action responses
-- Uses `UNUserNotificationCenter`
+**Core Service (`NotificationService.swift`):**
+- `@Observable @MainActor` singleton for thread-safe UI binding
+- Handles authorization, category setup, and shared configuration
+- Delegate methods in `NotificationService+Delegate.swift`
+
+**Schedulers (static methods, no shared state):**
+- `ServiceNotificationScheduler` - Service due notifications (30/7/1/0 days before)
+- `MileageReminderScheduler` - Bi-weekly mileage update reminders
+- `MarbeteNotificationScheduler` - PR vehicle registration expiration
+- `YearlyRoundupScheduler` - Annual cost summary (January 2nd)
 
 **Setup:**
 ```swift
@@ -41,8 +53,10 @@ UNUserNotificationCenter.current().delegate = NotificationService.shared
 ```
 
 **Categories:**
-- `SERVICE_DUE` - Standard service reminder
-- `MARBETE_DUE` - Vehicle registration reminder
+- `SERVICE_DUE` - Service reminder with "Mark Done" / "Remind Tomorrow"
+- `MILEAGE_REMINDER` - Odometer update with "Update Now" / "Remind Later"
+- `MARBETE_DUE` - Registration reminder with "Remind Tomorrow"
+- `YEARLY_ROUNDUP` - Cost summary with "View Costs"
 
 ### OCR/OdometerOCRService
 Vision framework OCR for reading odometer displays.
@@ -135,13 +149,21 @@ Shares data with widget extension via App Groups.
 
 ## Concurrency Patterns
 
-Services use Swift concurrency:
+Services use modern Swift concurrency with `@Observable` and `@MainActor`:
 ```swift
+@Observable
 @MainActor
-class NotificationService {
+final class NotificationService: NSObject {
     static let shared = NotificationService()
+    var isAuthorized = false
+    // ...
+}
+```
 
-    func schedule(_ service: Service) async throws {
+Schedulers are stateless structs with static methods:
+```swift
+struct ServiceNotificationScheduler {
+    static func scheduleNotification(for service: Service, vehicle: Vehicle) -> String? {
         // ...
     }
 }
