@@ -517,8 +517,8 @@ class NotificationService: NSObject, ObservableObject {
         reminderDate: Date
     ) -> UNNotificationRequest {
         let content = UNMutableNotificationContent()
-        content.title = "Time to Update Your Odometer"
-        content.body = "Keep \(vehicleName) maintenance estimates accurate by updating your current mileage"
+        content.title = "Odometer Sync Requested"
+        content.body = "\(vehicleName) here. It's been 14 days. How far have we gone?"
         content.sound = .default
         content.categoryIdentifier = Self.mileageReminderCategoryID
         content.userInfo = [
@@ -632,8 +632,8 @@ class NotificationService: NSObject, ObservableObject {
         let formattedCost = formatter.string(from: totalCost as NSDecimalNumber) ?? "$0"
 
         let content = UNMutableNotificationContent()
-        content.title = "Your \(year) Vehicle Costs Are In!"
-        content.body = "You spent \(formattedCost) on \(vehicleName) maintenance last year"
+        content.title = "\(year) Expense Report"
+        content.body = "\(vehicleName) cost you \(formattedCost) last year. You're welcome."
         content.sound = .default
         content.categoryIdentifier = Self.yearlyRoundupCategoryID
         content.userInfo = [
@@ -726,23 +726,23 @@ class NotificationService: NSObject, ObservableObject {
     ) -> UNNotificationRequest {
         let content = UNMutableNotificationContent()
 
-        // Vary message based on urgency
+        // Vary message based on urgency (tone escalates as deadline approaches)
         switch daysBeforeDue {
         case 60:
-            content.title = "Marbete Renewal Coming Up"
-            content.body = "\(vehicleName) - Time to plan your marbete renewal (expires in 2 months)"
+            content.title = "Marbete Status: 60 Days"
+            content.body = "\(vehicleName) requesting registration renewal. No rush. Yet."
         case 30:
-            content.title = "Marbete Renewal Reminder"
-            content.body = "\(vehicleName) - Don't forget to renew your marbete (expires in 1 month)"
+            content.title = "Marbete Status: 30 Days"
+            content.body = "\(vehicleName) would prefer not to be impounded."
         case 7:
-            content.title = "Marbete Renewal Due Soon!"
-            content.body = "\(vehicleName) - Your marbete expires in 1 week"
+            content.title = "Marbete Status: 7 Days"
+            content.body = "\(vehicleName) is starting to worry about that marbete."
         case 1:
-            content.title = "Marbete Expires Tomorrow!"
-            content.body = "\(vehicleName) - Renew your marbete today to avoid fines"
+            content.title = "Marbete Status: URGENT"
+            content.body = "\(vehicleName) expires tomorrow. Legally speaking."
         default:
-            content.title = "Marbete Renewal Reminder"
-            content.body = "\(vehicleName) - Your marbete expires in \(daysBeforeDue) days"
+            content.title = "Marbete Status: \(daysBeforeDue) Days"
+            content.body = "\(vehicleName) - Marbete expires in \(daysBeforeDue) days."
         }
 
         content.sound = .default
