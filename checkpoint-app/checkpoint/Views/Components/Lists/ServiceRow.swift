@@ -41,61 +41,58 @@ struct ServiceRow: View {
     }
 
     var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: Spacing.md) {
-                // Status indicator (square - brutalist) with glow for urgent
-                ZStack {
-                    Rectangle()
-                        .fill(status.color.opacity(0.15))
-                        .frame(width: 32, height: 32)
+        HStack(spacing: Spacing.md) {
+            // Status indicator (square - brutalist) with glow for urgent
+            ZStack {
+                Rectangle()
+                    .fill(status.color.opacity(0.15))
+                    .frame(width: 32, height: 32)
 
-                    Rectangle()
-                        .fill(status.color)
-                        .frame(width: 8, height: 8)
-                        .statusGlow(color: status.color, isActive: isUrgent)
-                        .pulseAnimation(isActive: isUrgent)
-                }
+                Rectangle()
+                    .fill(status.color)
+                    .frame(width: 8, height: 8)
+                    .statusGlow(color: status.color, isActive: isUrgent)
+                    .pulseAnimation(isActive: isUrgent)
+            }
 
-                // Service info with progress
-                VStack(alignment: .leading, spacing: 6) {
-                    // Service name - monospace
-                    Text(service.name.uppercased())
-                        .font(.brutalistBody)
-                        .foregroundStyle(Theme.textPrimary)
+            // Service info with progress
+            VStack(alignment: .leading, spacing: 6) {
+                // Service name - monospace
+                Text(service.name.uppercased())
+                    .font(.brutalistBody)
+                    .foregroundStyle(Theme.textPrimary)
 
-                    // Mini progress bar + due info - miles first
-                    HStack(spacing: Spacing.sm) {
-                        // Mini progress indicator
-                        if service.dueMileage != nil {
-                            miniProgressBar
-                        }
+                // Mini progress bar + due info - miles first
+                HStack(spacing: Spacing.sm) {
+                    // Mini progress indicator
+                    if service.dueMileage != nil {
+                        miniProgressBar
+                    }
 
-                        // Miles info (primary) or days info (fallback for date-only services)
-                        if let miles = milesRemaining {
-                            Text(formatMilesText(miles))
-                                .font(.instrumentLabel)
-                                .foregroundStyle(status == .overdue ? status.color : Theme.textTertiary)
-                                .tracking(0.5)
-                        } else if let days = daysUntilDue {
-                            Text(dueText(days: days))
-                                .font(.instrumentLabel)
-                                .foregroundStyle(status == .overdue ? status.color : Theme.textTertiary)
-                                .tracking(0.5)
-                        }
+                    // Miles info (primary) or days info (fallback for date-only services)
+                    if let miles = milesRemaining {
+                        Text(formatMilesText(miles))
+                            .font(.instrumentLabel)
+                            .foregroundStyle(status == .overdue ? status.color : Theme.textTertiary)
+                            .tracking(0.5)
+                    } else if let days = daysUntilDue {
+                        Text(dueText(days: days))
+                            .font(.instrumentLabel)
+                            .foregroundStyle(status == .overdue ? status.color : Theme.textTertiary)
+                            .tracking(0.5)
                     }
                 }
-
-                Spacer()
-
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Theme.textTertiary.opacity(0.5))
             }
-            .padding(.horizontal, Spacing.md)
-            .padding(.vertical, Spacing.listItem)
-            .contentShape(Rectangle())
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Theme.textTertiary.opacity(0.5))
         }
-        .buttonStyle(ServiceRowButtonStyle())
+        .padding(.horizontal, Spacing.md)
+        .padding(.vertical, Spacing.listItem)
+        .tappableCard(action: onTap)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(service.name)")
         .accessibilityValue(service.dueDescription ?? "No due date")

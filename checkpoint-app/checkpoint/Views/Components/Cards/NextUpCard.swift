@@ -46,143 +46,140 @@ struct NextUpCard: View {
     }
 
     var body: some View {
-        Button(action: onTap) {
-            VStack(alignment: .leading, spacing: 0) {
-                // Header row: status + service name
-                HStack(alignment: .top) {
-                    // Status indicator (square, not circle - brutalist) with glow
-                    Rectangle()
-                        .fill(status.color)
-                        .frame(width: 8, height: 8)
-                        .statusGlow(color: status.color, isActive: isUrgent)
-                        .pulseAnimation(isActive: isUrgent)
+        VStack(alignment: .leading, spacing: 0) {
+            // Header row: status + service name
+            HStack(alignment: .top) {
+                // Status indicator (square, not circle - brutalist) with glow
+                Rectangle()
+                    .fill(status.color)
+                    .frame(width: 8, height: 8)
+                    .statusGlow(color: status.color, isActive: isUrgent)
+                    .pulseAnimation(isActive: isUrgent)
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(status.label.isEmpty ? "SCHEDULED" : status.label)
-                            .font(.brutalistLabel)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(status.label.isEmpty ? "SCHEDULED" : status.label)
+                        .font(.brutalistLabel)
+                        .foregroundStyle(status.color)
+                        .textCase(.uppercase)
+                        .tracking(1.5)
+
+                    Text(service.name)
+                        .font(.brutalistHeading)
+                        .foregroundStyle(Theme.textPrimary)
+                        .textCase(.uppercase)
+                }
+
+                Spacer()
+            }
+            .padding(.bottom, 16)
+
+            // Divider
+            Rectangle()
+                .fill(Theme.gridLine)
+                .frame(height: 1)
+
+            // Hero data display - miles first, days as fallback
+            if let miles = milesUntilDue {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(alignment: .lastTextBaseline, spacing: 4) {
+                        Text(Formatters.mileageNumber(abs(miles)))
+                            .font(.brutalistHero)
                             .foregroundStyle(status.color)
-                            .textCase(.uppercase)
-                            .tracking(1.5)
+                            .contentTransition(.numericText())
 
-                        Text(service.name)
+                        Text(DistanceSettings.shared.unit.uppercaseAbbreviation)
                             .font(.brutalistHeading)
-                            .foregroundStyle(Theme.textPrimary)
-                            .textCase(.uppercase)
+                            .foregroundStyle(status.color)
                     }
 
-                    Spacer()
+                    Text(miles < 0 ? "OVERDUE" : "REMAINING")
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.textTertiary)
+                        .tracking(1.5)
+
+                    // Pace prediction (only shown when sufficient data)
+                    if let paceDays = pacePredictedDays {
+                        Text("~\(paceDays) DAYS AT_YOUR_PACE")
+                            .font(.brutalistSecondary)
+                            .foregroundStyle(Theme.textSecondary)
+                            .padding(.top, 4)
+                    }
                 }
-                .padding(.bottom, 16)
+                .padding(.vertical, 20)
+            } else if let days = daysUntilDue {
+                // Fallback to days for date-only services (e.g., battery check, wiper blades)
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(alignment: .lastTextBaseline, spacing: 4) {
+                        Text("\(abs(days))")
+                            .font(.brutalistHero)
+                            .foregroundStyle(status.color)
+                            .contentTransition(.numericText())
 
-                // Divider
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: 1)
+                        Text("DAYS")
+                            .font(.brutalistHeading)
+                            .foregroundStyle(status.color)
+                    }
 
-                // Hero data display - miles first, days as fallback
-                if let miles = milesUntilDue {
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack(alignment: .lastTextBaseline, spacing: 4) {
-                            Text(Formatters.mileageNumber(abs(miles)))
-                                .font(.brutalistHero)
-                                .foregroundStyle(status.color)
-                                .contentTransition(.numericText())
+                    Text(days < 0 ? "OVERDUE" : "REMAINING")
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.textTertiary)
+                        .tracking(1.5)
+                }
+                .padding(.vertical, 20)
+            }
 
-                            Text(DistanceSettings.shared.unit.uppercaseAbbreviation)
-                                .font(.brutalistHeading)
-                                .foregroundStyle(status.color)
-                        }
+            // Divider
+            Rectangle()
+                .fill(Theme.gridLine)
+                .frame(height: 1)
 
-                        Text(miles < 0 ? "OVERDUE" : "REMAINING")
+            // Data rows
+            VStack(spacing: 8) {
+                if let dueMileage = service.dueMileage {
+                    HStack {
+                        Text("CURRENT")
                             .font(.brutalistLabel)
                             .foregroundStyle(Theme.textTertiary)
-                            .tracking(1.5)
+                            .tracking(1)
 
-                        // Pace prediction (only shown when sufficient data)
-                        if let paceDays = pacePredictedDays {
-                            Text("~\(paceDays) DAYS AT_YOUR_PACE")
-                                .font(.brutalistSecondary)
-                                .foregroundStyle(Theme.textSecondary)
-                                .padding(.top, 4)
-                        }
-                    }
-                    .padding(.vertical, 20)
-                } else if let days = daysUntilDue {
-                    // Fallback to days for date-only services (e.g., battery check, wiper blades)
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack(alignment: .lastTextBaseline, spacing: 4) {
-                            Text("\(abs(days))")
-                                .font(.brutalistHero)
-                                .foregroundStyle(status.color)
-                                .contentTransition(.numericText())
+                        Spacer()
 
-                            Text("DAYS")
-                                .font(.brutalistHeading)
-                                .foregroundStyle(status.color)
-                        }
+                        HStack(spacing: 4) {
+                            Text(Formatters.mileageDisplay(currentMileage))
+                                .font(.brutalistBody)
+                                .foregroundStyle(Theme.accent)
 
-                        Text(days < 0 ? "OVERDUE" : "REMAINING")
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.textTertiary)
-                            .tracking(1.5)
-                    }
-                    .padding(.vertical, 20)
-                }
-
-                // Divider
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: 1)
-
-                // Data rows
-                VStack(spacing: 8) {
-                    if let dueMileage = service.dueMileage {
-                        HStack {
-                            Text("CURRENT")
-                                .font(.brutalistLabel)
-                                .foregroundStyle(Theme.textTertiary)
-                                .tracking(1)
-
-                            Spacer()
-
-                            HStack(spacing: 4) {
-                                Text(Formatters.mileageDisplay(currentMileage))
-                                    .font(.brutalistBody)
-                                    .foregroundStyle(Theme.accent)
-
-                                if isEstimatedMileage {
-                                    Text("(EST)")
-                                        .font(.brutalistLabel)
-                                        .foregroundStyle(Theme.textSecondary)
-                                        .tracking(0.5)
-                                }
+                            if isEstimatedMileage {
+                                Text("(EST)")
+                                    .font(.brutalistLabel)
+                                    .foregroundStyle(Theme.textSecondary)
+                                    .tracking(0.5)
                             }
                         }
-
-                        HStack {
-                            Text("DUE_AT")
-                                .font(.brutalistLabel)
-                                .foregroundStyle(Theme.textTertiary)
-                                .tracking(1)
-
-                            Spacer()
-
-                            Text(Formatters.mileageDisplay(dueMileage))
-                                .font(.brutalistBody)
-                                .foregroundStyle(status.color)
-                        }
-
-                        // Progress bar (simple, geometric)
-                        progressBar
-                            .padding(.top, 8)
                     }
+
+                    HStack {
+                        Text("DUE_AT")
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.textTertiary)
+                            .tracking(1)
+
+                        Spacer()
+
+                        Text(Formatters.mileageDisplay(dueMileage))
+                            .font(.brutalistBody)
+                            .foregroundStyle(status.color)
+                    }
+
+                    // Progress bar (simple, geometric)
+                    progressBar
+                        .padding(.top, 8)
                 }
-                .padding(.top, 12)
             }
-            .glassCardStyle(intensity: .subtle)
-            .contentShape(Rectangle())
+            .padding(.top, 12)
         }
-        .buttonStyle(CardButtonStyle())
+        .glassCardStyle(intensity: .subtle)
+        .tappableCard(action: onTap)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(service.name), \(status.label)")
         .accessibilityHint(service.dueDescription ?? "")
@@ -244,89 +241,86 @@ struct MarbeteNextUpCard: View {
     }
 
     var body: some View {
-        Button(action: onTap) {
-            VStack(alignment: .leading, spacing: 0) {
-                // Header row: status + item name
-                HStack(alignment: .top) {
-                    // Status indicator (square, brutalist) with glow
-                    Rectangle()
-                        .fill(status.color)
-                        .frame(width: 8, height: 8)
-                        .statusGlow(color: status.color, isActive: isUrgent)
-                        .pulseAnimation(isActive: isUrgent)
+        VStack(alignment: .leading, spacing: 0) {
+            // Header row: status + item name
+            HStack(alignment: .top) {
+                // Status indicator (square, brutalist) with glow
+                Rectangle()
+                    .fill(status.color)
+                    .frame(width: 8, height: 8)
+                    .statusGlow(color: status.color, isActive: isUrgent)
+                    .pulseAnimation(isActive: isUrgent)
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(status.label.isEmpty ? "SCHEDULED" : status.label)
-                            .font(.brutalistLabel)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(status.label.isEmpty ? "SCHEDULED" : status.label)
+                        .font(.brutalistLabel)
+                        .foregroundStyle(status.color)
+                        .textCase(.uppercase)
+                        .tracking(1.5)
+
+                    Text(marbeteItem.itemName)
+                        .font(.brutalistHeading)
+                        .foregroundStyle(Theme.textPrimary)
+                        .textCase(.uppercase)
+                }
+
+                Spacer()
+            }
+            .padding(.bottom, 16)
+
+            // Divider
+            Rectangle()
+                .fill(Theme.gridLine)
+                .frame(height: 1)
+
+            // Hero data display - days only for marbete
+            if let days = daysUntilDue {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(alignment: .lastTextBaseline, spacing: 4) {
+                        Text("\(abs(days))")
+                            .font(.brutalistHero)
                             .foregroundStyle(status.color)
-                            .textCase(.uppercase)
-                            .tracking(1.5)
+                            .contentTransition(.numericText())
 
-                        Text(marbeteItem.itemName)
+                        Text("DAYS")
                             .font(.brutalistHeading)
-                            .foregroundStyle(Theme.textPrimary)
-                            .textCase(.uppercase)
+                            .foregroundStyle(status.color)
                     }
+
+                    Text(days < 0 ? "EXPIRED" : "REMAINING")
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.textTertiary)
+                        .tracking(1.5)
+                }
+                .padding(.vertical, 20)
+            }
+
+            // Divider
+            Rectangle()
+                .fill(Theme.gridLine)
+                .frame(height: 1)
+
+            // Expiration info
+            VStack(spacing: 8) {
+                HStack {
+                    Text("EXPIRES")
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.textTertiary)
+                        .tracking(1)
 
                     Spacer()
-                }
-                .padding(.bottom, 16)
 
-                // Divider
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: 1)
-
-                // Hero data display - days only for marbete
-                if let days = daysUntilDue {
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack(alignment: .lastTextBaseline, spacing: 4) {
-                            Text("\(abs(days))")
-                                .font(.brutalistHero)
-                                .foregroundStyle(status.color)
-                                .contentTransition(.numericText())
-
-                            Text("DAYS")
-                                .font(.brutalistHeading)
-                                .foregroundStyle(status.color)
-                        }
-
-                        Text(days < 0 ? "EXPIRED" : "REMAINING")
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.textTertiary)
-                            .tracking(1.5)
-                    }
-                    .padding(.vertical, 20)
-                }
-
-                // Divider
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: 1)
-
-                // Expiration info
-                VStack(spacing: 8) {
-                    HStack {
-                        Text("EXPIRES")
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.textTertiary)
-                            .tracking(1)
-
-                        Spacer()
-
-                        if let formatted = marbeteItem.expirationFormatted {
-                            Text(formatted)
-                                .font(.brutalistBody)
-                                .foregroundStyle(status.color)
-                        }
+                    if let formatted = marbeteItem.expirationFormatted {
+                        Text(formatted)
+                            .font(.brutalistBody)
+                            .foregroundStyle(status.color)
                     }
                 }
-                .padding(.top, 12)
             }
-            .glassCardStyle(intensity: .subtle)
-            .contentShape(Rectangle())
+            .padding(.top, 12)
         }
-        .buttonStyle(CardButtonStyle())
+        .glassCardStyle(intensity: .subtle)
+        .tappableCard(action: onTap)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Marbete renewal, \(status.label)")
         .accessibilityHint(marbeteItem.expirationFormatted ?? "")
