@@ -26,7 +26,9 @@ Think: a patient machine that's been waiting for you to do something, finally sp
 
 ### Service Maintenance
 
-Service notifications remain utilitarian—clear status updates without personality. The vehicle name and service name provide sufficient context.
+Service notifications remain utilitarian—clear status updates without personality.
+
+**Why utilitarian?** Service notifications are the most frequent and actionable. Users need to immediately understand what service is due and when. Adding personality here would obscure critical information and become tiresome over time. The vehicle name, service name, and timeframe must be instantly scannable. Save the personality for less frequent, lower-stakes notifications where a bit of humor is a welcome surprise rather than an obstacle.
 
 | Trigger | Title | Body |
 |---------|-------|------|
