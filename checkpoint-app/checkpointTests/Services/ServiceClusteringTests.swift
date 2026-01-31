@@ -42,7 +42,8 @@ final class ServiceClusteringServiceTests: XCTestCase {
     @MainActor
     func test_detectClusters_servicesWithinMileageWindow_returnsSingleCluster() {
         // Given: 3 services due at 50,000, 50,500, 50,800 miles (within 1,000 mi window)
-        let vehicle = createTestVehicle(mileage: 49500)
+        // Current mileage 50,100 puts all services within 750mi "due soon" threshold
+        let vehicle = createTestVehicle(mileage: 50100)
         let service1 = createTestService(name: "Oil Change", dueMileage: 50000, dueInDays: 5)
         let service2 = createTestService(name: "Tire Rotation", dueMileage: 50500, dueInDays: 10)
         let service3 = createTestService(name: "Air Filter", dueMileage: 50800, dueInDays: 15)

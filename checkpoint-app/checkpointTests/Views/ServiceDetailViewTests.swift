@@ -61,7 +61,7 @@ final class ServiceDetailViewTests: XCTestCase {
         let service = Service(
             name: "Oil Change",
             dueDate: soonDate,
-            dueMileage: 40000
+            dueMileage: nil
         )
         service.vehicle = vehicle
 
