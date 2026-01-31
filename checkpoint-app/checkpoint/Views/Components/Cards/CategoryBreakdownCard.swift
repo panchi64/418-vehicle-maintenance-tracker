@@ -1,0 +1,90 @@
+//
+//  CategoryBreakdownCard.swift
+//  checkpoint
+//
+//  Card displaying cost breakdown by category with percentages
+//
+
+import SwiftUI
+
+struct CategoryBreakdownCard: View {
+    let breakdown: [(category: CostCategory, amount: Decimal, percentage: Double)]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            InstrumentSectionHeader(title: "By Category")
+
+            VStack(spacing: 0) {
+                ForEach(breakdown, id: \.category) { item in
+                    HStack(spacing: Spacing.sm) {
+                        Image(systemName: item.category.icon)
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(item.category.color)
+                            .frame(width: 20)
+
+                        Text(item.category.displayName)
+                            .font(.brutalistBody)
+                            .foregroundStyle(Theme.textPrimary)
+
+                        Spacer()
+
+                        Text(String(format: "%.0f%%", item.percentage))
+                            .font(.brutalistSecondary)
+                            .foregroundStyle(Theme.textTertiary)
+                            .frame(width: 40, alignment: .trailing)
+
+                        Text(formatCurrency(item.amount))
+                            .font(.brutalistBody)
+                            .foregroundStyle(item.category.color)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                            .frame(minWidth: 60, alignment: .trailing)
+                    }
+                    .padding(Spacing.md)
+
+                    if item.category != breakdown.last?.category {
+                        Rectangle()
+                            .fill(Theme.gridLine)
+                            .frame(height: 1)
+                            .padding(.leading, 28)
+                    }
+                }
+            }
+            .background(Theme.surfaceInstrument)
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+            )
+        }
+    }
+
+    private func formatCurrency(_ amount: Decimal) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = "USD"
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.maximumFractionDigits = 0
+        return formatter.string(from: amount as NSDecimalNumber) ?? "$0"
+    }
+}
+
+#Preview {
+    ZStack {
+        AtmosphericBackground()
+
+        VStack(spacing: Spacing.lg) {
+            CategoryBreakdownCard(breakdown: [
+                (category: .maintenance, amount: 450.00, percentage: 60),
+                (category: .repair, amount: 225.00, percentage: 30),
+                (category: .upgrade, amount: 75.00, percentage: 10)
+            ])
+
+            CategoryBreakdownCard(breakdown: [
+                (category: .repair, amount: 1200.00, percentage: 80),
+                (category: .maintenance, amount: 300.00, percentage: 20)
+            ])
+        }
+        .padding(Spacing.screenHorizontal)
+    }
+    .preferredColorScheme(.dark)
+}

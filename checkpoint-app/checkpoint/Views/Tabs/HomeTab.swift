@@ -145,10 +145,7 @@ struct HomeTab: View {
                                 .staggeredReveal(index: index, baseDelay: 0.25)
 
                                 if index < min(remainingServices.count, 3) - 1 {
-                                    Rectangle()
-                                        .fill(Theme.gridLine)
-                                        .frame(height: 1)
-                                        .padding(.leading, 56)
+                                    ListDivider()
                                 }
                             }
                         }
@@ -192,10 +189,7 @@ struct HomeTab: View {
                                 .buttonStyle(.plain)
 
                                 if index < recentLogs.count - 1 {
-                                    Rectangle()
-                                        .fill(Theme.gridLine)
-                                        .frame(height: 1)
-                                        .padding(.leading, 28)
+                                    ListDivider(leadingPadding: 28)
                                 }
                             }
                         }
@@ -308,64 +302,21 @@ struct HomeTab: View {
     }
 
     private var emptyVehicleState: some View {
-        VStack(spacing: Spacing.lg) {
-            ZStack {
-                Rectangle()
-                    .fill(Theme.accent.opacity(0.1))
-                    .frame(width: 100, height: 100)
-
-                Image(systemName: "car.side.fill")
-                    .font(.system(size: 40, weight: .light))
-                    .foregroundStyle(Theme.accent)
-            }
-
-            VStack(spacing: Spacing.xs) {
-                Text("No Vehicles")
-                    .font(.brutalistHeading)
-                    .foregroundStyle(Theme.textPrimary)
-
-                Text("Add your first vehicle to start\ntracking maintenance")
-                    .font(.brutalistSecondary)
-                    .foregroundStyle(Theme.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
-            }
-
-            Button("Add Vehicle") {
-                appState.showAddVehicle = true
-            }
-            .buttonStyle(.primary)
-            .frame(width: 160)
-            .padding(.top, Spacing.sm)
-        }
-        .padding(Spacing.xxl)
+        EmptyStateView(
+            icon: "car.side.fill",
+            title: "No Vehicles",
+            message: "Add your first vehicle to start\ntracking maintenance",
+            action: { appState.showAddVehicle = true },
+            actionLabel: "Add Vehicle"
+        )
     }
 
     private var noServicesState: some View {
-        VStack(spacing: Spacing.lg) {
-            ZStack {
-                Rectangle()
-                    .fill(Theme.accent.opacity(0.1))
-                    .frame(width: 100, height: 100)
-
-                Image(systemName: "checkmark")
-                    .font(.system(size: 40, weight: .light))
-                    .foregroundStyle(Theme.accent)
-            }
-
-            VStack(spacing: Spacing.xs) {
-                Text("All Clear")
-                    .font(.brutalistHeading)
-                    .foregroundStyle(Theme.textPrimary)
-
-                Text("No maintenance services scheduled\nfor this vehicle")
-                    .font(.brutalistSecondary)
-                    .foregroundStyle(Theme.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
-            }
-        }
-        .padding(Spacing.xxl)
+        EmptyStateView(
+            icon: "checkmark",
+            title: "All Clear",
+            message: "No maintenance services scheduled\nfor this vehicle"
+        )
     }
 
     // MARK: - Recall Fetch

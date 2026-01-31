@@ -113,26 +113,12 @@ struct AddVehicleView: View {
 
                             // Odometer OCR processing indicator
                             if isProcessingOdometerOCR {
-                                HStack(spacing: Spacing.sm) {
-                                    ProgressView()
-                                        .tint(Theme.accent)
-                                    Text("SCANNING ODOMETER...")
-                                        .font(.brutalistLabel)
-                                        .foregroundStyle(Theme.textSecondary)
-                                        .tracking(1)
-                                }
-                                .padding(Spacing.md)
-                                .frame(maxWidth: .infinity)
-                                .background(Theme.surfaceInstrument)
-                                .overlay(
-                                    Rectangle()
-                                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                                )
+                                OCRProcessingIndicator(text: "Scanning odometer...")
                             }
 
                             // Odometer OCR error
                             if let error = odometerOCRError {
-                                vinErrorRow(error) {
+                                ErrorMessageRow(message: error) {
                                     odometerOCRError = nil
                                 }
                             }
@@ -194,26 +180,12 @@ struct AddVehicleView: View {
 
                                 // VIN OCR processing indicator
                                 if isProcessingVINOCR {
-                                    HStack(spacing: Spacing.sm) {
-                                        ProgressView()
-                                            .tint(Theme.accent)
-                                        Text("SCANNING VIN...")
-                                            .font(.brutalistLabel)
-                                            .foregroundStyle(Theme.textSecondary)
-                                            .tracking(1)
-                                    }
-                                    .padding(Spacing.md)
-                                    .frame(maxWidth: .infinity)
-                                    .background(Theme.surfaceInstrument)
-                                    .overlay(
-                                        Rectangle()
-                                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                                    )
+                                    OCRProcessingIndicator(text: "Scanning VIN...")
                                 }
 
                                 // VIN OCR error
                                 if let error = vinOCRError {
-                                    vinErrorRow(error) {
+                                    ErrorMessageRow(message: error) {
                                         vinOCRError = nil
                                     }
                                 }
@@ -238,7 +210,7 @@ struct AddVehicleView: View {
 
                                 // VIN lookup error
                                 if let error = vinLookupError {
-                                    vinErrorRow(error) {
+                                    ErrorMessageRow(message: error) {
                                         vinLookupError = nil
                                     }
                                 }
@@ -330,37 +302,6 @@ struct AddVehicleView: View {
                 }
             }
         }
-    }
-
-    // MARK: - VIN Error Row
-
-    private func vinErrorRow(_ error: String, onDismiss: @escaping () -> Void) -> some View {
-        HStack(spacing: Spacing.sm) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(Theme.statusOverdue)
-
-            Text(error.uppercased())
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.statusOverdue)
-                .tracking(1)
-
-            Spacer()
-
-            Button {
-                onDismiss()
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(Theme.textTertiary)
-            }
-        }
-        .padding(Spacing.md)
-        .background(Theme.statusOverdue.opacity(0.1))
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.statusOverdue.opacity(0.5), lineWidth: Theme.borderWidth)
-        )
     }
 
     // MARK: - VIN Lookup

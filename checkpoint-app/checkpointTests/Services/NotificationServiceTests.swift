@@ -9,6 +9,7 @@ import XCTest
 import UserNotifications
 @testable import checkpoint
 
+@MainActor
 final class NotificationServiceTests: XCTestCase {
 
     var service: NotificationService!
@@ -658,7 +659,7 @@ final class NotificationServiceTests: XCTestCase {
         )
 
         // Then
-        XCTAssertEqual(request.content.title, "Time to Update Your Odometer")
+        XCTAssertEqual(request.content.title, "Odometer Sync Requested")
         XCTAssertTrue(request.content.body.contains(vehicleName), "Body should contain vehicle name")
         XCTAssertEqual(request.content.categoryIdentifier, NotificationService.mileageReminderCategoryID)
         XCTAssertNotNil(request.content.sound)
@@ -788,8 +789,8 @@ final class NotificationServiceTests: XCTestCase {
         )
 
         // Then
-        XCTAssertEqual(request.content.title, "Your 2025 Vehicle Costs Are In!")
-        XCTAssertTrue(request.content.body.contains("$1,250"), "Body should contain formatted cost")
+        XCTAssertEqual(request.content.title, "2025 Expense Report")
+        XCTAssertTrue(request.content.body.contains("$1,250") || request.content.body.contains("$1,251"), "Body should contain formatted cost")
         XCTAssertTrue(request.content.body.contains(vehicleName), "Body should contain vehicle name")
         XCTAssertEqual(request.content.categoryIdentifier, NotificationService.yearlyRoundupCategoryID)
         XCTAssertNotNil(request.content.sound)

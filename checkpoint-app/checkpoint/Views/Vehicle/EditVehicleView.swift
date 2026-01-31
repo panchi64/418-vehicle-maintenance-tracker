@@ -136,26 +136,12 @@ struct EditVehicleView: View {
 
                             // Odometer OCR processing indicator
                             if isProcessingOdometerOCR {
-                                HStack(spacing: Spacing.sm) {
-                                    ProgressView()
-                                        .tint(Theme.accent)
-                                    Text("SCANNING ODOMETER...")
-                                        .font(.brutalistLabel)
-                                        .foregroundStyle(Theme.textSecondary)
-                                        .tracking(1)
-                                }
-                                .padding(Spacing.md)
-                                .frame(maxWidth: .infinity)
-                                .background(Theme.surfaceInstrument)
-                                .overlay(
-                                    Rectangle()
-                                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                                )
+                                OCRProcessingIndicator(text: "Scanning odometer...")
                             }
 
                             // Odometer OCR error
                             if let error = odometerOCRError {
-                                vinErrorRow(error) {
+                                ErrorMessageRow(message: error) {
                                     odometerOCRError = nil
                                 }
                             }
@@ -217,26 +203,12 @@ struct EditVehicleView: View {
 
                                 // VIN OCR processing indicator
                                 if isProcessingVINOCR {
-                                    HStack(spacing: Spacing.sm) {
-                                        ProgressView()
-                                            .tint(Theme.accent)
-                                        Text("SCANNING VIN...")
-                                            .font(.brutalistLabel)
-                                            .foregroundStyle(Theme.textSecondary)
-                                            .tracking(1)
-                                    }
-                                    .padding(Spacing.md)
-                                    .frame(maxWidth: .infinity)
-                                    .background(Theme.surfaceInstrument)
-                                    .overlay(
-                                        Rectangle()
-                                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                                    )
+                                    OCRProcessingIndicator(text: "Scanning VIN...")
                                 }
 
                                 // VIN OCR error
                                 if let error = vinOCRError {
-                                    vinErrorRow(error) {
+                                    ErrorMessageRow(message: error) {
                                         vinOCRError = nil
                                     }
                                 }
@@ -261,7 +233,7 @@ struct EditVehicleView: View {
 
                                 // VIN lookup error
                                 if let error = vinLookupError {
-                                    vinErrorRow(error) {
+                                    ErrorMessageRow(message: error) {
                                         vinLookupError = nil
                                     }
                                 }
@@ -291,18 +263,10 @@ struct EditVehicleView: View {
                         VStack(alignment: .leading, spacing: Spacing.sm) {
                             InstrumentSectionHeader(title: "Marbete")
 
-                            VStack(spacing: Spacing.md) {
-                                // Month picker
-                                marbeteMonthPicker
-
-                                // Year picker
-                                marbeteYearPicker
-
-                                // Status indicator (only shown when marbete is set)
-                                if marbeteExpirationMonth != nil && marbeteExpirationYear != nil {
-                                    marbeteStatusIndicator
-                                }
-                            }
+                            MarbetePicker(
+                                month: $marbeteExpirationMonth,
+                                year: $marbeteExpirationYear
+                            )
 
                             Text("Puerto Rico vehicle registration tag expiration (optional)")
                                 .font(.caption)
@@ -406,37 +370,6 @@ struct EditVehicleView: View {
         }
     }
 
-    // MARK: - VIN Error Row
-
-    private func vinErrorRow(_ error: String, onDismiss: @escaping () -> Void) -> some View {
-        HStack(spacing: Spacing.sm) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(Theme.statusOverdue)
-
-            Text(error.uppercased())
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.statusOverdue)
-                .tracking(1)
-
-            Spacer()
-
-            Button {
-                onDismiss()
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(Theme.textTertiary)
-            }
-        }
-        .padding(Spacing.md)
-        .background(Theme.statusOverdue.opacity(0.1))
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.statusOverdue.opacity(0.5), lineWidth: Theme.borderWidth)
-        )
-    }
-
     // MARK: - VIN Lookup
 
     private func lookUpVIN() {
@@ -512,169 +445,6 @@ struct EditVehicleView: View {
                 }
             }
         }
-    }
-
-    // MARK: - Marbete Pickers
-
-    private var marbeteMonthPicker: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("EXPIRATION MONTH")
-                .font(.instrumentLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1.5)
-                .textCase(.uppercase)
-
-            Menu {
-                Button("Not Set") {
-                    marbeteExpirationMonth = nil
-                }
-                Divider()
-                ForEach(1...12, id: \.self) { month in
-                    Button(Calendar.current.monthSymbols[month - 1]) {
-                        marbeteExpirationMonth = month
-                    }
-                }
-            } label: {
-                HStack {
-                    if let month = marbeteExpirationMonth {
-                        Text(Calendar.current.monthSymbols[month - 1])
-                            .font(.instrumentBody)
-                            .foregroundStyle(Theme.textPrimary)
-                    } else {
-                        Text("Not Set")
-                            .font(.instrumentBody)
-                            .foregroundStyle(Theme.textTertiary)
-                    }
-                    Spacer()
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(Theme.accent)
-                }
-                .padding(16)
-                .background(Theme.surfaceInstrument)
-                .overlay(
-                    Rectangle()
-                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                )
-            }
-        }
-    }
-
-    private var marbeteYearPicker: some View {
-        let currentYear = Calendar.current.component(.year, from: .now)
-        let yearRange = currentYear...(currentYear + 2)
-
-        return VStack(alignment: .leading, spacing: 6) {
-            Text("EXPIRATION YEAR")
-                .font(.instrumentLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1.5)
-                .textCase(.uppercase)
-
-            Menu {
-                Button("Not Set") {
-                    marbeteExpirationYear = nil
-                }
-                Divider()
-                ForEach(yearRange, id: \.self) { year in
-                    Button(String(year)) {
-                        marbeteExpirationYear = year
-                    }
-                }
-            } label: {
-                HStack {
-                    if let year = marbeteExpirationYear {
-                        Text(String(year))
-                            .font(.instrumentBody)
-                            .foregroundStyle(Theme.textPrimary)
-                    } else {
-                        Text("Not Set")
-                            .font(.instrumentBody)
-                            .foregroundStyle(Theme.textTertiary)
-                    }
-                    Spacer()
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(Theme.accent)
-                }
-                .padding(16)
-                .background(Theme.surfaceInstrument)
-                .overlay(
-                    Rectangle()
-                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                )
-            }
-        }
-    }
-
-    private var marbeteStatusIndicator: some View {
-        let status = computeMarbeteStatus()
-        let statusText = marbeteStatusText(for: status)
-
-        return HStack(spacing: Spacing.sm) {
-            Rectangle()
-                .fill(status.color)
-                .frame(width: 8, height: 8)
-
-            Text(statusText)
-                .font(.brutalistSecondary)
-                .foregroundStyle(status.color)
-
-            Spacer()
-
-            if let formatted = marbeteFormattedExpiration() {
-                Text(formatted)
-                    .font(.brutalistSecondary)
-                    .foregroundStyle(Theme.textSecondary)
-            }
-        }
-        .padding(Spacing.md)
-        .background(status.color.opacity(0.1))
-        .overlay(
-            Rectangle()
-                .strokeBorder(status.color.opacity(0.3), lineWidth: Theme.borderWidth)
-        )
-    }
-
-    private func computeMarbeteStatus() -> ServiceStatus {
-        guard let month = marbeteExpirationMonth,
-              let year = marbeteExpirationYear else { return .neutral }
-
-        var components = DateComponents()
-        components.year = year
-        components.month = month
-        components.day = 1
-
-        guard let firstDay = Calendar.current.date(from: components),
-              let lastDay = Calendar.current.date(byAdding: DateComponents(month: 1, day: -1), to: firstDay) else {
-            return .neutral
-        }
-
-        let days = Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: .now), to: Calendar.current.startOfDay(for: lastDay)).day ?? 0
-
-        if days < 0 {
-            return .overdue
-        } else if days <= 60 {
-            return .dueSoon
-        } else {
-            return .good
-        }
-    }
-
-    private func marbeteStatusText(for status: ServiceStatus) -> String {
-        switch status {
-        case .overdue: return "EXPIRED"
-        case .dueSoon: return "EXPIRES SOON"
-        case .good: return "VALID"
-        case .neutral: return ""
-        }
-    }
-
-    private func marbeteFormattedExpiration() -> String? {
-        guard let month = marbeteExpirationMonth,
-              let year = marbeteExpirationYear else { return nil }
-        let monthName = Calendar.current.monthSymbols[month - 1]
-        return "\(monthName) \(year)"
     }
 
     // MARK: - Save

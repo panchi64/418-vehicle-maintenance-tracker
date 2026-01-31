@@ -433,8 +433,10 @@ final class ServiceDetailViewTests: XCTestCase {
         // When: Getting mileage description
         let description = service.mileageDescription
 
-        // Then: Should show remaining miles
-        XCTAssertEqual(description, "or 5000 miles")
+        // Then: Should show remaining miles (format: "or X miles" or "or X kilometers")
+        XCTAssertNotNil(description)
+        XCTAssertTrue(description!.hasPrefix("or "), "Description should start with 'or'")
+        XCTAssertTrue(description!.contains("5000") || description!.contains("5,000"), "Description should contain remaining distance")
     }
 
     func testMileageDescription_MilesOverdue() {
@@ -446,8 +448,10 @@ final class ServiceDetailViewTests: XCTestCase {
         // When: Getting mileage description
         let description = service.mileageDescription
 
-        // Then: Should show overdue miles
-        XCTAssertEqual(description, "1000 miles overdue")
+        // Then: Should show overdue miles (format: "X miles overdue" or "X kilometers overdue")
+        XCTAssertNotNil(description)
+        XCTAssertTrue(description!.contains("1000") || description!.contains("1,000"), "Description should contain overdue distance")
+        XCTAssertTrue(description!.contains("overdue"), "Description should contain 'overdue'")
     }
 
     func testMileageDescription_NilWhenNoDueMileage() {

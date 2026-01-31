@@ -11,7 +11,8 @@ import Combine
 import CoreData
 
 /// Service for updating widget data in the shared App Group container
-class WidgetDataService {
+@MainActor
+final class WidgetDataService {
     static let shared = WidgetDataService()
 
     private let appGroupID = "group.com.418-studio.checkpoint.shared"

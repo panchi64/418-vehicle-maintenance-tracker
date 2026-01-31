@@ -150,10 +150,7 @@ struct ServicesTab: View {
                                 .staggeredReveal(index: index, baseDelay: 0.2)
 
                                 if index < filteredServices.count - 1 {
-                                    Rectangle()
-                                        .fill(Theme.gridLine)
-                                        .frame(height: 1)
-                                        .padding(.leading, 56)
+                                    ListDivider()
                                 }
                             }
                         }
@@ -182,10 +179,7 @@ struct ServicesTab: View {
                                 .staggeredReveal(index: index, baseDelay: 0.3)
 
                                 if index < filteredLogs.count - 1 {
-                                    Rectangle()
-                                        .fill(Theme.gridLine)
-                                        .frame(height: 1)
-                                        .padding(.leading, 28)
+                                    ListDivider(leadingPadding: 28)
                                 }
                             }
                         }
@@ -295,57 +289,19 @@ struct ServicesTab: View {
     // MARK: - Empty States
 
     private var emptyState: some View {
-        VStack(spacing: Spacing.lg) {
-            ZStack {
-                Rectangle()
-                    .fill(Theme.accent.opacity(0.1))
-                    .frame(width: 100, height: 100)
-
-                Image(systemName: searchText.isEmpty ? "wrench.and.screwdriver" : "magnifyingglass")
-                    .font(.system(size: 40, weight: .light))
-                    .foregroundStyle(Theme.accent)
-            }
-
-            VStack(spacing: Spacing.xs) {
-                Text(searchText.isEmpty ? "No Services" : "No Results")
-                    .font(.brutalistHeading)
-                    .foregroundStyle(Theme.textPrimary)
-
-                Text(searchText.isEmpty ? "Add your first service to\nstart tracking maintenance" : "Try a different search term\nor filter")
-                    .font(.brutalistSecondary)
-                    .foregroundStyle(Theme.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
-            }
-        }
-        .padding(Spacing.xxl)
+        EmptyStateView(
+            icon: searchText.isEmpty ? "wrench.and.screwdriver" : "magnifyingglass",
+            title: searchText.isEmpty ? "No Services" : "No Results",
+            message: searchText.isEmpty ? "Add your first service to\nstart tracking maintenance" : "Try a different search term\nor filter"
+        )
     }
 
     private var noVehicleState: some View {
-        VStack(spacing: Spacing.lg) {
-            ZStack {
-                Rectangle()
-                    .fill(Theme.accent.opacity(0.1))
-                    .frame(width: 100, height: 100)
-
-                Image(systemName: "car.side.fill")
-                    .font(.system(size: 40, weight: .light))
-                    .foregroundStyle(Theme.accent)
-            }
-
-            VStack(spacing: Spacing.xs) {
-                Text("No Vehicle")
-                    .font(.brutalistHeading)
-                    .foregroundStyle(Theme.textPrimary)
-
-                Text("Select or add a vehicle\nto view services")
-                    .font(.brutalistSecondary)
-                    .foregroundStyle(Theme.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
-            }
-        }
-        .padding(Spacing.xxl)
+        EmptyStateView(
+            icon: "car.side.fill",
+            title: "No Vehicle",
+            message: "Select or add a vehicle\nto view services"
+        )
     }
 
 }
