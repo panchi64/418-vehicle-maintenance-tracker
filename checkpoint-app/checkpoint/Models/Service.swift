@@ -86,17 +86,19 @@ extension Service {
             return .overdue
         }
 
-        // Check if due soon (within 30 days or 500 miles)
-        if let dueDate = dueDate {
-            let daysUntilDue = Calendar.current.dateComponents([.day], from: currentDate, to: dueDate).day ?? 0
-            if daysUntilDue <= 30 && daysUntilDue >= 0 {
+        // Check if due soon
+        // For mileage-tracked services: use mileage threshold (750 miles)
+        // For date-only services: use date threshold (30 days)
+        if let dueMileage = dueMileage {
+            // Mileage-tracked service: only use mileage for "due soon" check
+            let milesUntilDue = dueMileage - currentMileage
+            if milesUntilDue <= 750 && milesUntilDue >= 0 {
                 return .dueSoon
             }
-        }
-
-        if let dueMileage = dueMileage {
-            let milesUntilDue = dueMileage - currentMileage
-            if milesUntilDue <= 500 && milesUntilDue >= 0 {
+        } else if let dueDate = dueDate {
+            // Date-only service (no mileage tracking): use date for "due soon" check
+            let daysUntilDue = Calendar.current.dateComponents([.day], from: currentDate, to: dueDate).day ?? 0
+            if daysUntilDue <= 30 && daysUntilDue >= 0 {
                 return .dueSoon
             }
         }
