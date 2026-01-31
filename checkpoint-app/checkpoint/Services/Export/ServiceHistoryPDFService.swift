@@ -22,25 +22,27 @@ final class ServiceHistoryPDFService {
         static let margin: CGFloat = 50
         static let contentWidth: CGFloat = pageSize.width - (margin * 2)
         static let borderWidth: CGFloat = 2
-        static let sectionSpacing: CGFloat = 24
-        static let itemSpacing: CGFloat = 16
-        static let lineHeight: CGFloat = 18
+        static let sectionSpacing: CGFloat = 20
+        static let itemSpacing: CGFloat = 8
+        static let lineHeight: CGFloat = 14
     }
 
     private enum Colors {
         static let background = UIColor.white
         static let text = UIColor.black
         static let secondary = UIColor.darkGray
-        static let accent = UIColor(red: 232/255, green: 155/255, blue: 60/255, alpha: 1) // #E89B3C
+        static let accent = UIColor(red: 0/255, green: 119/255, blue: 182/255, alpha: 1) // Cerulean blue
         static let border = UIColor.lightGray
     }
 
     private enum Fonts {
-        static let title = UIFont.monospacedSystemFont(ofSize: 24, weight: .bold)
-        static let heading = UIFont.monospacedSystemFont(ofSize: 14, weight: .bold)
-        static let body = UIFont.monospacedSystemFont(ofSize: 11, weight: .regular)
-        static let label = UIFont.monospacedSystemFont(ofSize: 9, weight: .medium)
-        static let serviceName = UIFont.monospacedSystemFont(ofSize: 12, weight: .medium)
+        static let title = UIFont.monospacedSystemFont(ofSize: 22, weight: .bold)
+        static let subtitle = UIFont.monospacedSystemFont(ofSize: 16, weight: .semibold)
+        static let heading = UIFont.monospacedSystemFont(ofSize: 11, weight: .bold)
+        static let body = UIFont.monospacedSystemFont(ofSize: 9, weight: .regular)
+        static let label = UIFont.monospacedSystemFont(ofSize: 8, weight: .medium)
+        static let serviceName = UIFont.monospacedSystemFont(ofSize: 10, weight: .semibold)
+        static let cost = UIFont.monospacedSystemFont(ofSize: 10, weight: .medium)
     }
 
     // MARK: - Public API
@@ -137,24 +139,24 @@ final class ServiceHistoryPDFService {
         var currentY = y
 
         // App branding
-        let brandingRect = CGRect(x: Layout.margin, y: currentY, width: Layout.contentWidth, height: 30)
+        let brandingRect = CGRect(x: Layout.margin, y: currentY, width: Layout.contentWidth, height: 26)
         let brandingAttributes: [NSAttributedString.Key: Any] = [
             .font: Fonts.title,
             .foregroundColor: Colors.accent
         ]
         "CHECKPOINT".draw(in: brandingRect, withAttributes: brandingAttributes)
 
-        currentY += 32
+        currentY += 26
 
         // Subtitle
-        let subtitleRect = CGRect(x: Layout.margin, y: currentY, width: Layout.contentWidth, height: 20)
+        let subtitleRect = CGRect(x: Layout.margin, y: currentY, width: Layout.contentWidth, height: 14)
         let subtitleAttributes: [NSAttributedString.Key: Any] = [
             .font: Fonts.label,
             .foregroundColor: Colors.secondary
         ]
         "SERVICE HISTORY REPORT".draw(in: subtitleRect, withAttributes: subtitleAttributes)
 
-        currentY += 28
+        currentY += 20
 
         // Divider
         currentY = drawDivider(at: currentY, in: context)
@@ -166,37 +168,40 @@ final class ServiceHistoryPDFService {
         var currentY = y + Layout.sectionSpacing
 
         // Vehicle name (large)
-        let nameRect = CGRect(x: Layout.margin, y: currentY, width: Layout.contentWidth, height: 28)
+        let nameRect = CGRect(x: Layout.margin, y: currentY, width: Layout.contentWidth, height: 20)
         let nameAttributes: [NSAttributedString.Key: Any] = [
-            .font: Fonts.title,
+            .font: Fonts.subtitle,
             .foregroundColor: Colors.text
         ]
         vehicle.displayName.draw(in: nameRect, withAttributes: nameAttributes)
 
-        currentY += 32
+        currentY += 22
 
-        // Vehicle details grid
-        let leftColumnX = Layout.margin
-        let rightColumnX = Layout.margin + Layout.contentWidth / 2
+        // Vehicle details on single line
+        var detailParts: [String] = []
 
-        // Row 1: VIN and Current Mileage
+        if vehicle.year > 0 {
+            detailParts.append("\(vehicle.year)")
+        }
+        if !vehicle.make.isEmpty && !vehicle.model.isEmpty {
+            detailParts.append("\(vehicle.make) \(vehicle.model)")
+        }
         if let vin = vehicle.vin, !vin.isEmpty {
-            currentY = drawDataRow(at: currentY, x: leftColumnX, label: "VIN", value: vin, in: context)
+            detailParts.append("VIN: \(vin)")
         }
 
         let mileageValue = Formatters.mileage(vehicle.effectiveMileage)
-        drawDataRow(at: currentY - Layout.lineHeight - 4, x: rightColumnX, label: "CURRENT MILEAGE", value: mileageValue, in: context)
+        detailParts.append(mileageValue)
 
-        // Row 2: Year and Make/Model
-        if vehicle.year > 0 {
-            currentY = drawDataRow(at: currentY, x: leftColumnX, label: "YEAR", value: "\(vehicle.year)", in: context)
-        }
+        let detailsStr = detailParts.joined(separator: "  •  ")
+        let detailsRect = CGRect(x: Layout.margin, y: currentY, width: Layout.contentWidth, height: Layout.lineHeight)
+        let detailsAttributes: [NSAttributedString.Key: Any] = [
+            .font: Fonts.body,
+            .foregroundColor: Colors.secondary
+        ]
+        detailsStr.draw(in: detailsRect, withAttributes: detailsAttributes)
 
-        if !vehicle.make.isEmpty && !vehicle.model.isEmpty {
-            drawDataRow(at: currentY - Layout.lineHeight - 4, x: rightColumnX, label: "MAKE/MODEL", value: "\(vehicle.make) \(vehicle.model)", in: context)
-        }
-
-        currentY += Layout.sectionSpacing / 2
+        currentY += Layout.lineHeight + 12
 
         // Divider
         currentY = drawDivider(at: currentY, in: context)
@@ -204,38 +209,17 @@ final class ServiceHistoryPDFService {
         return currentY
     }
 
-    @discardableResult
-    private func drawDataRow(at y: CGFloat, x: CGFloat, label: String, value: String, in context: CGContext) -> CGFloat {
-        // Label
-        let labelRect = CGRect(x: x, y: y, width: 150, height: Layout.lineHeight)
-        let labelAttributes: [NSAttributedString.Key: Any] = [
-            .font: Fonts.label,
-            .foregroundColor: Colors.secondary
-        ]
-        label.draw(in: labelRect, withAttributes: labelAttributes)
-
-        // Value
-        let valueRect = CGRect(x: x, y: y + Layout.lineHeight, width: Layout.contentWidth / 2 - 20, height: Layout.lineHeight)
-        let valueAttributes: [NSAttributedString.Key: Any] = [
-            .font: Fonts.body,
-            .foregroundColor: Colors.text
-        ]
-        value.draw(in: valueRect, withAttributes: valueAttributes)
-
-        return y + Layout.lineHeight * 2 + 4
-    }
-
     private func drawSectionHeader(at y: CGFloat, title: String, in context: CGContext) -> CGFloat {
         var currentY = y + Layout.sectionSpacing
 
-        let headerRect = CGRect(x: Layout.margin, y: currentY, width: Layout.contentWidth, height: 20)
+        let headerRect = CGRect(x: Layout.margin, y: currentY, width: Layout.contentWidth, height: 14)
         let headerAttributes: [NSAttributedString.Key: Any] = [
             .font: Fonts.heading,
             .foregroundColor: Colors.accent
         ]
         title.draw(in: headerRect, withAttributes: headerAttributes)
 
-        currentY += 24
+        currentY += 16
 
         // Thin line under header
         context.setStrokeColor(Colors.border.cgColor)
@@ -244,31 +228,55 @@ final class ServiceHistoryPDFService {
         context.addLine(to: CGPoint(x: Layout.margin + Layout.contentWidth, y: currentY))
         context.strokePath()
 
-        return currentY + 8
+        return currentY + 6
     }
 
     private func drawServiceLog(at y: CGFloat, log: ServiceLog, options: ExportOptions, in context: CGContext) -> CGFloat {
         var currentY = y + Layout.itemSpacing
 
-        // Service name
+        // Row 1: Service name (left), date (center-right), cost (right)
         let serviceName = log.service?.name ?? "Service"
-        let nameRect = CGRect(x: Layout.margin, y: currentY, width: Layout.contentWidth, height: 18)
+        let nameRect = CGRect(x: Layout.margin, y: currentY, width: Layout.contentWidth - 170, height: Layout.lineHeight)
         let nameAttributes: [NSAttributedString.Key: Any] = [
             .font: Fonts.serviceName,
             .foregroundColor: Colors.text
         ]
         serviceName.draw(in: nameRect, withAttributes: nameAttributes)
 
-        currentY += 18
-
-        // Date, mileage, cost on same line
+        // Date in the middle-right area
         let dateStr = Formatters.mediumDate.string(from: log.performedDate)
-        let mileageStr = Formatters.mileage(log.mileageAtService)
-        var detailsStr = "\(dateStr)  //  \(mileageStr)"
+        let dateRect = CGRect(x: Layout.margin + Layout.contentWidth - 165, y: currentY, width: 95, height: Layout.lineHeight)
+        let dateAttributes: [NSAttributedString.Key: Any] = [
+            .font: Fonts.body,
+            .foregroundColor: Colors.secondary
+        ]
+        dateStr.draw(in: dateRect, withAttributes: dateAttributes)
 
+        // Cost aligned right
         if let cost = log.cost, cost > 0 {
             let costStr = Formatters.currency.string(from: cost as NSDecimalNumber) ?? "$\(cost)"
-            detailsStr += "  //  \(costStr)"
+            let costRect = CGRect(x: Layout.margin + Layout.contentWidth - 65, y: currentY, width: 65, height: Layout.lineHeight)
+            let paragraphStyle = NSMutableParagraphStyle()
+            paragraphStyle.alignment = .right
+            let costAttributes: [NSAttributedString.Key: Any] = [
+                .font: Fonts.cost,
+                .foregroundColor: Colors.accent,
+                .paragraphStyle: paragraphStyle
+            ]
+            costStr.draw(in: costRect, withAttributes: costAttributes)
+        }
+
+        currentY += Layout.lineHeight + 2
+
+        // Row 2: Mileage and notes (more space for description)
+        let mileageStr = Formatters.mileage(log.mileageAtService)
+        var detailsStr = mileageStr
+
+        // Add truncated notes inline if present - now with more space
+        if let notes = log.notes, !notes.isEmpty {
+            let maxNotesLength = 80
+            let truncatedNotes = notes.count > maxNotesLength ? String(notes.prefix(maxNotesLength)) + "..." : notes
+            detailsStr += "  •  \(truncatedNotes)"
         }
 
         let detailsRect = CGRect(x: Layout.margin, y: currentY, width: Layout.contentWidth, height: Layout.lineHeight)
@@ -280,25 +288,9 @@ final class ServiceHistoryPDFService {
 
         currentY += Layout.lineHeight
 
-        // Notes (if any)
-        if let notes = log.notes, !notes.isEmpty {
-            currentY += 4
-            let notesRect = CGRect(x: Layout.margin, y: currentY, width: Layout.contentWidth, height: 40)
-            let notesAttributes: [NSAttributedString.Key: Any] = [
-                .font: Fonts.body,
-                .foregroundColor: Colors.secondary
-            ]
-
-            // Truncate notes if too long
-            let truncatedNotes = notes.count > 200 ? String(notes.prefix(200)) + "..." : notes
-            truncatedNotes.draw(in: notesRect, withAttributes: notesAttributes)
-
-            currentY += min(40, CGFloat(notes.count / 60 + 1) * Layout.lineHeight)
-        }
-
         // Light divider between entries
-        currentY += 8
-        context.setStrokeColor(Colors.border.withAlphaComponent(0.5).cgColor)
+        currentY += 6
+        context.setStrokeColor(Colors.border.withAlphaComponent(0.4).cgColor)
         context.setLineWidth(0.5)
         context.move(to: CGPoint(x: Layout.margin, y: currentY))
         context.addLine(to: CGPoint(x: Layout.margin + Layout.contentWidth, y: currentY))
@@ -331,17 +323,17 @@ final class ServiceHistoryPDFService {
         let totalCost = serviceLogs.reduce(Decimal.zero) { $0 + ($1.cost ?? 0) }
         let totalFormatted = Formatters.currency.string(from: totalCost as NSDecimalNumber) ?? "$0.00"
 
-        // Total spent row
-        let totalLabelRect = CGRect(x: Layout.margin, y: currentY, width: 150, height: 20)
+        // Total spent row - more compact
+        let totalLabelRect = CGRect(x: Layout.margin, y: currentY, width: 100, height: 16)
         let labelAttributes: [NSAttributedString.Key: Any] = [
             .font: Fonts.heading,
             .foregroundColor: Colors.text
         ]
         "TOTAL SPENT".draw(in: totalLabelRect, withAttributes: labelAttributes)
 
-        let totalValueRect = CGRect(x: Layout.margin + Layout.contentWidth - 150, y: currentY, width: 150, height: 20)
+        let totalValueRect = CGRect(x: Layout.margin + Layout.contentWidth - 120, y: currentY, width: 120, height: 20)
         let valueAttributes: [NSAttributedString.Key: Any] = [
-            .font: Fonts.title,
+            .font: Fonts.subtitle,
             .foregroundColor: Colors.accent
         ]
 
@@ -352,7 +344,7 @@ final class ServiceHistoryPDFService {
         rightAlignedAttributes[.paragraphStyle] = paragraphStyle
         totalFormatted.draw(in: totalValueRect, withAttributes: rightAlignedAttributes)
 
-        currentY += 28
+        currentY += 20
 
         // Service count
         let countStr = "\(serviceLogs.count) service\(serviceLogs.count == 1 ? "" : "s") recorded"
@@ -406,12 +398,7 @@ final class ServiceHistoryPDFService {
     }
 
     private func estimateLogHeight(_ log: ServiceLog, options: ExportOptions) -> CGFloat {
-        var height: CGFloat = Layout.itemSpacing + 18 + Layout.lineHeight + 8 // Name, details, divider
-
-        if let notes = log.notes, !notes.isEmpty {
-            height += 4 + min(40, CGFloat(notes.count / 60 + 1) * Layout.lineHeight)
-        }
-
-        return height
+        // Compact layout: name row + details row + spacing + divider
+        return Layout.itemSpacing + Layout.lineHeight + 2 + Layout.lineHeight + 6
     }
 }
