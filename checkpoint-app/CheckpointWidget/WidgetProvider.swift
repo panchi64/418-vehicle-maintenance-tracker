@@ -111,7 +111,6 @@ struct WidgetProvider: AppIntentTimelineProvider {
     // App Group container identifier
     private let appGroupID = "group.com.418-studio.checkpoint.shared"
     private let widgetDataKey = "widgetData"
-    private let vehicleListKey = "vehicleList"
 
     func placeholder(in context: Context) -> ServiceEntry {
         ServiceEntry.placeholder
@@ -138,76 +137,37 @@ struct WidgetProvider: AppIntentTimelineProvider {
             return makeEmptyEntry(configuration: configuration)
         }
 
-        // Load shared settings as fallback
+        // Load shared settings for mileage display mode
         let sharedSettings = SharedWidgetSettings.load()
 
         // Determine which vehicle to load:
         // 1. Use configured vehicle if available (explicit per-widget config)
-        // 2. Fall back to app's currently selected vehicle (syncs with main app)
-        // 3. Fall back to shared settings default vehicle (legacy)
-        // 4. Fall back to first vehicle in list
-        // 5. Fall back to legacy widgetData key
-        let vehicleID: String?
-        let usesExplicitConfig: Bool
+        // 2. Fall back to widgetData key (always has app's current selection)
+        //
+        // Note: We use the widgetData key as primary fallback because it's written
+        // in the same operation as reloadAllTimelines(), avoiding cross-process
+        // UserDefaults synchronization issues with a separate vehicle ID key.
+        let effectiveConfig = CheckpointWidgetConfigurationIntent(
+            vehicle: configuration.vehicle,
+            mileageDisplayMode: sharedSettings.displayMode
+        )
 
+        // If widget is explicitly configured with a vehicle, try that vehicle's data first
         if let configuredVehicle = configuration.vehicle {
-            // User explicitly configured this widget with a specific vehicle
-            vehicleID = configuredVehicle.id
-            usesExplicitConfig = true
-        } else if let appSelectedID = sharedSettings.appSelectedVehicleID {
-            // Follow the app's currently selected vehicle
-            vehicleID = appSelectedID
-            usesExplicitConfig = false
-        } else if let sharedVehicleID = sharedSettings.vehicleID {
-            // Legacy: widget-specific default vehicle
-            vehicleID = sharedVehicleID
-            usesExplicitConfig = false
-        } else {
-            // Fall back to first vehicle
-            vehicleID = loadFirstVehicleID(from: userDefaults)
-            usesExplicitConfig = false
-        }
-
-        // Build effective configuration:
-        // - If widget has explicit config, use it
-        // - Otherwise, use shared settings for mileage display mode
-        let effectiveConfig: CheckpointWidgetConfigurationIntent
-        if usesExplicitConfig {
-            effectiveConfig = configuration
-        } else {
-            effectiveConfig = CheckpointWidgetConfigurationIntent(
-                vehicle: configuration.vehicle,
-                mileageDisplayMode: sharedSettings.displayMode
-            )
-        }
-
-        // Try vehicle-specific key first
-        if let vehicleID = vehicleID {
-            let vehicleKey = "widgetData_\(vehicleID)"
+            let vehicleKey = "widgetData_\(configuredVehicle.id)"
             if let data = userDefaults.data(forKey: vehicleKey),
                let entry = decodeEntry(from: data, configuration: effectiveConfig) {
                 return entry
             }
         }
 
-        // Fall back to legacy key
+        // Use the widgetData key which always contains the app's currently selected vehicle
         if let data = userDefaults.data(forKey: widgetDataKey),
            let entry = decodeEntry(from: data, configuration: effectiveConfig) {
             return entry
         }
 
         return makeEmptyEntry(configuration: effectiveConfig)
-    }
-
-    private func loadFirstVehicleID(from userDefaults: UserDefaults) -> String? {
-        guard let data = userDefaults.data(forKey: vehicleListKey) else { return nil }
-        do {
-            let items = try JSONDecoder().decode([VehicleListItem].self, from: data)
-            return items.first?.id
-        } catch {
-            print("Widget failed to decode vehicle list: \(error)")
-            return nil
-        }
     }
 
     private func decodeEntry(from data: Data, configuration: CheckpointWidgetConfigurationIntent) -> ServiceEntry? {

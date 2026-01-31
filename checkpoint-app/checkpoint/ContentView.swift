@@ -128,9 +128,9 @@ struct ContentView: View {
         }
         .onChange(of: appState.selectedVehicle) { _, newVehicle in
             updateAppIcon()
-            updateWidgetData()
-            // Persist selected vehicle ID
+            // Persist selected vehicle ID first so widget reads correct ID
             persistSelectedVehicle(newVehicle)
+            updateWidgetData()
         }
         .onChange(of: vehicles) { oldVehicles, newVehicles in
             // Update selection if current vehicle was deleted
@@ -272,9 +272,7 @@ struct ContentView: View {
                 sharedDefaults.removeObject(forKey: Self.selectedVehicleIDKey)
             }
         }
-
-        // Reload widget timelines so widgets can pick up the new selection
-        WidgetCenter.shared.reloadAllTimelines()
+        // Note: Widget reload happens in updateWidgetData() via WidgetDataService
     }
 
     // MARK: - App Icon

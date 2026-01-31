@@ -141,14 +141,26 @@ Widgets can be previewed in Xcode:
 }
 ```
 
+## UserDefaults Best Practices
+
+- **Do NOT call `synchronize()`** - It's deprecated and unnecessary. UserDefaults auto-syncs and calling it can hurt performance
+- The `widgetData` key contains the app's currently selected vehicle data
+- Widget uses `widgetData` as primary source to avoid cross-process synchronization issues
+- Widget configuration (per-widget vehicle selection) is stored separately by WidgetKit
+
 ## Troubleshooting
 
 **Widget not updating:**
 1. Verify App Group is configured on both targets
 2. Check `WidgetCenter.shared.reloadAllTimelines()` is called
 3. Verify data is being written to shared UserDefaults
+4. Note: `reloadAllTimelines()` is a suggestion to iOS, not a guarantee of immediate reload
 
 **Widget shows placeholder:**
 1. Check if any vehicles exist
 2. Verify JSON serialization is working
 3. Check for errors in `WidgetProvider.loadEntry()`
+
+**Widget shows wrong vehicle:**
+1. Ensure `WidgetDataService.updateWidget(for:)` is called when vehicle selection changes
+2. The `widgetData` key should always contain the currently selected vehicle's data
