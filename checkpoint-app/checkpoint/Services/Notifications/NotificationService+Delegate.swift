@@ -46,6 +46,12 @@ extension NotificationService: UNUserNotificationCenterDelegate {
             return
         }
 
+        // Handle cluster notifications
+        if notificationType == "cluster" {
+            await handleClusterNotificationResponse(response, userInfo: userInfo)
+            return
+        }
+
         // Handle service due notifications (default)
         await handleServiceDueResponse(response, userInfo: userInfo)
     }
@@ -151,6 +157,30 @@ extension NotificationService: UNUserNotificationCenterDelegate {
                 name: .navigateToServiceFromNotification,
                 object: nil,
                 userInfo: ["serviceID": serviceIDString]
+            )
+
+        default:
+            break
+        }
+    }
+
+    private func handleClusterNotificationResponse(
+        _ response: UNNotificationResponse,
+        userInfo: [AnyHashable: Any]
+    ) async {
+        guard let vehicleIDString = userInfo["vehicleID"] as? String,
+              let serviceIDStrings = userInfo["serviceIDs"] as? [String] else { return }
+
+        switch response.actionIdentifier {
+        case UNNotificationDefaultActionIdentifier:
+            // Navigate to home tab where cluster card is shown
+            NotificationCenter.default.post(
+                name: .navigateToClusterFromNotification,
+                object: nil,
+                userInfo: [
+                    "vehicleID": vehicleIDString,
+                    "serviceIDs": serviceIDStrings
+                ]
             )
 
         default:

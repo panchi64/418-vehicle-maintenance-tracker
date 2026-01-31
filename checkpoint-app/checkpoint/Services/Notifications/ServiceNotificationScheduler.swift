@@ -123,6 +123,37 @@ struct ServiceNotificationScheduler {
         }
     }
 
+    /// Reschedule all notifications for a vehicle with cluster awareness
+    /// - Clustered services get a single bundled notification
+    /// - Non-clustered services get individual notifications
+    @MainActor
+    static func rescheduleNotificationsWithClustering(for vehicle: Vehicle) {
+        let services = vehicle.services ?? []
+
+        // Cancel all existing notifications first
+        cancelNotifications(for: vehicle)
+        ClusterNotificationScheduler.cancelClusterNotifications(for: vehicle)
+
+        // Detect clusters
+        let clusters = ServiceClusteringService.detectClusters(for: vehicle, services: services)
+        let clusteredServiceIDs = Set(clusters.flatMap { $0.services.map { $0.id } })
+
+        // Schedule cluster notifications
+        for cluster in clusters {
+            ClusterNotificationScheduler.scheduleClusterNotification(for: cluster, vehicle: vehicle)
+        }
+
+        // Schedule individual notifications only for non-clustered services
+        let standaloneServices = services.filter { !clusteredServiceIDs.contains($0.id) }
+        let pace = vehicle.dailyMilesPace
+
+        for service in standaloneServices {
+            if let notificationID = scheduleNotificationWithPace(for: service, vehicle: vehicle, dailyPace: pace) {
+                service.notificationID = notificationID
+            }
+        }
+    }
+
     /// Internal helper to schedule notifications for a due date
     private static func scheduleNotificationsForDueDate(
         _ dueDate: Date, service: Service, vehicle: Vehicle

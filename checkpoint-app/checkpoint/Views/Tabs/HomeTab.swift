@@ -17,6 +17,11 @@ struct HomeTab: View {
     // Recall alert state
     @State private var recalls: [RecallInfo] = []
 
+    // Cluster state
+    @State private var primaryCluster: ServiceCluster?
+    @State private var dismissedClusterHashes: Set<String> = []
+    @AppStorage("dismissedClusterHashes") private var dismissedClusterHashesStorage: String = ""
+
     private var syncService: CloudSyncStatusService {
         CloudSyncStatusService.shared
     }
@@ -113,6 +118,22 @@ struct HomeTab: View {
                         }
                     }
                     .revealAnimation(delay: 0.2)
+                }
+
+                // Service Cluster Suggestion Card (after Next Up)
+                if let cluster = primaryCluster,
+                   !dismissedClusterHashes.contains(cluster.contentHash),
+                   ClusteringSettings.shared.isEnabled {
+                    ServiceClusterCard(
+                        cluster: cluster,
+                        onTap: {
+                            appState.selectedCluster = cluster
+                        },
+                        onDismiss: {
+                            dismissCluster(cluster)
+                        }
+                    )
+                    .revealAnimation(delay: 0.25)
                 }
 
                 // Upcoming services list (max 3 for home tab)
@@ -228,6 +249,31 @@ struct HomeTab: View {
         }
         .task(id: vehicle?.id) {
             await fetchRecalls()
+            detectClusters()
+        }
+        .onChange(of: vehicleServices.count) { _, _ in
+            detectClusters()
+        }
+        .onAppear {
+            loadDismissedClusters()
+        }
+        .sheet(item: $appState.selectedCluster) { cluster in
+            ServiceClusterDetailSheet(
+                cluster: cluster,
+                onServiceTap: { service in
+                    appState.selectedCluster = nil
+                    appState.selectedService = service
+                },
+                onMarkAllDone: {
+                    appState.selectedCluster = nil
+                    appState.clusterToMarkDone = cluster
+                }
+            )
+        }
+        .sheet(item: $appState.clusterToMarkDone) { cluster in
+            MarkClusterDoneSheet(cluster: cluster) {
+                detectClusters()
+            }
         }
     }
 
@@ -340,6 +386,36 @@ struct HomeTab: View {
             // Silently fail — recalls are supplementary info
             recalls = []
         }
+    }
+
+    // MARK: - Cluster Management
+
+    private func detectClusters() {
+        guard let vehicle = vehicle else {
+            primaryCluster = nil
+            return
+        }
+        primaryCluster = ServiceClusteringService.primaryCluster(
+            for: vehicle,
+            services: vehicleServices
+        )
+    }
+
+    private func dismissCluster(_ cluster: ServiceCluster) {
+        dismissedClusterHashes.insert(cluster.contentHash)
+        saveDismissedClusters()
+    }
+
+    private func loadDismissedClusters() {
+        dismissedClusterHashes = Set(
+            dismissedClusterHashesStorage
+                .split(separator: ",")
+                .map(String.init)
+        )
+    }
+
+    private func saveDismissedClusters() {
+        dismissedClusterHashesStorage = dismissedClusterHashes.joined(separator: ",")
     }
 
     // MARK: - Helpers

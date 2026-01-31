@@ -32,6 +32,9 @@ struct SettingsView: View {
                         // Widget Settings Section
                         widgetSettingsSection
 
+                        // Service Bundling Section
+                        serviceBundlingSection
+
                         Spacer()
                     }
                     .padding(Spacing.screenHorizontal)
@@ -110,6 +113,57 @@ struct SettingsView: View {
                     widgetSettingRow(
                         title: "Mileage Display",
                         value: WidgetSettingsManager.shared.mileageDisplayMode.displayName
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+            .background(Theme.surfaceInstrument)
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+            )
+        }
+    }
+
+    // MARK: - Service Bundling Section
+
+    private var serviceBundlingSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            Text("SERVICE BUNDLING")
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(2)
+
+            VStack(spacing: 0) {
+                // Enable/Disable Toggle
+                ServiceBundlingToggle()
+
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: Theme.borderWidth)
+
+                // Mileage Window
+                NavigationLink {
+                    ClusteringMileageWindowPicker()
+                } label: {
+                    widgetSettingRow(
+                        title: "Mileage Window",
+                        value: "\(Formatters.mileageNumber(ClusteringSettings.shared.mileageWindow)) \(DistanceSettings.shared.unit.abbreviation)"
+                    )
+                }
+                .buttonStyle(.plain)
+
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: Theme.borderWidth)
+
+                // Days Window
+                NavigationLink {
+                    ClusteringDaysWindowPicker()
+                } label: {
+                    widgetSettingRow(
+                        title: "Days Window",
+                        value: "\(ClusteringSettings.shared.daysWindow) days"
                     )
                 }
                 .buttonStyle(.plain)
@@ -245,6 +299,38 @@ struct AppIconToggle: View {
                 if !newValue {
                     AppIconService.shared.resetToDefaultIcon()
                 }
+            }
+        }
+    }
+}
+
+// MARK: - Service Bundling Toggle
+
+struct ServiceBundlingToggle: View {
+    @State private var isEnabled: Bool = ClusteringSettings.shared.isEnabled
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Bundle Suggestions")
+                    .font(.brutalistBody)
+                    .foregroundStyle(Theme.textPrimary)
+
+                Text("Suggest bundling services due around the same time")
+                    .font(.brutalistSecondary)
+                    .foregroundStyle(Theme.textTertiary)
+            }
+
+            Spacer()
+
+            Toggle("", isOn: $isEnabled)
+                .labelsHidden()
+                .tint(Theme.accent)
+        }
+        .padding(Spacing.md)
+        .onChange(of: isEnabled) { _, newValue in
+            Task { @MainActor in
+                ClusteringSettings.shared.isEnabled = newValue
             }
         }
     }

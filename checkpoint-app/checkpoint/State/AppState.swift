@@ -25,6 +25,11 @@ final class AppState {
     var selectedService: Service?
     var selectedServiceLog: ServiceLog?
 
+    // MARK: - Cluster States
+
+    var selectedCluster: ServiceCluster?
+    var clusterToMarkDone: ServiceCluster?
+
     // MARK: - Tab Enum
 
     enum Tab: String, CaseIterable {

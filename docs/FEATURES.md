@@ -33,7 +33,7 @@
 | Feature                | Priority | Status | Notes                                                |
 | ---------------------- | -------- | ------ | ---------------------------------------------------- |
 | Manual entry           | High     | ✅     | Basic form: service type, date, mileage, cost, notes |
-| Receipt/invoice OCR    | High     | ⏳     | Photo → auto-populate fields (date, cost, services)  |
+| Receipt/invoice capture| High     | ⏳     | Photo capture and text extraction for reference      |
 | Service type presets   | High     | ✅     | Oil change, tire rotation, brakes, etc.              |
 | Custom service types   | Medium   | ✅     | User-defined categories                              |
 | Attachments            | Medium   | ✅     | Photos, PDFs, receipts                               |
@@ -47,16 +47,16 @@
 
 | Tier | What's Included | Pricing |
 | ---- | --------------- | ------- |
-| **Basic OCR** | On-device Vision framework, text extraction, manual field selection | Free |
-| **AI-Powered OCR** | Server-side smart extraction, automatic field detection, high accuracy parsing | Subscription |
+| **Basic OCR** | On-device Vision framework, text extraction for viewing, receipt image storage | Free |
+| **AI-Powered OCR** | Apple Intelligence smart extraction, auto-populate fields (date, cost, services), contextual prompts | Subscription |
 
 | Feature                | Priority | Notes                                                   |
 | ---------------------- | -------- | ------------------------------------------------------- |
-| Document scanning      | High     | VisionKit for clean document capture                    |
-| On-device OCR          | High     | Vision framework, no cloud dependency (Free)            |
-| Smart field extraction | High     | Date, vendor, line items, costs, vehicle info (Subscription) |
-| Contextual prompts     | High     | Different flows for service receipts vs parts purchases |
-| Confidence indicators  | Low      | ✅ | Show extraction confidence, let user correct errors     |
+| Document scanning      | High     | VisionKit for clean document capture (Free)             |
+| On-device OCR          | High     | Vision framework text extraction for viewing (Free)     |
+| Smart field extraction | High     | Auto-populate date, vendor, costs via Apple Intelligence (Subscription) |
+| Contextual prompts     | High     | Different flows for service receipts vs parts purchases (Subscription) |
+| Confidence indicators  | Low      | Show extraction confidence, let user correct errors (Subscription) |
 
 **Contextual prompt logic:**
 
@@ -86,7 +86,7 @@
 | Mileage-based reminders      | High     | ✅     | "500 miles remaining" (primary method)                          |
 | Date-based reminders         | High     | ✅     | Fallback for non-mileage services (battery, wipers)             |
 | Smart notifications          | High     | ✅     | Default intervals: 30 days, 7 days, 1 day before due (configurable) |
-| Service clustering           | High     | ⏳     | Bundle nearby services into one visit                           |
+| Service clustering           | High     | ✅     | Bundle nearby services into one visit                           |
 | Seasonal reminders           | Medium   | ⏳     | Location + season → contextual alerts                           |
 | Severe vs normal schedules   | Medium   | ⏳     | Different intervals based on driving conditions                 |
 | Custom reminder intervals    | Medium   | ✅     | User-defined schedules                                          |
@@ -237,9 +237,8 @@
 
 | Feature                  | Priority | Status | Notes                                                    |
 | ------------------------ | -------- | ------ | -------------------------------------------------------- |
-| Service history PDF      | High     |      | Complete maintenance history for resale, warranty claims |
+| Service history PDF      | High     |      | Complete maintenance history for resale, warranty claims; shareable via iOS share sheet |
 | iCloud Sync              | High     | ✅     | Free native sync across iOS devices via CloudKit         |
-| Shareable reports        | Medium   |      | Send to mechanic, buyer, etc.                            |
 | Maintenance cost reports | Medium   |      | Graphs and breakdowns                                    |
 
 #### iCloud Sync (Free Feature)
