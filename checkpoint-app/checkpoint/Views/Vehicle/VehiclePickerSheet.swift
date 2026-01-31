@@ -22,6 +22,9 @@ struct VehiclePickerSheet: View {
     @State private var vehicleToDelete: Vehicle?
     @State private var showDeleteConfirmation = false
 
+    // State for editing
+    @State private var vehicleToEdit: Vehicle?
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -33,7 +36,13 @@ struct VehiclePickerSheet: View {
                         VStack(spacing: 0) {
                             ForEach(vehicles) { vehicle in
                                 vehicleRow(vehicle)
-                                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                    .contextMenu {
+                                        Button {
+                                            vehicleToEdit = vehicle
+                                        } label: {
+                                            Label("Edit", systemImage: "pencil")
+                                        }
+
                                         Button(role: .destructive) {
                                             vehicleToDelete = vehicle
                                             showDeleteConfirmation = true
@@ -118,6 +127,9 @@ struct VehiclePickerSheet: View {
                 Text("This will permanently delete \"\(vehicle.displayName)\" and all its services and maintenance history.")
             }
         }
+        .sheet(item: $vehicleToEdit) { vehicle in
+            EditVehicleView(vehicle: vehicle)
+        }
     }
 
     // MARK: - Delete Vehicle
@@ -191,7 +203,7 @@ struct VehiclePickerSheet: View {
         }
         .buttonStyle(ServiceRowButtonStyle())
         .accessibilityLabel(vehicle.displayName)
-        .accessibilityHint(selectedVehicle?.id == vehicle.id ? "Currently selected" : "Double tap to select")
+        .accessibilityHint(selectedVehicle?.id == vehicle.id ? "Currently selected. Long press for options." : "Double tap to select. Long press for options.")
     }
 }
 
