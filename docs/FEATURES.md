@@ -81,7 +81,7 @@
 
 | Feature                      | Priority | Status | Notes                                                           |
 | ---------------------------- | -------- | ------ | --------------------------------------------------------------- |
-| Pre-loaded factory schedules | High     | ⏳     | VIN decode → manufacturer intervals (see Data Strategy section) |
+| Pre-loaded factory schedules | High     | 🔮     | Moved to v2.0 — will leverage user vehicle data to prioritize which schedules to build first |
 | Manual schedule entry        | High     | ✅     | User inputs their own schedule from their owner's manual        |
 | Mileage-based reminders      | High     | ✅     | "500 miles remaining" (primary method)                          |
 | Date-based reminders         | High     | ✅     | Fallback for non-mileage services (battery, wipers)             |

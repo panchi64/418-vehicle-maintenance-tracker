@@ -67,11 +67,17 @@ Checkpoint aims to be the **definitive iOS vehicle maintenance companion** — a
 
 | Feature | Priority | Status |
 |---------|----------|--------|
-| Apple Watch Complication | High | ⏳ In Progress |
+| Apple Watch Complication | High | ⏳ Planned |
 | Siri Integration | Medium | ⏳ Planned |
-| Receipt/Invoice Capture | High | ⏳ Planned |
-| Pre-loaded Factory Schedules | High | ⏳ Planned |
-| Service Clustering | High | ✅ Complete |
+| Seasonal Reminders | Medium | ⏳ Planned |
+| Severe vs Normal Schedules | Medium | ⏳ Planned |
+
+### v1.0 Recently Completed
+
+| Feature | Status |
+|---------|--------|
+| Receipt/Invoice Capture | ✅ |
+| Service Clustering | ✅ |
 
 ### Reports & Export
 
@@ -213,6 +219,22 @@ These features require ongoing infrastructure and justify a subscription model (
 ## v2.0 — Intelligence & Insights
 
 > Crowd-sourced data, predictive maintenance, and professional tools.
+
+### Pre-loaded Factory Schedules
+
+| Feature | Priority | Description |
+|---------|----------|-------------|
+| **Factory Maintenance Schedules** | High | VIN decode → manufacturer intervals from owner's manuals |
+| **Normal vs Severe Modes** | Medium | Support both driving condition schedules |
+| **Crowdsourced Schedules** | Medium | Users submit/verify schedules for their vehicles |
+
+**Why v2.0 (not v1.0):**
+
+1. **No affordable APIs** — VIN → maintenance schedule APIs are enterprise-only pricing
+2. **Smart prioritization** — By v2.0, we'll have real user data on which vehicles to support first (build schedules for actual user vehicles, not guesses)
+3. **Current approach works** — Generic presets (5k oil change, tire rotation, etc.) are reasonable defaults that users can customize
+
+> See [Data Strategy: Factory Maintenance Schedules](#data-strategy-factory-maintenance-schedules) for extraction workflow details.
 
 ### On-Device Document Intelligence
 
