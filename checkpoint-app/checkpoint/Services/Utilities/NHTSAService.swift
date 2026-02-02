@@ -107,6 +107,17 @@ private nonisolated func decodeNHTSAJSON<T: Decodable>(_ type: T.Type, from data
     try JSONDecoder().decode(type, from: data)
 }
 
+// MARK: - Cache Entry
+
+private struct CacheEntry<T: Sendable>: Sendable {
+    let data: T
+    let timestamp: Date
+
+    func isValid(ttl: TimeInterval) -> Bool {
+        Date().timeIntervalSince(timestamp) < ttl
+    }
+}
+
 // MARK: - Service
 
 actor NHTSAService {
@@ -114,8 +125,22 @@ actor NHTSAService {
 
     private let session: URLSession
 
+    // Cache storage
+    private var vinCache: [String: CacheEntry<VINDecodeResult>] = [:]
+    private var recallsCache: [String: CacheEntry<[RecallInfo]>] = [:]
+
+    // Cache TTLs
+    private let vinCacheTTL: TimeInterval = 24 * 60 * 60  // 24 hours (VIN data is static)
+    private let recallsCacheTTL: TimeInterval = 60 * 60   // 1 hour (recalls can be updated)
+
     init(session: URLSession = .shared) {
         self.session = session
+    }
+
+    /// Clears all cached data (useful for testing or manual refresh)
+    func clearCache() {
+        vinCache.removeAll()
+        recallsCache.removeAll()
     }
 
     // MARK: - VIN Validation
@@ -140,6 +165,12 @@ actor NHTSAService {
         try validateVIN(vin)
 
         let trimmed = vin.trimmingCharacters(in: .whitespaces).uppercased()
+
+        // Check cache first
+        if let cached = vinCache[trimmed], cached.isValid(ttl: vinCacheTTL) {
+            return cached.data
+        }
+
         guard let url = URL(string: "https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/\(trimmed)?format=json") else {
             throw NHTSAError.serverError
         }
@@ -166,14 +197,14 @@ actor NHTSAService {
             throw NHTSAError.serverError
         }
 
-        let decoded: VINDecodeResponse
+        let vinResponse: VINDecodeResponse
         do {
-            decoded = try decodeNHTSAJSON(VINDecodeResponse.self, from: data)
+            vinResponse = try decodeNHTSAJSON(VINDecodeResponse.self, from: data)
         } catch {
             throw NHTSAError.decodingFailed
         }
 
-        guard let result = decoded.Results.first else {
+        guard let result = vinResponse.Results.first else {
             throw NHTSAError.noResultsFound
         }
 
@@ -192,7 +223,7 @@ actor NHTSAService {
         }
         let engineDescription = engineParts.isEmpty ? (result.EngineModel ?? "") : engineParts.joined(separator: " ")
 
-        return VINDecodeResult(
+        let vinDecodeResult = VINDecodeResult(
             make: result.Make ?? "",
             model: result.Model ?? "",
             modelYear: yearInt,
@@ -202,11 +233,24 @@ actor NHTSAService {
             fuelType: result.FuelTypePrimary ?? "",
             errorCode: result.ErrorCode ?? ""
         )
+
+        // Cache the result
+        vinCache[trimmed] = CacheEntry(data: vinDecodeResult, timestamp: Date())
+
+        return vinDecodeResult
     }
 
     // MARK: - Recall Fetch
 
     func fetchRecalls(make: String, model: String, year: Int) async throws -> [RecallInfo] {
+        // Create cache key from normalized inputs
+        let cacheKey = "\(make.lowercased())|\(model.lowercased())|\(year)"
+
+        // Check cache first
+        if let cached = recallsCache[cacheKey], cached.isValid(ttl: recallsCacheTTL) {
+            return cached.data
+        }
+
         let encodedMake = make.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? make
         let encodedModel = model.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? model
 
@@ -236,14 +280,14 @@ actor NHTSAService {
             throw NHTSAError.serverError
         }
 
-        let decoded: RecallsResponse
+        let recallsResponse: RecallsResponse
         do {
-            decoded = try decodeNHTSAJSON(RecallsResponse.self, from: data)
+            recallsResponse = try decodeNHTSAJSON(RecallsResponse.self, from: data)
         } catch {
             throw NHTSAError.decodingFailed
         }
 
-        return decoded.results.map { result in
+        let recalls = recallsResponse.results.map { result in
             RecallInfo(
                 campaignNumber: result.NHTSACampaignNumber ?? "",
                 component: result.Component ?? "",
@@ -255,5 +299,10 @@ actor NHTSAService {
                 parkOutside: result.parkOutSide ?? false
             )
         }
+
+        // Cache the result
+        recallsCache[cacheKey] = CacheEntry(data: recalls, timestamp: Date())
+
+        return recalls
     }
 }

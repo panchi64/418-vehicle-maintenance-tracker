@@ -413,6 +413,306 @@ final class NHTSAModelTests: XCTestCase {
     }
 }
 
+// MARK: - Cache Tests
+
+final class NHTSAServiceCacheTests: XCTestCase {
+
+    private var service: NHTSAService!
+
+    override func setUp() {
+        super.setUp()
+        MockURLProtocol.reset()
+        service = NHTSAService(session: makeSession())
+    }
+
+    override func tearDown() async throws {
+        await service.clearCache()
+        MockURLProtocol.reset()
+        try await super.tearDown()
+    }
+
+    func testDecodeVIN_SecondCall_ReturnsCachedResult() async throws {
+        let json = """
+        {
+            "Results": [{
+                "Make": "Toyota",
+                "Model": "Camry",
+                "ModelYear": "2012",
+                "EngineModel": "",
+                "DisplacementL": "",
+                "FuelTypePrimary": "",
+                "DriveType": "",
+                "BodyClass": "",
+                "ErrorCode": "0",
+                "EngineCylinders": "",
+                "EngineHP": ""
+            }]
+        }
+        """
+        MockURLProtocol.mockData = json.data(using: .utf8)
+        MockURLProtocol.mockResponse = mockHTTPResponse()
+
+        // First call - hits the network
+        let result1 = try await service.decodeVIN("4T1BF1FK5CU123456")
+        XCTAssertEqual(result1.make, "Toyota")
+
+        // Clear mock data to prove second call uses cache
+        MockURLProtocol.mockData = nil
+        MockURLProtocol.mockResponse = nil
+
+        // Second call - should use cache (would fail if it hit network)
+        let result2 = try await service.decodeVIN("4T1BF1FK5CU123456")
+        XCTAssertEqual(result2.make, "Toyota")
+        XCTAssertEqual(result2.model, "Camry")
+    }
+
+    func testDecodeVIN_DifferentVINs_NotCached() async throws {
+        let json1 = """
+        {
+            "Results": [{
+                "Make": "Toyota",
+                "Model": "Camry",
+                "ModelYear": "2012",
+                "EngineModel": "",
+                "DisplacementL": "",
+                "FuelTypePrimary": "",
+                "DriveType": "",
+                "BodyClass": "",
+                "ErrorCode": "0",
+                "EngineCylinders": "",
+                "EngineHP": ""
+            }]
+        }
+        """
+        MockURLProtocol.mockData = json1.data(using: .utf8)
+        MockURLProtocol.mockResponse = mockHTTPResponse()
+
+        let result1 = try await service.decodeVIN("4T1BF1FK5CU123456")
+        XCTAssertEqual(result1.make, "Toyota")
+
+        // Setup different response for second VIN
+        let json2 = """
+        {
+            "Results": [{
+                "Make": "Honda",
+                "Model": "Civic",
+                "ModelYear": "2020",
+                "EngineModel": "",
+                "DisplacementL": "",
+                "FuelTypePrimary": "",
+                "DriveType": "",
+                "BodyClass": "",
+                "ErrorCode": "0",
+                "EngineCylinders": "",
+                "EngineHP": ""
+            }]
+        }
+        """
+        MockURLProtocol.mockData = json2.data(using: .utf8)
+
+        // Different VIN - should hit network
+        let result2 = try await service.decodeVIN("1HGBH41JXMN109186")
+        XCTAssertEqual(result2.make, "Honda")
+    }
+
+    func testDecodeVIN_CaseInsensitive_UsesSameCache() async throws {
+        let json = """
+        {
+            "Results": [{
+                "Make": "Toyota",
+                "Model": "Camry",
+                "ModelYear": "2012",
+                "EngineModel": "",
+                "DisplacementL": "",
+                "FuelTypePrimary": "",
+                "DriveType": "",
+                "BodyClass": "",
+                "ErrorCode": "0",
+                "EngineCylinders": "",
+                "EngineHP": ""
+            }]
+        }
+        """
+        MockURLProtocol.mockData = json.data(using: .utf8)
+        MockURLProtocol.mockResponse = mockHTTPResponse()
+
+        // First call with lowercase
+        let result1 = try await service.decodeVIN("4t1bf1fk5cu123456")
+        XCTAssertEqual(result1.make, "Toyota")
+
+        // Clear mock to prove cache is used
+        MockURLProtocol.mockData = nil
+        MockURLProtocol.mockResponse = nil
+
+        // Second call with uppercase - should use same cache entry
+        let result2 = try await service.decodeVIN("4T1BF1FK5CU123456")
+        XCTAssertEqual(result2.make, "Toyota")
+    }
+
+    func testFetchRecalls_SecondCall_ReturnsCachedResult() async throws {
+        let json = """
+        {
+            "Count": 1,
+            "results": [{
+                "NHTSACampaignNumber": "24V123",
+                "Component": "AIR BAGS",
+                "Summary": "Test recall",
+                "Consequence": "",
+                "Remedy": "",
+                "ReportReceivedDate": "",
+                "parkIt": false,
+                "parkOutSide": false
+            }]
+        }
+        """
+        MockURLProtocol.mockData = json.data(using: .utf8)
+        MockURLProtocol.mockResponse = mockHTTPResponse()
+
+        // First call
+        let recalls1 = try await service.fetchRecalls(make: "Toyota", model: "Camry", year: 2012)
+        XCTAssertEqual(recalls1.count, 1)
+
+        // Clear mock to prove cache is used
+        MockURLProtocol.mockData = nil
+        MockURLProtocol.mockResponse = nil
+
+        // Second call - should use cache
+        let recalls2 = try await service.fetchRecalls(make: "Toyota", model: "Camry", year: 2012)
+        XCTAssertEqual(recalls2.count, 1)
+        XCTAssertEqual(recalls2[0].campaignNumber, "24V123")
+    }
+
+    func testFetchRecalls_CaseInsensitive_UsesSameCache() async throws {
+        let json = """
+        {
+            "Count": 1,
+            "results": [{
+                "NHTSACampaignNumber": "24V123",
+                "Component": "AIR BAGS",
+                "Summary": "Test recall",
+                "Consequence": "",
+                "Remedy": "",
+                "ReportReceivedDate": "",
+                "parkIt": false,
+                "parkOutSide": false
+            }]
+        }
+        """
+        MockURLProtocol.mockData = json.data(using: .utf8)
+        MockURLProtocol.mockResponse = mockHTTPResponse()
+
+        // First call
+        let recalls1 = try await service.fetchRecalls(make: "Toyota", model: "Camry", year: 2012)
+        XCTAssertEqual(recalls1.count, 1)
+
+        // Clear mock
+        MockURLProtocol.mockData = nil
+        MockURLProtocol.mockResponse = nil
+
+        // Second call with different casing - should use same cache
+        let recalls2 = try await service.fetchRecalls(make: "TOYOTA", model: "CAMRY", year: 2012)
+        XCTAssertEqual(recalls2.count, 1)
+    }
+
+    func testFetchRecalls_DifferentVehicle_NotCached() async throws {
+        let json1 = """
+        {
+            "Count": 1,
+            "results": [{
+                "NHTSACampaignNumber": "24V123",
+                "Component": "AIR BAGS",
+                "Summary": "Toyota recall",
+                "Consequence": "",
+                "Remedy": "",
+                "ReportReceivedDate": "",
+                "parkIt": false,
+                "parkOutSide": false
+            }]
+        }
+        """
+        MockURLProtocol.mockData = json1.data(using: .utf8)
+        MockURLProtocol.mockResponse = mockHTTPResponse()
+
+        let recalls1 = try await service.fetchRecalls(make: "Toyota", model: "Camry", year: 2012)
+        XCTAssertEqual(recalls1[0].summary, "Toyota recall")
+
+        // Setup different response
+        let json2 = """
+        {
+            "Count": 1,
+            "results": [{
+                "NHTSACampaignNumber": "24V456",
+                "Component": "BRAKES",
+                "Summary": "Honda recall",
+                "Consequence": "",
+                "Remedy": "",
+                "ReportReceivedDate": "",
+                "parkIt": false,
+                "parkOutSide": false
+            }]
+        }
+        """
+        MockURLProtocol.mockData = json2.data(using: .utf8)
+
+        // Different vehicle - should hit network
+        let recalls2 = try await service.fetchRecalls(make: "Honda", model: "Civic", year: 2020)
+        XCTAssertEqual(recalls2[0].summary, "Honda recall")
+    }
+
+    func testClearCache_RemovesCachedData() async throws {
+        let json = """
+        {
+            "Results": [{
+                "Make": "Toyota",
+                "Model": "Camry",
+                "ModelYear": "2012",
+                "EngineModel": "",
+                "DisplacementL": "",
+                "FuelTypePrimary": "",
+                "DriveType": "",
+                "BodyClass": "",
+                "ErrorCode": "0",
+                "EngineCylinders": "",
+                "EngineHP": ""
+            }]
+        }
+        """
+        MockURLProtocol.mockData = json.data(using: .utf8)
+        MockURLProtocol.mockResponse = mockHTTPResponse()
+
+        // First call - caches result
+        let result1 = try await service.decodeVIN("4T1BF1FK5CU123456")
+        XCTAssertEqual(result1.make, "Toyota")
+
+        // Clear cache
+        await service.clearCache()
+
+        // Setup different response - if cache still worked, we'd get Toyota
+        let json2 = """
+        {
+            "Results": [{
+                "Make": "Honda",
+                "Model": "Accord",
+                "ModelYear": "2020",
+                "EngineModel": "",
+                "DisplacementL": "",
+                "FuelTypePrimary": "",
+                "DriveType": "",
+                "BodyClass": "",
+                "ErrorCode": "0",
+                "EngineCylinders": "",
+                "EngineHP": ""
+            }]
+        }
+        """
+        MockURLProtocol.mockData = json2.data(using: .utf8)
+
+        // Should get new data since cache was cleared
+        let result2 = try await service.decodeVIN("4T1BF1FK5CU123456")
+        XCTAssertEqual(result2.make, "Honda", "Cache should have been cleared, returning new API result")
+    }
+}
+
 // MARK: - NHTSAError Equatable
 
 extension NHTSAError: Equatable {}
