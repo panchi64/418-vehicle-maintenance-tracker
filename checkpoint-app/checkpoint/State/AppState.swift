@@ -30,6 +30,17 @@ final class AppState {
     var selectedCluster: ServiceCluster?
     var clusterToMarkDone: ServiceCluster?
 
+    // MARK: - Siri Integration
+
+    /// Pending mileage update from Siri intent
+    var pendingMileageUpdate: SiriMileageUpdate?
+
+    /// Data for a pending mileage update from Siri
+    struct SiriMileageUpdate {
+        let vehicleID: String
+        let mileage: Int
+    }
+
     // MARK: - Tab Enum
 
     enum Tab: String, CaseIterable {

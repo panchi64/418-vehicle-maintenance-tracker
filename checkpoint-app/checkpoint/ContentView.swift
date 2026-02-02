@@ -19,6 +19,7 @@ struct ContentView: View {
     @State private var appState = AppState()
     @State private var showMileageUpdate = false
     @State private var showSettings = false
+    @State private var siriPrefilledMileage: Int?
 
     // MARK: - Vehicle Selection Persistence
 
@@ -119,8 +120,15 @@ struct ContentView: View {
             schedulePeriodicNotifications()
         }
         .onChange(of: scenePhase) { _, newPhase in
-            if newPhase == .active || newPhase == .background {
-                // Update app icon when entering foreground or going to background
+            if newPhase == .active {
+                // Update app icon when entering foreground
+                updateAppIcon()
+                // Update widget data
+                updateWidgetData()
+                // Check for pending Siri mileage update
+                handlePendingSiriMileageUpdate()
+            } else if newPhase == .background {
+                // Update app icon when going to background
                 updateAppIcon()
                 // Update widget data
                 updateWidgetData()
@@ -177,10 +185,14 @@ struct ContentView: View {
                 EditVehicleView(vehicle: vehicle)
             }
         }
-        .sheet(isPresented: $showMileageUpdate) {
+        .sheet(isPresented: $showMileageUpdate, onDismiss: {
+            // Clear Siri prefilled mileage after sheet is dismissed
+            siriPrefilledMileage = nil
+        }) {
             if let vehicle = currentVehicle {
                 MileageUpdateSheet(
                     currentMileage: vehicle.currentMileage,
+                    prefilledMileage: siriPrefilledMileage,
                     onSave: { newMileage in
                         updateMileage(newMileage, for: vehicle)
                     }
@@ -292,6 +304,37 @@ struct ContentView: View {
         } else {
             WidgetDataService.shared.clearWidgetData()
         }
+    }
+
+    // MARK: - Siri Integration
+
+    /// Handle pending mileage update from Siri intent
+    private func handlePendingSiriMileageUpdate() {
+        let pending = PendingMileageUpdate.shared
+        guard pending.hasPendingUpdate,
+              let vehicleIDString = pending.vehicleID,
+              let mileage = pending.mileage else {
+            return
+        }
+
+        // Clear the pending update immediately to avoid re-processing
+        pending.clear()
+
+        // Find the vehicle by ID
+        guard let vehicleID = UUID(uuidString: vehicleIDString),
+              let vehicle = vehicles.first(where: { $0.id == vehicleID }) else {
+            return
+        }
+
+        // Select the vehicle if it's not already selected
+        if currentVehicle?.id != vehicleID {
+            appState.selectedVehicle = vehicle
+        }
+
+        // Navigate to home and show mileage update with prefilled value
+        appState.selectedTab = .home
+        siriPrefilledMileage = mileage
+        showMileageUpdate = true
     }
 
     // MARK: - Mileage Update

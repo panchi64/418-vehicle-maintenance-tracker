@@ -2,12 +2,13 @@
 //  VehicleEntity.swift
 //  CheckpointWidget
 //
-//  AppEntity for vehicle selection in widget configuration
+//  AppEntity for vehicle selection in widget configuration and Siri intents
+//  This file should be added to BOTH the main app and widget targets in Xcode
 //
 
 import AppIntents
 
-/// Entity representing a vehicle for widget configuration selection
+/// Entity representing a vehicle for widget configuration and Siri intent selection
 struct VehicleEntity: AppEntity {
     let id: String
     let displayName: String

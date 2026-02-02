@@ -3,21 +3,25 @@
 //  CheckpointWidget
 //
 //  EntityQuery for fetching vehicles from App Group UserDefaults
+//  This file should be added to BOTH the main app and widget targets in Xcode
 //
 
 import AppIntents
 
+#if !MAIN_APP_TARGET
 // MARK: - Vehicle List Item
 
-/// Lightweight vehicle data for widget configuration stored in App Group UserDefaults
+/// Lightweight vehicle data for widget/Siri configuration stored in App Group UserDefaults
+/// Only defined here for the widget target - main app uses WidgetDataService.VehicleListItem
 struct VehicleListItem: Codable, Sendable {
     let id: String
     let displayName: String
 }
+#endif
 
 // MARK: - Vehicle Entity Query
 
-/// Query to fetch vehicles for widget configuration picker
+/// Query to fetch vehicles for widget configuration picker and Siri intents
 struct VehicleEntityQuery: EntityQuery {
     private let appGroupID = "group.com.418-studio.checkpoint.shared"
     private let vehicleListKey = "vehicleList"

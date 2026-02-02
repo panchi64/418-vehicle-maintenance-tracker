@@ -10,6 +10,8 @@
 		5AB669662F2687FC0036D71B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5AB669652F2687FC0036D71B /* WidgetKit.framework */; };
 		5AB669682F2687FC0036D71B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5AB669672F2687FC0036D71B /* SwiftUI.framework */; };
 		5AB669752F2687FD0036D71B /* CheckpointWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5AB669632F2687FC0036D71B /* CheckpointWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		5ASIRI0012F3000000036D71B /* VehicleEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ASIRI0022F3000000036D71B /* VehicleEntity.swift */; };
+		5ASIRI0032F3000000036D71B /* VehicleEntityQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ASIRI0042F3000000036D71B /* VehicleEntityQuery.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,6 +60,8 @@
 		5AB669652F2687FC0036D71B /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		5AB669672F2687FC0036D71B /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		5AB6698C2F268BBA0036D71B /* CheckpointWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CheckpointWidgetExtension.entitlements; sourceTree = "<group>"; };
+		5ASIRI0022F3000000036D71B /* VehicleEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VehicleEntity.swift; path = CheckpointWidget/VehicleEntity.swift; sourceTree = SOURCE_ROOT; };
+		5ASIRI0042F3000000036D71B /* VehicleEntityQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VehicleEntityQuery.swift; path = CheckpointWidget/VehicleEntityQuery.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -151,9 +155,19 @@
 				5AAAA9392F2084330002A8C6 /* checkpointTests */,
 				5AAAA9432F2084330002A8C6 /* checkpointUITests */,
 				5AB669692F2687FD0036D71B /* CheckpointWidget */,
+				5ASIRI0052F3000000036D71B /* SharedEntities */,
 				5AB669642F2687FC0036D71B /* Frameworks */,
 				5AAAA9282F2084320002A8C6 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		5ASIRI0052F3000000036D71B /* SharedEntities */ = {
+			isa = PBXGroup;
+			children = (
+				5ASIRI0022F3000000036D71B /* VehicleEntity.swift */,
+				5ASIRI0042F3000000036D71B /* VehicleEntityQuery.swift */,
+			);
+			name = SharedEntities;
 			sourceTree = "<group>";
 		};
 		5AAAA9282F2084320002A8C6 /* Products */ = {
@@ -355,6 +369,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5ASIRI0012F3000000036D71B /* VehicleEntity.swift in Sources */,
+				5ASIRI0032F3000000036D71B /* VehicleEntityQuery.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -546,6 +562,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.418-studio.checkpoint";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "MAIN_APP_TARGET DEBUG $(inherited)";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -582,6 +599,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.418-studio.checkpoint";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "MAIN_APP_TARGET $(inherited)";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;

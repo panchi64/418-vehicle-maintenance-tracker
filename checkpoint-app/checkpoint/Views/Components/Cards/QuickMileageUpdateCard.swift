@@ -129,7 +129,14 @@ struct MileageUpdateSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     let currentMileage: Int
+    let prefilledMileage: Int?
     let onSave: (Int) -> Void
+
+    init(currentMileage: Int, prefilledMileage: Int? = nil, onSave: @escaping (Int) -> Void) {
+        self.currentMileage = currentMileage
+        self.prefilledMileage = prefilledMileage
+        self.onSave = onSave
+    }
 
     @State private var newMileage: Int?
     @State private var showCamera = false
@@ -188,7 +195,8 @@ struct MileageUpdateSheet: View {
             }
         }
         .onAppear {
-            newMileage = currentMileage
+            // Use prefilled mileage from Siri if available, otherwise use current
+            newMileage = prefilledMileage ?? currentMileage
         }
         .fullScreenCover(isPresented: $showCamera) {
             OdometerCameraSheet { image in

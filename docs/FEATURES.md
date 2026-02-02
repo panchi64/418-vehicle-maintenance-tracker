@@ -401,7 +401,7 @@
 | Widget Settings Sync         | High     | ✅     | Configure default widget settings in app Settings; all widgets inherit |
 | One-tap notification actions | High     | ✅     | "Did you do your oil change?" → Yes/No buttons |
 | Apple Watch Complication     | High     | ⏳     | Quick mileage logging, glanceable "Next Up"    |
-| Siri integration             | Medium   | ⏳     | "Hey Siri, what's due on my car?"              |
+| Siri integration             | Medium   | ✅     | "Hey Siri, what's due on my car?"              |
 | CarPlay Dashboard Widget     | Medium   | ✅     | iOS 16+ compact widget on CarPlay home screen  |
 | Dynamic App Icon             | Medium   | ✅     | Icon changes based on service urgency (configurable in Settings) |
 

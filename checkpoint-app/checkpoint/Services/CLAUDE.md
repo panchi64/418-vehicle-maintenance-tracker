@@ -21,6 +21,12 @@ Services/
 │   ├── OdometerImagePreprocessor.swift
 │   ├── OdometerOCRService.swift
 │   └── VINOCRService.swift
+├── Siri/                # Siri voice command integration (see Siri/CLAUDE.md)
+│   ├── CheckNextDueIntent.swift            # "What's due on my car?"
+│   ├── ListUpcomingServicesIntent.swift    # "What maintenance is coming up?"
+│   ├── UpdateMileageIntent.swift           # "Update mileage to X miles"
+│   ├── CheckpointShortcuts.swift           # AppShortcutsProvider with phrases
+│   └── SiriDataProvider.swift              # Reads data from App Groups
 ├── Sync/                # iCloud & data sync
 │   ├── CloudSyncStatusService.swift
 │   ├── DataMigrationService.swift
