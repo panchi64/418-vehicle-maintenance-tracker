@@ -15,27 +15,35 @@ struct QuickMileageUpdateCard: View {
 
     @State private var showMileageSheet = false
 
-    /// Display mileage: use estimated if available, otherwise actual
+    /// Whether to show estimates (from settings)
+    private var showEstimates: Bool {
+        MileageEstimateSettings.shared.showEstimates
+    }
+
+    /// Whether we're displaying an estimated value
+    private var isShowingEstimate: Bool {
+        showEstimates && vehicle.isUsingEstimatedMileage
+    }
+
+    /// Display mileage: use estimated if available and enabled, otherwise actual
     private var displayMileage: Int {
-        vehicle.isUsingEstimatedMileage ? (vehicle.estimatedMileage ?? vehicle.currentMileage) : vehicle.currentMileage
+        isShowingEstimate ? (vehicle.estimatedMileage ?? vehicle.currentMileage) : vehicle.currentMileage
     }
 
     private var formattedMileage: String {
         let unit = DistanceSettings.shared.unit
         let displayValue = unit.fromMiles(displayMileage)
-        return Formatters.mileageNumber(displayValue)
+        let number = Formatters.mileageNumber(displayValue)
+
+        // Add tilda prefix for estimates
+        if isShowingEstimate {
+            return "~" + number
+        }
+        return number
     }
 
     private var unitAbbreviation: String {
         DistanceSettings.shared.unit.uppercaseAbbreviation
-    }
-
-    /// Description text including estimated status
-    private var mileageDescription: String {
-        if vehicle.isUsingEstimatedMileage {
-            return "Estimated • \(vehicle.mileageUpdateDescription)"
-        }
-        return vehicle.mileageUpdateDescription
     }
 
     var body: some View {
@@ -55,17 +63,20 @@ struct QuickMileageUpdateCard: View {
                                 .font(.brutalistLabel)
                                 .foregroundStyle(Theme.textTertiary)
                                 .tracking(1)
+                        }
 
-                            // Subtle estimated indicator
-                            if vehicle.isUsingEstimatedMileage {
-                                Text("EST")
+                        // Inline confidence indicator when showing estimate
+                        if isShowingEstimate, let confidence = vehicle.paceConfidence {
+                            HStack(spacing: Spacing.xs) {
+                                CompactConfidenceBar(level: confidence)
+                                Text(confidence.label)
                                     .font(.brutalistLabel)
-                                    .foregroundStyle(Theme.textSecondary)
+                                    .foregroundStyle(confidence.color)
                                     .tracking(1)
                             }
                         }
 
-                        Text(mileageDescription)
+                        Text(vehicle.mileageUpdateDescription)
                             .font(.brutalistSecondary)
                             .foregroundStyle(Theme.textTertiary)
                     }
@@ -85,24 +96,6 @@ struct QuickMileageUpdateCard: View {
                             .background(Theme.accent)
                     }
                 }
-
-                // Subtle confidence indicator (only when estimated, metadata style)
-                if vehicle.isUsingEstimatedMileage, let confidence = vehicle.paceConfidence {
-                    HStack(spacing: Spacing.xs) {
-                        Text("PACE_CONFIDENCE")
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.textTertiary)
-                            .tracking(1)
-
-                        CompactConfidenceBar(level: confidence)
-
-                        Text(confidence.label)
-                            .font(.brutalistLabel)
-                            .foregroundStyle(confidence.color)
-                            .tracking(1)
-                    }
-                    .padding(.top, Spacing.xs)
-                }
             }
             .padding(Spacing.md)
             .background(Theme.surfaceInstrument)
@@ -113,12 +106,12 @@ struct QuickMileageUpdateCard: View {
         }
         .sheet(isPresented: $showMileageSheet) {
             MileageUpdateSheet(
-                currentMileage: vehicle.currentMileage,
+                vehicle: vehicle,
                 onSave: { newMileage in
                     onUpdate(newMileage)
                 }
             )
-            .presentationDetents([.height(340)])
+            .presentationDetents([.height(450)])
         }
     }
 }
@@ -128,12 +121,12 @@ struct QuickMileageUpdateCard: View {
 struct MileageUpdateSheet: View {
     @Environment(\.dismiss) private var dismiss
 
-    let currentMileage: Int
+    let vehicle: Vehicle
     let prefilledMileage: Int?
     let onSave: (Int) -> Void
 
-    init(currentMileage: Int, prefilledMileage: Int? = nil, onSave: @escaping (Int) -> Void) {
-        self.currentMileage = currentMileage
+    init(vehicle: Vehicle, prefilledMileage: Int? = nil, onSave: @escaping (Int) -> Void) {
+        self.vehicle = vehicle
         self.prefilledMileage = prefilledMileage
         self.onSave = onSave
     }
@@ -151,6 +144,16 @@ struct MileageUpdateSheet: View {
         UIImagePickerController.isSourceTypeAvailable(.camera)
     }
 
+    /// Whether to show estimates (from settings)
+    private var showEstimates: Bool {
+        MileageEstimateSettings.shared.showEstimates
+    }
+
+    /// Whether we have an estimate to show
+    private var hasEstimate: Bool {
+        showEstimates && vehicle.isUsingEstimatedMileage && vehicle.estimatedMileage != nil
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -158,6 +161,9 @@ struct MileageUpdateSheet: View {
                     .ignoresSafeArea()
 
                 VStack(spacing: Spacing.lg) {
+                    // Context row: estimate + last confirmed
+                    contextRow
+
                     // Mileage input with camera button
                     mileageInputSection
 
@@ -195,8 +201,11 @@ struct MileageUpdateSheet: View {
             }
         }
         .onAppear {
-            // Use prefilled mileage from Siri if available, otherwise use current
-            newMileage = prefilledMileage ?? currentMileage
+            // Use prefilled mileage from Siri if available, otherwise start empty
+            if let prefilled = prefilledMileage {
+                newMileage = prefilled
+            }
+            // Otherwise leave newMileage nil so user enters actual reading
         }
         .fullScreenCover(isPresented: $showCamera) {
             OdometerCameraSheet { image in
@@ -211,7 +220,7 @@ struct MileageUpdateSheet: View {
                     onConfirm: { mileage in
                         newMileage = mileage
                     },
-                    currentMileage: currentMileage,
+                    currentMileage: vehicle.currentMileage,
                     detectedUnit: result.detectedUnit,
                     rawText: result.rawText,
                     debugImage: ocrDebugImage
@@ -221,12 +230,141 @@ struct MileageUpdateSheet: View {
         }
     }
 
+    // MARK: - Context Row
+
+    @ViewBuilder
+    private var contextRow: some View {
+        if hasEstimate {
+            // Show both estimate and last confirmed
+            HStack(spacing: Spacing.sm) {
+                // Current estimate card
+                estimateContextCard
+
+                // Last confirmed card
+                lastConfirmedContextCard
+            }
+        } else if vehicle.mileageUpdatedAt != nil {
+            // No estimate, just show last confirmed
+            lastConfirmedOnlyCard
+        } else {
+            // No estimate and never updated - show hint
+            noEstimateHint
+        }
+    }
+
+    private var estimateContextCard: some View {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            Text("CURRENT ESTIMATE")
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(1)
+
+            if let estimate = vehicle.estimatedMileage {
+                Text(Formatters.estimatedMileage(estimate) + " " + DistanceSettings.shared.unit.uppercaseAbbreviation)
+                    .font(.brutalistBody)
+                    .foregroundStyle(Theme.accent)
+            }
+
+            if let confidence = vehicle.paceConfidence {
+                HStack(spacing: Spacing.xs) {
+                    CompactConfidenceBar(level: confidence)
+                    Text(confidence.label)
+                        .font(.brutalistLabel)
+                        .foregroundStyle(confidence.color)
+                        .tracking(1)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(Spacing.md)
+        .background(Theme.surfaceInstrument)
+        .overlay(
+            Rectangle()
+                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+        )
+    }
+
+    private var lastConfirmedContextCard: some View {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            Text("LAST CONFIRMED")
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(1)
+
+            Text(Formatters.mileageNumber(vehicle.currentMileage) + " " + DistanceSettings.shared.unit.uppercaseAbbreviation)
+                .font(.brutalistBody)
+                .foregroundStyle(Theme.textPrimary)
+
+            Text(vehicle.mileageUpdateDescription)
+                .font(.brutalistSecondary)
+                .foregroundStyle(Theme.textTertiary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(Spacing.md)
+        .background(Theme.surfaceInstrument)
+        .overlay(
+            Rectangle()
+                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+        )
+    }
+
+    private var lastConfirmedOnlyCard: some View {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            Text("LAST CONFIRMED")
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(1)
+
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                Text(Formatters.mileageNumber(vehicle.currentMileage))
+                    .font(.brutalistBody)
+                    .foregroundStyle(Theme.textPrimary)
+
+                Text(DistanceSettings.shared.unit.uppercaseAbbreviation)
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.textTertiary)
+                    .tracking(1)
+            }
+
+            Text(vehicle.mileageUpdateDescription)
+                .font(.brutalistSecondary)
+                .foregroundStyle(Theme.textTertiary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(Spacing.md)
+        .background(Theme.surfaceInstrument)
+        .overlay(
+            Rectangle()
+                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+        )
+    }
+
+    private var noEstimateHint: some View {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            Text("NO ESTIMATE AVAILABLE")
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(1)
+
+            Text("Update a few more times to enable driving pace estimates")
+                .font(.brutalistSecondary)
+                .foregroundStyle(Theme.textTertiary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(Spacing.md)
+        .background(Theme.surfaceInstrument)
+        .overlay(
+            Rectangle()
+                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+        )
+    }
+
     // MARK: - Mileage Input Section
 
     private var mileageInputSection: some View {
         VStack(alignment: .leading, spacing: 6) {
             // Label
-            Text("CURRENT MILEAGE")
+            Text("ENTER MILEAGE")
                 .font(.instrumentLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1.5)
@@ -235,7 +373,7 @@ struct MileageUpdateSheet: View {
             HStack(spacing: 0) {
                 // Number input
                 HStack(spacing: 8) {
-                    TextField("\(currentMileage)", text: mileageBinding)
+                    TextField("", text: mileageBinding)
                         .font(.instrumentBody)
                         .foregroundStyle(Theme.textPrimary)
                         .keyboardType(.numberPad)
@@ -352,7 +490,7 @@ struct MileageUpdateSheet: View {
             do {
                 let result = try await OdometerOCRService.shared.recognizeMileage(
                     from: image,
-                    currentMileage: currentMileage
+                    currentMileage: vehicle.currentMileage
                 )
 
                 await MainActor.run {

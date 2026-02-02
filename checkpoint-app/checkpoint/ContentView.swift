@@ -191,13 +191,13 @@ struct ContentView: View {
         }) {
             if let vehicle = currentVehicle {
                 MileageUpdateSheet(
-                    currentMileage: vehicle.currentMileage,
+                    vehicle: vehicle,
                     prefilledMileage: siriPrefilledMileage,
                     onSave: { newMileage in
                         updateMileage(newMileage, for: vehicle)
                     }
                 )
-                .presentationDetents([.height(280)])
+                .presentationDetents([.height(450)])
             }
         }
         .sheet(isPresented: $showSettings) {

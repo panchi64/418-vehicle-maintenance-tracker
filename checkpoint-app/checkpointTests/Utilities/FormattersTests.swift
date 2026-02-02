@@ -137,4 +137,37 @@ final class FormattersTests: XCTestCase {
         let result = Formatters.mileage(1_000_000)
         XCTAssertEqual(result, "1,000,000 mi")
     }
+
+    // MARK: - Estimated Mileage Tests
+
+    func testEstimatedMileage_WithMiles_AddsTildaPrefix() {
+        DistanceSettings.shared.unit = .miles
+
+        let result = Formatters.estimatedMileage(32847)
+        XCTAssertEqual(result, "~32,847")
+    }
+
+    func testEstimatedMileage_WithKilometers_AddsTildaPrefix() {
+        DistanceSettings.shared.unit = .kilometers
+
+        // 32847 miles = ~52,862 km (rounded)
+        let result = Formatters.estimatedMileage(32847)
+        XCTAssertEqual(result, "~52,862")
+    }
+
+    func testEstimatedMileage_ExplicitUnit_UsesProvidedUnit() {
+        // Should use explicit unit regardless of settings
+        DistanceSettings.shared.unit = .miles
+
+        let kmResult = Formatters.estimatedMileage(100, unit: .kilometers)
+        XCTAssertEqual(kmResult, "~161")
+
+        let miResult = Formatters.estimatedMileage(100, unit: .miles)
+        XCTAssertEqual(miResult, "~100")
+    }
+
+    func testEstimatedMileage_ZeroValue_ReturnsTildaZero() {
+        DistanceSettings.shared.unit = .miles
+        XCTAssertEqual(Formatters.estimatedMileage(0), "~0")
+    }
 }

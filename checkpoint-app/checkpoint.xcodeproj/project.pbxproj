@@ -161,15 +161,6 @@
 			);
 			sourceTree = "<group>";
 		};
-		5ASIRI0052F3000000036D71B /* SharedEntities */ = {
-			isa = PBXGroup;
-			children = (
-				5ASIRI0022F3000000036D71B /* VehicleEntity.swift */,
-				5ASIRI0042F3000000036D71B /* VehicleEntityQuery.swift */,
-			);
-			name = SharedEntities;
-			sourceTree = "<group>";
-		};
 		5AAAA9282F2084320002A8C6 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -188,6 +179,15 @@
 				5AB669672F2687FC0036D71B /* SwiftUI.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		5ASIRI0052F3000000036D71B /* SharedEntities */ = {
+			isa = PBXGroup;
+			children = (
+				5ASIRI0022F3000000036D71B /* VehicleEntity.swift */,
+				5ASIRI0042F3000000036D71B /* VehicleEntityQuery.swift */,
+			);
+			name = SharedEntities;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

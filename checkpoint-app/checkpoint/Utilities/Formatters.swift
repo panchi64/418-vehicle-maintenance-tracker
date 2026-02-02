@@ -85,4 +85,23 @@ enum Formatters {
         let displayValue = unit.fromMiles(miles)
         return decimal.string(from: NSNumber(value: displayValue)) ?? "\(displayValue)"
     }
+
+    // MARK: - Estimated Mileage Methods
+
+    /// Format estimated mileage with tilda prefix: "~32,847"
+    /// Automatically converts from internal miles to user's preferred display unit
+    @MainActor
+    static func estimatedMileage(_ miles: Int) -> String {
+        let unit = DistanceSettings.shared.unit
+        let displayValue = unit.fromMiles(miles)
+        let formatted = decimal.string(from: NSNumber(value: displayValue)) ?? "\(displayValue)"
+        return "~" + formatted
+    }
+
+    /// Format estimated mileage with explicit unit (for widget/non-MainActor contexts)
+    static func estimatedMileage(_ miles: Int, unit: DistanceUnit) -> String {
+        let displayValue = unit.fromMiles(miles)
+        let formatted = decimal.string(from: NSNumber(value: displayValue)) ?? "\(displayValue)"
+        return "~" + formatted
+    }
 }

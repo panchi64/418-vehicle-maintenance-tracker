@@ -29,6 +29,9 @@ struct SettingsView: View {
                         // Distance Unit Section
                         distanceUnitSection
 
+                        // Mileage Estimation Section
+                        mileageEstimationSection
+
                         // Widget Settings Section
                         widgetSettingsSection
 
@@ -77,6 +80,19 @@ struct SettingsView: View {
 
             // Unit picker
             DistanceUnitPicker()
+        }
+    }
+
+    // MARK: - Mileage Estimation Section
+
+    private var mileageEstimationSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            Text("MILEAGE ESTIMATION")
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(2)
+
+            MileageEstimatesToggle()
         }
     }
 
@@ -331,6 +347,43 @@ struct ServiceBundlingToggle: View {
         .onChange(of: isEnabled) { _, newValue in
             Task { @MainActor in
                 ClusteringSettings.shared.isEnabled = newValue
+            }
+        }
+    }
+}
+
+// MARK: - Mileage Estimates Toggle
+
+struct MileageEstimatesToggle: View {
+    @State private var isEnabled: Bool = MileageEstimateSettings.shared.showEstimates
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Show Estimates")
+                    .font(.brutalistBody)
+                    .foregroundStyle(Theme.textPrimary)
+
+                Text("Display estimated mileage based on driving pace")
+                    .font(.brutalistSecondary)
+                    .foregroundStyle(Theme.textTertiary)
+            }
+
+            Spacer()
+
+            Toggle("", isOn: $isEnabled)
+                .labelsHidden()
+                .tint(Theme.accent)
+        }
+        .padding(Spacing.md)
+        .background(Theme.surfaceInstrument)
+        .overlay(
+            Rectangle()
+                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+        )
+        .onChange(of: isEnabled) { _, newValue in
+            Task { @MainActor in
+                MileageEstimateSettings.shared.showEstimates = newValue
             }
         }
     }

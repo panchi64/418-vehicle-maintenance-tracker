@@ -2,7 +2,8 @@
 //  OCRConfirmationView.swift
 //  checkpoint
 //
-//  Confirmation dialog for OCR-extracted mileage with confidence indicator
+//  Confirmation dialog for OCR-extracted mileage
+//  Shows low-confidence warning when needed
 //  Follows brutalist design: sharp corners, 2px borders, monospace typography
 //
 
@@ -38,10 +39,6 @@ struct OCRConfirmationView: View {
 
     private var displayMileage: Int {
         editedMileage ?? extractedMileage
-    }
-
-    private var confidencePercentage: Int {
-        Int(confidence * 100)
     }
 
     private var confidenceLevel: ConfidenceLevel {
@@ -94,10 +91,7 @@ struct OCRConfirmationView: View {
                     // Extracted mileage display (directly editable)
                     mileageDisplay
 
-                    // Confidence indicator
-                    confidenceIndicator
-
-                    // Warning for low confidence
+                    // Warning for low confidence only (no confidence bar)
                     if confidenceLevel == .low {
                         lowConfidenceWarning
                     }
@@ -172,34 +166,6 @@ struct OCRConfirmationView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, Spacing.xl)
-        .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
-    }
-
-    // MARK: - Confidence Indicator
-
-    private var confidenceIndicator: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            HStack {
-                Text("CONFIDENCE")
-                    .font(.brutalistLabel)
-                    .foregroundStyle(Theme.textTertiary)
-                    .tracking(1.5)
-
-                Spacer()
-
-                Text("\(confidencePercentage)%")
-                    .font(.brutalistBody)
-                    .foregroundStyle(confidenceLevel.color)
-            }
-
-            // Segmented bar (brutalist style - 10 rectangular segments)
-            ConfidenceBar(confidence: confidence, level: confidenceLevel)
-        }
-        .padding(Spacing.md)
         .background(Theme.surfaceInstrument)
         .overlay(
             Rectangle()
