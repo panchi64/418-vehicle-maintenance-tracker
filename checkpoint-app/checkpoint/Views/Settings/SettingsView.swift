@@ -20,23 +20,20 @@ struct SettingsView: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: Spacing.lg) {
-                        // iCloud Sync Section
+                        // DATA & SYNC
                         SyncSettingsSection()
 
-                        // App Icon Section
-                        appIconSection
+                        // DISPLAY
+                        displaySection
 
-                        // Distance Unit Section
-                        distanceUnitSection
+                        // ALERTS
+                        alertsSection
 
-                        // Mileage Estimation Section
-                        mileageEstimationSection
-
-                        // Widget Settings Section
-                        widgetSettingsSection
-
-                        // Service Bundling Section
+                        // SERVICE BUNDLING
                         serviceBundlingSection
+
+                        // WIDGETS
+                        widgetSettingsSection
 
                         Spacer()
                     }
@@ -44,55 +41,101 @@ struct SettingsView: View {
                     .padding(.top, Spacing.lg)
                 }
             }
-            .navigationTitle("Settings")
+            .navigationTitle(L10n.settingsTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button(L10n.commonDone) { dismiss() }
                         .foregroundStyle(Theme.accent)
                 }
             }
         }
     }
 
-    // MARK: - App Icon Section
+    // MARK: - Display Section
 
-    private var appIconSection: some View {
+    private var displaySection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("APP ICON")
+            Text(L10n.settingsDisplay)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(2)
 
-            AppIconToggle()
+            VStack(spacing: 0) {
+                // Distance Unit
+                NavigationLink {
+                    DistanceUnitPickerView()
+                } label: {
+                    widgetSettingRow(
+                        title: L10n.settingsDistanceUnit,
+                        value: DistanceSettings.shared.unit.displayName
+                    )
+                }
+                .buttonStyle(.plain)
+
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: Theme.borderWidth)
+
+                // Mileage Estimation
+                MileageEstimatesToggle()
+            }
+            .background(Theme.surfaceInstrument)
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+            )
         }
     }
 
-    // MARK: - Distance Unit Section
+    // MARK: - Alerts Section
 
-    private var distanceUnitSection: some View {
+    private var alertsSection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            // Section header
-            Text("DISTANCE UNIT")
+            Text(L10n.settingsAlerts)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(2)
 
-            // Unit picker
-            DistanceUnitPicker()
-        }
-    }
+            VStack(spacing: 0) {
+                // Due Soon Mileage Threshold
+                NavigationLink {
+                    DueSoonMileageThresholdPicker()
+                } label: {
+                    widgetSettingRow(
+                        title: L10n.settingsDueSoonMileage,
+                        value: "\(Formatters.mileageNumber(DueSoonSettings.shared.mileageThreshold)) \(DistanceSettings.shared.unit.abbreviation)"
+                    )
+                }
+                .buttonStyle(.plain)
 
-    // MARK: - Mileage Estimation Section
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: Theme.borderWidth)
 
-    private var mileageEstimationSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("MILEAGE ESTIMATION")
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(2)
+                // Due Soon Days Threshold
+                NavigationLink {
+                    DueSoonDaysThresholdPicker()
+                } label: {
+                    widgetSettingRow(
+                        title: L10n.settingsDueSoonDays,
+                        value: "\(DueSoonSettings.shared.daysThreshold) \(L10n.commonDays)"
+                    )
+                }
+                .buttonStyle(.plain)
 
-            MileageEstimatesToggle()
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: Theme.borderWidth)
+
+                // App Icon Auto-change
+                AppIconToggle()
+            }
+            .background(Theme.surfaceInstrument)
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+            )
         }
     }
 
@@ -101,7 +144,7 @@ struct SettingsView: View {
     private var widgetSettingsSection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             // Section header
-            Text("WIDGETS")
+            Text(L10n.settingsWidgets)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(2)
@@ -112,7 +155,7 @@ struct SettingsView: View {
                     WidgetVehiclePicker(vehicles: vehicles)
                 } label: {
                     widgetSettingRow(
-                        title: "Default Vehicle",
+                        title: L10n.settingsDefaultVehicle,
                         value: selectedVehicleName
                     )
                 }
@@ -127,7 +170,7 @@ struct SettingsView: View {
                     WidgetMileageModePicker()
                 } label: {
                     widgetSettingRow(
-                        title: "Mileage Display",
+                        title: L10n.settingsMileageDisplay,
                         value: WidgetSettingsManager.shared.mileageDisplayMode.displayName
                     )
                 }
@@ -145,7 +188,7 @@ struct SettingsView: View {
 
     private var serviceBundlingSection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("SERVICE BUNDLING")
+            Text(L10n.settingsServiceBundling)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(2)
@@ -163,7 +206,7 @@ struct SettingsView: View {
                     ClusteringMileageWindowPicker()
                 } label: {
                     widgetSettingRow(
-                        title: "Mileage Window",
+                        title: L10n.settingsMileageWindow,
                         value: "\(Formatters.mileageNumber(ClusteringSettings.shared.mileageWindow)) \(DistanceSettings.shared.unit.abbreviation)"
                     )
                 }
@@ -178,8 +221,8 @@ struct SettingsView: View {
                     ClusteringDaysWindowPicker()
                 } label: {
                     widgetSettingRow(
-                        title: "Days Window",
-                        value: "\(ClusteringSettings.shared.daysWindow) days"
+                        title: L10n.settingsDaysWindow,
+                        value: "\(ClusteringSettings.shared.daysWindow) \(L10n.commonDays)"
                     )
                 }
                 .buttonStyle(.plain)
@@ -197,7 +240,7 @@ struct SettingsView: View {
            let vehicle = vehicles.first(where: { $0.id.uuidString == vehicleID }) {
             return vehicle.name
         }
-        return "First Vehicle"
+        return L10n.vehicleFirstVehicle
     }
 
     private func widgetSettingRow(title: String, value: String) -> some View {
@@ -221,30 +264,45 @@ struct SettingsView: View {
     }
 }
 
-// MARK: - Distance Unit Picker
+// MARK: - Distance Unit Picker View
 
-struct DistanceUnitPicker: View {
+struct DistanceUnitPickerView: View {
+    @Environment(\.dismiss) private var dismiss
     @State private var selectedUnit: DistanceUnit = DistanceSettings.shared.unit
 
     var body: some View {
-        VStack(spacing: 0) {
-            ForEach(DistanceUnit.allCases, id: \.self) { unit in
-                unitRow(for: unit)
+        ZStack {
+            Theme.backgroundPrimary
+                .ignoresSafeArea()
 
-                if unit != DistanceUnit.allCases.last {
-                    Rectangle()
-                        .fill(Theme.gridLine)
-                        .frame(height: Theme.borderWidth)
+            VStack(alignment: .leading, spacing: Spacing.lg) {
+                VStack(spacing: 0) {
+                    ForEach(DistanceUnit.allCases, id: \.self) { unit in
+                        unitRow(for: unit)
+
+                        if unit != DistanceUnit.allCases.last {
+                            Rectangle()
+                                .fill(Theme.gridLine)
+                                .frame(height: Theme.borderWidth)
+                        }
+                    }
                 }
+                .background(Theme.surfaceInstrument)
+                .overlay(
+                    Rectangle()
+                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+                )
+                .padding(.horizontal, Spacing.screenHorizontal)
+
+                Spacer()
             }
+            .padding(.top, Spacing.lg)
         }
-        .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .navigationTitle(L10n.distanceUnitTitle)
+        .navigationBarTitleDisplayMode(.inline)
         .onChange(of: selectedUnit) { _, newUnit in
             Task { @MainActor in
+                HapticService.shared.selectionChanged()
                 DistanceSettings.shared.unit = newUnit
             }
         }
@@ -260,7 +318,7 @@ struct DistanceUnitPicker: View {
                         .font(.brutalistBody)
                         .foregroundStyle(Theme.textPrimary)
 
-                    Text(unit == .miles ? "mi (default)" : "km")
+                    Text(unit == .miles ? L10n.distanceMilesDefault : L10n.distanceKilometersAbbr)
                         .font(.brutalistSecondary)
                         .foregroundStyle(Theme.textTertiary)
                 }
@@ -288,11 +346,11 @@ struct AppIconToggle: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Automatic Icon")
+                Text(L10n.settingsAutomaticIcon)
                     .font(.brutalistBody)
                     .foregroundStyle(Theme.textPrimary)
 
-                Text("Changes icon based on service urgency")
+                Text(L10n.settingsAutomaticIconDesc)
                     .font(.brutalistSecondary)
                     .foregroundStyle(Theme.textTertiary)
             }
@@ -304,13 +362,9 @@ struct AppIconToggle: View {
                 .tint(Theme.accent)
         }
         .padding(Spacing.md)
-        .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
         .onChange(of: isEnabled) { _, newValue in
             Task { @MainActor in
+                HapticService.shared.selectionChanged()
                 AppIconSettings.shared.autoChangeEnabled = newValue
                 if !newValue {
                     AppIconService.shared.resetToDefaultIcon()
@@ -328,11 +382,11 @@ struct ServiceBundlingToggle: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Bundle Suggestions")
+                Text(L10n.settingsBundleSuggestions)
                     .font(.brutalistBody)
                     .foregroundStyle(Theme.textPrimary)
 
-                Text("Suggest bundling services due around the same time")
+                Text(L10n.settingsBundleSuggestionsDesc)
                     .font(.brutalistSecondary)
                     .foregroundStyle(Theme.textTertiary)
             }
@@ -360,11 +414,11 @@ struct MileageEstimatesToggle: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Show Estimates")
+                Text(L10n.settingsMileageEstimation)
                     .font(.brutalistBody)
                     .foregroundStyle(Theme.textPrimary)
 
-                Text("Display estimated mileage based on driving pace")
+                Text(L10n.settingsMileageEstimationDesc)
                     .font(.brutalistSecondary)
                     .foregroundStyle(Theme.textTertiary)
             }
@@ -376,13 +430,9 @@ struct MileageEstimatesToggle: View {
                 .tint(Theme.accent)
         }
         .padding(Spacing.md)
-        .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
         .onChange(of: isEnabled) { _, newValue in
             Task { @MainActor in
+                HapticService.shared.selectionChanged()
                 MileageEstimateSettings.shared.showEstimates = newValue
             }
         }

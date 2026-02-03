@@ -1,0 +1,100 @@
+// Localizable.strings
+// checkpoint
+//
+// English localization strings for the Checkpoint vehicle maintenance tracker app.
+// Uses dot-notation keys for organization by feature area.
+
+// MARK: - Common
+
+"common.cancel" = "Cancel";
+"common.back" = "Back";
+"common.next" = "Next";
+"common.save" = "Save";
+"common.done" = "Done";
+"common.dismiss" = "Dismiss";
+"common.days" = "days";
+
+// MARK: - Vehicle
+
+"vehicle.add" = "Add Vehicle";
+"vehicle.details" = "Vehicle Details";
+"vehicle.nickname" = "Nickname";
+"vehicle.make" = "Make";
+"vehicle.model" = "Model";
+"vehicle.year" = "Year";
+"vehicle.make_placeholder" = "Toyota, Honda, Ford...";
+"vehicle.model_placeholder" = "Camry, Civic, F-150...";
+"vehicle.year_placeholder" = "2024";
+"vehicle.nickname_placeholder" = "Optional";
+"vehicle.optional" = "Optional";
+"vehicle.odometer" = "Odometer";
+"vehicle.current_mileage" = "Current Mileage";
+"vehicle.mileage_placeholder" = "0";
+"vehicle.identification" = "Identification";
+"vehicle.vin" = "VIN";
+"vehicle.vin_placeholder" = "Optional";
+"vehicle.vin_help" = "17-character Vehicle Identification Number";
+"vehicle.specifications" = "Specifications";
+"vehicle.tire_size" = "Tire Size";
+"vehicle.tire_size_placeholder" = "225/45R17 (Optional)";
+"vehicle.oil_type" = "Oil Type";
+"vehicle.oil_type_placeholder" = "0W-20 Synthetic (Optional)";
+"vehicle.notes" = "Notes";
+"vehicle.notes_placeholder" = "Vehicle quirks, history, reminders...";
+"vehicle.save" = "Save Vehicle";
+"vehicle.skip_details" = "Skip Details";
+"vehicle.first_vehicle" = "First Vehicle";
+
+// MARK: - Add Vehicle Flow
+
+"addvehicle.step" = "Step %d of %d";
+"addvehicle.basics" = "Vehicle Basics";
+"addvehicle.scanning_vin" = "Scanning VIN...";
+"addvehicle.scanning_odometer" = "Scanning odometer...";
+"addvehicle.vin_align_guide" = "ALIGN VIN HERE";
+"addvehicle.vin_lookup" = "Look Up VIN";
+"addvehicle.vin_lookup_loading" = "Looking Up...";
+
+// MARK: - Settings
+
+"settings.title" = "Settings";
+"settings.display" = "DISPLAY";
+"settings.alerts" = "ALERTS";
+"settings.widgets" = "WIDGETS";
+"settings.service_bundling" = "SERVICE BUNDLING";
+"settings.distance_unit" = "Distance Unit";
+"settings.mileage_estimation" = "Mileage Estimation";
+"settings.mileage_estimation_desc" = "Show estimated mileage based on driving pace";
+"settings.due_soon_mileage" = "Due Soon (Mileage)";
+"settings.due_soon_days" = "Due Soon (Days)";
+"settings.automatic_icon" = "Automatic Icon";
+"settings.automatic_icon_desc" = "Changes icon based on service urgency";
+"settings.bundle_suggestions" = "Bundle Suggestions";
+"settings.bundle_suggestions_desc" = "Suggest bundling services due around the same time";
+"settings.default_vehicle" = "Default Vehicle";
+"settings.mileage_display" = "Mileage Display";
+"settings.mileage_window" = "Mileage Window";
+"settings.days_window" = "Days Window";
+
+// MARK: - Distance Unit Picker
+
+"distance.miles" = "Miles";
+"distance.kilometers" = "Kilometers";
+"distance.miles_default" = "mi (default)";
+"distance.kilometers_abbr" = "km";
+"distance.unit_title" = "Distance Unit";
+
+// MARK: - Due Soon Threshold Pickers
+
+"duesoon.mileage_title" = "Mileage Threshold";
+"duesoon.mileage_desc" = "Choose when a service is marked \"due soon\" based on mileage remaining.";
+"duesoon.days_title" = "Days Threshold";
+"duesoon.days_desc" = "Choose when a date-based service is marked \"due soon\" based on days remaining.";
+"duesoon.default" = "Default";
+
+// MARK: - Errors
+
+"error.required_field" = "This field is required";
+"error.invalid_vin_format" = "Invalid VIN format";
+"error.could_not_read_odometer" = "Could not read odometer from image";
+"error.network_connection_failed" = "Network connection failed";

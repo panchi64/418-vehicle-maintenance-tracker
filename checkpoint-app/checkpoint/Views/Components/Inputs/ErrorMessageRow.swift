@@ -30,6 +30,7 @@ struct ErrorMessageRow: View {
                 Image(systemName: "xmark")
                     .font(.system(size: 12, weight: .bold))
                     .foregroundStyle(Theme.textTertiary)
+                    .minimumTouchTarget()
             }
         }
         .padding(Spacing.md)
@@ -47,15 +48,15 @@ struct ErrorMessageRow: View {
             .ignoresSafeArea()
 
         VStack(spacing: Spacing.lg) {
-            ErrorMessageRow(message: "Invalid VIN format") {
+            ErrorMessageRow(message: L10n.errorInvalidVINFormat) {
                 print("Dismissed")
             }
 
-            ErrorMessageRow(message: "Could not read odometer from image") {
+            ErrorMessageRow(message: L10n.errorCouldNotReadOdometer) {
                 print("Dismissed")
             }
 
-            ErrorMessageRow(message: "Network connection failed") {
+            ErrorMessageRow(message: L10n.errorNetworkConnectionFailed) {
                 print("Dismissed")
             }
         }
