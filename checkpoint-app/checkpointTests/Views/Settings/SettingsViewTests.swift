@@ -68,7 +68,7 @@ final class SettingsViewTests: XCTestCase {
 
     func testDistanceUnitPickerCanBeCreated() {
         // Basic smoke test for the picker
-        let picker = DistanceUnitPicker()
+        let picker = DistanceUnitPickerView()
         XCTAssertNotNil(picker)
     }
 }

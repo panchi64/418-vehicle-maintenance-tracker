@@ -13,24 +13,13 @@ struct ServicesTab: View {
     @Query private var services: [Service]
     @Query private var serviceLogs: [ServiceLog]
 
-    @State private var searchText = ""
-    @State private var statusFilter: StatusFilter = .all
-    @State private var viewMode: ViewMode = .list
     @State private var showExportOptions = false
     @State private var exportPDFURL: URL?
     @State private var isExporting = false
 
-    enum ViewMode: String, CaseIterable {
-        case list = "List"
-        case timeline = "Timeline"
-    }
-
-    enum StatusFilter: String, CaseIterable {
-        case all = "All"
-        case overdue = "Overdue"
-        case dueSoon = "Due Soon"
-        case good = "Good"
-    }
+    // Type aliases for cleaner code
+    private typealias ViewMode = AppState.ServicesViewMode
+    private typealias StatusFilter = AppState.ServicesStatusFilter
 
     private var vehicle: Vehicle? {
         appState.selectedVehicle
@@ -52,12 +41,12 @@ struct ServicesTab: View {
         let effectiveMileage = vehicle.effectiveMileage
 
         // Apply search filter
-        if !searchText.isEmpty {
-            filtered = filtered.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+        if !appState.servicesSearchText.isEmpty {
+            filtered = filtered.filter { $0.name.localizedCaseInsensitiveContains(appState.servicesSearchText) }
         }
 
         // Apply status filter
-        switch statusFilter {
+        switch appState.servicesStatusFilter {
         case .all:
             break
         case .overdue:
@@ -79,22 +68,22 @@ struct ServicesTab: View {
     }
 
     private var filteredLogs: [ServiceLog] {
-        if searchText.isEmpty {
+        if appState.servicesSearchText.isEmpty {
             return vehicleServiceLogs
         }
         return vehicleServiceLogs.filter { log in
             // Search service name
-            if log.service?.name.localizedCaseInsensitiveContains(searchText) ?? false {
+            if log.service?.name.localizedCaseInsensitiveContains(appState.servicesSearchText) ?? false {
                 return true
             }
             // Search notes
-            if log.notes?.localizedCaseInsensitiveContains(searchText) ?? false {
+            if log.notes?.localizedCaseInsensitiveContains(appState.servicesSearchText) ?? false {
                 return true
             }
             // Search extracted text from attachments (receipt OCR)
             if let attachments = log.attachments {
                 for attachment in attachments {
-                    if attachment.extractedText?.localizedCaseInsensitiveContains(searchText) ?? false {
+                    if attachment.extractedText?.localizedCaseInsensitiveContains(appState.servicesSearchText) ?? false {
                         return true
                     }
                 }
@@ -113,17 +102,17 @@ struct ServicesTab: View {
                 // View mode toggle
                 InstrumentSegmentedControl(
                     options: ViewMode.allCases,
-                    selection: $viewMode
+                    selection: $appState.servicesViewMode
                 ) { mode in
                     mode.rawValue
                 }
                 .revealAnimation(delay: 0.12)
 
                 // Status filter (only show in list mode)
-                if viewMode == .list {
+                if appState.servicesViewMode == .list {
                     InstrumentSegmentedControl(
                         options: StatusFilter.allCases,
-                        selection: $statusFilter
+                        selection: $appState.servicesStatusFilter
                     ) { filter in
                         filter.rawValue
                     }
@@ -131,7 +120,7 @@ struct ServicesTab: View {
                 }
 
                 // Content based on view mode
-                if viewMode == .timeline, let vehicle = vehicle {
+                if appState.servicesViewMode == .timeline, let vehicle = vehicle {
                     MaintenanceTimeline(
                         services: vehicleServices,
                         serviceLogs: vehicleServiceLogs,
@@ -147,7 +136,7 @@ struct ServicesTab: View {
                 }
 
                 // Upcoming services section (list mode)
-                if viewMode == .list && !filteredServices.isEmpty, let vehicle = vehicle {
+                if appState.servicesViewMode == .list && !filteredServices.isEmpty, let vehicle = vehicle {
                     VStack(alignment: .leading, spacing: Spacing.sm) {
                         InstrumentSectionHeader(title: "Scheduled Services")
 
@@ -182,7 +171,7 @@ struct ServicesTab: View {
                 }
 
                 // Service History section (list mode only)
-                if viewMode == .list && !filteredLogs.isEmpty {
+                if appState.servicesViewMode == .list && !filteredLogs.isEmpty {
                     VStack(alignment: .leading, spacing: Spacing.sm) {
                         InstrumentSectionHeader(title: "Service History") {
                             Button {
@@ -224,7 +213,7 @@ struct ServicesTab: View {
                 }
 
                 // Empty state (only in list mode when no content)
-                if viewMode == .list && filteredServices.isEmpty && filteredLogs.isEmpty && vehicle != nil {
+                if appState.servicesViewMode == .list && filteredServices.isEmpty && filteredLogs.isEmpty && vehicle != nil {
                     emptyState
                         .revealAnimation(delay: 0.2)
                 }
@@ -263,15 +252,15 @@ struct ServicesTab: View {
                 .font(.system(size: 16, weight: .medium))
                 .foregroundStyle(Theme.textTertiary)
 
-            TextField("Search services...", text: $searchText)
+            TextField("Search services, notes, receipts...", text: $appState.servicesSearchText)
                 .font(.brutalistBody)
                 .foregroundStyle(Theme.textPrimary)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
 
-            if !searchText.isEmpty {
+            if !appState.servicesSearchText.isEmpty {
                 Button {
-                    searchText = ""
+                    appState.servicesSearchText = ""
                 } label: {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 16))
@@ -336,9 +325,9 @@ struct ServicesTab: View {
 
     private var emptyState: some View {
         EmptyStateView(
-            icon: searchText.isEmpty ? "wrench.and.screwdriver" : "magnifyingglass",
-            title: searchText.isEmpty ? "No Services" : "No Results",
-            message: searchText.isEmpty ? "Add your first service to\nstart tracking maintenance" : "Try a different search term\nor filter"
+            icon: appState.servicesSearchText.isEmpty ? "wrench.and.screwdriver" : "magnifyingglass",
+            title: appState.servicesSearchText.isEmpty ? "No Services" : "No Results",
+            message: appState.servicesSearchText.isEmpty ? "Add your first service to\nstart tracking maintenance" : "Try a different search term\nor filter"
         )
     }
 

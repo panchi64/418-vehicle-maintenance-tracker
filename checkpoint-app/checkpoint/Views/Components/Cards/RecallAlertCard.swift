@@ -27,7 +27,7 @@ struct RecallAlertCard: View {
             // Header
             Button {
                 // Soft haptic feedback for expand/collapse
-                UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                HapticService.shared.tabChanged()
                 withAnimation(.easeOut(duration: Theme.animationMedium)) {
                     isExpanded.toggle()
                 }

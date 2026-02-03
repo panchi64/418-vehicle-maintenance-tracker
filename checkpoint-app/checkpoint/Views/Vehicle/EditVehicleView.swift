@@ -101,19 +101,22 @@ struct EditVehicleView: View {
                                 InstrumentTextField(
                                     label: "Make",
                                     text: $make,
-                                    placeholder: "Toyota, Honda, Ford..."
+                                    placeholder: "Toyota, Honda, Ford...",
+                                    isRequired: true
                                 )
 
                                 InstrumentTextField(
                                     label: "Model",
                                     text: $model,
-                                    placeholder: "Camry, Civic, F-150..."
+                                    placeholder: "Camry, Civic, F-150...",
+                                    isRequired: true
                                 )
 
                                 InstrumentNumberField(
                                     label: "Year",
                                     value: $year,
-                                    placeholder: "2024"
+                                    placeholder: "2024",
+                                    isRequired: true
                                 )
                             }
                         }

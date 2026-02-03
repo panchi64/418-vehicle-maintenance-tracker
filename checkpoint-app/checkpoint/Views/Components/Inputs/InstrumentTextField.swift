@@ -14,16 +14,25 @@ struct InstrumentTextField: View {
     var keyboardType: UIKeyboardType = .default
     var textContentType: UITextContentType?
     var autocapitalization: TextInputAutocapitalization = .sentences
+    var isRequired: Bool = false
 
     @FocusState private var isFocused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            // Label
-            Text(label.uppercased())
-                .font(.instrumentLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1.5)
+            // Label with optional required indicator
+            HStack(spacing: 2) {
+                Text(label.uppercased())
+                    .font(.instrumentLabel)
+                    .foregroundStyle(Theme.textTertiary)
+                    .tracking(1.5)
+
+                if isRequired {
+                    Text("*")
+                        .font(.instrumentLabel)
+                        .foregroundStyle(Theme.statusOverdue)
+                }
+            }
 
             // Input field
             TextField(placeholder, text: $text)
@@ -56,6 +65,7 @@ struct InstrumentNumberField: View {
     @Binding var value: Int?
     var placeholder: String = ""
     var suffix: String = ""
+    var isRequired: Bool = false
 
     /// Show camera button accessory
     var showCameraButton: Bool = false
@@ -68,11 +78,19 @@ struct InstrumentNumberField: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            // Label
-            Text(label.uppercased())
-                .font(.instrumentLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1.5)
+            // Label with optional required indicator
+            HStack(spacing: 2) {
+                Text(label.uppercased())
+                    .font(.instrumentLabel)
+                    .foregroundStyle(Theme.textTertiary)
+                    .tracking(1.5)
+
+                if isRequired {
+                    Text("*")
+                        .font(.instrumentLabel)
+                        .foregroundStyle(Theme.statusOverdue)
+                }
+            }
 
             // Input field with optional camera accessory
             HStack(spacing: 0) {

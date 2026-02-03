@@ -30,6 +30,24 @@ final class AppState {
     var selectedCluster: ServiceCluster?
     var clusterToMarkDone: ServiceCluster?
 
+    // MARK: - Services Tab State (preserved across tab switches)
+
+    var servicesSearchText = ""
+    var servicesStatusFilter: ServicesStatusFilter = .all
+    var servicesViewMode: ServicesViewMode = .list
+
+    enum ServicesStatusFilter: String, CaseIterable {
+        case all = "All"
+        case overdue = "Overdue"
+        case dueSoon = "Due Soon"
+        case good = "Good"
+    }
+
+    enum ServicesViewMode: String, CaseIterable {
+        case list = "List"
+        case timeline = "Timeline"
+    }
+
     // MARK: - Siri Integration
 
     /// Pending mileage update from Siri intent

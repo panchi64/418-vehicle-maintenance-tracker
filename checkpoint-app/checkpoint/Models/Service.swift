@@ -75,6 +75,7 @@ enum ServiceStatus {
 }
 
 extension Service {
+    @MainActor
     func status(currentMileage: Int, currentDate: Date = .now) -> ServiceStatus {
         // Check if overdue by date
         if let dueDate = dueDate, currentDate > dueDate {
@@ -86,19 +87,22 @@ extension Service {
             return .overdue
         }
 
-        // Check if due soon
-        // For mileage-tracked services: use mileage threshold (750 miles)
-        // For date-only services: use date threshold (30 days)
+        // Check if due soon using customizable thresholds
+        // For mileage-tracked services: use mileage threshold
+        // For date-only services: use date threshold
+        let mileageThreshold = DueSoonSettings.shared.mileageThreshold
+        let daysThreshold = DueSoonSettings.shared.daysThreshold
+
         if let dueMileage = dueMileage {
             // Mileage-tracked service: only use mileage for "due soon" check
             let milesUntilDue = dueMileage - currentMileage
-            if milesUntilDue <= 750 && milesUntilDue >= 0 {
+            if milesUntilDue <= mileageThreshold && milesUntilDue >= 0 {
                 return .dueSoon
             }
         } else if let dueDate = dueDate {
             // Date-only service (no mileage tracking): use date for "due soon" check
             let daysUntilDue = Calendar.current.dateComponents([.day], from: currentDate, to: dueDate).day ?? 0
-            if daysUntilDue <= 30 && daysUntilDue >= 0 {
+            if daysUntilDue <= daysThreshold && daysUntilDue >= 0 {
                 return .dueSoon
             }
         }

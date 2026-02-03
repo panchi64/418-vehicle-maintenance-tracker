@@ -73,7 +73,7 @@ struct ContentView: View {
                             guard abs(horizontalSwipe) > verticalSwipe else { return }
 
                             // Soft haptic feedback for tab switch
-                            UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                            HapticService.shared.tabChanged()
 
                             withAnimation(.easeOut(duration: Theme.animationMedium)) {
                                 if horizontalSwipe > 0 {
@@ -105,6 +105,15 @@ struct ContentView: View {
                         .padding(.bottom, 72 + Spacing.md) // Above tab bar
                     }
                 }
+            }
+        }
+        .overlay(alignment: .bottom) {
+            if let toast = ToastService.shared.currentToast {
+                ToastView(toast: toast)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .padding(.bottom, 72 + Spacing.lg)
+                    .padding(.horizontal, Spacing.screenHorizontal)
+                    .animation(.easeOut(duration: Theme.animationMedium), value: ToastService.shared.currentToast?.id)
             }
         }
         .onAppear {
@@ -161,7 +170,7 @@ struct ContentView: View {
             )
         }
         .sheet(isPresented: $appState.showAddVehicle) {
-            AddVehicleView()
+            AddVehicleFlowView()
         }
         .sheet(isPresented: $appState.showAddService) {
             if let vehicle = currentVehicle {

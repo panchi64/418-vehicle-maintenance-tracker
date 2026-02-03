@@ -25,6 +25,70 @@ struct VehiclePickerSheet: View {
     // State for editing
     @State private var vehicleToEdit: Vehicle?
 
+    // MARK: - Vehicle Snapshot for Undo
+
+    struct VehicleSnapshot {
+        let id: UUID
+        let name: String
+        let make: String
+        let model: String
+        let year: Int
+        let currentMileage: Int
+        let vin: String?
+        let tireSize: String?
+        let oilType: String?
+        let notes: String?
+        let mileageUpdatedAt: Date?
+        let marbeteExpirationMonth: Int?
+        let marbeteExpirationYear: Int?
+        let marbeteNotificationID: String?
+
+        init(from vehicle: Vehicle) {
+            self.id = vehicle.id
+            self.name = vehicle.name
+            self.make = vehicle.make
+            self.model = vehicle.model
+            self.year = vehicle.year
+            self.currentMileage = vehicle.currentMileage
+            self.vin = vehicle.vin
+            self.tireSize = vehicle.tireSize
+            self.oilType = vehicle.oilType
+            self.notes = vehicle.notes
+            self.mileageUpdatedAt = vehicle.mileageUpdatedAt
+            self.marbeteExpirationMonth = vehicle.marbeteExpirationMonth
+            self.marbeteExpirationYear = vehicle.marbeteExpirationYear
+            self.marbeteNotificationID = vehicle.marbeteNotificationID
+        }
+
+        func restore(to modelContext: ModelContext) {
+            let vehicle = Vehicle(
+                name: name,
+                make: make,
+                model: model,
+                year: year,
+                currentMileage: currentMileage,
+                vin: vin,
+                tireSize: tireSize,
+                oilType: oilType,
+                notes: notes,
+                mileageUpdatedAt: mileageUpdatedAt,
+                marbeteExpirationMonth: marbeteExpirationMonth,
+                marbeteExpirationYear: marbeteExpirationYear
+            )
+            // Restore the same ID to maintain references
+            vehicle.id = id
+            vehicle.marbeteNotificationID = marbeteNotificationID
+            modelContext.insert(vehicle)
+        }
+
+        var displayName: String {
+            if name.isEmpty {
+                return "\(year) \(make) \(model)"
+            }
+            return name
+        }
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -135,6 +199,9 @@ struct VehiclePickerSheet: View {
     // MARK: - Delete Vehicle
 
     private func deleteVehicle(_ vehicle: Vehicle) {
+        // Create snapshot for undo
+        let snapshot = VehicleSnapshot(from: vehicle)
+
         let vehicleID = vehicle.id.uuidString
         let isSelectedVehicle = selectedVehicle?.id == vehicle.id
 
@@ -171,6 +238,29 @@ struct VehiclePickerSheet: View {
         WidgetCenter.shared.reloadAllTimelines()
 
         vehicleToDelete = nil
+
+        // Show toast with undo action
+        ToastService.shared.show(
+            "\(snapshot.displayName) deleted",
+            action: ToastService.ToastAction(
+                label: "UNDO",
+                handler: { @MainActor in
+                    // Restore vehicle from snapshot
+                    snapshot.restore(to: modelContext)
+
+                    // If this was the selected vehicle, reselect it
+                    if isSelectedVehicle {
+                        // Find the restored vehicle by ID
+                        if let restoredVehicle = vehicles.first(where: { $0.id == snapshot.id }) {
+                            selectedVehicle = restoredVehicle
+                        }
+                    }
+
+                    // Reload widget timelines
+                    WidgetCenter.shared.reloadAllTimelines()
+                }
+            )
+        )
     }
 
     private func vehicleRow(_ vehicle: Vehicle) -> some View {
