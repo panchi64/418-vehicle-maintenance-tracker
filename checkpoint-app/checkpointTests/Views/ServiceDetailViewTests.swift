@@ -12,6 +12,18 @@ import SwiftData
 @MainActor
 final class ServiceDetailViewTests: XCTestCase {
 
+    override func setUp() {
+        super.setUp()
+        // Reset to miles before each test to ensure consistent results
+        DistanceSettings.shared.unit = .miles
+    }
+
+    override func tearDown() {
+        // Reset to miles after tests
+        DistanceSettings.shared.unit = .miles
+        super.tearDown()
+    }
+
     // MARK: - Status Display Tests
 
     func testStatusDisplay_OverdueByDate() {

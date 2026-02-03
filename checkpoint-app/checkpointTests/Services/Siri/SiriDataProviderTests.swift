@@ -13,11 +13,22 @@ final class SiriDataProviderTests: XCTestCase {
     private let widgetDataKey = "widgetData"
     private let vehicleListKey = "vehicleList"
 
+    override func setUp() {
+        super.setUp()
+        // Clean up any existing data before each test
+        if let userDefaults = UserDefaults(suiteName: appGroupID) {
+            userDefaults.removeObject(forKey: widgetDataKey)
+            userDefaults.removeObject(forKey: vehicleListKey)
+            userDefaults.synchronize()
+        }
+    }
+
     override func tearDown() {
         // Clean up test data
         if let userDefaults = UserDefaults(suiteName: appGroupID) {
             userDefaults.removeObject(forKey: widgetDataKey)
             userDefaults.removeObject(forKey: vehicleListKey)
+            userDefaults.synchronize()
         }
         super.tearDown()
     }
