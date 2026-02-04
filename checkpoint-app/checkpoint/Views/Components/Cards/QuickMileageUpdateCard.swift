@@ -187,8 +187,7 @@ struct MileageUpdateSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
-                        .font(.brutalistBody)
-                        .foregroundStyle(Theme.accent)
+                        .toolbarButtonStyle()
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
@@ -197,8 +196,7 @@ struct MileageUpdateSheet: View {
                             dismiss()
                         }
                     }
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.accent)
+                    .toolbarButtonStyle(isDisabled: newMileage == nil || newMileage! <= 0 || isProcessingOCR)
                     .disabled(newMileage == nil || newMileage! <= 0 || isProcessingOCR)
                 }
             }

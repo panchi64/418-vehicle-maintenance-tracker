@@ -100,8 +100,7 @@ struct ExportOptionsSheet: View {
                     Button("Cancel") {
                         dismiss()
                     }
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.accent)
+                    .toolbarButtonStyle()
                 }
             }
         }

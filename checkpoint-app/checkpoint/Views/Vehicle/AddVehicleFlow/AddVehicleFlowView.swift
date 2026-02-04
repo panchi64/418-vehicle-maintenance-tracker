@@ -51,8 +51,7 @@ struct AddVehicleFlowView: View {
                         Button(L10n.commonCancel) {
                             dismiss()
                         }
-                        .font(.brutalistBody)
-                        .foregroundStyle(Theme.accent)
+                        .toolbarButtonStyle()
                     } else {
                         Button {
                             withAnimation(.easeInOut(duration: Theme.animationMedium)) {
@@ -63,9 +62,8 @@ struct AddVehicleFlowView: View {
                                 Image(systemName: "chevron.left")
                                 Text(L10n.commonBack)
                             }
-                            .font(.brutalistBody)
-                            .foregroundStyle(Theme.accent)
                         }
+                        .toolbarButtonStyle()
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
@@ -75,15 +73,13 @@ struct AddVehicleFlowView: View {
                                 currentStep = .details
                             }
                         }
-                        .font(.brutalistBody)
-                        .foregroundStyle(Theme.accent)
+                        .toolbarButtonStyle(isDisabled: !formState.isBasicsValid)
                         .disabled(!formState.isBasicsValid)
                     } else {
                         Button(L10n.vehicleSave) {
                             saveVehicle()
                         }
-                        .font(.brutalistBody)
-                        .foregroundStyle(Theme.accent)
+                        .toolbarButtonStyle()
                     }
                 }
             }

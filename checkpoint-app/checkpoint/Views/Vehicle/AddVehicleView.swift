@@ -264,15 +264,13 @@ struct AddVehicleView: View {
                     Button("Cancel") {
                         dismiss()
                     }
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.accent)
+                    .toolbarButtonStyle()
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         saveVehicle()
                     }
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.accent)
+                    .toolbarButtonStyle(isDisabled: !isFormValid)
                     .disabled(!isFormValid)
                 }
             }

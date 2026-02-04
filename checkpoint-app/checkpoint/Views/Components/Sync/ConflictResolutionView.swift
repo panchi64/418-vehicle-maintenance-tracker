@@ -68,8 +68,7 @@ struct ConflictResolutionView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
-                        .font(.brutalistBody)
-                        .foregroundStyle(Theme.accent)
+                        .toolbarButtonStyle()
                 }
             }
         }
@@ -318,8 +317,7 @@ struct ConflictListView: View {
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
-                        .font(.brutalistBody)
-                        .foregroundStyle(Theme.accent)
+                        .toolbarButtonStyle()
                 }
             }
             .sheet(item: $selectedConflict) { conflict in

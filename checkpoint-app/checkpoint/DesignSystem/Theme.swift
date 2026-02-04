@@ -350,6 +350,32 @@ extension ButtonStyle where Self == InstrumentButtonStyle {
     static var instrument: InstrumentButtonStyle { InstrumentButtonStyle() }
 }
 
+// MARK: - Toolbar Button Style
+
+struct ToolbarButtonStyle: ViewModifier {
+    let isDisabled: Bool
+
+    init(isDisabled: Bool = false) {
+        self.isDisabled = isDisabled
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .font(.brutalistBody)
+            .foregroundStyle(Theme.backgroundPrimary)
+            .padding(.horizontal, Spacing.sm)
+            .padding(.vertical, Spacing.xs)
+            .background(Theme.textPrimary)
+            .opacity(isDisabled ? 0.4 : 1.0)
+    }
+}
+
+extension View {
+    func toolbarButtonStyle(isDisabled: Bool = false) -> some View {
+        modifier(ToolbarButtonStyle(isDisabled: isDisabled))
+    }
+}
+
 // MARK: - Cerulean Background
 
 struct AtmosphericBackground: View {

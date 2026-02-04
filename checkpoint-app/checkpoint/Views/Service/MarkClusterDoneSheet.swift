@@ -48,13 +48,11 @@ struct MarkClusterDoneSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
-                        .font(.brutalistBody)
-                        .foregroundStyle(Theme.accent)
+                        .toolbarButtonStyle()
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") { saveAll() }
-                        .font(.brutalistBody)
-                        .foregroundStyle(Theme.accent)
+                        .toolbarButtonStyle(isDisabled: mileage == nil)
                         .disabled(mileage == nil)
                 }
             }

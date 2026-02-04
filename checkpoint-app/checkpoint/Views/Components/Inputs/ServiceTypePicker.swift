@@ -167,8 +167,7 @@ struct ServicePresetPickerSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
-                        .font(.brutalistBody)
-                        .foregroundStyle(Theme.accent)
+                        .toolbarButtonStyle()
                 }
             }
         }
