@@ -65,6 +65,7 @@ struct ServiceDetailView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(Theme.textPrimary)
+                .buttonBorderShape(.roundedRectangle(radius: 6))
             }
         }
         .sheet(isPresented: $showEditSheet, onDismiss: { updateAppIcon(); updateWidgetData() }) {

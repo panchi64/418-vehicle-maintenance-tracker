@@ -21,7 +21,7 @@ struct BrutalistTabBar: View {
                 }
             }
             .frame(height: 48)
-            .glassEffect(.regular.tint(Theme.surfaceInstrument))
+            .glassEffect(.regular.tint(Theme.surfaceInstrument), in: RoundedRectangle(cornerRadius: 6))
 
             // Add button (if action provided)
             if let onAddTapped {
@@ -35,7 +35,7 @@ struct BrutalistTabBar: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(Theme.accent)
-                .buttonBorderShape(.circle)
+                .buttonBorderShape(.roundedRectangle(radius: 6))
             }
         }
         .padding(.horizontal, Spacing.md)
