@@ -351,6 +351,9 @@ extension ButtonStyle where Self == InstrumentButtonStyle {
 }
 
 // MARK: - Toolbar Button Style
+// iOS 26 toolbars use Liquid Glass styling. Use .tint() to color the glass
+// and .buttonStyle(.borderedProminent) for filled buttons with custom color.
+// The off-white tint matches our brutalist aesthetic within the glass system.
 
 struct ToolbarButtonStyle: ViewModifier {
     let isDisabled: Bool
@@ -362,10 +365,8 @@ struct ToolbarButtonStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
             .font(.brutalistBody)
-            .foregroundStyle(Theme.backgroundPrimary)
-            .padding(.horizontal, Spacing.sm)
-            .padding(.vertical, Spacing.xs)
-            .background(Theme.textPrimary)
+            .buttonStyle(.borderedProminent)
+            .tint(Theme.textPrimary)
             .opacity(isDisabled ? 0.4 : 1.0)
     }
 }
