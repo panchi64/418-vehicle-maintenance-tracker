@@ -63,6 +63,8 @@ struct ServiceDetailView: View {
                 } label: {
                     Image(systemName: "pencil")
                 }
+                .buttonStyle(.borderedProminent)
+                .tint(Theme.textPrimary)
             }
         }
         .sheet(isPresented: $showEditSheet, onDismiss: { updateAppIcon(); updateWidgetData() }) {
