@@ -68,7 +68,8 @@ struct ConflictResolutionView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
-                        .foregroundStyle(Theme.textSecondary)
+                        .font(.brutalistBody)
+                        .foregroundStyle(Theme.accent)
                 }
             }
         }
@@ -317,6 +318,7 @@ struct ConflictListView: View {
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
+                        .font(.brutalistBody)
                         .foregroundStyle(Theme.accent)
                 }
             }

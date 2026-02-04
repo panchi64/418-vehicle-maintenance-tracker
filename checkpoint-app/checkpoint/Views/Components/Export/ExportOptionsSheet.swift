@@ -101,7 +101,7 @@ struct ExportOptionsSheet: View {
                         dismiss()
                     }
                     .font(.brutalistBody)
-                    .foregroundStyle(Theme.textSecondary)
+                    .foregroundStyle(Theme.accent)
                 }
             }
         }

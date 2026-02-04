@@ -177,15 +177,6 @@ struct MileageUpdateSheet: View {
                         processingView
                     }
 
-                    Button("Save") {
-                        if let mileage = newMileage, mileage > 0 {
-                            onSave(mileage)
-                            dismiss()
-                        }
-                    }
-                    .buttonStyle(.primary)
-                    .disabled(newMileage == nil || newMileage! <= 0 || isProcessingOCR)
-
                     Spacer()
                 }
                 .padding(Spacing.screenHorizontal)
@@ -196,7 +187,19 @@ struct MileageUpdateSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                        .font(.brutalistBody)
                         .foregroundStyle(Theme.accent)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        if let mileage = newMileage, mileage > 0 {
+                            onSave(mileage)
+                            dismiss()
+                        }
+                    }
+                    .font(.brutalistBody)
+                    .foregroundStyle(Theme.accent)
+                    .disabled(newMileage == nil || newMileage! <= 0 || isProcessingOCR)
                 }
             }
         }

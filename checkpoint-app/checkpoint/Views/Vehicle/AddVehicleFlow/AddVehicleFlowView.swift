@@ -27,29 +27,18 @@ struct AddVehicleFlowView: View {
 
                 switch currentStep {
                 case .basics:
-                    VehicleBasicsStep(
-                        formState: formState,
-                        onNext: {
-                            withAnimation(.easeInOut(duration: Theme.animationMedium)) {
-                                currentStep = .details
-                            }
-                        }
-                    )
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .leading),
-                        removal: .move(edge: .leading)
-                    ))
+                    VehicleBasicsStep(formState: formState)
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .leading),
+                            removal: .move(edge: .leading)
+                        ))
 
                 case .details:
-                    VehicleDetailsStep(
-                        formState: formState,
-                        onSave: saveVehicle,
-                        onSkip: saveVehicle
-                    )
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .trailing),
-                        removal: .move(edge: .trailing)
-                    ))
+                    VehicleDetailsStep(formState: formState)
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .trailing),
+                            removal: .move(edge: .trailing)
+                        ))
                 }
             }
             .navigationTitle(navigationTitle)
@@ -62,6 +51,7 @@ struct AddVehicleFlowView: View {
                         Button(L10n.commonCancel) {
                             dismiss()
                         }
+                        .font(.brutalistBody)
                         .foregroundStyle(Theme.accent)
                     } else {
                         Button {
@@ -73,8 +63,27 @@ struct AddVehicleFlowView: View {
                                 Image(systemName: "chevron.left")
                                 Text(L10n.commonBack)
                             }
+                            .font(.brutalistBody)
                             .foregroundStyle(Theme.accent)
                         }
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    if currentStep == .basics {
+                        Button(L10n.commonNext) {
+                            withAnimation(.easeInOut(duration: Theme.animationMedium)) {
+                                currentStep = .details
+                            }
+                        }
+                        .font(.brutalistBody)
+                        .foregroundStyle(Theme.accent)
+                        .disabled(!formState.isBasicsValid)
+                    } else {
+                        Button(L10n.vehicleSave) {
+                            saveVehicle()
+                        }
+                        .font(.brutalistBody)
+                        .foregroundStyle(Theme.accent)
                     }
                 }
             }

@@ -319,10 +319,12 @@ struct EditVehicleView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                        .font(.brutalistBody)
                         .foregroundStyle(Theme.accent)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") { saveChanges() }
+                        .font(.brutalistBody)
                         .foregroundStyle(Theme.accent)
                         .disabled(!isFormValid)
                 }

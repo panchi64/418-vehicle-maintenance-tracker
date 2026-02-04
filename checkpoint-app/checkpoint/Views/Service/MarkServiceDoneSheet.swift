@@ -87,10 +87,12 @@ struct MarkServiceDoneSheet: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                         .font(.brutalistBody)
+                        .foregroundStyle(Theme.accent)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") { markAsDone() }
                         .font(.brutalistBody)
+                        .foregroundStyle(Theme.accent)
                         .disabled(mileage == nil)
                 }
             }

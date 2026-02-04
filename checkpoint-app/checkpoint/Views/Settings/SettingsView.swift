@@ -46,6 +46,7 @@ struct SettingsView: View {
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(L10n.commonDone) { dismiss() }
+                        .font(.brutalistBody)
                         .foregroundStyle(Theme.accent)
                 }
             }

@@ -3,6 +3,7 @@
 //  checkpoint
 //
 //  Form for editing an existing service's details and schedule
+//  with instrument cluster aesthetic
 //
 
 import SwiftUI
@@ -20,9 +21,11 @@ struct EditServiceView: View {
     @State private var serviceName: String = ""
     @State private var dueDate: Date = Date()
     @State private var hasDueDate: Bool = false
-    @State private var dueMileage: String = ""
-    @State private var intervalMonths: String = ""
-    @State private var intervalMiles: String = ""
+    @State private var dueMileage: Int? = nil
+    @State private var intervalMonths: Int? = nil
+    @State private var intervalMiles: Int? = nil
+
+    @State private var showDeleteConfirmation = false
 
     var isFormValid: Bool {
         !serviceName.isEmpty
@@ -30,77 +33,135 @@ struct EditServiceView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Service Details") {
-                    TextField("Service Name", text: $serviceName)
-                }
+            ZStack {
+                AtmosphericBackground()
 
-                Section("Due Date") {
-                    Toggle("Has Due Date", isOn: $hasDueDate)
+                ScrollView {
+                    VStack(spacing: Spacing.lg) {
+                        // Service Details Section
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                            InstrumentSectionHeader(title: "Service Details")
 
-                    if hasDueDate {
-                        DatePicker("Due Date", selection: $dueDate, displayedComponents: .date)
-                    }
-
-                    HStack {
-                        Text("Due Mileage")
-                        Spacer()
-                        TextField("Optional", text: $dueMileage)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
-                        Text("mi")
-                            .foregroundStyle(Theme.textSecondary)
-                    }
-                }
-
-                Section("Repeat Interval") {
-                    HStack {
-                        Text("Every")
-                        Spacer()
-                        TextField("6", text: $intervalMonths)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 50)
-                        Text("months")
-                            .foregroundStyle(Theme.textSecondary)
-                    }
-
-                    HStack {
-                        Text("Or every")
-                        Spacer()
-                        TextField("5000", text: $intervalMiles)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 70)
-                        Text("miles")
-                            .foregroundStyle(Theme.textSecondary)
-                    }
-                }
-
-                Section {
-                    Button(role: .destructive) {
-                        deleteService()
-                    } label: {
-                        HStack {
-                            Spacer()
-                            Text("Delete Service")
-                            Spacer()
+                            InstrumentTextField(
+                                label: "Service Name",
+                                text: $serviceName,
+                                placeholder: "Oil Change, Tire Rotation...",
+                                isRequired: true
+                            )
                         }
+
+                        // Due Date Section
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                            InstrumentSectionHeader(title: "Due Date")
+
+                            VStack(spacing: Spacing.md) {
+                                // Due date toggle
+                                HStack {
+                                    Text("HAS DUE DATE")
+                                        .font(.brutalistLabel)
+                                        .foregroundStyle(Theme.textTertiary)
+                                        .tracking(1)
+
+                                    Spacer()
+
+                                    Toggle("", isOn: $hasDueDate)
+                                        .labelsHidden()
+                                        .tint(Theme.accent)
+                                }
+                                .padding(Spacing.md)
+                                .background(Theme.surfaceInstrument)
+                                .overlay(
+                                    Rectangle()
+                                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+                                )
+
+                                if hasDueDate {
+                                    InstrumentDatePicker(
+                                        label: "Due Date",
+                                        date: $dueDate
+                                    )
+                                }
+
+                                InstrumentNumberField(
+                                    label: "Due Mileage",
+                                    value: $dueMileage,
+                                    placeholder: "Optional",
+                                    suffix: DistanceSettings.shared.unit.abbreviation
+                                )
+                            }
+                        }
+
+                        // Repeat Interval Section
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                            InstrumentSectionHeader(title: "Repeat Interval")
+
+                            VStack(spacing: Spacing.md) {
+                                InstrumentNumberField(
+                                    label: "Every",
+                                    value: $intervalMonths,
+                                    placeholder: "6",
+                                    suffix: "months"
+                                )
+
+                                InstrumentNumberField(
+                                    label: "Or Every",
+                                    value: $intervalMiles,
+                                    placeholder: "5000",
+                                    suffix: DistanceSettings.shared.unit.abbreviation
+                                )
+                            }
+                        }
+
+                        // Delete Button
+                        Button {
+                            showDeleteConfirmation = true
+                        } label: {
+                            HStack {
+                                Image(systemName: "trash")
+                                Text("Delete Service")
+                            }
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(Theme.statusOverdue)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: Theme.buttonHeight)
+                            .background(Theme.statusOverdue.opacity(0.1))
+                            .overlay(
+                                Rectangle()
+                                    .strokeBorder(Theme.statusOverdue.opacity(0.3), lineWidth: Theme.borderWidth)
+                            )
+                        }
+                        .padding(.top, Spacing.md)
                     }
+                    .padding(Spacing.screenHorizontal)
+                    .padding(.bottom, Spacing.xxl)
                 }
             }
             .navigationTitle("Edit Service")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                        .font(.brutalistBody)
                         .foregroundStyle(Theme.accent)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") { saveChanges() }
+                        .font(.brutalistBody)
                         .foregroundStyle(Theme.accent)
                         .disabled(!isFormValid)
                 }
+            }
+            .confirmationDialog(
+                "Delete Service?",
+                isPresented: $showDeleteConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Delete", role: .destructive) { deleteService() }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("This will also delete all service history for this service. This action cannot be undone.")
             }
             .onAppear {
                 loadServiceData()
@@ -114,9 +175,9 @@ struct EditServiceView: View {
         serviceName = service.name
         hasDueDate = service.dueDate != nil
         dueDate = service.dueDate ?? Date()
-        dueMileage = service.dueMileage.map(String.init) ?? ""
-        intervalMonths = service.intervalMonths.map(String.init) ?? ""
-        intervalMiles = service.intervalMiles.map(String.init) ?? ""
+        dueMileage = service.dueMileage
+        intervalMonths = service.intervalMonths
+        intervalMiles = service.intervalMiles
     }
 
     // MARK: - Save Logic
@@ -124,9 +185,9 @@ struct EditServiceView: View {
     private func saveChanges() {
         service.name = serviceName
         service.dueDate = hasDueDate ? dueDate : nil
-        service.dueMileage = Int(dueMileage)
-        service.intervalMonths = Int(intervalMonths)
-        service.intervalMiles = Int(intervalMiles)
+        service.dueMileage = dueMileage
+        service.intervalMonths = intervalMonths
+        service.intervalMiles = intervalMiles
 
         updateAppIcon()
         updateWidgetData()
@@ -174,4 +235,5 @@ struct EditServiceView: View {
 
     EditServiceView(service: service, vehicle: vehicle)
         .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self], inMemory: true)
+        .preferredColorScheme(.dark)
 }

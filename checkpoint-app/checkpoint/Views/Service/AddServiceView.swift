@@ -93,11 +93,13 @@ struct AddServiceView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                        .font(.brutalistBody)
                         .foregroundStyle(Theme.accent)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") { saveService() }
                         .font(.brutalistBody)
+                        .foregroundStyle(Theme.accent)
                         .disabled(!isFormValid)
                 }
             }

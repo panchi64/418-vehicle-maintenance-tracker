@@ -250,13 +250,6 @@ struct AddVehicleView: View {
                             )
                         }
 
-                        // Save button
-                        Button("Add Vehicle") {
-                            saveVehicle()
-                        }
-                        .buttonStyle(.primary)
-                        .disabled(!isFormValid)
-                        .padding(.top, Spacing.md)
                     }
                     .padding(Spacing.screenHorizontal)
                     .padding(.bottom, Spacing.xxl)
@@ -271,7 +264,16 @@ struct AddVehicleView: View {
                     Button("Cancel") {
                         dismiss()
                     }
+                    .font(.brutalistBody)
                     .foregroundStyle(Theme.accent)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        saveVehicle()
+                    }
+                    .font(.brutalistBody)
+                    .foregroundStyle(Theme.accent)
+                    .disabled(!isFormValid)
                 }
             }
             .fullScreenCover(isPresented: $showVINCamera) {
