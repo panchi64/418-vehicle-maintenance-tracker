@@ -86,26 +86,37 @@ struct ContentView: View {
                             }
                         }
                 )
-
-                // Custom tab bar - pinned to bottom
-                BrutalistTabBar(selectedTab: $appState.selectedTab)
-            }
-
-            // Floating action button overlay
-            if currentVehicle != nil {
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        FloatingActionButton {
-                            appState.showAddService = true
-                        }
-                        .revealAnimation(delay: 0.5)
-                        .padding(.trailing, Spacing.screenHorizontal)
-                        .padding(.bottom, 72 + Spacing.md) // Above tab bar
-                    }
+                // Reserve space at bottom for floating tab bar
+                .safeAreaInset(edge: .bottom, spacing: 0) {
+                    Color.clear.frame(height: 72)
                 }
             }
+
+            // Bottom gradient fade - on top of content, behind tab bar
+            VStack(spacing: 0) {
+                Spacer()
+                LinearGradient(
+                    colors: [
+                        Theme.backgroundPrimary.opacity(0),
+                        Theme.backgroundPrimary
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: 80)
+                Theme.backgroundPrimary
+                    .frame(height: 60)
+            }
+            .ignoresSafeArea()
+            .allowsHitTesting(false)
+        }
+        // Tab bar overlay - floats over content with glass effect
+        .overlay(alignment: .bottom) {
+            BrutalistTabBar(
+                selectedTab: $appState.selectedTab,
+                onAddTapped: currentVehicle != nil ? { appState.showAddService = true } : nil
+            )
+            .revealAnimation(delay: 0.3)
         }
         .overlay(alignment: .bottom) {
             if let toast = ToastService.shared.currentToast {
