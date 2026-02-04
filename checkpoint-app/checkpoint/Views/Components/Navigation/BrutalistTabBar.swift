@@ -29,7 +29,7 @@ struct BrutalistTabBar: View {
                     onAddTapped()
                 } label: {
                     Image(systemName: "plus")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 20, weight: .bold))
                         .foregroundStyle(Theme.backgroundPrimary)
                         .frame(width: 48, height: 48)
                 }
