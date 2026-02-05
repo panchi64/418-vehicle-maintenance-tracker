@@ -92,20 +92,20 @@ struct ContentView: View {
                 }
             }
 
-            // Bottom gradient fade - on top of content, behind tab bar
+            // Bottom gradient fade - subtle fade so content peeks through glass tab bar
             VStack(spacing: 0) {
                 Spacer()
                 LinearGradient(
                     colors: [
                         Theme.backgroundPrimary.opacity(0),
-                        Theme.backgroundPrimary
+                        Theme.backgroundPrimary.opacity(0.7)
                     ],
                     startPoint: .top,
                     endPoint: .bottom
                 )
-                .frame(height: 80)
-                Theme.backgroundPrimary
-                    .frame(height: 60)
+                .frame(height: 40)
+                Theme.backgroundPrimary.opacity(0.7)
+                    .frame(height: 34)
             }
             .ignoresSafeArea()
             .allowsHitTesting(false)

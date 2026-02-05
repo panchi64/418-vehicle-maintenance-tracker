@@ -21,9 +21,9 @@ struct BrutalistTabBar: View {
                 }
             }
             .frame(height: 48)
-            .glassEffect(.regular.tint(Theme.surfaceInstrument), in: RoundedRectangle(cornerRadius: 6))
+            .glassEffect(.clear.tint(Theme.surfaceInstrument), in: RoundedRectangle(cornerRadius: 6))
 
-            // Add button (if action provided)
+            // Circular FAB to the right
             if let onAddTapped {
                 Button {
                     onAddTapped()
@@ -35,7 +35,7 @@ struct BrutalistTabBar: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(Theme.accent)
-                .buttonBorderShape(.roundedRectangle(radius: 6))
+                .buttonBorderShape(.circle)
             }
         }
         .padding(.horizontal, Spacing.md)
@@ -48,22 +48,20 @@ struct BrutalistTabBar: View {
         return Button {
             selectedTab = tab
         } label: {
-            // Text centered, underline positioned on top
-            ZStack(alignment: .top) {
-                // Centered text
-                Text(tab.title)
-                    .font(.brutalistLabel)
-                    .foregroundStyle(isSelected ? Theme.accent : Theme.textTertiary)
-                    .tracking(2)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-                // Overline at top
-                Rectangle()
-                    .fill(isSelected ? Theme.accent : Color.clear)
-                    .frame(width: 40, height: 2)
-                    .padding(.top, Spacing.xs)
-            }
-            .contentShape(Rectangle())
+            Text(tab.title)
+                .font(.brutalistLabel)
+                .foregroundStyle(isSelected ? Theme.accent : Theme.textTertiary)
+                .tracking(2)
+                .padding(.horizontal, Spacing.md)
+                .padding(.vertical, Spacing.listItem)
+                .background {
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(Theme.textPrimary.opacity(0.1))
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
