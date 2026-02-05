@@ -367,7 +367,6 @@ struct ToolbarButtonStyle: ViewModifier {
             .font(.brutalistBody)
             .buttonStyle(.borderedProminent)
             .tint(Theme.textPrimary)
-            .buttonBorderShape(.roundedRectangle(radius: 6))
             .opacity(isDisabled ? 0.4 : 1.0)
     }
 }

@@ -170,7 +170,7 @@ struct VehiclePickerSheet: View {
                     Button("Done") {
                         dismiss()
                     }
-                    .foregroundStyle(Theme.accent)
+                    .toolbarButtonStyle()
                 }
             }
         }
