@@ -160,6 +160,64 @@ extension CostsTab {
         return monthlyTotals.map { ($0.key, $0.value) }.sorted { $0.0 > $1.0 }
     }
 
+    /// Monthly breakdown sorted oldest-first for chart display (left-to-right reading)
+    var monthlyBreakdownChronological: [(month: Date, amount: Decimal)] {
+        monthlyBreakdown.sorted { $0.month < $1.month }
+    }
+
+    /// Monthly breakdown grouped by both month AND category for stacked bar charts
+    var monthlyBreakdownByCategory: [(month: Date, category: CostCategory, amount: Decimal)] {
+        let calendar = Calendar.current
+        var grouped: [Date: [CostCategory: Decimal]] = [:]
+
+        for log in logsWithCosts {
+            let components = calendar.dateComponents([.year, .month], from: log.performedDate)
+            if let monthStart = calendar.date(from: components) {
+                let category = log.costCategory ?? .maintenance
+                grouped[monthStart, default: [:]][category, default: 0] += log.cost ?? 0
+            }
+        }
+
+        var result: [(month: Date, category: CostCategory, amount: Decimal)] = []
+        for (month, categories) in grouped {
+            for (category, amount) in categories {
+                result.append((month: month, category: category, amount: amount))
+            }
+        }
+
+        return result.sorted { $0.month < $1.month }
+    }
+
+    // MARK: - Cumulative Cost Over Time
+
+    /// Running total of costs over time for spending pace chart
+    var cumulativeCostOverTime: [(date: Date, cumulativeAmount: Decimal)] {
+        let calendar = Calendar.current
+
+        // Sort logs by date ascending
+        let sorted = logsWithCosts.sorted { $0.performedDate < $1.performedDate }
+
+        // Merge same-date entries
+        var dailyTotals: [(date: Date, amount: Decimal)] = []
+        for log in sorted {
+            let dayComponents = calendar.dateComponents([.year, .month, .day], from: log.performedDate)
+            let dayDate = calendar.date(from: dayComponents) ?? log.performedDate
+
+            if let lastIndex = dailyTotals.indices.last, dailyTotals[lastIndex].date == dayDate {
+                dailyTotals[lastIndex].amount += log.cost ?? 0
+            } else {
+                dailyTotals.append((date: dayDate, amount: log.cost ?? 0))
+            }
+        }
+
+        // Build cumulative total
+        var cumulative: Decimal = 0
+        return dailyTotals.map { entry in
+            cumulative += entry.amount
+            return (date: entry.date, cumulativeAmount: cumulative)
+        }
+    }
+
     // MARK: - Yearly Roundup
 
     var currentYear: Int {

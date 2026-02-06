@@ -10,11 +10,38 @@ import SwiftUI
 struct CategoryBreakdownCard: View {
     let breakdown: [(category: CostCategory, amount: Decimal, percentage: Double)]
 
+    private var totalAmount: Decimal {
+        breakdown.map(\.amount).reduce(0, +)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             InstrumentSectionHeader(title: "By Category")
 
             VStack(spacing: 0) {
+                // Proportion bar
+                if totalAmount > 0 {
+                    GeometryReader { geo in
+                        HStack(spacing: 0) {
+                            ForEach(breakdown, id: \.category) { item in
+                                let fraction = CGFloat(NSDecimalNumber(decimal: item.amount).doubleValue
+                                    / NSDecimalNumber(decimal: totalAmount).doubleValue)
+                                Rectangle()
+                                    .fill(item.category.color)
+                                    .frame(width: fraction * geo.size.width)
+                            }
+                        }
+                    }
+                    .frame(height: 12)
+                    .padding(.horizontal, Spacing.md)
+                    .padding(.top, Spacing.md)
+
+                    Rectangle()
+                        .fill(Theme.gridLine)
+                        .frame(height: 1)
+                        .padding(.leading, Spacing.md)
+                }
+
                 ForEach(breakdown, id: \.category) { item in
                     HStack(spacing: Spacing.sm) {
                         Image(systemName: item.category.icon)

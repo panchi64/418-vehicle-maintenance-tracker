@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import Charts
 
 struct CostsTab: View {
     @Bindable var appState: AppState
@@ -112,10 +113,16 @@ struct CostsTab: View {
 
     @ViewBuilder
     private var breakdownSections: some View {
+        // Spending pace chart
+        if cumulativeCostOverTime.count >= 3 {
+            CumulativeCostChartCard(data: cumulativeCostOverTime)
+                .revealAnimation(delay: 0.22)
+        }
+
         // Category breakdown (only show when "All" category is selected)
         if categoryFilter == .all && !categoryBreakdown.isEmpty {
             CategoryBreakdownCard(breakdown: categoryBreakdown)
-                .revealAnimation(delay: 0.22)
+                .revealAnimation(delay: 0.24)
         }
 
         // Yearly roundup card (show for Year and All periods)
@@ -129,13 +136,17 @@ struct CostsTab: View {
                     previousYearLogs: previousYearLogs
                 )
             }
-            .revealAnimation(delay: 0.24)
+            .revealAnimation(delay: 0.26)
         }
 
-        // Monthly summary (show for Year and All periods)
-        if (periodFilter == .year || periodFilter == .all) && monthlyBreakdown.count > 1 {
-            MonthlyBreakdownCard(breakdown: monthlyBreakdown)
-                .revealAnimation(delay: 0.26)
+        // Monthly trend chart (replaces MonthlyBreakdownCard)
+        if monthlyBreakdown.count > 1 && periodFilter != .month {
+            MonthlyTrendChartCard(
+                breakdown: monthlyBreakdownChronological,
+                breakdownByCategory: categoryFilter == .all ? monthlyBreakdownByCategory : nil,
+                isStacked: categoryFilter == .all
+            )
+            .revealAnimation(delay: 0.28)
         }
     }
 
