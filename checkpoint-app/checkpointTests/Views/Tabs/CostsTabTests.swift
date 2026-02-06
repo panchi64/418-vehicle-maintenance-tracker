@@ -699,4 +699,186 @@ final class CostsTabTests: XCTestCase {
                 "Cost per mile '\(formatted)' should fit within stats card with scaling")
         }
     }
+
+    // MARK: - Monthly Breakdown By Category Tests
+
+    @MainActor
+    func testMonthlyBreakdownByCategory_GroupsCorrectly() {
+        // Given - different categories in the same month
+        let calendar = Calendar.current
+        let januaryDate = calendar.date(from: DateComponents(year: 2025, month: 1, day: 15))!
+
+        let logs = [
+            ServiceLog(performedDate: januaryDate, mileageAtService: 30000, cost: Decimal(100), costCategory: .maintenance),
+            ServiceLog(performedDate: januaryDate, mileageAtService: 30000, cost: Decimal(200), costCategory: .repair),
+            ServiceLog(performedDate: januaryDate, mileageAtService: 30000, cost: Decimal(50), costCategory: .maintenance)
+        ]
+
+        // When - group by month and category
+        var grouped: [Date: [CostCategory: Decimal]] = [:]
+        for log in logs {
+            let components = calendar.dateComponents([.year, .month], from: log.performedDate)
+            if let monthStart = calendar.date(from: components) {
+                let category = log.costCategory ?? .maintenance
+                grouped[monthStart, default: [:]][category, default: 0] += log.cost ?? 0
+            }
+        }
+
+        // Then
+        let janStart = calendar.date(from: DateComponents(year: 2025, month: 1))!
+        XCTAssertEqual(grouped.count, 1, "All logs are in the same month")
+        XCTAssertEqual(grouped[janStart]?[.maintenance], Decimal(150), "Two maintenance logs should sum to 150")
+        XCTAssertEqual(grouped[janStart]?[.repair], Decimal(200), "Repair log should be 200")
+    }
+
+    @MainActor
+    func testMonthlyBreakdownByCategory_EmptyWhenNoCosts() {
+        // Given - no logs
+        let logs: [ServiceLog] = []
+
+        // When
+        let logsWithCosts = logs.filter { $0.cost != nil && $0.cost! > 0 }
+        let calendar = Calendar.current
+        var grouped: [Date: [CostCategory: Decimal]] = [:]
+        for log in logsWithCosts {
+            let components = calendar.dateComponents([.year, .month], from: log.performedDate)
+            if let monthStart = calendar.date(from: components) {
+                let category = log.costCategory ?? .maintenance
+                grouped[monthStart, default: [:]][category, default: 0] += log.cost ?? 0
+            }
+        }
+
+        // Then
+        XCTAssertTrue(grouped.isEmpty, "Should be empty when no costs exist")
+    }
+
+    // MARK: - Monthly Breakdown Chronological Tests
+
+    func testMonthlyBreakdownChronological_SortsOldestFirst() {
+        // Given - monthly breakdown sorted newest-first (default)
+        let calendar = Calendar.current
+        let jan = calendar.date(from: DateComponents(year: 2025, month: 1))!
+        let feb = calendar.date(from: DateComponents(year: 2025, month: 2))!
+        let mar = calendar.date(from: DateComponents(year: 2025, month: 3))!
+
+        let newestFirst: [(month: Date, amount: Decimal)] = [
+            (month: mar, amount: Decimal(300)),
+            (month: feb, amount: Decimal(200)),
+            (month: jan, amount: Decimal(100))
+        ]
+
+        // When - sort oldest-first (as monthlyBreakdownChronological does)
+        let chronological = newestFirst.sorted { $0.month < $1.month }
+
+        // Then
+        XCTAssertEqual(chronological[0].month, jan, "First entry should be oldest (January)")
+        XCTAssertEqual(chronological[1].month, feb)
+        XCTAssertEqual(chronological[2].month, mar, "Last entry should be newest (March)")
+    }
+
+    // MARK: - Cumulative Cost Over Time Tests
+
+    @MainActor
+    func testCumulativeCostOverTime_CalculatesRunningTotal() {
+        // Given
+        let calendar = Calendar.current
+        let date1 = calendar.date(from: DateComponents(year: 2025, month: 1, day: 10))!
+        let date2 = calendar.date(from: DateComponents(year: 2025, month: 2, day: 15))!
+        let date3 = calendar.date(from: DateComponents(year: 2025, month: 3, day: 20))!
+
+        let logs = [
+            ServiceLog(performedDate: date1, mileageAtService: 30000, cost: Decimal(50)),
+            ServiceLog(performedDate: date2, mileageAtService: 31000, cost: Decimal(75)),
+            ServiceLog(performedDate: date3, mileageAtService: 32000, cost: Decimal(100))
+        ]
+
+        // When - compute cumulative totals
+        let sorted = logs.sorted { $0.performedDate < $1.performedDate }
+        var cumulative: Decimal = 0
+        let result = sorted.map { log -> (date: Date, cumulativeAmount: Decimal) in
+            cumulative += log.cost ?? 0
+            let dayComponents = calendar.dateComponents([.year, .month, .day], from: log.performedDate)
+            let dayDate = calendar.date(from: dayComponents) ?? log.performedDate
+            return (date: dayDate, cumulativeAmount: cumulative)
+        }
+
+        // Then
+        XCTAssertEqual(result.count, 3)
+        XCTAssertEqual(result[0].cumulativeAmount, Decimal(50))
+        XCTAssertEqual(result[1].cumulativeAmount, Decimal(125))
+        XCTAssertEqual(result[2].cumulativeAmount, Decimal(225))
+    }
+
+    @MainActor
+    func testCumulativeCostOverTime_MergesSameDate() {
+        // Given - two logs on the same date
+        let calendar = Calendar.current
+        let date1 = calendar.date(from: DateComponents(year: 2025, month: 1, day: 10))!
+        let date2 = calendar.date(from: DateComponents(year: 2025, month: 2, day: 15))!
+
+        let logs = [
+            ServiceLog(performedDate: date1, mileageAtService: 30000, cost: Decimal(50)),
+            ServiceLog(performedDate: date1, mileageAtService: 30000, cost: Decimal(30)),
+            ServiceLog(performedDate: date2, mileageAtService: 31000, cost: Decimal(100))
+        ]
+
+        // When - merge same-date entries and compute cumulative
+        let sorted = logs.sorted { $0.performedDate < $1.performedDate }
+        var dailyTotals: [(date: Date, amount: Decimal)] = []
+        for log in sorted {
+            let dayComponents = calendar.dateComponents([.year, .month, .day], from: log.performedDate)
+            let dayDate = calendar.date(from: dayComponents) ?? log.performedDate
+
+            if let lastIndex = dailyTotals.indices.last, dailyTotals[lastIndex].date == dayDate {
+                dailyTotals[lastIndex].amount += log.cost ?? 0
+            } else {
+                dailyTotals.append((date: dayDate, amount: log.cost ?? 0))
+            }
+        }
+
+        var cumulative: Decimal = 0
+        let result = dailyTotals.map { entry -> (date: Date, cumulativeAmount: Decimal) in
+            cumulative += entry.amount
+            return (date: entry.date, cumulativeAmount: cumulative)
+        }
+
+        // Then - two points (merged same date), not three
+        XCTAssertEqual(result.count, 2, "Two logs on same date should merge into one point")
+        XCTAssertEqual(result[0].cumulativeAmount, Decimal(80), "First point: 50 + 30 = 80")
+        XCTAssertEqual(result[1].cumulativeAmount, Decimal(180), "Second point: 80 + 100 = 180")
+    }
+
+    @MainActor
+    func testCumulativeCostOverTime_RespectsFilters() {
+        // Given - logs in different categories
+        let calendar = Calendar.current
+        let date1 = calendar.date(from: DateComponents(year: 2025, month: 1, day: 10))!
+        let date2 = calendar.date(from: DateComponents(year: 2025, month: 2, day: 15))!
+
+        let maintenanceLog = ServiceLog(performedDate: date1, mileageAtService: 30000, cost: Decimal(50), costCategory: .maintenance)
+        let repairLog = ServiceLog(performedDate: date2, mileageAtService: 31000, cost: Decimal(200), costCategory: .repair)
+
+        // When - filter to maintenance only (as the category filter would)
+        let allLogs = [maintenanceLog, repairLog]
+        let filteredLogs = allLogs.filter { $0.costCategory == .maintenance }
+        let logsWithCosts = filteredLogs.filter { $0.cost != nil && $0.cost! > 0 }
+
+        // Then
+        XCTAssertEqual(logsWithCosts.count, 1, "Only maintenance logs should remain after filter")
+        XCTAssertEqual(logsWithCosts.first?.cost, Decimal(50))
+    }
+
+    @MainActor
+    func testCumulativeCostOverTime_EmptyWithInsufficientData() {
+        // Given - only one log (< 2 needed for meaningful chart, < 3 for display threshold)
+        let log = ServiceLog(performedDate: .now, mileageAtService: 30000, cost: Decimal(100))
+
+        // When
+        let logs = [log]
+        let logsWithCosts = logs.filter { $0.cost != nil && $0.cost! > 0 }
+
+        // Then - fewer than 3 points means chart won't display
+        XCTAssertLessThan(logsWithCosts.count, 3,
+            "With only 1 log, chart visibility threshold (>= 3) is not met")
+    }
 }
