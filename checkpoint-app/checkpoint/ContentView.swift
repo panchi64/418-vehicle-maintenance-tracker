@@ -423,7 +423,8 @@ struct ContentView: View {
     private func seedSampleDataIfNeeded() {
         guard vehicles.isEmpty else { return }
 
-        let vehicle = Vehicle(
+        // --- Vehicle 1: Daily Driver (Camry) ---
+        let camry = Vehicle(
             name: "Daily Driver",
             make: "Toyota",
             model: "Camry",
@@ -433,23 +434,45 @@ struct ContentView: View {
             tireSize: "215/55R17",
             oilType: "0W-20 Synthetic",
             notes: "Purchased certified pre-owned. Runs great!",
-            mileageUpdatedAt: Calendar.current.date(byAdding: .day, value: -3, to: .now)
+            mileageUpdatedAt: Calendar.current.date(byAdding: .day, value: -3, to: .now),
+            marbeteExpirationMonth: 3,
+            marbeteExpirationYear: 2026
         )
-        modelContext.insert(vehicle)
+        modelContext.insert(camry)
 
-        // Add sample services
-        let sampleServices = Service.sampleServices(for: vehicle)
-        for service in sampleServices {
+        for service in Service.sampleServices(for: camry) {
             modelContext.insert(service)
         }
+        for log in ServiceLog.sampleLogs(for: camry) {
+            modelContext.insert(log)
+        }
+        for snapshot in MileageSnapshot.sampleSnapshots(for: camry) {
+            modelContext.insert(snapshot)
+        }
 
-        // Add sample service logs for the Costs tab
-        let sampleLogs = ServiceLog.sampleLogs(for: vehicle)
-        for log in sampleLogs {
+        // --- Vehicle 2: Weekend Car (MX-5) ---
+        let mx5 = Vehicle(
+            name: "Weekend Car",
+            make: "Mazda",
+            model: "MX-5",
+            year: 2020,
+            currentMileage: 18200,
+            vin: "JM1NDAD75L0123789",
+            tireSize: "205/45R17",
+            oilType: "0W-20 Synthetic",
+            notes: "Garage kept. Summer tires only.",
+            mileageUpdatedAt: Calendar.current.date(byAdding: .day, value: -14, to: .now)
+        )
+        modelContext.insert(mx5)
+
+        for service in Service.sampleServicesCompact(for: mx5) {
+            modelContext.insert(service)
+        }
+        for log in ServiceLog.sampleLogsCompact(for: mx5) {
             modelContext.insert(log)
         }
 
-        appState.selectedVehicle = vehicle
+        appState.selectedVehicle = camry
     }
 }
 

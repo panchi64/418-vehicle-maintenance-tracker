@@ -240,7 +240,9 @@ extension Vehicle {
             tireSize: "215/55R17",
             oilType: "0W-20 Synthetic",
             notes: "Purchased certified pre-owned. Runs great!",
-            mileageUpdatedAt: Calendar.current.date(byAdding: .day, value: -3, to: .now)
+            mileageUpdatedAt: Calendar.current.date(byAdding: .day, value: -3, to: .now),
+            marbeteExpirationMonth: 3,
+            marbeteExpirationYear: 2026
         )
         return vehicle
     }
@@ -257,7 +259,9 @@ extension Vehicle {
                 tireSize: "215/55R17",
                 oilType: "0W-20 Synthetic",
                 notes: "Purchased certified pre-owned. Runs great!",
-                mileageUpdatedAt: Calendar.current.date(byAdding: .day, value: -3, to: .now)
+                mileageUpdatedAt: Calendar.current.date(byAdding: .day, value: -3, to: .now),
+                marbeteExpirationMonth: 3,
+                marbeteExpirationYear: 2026
             ),
             Vehicle(
                 name: "Weekend Car",
