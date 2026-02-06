@@ -53,9 +53,11 @@ Views/
 ### Components/Cards/
 | Component | Purpose |
 |-----------|---------|
-| `CategoryBreakdownCard.swift` | Cost breakdown by category |
+| `CategoryBreakdownCard.swift` | Cost breakdown by category with proportion bar |
 | `CostSummaryCard.swift` | Total spent hero card |
-| `MonthlyBreakdownCard.swift` | Monthly cost summary with bars |
+| `CumulativeCostChartCard.swift` | Area chart showing cumulative spending pace (Swift Charts) |
+| `MonthlyBreakdownCard.swift` | Monthly cost summary with bars (legacy, replaced by MonthlyTrendChartCard) |
+| `MonthlyTrendChartCard.swift` | Vertical bar chart of monthly spending, stacked by category (Swift Charts) |
 | `NextUpCard.swift` | Hero card for most urgent service |
 | `QuickMileageUpdateCard.swift` | Inline mileage entry card |
 | `QuickSpecsCard.swift` | Vehicle specs display |

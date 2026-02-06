@@ -239,7 +239,7 @@
 | ------------------------ | -------- | ------ | -------------------------------------------------------- |
 | Service history PDF      | High     | ✅   | Complete maintenance history for resale, warranty claims; shareable via iOS share sheet |
 | iCloud Sync              | High     | ✅     | Free native sync across iOS devices via CloudKit         |
-| Maintenance cost reports | Medium   |      | Graphs and breakdowns                                    |
+| Maintenance cost reports | Medium   | ✅   | Graphs and breakdowns (proportion bar, monthly trend, spending pace) |
 
 #### iCloud Sync (Free Feature)
 

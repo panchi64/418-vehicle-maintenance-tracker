@@ -9,6 +9,7 @@ This directory contains the design system tokens and modifiers that define Check
 | `Theme.swift` | Colors, button styles, card modifiers |
 | `Typography.swift` | Font definitions and text styles |
 | `Spacing.swift` | Spacing constants (4pt base unit) |
+| `BrutalistChartStyle.swift` | Swift Charts styling (`.brutalistChartStyle()` modifier, `ChartConstants`, `ChartFormatting`) |
 
 ## Design Philosophy
 
