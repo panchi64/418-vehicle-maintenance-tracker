@@ -39,7 +39,7 @@ struct CategoryBreakdownCard: View {
                     Rectangle()
                         .fill(Theme.gridLine)
                         .frame(height: 1)
-                        .padding(.leading, Spacing.md)
+                        .padding(.horizontal, Spacing.md)
                 }
 
                 ForEach(breakdown, id: \.category) { item in

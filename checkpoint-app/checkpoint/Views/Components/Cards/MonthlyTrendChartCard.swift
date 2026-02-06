@@ -20,6 +20,11 @@ struct MonthlyTrendChartCard: View {
         return f
     }()
 
+    /// Month stride count for x-axis labels based on data span
+    private var xAxisMonthStride: Int {
+        breakdown.count > 8 ? 3 : 1
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             InstrumentSectionHeader(title: "Monthly Trend")
@@ -60,10 +65,10 @@ struct MonthlyTrendChartCard: View {
             .chartForegroundStyleScale(categoryColorMapping(from: byCategory))
             .chartLegend(.hidden)
             .chartXAxis {
-                AxisMarks(values: .stride(by: .month)) { value in
+                AxisMarks(values: .stride(by: .month, count: xAxisMonthStride)) { value in
                     AxisValueLabel {
                         if let date = value.as(Date.self) {
-                            Text(Self.monthFormatter.string(from: date).uppercased())
+                            Text(xAxisLabel(for: date))
                                 .font(.brutalistLabel)
                                 .foregroundStyle(Theme.textTertiary)
                         }
@@ -93,10 +98,10 @@ struct MonthlyTrendChartCard: View {
                 .cornerRadius(0)
             }
             .chartXAxis {
-                AxisMarks(values: .stride(by: .month)) { value in
+                AxisMarks(values: .stride(by: .month, count: xAxisMonthStride)) { value in
                     AxisValueLabel {
                         if let date = value.as(Date.self) {
-                            Text(Self.monthFormatter.string(from: date).uppercased())
+                            Text(xAxisLabel(for: date))
                                 .font(.brutalistLabel)
                                 .foregroundStyle(Theme.textTertiary)
                         }
@@ -178,6 +183,19 @@ struct MonthlyTrendChartCard: View {
     }
 
     // MARK: - Helpers
+
+    /// Format x-axis label: "MMM" normally, "MMM 'YY" for January
+    private func xAxisLabel(for date: Date) -> String {
+        let calendar = Calendar.current
+        let month = calendar.component(.month, from: date)
+        let monthStr = Self.monthFormatter.string(from: date).uppercased()
+
+        if month == 1 {
+            let year = calendar.component(.year, from: date)
+            return "\(monthStr)\n'\(String(year).suffix(2))"
+        }
+        return monthStr
+    }
 
     private func categoryColorMapping(from data: [(month: Date, category: CostCategory, amount: Decimal)]) -> KeyValuePairs<String, Color> {
         let categories = Array(Set(data.map(\.category))).sorted { $0.displayName < $1.displayName }
