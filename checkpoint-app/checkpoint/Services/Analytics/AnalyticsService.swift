@@ -84,15 +84,18 @@ final class AnalyticsService {
 
     /// Update analytics consent. Sends the opt event before changing SDK state.
     func setEnabled(_ enabled: Bool) {
-        AnalyticsSettings.shared.isEnabled = enabled
-
-        guard isInitialized else { return }
+        guard isInitialized else {
+            AnalyticsSettings.shared.isEnabled = enabled
+            return
+        }
 
         if enabled {
+            AnalyticsSettings.shared.isEnabled = true
             PostHogSDK.shared.optIn()
             capture(.analyticsOptedIn)
         } else {
             capture(.analyticsOptedOut)
+            AnalyticsSettings.shared.isEnabled = false
             PostHogSDK.shared.optOut()
         }
 
