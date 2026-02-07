@@ -22,6 +22,9 @@ struct HomeTab: View {
     @State private var dismissedClusterHashes: Set<String> = []
     @AppStorage("dismissedClusterHashes") private var dismissedClusterHashesStorage: String = ""
 
+    // Seasonal reminders
+    @State private var activeSeasonalReminders: [SeasonalReminder] = []
+
     private var syncService: CloudSyncStatusService {
         CloudSyncStatusService.shared
     }
@@ -134,6 +137,20 @@ struct HomeTab: View {
                         }
                     )
                     .revealAnimation(delay: 0.25)
+                }
+
+                // Seasonal Advisory Cards (max 2)
+                ForEach(Array(activeSeasonalReminders.prefix(2)), id: \.id) { reminder in
+                    SeasonalReminderCard(
+                        reminder: reminder,
+                        onScheduleService: {
+                            scheduleSeasonalService(reminder)
+                        },
+                        onDismiss: {
+                            dismissSeasonalReminder(reminder)
+                        }
+                    )
+                    .revealAnimation(delay: 0.3)
                 }
 
                 // Upcoming services list (max 3 for home tab)
@@ -250,12 +267,14 @@ struct HomeTab: View {
         .task(id: vehicle?.id) {
             await fetchRecalls()
             detectClusters()
+            refreshSeasonalReminders()
         }
         .onChange(of: vehicleServices.count) { _, _ in
             detectClusters()
         }
         .onAppear {
             loadDismissedClusters()
+            refreshSeasonalReminders()
         }
         .sheet(item: $appState.selectedCluster) { cluster in
             ServiceClusterDetailSheet(
@@ -416,6 +435,29 @@ struct HomeTab: View {
 
     private func saveDismissedClusters() {
         dismissedClusterHashesStorage = dismissedClusterHashes.joined(separator: ",")
+    }
+
+    // MARK: - Seasonal Reminders
+
+    private func refreshSeasonalReminders() {
+        let zone = SeasonalSettings.shared.climateZone
+        activeSeasonalReminders = SeasonalReminder.activeReminders(for: zone, on: Date())
+    }
+
+    private func scheduleSeasonalService(_ reminder: SeasonalReminder) {
+        let year = Calendar.current.component(.year, from: Date())
+        SeasonalSettings.shared.dismissForYear(reminder.id, year: year)
+        appState.seasonalPrefill = reminder.toPrefill()
+        appState.showAddService = true
+        refreshSeasonalReminders()
+    }
+
+    private func dismissSeasonalReminder(_ reminder: SeasonalReminder) {
+        let year = Calendar.current.component(.year, from: Date())
+        SeasonalSettings.shared.dismissForYear(reminder.id, year: year)
+        withAnimation(.easeOut(duration: Theme.animationMedium)) {
+            refreshSeasonalReminders()
+        }
     }
 
     // MARK: - Helpers

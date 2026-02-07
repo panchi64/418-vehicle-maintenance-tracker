@@ -30,6 +30,10 @@ final class AppState {
     var selectedCluster: ServiceCluster?
     var clusterToMarkDone: ServiceCluster?
 
+    // MARK: - Seasonal Reminder Pre-fill
+
+    var seasonalPrefill: SeasonalPrefill?
+
     // MARK: - Services Tab State (preserved across tab switches)
 
     var servicesSearchText = ""

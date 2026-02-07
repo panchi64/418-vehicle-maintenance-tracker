@@ -20,6 +20,7 @@ struct AddServiceView: View {
     @Query private var services: [Service]
 
     let vehicle: Vehicle
+    var seasonalPrefill: SeasonalPrefill?
 
     // Mode selection
     @State private var mode: ServiceMode = .log
@@ -116,6 +117,13 @@ struct AddServiceView: View {
                 // Pre-fill mileage with current vehicle mileage
                 if mileageAtService == nil {
                     mileageAtService = vehicle.currentMileage
+                }
+                // Apply seasonal reminder pre-fill
+                if let prefill = seasonalPrefill {
+                    mode = .schedule
+                    customServiceName = prefill.serviceName
+                    dueDate = prefill.dueDate
+                    intervalMonths = prefill.intervalMonths
                 }
             }
         }

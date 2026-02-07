@@ -29,6 +29,9 @@ struct SettingsView: View {
                         // ALERTS
                         alertsSection
 
+                        // SEASONAL REMINDERS
+                        seasonalRemindersSection
+
                         // SERVICE BUNDLING
                         serviceBundlingSection
 
@@ -130,6 +133,42 @@ struct SettingsView: View {
 
                 // App Icon Auto-change
                 AppIconToggle()
+            }
+            .background(Theme.surfaceInstrument)
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+            )
+        }
+    }
+
+    // MARK: - Seasonal Reminders Section
+
+    private var seasonalRemindersSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            Text("SEASONAL REMINDERS")
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(2)
+
+            VStack(spacing: 0) {
+                // Enable/Disable Toggle
+                SeasonalRemindersToggle()
+
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: Theme.borderWidth)
+
+                // Climate Zone Picker
+                NavigationLink {
+                    ClimateZonePickerView()
+                } label: {
+                    widgetSettingRow(
+                        title: "Climate Zone",
+                        value: SeasonalSettings.shared.climateZone?.displayName ?? "Not Set"
+                    )
+                }
+                .buttonStyle(.plain)
             }
             .background(Theme.surfaceInstrument)
             .overlay(
@@ -261,6 +300,39 @@ struct SettingsView: View {
         }
         .padding(Spacing.md)
         .contentShape(Rectangle())
+    }
+}
+
+// MARK: - Seasonal Reminders Toggle
+
+struct SeasonalRemindersToggle: View {
+    @State private var isEnabled: Bool = SeasonalSettings.shared.isEnabled
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Seasonal Alerts")
+                    .font(.brutalistBody)
+                    .foregroundStyle(Theme.textPrimary)
+
+                Text("Show seasonal maintenance tips on the dashboard")
+                    .font(.brutalistSecondary)
+                    .foregroundStyle(Theme.textTertiary)
+            }
+
+            Spacer()
+
+            Toggle("", isOn: $isEnabled)
+                .labelsHidden()
+                .tint(Theme.accent)
+        }
+        .padding(Spacing.md)
+        .onChange(of: isEnabled) { _, newValue in
+            Task { @MainActor in
+                HapticService.shared.selectionChanged()
+                SeasonalSettings.shared.isEnabled = newValue
+            }
+        }
     }
 }
 

@@ -87,8 +87,8 @@
 | Date-based reminders         | High     | ✅     | Fallback for non-mileage services (battery, wipers)             |
 | Smart notifications          | High     | ✅     | Default intervals: 30 days, 7 days, 1 day before due (configurable) |
 | Service clustering           | High     | ✅     | Bundle nearby services into one visit                           |
-| Seasonal reminders           | Medium   | ⏳     | Location + season → contextual alerts                           |
-| Severe vs normal schedules   | Medium   | ⏳     | Different intervals based on driving conditions                 |
+| Seasonal reminders           | Medium   | ✅     | Climate zone + season → contextual dashboard cards              |
+| Severe vs normal schedules   | Medium   | 🔮     | Moved to v2.0 — only meaningful with pre-loaded factory schedules |
 | Custom reminder intervals    | Medium   | ✅     | User-defined schedules                                          |
 
 #### Setup: Schedule Source Choice
