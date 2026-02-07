@@ -39,6 +39,21 @@ enum Formatters {
         return formatter
     }()
 
+    /// Currency format with no decimals: "$46"
+    static let currencyWhole: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = "USD"
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.maximumFractionDigits = 0
+        return formatter
+    }()
+
+    /// Format a Decimal as whole-dollar currency: "$1,234"
+    static func currencyWhole(_ amount: Decimal) -> String {
+        currencyWhole.string(from: amount as NSDecimalNumber) ?? "$0"
+    }
+
     // MARK: - Mileage/Distance Methods
 
     /// Format mileage with suffix using user's preferred unit: "12,345 mi" or "19,867 km"

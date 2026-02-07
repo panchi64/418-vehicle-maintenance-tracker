@@ -7,6 +7,9 @@
 
 import Foundation
 import UserNotifications
+import os
+
+private let clusterNotificationLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "Notifications.Cluster")
 
 /// Scheduler for cluster notifications - one notification for multiple services
 struct ClusterNotificationScheduler {
@@ -89,7 +92,7 @@ struct ClusterNotificationScheduler {
 
             notificationCenter.add(request) { error in
                 if let error = error {
-                    print("Failed to schedule cluster notification (\(daysBeforeDue)d before): \(error)")
+                    clusterNotificationLogger.error("Failed to schedule cluster notification (\(daysBeforeDue)d before): \(error.localizedDescription)")
                 }
             }
         }

@@ -8,6 +8,9 @@
 import Foundation
 import UserNotifications
 import SwiftData
+import os
+
+private let notificationLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "Notifications")
 
 /// Core service for managing local notifications for vehicle maintenance reminders
 @Observable
@@ -74,7 +77,7 @@ final class NotificationService: NSObject {
             self.isAuthorized = granted
             return granted
         } catch {
-            print("Notification authorization error: \(error)")
+            notificationLogger.error("Notification authorization error: \(error.localizedDescription)")
             return false
         }
     }

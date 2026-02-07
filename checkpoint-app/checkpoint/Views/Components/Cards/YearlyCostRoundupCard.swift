@@ -25,7 +25,7 @@ struct YearlyCostRoundupCard: View {
     }
 
     private var logsWithCosts: [ServiceLog] {
-        yearLogs.filter { $0.cost != nil && $0.cost! > 0 }
+        yearLogs.filter { ($0.cost ?? 0) > 0 }
     }
 
     private var totalSpent: Decimal {
@@ -34,7 +34,7 @@ struct YearlyCostRoundupCard: View {
 
     private var previousYearTotal: Decimal {
         previousYearLogs
-            .filter { $0.cost != nil && $0.cost! > 0 }
+            .filter { ($0.cost ?? 0) > 0 }
             .compactMap { $0.cost }
             .reduce(0, +)
     }
@@ -79,20 +79,12 @@ struct YearlyCostRoundupCard: View {
     // MARK: - Formatters
 
     private func formatCurrency(_ amount: Decimal) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        formatter.locale = Locale(identifier: "en_US")
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: amount as NSDecimalNumber) ?? "$0"
+        Formatters.currencyWhole(amount)
     }
 
+    @MainActor
     private func formatMiles(_ miles: Int) -> String {
-        let unit = DistanceSettings.shared.unit
-        let displayValue = unit.fromMiles(miles)
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        return "~" + (formatter.string(from: NSNumber(value: displayValue)) ?? "\(displayValue)")
+        "~" + Formatters.mileageNumber(miles)
     }
 
     // MARK: - Body

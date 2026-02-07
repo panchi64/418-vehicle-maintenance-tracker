@@ -7,6 +7,9 @@
 
 import SwiftUI
 import QuickLook
+import os
+
+private let attachmentGridLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "Attachments")
 
 struct AttachmentGrid: View {
     let attachments: [ServiceAttachment]
@@ -60,7 +63,7 @@ struct AttachmentGrid: View {
             try data.write(to: tempURL)
             previewURL = tempURL
         } catch {
-            print("Error writing temp file for preview: \(error)")
+            attachmentGridLogger.error("Error writing temp file for preview: \(error.localizedDescription)")
         }
     }
 }

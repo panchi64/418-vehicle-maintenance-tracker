@@ -7,6 +7,9 @@
 
 import Foundation
 import UserNotifications
+import os
+
+private let serviceNotificationLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "Notifications.Service")
 
 /// Scheduler for service due notifications
 struct ServiceNotificationScheduler {
@@ -175,7 +178,7 @@ struct ServiceNotificationScheduler {
                 notificationDate: notificationDate, daysBeforeDue: daysBeforeDue
             )
             notificationCenter.add(request) { error in
-                if let error = error { print("Failed to schedule notification (\(daysBeforeDue)d before): \(error)") }
+                if let error = error { serviceNotificationLogger.error("Failed to schedule notification (\(daysBeforeDue)d before): \(error.localizedDescription)") }
             }
         }
         return baseNotificationID

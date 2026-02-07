@@ -7,6 +7,9 @@
 
 import Foundation
 import UserNotifications
+import os
+
+private let mileageNotificationLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "Notifications.Mileage")
 
 /// Scheduler for mileage reminder notifications
 struct MileageReminderScheduler {
@@ -78,7 +81,7 @@ struct MileageReminderScheduler {
 
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {
-                print("Failed to schedule mileage reminder: \(error)")
+                mileageNotificationLogger.error("Failed to schedule mileage reminder: \(error.localizedDescription)")
             }
         }
     }
@@ -108,7 +111,7 @@ struct MileageReminderScheduler {
 
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {
-                print("Failed to snooze mileage reminder: \(error)")
+                mileageNotificationLogger.error("Failed to snooze mileage reminder: \(error.localizedDescription)")
             }
         }
     }

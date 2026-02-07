@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import os
 
 // MARK: - Siri Service Data Structures
 
@@ -48,6 +49,8 @@ enum SiriServiceStatus: String {
 }
 
 // MARK: - Siri Data Provider
+
+private let siriLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "Siri")
 
 /// Reads vehicle and service data from App Groups for Siri intents
 struct SiriDataProvider {
@@ -93,7 +96,7 @@ struct SiriDataProvider {
             let items = try JSONDecoder().decode([VehicleListItemDTO].self, from: data)
             return items.map { SiriVehicleInfo(id: $0.id, displayName: $0.displayName) }
         } catch {
-            print("SiriDataProvider failed to decode vehicle list: \(error)")
+            siriLogger.error("Failed to decode vehicle list: \(error.localizedDescription)")
             return []
         }
     }
@@ -120,7 +123,7 @@ struct SiriDataProvider {
                 services: services
             )
         } catch {
-            print("SiriDataProvider failed to decode widget data: \(error)")
+            siriLogger.error("Failed to decode widget data: \(error.localizedDescription)")
             return nil
         }
     }

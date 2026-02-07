@@ -229,15 +229,17 @@ struct ServicesTab: View {
             .padding(.bottom, Spacing.xxl + 56)
         }
         .sheet(isPresented: $showExportOptions) {
-            ExportOptionsSheet(
-                vehicle: vehicle!,
-                serviceLogs: vehicleServiceLogs,
-                isExporting: $isExporting
-            ) { url in
-                exportPDFURL = url
+            if let vehicle = vehicle {
+                ExportOptionsSheet(
+                    vehicle: vehicle,
+                    serviceLogs: vehicleServiceLogs,
+                    isExporting: $isExporting
+                ) { url in
+                    exportPDFURL = url
+                }
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
             }
-            .presentationDetents([.medium])
-            .presentationDragIndicator(.visible)
         }
         .sheet(item: $exportPDFURL) { url in
             ShareSheet(items: [url])

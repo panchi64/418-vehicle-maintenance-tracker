@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os
 
 struct PresetData: Codable, Equatable {
     let name: String
@@ -13,6 +14,8 @@ struct PresetData: Codable, Equatable {
     let defaultIntervalMonths: Int?
     let defaultIntervalMiles: Int?
 }
+
+private let presetLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "PresetData")
 
 class PresetDataService {
     static let shared = PresetDataService()
@@ -31,7 +34,7 @@ class PresetDataService {
 
         // Locate the JSON file in the bundle
         guard let url = Bundle.main.url(forResource: "ServicePresets", withExtension: "json") else {
-            print("Error: ServicePresets.json not found in bundle")
+            presetLogger.error("ServicePresets.json not found in bundle")
             return []
         }
 
@@ -45,7 +48,7 @@ class PresetDataService {
             cachedPresets = presets
             return presets
         } catch {
-            print("Error loading presets: \(error)")
+            presetLogger.error("Error loading presets: \(error.localizedDescription)")
             return []
         }
     }

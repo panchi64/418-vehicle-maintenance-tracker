@@ -15,11 +15,11 @@ struct QuickSpecsCard: View {
     @State private var isExpanded = false
 
     private var hasAnySpecs: Bool {
-        vehicle.vin != nil || vehicle.tireSize != nil || vehicle.oilType != nil || (vehicle.notes != nil && !vehicle.notes!.isEmpty) || vehicle.hasMarbeteExpiration
+        vehicle.vin != nil || vehicle.tireSize != nil || vehicle.oilType != nil || !(vehicle.notes ?? "").isEmpty || vehicle.hasMarbeteExpiration
     }
 
     private var hasNotes: Bool {
-        vehicle.notes != nil && !vehicle.notes!.isEmpty
+        !(vehicle.notes ?? "").isEmpty
     }
 
     /// Truncated notes for preview display (first ~50 chars)
@@ -56,12 +56,12 @@ struct QuickSpecsCard: View {
                                     .foregroundStyle(Theme.textSecondary)
                             }
 
-                            if vehicle.tireSize != nil {
+                            if let tireSize = vehicle.tireSize {
                                 Text("•")
                                     .font(.brutalistSecondary)
                                     .foregroundStyle(Theme.gridLine)
 
-                                Text(vehicle.tireSize!)
+                                Text(tireSize)
                                     .font(.brutalistSecondary)
                                     .foregroundStyle(Theme.textSecondary)
                             }

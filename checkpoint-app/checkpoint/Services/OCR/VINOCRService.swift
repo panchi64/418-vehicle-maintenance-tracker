@@ -65,7 +65,7 @@ actor VINOCRService {
                 // Check if this is a valid 17-char VIN
                 if Self.isValidVIN(corrected) {
                     let confidence = topCandidate.confidence
-                    if bestCandidate == nil || confidence > bestCandidate!.confidence {
+                    if confidence > (bestCandidate?.confidence ?? -1) {
                         bestCandidate = VINOCRResult(vin: corrected, confidence: confidence)
                     }
                 }
@@ -74,7 +74,7 @@ actor VINOCRService {
                 if corrected.count > 17 {
                     if let extracted = Self.extractVINFromText(corrected) {
                         let confidence = topCandidate.confidence * 0.9
-                        if bestCandidate == nil || confidence > bestCandidate!.confidence {
+                        if confidence > (bestCandidate?.confidence ?? -1) {
                             bestCandidate = VINOCRResult(vin: extracted, confidence: confidence)
                         }
                     }

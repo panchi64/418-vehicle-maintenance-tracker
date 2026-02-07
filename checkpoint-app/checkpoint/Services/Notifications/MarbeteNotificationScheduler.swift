@@ -7,6 +7,9 @@
 
 import Foundation
 import UserNotifications
+import os
+
+private let marbeteNotificationLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "Notifications.Marbete")
 
 /// Scheduler for marbete (PR vehicle registration) expiration notifications
 struct MarbeteNotificationScheduler {
@@ -113,7 +116,7 @@ struct MarbeteNotificationScheduler {
 
             notificationCenter.add(request) { error in
                 if let error = error {
-                    print("Failed to schedule marbete notification (\(daysBeforeDue)d before): \(error)")
+                    marbeteNotificationLogger.error("Failed to schedule marbete notification (\(daysBeforeDue)d before): \(error.localizedDescription)")
                 }
             }
         }
@@ -151,7 +154,7 @@ struct MarbeteNotificationScheduler {
 
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {
-                print("Failed to snooze marbete reminder: \(error)")
+                marbeteNotificationLogger.error("Failed to snooze marbete reminder: \(error.localizedDescription)")
             }
         }
     }

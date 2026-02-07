@@ -8,6 +8,9 @@
 import SwiftUI
 import PhotosUI
 import UniformTypeIdentifiers
+import os
+
+private let attachmentLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "Attachments")
 
 struct AttachmentPicker: View {
     @Binding var attachments: [AttachmentData]
@@ -163,7 +166,7 @@ struct AttachmentPicker: View {
                 }
             }
         } catch {
-            print("Error loading photo: \(error)")
+            attachmentLogger.error("Error loading photo: \(error.localizedDescription)")
         }
 
         selectedPhotoItem = nil
@@ -189,7 +192,7 @@ struct AttachmentPicker: View {
             )
             attachments.append(attachment)
         } catch {
-            print("Error loading document: \(error)")
+            attachmentLogger.error("Error loading document: \(error.localizedDescription)")
         }
     }
 
@@ -212,7 +215,7 @@ struct AttachmentPicker: View {
                 let result = try await ReceiptOCRService.shared.extractText(from: image)
                 extractedText = result.text
             } catch {
-                print("OCR failed for page \(index + 1): \(error)")
+                attachmentLogger.error("OCR failed for page \(index + 1): \(error.localizedDescription)")
                 // Continue without extracted text - still save the image
             }
 

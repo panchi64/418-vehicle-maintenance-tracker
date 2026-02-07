@@ -25,12 +25,7 @@ struct QuickStatsBar: View {
     }
 
     private var formattedYTDSpend: String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        formatter.locale = Locale(identifier: "en_US")
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: ytdSpend as NSDecimalNumber) ?? "$0"
+        Formatters.currencyWhole(ytdSpend)
     }
 
     var body: some View {

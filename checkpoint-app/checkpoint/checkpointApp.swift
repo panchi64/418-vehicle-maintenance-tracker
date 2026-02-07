@@ -8,6 +8,9 @@
 import SwiftUI
 import SwiftData
 import UserNotifications
+import os
+
+private let appLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "App")
 
 @main
 struct checkpointApp: App {
@@ -55,7 +58,7 @@ struct checkpointApp: App {
                 return try ModelContainer(for: schema, configurations: [cloudConfig])
             } catch {
                 // CloudKit failed - fall back to local storage
-                print("CloudKit initialization failed: \(error). Falling back to local storage.")
+                appLogger.error("CloudKit initialization failed: \(error.localizedDescription). Falling back to local storage.")
             }
         }
 
@@ -71,6 +74,7 @@ struct checkpointApp: App {
         do {
             return try ModelContainer(for: schema, configurations: [localConfig])
         } catch {
+            appLogger.fault("Could not create ModelContainer: \(error.localizedDescription)")
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()

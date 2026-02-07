@@ -7,6 +7,9 @@
 
 import UIKit
 import SwiftData
+import os
+
+private let appIconLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "AppIcon")
 
 @MainActor
 final class AppIconService {
@@ -27,13 +30,13 @@ final class AppIconService {
     ///   - services: All services to evaluate
     func updateIcon(for vehicle: Vehicle?, services: [Service]) {
         guard UIApplication.shared.supportsAlternateIcons else {
-            print("[AppIcon] Alternate icons not supported")
+            appIconLogger.info("Alternate icons not supported")
             return
         }
 
         // When auto-change is disabled, always revert to the default icon
         guard AppIconSettings.shared.autoChangeEnabled else {
-            print("[AppIcon] Auto-change disabled")
+            appIconLogger.debug("Auto-change disabled")
             resetToDefaultIcon()
             return
         }
@@ -41,19 +44,19 @@ final class AppIconService {
         let targetIconName = determineIconName(for: vehicle, services: services)
         let currentIconName = UIApplication.shared.alternateIconName
 
-        print("[AppIcon] Current: \(currentIconName ?? "default"), Target: \(targetIconName ?? "default")")
+        appIconLogger.debug("Current: \(currentIconName ?? "default", privacy: .public), Target: \(targetIconName ?? "default", privacy: .public)")
 
         // Only update if the icon needs to change
         guard targetIconName != currentIconName else {
-            print("[AppIcon] No change needed")
+            appIconLogger.debug("No change needed")
             return
         }
 
         UIApplication.shared.setAlternateIconName(targetIconName) { error in
             if let error = error {
-                print("[AppIcon] Failed to update: \(error.localizedDescription)")
+                appIconLogger.error("Failed to update: \(error.localizedDescription)")
             } else {
-                print("[AppIcon] Successfully changed to: \(targetIconName ?? "default")")
+                appIconLogger.info("Successfully changed to: \(targetIconName ?? "default", privacy: .public)")
             }
         }
     }
@@ -61,7 +64,7 @@ final class AppIconService {
     /// Determines which icon to display based on service status
     private func determineIconName(for vehicle: Vehicle?, services: [Service]) -> String? {
         guard let vehicle = vehicle else {
-            print("[AppIcon] No vehicle selected")
+            appIconLogger.debug("No vehicle selected")
             return nil
         }
 
@@ -72,13 +75,13 @@ final class AppIconService {
             .sorted(by: { $0.urgencyScore(currentMileage: vehicle.currentMileage) < $1.urgencyScore(currentMileage: vehicle.currentMileage) })
             .first
         else {
-            print("[AppIcon] No services for vehicle")
+            appIconLogger.debug("No services for vehicle")
             return nil
         }
 
         // Determine icon based on status
         let status = mostUrgentService.status(currentMileage: vehicle.currentMileage)
-        print("[AppIcon] Most urgent service: \(mostUrgentService.name), status: \(status)")
+        appIconLogger.debug("Most urgent service: \(mostUrgentService.name, privacy: .public), status: \(String(describing: status), privacy: .public)")
 
         switch status {
         case .overdue:
@@ -96,9 +99,9 @@ final class AppIconService {
 
         UIApplication.shared.setAlternateIconName(nil) { error in
             if let error = error {
-                print("[AppIcon] Failed to reset: \(error.localizedDescription)")
+                appIconLogger.error("Failed to reset: \(error.localizedDescription)")
             } else {
-                print("[AppIcon] Reset to default icon")
+                appIconLogger.info("Reset to default icon")
             }
         }
     }

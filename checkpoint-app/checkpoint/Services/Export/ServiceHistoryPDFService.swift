@@ -8,6 +8,7 @@
 
 import UIKit
 import PDFKit
+import os
 
 /// Export options for PDF generation
 struct ExportOptions: Sendable {
@@ -15,6 +16,8 @@ struct ExportOptions: Sendable {
     var includeTotal: Bool = true
     var includeCostPerMile: Bool = false
 }
+
+private let pdfLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "PDFExport")
 
 @MainActor
 final class ServiceHistoryPDFService {
@@ -139,7 +142,7 @@ final class ServiceHistoryPDFService {
             try data.write(to: tempURL)
             return tempURL
         } catch {
-            print("Failed to write PDF: \(error)")
+            pdfLogger.error("Failed to write PDF: \(error.localizedDescription)")
             return nil
         }
     }

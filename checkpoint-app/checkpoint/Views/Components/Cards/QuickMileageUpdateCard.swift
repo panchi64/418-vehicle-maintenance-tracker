@@ -196,8 +196,8 @@ struct MileageUpdateSheet: View {
                             dismiss()
                         }
                     }
-                    .toolbarButtonStyle(isDisabled: newMileage == nil || newMileage! <= 0 || isProcessingOCR)
-                    .disabled(newMileage == nil || newMileage! <= 0 || isProcessingOCR)
+                    .toolbarButtonStyle(isDisabled: (newMileage ?? 0) <= 0 || isProcessingOCR)
+                    .disabled((newMileage ?? 0) <= 0 || isProcessingOCR)
                 }
             }
         }

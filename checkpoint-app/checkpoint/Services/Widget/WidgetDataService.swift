@@ -9,6 +9,9 @@ import Foundation
 import WidgetKit
 import Combine
 import CoreData
+import os
+
+private let widgetLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "Widget")
 
 /// Service for updating widget data in the shared App Group container
 @MainActor
@@ -69,7 +72,7 @@ final class WidgetDataService {
         services: [(name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?)]
     ) {
         guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
-            print("Failed to access App Group UserDefaults")
+            widgetLogger.error("Failed to access App Group UserDefaults")
             return
         }
 
@@ -102,7 +105,7 @@ final class WidgetDataService {
             // Reload widget timelines
             WidgetCenter.shared.reloadAllTimelines()
         } catch {
-            print("Failed to encode widget data: \(error)")
+            widgetLogger.error("Failed to encode widget data: \(error.localizedDescription)")
         }
     }
 
@@ -199,7 +202,7 @@ final class WidgetDataService {
     /// - Parameter vehicles: All vehicles to make available in widget configuration
     func updateVehicleList(_ vehicles: [Vehicle]) {
         guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
-            print("Failed to access App Group UserDefaults")
+            widgetLogger.error("Failed to access App Group UserDefaults")
             return
         }
 
@@ -211,7 +214,7 @@ final class WidgetDataService {
             let data = try JSONEncoder().encode(items)
             userDefaults.set(data, forKey: vehicleListKey)
         } catch {
-            print("Failed to encode vehicle list: \(error)")
+            widgetLogger.error("Failed to encode vehicle list: \(error.localizedDescription)")
         }
     }
 

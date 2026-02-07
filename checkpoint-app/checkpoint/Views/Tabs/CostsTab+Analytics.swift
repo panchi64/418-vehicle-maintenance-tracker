@@ -41,7 +41,7 @@ extension CostsTab {
     }
 
     var logsWithCosts: [ServiceLog] {
-        filteredLogs.filter { $0.cost != nil && $0.cost! > 0 }
+        filteredLogs.filter { ($0.cost ?? 0) > 0 }
     }
 
     // MARK: - Cost Metrics
@@ -51,12 +51,7 @@ extension CostsTab {
     }
 
     var formattedTotalSpent: String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        formatter.locale = Locale(identifier: "en_US")
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: totalSpent as NSDecimalNumber) ?? "$0"
+        Formatters.currencyWhole(totalSpent)
     }
 
     var serviceCount: Int {
@@ -70,12 +65,7 @@ extension CostsTab {
 
     var formattedAverageCost: String {
         guard let avg = averageCostPerService else { return "-" }
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        formatter.locale = Locale(identifier: "en_US")
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: avg as NSDecimalNumber) ?? "-"
+        return Formatters.currencyWhole(avg)
     }
 
     // MARK: - Cost Per Mile
@@ -102,7 +92,7 @@ extension CostsTab {
         guard vehicle != nil else { return nil }
 
         // Get all logs with costs for this vehicle (no period filter)
-        let allLogs = vehicleServiceLogs.filter { $0.cost != nil && $0.cost! > 0 }
+        let allLogs = vehicleServiceLogs.filter { ($0.cost ?? 0) > 0 }
         guard allLogs.count >= 2 else { return nil }
 
         let sortedLogs = allLogs.sorted { $0.performedDate < $1.performedDate }
