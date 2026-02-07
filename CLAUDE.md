@@ -66,6 +66,7 @@ xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPh
 - **OCR/OdometerOCRService, VINOCRService:** Vision framework OCR for camera capture
 - **Utilities/NHTSAService:** VIN decoding and recall alerts via NHTSA API
 - **Widget/WidgetDataService:** App Groups data sharing with widget (`@MainActor`)
+- **WatchConnectivity/WatchSessionService:** iPhone-side WCSession delegate for Apple Watch communication
 - **Sync/CloudSyncStatusService, SyncStatusService:** iCloud sync status monitoring
 
 ### Widget Extension
@@ -73,6 +74,15 @@ xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPh
 - Small widget: next upcoming service
 - Medium widget: next 2-3 services
 - Data synced via UserDefaults in shared container
+
+### Apple Watch App (CheckpointWatch)
+- **Min watchOS:** 10.0
+- **Data sync:** WatchConnectivity (`updateApplicationContext` iPhone→Watch, `sendMessage`/`transferUserInfo` Watch→iPhone)
+- **Watch App Group:** `group.com.418-studio.checkpoint.watch` (separate from iPhone App Group)
+- **No SwiftData on Watch** — lightweight JSON in UserDefaults, iPhone is source of truth
+- **Screens:** Services list, mileage update (digital crown), mark service done
+- **Complications:** Circular, rectangular, inline, corner (all `.accessory*` families)
+- **iPhone integration point:** `WidgetDataService.updateWidgetData()` → `WatchSessionService.sendVehicleData()`
 
 ## Project Structure
 
@@ -99,10 +109,14 @@ checkpoint-app/
 │   │   ├── OCR/              # Vision framework services
 │   │   ├── Sync/             # iCloud & data sync
 │   │   ├── Utilities/        # Single-purpose services
+│   │   ├── WatchConnectivity/ # iPhone-side WCSession delegate
 │   │   └── Widget/           # Widget data sharing
 │   ├── State/            # AppState (@Observable)
 │   ├── Utilities/        # Formatters, Settings, helpers
 │   └── Resources/        # ServicePresets.json
+├── CheckpointWatch/      # watchOS app (services, mileage update, mark done)
+├── CheckpointWatchWidget/ # watchOS widget extension (complications)
+├── CheckpointWatchTests/ # watchOS unit tests
 ├── CheckpointWidget/     # WidgetKit extension (see CheckpointWidget/CLAUDE.md)
 ├── checkpointTests/      # Unit tests (see checkpointTests/CLAUDE.md)
 └── checkpointUITests/    # UI tests

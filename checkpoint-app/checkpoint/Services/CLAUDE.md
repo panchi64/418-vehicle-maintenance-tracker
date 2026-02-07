@@ -39,6 +39,8 @@ Services/
 │   ├── AppIconService.swift
 │   ├── NHTSAService.swift
 │   └── PresetDataService.swift
+├── WatchConnectivity/   # Apple Watch communication
+│   └── WatchSessionService.swift
 └── Widget/              # Widget data sharing
     └── WidgetDataService.swift
 ```
@@ -211,6 +213,25 @@ Shares data with widget extension via App Groups.
 5. `WidgetCenter.shared.reloadAllTimelines()` triggers refresh
 
 **App Group:** `group.com.418-studio.checkpoint.shared`
+
+### WatchConnectivity/WatchSessionService
+iPhone-side WCSession delegate for Apple Watch communication.
+
+**Architecture:**
+- `@Observable @MainActor` singleton with WCSessionDelegate
+- Receives `ModelContainer` reference for SwiftData access
+- Activated in `checkpointApp.swift` init
+
+**Outgoing (iPhone → Watch):**
+- `sendVehicleData()` — called from `WidgetDataService.updateWidgetData()` after widget update
+- Uses `WCSession.updateApplicationContext()` (battery-efficient, latest-state-only)
+
+**Incoming (Watch → iPhone):**
+- `handleMileageUpdate()` — updates Vehicle.currentMileage, creates MileageSnapshot
+- `handleMarkServiceDone()` — creates ServiceLog, updates Service due tracking
+- Handles both `sendMessage` (real-time) and `transferUserInfo` (queued offline)
+
+**Watch App Group:** `group.com.418-studio.checkpoint.watch` (separate from iPhone App Group)
 
 ## Concurrency Patterns
 

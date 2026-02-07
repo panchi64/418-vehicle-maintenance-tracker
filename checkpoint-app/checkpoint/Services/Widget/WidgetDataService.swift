@@ -104,6 +104,16 @@ final class WidgetDataService {
 
             // Reload widget timelines
             WidgetCenter.shared.reloadAllTimelines()
+
+            // Send to Apple Watch
+            WatchSessionService.shared.sendVehicleData(
+                vehicleID: vehicleID,
+                vehicleName: vehicleName,
+                currentMileage: currentMileage,
+                estimatedMileage: estimatedMileage,
+                isEstimated: isEstimated,
+                services: services
+            )
         } catch {
             widgetLogger.error("Failed to encode widget data: \(error.localizedDescription)")
         }

@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftData
 import UserNotifications
+import WatchConnectivity
 import os
 
 private let appLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "App")
@@ -95,6 +96,10 @@ struct checkpointApp: App {
 
         // Initialize analytics
         AnalyticsService.shared.initialize()
+
+        // Initialize Watch connectivity
+        WatchSessionService.shared.modelContainer = sharedModelContainer
+        WatchSessionService.shared.activate()
     }
 
     var body: some Scene {

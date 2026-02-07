@@ -1,0 +1,20 @@
+{
+  "images" : [
+    {
+      "idiom" : "watch",
+      "platform" : "watchOS",
+      "scale" : "2x",
+      "size" : "33x33"
+    },
+    {
+      "idiom" : "watch-marketing",
+      "platform" : "watchOS",
+      "scale" : "1x",
+      "size" : "1024x1024"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
