@@ -28,6 +28,7 @@ struct AddVehicleFlowView: View {
                 switch currentStep {
                 case .basics:
                     VehicleBasicsStep(formState: formState)
+                        .trackScreen(.addVehicleBasics)
                         .transition(.asymmetric(
                             insertion: .move(edge: .leading),
                             removal: .move(edge: .leading)
@@ -35,6 +36,7 @@ struct AddVehicleFlowView: View {
 
                 case .details:
                     VehicleDetailsStep(formState: formState)
+                        .trackScreen(.addVehicleDetails)
                         .transition(.asymmetric(
                             insertion: .move(edge: .trailing),
                             removal: .move(edge: .trailing)
@@ -130,6 +132,7 @@ struct AddVehicleFlowView: View {
     // MARK: - VIN OCR
 
     private func processVINOCR(image: UIImage) {
+        AnalyticsService.shared.capture(.ocrAttempted(ocrType: .vin))
         formState.isProcessingVINOCR = true
         formState.vinOCRError = nil
 
@@ -140,11 +143,13 @@ struct AddVehicleFlowView: View {
                 await MainActor.run {
                     formState.isProcessingVINOCR = false
                     formState.vin = result.vin
+                    AnalyticsService.shared.capture(.ocrSucceeded(ocrType: .vin))
                 }
             } catch {
                 await MainActor.run {
                     formState.isProcessingVINOCR = false
                     formState.vinOCRError = error.localizedDescription
+                    AnalyticsService.shared.capture(.ocrFailed(ocrType: .vin))
                 }
             }
         }
@@ -153,6 +158,7 @@ struct AddVehicleFlowView: View {
     // MARK: - Odometer OCR
 
     private func processOdometerOCR(image: UIImage) {
+        AnalyticsService.shared.capture(.ocrAttempted(ocrType: .odometer))
         formState.isProcessingOdometerOCR = true
         formState.odometerOCRError = nil
         formState.ocrDebugImage = image
@@ -168,11 +174,14 @@ struct AddVehicleFlowView: View {
                     formState.isProcessingOdometerOCR = false
                     formState.ocrResult = result
                     formState.showOCRConfirmation = true
+                    formState.usedOdometerOCR = true
+                    AnalyticsService.shared.capture(.ocrSucceeded(ocrType: .odometer))
                 }
             } catch {
                 await MainActor.run {
                     formState.isProcessingOdometerOCR = false
                     formState.odometerOCRError = error.localizedDescription
+                    AnalyticsService.shared.capture(.ocrFailed(ocrType: .odometer))
                 }
             }
         }
@@ -181,6 +190,13 @@ struct AddVehicleFlowView: View {
     // MARK: - Save
 
     private func saveVehicle() {
+        // Analytics: track vehicle creation
+        AnalyticsService.shared.capture(.vehicleAdded(
+            usedOCR: formState.usedOdometerOCR,
+            usedVINLookup: formState.usedVINLookup,
+            hasNickname: !formState.name.isEmpty
+        ))
+
         let vehicle = Vehicle(
             name: formState.name,
             make: formState.make,

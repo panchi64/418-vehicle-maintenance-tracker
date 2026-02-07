@@ -6,6 +6,10 @@ This directory contains all service classes that handle business logic, external
 
 ```
 Services/
+├── Analytics/           # PostHog analytics (opt-out, privacy-respecting)
+│   ├── AnalyticsEvent.swift              # Type-safe event enum with properties
+│   ├── AnalyticsScreenTracker.swift      # .trackScreen() ViewModifier
+│   └── AnalyticsService.swift            # PostHog wrapper (@Observable @MainActor)
 ├── Export/              # Document export services
 │   └── ServiceHistoryPDFService.swift  # PDF generation for service history
 ├── Notifications/       # Local notification management (modular architecture)
@@ -40,6 +44,28 @@ Services/
 ```
 
 ## Service Inventory
+
+### Analytics/ (PostHog Integration)
+Privacy-respecting analytics via self-hosted PostHog. First external dependency.
+
+**Architecture:**
+- `AnalyticsService` — `@Observable @MainActor` singleton wrapping PostHog SDK
+- `AnalyticsEvent` — Type-safe enum with `.name` and `.properties` (categorical/boolean only, no PII)
+- `AnalyticsScreenTracker` — `.trackScreen(.home)` ViewModifier for automatic screen events
+- Settings managed via `AnalyticsSettings` in `Utilities/`
+
+**Configuration:** Info.plist keys `POSTHOG_API_KEY` and `POSTHOG_HOST` (build-time via xcconfig). If missing, analytics silently disabled.
+
+**Consent:** Opt-out model (enabled by default). Toggle in Settings. PostHog SDK `optIn()`/`optOut()` synced with `AnalyticsSettings.isEnabled`.
+
+**Usage:**
+```swift
+// Screen tracking (ViewModifier)
+.trackScreen(.home)
+
+// Event capture
+AnalyticsService.shared.capture(.vehicleAdded(usedOCR: true, usedVINLookup: false, hasNickname: true))
+```
 
 ### Export/ServiceHistoryPDFService
 Generates professional PDF documents with vehicle service history.

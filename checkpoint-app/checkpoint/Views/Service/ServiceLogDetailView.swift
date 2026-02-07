@@ -35,6 +35,7 @@ struct ServiceLogDetailView: View {
             .padding(.horizontal, Spacing.screenHorizontal)
             .padding(.vertical, Spacing.lg)
         }
+        .trackScreen(.serviceLogDetail)
         .background(Theme.backgroundPrimary)
         .navigationTitle("Service Log")
         .navigationBarTitleDisplayMode(.inline)

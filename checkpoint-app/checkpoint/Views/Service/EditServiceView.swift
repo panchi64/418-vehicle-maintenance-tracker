@@ -161,6 +161,7 @@ struct EditServiceView: View {
             } message: {
                 Text("This will also delete all service history for this service. This action cannot be undone.")
             }
+            .trackScreen(.editService)
             .onAppear {
                 loadServiceData()
             }
@@ -181,6 +182,7 @@ struct EditServiceView: View {
     // MARK: - Save Logic
 
     private func saveChanges() {
+        AnalyticsService.shared.capture(.serviceEdited)
         service.name = serviceName
         service.dueDate = hasDueDate ? dueDate : nil
         service.dueMileage = dueMileage
@@ -195,6 +197,7 @@ struct EditServiceView: View {
     // MARK: - Delete Logic
 
     private func deleteService() {
+        AnalyticsService.shared.capture(.serviceDeleted)
         modelContext.delete(service)
         updateAppIcon()
         updateWidgetData()

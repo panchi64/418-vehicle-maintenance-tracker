@@ -204,6 +204,7 @@ private struct VINLookupButton: View {
 
                 await MainActor.run {
                     formState.isDecodingVIN = false
+                    formState.usedVINLookup = true
                     // Auto-fill only empty fields
                     if formState.make.isEmpty { formState.make = result.make }
                     if formState.model.isEmpty { formState.model = result.model }

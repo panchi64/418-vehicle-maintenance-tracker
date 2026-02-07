@@ -84,6 +84,7 @@ struct HomeTab: View {
                 // Quick Mileage Update Card (shown if never updated or 14+ days ago)
                 if let vehicle = vehicle, vehicle.shouldPromptMileageUpdate {
                     QuickMileageUpdateCard(vehicle: vehicle) { newMileage in
+                        AnalyticsService.shared.capture(.mileageUpdated(source: .quickUpdate))
                         updateMileage(newMileage, for: vehicle)
                     }
                     .revealAnimation(delay: 0.15)
@@ -130,6 +131,7 @@ struct HomeTab: View {
                     ServiceClusterCard(
                         cluster: cluster,
                         onTap: {
+                            AnalyticsService.shared.capture(.serviceClusterTapped)
                             appState.selectedCluster = cluster
                         },
                         onDismiss: {
@@ -272,6 +274,7 @@ struct HomeTab: View {
         .onChange(of: vehicleServices.count) { _, _ in
             detectClusters()
         }
+        .trackScreen(.home)
         .onAppear {
             loadDismissedClusters()
             refreshSeasonalReminders()
@@ -284,6 +287,7 @@ struct HomeTab: View {
                     appState.selectedService = service
                 },
                 onMarkAllDone: {
+                    AnalyticsService.shared.capture(.serviceClusterMarkAllDone)
                     appState.selectedCluster = nil
                     appState.clusterToMarkDone = cluster
                 }
@@ -401,6 +405,9 @@ struct HomeTab: View {
                 model: vehicle.model,
                 year: vehicle.year
             )
+            if !recalls.isEmpty {
+                AnalyticsService.shared.capture(.recallAlertShown(recallCount: recalls.count))
+            }
         } catch {
             // Silently fail — recalls are supplementary info
             recalls = []

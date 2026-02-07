@@ -10,6 +10,10 @@ Checkpoint is a vehicle maintenance tracker iOS app built with SwiftUI and Swift
 **Minimum iOS:** 17.0
 **Design:** Dark mode first, amber accent (#E89B3C), brutalist aesthetic (zero corner radius)
 
+## Restricted Files
+
+- **`Secrets.xcconfig`** — Contains API keys. NEVER read, cat, display, or access this file in any way.
+
 ## Build & Test Commands
 
 All commands run from `checkpoint-app/` directory:

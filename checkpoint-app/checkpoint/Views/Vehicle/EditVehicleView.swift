@@ -327,6 +327,7 @@ struct EditVehicleView: View {
                         .disabled(!isFormValid)
                 }
             }
+            .trackScreen(.editVehicle)
             .confirmationDialog(
                 "Delete Vehicle?",
                 isPresented: $showDeleteConfirmation,
@@ -399,6 +400,7 @@ struct EditVehicleView: View {
     // MARK: - VIN OCR
 
     private func processVINOCR(image: UIImage) {
+        AnalyticsService.shared.capture(.ocrAttempted(ocrType: .vin))
         isProcessingVINOCR = true
         vinOCRError = nil
 
@@ -409,11 +411,13 @@ struct EditVehicleView: View {
                 await MainActor.run {
                     isProcessingVINOCR = false
                     vin = result.vin
+                    AnalyticsService.shared.capture(.ocrSucceeded(ocrType: .vin))
                 }
             } catch {
                 await MainActor.run {
                     isProcessingVINOCR = false
                     vinOCRError = error.localizedDescription
+                    AnalyticsService.shared.capture(.ocrFailed(ocrType: .vin))
                 }
             }
         }
@@ -422,6 +426,7 @@ struct EditVehicleView: View {
     // MARK: - Odometer OCR
 
     private func processOdometerOCR(image: UIImage) {
+        AnalyticsService.shared.capture(.ocrAttempted(ocrType: .odometer))
         isProcessingOdometerOCR = true
         odometerOCRError = nil
         ocrDebugImage = image
@@ -437,11 +442,13 @@ struct EditVehicleView: View {
                     isProcessingOdometerOCR = false
                     ocrResult = result
                     showOCRConfirmation = true
+                    AnalyticsService.shared.capture(.ocrSucceeded(ocrType: .odometer))
                 }
             } catch {
                 await MainActor.run {
                     isProcessingOdometerOCR = false
                     odometerOCRError = error.localizedDescription
+                    AnalyticsService.shared.capture(.ocrFailed(ocrType: .odometer))
                 }
             }
         }
@@ -450,6 +457,7 @@ struct EditVehicleView: View {
     // MARK: - Save
 
     private func saveChanges() {
+        AnalyticsService.shared.capture(.vehicleEdited)
         vehicle.name = name
         vehicle.make = make
         vehicle.model = model
@@ -478,6 +486,7 @@ struct EditVehicleView: View {
     }
 
     private func deleteVehicle() {
+        AnalyticsService.shared.capture(.vehicleDeleted)
         modelContext.delete(vehicle)
         updateAppIcon()
         WidgetDataService.shared.clearWidgetData()

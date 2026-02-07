@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5A409E922F36F7DD0010D306 /* PostHog in Frameworks */ = {isa = PBXBuildFile; productRef = 5APH00022F4000000036D71B /* PostHog */; };
 		5AB669662F2687FC0036D71B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5AB669652F2687FC0036D71B /* WidgetKit.framework */; };
 		5AB669682F2687FC0036D71B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5AB669672F2687FC0036D71B /* SwiftUI.framework */; };
 		5AB669752F2687FD0036D71B /* CheckpointWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5AB669632F2687FC0036D71B /* CheckpointWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -118,6 +119,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5A409E922F36F7DD0010D306 /* PostHog in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -212,6 +214,7 @@
 			);
 			name = checkpoint;
 			packageProductDependencies = (
+				5APH00022F4000000036D71B /* PostHog */,
 			);
 			productName = checkpoint;
 			productReference = 5AAAA9272F2084320002A8C6 /* checkpoint.app */;
@@ -320,6 +323,9 @@
 			);
 			mainGroup = 5AAAA91E2F2084320002A8C6;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				5APH00012F4000000036D71B /* XCRemoteSwiftPackageReference "posthog-ios" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5AAAA9282F2084320002A8C6 /* Products */;
 			projectDirPath = "";
@@ -800,6 +806,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		5APH00012F4000000036D71B /* XCRemoteSwiftPackageReference "posthog-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/PostHog/posthog-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		5APH00022F4000000036D71B /* PostHog */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5APH00012F4000000036D71B /* XCRemoteSwiftPackageReference "posthog-ios" */;
+			productName = PostHog;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 5AAAA91F2F2084320002A8C6 /* Project object */;
 }

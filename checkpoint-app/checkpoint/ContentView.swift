@@ -138,6 +138,16 @@ struct ContentView: View {
             updateWidgetData()
             // Schedule mileage reminders and yearly roundups for all vehicles
             schedulePeriodicNotifications()
+            // Analytics: session start
+            AnalyticsService.shared.capture(.appSessionStart(
+                vehicleCount: vehicles.count,
+                serviceCount: services.count
+            ))
+        }
+        .onChange(of: appState.selectedTab) { _, newTab in
+            if let tab = AnalyticsEvent.TabName(rawValue: newTab.rawValue) {
+                AnalyticsService.shared.capture(.tabSwitched(tab: tab))
+            }
         }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
@@ -147,11 +157,16 @@ struct ContentView: View {
                 updateWidgetData()
                 // Check for pending Siri mileage update
                 handlePendingSiriMileageUpdate()
+                // Analytics
+                AnalyticsService.shared.capture(.appOpened)
             } else if newPhase == .background {
                 // Update app icon when going to background
                 updateAppIcon()
                 // Update widget data
                 updateWidgetData()
+                // Analytics
+                AnalyticsService.shared.capture(.appBackgrounded)
+                AnalyticsService.shared.flush()
             }
         }
         .onChange(of: appState.selectedVehicle) { _, newVehicle in
@@ -159,6 +174,8 @@ struct ContentView: View {
             // Persist selected vehicle ID first so widget reads correct ID
             persistSelectedVehicle(newVehicle)
             updateWidgetData()
+            // Analytics
+            AnalyticsService.shared.capture(.vehicleSwitched)
         }
         .onChange(of: vehicles) { oldVehicles, newVehicles in
             // Update selection if current vehicle was deleted
@@ -216,14 +233,19 @@ struct ContentView: View {
                     vehicle: vehicle,
                     prefilledMileage: siriPrefilledMileage,
                     onSave: { newMileage in
+                        AnalyticsService.shared.capture(.mileageUpdated(source: .manual))
                         updateMileage(newMileage, for: vehicle)
                     }
                 )
+                .trackScreen(.mileageUpdate)
                 .presentationDetents([.height(450)])
             }
         }
         .sheet(isPresented: $showSettings) {
             SettingsView()
+                .onAppear {
+                    AnalyticsService.shared.capture(.settingsOpened)
+                }
         }
         // Handle mileage update notification navigation
         .onReceive(NotificationCenter.default.publisher(for: .navigateToMileageUpdateFromNotification)) { notification in

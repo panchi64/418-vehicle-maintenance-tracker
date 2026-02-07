@@ -85,12 +85,16 @@ struct checkpointApp: App {
         AppIconSettings.registerDefaults()
         WidgetSettingsManager.registerDefaults()
         SyncSettings.registerDefaults()
+        AnalyticsSettings.registerDefaults()
 
         // Set up notification delegate
         UNUserNotificationCenter.current().delegate = NotificationService.shared
 
         // Initialize CloudSyncStatusService to start monitoring
         _ = CloudSyncStatusService.shared
+
+        // Initialize analytics
+        AnalyticsService.shared.initialize()
     }
 
     var body: some Scene {
@@ -101,7 +105,12 @@ struct checkpointApp: App {
                     // Request notification authorization on app launch
                     await NotificationService.shared.checkAuthorizationStatus()
                     if !NotificationService.shared.isAuthorized {
-                        _ = await NotificationService.shared.requestAuthorization()
+                        let granted = await NotificationService.shared.requestAuthorization()
+                        if granted {
+                            AnalyticsService.shared.capture(.notificationPermissionGranted)
+                        } else {
+                            AnalyticsService.shared.capture(.notificationPermissionDenied)
+                        }
                     }
 
                     // Check iCloud account status

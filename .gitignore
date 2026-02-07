@@ -107,3 +107,6 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+
+# Secrets
+Secrets.xcconfig

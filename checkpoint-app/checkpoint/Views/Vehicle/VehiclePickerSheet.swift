@@ -174,6 +174,7 @@ struct VehiclePickerSheet: View {
                 }
             }
         }
+        .trackScreen(.vehiclePicker)
         .presentationDetents([.medium])
         .presentationDragIndicator(.visible)
         .applyGlassBackground()
@@ -199,6 +200,8 @@ struct VehiclePickerSheet: View {
     // MARK: - Delete Vehicle
 
     private func deleteVehicle(_ vehicle: Vehicle) {
+        AnalyticsService.shared.capture(.vehicleDeleted)
+
         // Create snapshot for undo
         let snapshot = VehicleSnapshot(from: vehicle)
 

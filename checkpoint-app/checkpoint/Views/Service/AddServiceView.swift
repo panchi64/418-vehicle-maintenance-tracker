@@ -113,6 +113,7 @@ struct AddServiceView: View {
                     }
                 }
             }
+            .trackScreen(.addService)
             .onAppear {
                 // Pre-fill mileage with current vehicle mileage
                 if mileageAtService == nil {
@@ -242,9 +243,24 @@ struct AddServiceView: View {
     // MARK: - Save Logic
 
     private func saveService() {
+        // Analytics
+        let isPreset = selectedPreset != nil
+        let category = selectedPreset?.category
+        let hasInterval = (intervalMonths != nil && intervalMonths != 0) || (intervalMiles != nil && intervalMiles != 0)
+
         if mode == .log {
+            AnalyticsService.shared.capture(.serviceLogged(
+                isPreset: isPreset,
+                category: category,
+                hasInterval: hasInterval
+            ))
             saveLoggedService()
         } else {
+            AnalyticsService.shared.capture(.serviceScheduled(
+                isPreset: isPreset,
+                category: category,
+                hasInterval: hasInterval
+            ))
             saveScheduledService()
         }
         updateAppIcon()

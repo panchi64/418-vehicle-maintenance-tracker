@@ -38,12 +38,16 @@ struct SettingsView: View {
                         // WIDGETS
                         widgetSettingsSection
 
+                        // ANALYTICS
+                        AnalyticsSettingsSection()
+
                         Spacer()
                     }
                     .padding(Spacing.screenHorizontal)
                     .padding(.top, Spacing.lg)
                 }
             }
+            .trackScreen(.settings)
             .navigationTitle(L10n.settingsTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

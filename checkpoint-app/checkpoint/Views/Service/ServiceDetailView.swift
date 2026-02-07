@@ -53,6 +53,7 @@ struct ServiceDetailView: View {
             .padding(.horizontal, Spacing.screenHorizontal)
             .padding(.vertical, Spacing.lg)
         }
+        .trackScreen(.serviceDetail)
         .background(Theme.backgroundPrimary)
         .navigationTitle(service.name)
         .navigationBarTitleDisplayMode(.large)

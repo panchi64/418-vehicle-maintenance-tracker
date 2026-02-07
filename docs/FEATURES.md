@@ -318,6 +318,26 @@
 
 - End of year (December/January) or on vehicle's anniversary in the app
 
+#### Privacy-Respecting Analytics
+
+> Self-hosted PostHog analytics for understanding feature usage and improving the app. No PII collected.
+
+| Feature                  | Priority | Status | Notes                                                    |
+| ------------------------ | -------- | ------ | -------------------------------------------------------- |
+| PostHog SDK integration  | Medium   | ✅     | SPM dependency, self-hosted, opt-out model               |
+| Event taxonomy           | Medium   | ✅     | Type-safe enum, categorical/boolean properties only      |
+| Screen tracking          | Medium   | ✅     | `.trackScreen()` ViewModifier on 14 screens              |
+| Feature usage events     | Medium   | ✅     | Vehicle/service CRUD, OCR, mileage, filters, export      |
+| Settings opt-out toggle  | High     | ✅     | Enabled by default, clear explanation, one tap to disable |
+| Graceful no-config       | High     | ✅     | Missing API key/host → analytics silently disabled       |
+
+**Privacy principles:**
+- No vehicle names, VINs, costs, or mileage values collected
+- Properties are categorical/boolean only (e.g., `has_cost: true`, not `cost: 45.99`)
+- Self-hosted PostHog instance (no third-party data sharing)
+- User can opt out with a single toggle in Settings
+- App functions identically with analytics disabled
+
 #### Nice-to-Haves (Get Right or Don't Do)
 
 > These could add value but need careful implementation. Better to skip than do poorly.

@@ -69,7 +69,6 @@ Checkpoint aims to be the **definitive iOS vehicle maintenance companion** — a
 |---------|----------|--------|
 | Apple Watch Complication | High | ⏳ Planned |
 | Seasonal Reminders | Medium | ⏳ Planned |
-| Severe vs Normal Schedules | Medium | ⏳ Planned |
 
 ### v1.0 Recently Completed
 

@@ -22,6 +22,10 @@ final class VehicleFormState {
     var oilType: String = ""
     var notes: String = ""
 
+    // MARK: - Analytics Tracking
+    var usedOdometerOCR = false
+    var usedVINLookup = false
+
     // MARK: - VIN Lookup State
     var isDecodingVIN = false
     var vinLookupError: String?

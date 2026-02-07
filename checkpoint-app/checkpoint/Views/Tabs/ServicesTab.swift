@@ -228,6 +228,13 @@ struct ServicesTab: View {
             .padding(.top, Spacing.md)
             .padding(.bottom, Spacing.xxl + 56)
         }
+        .trackScreen(.services)
+        .onChange(of: appState.servicesViewMode) { _, newMode in
+            AnalyticsService.shared.capture(.servicesViewModeChanged(mode: newMode.rawValue))
+        }
+        .onChange(of: appState.servicesStatusFilter) { _, newFilter in
+            AnalyticsService.shared.capture(.servicesFilterChanged(filter: newFilter.rawValue))
+        }
         .sheet(isPresented: $showExportOptions) {
             if let vehicle = vehicle {
                 ExportOptionsSheet(
@@ -235,6 +242,7 @@ struct ServicesTab: View {
                     serviceLogs: vehicleServiceLogs,
                     isExporting: $isExporting
                 ) { url in
+                    AnalyticsService.shared.capture(.serviceHistoryExported)
                     exportPDFURL = url
                 }
                 .presentationDetents([.medium])
@@ -259,6 +267,11 @@ struct ServicesTab: View {
                 .foregroundStyle(Theme.textPrimary)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
+                .onChange(of: appState.servicesSearchText) { oldValue, _ in
+                    if oldValue.isEmpty {
+                        AnalyticsService.shared.capture(.servicesSearchUsed)
+                    }
+                }
 
             if !appState.servicesSearchText.isEmpty {
                 Button {

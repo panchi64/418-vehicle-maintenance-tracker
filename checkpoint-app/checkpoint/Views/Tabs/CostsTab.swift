@@ -66,6 +66,13 @@ struct CostsTab: View {
             .padding(.top, Spacing.md)
             .padding(.bottom, Spacing.xxl + 56)
         }
+        .trackScreen(.costs)
+        .onChange(of: periodFilter) { _, newValue in
+            AnalyticsService.shared.capture(.costsPeriodChanged(period: newValue.rawValue))
+        }
+        .onChange(of: categoryFilter) { _, newValue in
+            AnalyticsService.shared.capture(.costsCategoryChanged(category: newValue.rawValue))
+        }
     }
 
     // MARK: - Filters Section

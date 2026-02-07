@@ -94,6 +94,7 @@ struct MarkServiceDoneSheet: View {
                         .disabled(mileage == nil)
                 }
             }
+            .trackScreen(.markServiceDone)
             .onAppear {
                 mileage = vehicle.currentMileage
             }
@@ -101,6 +102,13 @@ struct MarkServiceDoneSheet: View {
     }
 
     private func markAsDone() {
+        AnalyticsService.shared.capture(.serviceMarkedDone(
+            hasCost: !cost.isEmpty && Decimal(string: cost) != nil,
+            hasNotes: !notes.isEmpty,
+            hasAttachments: !pendingAttachments.isEmpty,
+            attachmentCount: pendingAttachments.count
+        ))
+
         let mileageInt = mileage ?? vehicle.currentMileage
 
         // Create service log
