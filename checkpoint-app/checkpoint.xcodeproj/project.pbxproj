@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5A409E922F36F7DD0010D306 /* PostHog in Frameworks */ = {isa = PBXBuildFile; productRef = 5APH00022F4000000036D71B /* PostHog */; };
+		5A40A09D2F3705D20010D306 /* Secrets.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 5A40A09C2F3705D20010D306 /* Secrets.xcconfig */; };
 		5AB669662F2687FC0036D71B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5AB669652F2687FC0036D71B /* WidgetKit.framework */; };
 		5AB669682F2687FC0036D71B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5AB669672F2687FC0036D71B /* SwiftUI.framework */; };
 		5AB669752F2687FD0036D71B /* CheckpointWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5AB669632F2687FC0036D71B /* CheckpointWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -54,6 +55,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5A40A09C2F3705D20010D306 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		5AAAA9272F2084320002A8C6 /* checkpoint.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = checkpoint.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5AAAA9362F2084330002A8C6 /* checkpointTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = checkpointTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5AAAA9402F2084330002A8C6 /* checkpointUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = checkpointUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -160,6 +162,7 @@
 				5ASIRI0052F3000000036D71B /* SharedEntities */,
 				5AB669642F2687FC0036D71B /* Frameworks */,
 				5AAAA9282F2084320002A8C6 /* Products */,
+				5A40A09C2F3705D20010D306 /* Secrets.xcconfig */,
 			);
 			sourceTree = "<group>";
 		};
@@ -365,6 +368,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5A40A09D2F3705D20010D306 /* Secrets.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -543,6 +547,7 @@
 		};
 		5AAAA94B2F2084330002A8C6 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5A40A09C2F3705D20010D306 /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -580,6 +585,7 @@
 		};
 		5AAAA94C2F2084330002A8C6 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5A40A09C2F3705D20010D306 /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

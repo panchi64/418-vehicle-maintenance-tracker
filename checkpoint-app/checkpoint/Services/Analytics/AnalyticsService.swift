@@ -44,9 +44,12 @@ final class AnalyticsService {
         config.captureScreenViews = false
         config.captureApplicationLifecycleEvents = false
         config.captureElementInteractions = false
+        config.enableSwizzling = false
         config.preloadFeatureFlags = false
         config.sendFeatureFlagEvent = false
         config.sessionReplay = false
+        config.surveys = false
+        config.remoteConfig = false
         config.flushAt = 20
         config.flushIntervalSeconds = 30
         config.personProfiles = .identifiedOnly
