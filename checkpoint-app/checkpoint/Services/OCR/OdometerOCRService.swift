@@ -51,13 +51,13 @@ actor OdometerOCRService {
         var errorDescription: String? {
             switch self {
             case .noTextFound:
-                return L10n.ocrErrorNoTextFound
+                return String(localized: "ocr.error.no_text_found")
             case .noValidMileageFound:
-                return L10n.ocrErrorNoValidMileage
+                return String(localized: "ocr.error.no_valid_mileage")
             case .imageProcessingFailed:
-                return L10n.ocrErrorImageProcessingFailed
+                return String(localized: "ocr.error.image_processing_failed")
             case .invalidMileage:
-                return L10n.ocrErrorInvalidMileage
+                return String(localized: "ocr.error.invalid_mileage")
             }
         }
     }

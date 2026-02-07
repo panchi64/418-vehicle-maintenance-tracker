@@ -202,11 +202,11 @@ enum VINOCRError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .imageProcessingFailed:
-            return L10n.ocrErrorImageProcessingFailed
+            return String(localized: "ocr.error.image_processing_failed")
         case .noTextFound:
-            return L10n.ocrErrorNoTextFound
+            return String(localized: "ocr.error.no_text_found")
         case .noVINFound:
-            return L10n.ocrErrorNoValidVIN
+            return String(localized: "ocr.error.no_valid_vin")
         }
     }
 }
