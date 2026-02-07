@@ -107,7 +107,8 @@ struct SeasonalReminder: Identifiable {
     /// Returns reminders that are currently active for the given zone and date.
     /// Respects SeasonalSettings for enabled state, dismissals, and suppressions.
     @MainActor
-    static func activeReminders(for zone: ClimateZone?, on date: Date, settings: SeasonalSettings = .shared) -> [SeasonalReminder] {
+    static func activeReminders(for zone: ClimateZone?, on date: Date, settings: SeasonalSettings? = nil) -> [SeasonalReminder] {
+        let settings = settings ?? .shared
         guard settings.isEnabled, let zone = zone else { return [] }
 
         let calendar = Calendar.current

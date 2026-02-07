@@ -15,6 +15,7 @@ private let appLogger = Logger(subsystem: "com.418-studio.checkpoint", category:
 
 @main
 struct checkpointApp: App {
+
     // App Group identifier for sharing data with widget
     private static let appGroupID = "group.com.418-studio.checkpoint.shared"
 

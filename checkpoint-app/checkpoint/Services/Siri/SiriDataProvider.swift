@@ -12,7 +12,7 @@ import os
 // MARK: - Siri Service Data Structures
 
 /// Service data formatted for Siri dialog responses
-struct SiriServiceData {
+nonisolated struct SiriServiceData {
     let vehicleName: String
     let vehicleID: String
     let currentMileage: Int
@@ -20,7 +20,7 @@ struct SiriServiceData {
 }
 
 /// Individual service information for Siri responses
-struct SiriService {
+nonisolated struct SiriService {
     let name: String
     let status: SiriServiceStatus
     let dueDescription: String
@@ -28,7 +28,7 @@ struct SiriService {
 }
 
 /// Service status for Siri responses
-enum SiriServiceStatus: String {
+nonisolated enum SiriServiceStatus: String {
     case overdue
     case dueSoon
     case good
@@ -50,10 +50,9 @@ enum SiriServiceStatus: String {
 
 // MARK: - Siri Data Provider
 
-private let siriLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "Siri")
-
 /// Reads vehicle and service data from App Groups for Siri intents
-struct SiriDataProvider {
+nonisolated struct SiriDataProvider {
+    private static let logger = Logger(subsystem: "com.418-studio.checkpoint", category: "Siri")
     private static let appGroupID = "group.com.418-studio.checkpoint.shared"
     private static let widgetDataKey = "widgetData"
     private static let vehicleListKey = "vehicleList"
@@ -96,7 +95,7 @@ struct SiriDataProvider {
             let items = try JSONDecoder().decode([VehicleListItemDTO].self, from: data)
             return items.map { SiriVehicleInfo(id: $0.id, displayName: $0.displayName) }
         } catch {
-            siriLogger.error("Failed to decode vehicle list: \(error.localizedDescription)")
+            logger.error("Failed to decode vehicle list: \(error.localizedDescription)")
             return []
         }
     }
@@ -123,7 +122,7 @@ struct SiriDataProvider {
                 services: services
             )
         } catch {
-            siriLogger.error("Failed to decode widget data: \(error.localizedDescription)")
+            logger.error("Failed to decode widget data: \(error.localizedDescription)")
             return nil
         }
     }
@@ -145,7 +144,7 @@ struct SiriDataProvider {
 // MARK: - Vehicle Info
 
 /// Lightweight vehicle info for Siri
-struct SiriVehicleInfo {
+nonisolated struct SiriVehicleInfo {
     let id: String
     let displayName: String
 }
@@ -153,13 +152,13 @@ struct SiriVehicleInfo {
 // MARK: - DTOs for Decoding
 
 /// DTO for decoding vehicle list from UserDefaults
-private struct VehicleListItemDTO: Codable {
+private nonisolated struct VehicleListItemDTO: Codable {
     let id: String
     let displayName: String
 }
 
 /// DTO for decoding widget data from UserDefaults
-private struct WidgetDataDTO: Codable {
+private nonisolated struct WidgetDataDTO: Codable {
     let vehicleName: String
     let currentMileage: Int
     let services: [SharedServiceDTO]
@@ -180,7 +179,7 @@ private struct WidgetDataDTO: Codable {
 }
 
 /// DTO for decoding shared service data
-private struct SharedServiceDTO: Codable {
+private nonisolated struct SharedServiceDTO: Codable {
     let name: String
     let status: String
     let dueDescription: String

@@ -11,7 +11,9 @@ import WatchConnectivity
 import SwiftData
 import os
 
-private let watchLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "WatchSession")
+private nonisolated enum WatchLog {
+    static let logger = Logger(subsystem: "com.418-studio.checkpoint", category: "WatchSession")
+}
 
 @Observable
 @MainActor
@@ -39,14 +41,14 @@ final class WatchSessionService: NSObject {
     /// Activate WCSession — call from app init
     func activate() {
         guard WCSession.isSupported() else {
-            watchLogger.info("WatchConnectivity not supported on this device")
+            WatchLog.logger.info("WatchConnectivity not supported on this device")
             return
         }
 
         let session = WCSession.default
         session.delegate = self
         session.activate()
-        watchLogger.info("WCSession activation requested")
+        WatchLog.logger.info("WCSession activation requested")
     }
 
     // MARK: - Send Data to Watch
@@ -65,7 +67,7 @@ final class WatchSessionService: NSObject {
 
         let session = WCSession.default
         guard session.activationState == .activated else {
-            watchLogger.info("WCSession not activated, skipping Watch update")
+            WatchLog.logger.info("WCSession not activated, skipping Watch update")
             return
         }
 
@@ -103,9 +105,9 @@ final class WatchSessionService: NSObject {
             let data = try JSONEncoder().encode(context)
             let contextDict: [String: Any] = ["watchContext": data]
             try session.updateApplicationContext(contextDict)
-            watchLogger.info("Sent vehicle data to Watch: \(vehicleName)")
+            WatchLog.logger.info("Sent vehicle data to Watch: \(vehicleName)")
         } catch {
-            watchLogger.error("Failed to send data to Watch: \(error.localizedDescription)")
+            WatchLog.logger.error("Failed to send data to Watch: \(error.localizedDescription)")
         }
     }
 
@@ -114,7 +116,7 @@ final class WatchSessionService: NSObject {
     /// Process mileage update from Watch
     private func handleMileageUpdate(_ data: Data) async {
         guard let container = modelContainer else {
-            watchLogger.error("No ModelContainer available for mileage update")
+            WatchLog.logger.error("No ModelContainer available for mileage update")
             return
         }
 
@@ -131,7 +133,7 @@ final class WatchSessionService: NSObject {
             descriptor.fetchLimit = 1
 
             guard let vehicle = try context.fetch(descriptor).first else {
-                watchLogger.error("Vehicle not found for mileage update: \(vehicleID)")
+                WatchLog.logger.error("Vehicle not found for mileage update: \(vehicleID)")
                 return
             }
 
@@ -148,21 +150,21 @@ final class WatchSessionService: NSObject {
             snapshot.vehicle = vehicle
 
             try context.save()
-            watchLogger.info("Updated mileage from Watch: \(update.newMileage) for \(vehicle.displayName)")
+            WatchLog.logger.info("Updated mileage from Watch: \(update.newMileage) for \(vehicle.displayName)")
 
             // Re-sync widget + Watch with updated data
             await MainActor.run {
                 WidgetDataService.shared.updateWidget(for: vehicle)
             }
         } catch {
-            watchLogger.error("Failed to handle mileage update from Watch: \(error.localizedDescription)")
+            WatchLog.logger.error("Failed to handle mileage update from Watch: \(error.localizedDescription)")
         }
     }
 
     /// Process mark-service-done from Watch
     private func handleMarkServiceDone(_ data: Data) async {
         guard let container = modelContainer else {
-            watchLogger.error("No ModelContainer available for service completion")
+            WatchLog.logger.error("No ModelContainer available for service completion")
             return
         }
 
@@ -179,13 +181,13 @@ final class WatchSessionService: NSObject {
             descriptor.fetchLimit = 1
 
             guard let vehicle = try context.fetch(descriptor).first else {
-                watchLogger.error("Vehicle not found for service completion: \(vehicleID)")
+                WatchLog.logger.error("Vehicle not found for service completion: \(vehicleID)")
                 return
             }
 
             // Find service by name
             guard let service = (vehicle.services ?? []).first(where: { $0.name == completion.serviceName }) else {
-                watchLogger.error("Service not found: \(completion.serviceName)")
+                WatchLog.logger.error("Service not found: \(completion.serviceName)")
                 return
             }
 
@@ -213,14 +215,14 @@ final class WatchSessionService: NSObject {
             }
 
             try context.save()
-            watchLogger.info("Marked service done from Watch: \(completion.serviceName)")
+            WatchLog.logger.info("Marked service done from Watch: \(completion.serviceName)")
 
             // Re-sync widget + Watch
             await MainActor.run {
                 WidgetDataService.shared.updateWidget(for: vehicle)
             }
         } catch {
-            watchLogger.error("Failed to handle service completion from Watch: \(error.localizedDescription)")
+            WatchLog.logger.error("Failed to handle service completion from Watch: \(error.localizedDescription)")
         }
     }
 
@@ -242,9 +244,9 @@ extension WatchSessionService: WCSessionDelegate {
     nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
         Task { @MainActor in
             if let error {
-                watchLogger.error("WCSession activation failed: \(error.localizedDescription)")
+                WatchLog.logger.error("WCSession activation failed: \(error.localizedDescription)")
             } else {
-                watchLogger.info("WCSession activated: \(activationState.rawValue)")
+                WatchLog.logger.info("WCSession activated: \(activationState.rawValue)")
                 isWatchReachable = session.isReachable
                 isWatchAppInstalled = session.isWatchAppInstalled
             }
@@ -252,18 +254,18 @@ extension WatchSessionService: WCSessionDelegate {
     }
 
     nonisolated func sessionDidBecomeInactive(_ session: WCSession) {
-        watchLogger.info("WCSession became inactive")
+        WatchLog.logger.info("WCSession became inactive")
     }
 
     nonisolated func sessionDidDeactivate(_ session: WCSession) {
-        watchLogger.info("WCSession deactivated, reactivating...")
+        WatchLog.logger.info("WCSession deactivated, reactivating...")
         session.activate()
     }
 
     nonisolated func sessionReachabilityDidChange(_ session: WCSession) {
         Task { @MainActor in
             isWatchReachable = session.isReachable
-            watchLogger.info("Watch reachability changed: \(session.isReachable)")
+            WatchLog.logger.info("Watch reachability changed: \(session.isReachable)")
         }
     }
 
@@ -283,7 +285,7 @@ extension WatchSessionService: WCSessionDelegate {
                 await handleMarkServiceDone(data)
                 replyHandler(["status": "ok"])
             } else {
-                watchLogger.warning("Unknown message from Watch: \(message.keys.joined(separator: ", "))")
+                WatchLog.logger.warning("Unknown message from Watch: \(message.keys.joined(separator: ", "))")
                 replyHandler(["status": "unknown"])
             }
         }
@@ -297,7 +299,7 @@ extension WatchSessionService: WCSessionDelegate {
             } else if let data = userInfo[WatchMarkServiceDoneDTO.messageKey] as? Data {
                 await handleMarkServiceDone(data)
             } else {
-                watchLogger.warning("Unknown userInfo from Watch")
+                WatchLog.logger.warning("Unknown userInfo from Watch")
             }
         }
     }

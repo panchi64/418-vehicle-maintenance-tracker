@@ -1,15 +1,9 @@
 {
   "images" : [
     {
-      "idiom" : "watch",
-      "platform" : "watchOS",
-      "scale" : "2x",
-      "size" : "33x33"
-    },
-    {
-      "idiom" : "watch-marketing",
-      "platform" : "watchOS",
-      "scale" : "1x",
+      "filename" : "AppIcon.png",
+      "idiom" : "universal",
+      "platform" : "watchos",
       "size" : "1024x1024"
     }
   ],
