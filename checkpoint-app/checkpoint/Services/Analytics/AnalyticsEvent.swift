@@ -93,6 +93,7 @@ enum AnalyticsEvent {
     case ocrAttempted(ocrType: OCRType)
     case ocrSucceeded(ocrType: OCRType)
     case ocrFailed(ocrType: OCRType)
+    case ocrConfirmed(ocrType: OCRType, valueEdited: Bool)
 
     // MARK: - Costs Tab
 
@@ -145,6 +146,7 @@ enum AnalyticsEvent {
         case .ocrAttempted: return "ocr_attempted"
         case .ocrSucceeded: return "ocr_succeeded"
         case .ocrFailed: return "ocr_failed"
+        case .ocrConfirmed: return "ocr_confirmed"
         case .costsPeriodChanged: return "costs_period_changed"
         case .costsCategoryChanged: return "costs_category_changed"
         case .servicesFilterChanged: return "services_filter_changed"
@@ -196,6 +198,8 @@ enum AnalyticsEvent {
             return ["ocr_type": ocrType.rawValue]
         case .ocrFailed(let ocrType):
             return ["ocr_type": ocrType.rawValue]
+        case .ocrConfirmed(let ocrType, let valueEdited):
+            return ["ocr_type": ocrType.rawValue, "value_edited": valueEdited]
         case .costsPeriodChanged(let period):
             return ["period": period]
         case .costsCategoryChanged(let category):

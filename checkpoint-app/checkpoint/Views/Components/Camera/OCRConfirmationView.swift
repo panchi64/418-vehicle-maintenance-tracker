@@ -254,6 +254,10 @@ struct OCRConfirmationView: View {
             if sourceUnit == .kilometers {
                 finalMileage = sourceUnit.toMiles(finalMileage)
             }
+            AnalyticsService.shared.capture(.ocrConfirmed(
+                ocrType: .odometer,
+                valueEdited: editedMileage != nil
+            ))
             onConfirm(finalMileage)
             dismiss()
         } label: {

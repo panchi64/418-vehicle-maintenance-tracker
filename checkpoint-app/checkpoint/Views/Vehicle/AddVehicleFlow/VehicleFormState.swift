@@ -34,6 +34,7 @@ final class VehicleFormState {
     var showVINCamera = false
     var isProcessingVINOCR = false
     var vinOCRError: String?
+    var vinOCROriginal: String?
 
     // MARK: - Odometer OCR State
     var showOdometerCamera = false

@@ -36,6 +36,7 @@ struct EditVehicleView: View {
     @State private var showVINCamera = false
     @State private var isProcessingVINOCR = false
     @State private var vinOCRError: String?
+    @State private var vinOCROriginal: String?
 
     // Odometer scan state
     @State private var showOdometerCamera = false
@@ -411,6 +412,7 @@ struct EditVehicleView: View {
                 await MainActor.run {
                     isProcessingVINOCR = false
                     vin = result.vin
+                    vinOCROriginal = result.vin
                     AnalyticsService.shared.capture(.ocrSucceeded(ocrType: .vin))
                 }
             } catch {
@@ -457,6 +459,14 @@ struct EditVehicleView: View {
     // MARK: - Save
 
     private func saveChanges() {
+        // Analytics: track VIN OCR confirmation at save time (VIN has no separate confirmation dialog)
+        if let vinOCROriginal {
+            AnalyticsService.shared.capture(.ocrConfirmed(
+                ocrType: .vin,
+                valueEdited: vin != vinOCROriginal
+            ))
+        }
+
         AnalyticsService.shared.capture(.vehicleEdited)
         vehicle.name = name
         vehicle.make = make

@@ -52,6 +52,7 @@ final class AnalyticsEventTests: XCTestCase {
         XCTAssertEqual(AnalyticsEvent.ocrAttempted(ocrType: .odometer).name, "ocr_attempted")
         XCTAssertEqual(AnalyticsEvent.ocrSucceeded(ocrType: .vin).name, "ocr_succeeded")
         XCTAssertEqual(AnalyticsEvent.ocrFailed(ocrType: .odometer).name, "ocr_failed")
+        XCTAssertEqual(AnalyticsEvent.ocrConfirmed(ocrType: .odometer, valueEdited: false).name, "ocr_confirmed")
     }
 
     // MARK: - Event Properties
@@ -113,6 +114,16 @@ final class AnalyticsEventTests: XCTestCase {
     func test_ocrProperties() {
         XCTAssertEqual(AnalyticsEvent.ocrAttempted(ocrType: .odometer).properties["ocr_type"] as? String, "odometer")
         XCTAssertEqual(AnalyticsEvent.ocrSucceeded(ocrType: .vin).properties["ocr_type"] as? String, "vin")
+    }
+
+    func test_ocrConfirmedProperties() {
+        let unedited = AnalyticsEvent.ocrConfirmed(ocrType: .odometer, valueEdited: false)
+        XCTAssertEqual(unedited.properties["ocr_type"] as? String, "odometer")
+        XCTAssertEqual(unedited.properties["value_edited"] as? Bool, false)
+
+        let edited = AnalyticsEvent.ocrConfirmed(ocrType: .vin, valueEdited: true)
+        XCTAssertEqual(edited.properties["ocr_type"] as? String, "vin")
+        XCTAssertEqual(edited.properties["value_edited"] as? Bool, true)
     }
 
     // MARK: - No PII

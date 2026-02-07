@@ -144,6 +144,7 @@ struct AddVehicleFlowView: View {
                 await MainActor.run {
                     formState.isProcessingVINOCR = false
                     formState.vin = result.vin
+                    formState.vinOCROriginal = result.vin
                     AnalyticsService.shared.capture(.ocrSucceeded(ocrType: .vin))
                 }
             } catch {
@@ -191,6 +192,14 @@ struct AddVehicleFlowView: View {
     // MARK: - Save
 
     private func saveVehicle() {
+        // Analytics: track VIN OCR confirmation at save time (VIN has no separate confirmation dialog)
+        if let vinOCROriginal = formState.vinOCROriginal {
+            AnalyticsService.shared.capture(.ocrConfirmed(
+                ocrType: .vin,
+                valueEdited: formState.vin != vinOCROriginal
+            ))
+        }
+
         // Analytics: track vehicle creation
         AnalyticsService.shared.capture(.vehicleAdded(
             usedOCR: formState.usedOdometerOCR,

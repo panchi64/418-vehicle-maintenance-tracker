@@ -201,9 +201,9 @@ Steps:
 | 1    | `mileage_prompt_shown` | —                              |
 | 2    | `mileage_updated`      | `source` equals `quick_update` |
 
-### OCR Success Rate
+### OCR Recognition Rate
 
-> Of camera OCR attempts, what percentage succeed. Broken down by type (odometer vs VIN). Failed OCR erodes trust in the feature.
+> Of camera OCR attempts, what percentage return a result (Vision framework didn't error). Broken down by type (odometer vs VIN). A low rate means users are getting camera/lighting failures.
 
 | Field             | Value      |
 | ----------------- | ---------- |
@@ -217,6 +217,55 @@ Steps:
 | ---- | --------------- |
 | 1    | `ocr_attempted` |
 | 2    | `ocr_succeeded` |
+
+### OCR End-to-End Funnel
+
+> Full pipeline from camera open to user accepting the result. Drop-off between succeeded → confirmed means users dismissed/cancelled the reading. Breakdown by type reveals which OCR mode has more friction.
+
+| Field             | Value      |
+| ----------------- | ---------- |
+| Type              | Funnels    |
+| Conversion window | 5 minutes  |
+| Breakdown         | `ocr_type` |
+
+Steps:
+
+| Step | Event           |
+| ---- | --------------- |
+| 1    | `ocr_attempted` |
+| 2    | `ocr_succeeded` |
+| 3    | `ocr_confirmed` |
+
+### OCR Reading Accuracy
+
+> Of confirmed OCR readings, what percentage did the user accept without editing? This is the true measure of OCR usefulness — a high unedited rate means the Vision pipeline is returning values users trust. Broken down by type.
+
+| Field       | Value          |
+| ----------- | -------------- |
+| Type        | Trends         |
+| Event       | `ocr_confirmed`|
+| Aggregation | Total count    |
+| Breakdown   | `value_edited` |
+| Chart type  | Bar (stacked)  |
+| Date range  | Last 30 days   |
+
+For a direct acceptance rate, add a second insight:
+
+| Field       | Value          |
+| ----------- | -------------- |
+| Type        | Trends         |
+| Event       | `ocr_confirmed`|
+| Aggregation | Total count    |
+| Date range  | Last 30 days   |
+
+Two series with filters:
+
+| Series | Filter                                    | Aggregation |
+| ------ | ----------------------------------------- | ----------- |
+| A      | `value_edited` equals `false`             | Total count |
+| B      | `ocr_confirmed` (all, no filter)          | Total count |
+
+Use a **Formula** insight: `A / B` to get the acceptance-without-edit rate. Break down by `ocr_type` to compare odometer vs VIN accuracy.
 
 ### Notification Permission Rate
 
