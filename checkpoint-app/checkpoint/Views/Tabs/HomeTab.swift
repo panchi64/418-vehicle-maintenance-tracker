@@ -87,6 +87,9 @@ struct HomeTab: View {
                         AnalyticsService.shared.capture(.mileageUpdated(source: .quickUpdate))
                         updateMileage(newMileage, for: vehicle)
                     }
+                    .onAppear {
+                        AnalyticsService.shared.capture(.mileagePromptShown)
+                    }
                     .revealAnimation(delay: 0.15)
                 }
 

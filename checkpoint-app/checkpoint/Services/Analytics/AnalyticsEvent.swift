@@ -87,7 +87,6 @@ enum AnalyticsEvent {
 
     case mileageUpdated(source: MileageSource)
     case mileagePromptShown
-    case mileagePromptDismissed
 
     // MARK: - OCR
 
@@ -143,7 +142,6 @@ enum AnalyticsEvent {
         case .serviceDeleted: return "service_deleted"
         case .mileageUpdated: return "mileage_updated"
         case .mileagePromptShown: return "mileage_prompt_shown"
-        case .mileagePromptDismissed: return "mileage_prompt_dismissed"
         case .ocrAttempted: return "ocr_attempted"
         case .ocrSucceeded: return "ocr_succeeded"
         case .ocrFailed: return "ocr_failed"

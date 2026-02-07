@@ -11,6 +11,7 @@ import SwiftData
 struct AddVehicleFlowView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(AppState.self) private var appState
 
     @State private var formState = VehicleFormState()
     @State private var currentStep: Step = .basics
@@ -206,16 +207,17 @@ struct AddVehicleFlowView: View {
             vin: formState.vin.isEmpty ? nil : formState.vin,
             tireSize: formState.tireSize.isEmpty ? nil : formState.tireSize,
             oilType: formState.oilType.isEmpty ? nil : formState.oilType,
-            notes: formState.notes.isEmpty ? nil : formState.notes,
-            mileageUpdatedAt: .now
+            notes: formState.notes.isEmpty ? nil : formState.notes
         )
         modelContext.insert(vehicle)
+        appState.selectedVehicle = vehicle
         dismiss()
     }
 }
 
 #Preview {
     AddVehicleFlowView()
+        .environment(AppState())
         .modelContainer(for: Vehicle.self, inMemory: true)
         .preferredColorScheme(.dark)
 }

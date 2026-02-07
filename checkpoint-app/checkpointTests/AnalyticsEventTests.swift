@@ -46,7 +46,6 @@ final class AnalyticsEventTests: XCTestCase {
     func test_mileageEventNames() {
         XCTAssertEqual(AnalyticsEvent.mileageUpdated(source: .manual).name, "mileage_updated")
         XCTAssertEqual(AnalyticsEvent.mileagePromptShown.name, "mileage_prompt_shown")
-        XCTAssertEqual(AnalyticsEvent.mileagePromptDismissed.name, "mileage_prompt_dismissed")
     }
 
     func test_ocrEventNames() {
@@ -173,7 +172,6 @@ final class AnalyticsEventTests: XCTestCase {
             .serviceEdited,
             .serviceDeleted,
             .mileagePromptShown,
-            .mileagePromptDismissed,
             .servicesSearchUsed,
             .serviceHistoryExported,
             .analyticsOptedOut,

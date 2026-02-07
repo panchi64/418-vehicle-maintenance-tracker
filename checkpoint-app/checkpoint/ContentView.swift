@@ -183,7 +183,14 @@ struct ContentView: View {
                !newVehicles.contains(where: { $0.id == selected.id }) {
                 // Clean up widget data for deleted vehicle
                 WidgetDataService.shared.removeWidgetData(for: selected.id.uuidString)
-                appState.selectedVehicle = newVehicles.first
+                // Select the previous vehicle in the old list, or fall back to first remaining
+                if let oldIndex = oldVehicles.firstIndex(where: { $0.id == selected.id }),
+                   oldIndex > 0,
+                   let fallback = newVehicles.first(where: { $0.id == oldVehicles[oldIndex - 1].id }) {
+                    appState.selectedVehicle = fallback
+                } else {
+                    appState.selectedVehicle = newVehicles.first
+                }
             }
             // Update vehicle list when vehicles are added or removed
             if oldVehicles.count != newVehicles.count {
@@ -199,6 +206,7 @@ struct ContentView: View {
         }
         .sheet(isPresented: $appState.showAddVehicle) {
             AddVehicleFlowView()
+                .environment(appState)
         }
         .sheet(isPresented: $appState.showAddService, onDismiss: {
             appState.seasonalPrefill = nil
