@@ -26,6 +26,7 @@ struct BrutalistTabBar: View {
             // Circular FAB to the right
             if let onAddTapped {
                 Button {
+                    HapticService.shared.lightImpact()
                     onAddTapped()
                 } label: {
                     Image(systemName: "plus")
@@ -47,6 +48,7 @@ struct BrutalistTabBar: View {
 
         return Button {
             selectedTab = tab
+            HapticService.shared.tabChanged()
         } label: {
             Text(tab.title)
                 .font(.brutalistLabel)

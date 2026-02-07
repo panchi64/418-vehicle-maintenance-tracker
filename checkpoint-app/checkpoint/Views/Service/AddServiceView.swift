@@ -33,6 +33,7 @@ struct AddServiceView: View {
     @State private var performedDate: Date = Date()
     @State private var mileageAtService: Int? = nil
     @State private var cost: String = ""
+    @State private var costError: String?
     @State private var costCategory: CostCategory = .maintenance
     @State private var notes: String = ""
     @State private var pendingAttachments: [AttachmentPicker.AttachmentData] = []
@@ -162,6 +163,16 @@ struct AddServiceView: View {
                     placeholder: "0.00",
                     keyboardType: .decimalPad
                 )
+                .onChange(of: cost) { _, newValue in
+                    cost = CostValidation.filterCostInput(newValue)
+                    costError = CostValidation.validate(cost)
+                }
+
+                if let costError {
+                    ErrorMessageRow(message: costError) {
+                        self.costError = nil
+                    }
+                }
 
                 VStack(alignment: .leading, spacing: Spacing.xs) {
                     Text("CATEGORY")
@@ -248,6 +259,8 @@ struct AddServiceView: View {
         let category = selectedPreset?.category
         let hasInterval = (intervalMonths != nil && intervalMonths != 0) || (intervalMiles != nil && intervalMiles != 0)
 
+        HapticService.shared.success()
+
         if mode == .log {
             AnalyticsService.shared.capture(.serviceLogged(
                 isPreset: isPreset,
@@ -265,6 +278,11 @@ struct AddServiceView: View {
         }
         updateAppIcon()
         updateWidgetData()
+        if mode == .log {
+            ToastService.shared.show(L10n.toastServiceAdded, icon: "checkmark", style: .success)
+        } else {
+            ToastService.shared.show(L10n.toastServiceScheduled, icon: "clock", style: .success)
+        }
         dismiss()
     }
 

@@ -117,22 +117,54 @@ struct ServicesTab: View {
                         filter.rawValue
                     }
                     .revealAnimation(delay: 0.15)
+
+                    // Active filter indicator
+                    if appState.servicesStatusFilter != .all || !appState.servicesSearchText.isEmpty {
+                        HStack {
+                            Text(L10n.emptyFilterShowing(filteredServices.count, vehicleServices.count).uppercased())
+                                .font(.brutalistLabel)
+                                .foregroundStyle(Theme.accent)
+                                .tracking(1.5)
+
+                            Spacer()
+
+                            Button {
+                                appState.servicesStatusFilter = .all
+                                appState.servicesSearchText = ""
+                            } label: {
+                                Text(L10n.emptyFilterClear.uppercased())
+                                    .font(.brutalistLabel)
+                                    .foregroundStyle(Theme.accent)
+                                    .tracking(1.5)
+                            }
+                            .buttonStyle(.instrument)
+                        }
+                    }
                 }
 
                 // Content based on view mode
                 if appState.servicesViewMode == .timeline, let vehicle = vehicle {
-                    MaintenanceTimeline(
-                        services: vehicleServices,
-                        serviceLogs: vehicleServiceLogs,
-                        vehicle: vehicle,
-                        onServiceTap: { service in
-                            appState.selectedService = service
-                        },
-                        onLogTap: { log in
-                            appState.selectedServiceLog = log
-                        }
-                    )
-                    .revealAnimation(delay: 0.2)
+                    if vehicleServiceLogs.isEmpty {
+                        EmptyStateView(
+                            icon: "clock.arrow.circlepath",
+                            title: L10n.emptyTimelineTitle,
+                            message: L10n.emptyTimelineMessage
+                        )
+                        .revealAnimation(delay: 0.2)
+                    } else {
+                        MaintenanceTimeline(
+                            services: vehicleServices,
+                            serviceLogs: vehicleServiceLogs,
+                            vehicle: vehicle,
+                            onServiceTap: { service in
+                                appState.selectedService = service
+                            },
+                            onLogTap: { log in
+                                appState.selectedServiceLog = log
+                            }
+                        )
+                        .revealAnimation(delay: 0.2)
+                    }
                 }
 
                 // Upcoming services section (list mode)
@@ -244,6 +276,7 @@ struct ServicesTab: View {
                 ) { url in
                     AnalyticsService.shared.capture(.serviceHistoryExported)
                     exportPDFURL = url
+                    ToastService.shared.show(L10n.toastPDFReady, icon: "doc.text", style: .info)
                 }
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)

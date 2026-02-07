@@ -99,9 +99,15 @@ struct NextUpCard: View {
 
                     // Pace prediction (only shown when sufficient data)
                     if let paceDays = pacePredictedDays {
-                        Text("~\(paceDays) DAYS AT_YOUR_PACE")
+                        Text("~\(paceDays) DAYS AT YOUR PACE")
                             .font(.brutalistSecondary)
                             .foregroundStyle(Theme.textSecondary)
+                            .padding(.top, 4)
+                    } else if dailyMilesPace == nil || dailyMilesPace == 0 {
+                        Text(L10n.emptyPaceHint.uppercased())
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.textTertiary)
+                            .tracking(1.5)
                             .padding(.top, 4)
                     }
                 }

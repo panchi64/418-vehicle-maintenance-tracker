@@ -113,6 +113,15 @@ struct CostsTab: View {
                 StatsCard(label: "PER MILE", value: formattedCostPerMile, valueColor: Theme.accent)
             }
             .revealAnimation(delay: 0.2)
+
+            if costPerMile == nil && !logsWithCosts.isEmpty {
+                Text(L10n.emptyCostPerMileHint.uppercased())
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.textTertiary)
+                    .tracking(1.5)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+            }
         }
     }
 
@@ -123,6 +132,9 @@ struct CostsTab: View {
         // Spending pace chart
         if cumulativeCostOverTime.count >= 3 {
             CumulativeCostChartCard(data: cumulativeCostOverTime)
+                .revealAnimation(delay: 0.22)
+        } else if !logsWithCosts.isEmpty {
+            ChartPlaceholderCard()
                 .revealAnimation(delay: 0.22)
         }
 
@@ -154,6 +166,9 @@ struct CostsTab: View {
                 isStacked: categoryFilter == .all
             )
             .revealAnimation(delay: 0.28)
+        } else if logsWithCosts.count == 1 && periodFilter != .month {
+            ChartPlaceholderCard()
+                .revealAnimation(delay: 0.28)
         }
     }
 

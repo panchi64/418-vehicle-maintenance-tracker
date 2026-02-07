@@ -12,6 +12,7 @@ struct FloatingActionButton: View {
 
     var body: some View {
         Button {
+            HapticService.shared.lightImpact()
             action()
         } label: {
             Image(systemName: "plus")
@@ -20,6 +21,7 @@ struct FloatingActionButton: View {
                 .frame(width: 56, height: 56)
                 .background(Theme.accent)
         }
+        .accessibilityLabel("Add service")
     }
 }
 

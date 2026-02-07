@@ -128,8 +128,8 @@
 		5AB669652F2687FC0036D71B /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		5AB669672F2687FC0036D71B /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		5ACB1F742F37C5C900714E55 /* CheckpointWatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "CheckpointWatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		5ACB1F802F37C5CA00714E55 /* CheckpointWatchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "CheckpointWatchTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		5ACB1F8A2F37C5CA00714E55 /* CheckpointWatchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "CheckpointWatchUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5ACB1F802F37C5CA00714E55 /* CheckpointWatchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CheckpointWatchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5ACB1F8A2F37C5CA00714E55 /* CheckpointWatchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CheckpointWatchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5ACB1FDB2F37C75800714E55 /* CheckpointWatchWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CheckpointWatchWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		5ACB20052F37C7BF00714E55 /* WatchDesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchDesignTokens.swift; sourceTree = "<group>"; };
 		5ACB20072F37C7BF00714E55 /* WatchDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchDataStore.swift; sourceTree = "<group>"; };
@@ -517,10 +517,10 @@
 			fileSystemSynchronizedGroups = (
 				5ACB30022F37D00000714E55 /* CheckpointWatchTests */,
 			);
-			name = "CheckpointWatchTests";
+			name = CheckpointWatchTests;
 			packageProductDependencies = (
 			);
-			productName = "CheckpointWatchTests";
+			productName = CheckpointWatchTests;
 			productReference = 5ACB1F802F37C5CA00714E55 /* CheckpointWatchTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
@@ -537,10 +537,10 @@
 			dependencies = (
 				5ACB1F8C2F37C5CA00714E55 /* PBXTargetDependency */,
 			);
-			name = "CheckpointWatchUITests";
+			name = CheckpointWatchUITests;
 			packageProductDependencies = (
 			);
-			productName = "CheckpointWatchUITests";
+			productName = CheckpointWatchUITests;
 			productReference = 5ACB1F8A2F37C5CA00714E55 /* CheckpointWatchUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};

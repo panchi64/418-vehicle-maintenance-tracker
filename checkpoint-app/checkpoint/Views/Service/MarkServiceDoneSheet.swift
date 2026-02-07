@@ -20,6 +20,7 @@ struct MarkServiceDoneSheet: View {
     @State private var performedDate: Date = Date()
     @State private var mileage: Int? = nil
     @State private var cost: String = ""
+    @State private var costError: String?
     @State private var notes: String = ""
     @State private var pendingAttachments: [AttachmentPicker.AttachmentData] = []
 
@@ -59,6 +60,16 @@ struct MarkServiceDoneSheet: View {
                                 placeholder: "$0.00",
                                 keyboardType: .decimalPad
                             )
+                            .onChange(of: cost) { _, newValue in
+                                cost = CostValidation.filterCostInput(newValue)
+                                costError = CostValidation.validate(cost)
+                            }
+
+                            if let costError {
+                                ErrorMessageRow(message: costError) {
+                                    self.costError = nil
+                                }
+                            }
 
                             InstrumentTextEditor(
                                 label: "Notes",
@@ -102,6 +113,7 @@ struct MarkServiceDoneSheet: View {
     }
 
     private func markAsDone() {
+        HapticService.shared.success()
         AnalyticsService.shared.capture(.serviceMarkedDone(
             hasCost: !cost.isEmpty && Decimal(string: cost) != nil,
             hasNotes: !notes.isEmpty,
@@ -173,6 +185,7 @@ struct MarkServiceDoneSheet: View {
 
         updateAppIcon()
         updateWidgetData()
+        ToastService.shared.show(L10n.toastServiceLogged, icon: "checkmark", style: .success)
         onSaved?()
         dismiss()
     }

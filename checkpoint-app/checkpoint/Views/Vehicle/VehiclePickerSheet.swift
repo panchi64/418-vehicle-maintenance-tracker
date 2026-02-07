@@ -200,6 +200,7 @@ struct VehiclePickerSheet: View {
     // MARK: - Delete Vehicle
 
     private func deleteVehicle(_ vehicle: Vehicle) {
+        HapticService.shared.warning()
         AnalyticsService.shared.capture(.vehicleDeleted)
 
         // Create snapshot for undo
@@ -245,6 +246,8 @@ struct VehiclePickerSheet: View {
         // Show toast with undo action
         ToastService.shared.show(
             "\(snapshot.displayName) deleted",
+            icon: "trash",
+            style: .info,
             action: ToastService.ToastAction(
                 label: "UNDO",
                 handler: { @MainActor in
@@ -290,13 +293,36 @@ struct VehiclePickerSheet: View {
                         .font(.system(size: 22))
                         .foregroundStyle(Theme.accent)
                 }
+
+                // Options menu button
+                Menu {
+                    Button {
+                        vehicleToEdit = vehicle
+                    } label: {
+                        Label("Edit", systemImage: "pencil")
+                    }
+
+                    Button(role: .destructive) {
+                        vehicleToDelete = vehicle
+                        showDeleteConfirmation = true
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.textTertiary)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .accessibilityLabel("Vehicle options")
             }
             .padding(Spacing.md)
             .contentShape(Rectangle())
         }
         .buttonStyle(ServiceRowButtonStyle())
         .accessibilityLabel(vehicle.displayName)
-        .accessibilityHint(selectedVehicle?.id == vehicle.id ? "Currently selected. Long press for options." : "Double tap to select. Long press for options.")
+        .accessibilityHint(selectedVehicle?.id == vehicle.id ? "Currently selected" : "Double tap to select")
     }
 }
 

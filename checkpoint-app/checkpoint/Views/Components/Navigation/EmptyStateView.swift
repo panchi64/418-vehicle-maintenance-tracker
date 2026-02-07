@@ -49,6 +49,7 @@ struct EmptyStateView: View {
                     .font(.system(size: 40, weight: .light))
                     .foregroundStyle(Theme.accent)
             }
+            .accessibilityHidden(true)
 
             // Text content
             VStack(spacing: Spacing.xs) {

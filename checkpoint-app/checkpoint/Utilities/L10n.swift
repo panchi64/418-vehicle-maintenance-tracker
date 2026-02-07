@@ -100,6 +100,47 @@ enum L10n {
     static var dueSoonDaysDesc: String { localized("duesoon.days_desc") }
     static var dueSoonDefault: String { localized("duesoon.default") }
 
+    // MARK: - Toast Messages
+
+    static var toastServiceLogged: String { localized("toast.service_logged") }
+    static var toastVehicleSaved: String { localized("toast.vehicle_saved") }
+    static var toastVehicleUpdated: String { localized("toast.vehicle_updated") }
+    static var toastVehicleDeleted: String { localized("toast.vehicle_deleted") }
+    static var toastServiceAdded: String { localized("toast.service_added") }
+    static var toastServiceScheduled: String { localized("toast.service_scheduled") }
+    static var toastMileageUpdated: String { localized("toast.mileage_updated") }
+    static var toastPDFReady: String { localized("toast.pdf_ready") }
+    static var toastSyncError: String { localized("toast.sync_error") }
+    static var toastReadingCaptured: String { localized("toast.reading_captured") }
+
+    // MARK: - OCR Errors
+
+    static var ocrErrorNoTextFound: String { localized("ocr.error.no_text_found") }
+    static var ocrErrorImageProcessingFailed: String { localized("ocr.error.image_processing_failed") }
+    static var ocrErrorNoValidMileage: String { localized("ocr.error.no_valid_mileage") }
+    static var ocrErrorInvalidMileage: String { localized("ocr.error.invalid_mileage") }
+    static var ocrErrorNoValidVIN: String { localized("ocr.error.no_valid_vin") }
+
+    // MARK: - Recall Alerts
+
+    static var recallErrorTitle: String { localized("recall.error_title") }
+    static var recallRetry: String { localized("recall.retry") }
+    static func recallLastChecked(_ timeAgo: String) -> String {
+        String(format: localized("recall.last_checked"), timeAgo)
+    }
+
+    // MARK: - Empty States
+
+    static var emptyCostPerMileHint: String { localized("empty.cost_per_mile_hint") }
+    static var emptyPaceHint: String { localized("empty.pace_hint") }
+    static var emptyChartPlaceholder: String { localized("empty.chart_placeholder") }
+    static var emptyTimelineTitle: String { localized("empty.timeline_title") }
+    static var emptyTimelineMessage: String { localized("empty.timeline_message") }
+    static func emptyFilterShowing(_ shown: Int, _ total: Int) -> String {
+        String(format: localized("empty.filter_showing"), shown, total)
+    }
+    static var emptyFilterClear: String { localized("empty.filter_clear") }
+
     // MARK: - Errors
 
     static var errorRequiredField: String { localized("error.required_field") }

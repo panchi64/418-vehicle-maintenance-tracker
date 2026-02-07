@@ -35,6 +35,7 @@ struct InstrumentSegmentedControl<T: Hashable>: View {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                 selection = option
             }
+            HapticService.shared.selectionChanged()
         } label: {
             Text(labelFor(option).uppercased())
                 .font(.instrumentLabel)

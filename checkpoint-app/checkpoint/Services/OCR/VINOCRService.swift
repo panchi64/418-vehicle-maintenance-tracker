@@ -202,11 +202,11 @@ enum VINOCRError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .imageProcessingFailed:
-            return "Could not process the image. Try again."
+            return L10n.ocrErrorImageProcessingFailed
         case .noTextFound:
-            return "No text detected in the image. Try a clearer photo."
+            return L10n.ocrErrorNoTextFound
         case .noVINFound:
-            return "No VIN found in the image. Make sure the full 17-character VIN is visible."
+            return L10n.ocrErrorNoValidVIN
         }
     }
 }

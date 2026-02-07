@@ -16,6 +16,7 @@ struct HomeTab: View {
 
     // Recall alert state
     @State private var recalls: [RecallInfo] = []
+    @State private var recallFetchFailed = false
 
     // Cluster state
     @State private var primaryCluster: ServiceCluster?
@@ -70,6 +71,9 @@ struct HomeTab: View {
                 // Recall Alert Card (safety-critical, shown above everything)
                 if !recalls.isEmpty {
                     RecallAlertCard(recalls: recalls)
+                        .revealAnimation(delay: 0.05)
+                } else if recallFetchFailed && vehicle != nil {
+                    recallErrorCard
                         .revealAnimation(delay: 0.05)
                 }
 
@@ -391,6 +395,52 @@ struct HomeTab: View {
         )
     }
 
+    // MARK: - Recall Error Card
+
+    private var recallErrorCard: some View {
+        Button {
+            HapticService.shared.lightImpact()
+            Task {
+                await fetchRecalls()
+            }
+        } label: {
+            HStack(spacing: Spacing.sm) {
+                Image(systemName: "exclamationmark.triangle")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(Theme.statusOverdue)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L10n.recallErrorTitle.uppercased())
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.textPrimary)
+                        .tracking(1.5)
+
+                    if let lastChecked = RecallCheckCache.shared.lastCheckedDescription {
+                        Text(L10n.recallLastChecked(lastChecked).uppercased())
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.textTertiary)
+                            .tracking(1.5)
+                    } else {
+                        Text(L10n.recallRetry.uppercased())
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.textTertiary)
+                            .tracking(1.5)
+                    }
+                }
+
+                Spacer()
+            }
+            .padding(Spacing.md)
+            .background(Theme.surfaceInstrument)
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
     // MARK: - Recall Fetch
 
     private func fetchRecalls() async {
@@ -408,11 +458,13 @@ struct HomeTab: View {
                 model: vehicle.model,
                 year: vehicle.year
             )
+            recallFetchFailed = false
+            RecallCheckCache.shared.recordSuccess()
             if !recalls.isEmpty {
                 AnalyticsService.shared.capture(.recallAlertShown(recallCount: recalls.count))
             }
         } catch {
-            // Silently fail — recalls are supplementary info
+            recallFetchFailed = true
             recalls = []
         }
     }

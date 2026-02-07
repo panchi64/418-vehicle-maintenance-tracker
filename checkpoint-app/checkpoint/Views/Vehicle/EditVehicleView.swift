@@ -200,10 +200,21 @@ struct EditVehicleView: View {
                                     )
                                 }
 
-                                Text("17-character Vehicle Identification Number")
-                                    .font(.caption)
-                                    .foregroundStyle(Theme.textTertiary)
-                                    .padding(.leading, 4)
+                                HStack {
+                                    Text("17-character Vehicle Identification Number")
+                                        .font(.caption)
+                                        .foregroundStyle(Theme.textTertiary)
+
+                                    Spacer()
+
+                                    if !vin.isEmpty {
+                                        Text("\(vin.count)/17")
+                                            .font(.brutalistLabel)
+                                            .foregroundStyle(isVINValid ? Theme.statusGood : Theme.textTertiary)
+                                            .tracking(1)
+                                    }
+                                }
+                                .padding(.leading, 4)
 
                                 // VIN OCR processing indicator
                                 if isProcessingVINOCR {
@@ -459,6 +470,7 @@ struct EditVehicleView: View {
     // MARK: - Save
 
     private func saveChanges() {
+        HapticService.shared.success()
         // Analytics: track VIN OCR confirmation at save time (VIN has no separate confirmation dialog)
         if let vinOCROriginal {
             AnalyticsService.shared.capture(.ocrConfirmed(
@@ -492,10 +504,12 @@ struct EditVehicleView: View {
 
         updateAppIcon()
         updateWidgetData()
+        ToastService.shared.show(L10n.toastVehicleUpdated, icon: "checkmark", style: .success)
         dismiss()
     }
 
     private func deleteVehicle() {
+        HapticService.shared.warning()
         AnalyticsService.shared.capture(.vehicleDeleted)
         modelContext.delete(vehicle)
         updateAppIcon()

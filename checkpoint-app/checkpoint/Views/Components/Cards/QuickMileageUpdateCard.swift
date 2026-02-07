@@ -192,6 +192,7 @@ struct MileageUpdateSheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         if let mileage = newMileage, mileage > 0 {
+                            HapticService.shared.success()
                             onSave(mileage)
                             dismiss()
                         }

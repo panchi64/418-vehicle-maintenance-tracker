@@ -71,23 +71,22 @@ final class OdometerOCRServiceTests: XCTestCase {
 
     func testNoTextFoundError() {
         let error = OdometerOCRService.OCRError.noTextFound
-        XCTAssertEqual(error.errorDescription, "No text could be recognized in the image")
+        XCTAssertEqual(error.errorDescription, L10n.ocrErrorNoTextFound)
     }
 
     func testNoValidMileageFoundError() {
         let error = OdometerOCRService.OCRError.noValidMileageFound
-        XCTAssertEqual(error.errorDescription, "No valid mileage number was found")
+        XCTAssertEqual(error.errorDescription, L10n.ocrErrorNoValidMileage)
     }
 
     func testImageProcessingFailedError() {
         let error = OdometerOCRService.OCRError.imageProcessingFailed
-        XCTAssertEqual(error.errorDescription, "Failed to process the image")
+        XCTAssertEqual(error.errorDescription, L10n.ocrErrorImageProcessingFailed)
     }
 
     func testInvalidMileageError() {
-        let reason = "Mileage cannot be negative"
-        let error = OdometerOCRService.OCRError.invalidMileage(reason: reason)
-        XCTAssertEqual(error.errorDescription, "Invalid mileage: \(reason)")
+        let error = OdometerOCRService.OCRError.invalidMileage(reason: "Mileage cannot be negative")
+        XCTAssertEqual(error.errorDescription, L10n.ocrErrorInvalidMileage)
     }
 
     // MARK: - OCR Recognition Tests

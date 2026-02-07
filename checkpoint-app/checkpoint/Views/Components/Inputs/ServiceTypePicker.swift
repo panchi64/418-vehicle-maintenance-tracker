@@ -132,6 +132,7 @@ struct ServicePresetPickerSheet: View {
                 Section {
                     ForEach(presetService.presets(for: selectedCategory), id: \.name) { preset in
                         Button {
+                            HapticService.shared.selectionChanged()
                             selectedPreset = preset
                             dismiss()
                         } label: {

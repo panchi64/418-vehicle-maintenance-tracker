@@ -39,11 +39,13 @@ struct MarbetePicker: View {
             Menu {
                 Button("Not Set") {
                     month = nil
+                    HapticService.shared.selectionChanged()
                 }
                 Divider()
                 ForEach(1...12, id: \.self) { monthValue in
                     Button(Calendar.current.monthSymbols[monthValue - 1]) {
                         month = monthValue
+                        HapticService.shared.selectionChanged()
                     }
                 }
             } label: {
@@ -88,11 +90,13 @@ struct MarbetePicker: View {
             Menu {
                 Button("Not Set") {
                     year = nil
+                    HapticService.shared.selectionChanged()
                 }
                 Divider()
                 ForEach(yearRange, id: \.self) { yearValue in
                     Button(String(yearValue)) {
                         year = yearValue
+                        HapticService.shared.selectionChanged()
                     }
                 }
             } label: {

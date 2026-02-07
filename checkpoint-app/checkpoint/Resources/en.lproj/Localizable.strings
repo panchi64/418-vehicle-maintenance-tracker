@@ -92,6 +92,43 @@
 "duesoon.days_desc" = "Choose when a date-based service is marked \"due soon\" based on days remaining.";
 "duesoon.default" = "Default";
 
+// MARK: - Toast Messages
+
+"toast.service_logged" = "Service logged";
+"toast.vehicle_saved" = "Vehicle saved";
+"toast.vehicle_updated" = "Vehicle updated";
+"toast.vehicle_deleted" = "Vehicle deleted";
+"toast.service_added" = "Service added";
+"toast.service_scheduled" = "Service scheduled";
+"toast.mileage_updated" = "Mileage updated";
+"toast.pdf_ready" = "PDF ready";
+"toast.sync_error" = "Sync issue — data saved locally";
+"toast.reading_captured" = "Reading captured";
+
+// MARK: - OCR Errors
+
+"ocr.error.no_text_found" = "Couldn't detect the reading. Ensure it's well-lit and centered.";
+"ocr.error.image_processing_failed" = "Image couldn't be processed. Try again with a clearer photo.";
+"ocr.error.no_valid_mileage" = "No valid mileage found. Align the odometer in the frame.";
+"ocr.error.invalid_mileage" = "The detected value doesn't look right. You can edit it below.";
+"ocr.error.no_valid_vin" = "No valid VIN found. Align the VIN plate in the frame.";
+
+// MARK: - Recall Alerts
+
+"recall.error_title" = "Couldn't check recalls";
+"recall.retry" = "Tap to retry";
+"recall.last_checked" = "Last checked: %@";
+
+// MARK: - Empty States
+
+"empty.cost_per_mile_hint" = "Log 2+ services with mileage to calculate";
+"empty.pace_hint" = "Update mileage to enable pace estimates";
+"empty.chart_placeholder" = "3+ entries needed";
+"empty.timeline_title" = "No History";
+"empty.timeline_message" = "Complete a service to see your maintenance timeline";
+"empty.filter_showing" = "Showing %d of %d";
+"empty.filter_clear" = "Clear";
+
 // MARK: - Errors
 
 "error.required_field" = "This field is required";

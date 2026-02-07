@@ -30,6 +30,8 @@ struct ContentView: View {
         appState.selectedVehicle ?? vehicles.first
     }
 
+    // TODO: [ONBOARDING] — See docs/ONBOARDING.md
+
     var body: some View {
         ZStack {
             AtmosphericBackground()
@@ -243,6 +245,7 @@ struct ContentView: View {
                     onSave: { newMileage in
                         AnalyticsService.shared.capture(.mileageUpdated(source: .manual))
                         updateMileage(newMileage, for: vehicle)
+                        ToastService.shared.show(L10n.toastMileageUpdated, icon: "gauge.medium", style: .success)
                     }
                 )
                 .trackScreen(.mileageUpdate)

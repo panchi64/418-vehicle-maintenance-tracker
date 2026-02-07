@@ -176,10 +176,21 @@ struct AddVehicleView: View {
                                     )
                                 }
 
-                                Text("17-character Vehicle Identification Number")
-                                    .font(.caption)
-                                    .foregroundStyle(Theme.textTertiary)
-                                    .padding(.leading, 4)
+                                HStack {
+                                    Text("17-character Vehicle Identification Number")
+                                        .font(.caption)
+                                        .foregroundStyle(Theme.textTertiary)
+
+                                    Spacer()
+
+                                    if !vin.isEmpty {
+                                        Text("\(vin.count)/17")
+                                            .font(.brutalistLabel)
+                                            .foregroundStyle(isVINValid ? Theme.statusGood : Theme.textTertiary)
+                                            .tracking(1)
+                                    }
+                                }
+                                .padding(.leading, 4)
 
                                 // VIN OCR processing indicator
                                 if isProcessingVINOCR {
@@ -387,6 +398,7 @@ struct AddVehicleView: View {
     // MARK: - Save
 
     private func saveVehicle() {
+        HapticService.shared.success()
         let vehicle = Vehicle(
             name: name,
             make: make,
@@ -400,6 +412,7 @@ struct AddVehicleView: View {
             mileageUpdatedAt: .now
         )
         modelContext.insert(vehicle)
+        ToastService.shared.show(L10n.toastVehicleSaved, icon: "checkmark", style: .success)
         dismiss()
     }
 }

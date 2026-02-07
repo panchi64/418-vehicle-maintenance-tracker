@@ -182,6 +182,7 @@ struct EditServiceView: View {
     // MARK: - Save Logic
 
     private func saveChanges() {
+        HapticService.shared.success()
         AnalyticsService.shared.capture(.serviceEdited)
         service.name = serviceName
         service.dueDate = hasDueDate ? dueDate : nil

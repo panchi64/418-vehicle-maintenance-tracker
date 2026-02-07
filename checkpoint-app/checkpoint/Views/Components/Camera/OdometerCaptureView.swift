@@ -175,6 +175,7 @@ class OdometerCaptureViewController: UIViewController {
         captureButton.backgroundColor = accentOffWhite
         captureButton.translatesAutoresizingMaskIntoConstraints = false
         captureButton.addTarget(self, action: #selector(capturePhoto), for: .touchUpInside)
+        captureButton.accessibilityLabel = "Capture odometer reading"
         view.addSubview(captureButton)
 
         // Cancel button
@@ -201,6 +202,7 @@ class OdometerCaptureViewController: UIViewController {
     // MARK: - Actions
 
     @objc private func capturePhoto() {
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         let settings = AVCapturePhotoSettings()
         photoOutput.capturePhoto(with: settings, delegate: self)
     }
