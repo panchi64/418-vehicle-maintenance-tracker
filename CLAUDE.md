@@ -160,18 +160,23 @@ Feature implementation status is tracked in `docs/FEATURES.md`. When implementin
 ## Additional Documentation
 
 ### Product & Strategy (`docs/`)
+- `docs/FEATURES.md` - Feature catalog, roadmap, and implementation status tracking (single source of truth)
 - `docs/MARKET_RESEARCH.md` - Competitive analysis of the vehicle maintenance app market and positioning strategy
-- `docs/ROADMAP.md` - Version milestones and planned feature releases
-- `docs/FEATURES.md` - Feature catalog with implementation status tracking
 - `docs/MONETIZATION.md` - Pricing and feature tier strategy (free core, optional paid sync, no ads)
+- `docs/DATA_RELIABILITY.md` - Data strategy, local-first principles, backup/sync architecture
 
 ### Design & UX (`docs/`)
-- `docs/AESTHETIC.md` - Design language and visual philosophy (brutalist-tech-modernist)
+- `docs/AESTHETIC.md` - 418 brand design language and visual philosophy (brutalist-tech-modernist)
 - `docs/NOTIFICATION_TONE.md` - Voice and messaging guidelines for notifications (mechanical, dry-humored, vehicle "speaks" to user)
 - `docs/UNITS_AND_INTERVALS.md` - UX spec for maintenance tracking units (miles/km/months/days), dual-interval display logic, and user-configurable priority setting
 
-### Data & Reliability (`docs/`)
-- `docs/DATA_RELIABILITY.md` - Data strategy, local-first principles, backup/sync architecture, and mileage estimation
+### Analytics (`docs/`)
+- `docs/POSTHOG_DASHBOARDS.md` - PostHog analytics dashboard setup guide and event taxonomy
+
+### Troubleshooting (`docs/troubleshooting/`)
+- `docs/troubleshooting/xctest-mainactor-observable-crashes.md` - Testing with @Observable @MainActor classes
+- `docs/troubleshooting/xctest-swiftdata-schema-crashes.md` - Schema mismatch in simulator
+- `docs/troubleshooting/xctest-parallel-simulator-failures.md` - Parallel test execution issues
 
 ### Codebase (`checkpoint-app/`)
 - `checkpoint-app/CLAUDE.md` - Detailed iOS development patterns

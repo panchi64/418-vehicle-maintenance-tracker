@@ -1,6 +1,19 @@
-# Vehicle Maintenance Tracker - Feature Ideas
+# Checkpoint — Features & Roadmap
 
-> A modern iOS app for tracking vehicle maintenance with a focus on simplicity, smart automation, and iOS 26 Liquid Glass design.
+> The definitive iOS vehicle maintenance companion — an app that respects users' time, protects their data, and surfaces the right information at the right moment.
+
+---
+
+## Release Timeline
+
+| Version | Theme | Target | Status |
+|---------|-------|--------|--------|
+| **v1.0** | Core Experience | Q1 2026 | 🚧 In Development |
+| **v1.5** | EV & Cloud | Q2-Q3 2026 | 📋 Planned |
+| **v2.0** | Intelligence & Insights | Q4 2026 | 📋 Planned |
+| **v2.5** | Education & DIY | 2027 | 🔮 Future |
+
+v1.0 features are tracked throughout this document. Future versions are outlined [below](#future-versions).
 
 ---
 
@@ -159,6 +172,14 @@
 | Odometer tracking     | High     | ✅     | Manual entry + smart estimation                            |
 | Distance unit support | Medium   | ✅     | Miles or kilometers preference (global setting)            |
 | Vehicle notes         | Medium   | ✅     | Freeform notes area for quirks, history, or reminders      |
+
+#### VIN Registration Improvements (Planned)
+
+| Feature | Description |
+|---------|-------------|
+| VIN value prop banner | Inline callout above VIN input: "Enter your VIN to auto-fill make, model, and year — and check for open recalls." |
+| Always-visible character count | Show `12 / 17 CHARACTERS` below input, transitioning to `VIN VALID — LOOK UP DETAILS` when valid |
+| Auto-fill feedback | Checkmark + "DETAILS FILLED FROM VIN" message when VIN lookup succeeds; auto-filled fields get subtle accent flash |
 
 ---
 
@@ -373,6 +394,17 @@
 - Best suited for enthusiast mode — casual users may find it overwhelming
 
 **Philosophy:** These are v2+ features. Ship without them, add later when we have enough data and can do them well.
+
+#### Contextual Insights (Planned)
+
+Surface meaningful context alongside existing data to help users understand trends and take action.
+
+| Feature | Location | Description |
+|---------|----------|-------------|
+| Service detail insights | ServiceDetailView | Time since last service, miles driven since, average cost, times serviced |
+| Service row context | ServiceRow | Subtle "Last: 5 mo ago" line below progress bar |
+| Mileage update motivation | QuickMileageUpdateCard | "Keeps N service reminders accurate" (N = services with dueMileage) |
+| NextUpCard last service | NextUpCard | "LAST SERVICE" data row when lastPerformed exists |
 
 ---
 
@@ -746,39 +778,78 @@ If a vehicle isn't in our database yet:
 
 ---
 
-## Version Roadmap
+## Future Versions
 
-> Planned feature additions by version. Core v1.0 features are tracked throughout this document.
+### v1.5 — EV & Cloud (Q2-Q3 2026)
 
-### v1.5 — EV Support
+**EV & Hybrid Support:**
 
-| Feature                     | Priority | Notes                                                    |
-| --------------------------- | -------- | -------------------------------------------------------- |
-| EV maintenance schedules    | High     | Battery health checks, coolant, brake fluid, cabin filter |
-| Battery health tracking     | High     | Log degradation over time, charging habits               |
-| Software update logging     | Medium   | Track OTA updates as "maintenance" events                |
-| Regenerative braking notes  | Medium   | Affects brake pad wear — surface in brake service reminders |
-| EV-specific service types   | High     | Presets: battery conditioning, thermal system, HV cables |
+| Feature | Priority | Notes |
+|---------|----------|-------|
+| EV maintenance schedules | High | Battery health checks, coolant, brake fluid, cabin filter |
+| Battery health tracking | High | Log degradation over time, charging habits |
+| EV-specific service types | High | Presets: battery conditioning, thermal system, HV cables |
+| Software update logging | Medium | Track OTA updates as "maintenance" events |
+| Regenerative braking notes | Medium | Affects brake pad wear — surface in brake service reminders |
 
-**Why v1.5:**
-- EV market growing rapidly ($18B → $84B by 2033)
-- Existing apps built for ICE vehicles — EV owners underserved
-- Different maintenance cadence — worth dedicated attention after core app is solid
+EV maintenance market: $18B (2023) → $84B projected (2033). Existing apps designed for ICE vehicles — EV owners underserved. Different maintenance cadence requires dedicated attention after core app is solid.
 
-### v2.0 — Education & DIY
+**Cloud & Subscription Features:**
 
-| Feature                     | Priority | Notes                                                    |
-| --------------------------- | -------- | -------------------------------------------------------- |
-| First-time owner education  | High     | "What does this mean?" explainers for every service type |
-| Video tutorial links        | Medium   | Curated YouTube links for common DIY tasks               |
-| Gamified progress           | Low      | "First Oil Change Complete!" badges — subtle, not annoying |
-| DIY mechanic mode           | High     | Parts inventory, projects in progress, tool checklists   |
-| DIY vs shop cost comparison | Medium   | Show savings from doing it yourself                      |
+| Feature | Priority | Notes |
+|---------|----------|-------|
+| AI-Powered OCR | High | Server-side smart extraction for receipts/invoices |
+| Account Sync | High | Cross-device sync via cloud infrastructure |
+| Family Sharing | High | Multi-user access to shared vehicles across Apple IDs |
 
-**Why v2.0:**
-- 40% of Gen Z learns car care from YouTube — education gap is real
-- 47% of car owners now do basic DIY maintenance
-- Requires significant new UI/UX work — better to nail basics first
+These features require ongoing server infrastructure and justify an annual subscription. See [MONETIZATION.md](./MONETIZATION.md) for pricing strategy.
+
+### v2.0 — Intelligence & Insights (Q4 2026)
+
+| Feature | Priority | Notes |
+|---------|----------|-------|
+| Factory maintenance schedules | High | VIN decode → manufacturer intervals via LLM extraction from owner's manuals |
+| Crowd-sourced reliability data | Medium | Opt-in anonymized data, common issues by vehicle |
+| Advanced analytics | Medium | Predicted issues (high confidence only), vehicle health diagram |
+| Desktop/web access | Medium | Browser-based access for professionals |
+
+**Why v2.0:** By this point we'll have real user data on which vehicles to support first. Factory schedules need prioritization data. Crowd-sourced features need a user base to be meaningful.
+
+### v2.5 — Education & DIY (2027)
+
+| Feature | Priority | Notes |
+|---------|----------|-------|
+| First-time owner education | High | "What does this mean?" explainers for every service type |
+| DIY mechanic mode | High | Parts inventory, projects in progress, tool checklists |
+| Video tutorial links | Medium | Curated YouTube links for common DIY tasks |
+| DIY vs shop cost comparison | Medium | Show savings from doing it yourself |
+
+40% of Gen Z learns car care from YouTube — education gap is real. 47% of US car owners now do basic DIY maintenance ($49.2B market growing at 5.8% annually).
+
+---
+
+## Monetization Alignment
+
+| Tier | Price | Key Features |
+|------|-------|-------------|
+| **Free** | $0 | Unlimited vehicles, full core features, all widgets, basic OCR, iCloud sync |
+| **Pro Bundle** | One-time ($7.99–$14.99) | Advanced reports, PDF export, theme customization |
+| **Subscription** | Annual ($9.99–$14.99) | AI OCR, cloud sync, family sharing, desktop/web |
+
+See [MONETIZATION.md](./MONETIZATION.md) for full pricing strategy, upgrade flows, and competitive positioning.
+
+---
+
+## Guiding Principles
+
+1. **Never lose user data** — Non-negotiable
+2. **Work offline** — Cloud is a bonus, not a requirement
+3. **User owns their data** — Export always available
+4. **Fail gracefully** — Errors don't cascade to data loss
+5. **Communicate clearly** — Users know what's happening
+6. **Ship small, iterate fast** — Get feedback early
+
+See [DATA_RELIABILITY.md](./DATA_RELIABILITY.md) for the full data reliability commitment.
 
 ---
 
@@ -788,6 +859,8 @@ If a vehicle isn't in our database yet:
 - [ ] Should we support iPad / Mac via Catalyst?
 - [ ] How many vehicles should we seed the schedule database with before launch?
 - [ ] What's the review/verification process for crowdsourced schedules?
+- [ ] Regional pricing considerations for Pro and Subscription?
+- [ ] Should Pro bundle be included in Subscription, or separate?
 
 ---
 
@@ -801,4 +874,4 @@ If a vehicle isn't in our database yet:
 
 ---
 
-_Last updated: January 2026_ (Refined with market research insights)
+_Last updated: February 2026_
