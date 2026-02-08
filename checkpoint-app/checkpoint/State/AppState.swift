@@ -22,6 +22,9 @@ final class AppState {
     var showAddVehicle = false
     var showAddService = false
     var showEditVehicle = false
+    var showProPaywall = false
+    var showTipModal = false
+    var unlockedTheme: ThemeDefinition?
     var selectedService: Service?
     var selectedServiceLog: ServiceLog?
 
@@ -168,6 +171,28 @@ final class AppState {
 
     func navigateToHome() {
         selectedTab = .home
+    }
+
+    // MARK: - Monetization
+
+    func requestAddVehicle(vehicleCount: Int) {
+        if vehicleCount >= 3 && !StoreManager.shared.isPro {
+            showProPaywall = true
+            AnalyticsService.shared.capture(.vehicleLimitReached(vehicleCount: vehicleCount))
+        } else {
+            showAddVehicle = true
+        }
+    }
+
+    func recordCompletedAction() {
+        guard !StoreManager.shared.isPro,
+              !PurchaseSettings.shared.hasShownTipModalThisSession else { return }
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1.5))
+            showTipModal = true
+            PurchaseSettings.shared.hasShownTipModalThisSession = true
+            AnalyticsService.shared.capture(.tipModalShown)
+        }
     }
 }
 

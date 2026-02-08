@@ -380,7 +380,7 @@ struct HomeTab: View {
             icon: "car.side.fill",
             title: "No Vehicles",
             message: "Add your first vehicle to start\ntracking maintenance",
-            action: { appState.showAddVehicle = true },
+            action: { appState.requestAddVehicle(vehicleCount: 0) },
             actionLabel: "Add Vehicle"
         )
     }

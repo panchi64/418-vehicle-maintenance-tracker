@@ -11,60 +11,60 @@ import SwiftUI
 extension Font {
     // MARK: - Brutalist Monospace Type Scale
 
-    /// 56pt Mono Light - Hero data displays
-    static var brutalistHero: Font {
-        .system(size: 56, weight: .light, design: .monospaced)
+    /// 56pt Light - Hero data displays
+    @MainActor static var brutalistHero: Font {
+        .system(size: 56, weight: .light, design: ThemeManager.shared.current.fontDesign.toSwiftUI())
     }
 
-    /// 32pt Mono Medium - Primary headings
-    static var brutalistTitle: Font {
-        .system(size: 32, weight: .medium, design: .monospaced)
+    /// 32pt Medium - Primary headings
+    @MainActor static var brutalistTitle: Font {
+        .system(size: 32, weight: .medium, design: ThemeManager.shared.current.fontDesign.toSwiftUI())
     }
 
-    /// 20pt Mono Medium - Section titles, service names
-    static var brutalistHeading: Font {
-        .system(size: 20, weight: .medium, design: .monospaced)
+    /// 20pt Medium - Section titles, service names
+    @MainActor static var brutalistHeading: Font {
+        .system(size: 20, weight: .medium, design: ThemeManager.shared.current.fontDesign.toSwiftUI())
     }
 
-    /// 15pt Mono Regular - Body text
-    static var brutalistBody: Font {
-        .system(size: 15, weight: .regular, design: .monospaced)
+    /// 15pt Regular - Body text
+    @MainActor static var brutalistBody: Font {
+        .system(size: 15, weight: .regular, design: ThemeManager.shared.current.fontDesign.toSwiftUI())
     }
 
-    /// 13pt Mono Regular - Secondary content
-    static var brutalistSecondary: Font {
-        .system(size: 13, weight: .regular, design: .monospaced)
+    /// 13pt Regular - Secondary content
+    @MainActor static var brutalistSecondary: Font {
+        .system(size: 13, weight: .regular, design: ThemeManager.shared.current.fontDesign.toSwiftUI())
     }
 
-    /// 11pt Mono Medium - Labels, all caps
-    static var brutalistLabel: Font {
-        .system(size: 11, weight: .medium, design: .monospaced)
+    /// 11pt Medium - Labels, all caps
+    @MainActor static var brutalistLabel: Font {
+        .system(size: 11, weight: .medium, design: ThemeManager.shared.current.fontDesign.toSwiftUI())
     }
 
-    /// 11pt Mono Bold - Emphasized labels
-    static var brutalistLabelBold: Font {
-        .system(size: 11, weight: .bold, design: .monospaced)
+    /// 11pt Bold - Emphasized labels
+    @MainActor static var brutalistLabelBold: Font {
+        .system(size: 11, weight: .bold, design: ThemeManager.shared.current.fontDesign.toSwiftUI())
     }
 
     // MARK: - Legacy Aliases (for compatibility)
 
-    static var instrumentLarge: Font { brutalistHero }
-    static var instrumentMedium: Font { brutalistTitle }
-    static var instrumentLabel: Font { brutalistLabel }
-    static var instrumentSection: Font { brutalistLabel }
-    static var instrumentBody: Font { brutalistBody }
-    static var instrumentMono: Font { brutalistSecondary }
+    @MainActor static var instrumentLarge: Font { brutalistHero }
+    @MainActor static var instrumentMedium: Font { brutalistTitle }
+    @MainActor static var instrumentLabel: Font { brutalistLabel }
+    @MainActor static var instrumentSection: Font { brutalistLabel }
+    @MainActor static var instrumentBody: Font { brutalistBody }
+    @MainActor static var instrumentMono: Font { brutalistSecondary }
 
-    static var displayLarge: Font { brutalistHero }
-    static var headlineLarge: Font { brutalistTitle }
-    static var headline: Font { brutalistHeading }
-    static var title: Font { brutalistHeading }
-    static var bodyText: Font { brutalistBody }
-    static var bodySecondary: Font { brutalistSecondary }
-    static var caption: Font { brutalistSecondary }
-    static var captionSmall: Font { brutalistLabel }
-    static var monoLarge: Font { brutalistHero }
-    static var monoBody: Font { brutalistBody }
+    @MainActor static var displayLarge: Font { brutalistHero }
+    @MainActor static var headlineLarge: Font { brutalistTitle }
+    @MainActor static var headline: Font { brutalistHeading }
+    @MainActor static var title: Font { brutalistHeading }
+    @MainActor static var bodyText: Font { brutalistBody }
+    @MainActor static var bodySecondary: Font { brutalistSecondary }
+    @MainActor static var caption: Font { brutalistSecondary }
+    @MainActor static var captionSmall: Font { brutalistLabel }
+    @MainActor static var monoLarge: Font { brutalistHero }
+    @MainActor static var monoBody: Font { brutalistBody }
 }
 
 // MARK: - Brutalist Text Style Modifiers

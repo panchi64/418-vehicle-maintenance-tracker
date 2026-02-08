@@ -10,32 +10,32 @@ import SwiftUI
 
 enum Theme {
     // MARK: - Backgrounds
-    static let backgroundPrimary = Color("BackgroundPrimary")
-    static let backgroundElevated = Color("BackgroundElevated")
-    static let backgroundSubtle = Color("BackgroundSubtle")
+    static var backgroundPrimary: Color { ThemeManager.shared.current.backgroundPrimaryColor }
+    static var backgroundElevated: Color { ThemeManager.shared.current.backgroundElevatedColor }
+    static var backgroundSubtle: Color { ThemeManager.shared.current.backgroundSubtleColor }
 
     // MARK: - Surfaces
-    static let surfaceInstrument = Color("SurfaceInstrument")
-    static let glow = Color("GlowAmber")
-    static let gridLine = Color("GridLine")
+    static var surfaceInstrument: Color { ThemeManager.shared.current.surfaceInstrumentColor }
+    static var glow: Color { ThemeManager.shared.current.glowColor }
+    static var gridLine: Color { ThemeManager.shared.current.gridLineColor }
 
     // MARK: - Text
-    static let textPrimary = Color("TextPrimary")
-    static let textSecondary = Color("TextSecondary")
-    static let textTertiary = Color("TextTertiary")
+    static var textPrimary: Color { ThemeManager.shared.current.textPrimaryColor }
+    static var textSecondary: Color { ThemeManager.shared.current.textSecondaryColor }
+    static var textTertiary: Color { ThemeManager.shared.current.textTertiaryColor }
 
     // MARK: - Borders
-    static let borderSubtle = Color("BorderSubtle")
+    static var borderSubtle: Color { ThemeManager.shared.current.borderSubtleColor }
 
     // MARK: - Accent
-    static let accent = Color("Accent")
-    static let accentMuted = Color("AccentMuted")
+    static var accent: Color { ThemeManager.shared.current.accentColor }
+    static var accentMuted: Color { ThemeManager.shared.current.accentMutedColor }
 
     // MARK: - Status
-    static let statusOverdue = Color("StatusOverdue")
-    static let statusDueSoon = Color("StatusDueSoon")
-    static let statusGood = Color("StatusGood")
-    static let statusNeutral = Color("StatusNeutral")
+    static var statusOverdue: Color { ThemeManager.shared.current.statusOverdueColor }
+    static var statusDueSoon: Color { ThemeManager.shared.current.statusDueSoonColor }
+    static var statusGood: Color { ThemeManager.shared.current.statusGoodColor }
+    static var statusNeutral: Color { ThemeManager.shared.current.statusNeutralColor }
 
     // MARK: - Brutalist Layout Constants
     static let screenHorizontalPadding: CGFloat = 16
