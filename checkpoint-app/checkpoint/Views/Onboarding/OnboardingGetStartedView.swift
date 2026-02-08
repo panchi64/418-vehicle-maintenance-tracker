@@ -192,7 +192,7 @@ struct OnboardingGetStartedView: View {
                                         )
                                     }
                                     .padding(.top, Spacing.sm)
-                                    .transition(.opacity.combined(with: .move(edge: .top)))
+                                    .transition(.opacity)
                                 }
                             }
 
