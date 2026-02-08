@@ -87,12 +87,6 @@ struct ServiceLogDetailView: View {
             InstrumentSectionHeader(title: "Details")
 
             VStack(spacing: 0) {
-                detailRow(title: "Date", value: Formatters.mediumDate.string(from: log.performedDate))
-                Divider()
-
-                detailRow(title: "Mileage", value: Formatters.mileage(log.mileageAtService))
-                Divider()
-
                 if let cost = log.formattedCost {
                     detailRow(title: "Cost", value: cost)
                     Divider()
@@ -100,7 +94,10 @@ struct ServiceLogDetailView: View {
 
                 if let category = log.costCategory {
                     detailRow(title: "Category", value: category.displayName)
+                    Divider()
                 }
+
+                detailRow(title: "Mileage", value: Formatters.mileage(log.mileageAtService))
             }
             .background(Theme.surfaceInstrument)
             .clipShape(Rectangle())

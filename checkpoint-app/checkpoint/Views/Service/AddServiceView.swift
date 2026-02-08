@@ -136,21 +136,12 @@ struct AddServiceView: View {
     @ViewBuilder
     private var logModeFields: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "Service Details")
+            InstrumentSectionHeader(title: "Date Performed")
 
-            VStack(spacing: Spacing.md) {
-                InstrumentDatePicker(
-                    label: "Date Performed",
-                    date: $performedDate
-                )
-
-                InstrumentNumberField(
-                    label: "Mileage",
-                    value: $mileageAtService,
-                    placeholder: "Required",
-                    suffix: "mi"
-                )
-            }
+            InstrumentDatePicker(
+                label: "Date Performed",
+                date: $performedDate
+            )
         }
 
         VStack(alignment: .leading, spacing: Spacing.sm) {
@@ -188,6 +179,17 @@ struct AddServiceView: View {
                     }
                 }
             }
+        }
+
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            InstrumentSectionHeader(title: "Mileage")
+
+            InstrumentNumberField(
+                label: "Mileage",
+                value: $mileageAtService,
+                placeholder: "Required",
+                suffix: "mi"
+            )
         }
 
         VStack(alignment: .leading, spacing: Spacing.sm) {
