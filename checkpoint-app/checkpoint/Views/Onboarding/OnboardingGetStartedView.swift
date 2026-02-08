@@ -16,6 +16,7 @@ struct OnboardingGetStartedView: View {
     @Binding var marbeteMonth: Int?
     @Binding var marbeteYear: Int?
 
+    @State private var showMarbeteSection = false
     @State private var vin = ""
     @State private var isDecodingVIN = false
     @State private var vinLookupError: String?
@@ -149,29 +150,50 @@ struct OnboardingGetStartedView: View {
                                 )
                             }
 
-                            // Marbete section
+                            // Marbete section (collapsible — region-specific)
                             Rectangle()
                                 .fill(Theme.gridLine)
                                 .frame(height: Theme.borderWidth)
 
-                            VStack(alignment: .leading, spacing: Spacing.sm) {
-                                HStack(spacing: Spacing.sm) {
-                                    Image(systemName: "calendar.badge.clock")
-                                        .font(.system(size: 16, weight: .medium))
-                                        .foregroundStyle(Theme.accent)
+                            VStack(alignment: .leading, spacing: 0) {
+                                Button {
+                                    withAnimation(.easeOut(duration: Theme.animationMedium)) {
+                                        showMarbeteSection.toggle()
+                                    }
+                                } label: {
+                                    HStack(spacing: Spacing.sm) {
+                                        Image(systemName: "calendar.badge.clock")
+                                            .font(.system(size: 16, weight: .medium))
+                                            .foregroundStyle(Theme.accent)
 
-                                    Text("REGISTRATION TAG")
-                                        .brutalistLabelStyle(color: Theme.accent)
+                                        Text("MARBETE / REGISTRATION TAG")
+                                            .brutalistLabelStyle(color: Theme.accent)
+
+                                        Spacer()
+
+                                        Image(systemName: "chevron.down")
+                                            .font(.system(size: 12, weight: .semibold))
+                                            .foregroundStyle(Theme.accent)
+                                            .rotationEffect(.degrees(showMarbeteSection ? 180 : 0))
+                                    }
+                                    .contentShape(Rectangle())
                                 }
+                                .buttonStyle(.plain)
 
-                                Text("Track your yearly vehicle registration expiration and get reminders before it lapses.")
-                                    .font(.brutalistSecondary)
-                                    .foregroundStyle(Theme.textSecondary)
+                                if showMarbeteSection {
+                                    VStack(alignment: .leading, spacing: Spacing.sm) {
+                                        Text("Track your yearly vehicle registration expiration and get reminders before it lapses.")
+                                            .font(.brutalistSecondary)
+                                            .foregroundStyle(Theme.textSecondary)
 
-                                MarbetePicker(
-                                    month: $marbeteMonth,
-                                    year: $marbeteYear
-                                )
+                                        MarbetePicker(
+                                            month: $marbeteMonth,
+                                            year: $marbeteYear
+                                        )
+                                    }
+                                    .padding(.top, Spacing.sm)
+                                    .transition(.opacity.combined(with: .move(edge: .top)))
+                                }
                             }
 
                             // Primary action button
