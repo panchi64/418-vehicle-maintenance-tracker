@@ -55,25 +55,3 @@ protocol UpcomingItem: Identifiable {
 }
 ```
 This enables unified sorting and display in "Next Up" views.
-
-## Vehicle Computed Properties
-
-Key computed properties on `Vehicle`:
-- `effectiveMileage` - Current or estimated mileage
-- `dailyMilesPace` - Calculated driving pace (miles/day)
-- `paceConfidence` - `.high`, `.medium`, or `.low`
-- `allUpcomingItems` - Services + marbete sorted by urgency
-- `nextUpItem` - Most urgent item
-
-## CostCategory
-Enum for categorizing service costs:
-- `.maintenance` - Regular upkeep
-- `.repair` - Fix/replacement
-- `.upgrade` - Improvements
-- `.inspection` - Checks/certifications
-- `.other` - Miscellaneous
-
-## MileageSource
-Enum for tracking how mileage was recorded:
-- `.manual` - User entered directly
-- `.serviceCompletion` - Captured when logging service

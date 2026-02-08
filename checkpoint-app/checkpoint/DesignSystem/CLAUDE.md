@@ -2,28 +2,6 @@
 
 This directory contains the design system tokens and modifiers that define Checkpoint's visual language.
 
-## Files
-
-| File | Purpose |
-|------|---------|
-| `Theme.swift` | Colors, button styles, card modifiers |
-| `Typography.swift` | Font definitions and text styles |
-| `Spacing.swift` | Spacing constants (4pt base unit) |
-| `BrutalistChartStyle.swift` | Swift Charts styling (`.brutalistChartStyle()` modifier, `ChartConstants`, `ChartFormatting`) |
-
-## Design Philosophy
-
-**Brutalist Aesthetic:**
-- Zero corner radius (sharp edges)
-- High contrast
-- Bold typography
-- Functional over decorative
-
-**Dark Mode First:**
-- Primary background: near-black
-- Amber accent (#E89B3C)
-- Status colors for urgency
-
 ## Color Tokens
 
 ### Backgrounds
@@ -69,12 +47,6 @@ All fonts use SF Pro (system font):
 | `caption` | 13pt | Medium | Labels, metadata |
 | `captionSmall` | 11pt | Regular | Fine print |
 
-Usage:
-```swift
-Text("Oil Change")
-    .font(Typography.title)
-```
-
 ## Spacing System
 
 Base unit: 4pt
@@ -90,36 +62,12 @@ Base unit: 4pt
 | `xl` | 32pt | Major sections |
 | `xxl` | 48pt | Hero spacing |
 
-Usage:
-```swift
-VStack(spacing: Spacing.md) {
-    // ...
-}
-.padding(.horizontal, Spacing.screenHorizontal)
-```
-
 ## View Modifiers
 
-### Card Style
-```swift
-.cardStyle()  // Elevated card with gradient overlay
-```
-Applies:
-- Background color
-- Zero corner radius
-- Subtle gradient overlay
-- Shadow
-
-### Screen Padding
-```swift
-.screenPadding()  // Standard horizontal padding
-```
-
-### Button Styles
-```swift
-.buttonStyle(.primary)    // Amber filled button
-.buttonStyle(.secondary)  // Outlined button
-```
+- `.cardStyle()` — Elevated card with gradient overlay, zero corner radius, shadow
+- `.screenPadding()` — Standard horizontal padding
+- `.buttonStyle(.primary)` — Amber filled button
+- `.buttonStyle(.secondary)` — Outlined button
 
 ## Usage Guidelines
 
@@ -128,23 +76,3 @@ Applies:
 3. **Dark backgrounds** - Cards float on dark backgrounds
 4. **Status colors for meaning** - Use status colors only for urgency indicators
 5. **Typography hierarchy** - Use appropriate text styles for information hierarchy
-
-## Example Component
-
-```swift
-struct ExampleCard: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("Title")
-                .font(Typography.title)
-                .foregroundStyle(Theme.textPrimary)
-
-            Text("Description")
-                .font(Typography.bodySecondary)
-                .foregroundStyle(Theme.textSecondary)
-        }
-        .padding(Spacing.md)
-        .cardStyle()
-    }
-}
-```

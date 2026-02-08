@@ -55,87 +55,6 @@ xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPh
 - Push navigation for detail views
 - Vehicle selector persists at top of all tabs
 
-### Onboarding (in `Views/Onboarding/`)
-- **State:** `OnboardingState` (`@Observable @MainActor`) with `OnboardingPhase` enum (`.intro` → `.tour(step:)` → `.tourTransition(toStep:)` → `.getStarted` → `.completed`)
-- **Phase 1 — Intro:** `OnboardingIntroView` as `.fullScreenCover`, 2 paged screens (Welcome + Features with distance unit picker)
-- **Phase 2 — Tour:** `OnboardingTourOverlay` overlay on real UI with dummy data, 4 steps switching tabs; `OnboardingTourTransitionCard` shows between steps when tab changes
-- **Phase 3 — Get Started:** `OnboardingGetStartedView` as `.fullScreenCover` with VIN input, manual entry, and skip options
-- **Persistence:** `@AppStorage("hasCompletedOnboarding")` prevents re-showing
-- **Sample data:** Seeded when entering tour phase, tracked by ID in `OnboardingState.sampleVehicleIDs`, cleared on skip/complete
-- **Notifications:** Permission prompt delayed until after onboarding completes
-
-### Data Models (in `Models/`)
-- **Vehicle:** name, make, model, year, currentMileage, VIN; has many services/serviceLogs/mileageSnapshots
-- **Service:** due tracking (date/mileage), intervals, status computation (overdue/dueSoon/good/neutral)
-- **ServiceLog:** completed service records with cost, notes, attachments
-- **MileageSnapshot:** driving pattern analysis for mileage estimation
-
-### Key Services (in `Services/`)
-- **Notifications/:** modular architecture with focused schedulers (Service, Mileage, Marbete, YearlyRoundup); core `NotificationService` uses `@Observable @MainActor`
-- **OCR/OdometerOCRService, VINOCRService:** Vision framework OCR for camera capture
-- **Import/CSVImportService:** CSV import from Fuelly, Drivvo, Simply Auto with format auto-detection
-- **Utilities/NHTSAService:** VIN decoding and recall alerts via NHTSA API
-- **Widget/WidgetDataService:** App Groups data sharing with widget (`@MainActor`), processes pending widget completions on foreground
-- **WatchConnectivity/WatchSessionService:** iPhone-side WCSession delegate for Apple Watch communication
-- **Sync/CloudSyncStatusService, SyncStatusService:** iCloud sync status monitoring
-
-### Widget Extension
-- Uses App Groups: `group.com.418-studio.checkpoint.shared`
-- Small widget: next upcoming service
-- Medium widget: next 2-3 services with interactive "Done" button (iOS 17+ App Intents)
-- `MarkServiceDoneIntent` queues completion in shared UserDefaults; main app processes on foreground
-- Data synced via UserDefaults in shared container
-
-### Apple Watch App (CheckpointWatch)
-- **Min watchOS:** 10.0
-- **Data sync:** WatchConnectivity (`updateApplicationContext` iPhone→Watch, `sendMessage`/`transferUserInfo` Watch→iPhone)
-- **Watch App Group:** `group.com.418-studio.checkpoint.watch` (separate from iPhone App Group)
-- **No SwiftData on Watch** — lightweight JSON in UserDefaults, iPhone is source of truth
-- **Screens:** Services list, mileage update (digital crown), mark service done
-- **Complications:** Circular, rectangular, inline, corner (all `.accessory*` families)
-- **iPhone integration point:** `WidgetDataService.updateWidgetData()` → `WatchSessionService.sendVehicleData()`
-
-## Project Structure
-
-```
-checkpoint-app/
-├── checkpoint/
-│   ├── Models/           # SwiftData entities (see Models/CLAUDE.md)
-│   ├── Views/
-│   │   ├── Tabs/         # Home, Services, Costs tabs
-│   │   ├── Vehicle/      # Vehicle CRUD views
-│   │   ├── Service/      # Service CRUD views
-│   │   ├── Settings/     # Settings views
-│   │   ├── Onboarding/   # Guided intro, tour overlay, get started card
-│   │   └── Components/   # Reusable UI components (see Views/CLAUDE.md)
-│   │       ├── Attachments/  # Photo/document handling
-│   │       ├── Camera/       # Vision framework OCR views
-│   │       ├── Cards/        # Dashboard cards
-│   │       ├── Inputs/       # Form input controls
-│   │       ├── Lists/        # List/timeline components
-│   │       ├── Navigation/   # Navigation & structural
-│   │       └── Sync/         # Data sync UI
-│   ├── DesignSystem/     # Theme, Typography, Spacing tokens (see DesignSystem/CLAUDE.md)
-│   ├── Services/         # Business logic services (see Services/CLAUDE.md)
-│   │   ├── Import/           # CSV import (Fuelly, Drivvo, Simply Auto)
-│   │   ├── Notifications/    # Local notification management
-│   │   ├── OCR/              # Vision framework services
-│   │   ├── Sync/             # iCloud & data sync
-│   │   ├── Utilities/        # Single-purpose services
-│   │   ├── WatchConnectivity/ # iPhone-side WCSession delegate
-│   │   └── Widget/           # Widget data sharing
-│   ├── State/            # AppState (@Observable)
-│   ├── Utilities/        # Formatters, Settings, helpers
-│   └── Resources/        # ServicePresets.json
-├── CheckpointWatch/      # watchOS app (services, mileage update, mark done)
-├── CheckpointWatchWidget/ # watchOS widget extension (complications)
-├── CheckpointWatchTests/ # watchOS unit tests
-├── CheckpointWidget/     # WidgetKit extension (see CheckpointWidget/CLAUDE.md)
-│   └── Shared/           # Shared types (colors, settings, pending completions)
-├── checkpointTests/      # Unit tests (see checkpointTests/CLAUDE.md)
-└── checkpointUITests/    # UI tests
-```
-
 ## Design System
 
 Use tokens from `DesignSystem/`:
@@ -154,6 +73,25 @@ modelContainer = try! ModelContainer(for: Vehicle.self, configurations: config)
 
 Tests should verify actual functionality - avoid hacky workarounds that circumvent proper testing.
 
+## Common Tasks
+
+### Adding a new Service Type Preset
+1. Add to `Resources/ServicePresets.json`
+2. Include `name`, `category`, `defaultIntervalMonths`, `defaultIntervalMiles`
+
+### Adding a new Status Color
+1. Add color to `Assets.xcassets/Colors/`
+2. Add static property in `Theme.swift`
+3. Update `ServiceStatus.color` in `Service.swift`
+
+## Important Notes
+
+- All data persisted via SwiftData with automatic iCloud sync (when configured)
+- Widget requires App Group capability on both main app and widget targets
+- Notifications require authorization - check `isAuthorized` before scheduling
+- Service due status considers both date AND mileage thresholds
+- App is portrait-only via `UISupportedInterfaceOrientations` + `UIRequiresFullScreen` in Info.plist
+
 ## Feature Tracking
 
 Feature implementation status is tracked in `docs/FEATURES.md`. When implementing new features:
@@ -163,31 +101,4 @@ Feature implementation status is tracked in `docs/FEATURES.md`. When implementin
 
 ## Additional Documentation
 
-### Product & Strategy (`docs/`)
-- `docs/FEATURES.md` - Feature catalog, roadmap, and implementation status tracking (single source of truth)
-- `docs/GAP_ANALYSIS.md` - Market gap analysis: what to build next based on competitive research (Feb 2026)
-- `docs/MARKET_RESEARCH.md` - Competitive analysis of the vehicle maintenance app market and positioning strategy
-- `docs/MONETIZATION.md` - Pricing and feature tier strategy (free core, optional paid sync, no ads)
-- `docs/DATA_RELIABILITY.md` - Data strategy, local-first principles, backup/sync architecture
-
-### Design & UX (`docs/`)
-- `docs/AESTHETIC.md` - 418 brand design language and visual philosophy (brutalist-tech-modernist)
-- `docs/NOTIFICATION_TONE.md` - Voice and messaging guidelines for notifications (mechanical, dry-humored, vehicle "speaks" to user)
-- `docs/UNITS_AND_INTERVALS.md` - UX spec for maintenance tracking units (miles/km/months/days), dual-interval display logic, and user-configurable priority setting
-
-### Analytics (`docs/`)
-- `docs/POSTHOG_DASHBOARDS.md` - PostHog analytics dashboard setup guide and event taxonomy
-
-### Troubleshooting (`docs/troubleshooting/`)
-- `docs/troubleshooting/xctest-mainactor-observable-crashes.md` - Testing with @Observable @MainActor classes
-- `docs/troubleshooting/xctest-swiftdata-schema-crashes.md` - Schema mismatch in simulator
-- `docs/troubleshooting/xctest-parallel-simulator-failures.md` - Parallel test execution issues
-
-### Codebase (`checkpoint-app/`)
-- `checkpoint-app/CLAUDE.md` - Detailed iOS development patterns
-- `checkpoint-app/checkpoint/Models/CLAUDE.md` - Entity relationships and data patterns
-- `checkpoint-app/checkpoint/Services/CLAUDE.md` - Service layer architecture
-- `checkpoint-app/checkpoint/Views/CLAUDE.md` - View components and UI patterns
-- `checkpoint-app/checkpoint/DesignSystem/CLAUDE.md` - Design tokens and modifiers
-- `checkpoint-app/CheckpointWidget/CLAUDE.md` - Widget extension guide
-- `checkpoint-app/checkpointTests/CLAUDE.md` - Testing patterns and setup
+See `docs/` for product strategy, design specs, analytics, and troubleshooting guides. See `docs/ARCHITECTURE.md` for detailed architecture reference (project structure tree, component inventories, service descriptions, data models, widget internals).

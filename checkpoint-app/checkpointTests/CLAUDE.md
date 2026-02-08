@@ -8,27 +8,13 @@ This directory contains unit tests for the Checkpoint app.
 checkpointTests/
 ├── checkpointTests.swift    # Base test class (template)
 ├── Models/                  # Model tests
-│   ├── CostCategoryTests.swift
-│   ├── MarbeteTests.swift
-│   ├── MileageSnapshotTests.swift
-│   ├── ServiceAttachmentTests.swift
-│   ├── ServiceLogTests.swift
-│   ├── ServicePresetTests.swift
-│   ├── ServiceTests.swift
-│   ├── SeasonalReminderTests.swift
-│   └── VehicleTests.swift
 ├── Views/                   # View tests
 ├── Services/                # Service tests
-│   └── CSVImportServiceTests.swift  # CSV import format detection & parsing
 ├── State/                   # AppState tests
 ├── Utilities/               # Utility tests
 ├── Insights/                # Contextual insights tests
-│   └── ContextualInsightsTests.swift
 ├── Vehicle/                 # Vehicle feature tests
-│   └── VINRegistrationTests.swift
 └── Widget/                  # Widget tests
-    ├── AccessoryWidgetTests.swift
-    └── PendingWidgetCompletionTests.swift
 ```
 
 ## Test Setup Pattern
@@ -69,95 +55,6 @@ Use descriptive names following the pattern:
 test_[method/property]_[scenario]_[expectedResult]
 ```
 
-Examples:
-```swift
-func test_status_pastDueDate_returnsOverdue()
-func test_urgencyScore_noDueDateOrMileage_returnsMaxInt()
-func test_dailyMilesPace_lessThan7Days_returnsNil()
-```
-
-## Model Test Coverage
-
-### VehicleTests
-- Vehicle creation and properties
-- Relationship management (services, logs, snapshots)
-- `displayName` computation
-- `effectiveMileage` calculation
-- `dailyMilesPace` and confidence
-- Marbete expiration logic
-
-### ServiceTests
-- Service status computation
-- Urgency scoring
-- Due date/mileage thresholds
-- Status edge cases
-
-### MileageSnapshotTests
-- EWMA pace calculation
-- Recency weighting
-- Minimum data requirements (7 days)
-- Confidence levels
-
-### ServiceLogTests
-- Log creation
-- Relationship to Service and Vehicle
-- Attachment handling
-
-### ServiceAttachmentTests
-- Attachment creation
-- Thumbnail generation
-- MIME type handling
-
-### MarbeteTests
-- Expiration date calculation
-- Status computation
-- Days remaining calculation
-
-### CSVImportServiceTests
-- CSV format auto-detection (Fuelly, Drivvo, Simply Auto)
-- Row parsing and ServiceLog creation
-- Handling of malformed/incomplete rows
-- Import count accuracy
-
-### ContextualInsightsTests
-- Time since last service formatting
-- Miles since last service calculation
-- Average cost computation
-- Times serviced count
-
-### PendingWidgetCompletionTests
-- Encoding/decoding of pending completions
-- Queue and dequeue from UserDefaults
-- Processing into ServiceLog entries
-
-### VINRegistrationTests
-- Character count display logic
-- VIN validation state transitions
-- Auto-fill feedback after successful lookup
-
-## Async Test Pattern
-
-For async operations:
-```swift
-func test_fetchRecalls_validVIN_returnsRecalls() async throws {
-    let recalls = try await NHTSAService.shared.fetchRecalls(vin: "1HGCM82633A123456")
-    XCTAssertFalse(recalls.isEmpty)
-}
-```
-
-## Mocking Services
-
-For service tests that need mocking:
-```swift
-class MockNotificationService: NotificationServiceProtocol {
-    var scheduledNotifications: [String] = []
-
-    func schedule(_ service: Service) async throws {
-        scheduledNotifications.append(service.id.uuidString)
-    }
-}
-```
-
 ## Running Tests
 
 ```bash
@@ -171,56 +68,4 @@ xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPh
 # Specific test class
 xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPhone 17' \
   -only-testing:checkpointTests/VehicleTests
-
-# Specific test method
-xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPhone 17' \
-  -only-testing:checkpointTests/VehicleTests/test_status_pastDueDate_returnsOverdue
-```
-
-## Coverage Targets
-
-| Category | Target |
-|----------|--------|
-| Models | 90%+ |
-| Services | 80%+ |
-| Utilities | 80%+ |
-| Views | Key interactions |
-
-## Best Practices
-
-1. **Isolate tests** - Each test should be independent
-2. **Use in-memory storage** - Avoid disk I/O in tests
-3. **Test edge cases** - nil values, empty arrays, boundary conditions
-4. **Descriptive assertions** - Include messages in XCTAssert calls
-5. **Clean up** - Reset state in tearDown
-
-## Common Test Helpers
-
-```swift
-extension XCTestCase {
-    func createTestVehicle(
-        name: String = "Test Car",
-        mileage: Int = 50000
-    ) -> Vehicle {
-        Vehicle(
-            name: name,
-            make: "Test",
-            model: "Model",
-            year: 2020,
-            currentMileage: mileage
-        )
-    }
-
-    func createTestService(
-        name: String = "Oil Change",
-        dueDate: Date? = nil,
-        dueMileage: Int? = nil
-    ) -> Service {
-        Service(
-            name: name,
-            dueDate: dueDate,
-            dueMileage: dueMileage
-        )
-    }
-}
 ```
