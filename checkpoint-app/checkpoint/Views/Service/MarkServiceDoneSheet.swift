@@ -11,6 +11,7 @@ import SwiftData
 struct MarkServiceDoneSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(AppState.self) private var appState
     @Query private var services: [Service]
 
     let service: Service
@@ -187,6 +188,7 @@ struct MarkServiceDoneSheet: View {
         updateWidgetData()
         ToastService.shared.show(L10n.toastServiceLogged, icon: "checkmark", style: .success)
         onSaved?()
+        appState.recordCompletedAction()
         dismiss()
     }
 
@@ -217,6 +219,7 @@ struct MarkServiceDoneSheet: View {
     )
 
     MarkServiceDoneSheet(service: service, vehicle: vehicle)
+        .environment(AppState())
         .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self], inMemory: true)
         .preferredColorScheme(.dark)
 }

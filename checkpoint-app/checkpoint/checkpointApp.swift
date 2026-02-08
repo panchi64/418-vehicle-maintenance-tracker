@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import StoreKit
 import UserNotifications
 import WatchConnectivity
 import os
@@ -88,6 +89,9 @@ struct checkpointApp: App {
         WidgetSettingsManager.registerDefaults()
         SyncSettings.registerDefaults()
         AnalyticsSettings.registerDefaults()
+        PurchaseSettings.registerDefaults()
+        ThemeManager.registerDefaults()
+        PurchaseSettings.shared.hasShownTipModalThisSession = false
 
         // Set up notification delegate
         UNUserNotificationCenter.current().delegate = NotificationService.shared
@@ -106,7 +110,13 @@ struct checkpointApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .preferredColorScheme(.dark)
+                .preferredColorScheme({
+                    switch ThemeManager.shared.current.colorScheme {
+                    case .dark: return .dark
+                    case .light: return .light
+                    case .system: return nil
+                    }
+                }())
                 .task {
                     // Only request notification permission after onboarding is completed
                     // This avoids overwhelming new users with system prompts during intro
@@ -124,6 +134,9 @@ struct checkpointApp: App {
 
                     // Check iCloud account status
                     await SyncStatusService.shared.checkAccountStatus()
+
+                    // Load StoreKit products
+                    await StoreManager.shared.loadProducts()
                 }
         }
         .modelContainer(sharedModelContainer)

@@ -247,7 +247,7 @@ struct ContentView: View {
         .sheet(isPresented: $appState.showVehiclePicker) {
             VehiclePickerSheet(
                 selectedVehicle: $appState.selectedVehicle,
-                onAddVehicle: { appState.showAddVehicle = true }
+                onAddVehicle: { appState.requestAddVehicle(vehicleCount: vehicles.count) }
             )
         }
         .sheet(isPresented: $appState.showAddVehicle, onDismiss: {
@@ -269,6 +269,7 @@ struct ContentView: View {
                 NavigationStack {
                     ServiceDetailView(service: service, vehicle: vehicle)
                 }
+                .environment(appState)
             }
         }
         .sheet(item: $appState.selectedServiceLog) { log in
@@ -301,9 +302,20 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showSettings) {
             SettingsView(onboardingState: onboardingState)
+                .environment(appState)
                 .onAppear {
                     AnalyticsService.shared.capture(.settingsOpened)
                 }
+        }
+        .sheet(isPresented: $appState.showProPaywall) {
+            ProPaywallSheet()
+        }
+        .sheet(isPresented: $appState.showTipModal) {
+            TipModalView()
+                .environment(appState)
+        }
+        .sheet(item: $appState.unlockedTheme) { theme in
+            ThemeRevealView(theme: theme)
         }
         // MARK: - Onboarding
         .fullScreenCover(isPresented: Binding(
@@ -569,6 +581,7 @@ struct ContentView: View {
         updateWidgetData()
         // Reschedule mileage reminder for 14 days from now
         NotificationService.shared.scheduleMileageReminder(for: vehicle, lastUpdateDate: .now)
+        appState.recordCompletedAction()
     }
 
     // MARK: - Periodic Notifications

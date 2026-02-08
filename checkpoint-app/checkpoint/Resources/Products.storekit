@@ -1,0 +1,83 @@
+{
+  "identifier" : "Products",
+  "type" : "storekit",
+  "version" : 2,
+  "products" : [
+    {
+      "displayPrice" : "9.99",
+      "familyShareable" : false,
+      "id" : "pro.unlock",
+      "internalID" : "pro_unlock_001",
+      "localizations" : [
+        {
+          "description" : "Unlock unlimited vehicles, theme collection, and future Pro features.",
+          "displayName" : "Checkpoint Pro",
+          "locale" : "en_US"
+        }
+      ],
+      "productCategory" : "NonConsumable",
+      "referenceName" : "Pro Unlock",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "1.99",
+      "familyShareable" : false,
+      "id" : "tip.small",
+      "internalID" : "tip_small_001",
+      "localizations" : [
+        {
+          "description" : "A small tip to support Checkpoint development.",
+          "displayName" : "Small Tip",
+          "locale" : "en_US"
+        }
+      ],
+      "productCategory" : "NonConsumable",
+      "referenceName" : "Small Tip",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "4.99",
+      "familyShareable" : false,
+      "id" : "tip.medium",
+      "internalID" : "tip_medium_001",
+      "localizations" : [
+        {
+          "description" : "A medium tip to support Checkpoint development.",
+          "displayName" : "Medium Tip",
+          "locale" : "en_US"
+        }
+      ],
+      "productCategory" : "NonConsumable",
+      "referenceName" : "Medium Tip",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "9.99",
+      "familyShareable" : false,
+      "id" : "tip.large",
+      "internalID" : "tip_large_001",
+      "localizations" : [
+        {
+          "description" : "A generous tip to support Checkpoint development.",
+          "displayName" : "Large Tip",
+          "locale" : "en_US"
+        }
+      ],
+      "productCategory" : "NonConsumable",
+      "referenceName" : "Large Tip",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      }
+    ]
+  }
+}

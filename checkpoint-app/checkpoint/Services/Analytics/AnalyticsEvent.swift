@@ -121,6 +121,19 @@ enum AnalyticsEvent {
     case notificationPermissionGranted
     case notificationPermissionDenied
 
+    // MARK: - Monetization
+
+    case paywallShown(trigger: String)
+    case purchaseAttempted(product: String)
+    case purchaseSucceeded(product: String)
+    case purchaseFailed(product: String, error: String)
+    case purchaseRestored(product: String)
+    case tipModalShown
+    case tipModalDismissed
+    case themeUnlocked(themeID: String, tier: String)
+    case themeActivated(themeID: String)
+    case vehicleLimitReached(vehicleCount: Int)
+
     // MARK: - Onboarding
 
     case onboardingStarted
@@ -173,6 +186,16 @@ enum AnalyticsEvent {
         case .serviceClusterMarkAllDone: return "service_cluster_mark_all_done"
         case .notificationPermissionGranted: return "notification_permission_granted"
         case .notificationPermissionDenied: return "notification_permission_denied"
+        case .paywallShown: return "paywall_shown"
+        case .purchaseAttempted: return "purchase_attempted"
+        case .purchaseSucceeded: return "purchase_succeeded"
+        case .purchaseFailed: return "purchase_failed"
+        case .purchaseRestored: return "purchase_restored"
+        case .tipModalShown: return "tip_modal_shown"
+        case .tipModalDismissed: return "tip_modal_dismissed"
+        case .themeUnlocked: return "theme_unlocked"
+        case .themeActivated: return "theme_activated"
+        case .vehicleLimitReached: return "vehicle_limit_reached"
         case .onboardingStarted: return "onboarding_started"
         case .onboardingIntroSkipped: return "onboarding_intro_skipped"
         case .onboardingTourStarted: return "onboarding_tour_started"
@@ -235,6 +258,22 @@ enum AnalyticsEvent {
             return ["recall_count": recallCount]
         case .onboardingTourSkipped(let atStep):
             return ["at_step": atStep]
+        case .paywallShown(let trigger):
+            return ["trigger": trigger]
+        case .purchaseAttempted(let product):
+            return ["product": product]
+        case .purchaseSucceeded(let product):
+            return ["product": product]
+        case .purchaseFailed(let product, let error):
+            return ["product": product, "error": error]
+        case .purchaseRestored(let product):
+            return ["product": product]
+        case .themeUnlocked(let themeID, let tier):
+            return ["theme_id": themeID, "tier": tier]
+        case .themeActivated(let themeID):
+            return ["theme_id": themeID]
+        case .vehicleLimitReached(let vehicleCount):
+            return ["vehicle_count": vehicleCount]
         default:
             return [:]
         }

@@ -10,6 +10,7 @@ import SwiftData
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppState.self) private var appState
     @Query private var vehicles: [Vehicle]
     var onboardingState: OnboardingState?
 
@@ -35,6 +36,9 @@ struct SettingsView: View {
 
                         // DATA & SYNC — rarely changed after setup
                         dataSection
+
+                        // SUPPORT
+                        supportSection
 
                         SyncSettingsSection()
 
@@ -73,6 +77,21 @@ struct SettingsView: View {
                 .tracking(2)
 
             VStack(spacing: 0) {
+                // Theme
+                NavigationLink {
+                    ThemePickerView()
+                } label: {
+                    settingRow(
+                        title: "Theme",
+                        value: ThemeManager.shared.current.displayName
+                    )
+                }
+                .buttonStyle(.plain)
+
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: Theme.borderWidth)
+
                 // Distance Unit
                 NavigationLink {
                     DistanceUnitPickerView()
@@ -306,6 +325,56 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showCSVImport) {
             CSVImportView()
+        }
+    }
+
+    // MARK: - Support Section
+
+    private var supportSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            Text("SUPPORT")
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(2)
+
+            VStack(spacing: 0) {
+                NavigationLink {
+                    TipJarView()
+                        .environment(appState)
+                } label: {
+                    settingRow(
+                        title: "Support Checkpoint",
+                        value: ""
+                    )
+                }
+                .buttonStyle(.plain)
+
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: Theme.borderWidth)
+
+                Button {
+                    Task { await StoreManager.shared.restorePurchases() }
+                } label: {
+                    HStack {
+                        Text("Restore Purchases")
+                            .font(.brutalistBody)
+                            .foregroundStyle(Theme.textPrimary)
+                        Spacer()
+                        Image(systemName: "arrow.counterclockwise")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+                    .padding(Spacing.md)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+            .background(Theme.surfaceInstrument)
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+            )
         }
     }
 
@@ -595,5 +664,6 @@ struct MileageEstimatesToggle: View {
 
 #Preview {
     SettingsView()
+        .environment(AppState())
         .preferredColorScheme(.dark)
 }
