@@ -161,6 +161,7 @@ Feature implementation status is tracked in `docs/FEATURES.md`. When implementin
 
 ### Product & Strategy (`docs/`)
 - `docs/FEATURES.md` - Feature catalog, roadmap, and implementation status tracking (single source of truth)
+- `docs/GAP_ANALYSIS.md` - Market gap analysis: what to build next based on competitive research (Feb 2026)
 - `docs/MARKET_RESEARCH.md` - Competitive analysis of the vehicle maintenance app market and positioning strategy
 - `docs/MONETIZATION.md` - Pricing and feature tier strategy (free core, optional paid sync, no ads)
 - `docs/DATA_RELIABILITY.md` - Data strategy, local-first principles, backup/sync architecture

@@ -9,7 +9,7 @@
 | Version | Theme | Target | Status |
 |---------|-------|--------|--------|
 | **v1.0** | Core Experience | Q1 2026 | 🚧 In Development |
-| **v1.5** | EV & Cloud | Q2-Q3 2026 | 📋 Planned |
+| **v1.5** | EV, Engagement & Platform | Q2-Q3 2026 | 📋 Planned |
 | **v2.0** | Intelligence & Insights | Q4 2026 | 📋 Planned |
 | **v2.5** | Education & DIY | 2027 | 🔮 Future |
 
@@ -261,6 +261,7 @@ v1.0 features are tracked throughout this document. Future versions are outlined
 | Service history PDF      | High     | ✅   | Complete maintenance history for resale, warranty claims; shareable via iOS share sheet |
 | iCloud Sync              | High     | ✅     | Free native sync across iOS devices via CloudKit         |
 | Maintenance cost reports | Medium   | ✅   | Graphs and breakdowns (proportion bar, monthly trend, spending pace) |
+| CSV import               | Medium   | ⏳     | Import from Fuelly, Drivvo, Simply Auto — reduces switching cost |
 
 #### iCloud Sync (Free Feature)
 
@@ -456,6 +457,7 @@ Surface meaningful context alongside existing data to help users understand tren
 | Siri integration             | Medium   | ✅     | "Hey Siri, what's due on my car?"              |
 | CarPlay Dashboard Widget     | Medium   | ✅     | iOS 16+ compact widget on CarPlay home screen  |
 | Dynamic App Icon             | Medium   | ✅     | Icon changes based on service urgency (configurable in Settings) |
+| Interactive Widgets          | Medium   | ⏳     | iOS 17+ button on medium widget to mark service complete |
 
 **Notification philosophy:**
 
@@ -649,15 +651,22 @@ Surface meaningful context alongside existing data to help users understand tren
 
 ## Competitive Gaps to Exploit
 
-| Gap                       | Our Solution                                       |
-| ------------------------- | -------------------------------------------------- |
-| Manual data entry fatigue | OCR receipts, VIN decode, smart mileage estimation |
-| Outdated UI               | Native iOS 26 Liquid Glass                         |
-| Subscription burnout      | Free full-featured app, no ads, pay only for extras |
-| No smart scheduling       | Factory intervals pre-loaded                       |
-| Abandoned apps            | Commitment to long-term support                    |
-| No "what's next" view     | Dashboard prioritizes urgency                      |
-| Limited Apple integration | Widgets, CarPlay, Apple Watch, Siri                |
+> Updated February 2026 based on [market gap analysis](./GAP_ANALYSIS.md).
+
+| Gap in Market | Checkpoint's Answer | Who We Beat |
+|---|---|---|
+| Manual data entry fatigue | OCR receipts, VIN decode, smart mileage estimation, fuel-fed odometer updates | Simply Auto (10+ fields per fuel entry), all manual-only apps |
+| Outdated UI | Native iOS 26 Liquid Glass, brutalist design language | aCar ("UI from the early 2000s"), Fuelly (stale development) |
+| Subscription burnout | Free full-featured app, no ads, pay only for server features | FIXD ($99/yr), AUTOsist ($5/vehicle/mo), Drivvo (400% price hikes) |
+| No "what's next" view | Dashboard prioritizes urgency, Live Activities surface deadlines | Every app that requires opening to check status |
+| Limited Apple integration | Widgets + CarPlay + Watch + Siri + Live Activities + Interactive Widgets | Nobody has all six |
+| Data loss anxiety | Local-first, iCloud sync, automatic backups, free export | Simply Auto (data loss reports), abandoned apps (Car Minder) |
+| No factory schedules | VIN → auto-populated manufacturer intervals (customizable) | CARFAX (rigid intervals), everyone else (manual only) |
+| No smart scheduling | Service clustering, seasonal reminders, predictive mileage | No competitor bundles these together |
+| DIY mechanics ignored | Custom service types, part tracking, freeform notes | CARFAX (only counts dealer service), most preset-only apps |
+| No engagement between services | Fuel tracking creates weekly touchpoint, mileage prompts | Apps users forget about between oil changes |
+| EV owners underserved | Native EV/hybrid schedules, kWh tracking, battery health | Every ICE-first competitor |
+| App abandonment fear | 5-year support commitment, open export, responsive developer | Car Minder (abandoned), aCar (stale), Fuelly (stagnant) |
 
 ---
 
@@ -780,7 +789,32 @@ If a vehicle isn't in our database yet:
 
 ## Future Versions
 
-### v1.5 — EV & Cloud (Q2-Q3 2026)
+### v1.5 — EV, Engagement & Platform (Q2-Q3 2026)
+
+> Expanded scope based on [market gap analysis](./GAP_ANALYSIS.md). Three themes: EV support, user engagement, and platform depth.
+
+**Factory Maintenance Schedules (moved from v2.0):**
+
+| Feature | Priority | Notes |
+|---------|----------|-------|
+| Top 20-30 vehicle schedules | High | LLM extraction from owner's manuals for highest-volume US vehicles |
+| VIN → auto-populated schedule | High | Scan VIN, get complete maintenance timeline pre-built |
+| Schedule customization | High | Users can adjust any auto-populated interval |
+| Crowdsource contribution flow | Medium | Users submit schedule data + manual photos for review |
+
+**Why moved up:** Market research identifies this as the #1 feature gap across all competitors. CARFAX does it partially with rigid intervals. No competitor offers VIN → customizable factory schedule. This is the single feature most likely to convert spreadsheet holdouts. Starting with top 20-30 vehicles by US sales covers ~40% of users. Pipeline already designed (see Data Strategy section above).
+
+**Fuel & Energy Tracking (new — see [GAP_ANALYSIS.md](./GAP_ANALYSIS.md#2b)):**
+
+| Feature | Priority | Notes |
+|---------|----------|-------|
+| Fuel logging (odometer, gallons, cost) | Medium | Minimal required fields — 3 inputs, optional extras |
+| MPG/L100km calculation & trend | Medium | Simple efficiency tracking, not elaborate analytics |
+| kWh tracking for EVs | Medium | Pairs with EV support below |
+| Odometer feed to mileage estimation | High | Fuel entries improve existing smart mileage system accuracy |
+| Cost integration with Costs tab | High | Fuel costs flow into existing cost tracking & analytics |
+
+**Why add:** Creates weekly engagement (vs monthly maintenance events), improves mileage estimation accuracy, completes total cost of ownership picture. Research shows a passionate minority (8-9M downloads) but the engagement benefit serves all users. Keep lightweight — 3 required fields, no GPS, no station database.
 
 **EV & Hybrid Support:**
 
@@ -794,6 +828,15 @@ If a vehicle isn't in our database yet:
 
 EV maintenance market: $18B (2023) → $84B projected (2033). Existing apps designed for ICE vehicles — EV owners underserved. Different maintenance cadence requires dedicated attention after core app is solid.
 
+**Platform & iOS Depth (new):**
+
+| Feature | Priority | Notes |
+|---------|----------|-------|
+| Live Activities & Dynamic Island | High | Overdue/approaching service alerts on Lock Screen — zero competition in category |
+| Face ID / Touch ID app lock | Low | Biometric lock on app launch, togglable in Settings |
+
+**Why add:** Live Activities are "completely untapped" in the category. Zero competitors use them. Makes Checkpoint feel native to iOS in a way nobody else does. Interactive widgets extend existing infrastructure with minimal effort.
+
 **Cloud & Subscription Features:**
 
 | Feature | Priority | Notes |
@@ -804,16 +847,24 @@ EV maintenance market: $18B (2023) → $84B projected (2033). Existing apps desi
 
 These features require ongoing server infrastructure and justify an annual subscription. See [MONETIZATION.md](./MONETIZATION.md) for pricing strategy.
 
+**Additional v1.5 Considerations:**
+
+| Feature | Priority | Notes |
+|---------|----------|-------|
+| Part number tracking on service logs | Low | Optional "parts" fields: name, number, brand, warranty date |
+
 ### v2.0 — Intelligence & Insights (Q4 2026)
 
 | Feature | Priority | Notes |
 |---------|----------|-------|
-| Factory maintenance schedules | High | VIN decode → manufacturer intervals via LLM extraction from owner's manuals |
+| Expand factory schedules | High | Grow from 20-30 vehicles to 100+ based on user demand data |
 | Crowd-sourced reliability data | Medium | Opt-in anonymized data, common issues by vehicle |
 | Advanced analytics | Medium | Predicted issues (high confidence only), vehicle health diagram |
-| Desktop/web access | Medium | Browser-based access for professionals |
+| Connected car API (Smartcar) | Medium | Auto-read odometer from 40+ automakers — strongest subscription justification |
+| Vehicle transfer / data handoff | Medium | Export vehicle package to buyer — virality mechanism |
+| Desktop/web access | Low | Browser-based access (deprioritized — iCloud sync + PDF export covers 80% of need) |
 
-**Why v2.0:** By this point we'll have real user data on which vehicles to support first. Factory schedules need prioritization data. Crowd-sourced features need a user base to be meaningful.
+**Changes from original plan:** Factory schedules moved to v1.5 (top 20-30 vehicles). Desktop/web access deprioritized (high infrastructure cost, low relative demand). Connected car API and vehicle transfer added based on market research.
 
 ### v2.5 — Education & DIY (2027)
 
@@ -871,6 +922,8 @@ See [DATA_RELIABILITY.md](./DATA_RELIABILITY.md) for the full data reliability c
 - [SmartCar - Auto Repair Features Drivers Want](https://smartcar.com/blog/auto-repair-features)
 - [Apple Developer - Liquid Glass](https://developer.apple.com/documentation/SwiftUI/Applying-Liquid-Glass-to-custom-views)
 - [Liquid Glass SwiftUI Reference (GitHub)](https://github.com/conorluddy/LiquidGlassReference)
+- Market gap analysis (Feb 2026) — see [GAP_ANALYSIS.md](./GAP_ANALYSIS.md)
+- Fuel tracking viability research (Feb 2026) — informed GAP_ANALYSIS.md section 2b
 
 ---
 
