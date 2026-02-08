@@ -105,6 +105,7 @@ Minimal, mechanical interactions:
 - No rounded corners (sharp, 90-degree edges only)
 - No animations except micro-interactions (rotate, opacity fade)
 - Instant state changes preferred over smooth transitions
+- **Collapsible/accordion content must use fade-only transitions (`.transition(.opacity)`), never slide (`.move(edge:)`).** Content appears and disappears in place—no directional motion.
 
 ## Content Philosophy
 

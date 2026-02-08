@@ -25,8 +25,23 @@ struct RecallAlertCard: View {
         return "\(count) Open Recall\(count == 1 ? "" : "s")"
     }
 
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM/dd/yyyy"
+        return formatter
+    }()
+
+    /// Recalls sorted by report date descending (most recent first).
+    private var sortedRecalls: [RecallInfo] {
+        recalls.sorted { a, b in
+            let dateA = Self.dateFormatter.date(from: a.reportDate) ?? .distantPast
+            let dateB = Self.dateFormatter.date(from: b.reportDate) ?? .distantPast
+            return dateA > dateB
+        }
+    }
+
     private var inlineRecalls: [RecallInfo] {
-        Array(recalls.prefix(RecallAlertCard.inlineLimit))
+        Array(sortedRecalls.prefix(RecallAlertCard.inlineLimit))
     }
 
     private var hasOverflow: Bool {
@@ -75,74 +90,77 @@ struct RecallAlertCard: View {
 
             // Expanded recall list (capped at inlineLimit)
             if isExpanded {
-                Rectangle()
-                    .fill(Theme.statusOverdue.opacity(0.3))
-                    .frame(height: 1)
-
                 VStack(spacing: 0) {
-                    ForEach(Array(inlineRecalls.enumerated()), id: \.element.id) { index, recall in
-                        recallRow(recall)
+                    Rectangle()
+                        .fill(Theme.statusOverdue.opacity(0.3))
+                        .frame(height: 1)
 
-                        if index < inlineRecalls.count - 1 {
-                            Rectangle()
-                                .fill(Theme.statusOverdue.opacity(0.15))
-                                .frame(height: 1)
-                                .padding(.leading, Spacing.md)
+                    VStack(spacing: 0) {
+                        ForEach(Array(inlineRecalls.enumerated()), id: \.element.id) { index, recall in
+                            recallRow(recall)
+
+                            if index < inlineRecalls.count - 1 {
+                                Rectangle()
+                                    .fill(Theme.statusOverdue.opacity(0.15))
+                                    .frame(height: 1)
+                                    .padding(.leading, Spacing.md)
+                            }
                         }
                     }
-                }
 
-                // "View all" button when there are more recalls than shown
-                if hasOverflow {
+                    // "View all" button when there are more recalls than shown
+                    if hasOverflow {
+                        Rectangle()
+                            .fill(Theme.statusOverdue.opacity(0.3))
+                            .frame(height: 1)
+
+                        Button {
+                            showAllRecalls = true
+                        } label: {
+                            HStack {
+                                Text("VIEW ALL \(recalls.count) RECALLS")
+                                    .font(.brutalistLabel)
+                                    .foregroundStyle(Theme.statusOverdue)
+                                    .tracking(1.5)
+                                Spacer()
+                                Image(systemName: "arrow.up.right")
+                                    .font(.system(size: 11, weight: .bold))
+                                    .foregroundStyle(Theme.statusOverdue)
+                            }
+                            .padding(Spacing.md)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    // Collapse footer
                     Rectangle()
                         .fill(Theme.statusOverdue.opacity(0.3))
                         .frame(height: 1)
 
                     Button {
-                        showAllRecalls = true
+                        HapticService.shared.tabChanged()
+                        withAnimation(.easeOut(duration: Theme.animationMedium)) {
+                            isExpanded = false
+                        }
                     } label: {
                         HStack {
-                            Text("VIEW ALL \(recalls.count) RECALLS")
+                            Spacer()
+                            Image(systemName: "chevron.up")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundStyle(Theme.statusOverdue.opacity(0.6))
+                            Text("COLLAPSE")
                                 .font(.brutalistLabel)
-                                .foregroundStyle(Theme.statusOverdue)
+                                .foregroundStyle(Theme.statusOverdue.opacity(0.6))
                                 .tracking(1.5)
                             Spacer()
-                            Image(systemName: "arrow.up.right")
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundStyle(Theme.statusOverdue)
                         }
-                        .padding(Spacing.md)
+                        .padding(.vertical, Spacing.sm)
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                 }
-
-                // Collapse footer
-                Rectangle()
-                    .fill(Theme.statusOverdue.opacity(0.3))
-                    .frame(height: 1)
-
-                Button {
-                    HapticService.shared.tabChanged()
-                    withAnimation(.easeOut(duration: Theme.animationMedium)) {
-                        isExpanded = false
-                    }
-                } label: {
-                    HStack {
-                        Spacer()
-                        Image(systemName: "chevron.up")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundStyle(Theme.statusOverdue.opacity(0.6))
-                        Text("COLLAPSE")
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.statusOverdue.opacity(0.6))
-                            .tracking(1.5)
-                        Spacer()
-                    }
-                    .padding(.vertical, Spacing.sm)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
+                .transition(.opacity)
             }
         }
         .background(Theme.statusOverdue.opacity(0.08))
@@ -151,7 +169,7 @@ struct RecallAlertCard: View {
                 .strokeBorder(Theme.statusOverdue.opacity(0.5), lineWidth: Theme.borderWidth)
         )
         .sheet(isPresented: $showAllRecalls) {
-            RecallListSheet(recalls: recalls)
+            RecallListSheet(recalls: sortedRecalls)
         }
     }
 
@@ -406,7 +424,7 @@ private struct RecallAccordionCard: View {
                     .padding(.top, Spacing.xs)
                 }
                 .padding(Spacing.md)
-                .transition(.opacity.combined(with: .move(edge: .top)))
+                .transition(.opacity)
             }
         }
         .background(Theme.statusOverdue.opacity(0.08))

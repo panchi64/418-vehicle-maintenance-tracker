@@ -70,9 +70,6 @@ struct HomeTab: View {
                     if !appState.currentRecalls.isEmpty {
                         RecallAlertCard(recalls: appState.currentRecalls)
                             .revealAnimation(delay: 0.05)
-                    } else if appState.currentRecallFetchFailed && vehicle != nil {
-                        recallErrorCard
-                            .revealAnimation(delay: 0.05)
                     }
 
                     // Quick Specs Card
@@ -394,54 +391,6 @@ struct HomeTab: View {
             title: "All Clear",
             message: "No maintenance services scheduled\nfor this vehicle"
         )
-    }
-
-    // MARK: - Recall Error Card
-
-    private var recallErrorCard: some View {
-        Button {
-            HapticService.shared.lightImpact()
-            if let vehicle = vehicle {
-                Task {
-                    await appState.fetchRecalls(for: vehicle)
-                }
-            }
-        } label: {
-            HStack(spacing: Spacing.sm) {
-                Image(systemName: "exclamationmark.triangle")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(Theme.statusOverdue)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(L10n.recallErrorTitle.uppercased())
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textPrimary)
-                        .tracking(1.5)
-
-                    if let lastChecked = RecallCheckCache.shared.lastCheckedDescription {
-                        Text(L10n.recallLastChecked(lastChecked).uppercased())
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.textTertiary)
-                            .tracking(1.5)
-                    } else {
-                        Text(L10n.recallRetry.uppercased())
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.textTertiary)
-                            .tracking(1.5)
-                    }
-                }
-
-                Spacer()
-            }
-            .padding(Spacing.md)
-            .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
     }
 
     // MARK: - Cluster Management
