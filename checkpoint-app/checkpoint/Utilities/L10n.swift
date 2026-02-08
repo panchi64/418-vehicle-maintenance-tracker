@@ -171,6 +171,8 @@ enum L10n {
 
     static var onboardingDistanceUnit: String { localized("onboarding.distance_unit") }
     static var onboardingDistanceUnitExplanation: String { localized("onboarding.distance_unit_explanation") }
+    static var onboardingClimateZone: String { localized("onboarding.climate_zone") }
+    static var onboardingClimateZoneExplanation: String { localized("onboarding.climate_zone_explanation") }
     static var onboardingSwipeNext: String { localized("onboarding.swipe_next") }
 
     static var onboardingTourDashboardTitle: String { localized("onboarding.tour.dashboard.title") }

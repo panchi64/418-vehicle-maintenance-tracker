@@ -159,6 +159,8 @@
 
 "onboarding.distance_unit" = "Distance Unit";
 "onboarding.distance_unit_explanation" = "All mileage tracking, service intervals, and cost-per-distance calculations use this unit. You can change it later in Settings.";
+"onboarding.climate_zone" = "Climate Zone";
+"onboarding.climate_zone_explanation" = "Seasonal reminders adapt to your climate — winter tires, AC checks, battery heat warnings. You can change this later in Settings.";
 "onboarding.swipe_next" = "Swipe to continue";
 
 "onboarding.tour.dashboard.title" = "01 // Dashboard";

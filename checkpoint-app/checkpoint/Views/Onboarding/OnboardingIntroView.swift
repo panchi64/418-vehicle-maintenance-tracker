@@ -2,7 +2,7 @@
 //  OnboardingIntroView.swift
 //  checkpoint
 //
-//  Phase 1: Full-screen intro pages — Welcome and Features + Distance Unit
+//  Phase 1: Full-screen intro pages — Welcome, Distance Unit, and Climate Zone
 //
 
 import SwiftUI
@@ -13,6 +13,9 @@ struct OnboardingIntroView: View {
     let onSkip: () -> Void
 
     @State private var currentPage = 0
+    @State private var selectedClimateZone: ClimateZone? = SeasonalSettings.shared.climateZone
+
+    private let totalPages = 3
 
     var body: some View {
         ZStack {
@@ -39,12 +42,15 @@ struct OnboardingIntroView: View {
 
                     distanceUnitPageContent
                         .tag(1)
+
+                    climateZonePageContent
+                        .tag(2)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
 
                 // Fixed bottom area — step indicator always in same position
                 VStack(spacing: Spacing.md) {
-                    if currentPage == 0 {
+                    if currentPage < totalPages - 1 {
                         HStack(spacing: Spacing.xs) {
                             Text(L10n.onboardingSwipeNext)
                                 .font(.brutalistLabel)
@@ -65,7 +71,7 @@ struct OnboardingIntroView: View {
                         .buttonStyle(.primary)
                     }
 
-                    StepIndicator(currentStep: currentPage + 1, totalSteps: 2)
+                    StepIndicator(currentStep: currentPage + 1, totalSteps: totalPages)
                 }
                 .animation(.easeOut(duration: Theme.animationMedium), value: currentPage)
                 .padding(.horizontal, Spacing.screenHorizontal)
@@ -159,6 +165,76 @@ struct OnboardingIntroView: View {
             Spacer()
         }
         .padding(.horizontal, Spacing.screenHorizontal)
+    }
+
+    // MARK: - Page 3: Climate Zone
+
+    private var climateZonePageContent: some View {
+        VStack(spacing: Spacing.lg) {
+            Spacer()
+
+            VStack(alignment: .leading, spacing: Spacing.lg) {
+                // Section header
+                InstrumentSectionHeader(title: L10n.onboardingClimateZone)
+
+                // Explanation
+                Text(L10n.onboardingClimateZoneExplanation)
+                    .font(.brutalistBody)
+                    .foregroundStyle(Theme.textSecondary)
+
+                // Climate zone list
+                VStack(spacing: 0) {
+                    ForEach(ClimateZone.allCases, id: \.self) { zone in
+                        climateZoneRow(for: zone)
+
+                        if zone != ClimateZone.allCases.last {
+                            Rectangle()
+                                .fill(Theme.gridLine)
+                                .frame(height: Theme.borderWidth)
+                        }
+                    }
+                }
+                .background(Theme.surfaceInstrument)
+                .overlay(
+                    Rectangle()
+                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+                )
+            }
+
+            Spacer()
+        }
+        .padding(.horizontal, Spacing.screenHorizontal)
+    }
+
+    private func climateZoneRow(for zone: ClimateZone) -> some View {
+        Button {
+            selectedClimateZone = zone
+            SeasonalSettings.shared.climateZone = zone
+            HapticService.shared.selectionChanged()
+        } label: {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(zone.displayName)
+                        .font(.brutalistBody)
+                        .foregroundStyle(Theme.textPrimary)
+
+                    Text(zone.description)
+                        .font(.brutalistSecondary)
+                        .foregroundStyle(Theme.textTertiary)
+                }
+
+                Spacer()
+
+                if selectedClimateZone == zone {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(Theme.accent)
+                }
+            }
+            .padding(Spacing.md)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Feature Row
