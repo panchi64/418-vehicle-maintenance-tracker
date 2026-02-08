@@ -11,6 +11,7 @@ import SwiftData
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Query private var vehicles: [Vehicle]
+    var onboardingState: OnboardingState?
 
     var body: some View {
         NavigationStack {
@@ -39,6 +40,10 @@ struct SettingsView: View {
 
                         // PRIVACY — analytics opt-out
                         privacySection
+
+                        #if DEBUG
+                        debugSection
+                        #endif
 
                         Spacer()
                     }
@@ -309,6 +314,47 @@ struct SettingsView: View {
     private var privacySection: some View {
         AnalyticsSettingsSection(sectionTitle: L10n.settingsPrivacy)
     }
+
+    // MARK: - Debug Section
+
+    #if DEBUG
+    private var debugSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            Text("DEBUG")
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.statusOverdue)
+                .tracking(2)
+
+            VStack(spacing: 0) {
+                Button {
+                    OnboardingState.hasCompletedOnboarding = false
+                    onboardingState?.currentPhase = .intro
+                    dismiss()
+                } label: {
+                    HStack {
+                        Text("Replay Onboarding")
+                            .font(.brutalistBody)
+                            .foregroundStyle(Theme.textPrimary)
+
+                        Spacer()
+
+                        Image(systemName: "arrow.counterclockwise")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+                    .padding(Spacing.md)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+            .background(Theme.surfaceInstrument)
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+            )
+        }
+    }
+    #endif
 
     private var selectedVehicleName: String {
         if let vehicleID = WidgetSettingsManager.shared.defaultVehicleID,

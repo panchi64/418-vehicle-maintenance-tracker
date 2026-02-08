@@ -286,7 +286,7 @@ struct ContentView: View {
             }
         }
         .sheet(isPresented: $showSettings) {
-            SettingsView()
+            SettingsView(onboardingState: onboardingState)
                 .onAppear {
                     AnalyticsService.shared.capture(.settingsOpened)
                 }

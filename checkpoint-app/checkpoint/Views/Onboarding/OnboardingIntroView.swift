@@ -2,7 +2,7 @@
 //  OnboardingIntroView.swift
 //  checkpoint
 //
-//  Phase 1: Full-screen intro pages — Welcome, Distance Unit, and Climate Zone
+//  Phase 1: Full-screen intro pages — Welcome and Preferences (Distance Unit + Climate Zone)
 //
 
 import SwiftUI
@@ -14,8 +14,6 @@ struct OnboardingIntroView: View {
 
     @State private var currentPage = 0
     @State private var selectedClimateZone: ClimateZone? = SeasonalSettings.shared.climateZone
-
-    private let totalPages = 3
 
     var body: some View {
         ZStack {
@@ -40,17 +38,14 @@ struct OnboardingIntroView: View {
                     welcomePageContent
                         .tag(0)
 
-                    distanceUnitPageContent
+                    preferencesPageContent
                         .tag(1)
-
-                    climateZonePageContent
-                        .tag(2)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
 
                 // Fixed bottom area — step indicator always in same position
                 VStack(spacing: Spacing.md) {
-                    if currentPage < totalPages - 1 {
+                    if currentPage == 0 {
                         HStack(spacing: Spacing.xs) {
                             Text(L10n.onboardingSwipeNext)
                                 .font(.brutalistLabel)
@@ -71,7 +66,7 @@ struct OnboardingIntroView: View {
                         .buttonStyle(.primary)
                     }
 
-                    StepIndicator(currentStep: currentPage + 1, totalSteps: totalPages)
+                    StepIndicator(currentStep: currentPage + 1, totalSteps: 2)
                 }
                 .animation(.easeOut(duration: Theme.animationMedium), value: currentPage)
                 .padding(.horizontal, Spacing.screenHorizontal)
@@ -136,74 +131,58 @@ struct OnboardingIntroView: View {
         .padding(.horizontal, Spacing.screenHorizontal)
     }
 
-    // MARK: - Page 2: Distance Unit
+    // MARK: - Page 2: Preferences (Distance Unit + Climate Zone)
 
-    private var distanceUnitPageContent: some View {
-        VStack(spacing: Spacing.lg) {
-            Spacer()
+    private var preferencesPageContent: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: Spacing.xl) {
+                // Distance Unit
+                VStack(alignment: .leading, spacing: Spacing.sm) {
+                    InstrumentSectionHeader(title: L10n.onboardingDistanceUnit)
 
-            VStack(alignment: .leading, spacing: Spacing.lg) {
-                // Section header
-                InstrumentSectionHeader(title: L10n.onboardingDistanceUnit)
+                    Text(L10n.onboardingDistanceUnitExplanation)
+                        .font(.brutalistSecondary)
+                        .foregroundStyle(Theme.textSecondary)
 
-                // Explanation
-                Text(L10n.onboardingDistanceUnitExplanation)
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textSecondary)
+                    InstrumentSegmentedControl(
+                        options: DistanceUnit.allCases,
+                        selection: Binding(
+                            get: { DistanceSettings.shared.unit },
+                            set: { DistanceSettings.shared.unit = $0 }
+                        ),
+                        labelFor: { $0.displayName }
+                    )
+                }
 
-                // Distance unit picker
-                InstrumentSegmentedControl(
-                    options: DistanceUnit.allCases,
-                    selection: Binding(
-                        get: { DistanceSettings.shared.unit },
-                        set: { DistanceSettings.shared.unit = $0 }
-                    ),
-                    labelFor: { $0.displayName }
-                )
-            }
+                // Climate Zone
+                VStack(alignment: .leading, spacing: Spacing.sm) {
+                    InstrumentSectionHeader(title: L10n.onboardingClimateZone)
 
-            Spacer()
-        }
-        .padding(.horizontal, Spacing.screenHorizontal)
-    }
+                    Text(L10n.onboardingClimateZoneExplanation)
+                        .font(.brutalistSecondary)
+                        .foregroundStyle(Theme.textSecondary)
 
-    // MARK: - Page 3: Climate Zone
+                    VStack(spacing: 0) {
+                        ForEach(ClimateZone.allCases, id: \.self) { zone in
+                            climateZoneRow(for: zone)
 
-    private var climateZonePageContent: some View {
-        VStack(spacing: Spacing.lg) {
-            Spacer()
-
-            VStack(alignment: .leading, spacing: Spacing.lg) {
-                // Section header
-                InstrumentSectionHeader(title: L10n.onboardingClimateZone)
-
-                // Explanation
-                Text(L10n.onboardingClimateZoneExplanation)
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textSecondary)
-
-                // Climate zone list
-                VStack(spacing: 0) {
-                    ForEach(ClimateZone.allCases, id: \.self) { zone in
-                        climateZoneRow(for: zone)
-
-                        if zone != ClimateZone.allCases.last {
-                            Rectangle()
-                                .fill(Theme.gridLine)
-                                .frame(height: Theme.borderWidth)
+                            if zone != ClimateZone.allCases.last {
+                                Rectangle()
+                                    .fill(Theme.gridLine)
+                                    .frame(height: Theme.borderWidth)
+                            }
                         }
                     }
+                    .background(Theme.surfaceInstrument)
+                    .overlay(
+                        Rectangle()
+                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+                    )
                 }
-                .background(Theme.surfaceInstrument)
-                .overlay(
-                    Rectangle()
-                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                )
             }
-
-            Spacer()
+            .padding(.horizontal, Spacing.screenHorizontal)
+            .padding(.vertical, Spacing.xl)
         }
-        .padding(.horizontal, Spacing.screenHorizontal)
     }
 
     private func climateZoneRow(for zone: ClimateZone) -> some View {
