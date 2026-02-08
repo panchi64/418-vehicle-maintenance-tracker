@@ -86,6 +86,15 @@ struct AddVehicleFlowView: View {
                     }
                 }
             }
+            .onAppear {
+                // Apply onboarding marbete prefill if set
+                if let month = appState.onboardingMarbeteMonth {
+                    formState.marbeteExpirationMonth = month
+                }
+                if let year = appState.onboardingMarbeteYear {
+                    formState.marbeteExpirationYear = year
+                }
+            }
             .fullScreenCover(isPresented: $formState.showVINCamera) {
                 OdometerCameraSheet(
                     onImageCaptured: { image in
@@ -218,6 +227,14 @@ struct AddVehicleFlowView: View {
             oilType: formState.oilType.isEmpty ? nil : formState.oilType,
             notes: formState.notes.isEmpty ? nil : formState.notes
         )
+
+        // Marbete
+        vehicle.marbeteExpirationMonth = formState.marbeteExpirationMonth
+        vehicle.marbeteExpirationYear = formState.marbeteExpirationYear
+        if vehicle.hasMarbeteExpiration {
+            NotificationService.shared.scheduleMarbeteNotifications(for: vehicle)
+        }
+
         modelContext.insert(vehicle)
         appState.selectedVehicle = vehicle
         dismiss()

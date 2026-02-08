@@ -239,7 +239,10 @@ struct ContentView: View {
                 onAddVehicle: { appState.showAddVehicle = true }
             )
         }
-        .sheet(isPresented: $appState.showAddVehicle) {
+        .sheet(isPresented: $appState.showAddVehicle, onDismiss: {
+            appState.onboardingMarbeteMonth = nil
+            appState.onboardingMarbeteYear = nil
+        }) {
             AddVehicleFlowView()
                 .environment(appState)
         }
@@ -372,7 +375,9 @@ struct ContentView: View {
                     AnalyticsService.shared.capture(.onboardingSkippedGetStarted)
                     clearSampleData()
                     onboardingState.complete()
-                }
+                },
+                marbeteMonth: $appState.onboardingMarbeteMonth,
+                marbeteYear: $appState.onboardingMarbeteYear
             )
         }
         // Handle mileage update notification navigation

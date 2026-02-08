@@ -68,36 +68,39 @@ struct HomeTab: View {
     var body: some View {
         ScrollView {
             VStack(spacing: Spacing.xl) {
-                // Recall Alert Card (safety-critical, shown above everything)
-                if !recalls.isEmpty {
-                    RecallAlertCard(recalls: recalls)
-                        .revealAnimation(delay: 0.05)
-                } else if recallFetchFailed && vehicle != nil {
-                    recallErrorCard
-                        .revealAnimation(delay: 0.05)
-                }
+                // Instrument cluster: compact status cards grouped tightly
+                VStack(spacing: Spacing.md) {
+                    // Recall Alert Card (safety-critical, shown above everything)
+                    if !recalls.isEmpty {
+                        RecallAlertCard(recalls: recalls)
+                            .revealAnimation(delay: 0.05)
+                    } else if recallFetchFailed && vehicle != nil {
+                        recallErrorCard
+                            .revealAnimation(delay: 0.05)
+                    }
 
-                // Quick Specs Card
-                if let vehicle = vehicle {
-                    QuickSpecsCard(vehicle: vehicle) {
-                        appState.showEditVehicle = true
+                    // Quick Specs Card
+                    if let vehicle = vehicle {
+                        QuickSpecsCard(vehicle: vehicle) {
+                            appState.showEditVehicle = true
+                        }
+                        .revealAnimation(delay: 0.1)
                     }
-                    .revealAnimation(delay: 0.1)
-                }
 
-                // Quick Mileage Update Card (shown if never updated or 14+ days ago)
-                if let vehicle = vehicle, vehicle.shouldPromptMileageUpdate {
-                    QuickMileageUpdateCard(
-                        vehicle: vehicle,
-                        mileageTrackedServiceCount: vehicleServices.filter { $0.dueMileage != nil }.count
-                    ) { newMileage in
-                        AnalyticsService.shared.capture(.mileageUpdated(source: .quickUpdate))
-                        updateMileage(newMileage, for: vehicle)
+                    // Quick Mileage Update Card (shown if never updated or 14+ days ago)
+                    if let vehicle = vehicle, vehicle.shouldPromptMileageUpdate {
+                        QuickMileageUpdateCard(
+                            vehicle: vehicle,
+                            mileageTrackedServiceCount: vehicleServices.filter { $0.dueMileage != nil }.count
+                        ) { newMileage in
+                            AnalyticsService.shared.capture(.mileageUpdated(source: .quickUpdate))
+                            updateMileage(newMileage, for: vehicle)
+                        }
+                        .onAppear {
+                            AnalyticsService.shared.capture(.mileagePromptShown)
+                        }
+                        .revealAnimation(delay: 0.15)
                     }
-                    .onAppear {
-                        AnalyticsService.shared.capture(.mileagePromptShown)
-                    }
-                    .revealAnimation(delay: 0.15)
                 }
 
                 // Next Up hero card (service or marbete, whichever is more urgent)

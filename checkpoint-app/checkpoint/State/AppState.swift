@@ -34,6 +34,11 @@ final class AppState {
 
     var seasonalPrefill: SeasonalPrefill?
 
+    // MARK: - Onboarding Pre-fill
+
+    var onboardingMarbeteMonth: Int?
+    var onboardingMarbeteYear: Int?
+
     // MARK: - Services Tab State (preserved across tab switches)
 
     var servicesSearchText = ""

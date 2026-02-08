@@ -65,6 +65,21 @@ struct VehicleDetailsStep: View {
                     }
                 }
 
+                // Marbete Section (Registration Tag)
+                VStack(alignment: .leading, spacing: Spacing.sm) {
+                    InstrumentSectionHeader(title: "Marbete")
+
+                    MarbetePicker(
+                        month: $formState.marbeteExpirationMonth,
+                        year: $formState.marbeteExpirationYear
+                    )
+
+                    Text("Yearly vehicle registration tag expiration")
+                        .font(.brutalistSecondary)
+                        .foregroundStyle(Theme.textTertiary)
+                        .padding(.leading, 4)
+                }
+
                 // Notes Section
                 VStack(alignment: .leading, spacing: Spacing.sm) {
                     InstrumentSectionHeader(title: L10n.vehicleNotes)

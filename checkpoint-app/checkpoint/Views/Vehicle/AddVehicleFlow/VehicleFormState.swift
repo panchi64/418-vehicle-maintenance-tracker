@@ -22,6 +22,10 @@ final class VehicleFormState {
     var oilType: String = ""
     var notes: String = ""
 
+    // MARK: - Marbete (Registration Tag)
+    var marbeteExpirationMonth: Int? = nil
+    var marbeteExpirationYear: Int? = nil
+
     // MARK: - Analytics Tracking
     var usedOdometerOCR = false
     var usedVINLookup = false

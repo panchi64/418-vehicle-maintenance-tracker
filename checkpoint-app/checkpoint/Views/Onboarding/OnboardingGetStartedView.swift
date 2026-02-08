@@ -12,6 +12,10 @@ struct OnboardingGetStartedView: View {
     let onManualEntry: () -> Void
     let onSkip: () -> Void
 
+    // Marbete bindings (flow back to parent for prefill)
+    @Binding var marbeteMonth: Int?
+    @Binding var marbeteYear: Int?
+
     @State private var vin = ""
     @State private var isDecodingVIN = false
     @State private var vinLookupError: String?
@@ -142,6 +146,31 @@ struct OnboardingGetStartedView: View {
                                 .overlay(
                                     Rectangle()
                                         .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+                                )
+                            }
+
+                            // Marbete section
+                            Rectangle()
+                                .fill(Theme.gridLine)
+                                .frame(height: Theme.borderWidth)
+
+                            VStack(alignment: .leading, spacing: Spacing.sm) {
+                                HStack(spacing: Spacing.sm) {
+                                    Image(systemName: "calendar.badge.clock")
+                                        .font(.system(size: 16, weight: .medium))
+                                        .foregroundStyle(Theme.accent)
+
+                                    Text("REGISTRATION TAG")
+                                        .brutalistLabelStyle(color: Theme.accent)
+                                }
+
+                                Text("Track your yearly vehicle registration expiration and get reminders before it lapses.")
+                                    .font(.brutalistSecondary)
+                                    .foregroundStyle(Theme.textSecondary)
+
+                                MarbetePicker(
+                                    month: $marbeteMonth,
+                                    year: $marbeteYear
                                 )
                             }
 
@@ -287,7 +316,9 @@ struct OnboardingGetStartedView: View {
     OnboardingGetStartedView(
         onVINLookupComplete: { _, _ in },
         onManualEntry: {},
-        onSkip: {}
+        onSkip: {},
+        marbeteMonth: .constant(nil),
+        marbeteYear: .constant(nil)
     )
     .preferredColorScheme(.dark)
 }
