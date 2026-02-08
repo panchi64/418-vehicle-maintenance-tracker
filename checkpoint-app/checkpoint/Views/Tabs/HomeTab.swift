@@ -14,10 +14,6 @@ struct HomeTab: View {
     @Query private var services: [Service]
     @Query private var serviceLogs: [ServiceLog]
 
-    // Recall alert state
-    @State private var recalls: [RecallInfo] = []
-    @State private var recallFetchFailed = false
-
     // Cluster state
     @State private var primaryCluster: ServiceCluster?
     @State private var dismissedClusterHashes: Set<String> = []
@@ -71,10 +67,10 @@ struct HomeTab: View {
                 // Instrument cluster: compact status cards grouped tightly
                 VStack(spacing: Spacing.md) {
                     // Recall Alert Card (safety-critical, shown above everything)
-                    if !recalls.isEmpty {
-                        RecallAlertCard(recalls: recalls)
+                    if !appState.currentRecalls.isEmpty {
+                        RecallAlertCard(recalls: appState.currentRecalls)
                             .revealAnimation(delay: 0.05)
-                    } else if recallFetchFailed && vehicle != nil {
+                    } else if appState.currentRecallFetchFailed && vehicle != nil {
                         recallErrorCard
                             .revealAnimation(delay: 0.05)
                     }
@@ -280,7 +276,6 @@ struct HomeTab: View {
             .padding(.bottom, Spacing.xxl + 56) // Extra padding for FAB and tab bar
         }
         .task(id: vehicle?.id) {
-            await fetchRecalls()
             detectClusters()
             refreshSeasonalReminders()
         }
@@ -406,8 +401,10 @@ struct HomeTab: View {
     private var recallErrorCard: some View {
         Button {
             HapticService.shared.lightImpact()
-            Task {
-                await fetchRecalls()
+            if let vehicle = vehicle {
+                Task {
+                    await appState.fetchRecalls(for: vehicle)
+                }
             }
         } label: {
             HStack(spacing: Spacing.sm) {
@@ -445,34 +442,6 @@ struct HomeTab: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-    }
-
-    // MARK: - Recall Fetch
-
-    private func fetchRecalls() async {
-        guard let vehicle = vehicle,
-              !vehicle.make.isEmpty,
-              !vehicle.model.isEmpty,
-              vehicle.year > 0 else {
-            recalls = []
-            return
-        }
-
-        do {
-            recalls = try await NHTSAService.shared.fetchRecalls(
-                make: vehicle.make,
-                model: vehicle.model,
-                year: vehicle.year
-            )
-            recallFetchFailed = false
-            RecallCheckCache.shared.recordSuccess()
-            if !recalls.isEmpty {
-                AnalyticsService.shared.capture(.recallAlertShown(recallCount: recalls.count))
-            }
-        } catch {
-            recallFetchFailed = true
-            recalls = []
-        }
     }
 
     // MARK: - Cluster Management

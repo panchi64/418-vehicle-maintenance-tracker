@@ -34,6 +34,54 @@ final class AppState {
 
     var seasonalPrefill: SeasonalPrefill?
 
+    // MARK: - Recall State
+
+    enum RecallFetchState {
+        case notFetched
+        case fetched([RecallInfo])
+        case failed
+    }
+
+    var recallState: [UUID: RecallFetchState] = [:]
+
+    /// Recalls for the currently selected vehicle
+    var currentRecalls: [RecallInfo] {
+        guard let id = selectedVehicle?.id,
+              case .fetched(let results) = recallState[id] else { return [] }
+        return results
+    }
+
+    /// Whether the recall fetch failed for the currently selected vehicle
+    var currentRecallFetchFailed: Bool {
+        guard let id = selectedVehicle?.id,
+              case .failed = recallState[id] else { return false }
+        return true
+    }
+
+    func fetchRecalls(for vehicle: Vehicle) async {
+        guard !vehicle.make.isEmpty,
+              !vehicle.model.isEmpty,
+              vehicle.year > 0 else {
+            recallState[vehicle.id] = .fetched([])
+            return
+        }
+
+        do {
+            let results = try await NHTSAService.shared.fetchRecalls(
+                make: vehicle.make,
+                model: vehicle.model,
+                year: vehicle.year
+            )
+            recallState[vehicle.id] = .fetched(results)
+            RecallCheckCache.shared.recordSuccess()
+            if !results.isEmpty {
+                AnalyticsService.shared.capture(.recallAlertShown(recallCount: results.count))
+            }
+        } catch {
+            recallState[vehicle.id] = .failed
+        }
+    }
+
     // MARK: - Onboarding Pre-fill
 
     var onboardingMarbeteMonth: Int?

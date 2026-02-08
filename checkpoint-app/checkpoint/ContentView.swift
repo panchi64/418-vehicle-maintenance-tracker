@@ -146,6 +146,8 @@ struct ContentView: View {
             updateWidgetData()
             // Schedule mileage reminders and yearly roundups for all vehicles
             schedulePeriodicNotifications()
+            // Fetch recalls for all existing vehicles
+            fetchRecallsForAllVehicles()
             // Analytics: session start
             AnalyticsService.shared.capture(.appSessionStart(
                 vehicleCount: vehicles.count,
@@ -230,6 +232,15 @@ struct ContentView: View {
             // Update vehicle list when vehicles are added or removed
             if oldVehicles.count != newVehicles.count {
                 WidgetDataService.shared.updateVehicleList(newVehicles)
+            }
+            // Fetch recalls for newly added vehicles
+            if newVehicles.count > oldVehicles.count {
+                let oldIDs = Set(oldVehicles.map(\.id))
+                for vehicle in newVehicles where !oldIDs.contains(vehicle.id) {
+                    Task {
+                        await appState.fetchRecalls(for: vehicle)
+                    }
+                }
             }
         }
         // Centralized sheets
@@ -462,6 +473,17 @@ struct ContentView: View {
             }
         }
         // Note: Widget reload happens in updateWidgetData() via WidgetDataService
+    }
+
+    // MARK: - Recalls
+
+    /// Fetch recalls for all existing vehicles (called once on app launch)
+    private func fetchRecallsForAllVehicles() {
+        for vehicle in vehicles {
+            Task {
+                await appState.fetchRecalls(for: vehicle)
+            }
+        }
     }
 
     // MARK: - App Icon
