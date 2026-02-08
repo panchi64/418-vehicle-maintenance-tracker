@@ -2,7 +2,7 @@
 //  SettingsView.swift
 //  checkpoint
 //
-//  Settings screen with distance unit picker, app icon preferences, and widget settings
+//  Settings screen organized by: Display, Reminders, Smart Features, Widgets, Data & Sync, Privacy
 //
 
 import SwiftUI
@@ -20,26 +20,23 @@ struct SettingsView: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: Spacing.lg) {
-                        // DATA & SYNC
-                        SyncSettingsSection()
-
-                        // DISPLAY
+                        // DISPLAY — most commonly adjusted
                         displaySection
 
-                        // ALERTS
-                        alertsSection
+                        // REMINDERS — notification thresholds and seasonal alerts
+                        remindersSection
 
-                        // SEASONAL REMINDERS
-                        seasonalRemindersSection
-
-                        // SERVICE BUNDLING
-                        serviceBundlingSection
+                        // SMART FEATURES — service bundling
+                        smartFeaturesSection
 
                         // WIDGETS
                         widgetSettingsSection
 
-                        // ANALYTICS
-                        AnalyticsSettingsSection()
+                        // DATA & SYNC — rarely changed after setup
+                        SyncSettingsSection()
+
+                        // PRIVACY — analytics opt-out
+                        privacySection
 
                         Spacer()
                     }
@@ -73,7 +70,7 @@ struct SettingsView: View {
                 NavigationLink {
                     DistanceUnitPickerView()
                 } label: {
-                    widgetSettingRow(
+                    settingRow(
                         title: L10n.settingsDistanceUnit,
                         value: DistanceSettings.shared.unit.displayName
                     )
@@ -86,6 +83,13 @@ struct SettingsView: View {
 
                 // Mileage Estimation
                 MileageEstimatesToggle()
+
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: Theme.borderWidth)
+
+                // App Icon Auto-change (moved from Alerts — it's a display preference)
+                AppIconToggle()
             }
             .background(Theme.surfaceInstrument)
             .overlay(
@@ -95,11 +99,11 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Alerts Section
+    // MARK: - Reminders Section
 
-    private var alertsSection: some View {
+    private var remindersSection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text(L10n.settingsAlerts)
+            Text(L10n.settingsReminders)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(2)
@@ -109,7 +113,7 @@ struct SettingsView: View {
                 NavigationLink {
                     DueSoonMileageThresholdPicker()
                 } label: {
-                    widgetSettingRow(
+                    settingRow(
                         title: L10n.settingsDueSoonMileage,
                         value: "\(Formatters.mileageNumber(DueSoonSettings.shared.mileageThreshold)) \(DistanceSettings.shared.unit.abbreviation)"
                     )
@@ -124,7 +128,7 @@ struct SettingsView: View {
                 NavigationLink {
                     DueSoonDaysThresholdPicker()
                 } label: {
-                    widgetSettingRow(
+                    settingRow(
                         title: L10n.settingsDueSoonDays,
                         value: "\(DueSoonSettings.shared.daysThreshold) \(L10n.commonDays)"
                     )
@@ -135,28 +139,7 @@ struct SettingsView: View {
                     .fill(Theme.gridLine)
                     .frame(height: Theme.borderWidth)
 
-                // App Icon Auto-change
-                AppIconToggle()
-            }
-            .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
-        }
-    }
-
-    // MARK: - Seasonal Reminders Section
-
-    private var seasonalRemindersSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("SEASONAL REMINDERS")
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(2)
-
-            VStack(spacing: 0) {
-                // Enable/Disable Toggle
+                // Seasonal Alerts Toggle
                 SeasonalRemindersToggle()
 
                 Rectangle()
@@ -167,9 +150,60 @@ struct SettingsView: View {
                 NavigationLink {
                     ClimateZonePickerView()
                 } label: {
-                    widgetSettingRow(
+                    settingRow(
                         title: "Climate Zone",
                         value: SeasonalSettings.shared.climateZone?.displayName ?? "Not Set"
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+            .background(Theme.surfaceInstrument)
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+            )
+        }
+    }
+
+    // MARK: - Smart Features Section
+
+    private var smartFeaturesSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            Text(L10n.settingsSmartFeatures)
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(2)
+
+            VStack(spacing: 0) {
+                // Service Bundling Toggle
+                ServiceBundlingToggle()
+
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: Theme.borderWidth)
+
+                // Mileage Window
+                NavigationLink {
+                    ClusteringMileageWindowPicker()
+                } label: {
+                    settingRow(
+                        title: L10n.settingsMileageWindow,
+                        value: "\(Formatters.mileageNumber(ClusteringSettings.shared.mileageWindow)) \(DistanceSettings.shared.unit.abbreviation)"
+                    )
+                }
+                .buttonStyle(.plain)
+
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: Theme.borderWidth)
+
+                // Days Window
+                NavigationLink {
+                    ClusteringDaysWindowPicker()
+                } label: {
+                    settingRow(
+                        title: L10n.settingsDaysWindow,
+                        value: "\(ClusteringSettings.shared.daysWindow) \(L10n.commonDays)"
                     )
                 }
                 .buttonStyle(.plain)
@@ -186,7 +220,6 @@ struct SettingsView: View {
 
     private var widgetSettingsSection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            // Section header
             Text(L10n.settingsWidgets)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
@@ -197,7 +230,7 @@ struct SettingsView: View {
                 NavigationLink {
                     WidgetVehiclePicker(vehicles: vehicles)
                 } label: {
-                    widgetSettingRow(
+                    settingRow(
                         title: L10n.settingsDefaultVehicle,
                         value: selectedVehicleName
                     )
@@ -212,7 +245,7 @@ struct SettingsView: View {
                 NavigationLink {
                     WidgetMileageModePicker()
                 } label: {
-                    widgetSettingRow(
+                    settingRow(
                         title: L10n.settingsMileageDisplay,
                         value: WidgetSettingsManager.shared.mileageDisplayMode.displayName
                     )
@@ -227,55 +260,10 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Service Bundling Section
+    // MARK: - Privacy Section
 
-    private var serviceBundlingSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text(L10n.settingsServiceBundling)
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(2)
-
-            VStack(spacing: 0) {
-                // Enable/Disable Toggle
-                ServiceBundlingToggle()
-
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
-
-                // Mileage Window
-                NavigationLink {
-                    ClusteringMileageWindowPicker()
-                } label: {
-                    widgetSettingRow(
-                        title: L10n.settingsMileageWindow,
-                        value: "\(Formatters.mileageNumber(ClusteringSettings.shared.mileageWindow)) \(DistanceSettings.shared.unit.abbreviation)"
-                    )
-                }
-                .buttonStyle(.plain)
-
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
-
-                // Days Window
-                NavigationLink {
-                    ClusteringDaysWindowPicker()
-                } label: {
-                    widgetSettingRow(
-                        title: L10n.settingsDaysWindow,
-                        value: "\(ClusteringSettings.shared.daysWindow) \(L10n.commonDays)"
-                    )
-                }
-                .buttonStyle(.plain)
-            }
-            .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
-        }
+    private var privacySection: some View {
+        AnalyticsSettingsSection(sectionTitle: L10n.settingsPrivacy)
     }
 
     private var selectedVehicleName: String {
@@ -286,7 +274,7 @@ struct SettingsView: View {
         return L10n.vehicleFirstVehicle
     }
 
-    private func widgetSettingRow(title: String, value: String) -> some View {
+    private func settingRow(title: String, value: String) -> some View {
         HStack {
             Text(title)
                 .font(.brutalistBody)

@@ -121,6 +121,18 @@ enum AnalyticsEvent {
     case notificationPermissionGranted
     case notificationPermissionDenied
 
+    // MARK: - Onboarding
+
+    case onboardingStarted
+    case onboardingIntroSkipped
+    case onboardingTourStarted
+    case onboardingTourSkipped(atStep: Int)
+    case onboardingTourCompleted
+    case onboardingVINLookupUsed
+    case onboardingManualEntry
+    case onboardingSkippedGetStarted
+    case onboardingCompleted
+
     // MARK: - Event Properties
 
     /// The PostHog event name string
@@ -161,6 +173,15 @@ enum AnalyticsEvent {
         case .serviceClusterMarkAllDone: return "service_cluster_mark_all_done"
         case .notificationPermissionGranted: return "notification_permission_granted"
         case .notificationPermissionDenied: return "notification_permission_denied"
+        case .onboardingStarted: return "onboarding_started"
+        case .onboardingIntroSkipped: return "onboarding_intro_skipped"
+        case .onboardingTourStarted: return "onboarding_tour_started"
+        case .onboardingTourSkipped: return "onboarding_tour_skipped"
+        case .onboardingTourCompleted: return "onboarding_tour_completed"
+        case .onboardingVINLookupUsed: return "onboarding_vin_lookup_used"
+        case .onboardingManualEntry: return "onboarding_manual_entry"
+        case .onboardingSkippedGetStarted: return "onboarding_skipped_get_started"
+        case .onboardingCompleted: return "onboarding_completed"
         }
     }
 
@@ -212,6 +233,8 @@ enum AnalyticsEvent {
             return ["setting": setting, "enabled": enabled]
         case .recallAlertShown(let recallCount):
             return ["recall_count": recallCount]
+        case .onboardingTourSkipped(let atStep):
+            return ["at_step": atStep]
         default:
             return [:]
         }

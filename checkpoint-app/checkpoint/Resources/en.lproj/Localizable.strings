@@ -60,8 +60,11 @@
 "settings.title" = "Settings";
 "settings.display" = "DISPLAY";
 "settings.alerts" = "ALERTS";
+"settings.reminders" = "REMINDERS";
 "settings.widgets" = "WIDGETS";
 "settings.service_bundling" = "SERVICE BUNDLING";
+"settings.smart_features" = "SMART FEATURES";
+"settings.privacy" = "PRIVACY";
 "settings.distance_unit" = "Distance Unit";
 "settings.mileage_estimation" = "Mileage Estimation";
 "settings.mileage_estimation_desc" = "Show estimated mileage based on driving pace";
@@ -135,3 +138,46 @@
 "error.invalid_vin_format" = "Invalid VIN format";
 "error.could_not_read_odometer" = "Could not read odometer from image";
 "error.network_connection_failed" = "Network connection failed";
+
+// MARK: - Onboarding
+
+"onboarding.welcome.title" = "CHECKPOINT";
+"onboarding.welcome.subtitle" = "Your vehicle has a lot to say.\nThis is where it talks.";
+"onboarding.skip" = "Skip";
+"onboarding.skip_tour" = "Skip Tour";
+"onboarding.lets_look" = "Let's Take a Look";
+
+"onboarding.feature1.title" = "Maintenance Tracking";
+"onboarding.feature1.body" = "Mileage and date-based reminders. Your vehicle keeps score.";
+"onboarding.feature2.title" = "VIN Lookup & Recalls";
+"onboarding.feature2.body" = "Enter your VIN. The rest fills itself. Open recalls surface automatically.";
+"onboarding.feature3.title" = "Cost Tracking";
+"onboarding.feature3.body" = "Every dollar, charted. Cost-per-mile included. No surprises.";
+
+"onboarding.distance_unit" = "Distance Unit";
+"onboarding.distance_unit_explanation" = "All mileage tracking, service intervals, and cost-per-distance calculations use this unit. You can change it later in Settings.";
+"onboarding.swipe_next" = "Swipe to continue";
+
+"onboarding.tour.dashboard.title" = "01 // Dashboard";
+"onboarding.tour.dashboard.body" = "The most urgent item surfaces first. No buried information. No digging.";
+"onboarding.tour.vehicle.title" = "02 // Your Vehicle";
+"onboarding.tour.vehicle.body" = "Tap the name to switch vehicles. Tap the amber mileage when the odometer changes. Your vehicle tracks the rest.";
+"onboarding.tour.services.title" = "03 // Services";
+"onboarding.tour.services.body" = "Scheduled maintenance and completed history. Search, filter, export. Everything your vehicle needs, in one list.";
+"onboarding.tour.costs.title" = "04 // Costs";
+"onboarding.tour.costs.body" = "Every dollar your vehicle has cost you, charted. It's not sorry about it.";
+
+"onboarding.transition.services" = "Services";
+"onboarding.transition.costs" = "Costs";
+
+"onboarding.getstarted.title" = "Your Vehicle Is Waiting";
+"onboarding.getstarted.vin_label" = "Enter Your VIN";
+"onboarding.getstarted.vin_help" = "17 characters. We handle the rest. Make, model, year, open recalls.";
+"onboarding.getstarted.vin_placeholder" = "Enter VIN...";
+"onboarding.getstarted.characters" = "%d / 17 Characters";
+"onboarding.getstarted.lookup" = "Look Up VIN";
+"onboarding.getstarted.looking_up" = "Looking Up...";
+"onboarding.getstarted.add_vehicle" = "Add Vehicle";
+"onboarding.getstarted.manual" = "Enter Details Manually";
+"onboarding.getstarted.or" = "OR";
+"onboarding.getstarted.skip" = "Skip for Now";

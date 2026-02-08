@@ -55,6 +55,15 @@ xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPh
 - Push navigation for detail views
 - Vehicle selector persists at top of all tabs
 
+### Onboarding (in `Views/Onboarding/`)
+- **State:** `OnboardingState` (`@Observable @MainActor`) with `OnboardingPhase` enum (`.intro` → `.tour(step:)` → `.tourTransition(toStep:)` → `.getStarted` → `.completed`)
+- **Phase 1 — Intro:** `OnboardingIntroView` as `.fullScreenCover`, 2 paged screens (Welcome + Features with distance unit picker)
+- **Phase 2 — Tour:** `OnboardingTourOverlay` overlay on real UI with dummy data, 4 steps switching tabs; `OnboardingTourTransitionCard` shows between steps when tab changes
+- **Phase 3 — Get Started:** `OnboardingGetStartedView` as `.fullScreenCover` with VIN input, manual entry, and skip options
+- **Persistence:** `@AppStorage("hasCompletedOnboarding")` prevents re-showing
+- **Sample data:** Seeded when entering tour phase, tracked by ID in `OnboardingState.sampleVehicleIDs`, cleared on skip/complete
+- **Notifications:** Permission prompt delayed until after onboarding completes
+
 ### Data Models (in `Models/`)
 - **Vehicle:** name, make, model, year, currentMileage, VIN; has many services/serviceLogs/mileageSnapshots
 - **Service:** due tracking (date/mileage), intervals, status computation (overdue/dueSoon/good/neutral)
@@ -95,6 +104,7 @@ checkpoint-app/
 │   │   ├── Vehicle/      # Vehicle CRUD views
 │   │   ├── Service/      # Service CRUD views
 │   │   ├── Settings/     # Settings views
+│   │   ├── Onboarding/   # Guided intro, tour overlay, get started card
 │   │   └── Components/   # Reusable UI components (see Views/CLAUDE.md)
 │   │       ├── Attachments/  # Photo/document handling
 │   │       ├── Camera/       # Vision framework OCR views

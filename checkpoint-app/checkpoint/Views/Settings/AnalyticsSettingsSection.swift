@@ -8,11 +8,12 @@
 import SwiftUI
 
 struct AnalyticsSettingsSection: View {
+    var sectionTitle: String = "ANALYTICS"
     @State private var isEnabled: Bool = AnalyticsSettings.shared.isEnabled
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("ANALYTICS")
+            Text(sectionTitle)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(2)

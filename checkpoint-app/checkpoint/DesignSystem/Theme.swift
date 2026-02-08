@@ -214,12 +214,14 @@ enum GlassIntensity {
     case subtle
     case medium
     case strong
+    case heavy
 
     var blurRadius: CGFloat {
         switch self {
         case .subtle: return 10
         case .medium: return Theme.glassBlurRadius
         case .strong: return 30
+        case .heavy: return 30
         }
     }
 
@@ -228,6 +230,16 @@ enum GlassIntensity {
         case .subtle: return 0.05
         case .medium: return Theme.glassTintOpacity
         case .strong: return 0.12
+        case .heavy: return 0.15
+        }
+    }
+
+    var materialOpacity: Double {
+        switch self {
+        case .subtle: return 0.5
+        case .medium: return 0.5
+        case .strong: return 0.5
+        case .heavy: return 0.75
         }
     }
 }
@@ -243,8 +255,8 @@ struct GlassCardStyle: ViewModifier {
                 ZStack {
                     // Frosted glass effect
                     Rectangle()
-                        .fill(.ultraThinMaterial)
-                        .opacity(0.5)
+                        .fill(intensity == .heavy ? .thinMaterial : .ultraThinMaterial)
+                        .opacity(intensity.materialOpacity)
 
                     // Tint overlay
                     Rectangle()

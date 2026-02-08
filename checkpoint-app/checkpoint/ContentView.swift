@@ -17,6 +17,7 @@ struct ContentView: View {
     @Query private var serviceLogs: [ServiceLog]
 
     @State private var appState = AppState()
+    @State private var onboardingState = OnboardingState()
     @State private var showMileageUpdate = false
     @State private var showSettings = false
     @State private var siriPrefilledMileage: Int?
@@ -30,7 +31,9 @@ struct ContentView: View {
         appState.selectedVehicle ?? vehicles.first
     }
 
-    // TODO: [ONBOARDING] — See docs/ONBOARDING.md
+    private var showOnboardingIntro: Bool {
+        onboardingState.currentPhase == .intro
+    }
 
     var body: some View {
         ZStack {
@@ -132,8 +135,11 @@ struct ContentView: View {
         .onAppear {
             // Restore persisted vehicle selection
             restoreSelectedVehicle()
-            // Seed sample data if needed
-            seedSampleDataIfNeeded()
+            // Only seed sample data for returning users (onboarding completed)
+            // New users get sample data seeded when tour starts
+            if OnboardingState.hasCompletedOnboarding {
+                seedSampleDataIfNeeded()
+            }
             // Update app icon based on service status
             updateAppIcon()
             // Update widget data
@@ -145,6 +151,31 @@ struct ContentView: View {
                 vehicleCount: vehicles.count,
                 serviceCount: services.count
             ))
+            // Track onboarding start for new users
+            if !OnboardingState.hasCompletedOnboarding {
+                AnalyticsService.shared.capture(.onboardingStarted)
+            }
+        }
+        .onChange(of: onboardingState.currentPhase) { _, newPhase in
+            if case .tourTransition(let toStep) = newPhase {
+                // Switch tab behind the transition card
+                switch toStep {
+                case 2: appState.selectedTab = .services
+                case 3: appState.selectedTab = .costs
+                default: break
+                }
+            } else if newPhase == .completed {
+                AnalyticsService.shared.capture(.onboardingCompleted)
+                // Request notification permission after onboarding completes
+                Task {
+                    let granted = await NotificationService.shared.requestAuthorization()
+                    if granted {
+                        AnalyticsService.shared.capture(.notificationPermissionGranted)
+                    } else {
+                        AnalyticsService.shared.capture(.notificationPermissionDenied)
+                    }
+                }
+            }
         }
         .onChange(of: appState.selectedTab) { _, newTab in
             if let tab = AnalyticsEvent.TabName(rawValue: newTab.rawValue) {
@@ -257,6 +288,90 @@ struct ContentView: View {
                 .onAppear {
                     AnalyticsService.shared.capture(.settingsOpened)
                 }
+        }
+        // MARK: - Onboarding
+        .fullScreenCover(isPresented: Binding(
+            get: { showOnboardingIntro },
+            set: { if !$0 { /* dismiss handled by callbacks */ } }
+        )) {
+            OnboardingIntroView(
+                onboardingState: onboardingState,
+                onStartTour: {
+                    AnalyticsService.shared.capture(.onboardingTourStarted)
+                    seedSampleDataForTour()
+                    onboardingState.startTour()
+                },
+                onSkip: {
+                    AnalyticsService.shared.capture(.onboardingIntroSkipped)
+                    onboardingState.complete()
+                }
+            )
+        }
+        .overlay {
+            if onboardingState.currentPhase.isTour {
+                if case .tourTransition(let toStep) = onboardingState.currentPhase {
+                    OnboardingTourTransitionCard(
+                        targetStep: toStep,
+                        onSkipTour: {
+                            let step = onboardingState.currentPhase.tourStep ?? 0
+                            AnalyticsService.shared.capture(.onboardingTourSkipped(atStep: step))
+                            clearSampleData()
+                            onboardingState.complete()
+                            appState.selectedTab = .home
+                        },
+                        onContinue: {
+                            onboardingState.resolveTransition()
+                        }
+                    )
+                    .transition(.opacity)
+                } else {
+                    OnboardingTourOverlay(
+                        appState: appState,
+                        onboardingState: onboardingState,
+                        onSkipTour: {
+                            let step = onboardingState.currentPhase.tourStep ?? 0
+                            AnalyticsService.shared.capture(.onboardingTourSkipped(atStep: step))
+                            clearSampleData()
+                            onboardingState.complete()
+                            appState.selectedTab = .home
+                        },
+                        onTourComplete: {
+                            AnalyticsService.shared.capture(.onboardingTourCompleted)
+                            appState.selectedTab = .home
+                            onboardingState.finishTour()
+                        }
+                    )
+                    .transition(.opacity)
+                }
+            }
+        }
+        .fullScreenCover(isPresented: Binding(
+            get: { onboardingState.currentPhase == .getStarted },
+            set: { if !$0 { /* dismiss handled by callbacks */ } }
+        )) {
+            OnboardingGetStartedView(
+                onVINLookupComplete: { _, _ in
+                    AnalyticsService.shared.capture(.onboardingVINLookupUsed)
+                    clearSampleData()
+                    onboardingState.complete()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                        appState.showAddVehicle = true
+                    }
+                },
+                onManualEntry: {
+                    AnalyticsService.shared.capture(.onboardingManualEntry)
+                    clearSampleData()
+                    onboardingState.complete()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                        appState.showAddVehicle = true
+                    }
+                },
+                onSkip: {
+                    AnalyticsService.shared.capture(.onboardingSkippedGetStarted)
+                    clearSampleData()
+                    onboardingState.complete()
+                }
+            )
         }
         // Handle mileage update notification navigation
         .onReceive(NotificationCenter.default.publisher(for: .navigateToMileageUpdateFromNotification)) { notification in
@@ -457,7 +572,16 @@ struct ContentView: View {
 
     private func seedSampleDataIfNeeded() {
         guard vehicles.isEmpty else { return }
+        seedSampleVehicles()
+    }
 
+    /// Seed sample data specifically for the onboarding tour
+    private func seedSampleDataForTour() {
+        guard vehicles.isEmpty else { return }
+        seedSampleVehicles()
+    }
+
+    private func seedSampleVehicles() {
         // --- Vehicle 1: Daily Driver (Camry) ---
         let camry = Vehicle(
             name: "Daily Driver",
@@ -474,6 +598,7 @@ struct ContentView: View {
             marbeteExpirationYear: 2026
         )
         modelContext.insert(camry)
+        appState.selectedVehicle = camry
 
         for service in Service.sampleServices(for: camry) {
             modelContext.insert(service)
@@ -507,7 +632,20 @@ struct ContentView: View {
             modelContext.insert(log)
         }
 
-        appState.selectedVehicle = camry
+        // Track sample vehicle IDs for cleanup
+        onboardingState.sampleVehicleIDs = [camry.id, mx5.id]
+    }
+
+    /// Clear all sample data created during onboarding tour
+    private func clearSampleData() {
+        let idsToRemove = onboardingState.sampleVehicleIDs
+        guard !idsToRemove.isEmpty else { return }
+
+        for vehicle in vehicles where idsToRemove.contains(vehicle.id) {
+            modelContext.delete(vehicle)
+        }
+        onboardingState.sampleVehicleIDs = []
+        appState.selectedVehicle = nil
     }
 }
 

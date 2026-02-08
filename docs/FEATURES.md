@@ -611,7 +611,7 @@
 - [ ] Immediate clarity on launch — no digging for important info
 - [ ] One-handed operation — thumb-friendly controls
 - [ ] Dark mode first — most users check car stuff in garages/parking lots
-- [ ] Minimal onboarding — VIN scan → ready to go
+- [x] Minimal onboarding — VIN scan → ready to go
 
 ---
 

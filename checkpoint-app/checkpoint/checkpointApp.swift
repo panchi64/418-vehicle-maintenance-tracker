@@ -108,14 +108,17 @@ struct checkpointApp: App {
             ContentView()
                 .preferredColorScheme(.dark)
                 .task {
-                    // Request notification authorization on app launch
-                    await NotificationService.shared.checkAuthorizationStatus()
-                    if !NotificationService.shared.isAuthorized {
-                        let granted = await NotificationService.shared.requestAuthorization()
-                        if granted {
-                            AnalyticsService.shared.capture(.notificationPermissionGranted)
-                        } else {
-                            AnalyticsService.shared.capture(.notificationPermissionDenied)
+                    // Only request notification permission after onboarding is completed
+                    // This avoids overwhelming new users with system prompts during intro
+                    if OnboardingState.hasCompletedOnboarding {
+                        await NotificationService.shared.checkAuthorizationStatus()
+                        if !NotificationService.shared.isAuthorized {
+                            let granted = await NotificationService.shared.requestAuthorization()
+                            if granted {
+                                AnalyticsService.shared.capture(.notificationPermissionGranted)
+                            } else {
+                                AnalyticsService.shared.capture(.notificationPermissionDenied)
+                            }
                         }
                     }
 
