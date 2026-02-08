@@ -58,6 +58,11 @@ struct ProPaywallSheet: View {
                             Button {
                                 Task {
                                     AnalyticsService.shared.capture(.purchaseAttempted(product: "pro.unlock"))
+                                    #if DEBUG
+                                    await storeManager.simulatePurchase(.proUnlock)
+                                    AnalyticsService.shared.capture(.purchaseSucceeded(product: "pro.unlock"))
+                                    dismiss()
+                                    #else
                                     do {
                                         let transaction = try await storeManager.purchase(.proUnlock)
                                         if transaction != nil {
@@ -67,6 +72,7 @@ struct ProPaywallSheet: View {
                                     } catch {
                                         AnalyticsService.shared.capture(.purchaseFailed(product: "pro.unlock", error: error.localizedDescription))
                                     }
+                                    #endif
                                 }
                             } label: {
                                 if storeManager.purchaseInProgress {

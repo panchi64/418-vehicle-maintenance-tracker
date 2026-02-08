@@ -36,9 +36,21 @@ struct TipModalView: View {
 
                     // Tip buttons in a horizontal row
                     HStack(spacing: Spacing.sm) {
+                        #if DEBUG
+                        if storeManager.tipProducts().isEmpty {
+                            debugTipSmall
+                            debugTipMedium
+                            debugTipLarge
+                        } else {
+                            ForEach(storeManager.tipProducts(), id: \.id) { product in
+                                tipButton(for: product)
+                            }
+                        }
+                        #else
                         ForEach(storeManager.tipProducts(), id: \.id) { product in
                             tipButton(for: product)
                         }
+                        #endif
                     }
                     .padding(.horizontal, Spacing.screenHorizontal)
 
@@ -67,6 +79,47 @@ struct TipModalView: View {
         }
         .presentationDetents([.height(350)])
     }
+
+    #if DEBUG
+    private func debugTipButton(label: String, price: String, productID: StoreManager.ProductID) -> some View {
+        Button {
+            Task {
+                await storeManager.simulatePurchase(productID)
+                PurchaseSettings.shared.totalTipCount += 1
+                dismiss()
+                if let theme = ThemeManager.shared.unlockRandomRareTheme() {
+                    AnalyticsService.shared.capture(.themeUnlocked(themeID: theme.id, tier: "rare"))
+                    try? await Task.sleep(for: .seconds(0.5))
+                    appState.unlockedTheme = theme
+                }
+            }
+        } label: {
+            VStack(spacing: 4) {
+                Text(price)
+                    .font(.brutalistBody)
+                    .foregroundStyle(Theme.surfaceInstrument)
+                Text(label)
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.surfaceInstrument.opacity(0.7))
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 60)
+        }
+        .buttonStyle(.primary)
+    }
+
+    private var debugTipSmall: some View {
+        debugTipButton(label: "Small", price: "$1.99", productID: .tipSmall)
+    }
+
+    private var debugTipMedium: some View {
+        debugTipButton(label: "Medium", price: "$4.99", productID: .tipMedium)
+    }
+
+    private var debugTipLarge: some View {
+        debugTipButton(label: "Large", price: "$9.99", productID: .tipLarge)
+    }
+    #endif
 
     private func tipButton(for product: Product) -> some View {
         Button {

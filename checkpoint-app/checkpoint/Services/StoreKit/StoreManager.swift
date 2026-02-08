@@ -32,7 +32,11 @@ final class StoreManager {
     // MARK: - Properties
 
     private(set) var products: [Product] = []
+    #if DEBUG
+    var isPro: Bool = true
+    #else
     var isPro: Bool = false
+    #endif
     var purchaseInProgress: Bool = false
     var purchaseError: String?
 
@@ -72,6 +76,20 @@ final class StoreManager {
     }
 
     // MARK: - Purchase
+
+    #if DEBUG
+    /// Simulates a successful purchase in debug builds without StoreKit
+    func simulatePurchase(_ productID: ProductID) async {
+        storeLogger.info("DEBUG: Simulating purchase for \(productID.rawValue)")
+        purchaseInProgress = true
+        defer { purchaseInProgress = false }
+        try? await Task.sleep(for: .seconds(0.3))
+        if productID == .proUnlock {
+            isPro = true
+            PurchaseSettings.shared.isPro = true
+        }
+    }
+    #endif
 
     func purchase(_ productID: ProductID) async throws -> StoreKit.Transaction? {
         guard let product = products.first(where: { $0.id == productID.rawValue }) else {
@@ -117,6 +135,10 @@ final class StoreManager {
     // MARK: - Entitlements
 
     func checkEntitlements() async {
+        #if DEBUG
+        isPro = true
+        PurchaseSettings.shared.isPro = true
+        #else
         var hasPro = false
 
         for await result in Transaction.currentEntitlements {
@@ -129,6 +151,7 @@ final class StoreManager {
 
         isPro = hasPro
         PurchaseSettings.shared.isPro = hasPro
+        #endif
     }
 
     // MARK: - Restore
