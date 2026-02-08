@@ -32,6 +32,7 @@ struct AttachmentPicker: View {
     }
 
     var body: some View {
+        let labelFont: Font = .brutalistLabel
         VStack(alignment: .leading, spacing: Spacing.sm) {
             // Buttons row
             HStack(spacing: Spacing.sm) {
@@ -40,7 +41,7 @@ struct AttachmentPicker: View {
                         Image(systemName: "camera.fill")
                             .font(.system(size: 14, weight: .medium))
                         Text("PHOTO")
-                            .font(.brutalistLabel)
+                            .font(labelFont)
                             .tracking(1)
                     }
                     .foregroundStyle(Theme.textPrimary)
