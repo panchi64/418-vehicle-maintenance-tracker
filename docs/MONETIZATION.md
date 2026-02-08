@@ -1,6 +1,6 @@
-# Vehicle Maintenance Tracker - Monetization Strategy
+# Checkpoint — Monetization Strategy
 
-> Guiding principles for pricing and feature tiers. The goal is a sustainable business model that respects users while funding ongoing development.
+> Finalized pricing, tiers, and implementation details for Checkpoint's monetization model. This is the source of truth for what's free, what's paid, and how the payment flows work.
 
 ---
 
@@ -11,211 +11,284 @@
 - **Pay for value, not access** — Premium features provide genuine extra value, not artificial gates
 - **Server costs justify subscriptions** — Only charge recurring fees for features with ongoing infrastructure costs
 - **Support the developer** — Offer a way for happy users to contribute beyond purchases
+- **No surprises** — Price increases are communicated upfront; early adopters are rewarded
 
 ---
 
 ## Pricing Tiers
 
-### Free Tier
+### Free Tier ($0, forever)
 
-> The full app experience for most users. No artificial limits, no ads.
-
-**Included:**
+> The full app experience for most users. Everything currently implemented ships free.
 
 | Category | Features |
-| -------- | -------- |
-| **Vehicles** | Unlimited vehicles |
-| **Core Features** | Service logging, reminders, mileage tracking, cost tracking |
-| **iCloud Sync** | Native CloudKit sync across iOS devices (iPhone, iPad) |
-| **Widgets** | Home Screen, Lock Screen, CarPlay Dashboard |
-| **Apple Watch** | Complication and Watch app |
-| **OCR** | Basic on-device OCR (Vision framework) |
-| **Notifications** | Full reminder system (30/7/1-day defaults) |
-| **Export** | Basic data export |
+|----------|----------|
+| **Vehicles** | Up to 3 vehicles |
+| **Core Features** | Service logging, reminders, mileage tracking, cost tracking, service clustering, seasonal reminders |
+| **Cost Analytics** | Total/YTD/monthly spending, category breakdowns, cost-per-mile, trend charts |
+| **iCloud Sync** | Native CloudKit sync across iOS devices — no account needed |
+| **Widgets** | Home Screen (small/medium), Lock Screen (inline/circular/rectangular), interactive "Done" button |
+| **Apple Watch** | Full watch app, complications, mileage update, mark service done |
+| **Siri** | "What's due?", "List upcoming services", "Update mileage" voice commands |
+| **OCR** | On-device Vision framework for odometer reading and receipt text extraction |
+| **VIN Decode** | NHTSA VIN lookup, on-device VIN OCR, auto-populate vehicle details |
+| **Recall Alerts** | NHTSA recall detection with safety-critical flags |
+| **Notifications** | Full reminder system (30/7/1-day), mileage-based, service clustering, marbete, yearly roundup |
+| **Export** | PDF service history, CSV import (Fuelly, Drivvo, Simply Auto, custom) |
+| **Dynamic App Icon** | Icon changes based on service urgency |
+| **Theme** | Default dark mode with amber accent |
+
+**Why 3 vehicles free (not unlimited):**
+- Covers single-car owners and most couples — the majority of users
+- No marginal server cost, but provides a natural upgrade path for multi-vehicle households and enthusiasts
+- Still more generous than competitors who limit to 1-2 vehicles
 
 **Why iCloud sync is free:**
-- Uses Apple's CloudKit — no server cost to us
-- Essential for data safety (primary user request)
-- Differentiator vs competitors who paywall basic sync
-- Builds trust and reduces data loss anxiety
-
-**Why unlimited vehicles free:**
-- No server cost to us — it's all local storage
-- Strong differentiator vs competitors who limit to 2-8 vehicles
-- Families are exactly the users who'd value Family Sharing (paid)
+- Uses Apple's CloudKit — zero server cost
+- Essential for data safety (the #1 user anxiety in the category)
+- Strong differentiator vs competitors who paywall basic sync
 
 **Why no ads:**
 - Ads feel cheap and erode premium positioning
-- Users hate them — it's a top complaint in competitor reviews
-- The freemium model works without them
+- Top complaint in competitor reviews
+- A tip jar with a gentle modal is less annoying and likely generates more long-term revenue
 
 ---
 
-### Pro Bundle (One-Time Purchase)
+### Pro (One-Time Purchase)
 
-> Advanced features for power users. Pay once, own forever.
+> Power user features. Pay once, own forever. All future Pro features included at no extra cost.
 
-**Price point:** TBD (research suggests $7.99–$14.99 range)
+**Pricing:** ~~$14.99~~ **$9.99** (launch price)
 
-**Included:**
+The app displays the full $14.99 price crossed out with the $9.99 launch price. This sets honest expectations — users know the price will increase, and early adopters feel rewarded. Price rises to $14.99 when AI-powered OCR ships.
 
-| Feature | Description |
-| ------- | ----------- |
-| **Advanced Reports** | Detailed analytics, spending trends, cost breakdowns |
-| **PDF Export** | Professional vehicle history documents with optional receipt attachments |
-| **Theme Customization** | Custom colors, app icons, personalization options |
+| Feature | Description | Status |
+|---------|-------------|--------|
+| **Unlimited Vehicles** | 4+ vehicles (free tier allows 3) | v1 |
+| **Basic Theme Collection** | 4-6 unlockable themes (typography, layout density, color schemes, light mode) | v1 |
+| **AI Receipt Auto-Fill** | Server-side smart extraction from receipt/invoice photos — auto-populates date, cost, vendor, services | Future |
+| **Deeper Vehicle Insights** | Advanced analytics, predictive maintenance trends, health scoring | Future |
 
 **Why one-time:**
-- These features have no ongoing server cost
-- Users strongly prefer one-time purchases over subscriptions
-- Builds goodwill and trust
+- No ongoing server cost for current Pro features
+- Users strongly prefer one-time purchases — subscription fatigue is severe in this category
+- Builds goodwill and trust; early adopters become advocates
 
-**Conversion triggers:**
-- User generates their first report and sees the preview
-- User tries to export PDF and sees Pro badge
-- User explores settings and discovers themes
+**Conversion flow:**
+1. User tries to add a 4th vehicle → paywall sheet appears
+2. Sheet shows ~~$14.99~~ $9.99 launch pricing with feature list
+3. StoreKit 2 purchase flow → vehicle unlocked immediately
 
----
-
-### Subscription Tier
-
-> Server-based features with ongoing infrastructure costs. Recurring revenue justified.
-
-**Price point:** TBD (research suggests $9.99–$14.99/year)
-
-**Included:**
-
-| Feature | Description |
-| ------- | ----------- |
-| **AI-Powered OCR** | Server-side smart extraction with high accuracy |
-| **Account Sync** | Cross-device sync via cloud infrastructure |
-| **Family Sharing** | Multi-user access to shared vehicles across Apple IDs |
-| **Desktop/Web Access** | Browser-based access (future feature) |
-
-**Why subscription:**
-- AI OCR requires server infrastructure and API costs
-- Sync requires cloud storage and real-time database
-- Family Sharing requires multi-user infrastructure
-- Ongoing costs = ongoing revenue
-
-**Conversion triggers:**
-- User scans a receipt and basic OCR misses fields → "Want better accuracy?"
-- User gets a new phone and wants to transfer data → "Enable cloud sync?"
-- User mentions spouse's car → "Share vehicles with family?"
+**Price increase trigger:**
+- When AI receipt auto-fill ships, Pro price moves to $14.99
+- Existing Pro owners get the new feature automatically at no extra charge
 
 ---
 
-### Tip Jar
+### Tip Jar ($1.99 / $4.99 / $9.99)
 
-> For users who love the app and want to support development beyond purchases.
+> For users who love the app and want to support development. Tips unlock exclusive themes.
 
-**Implementation:**
-- Simple one-time donations ($2.99, $4.99, $9.99 options)
-- Located in Settings under "Support the Developer"
-- No extra features — purely gratitude-based
-- Thank you message after purchase
+**Tip Tiers:**
 
-**Why offer this:**
-- Some users genuinely want to support indie developers
-- Low friction way to contribute
-- Builds community and loyalty
+| Tier | Price | You Keep (after Apple 15%) |
+|------|-------|---------------------------|
+| Small | $1.99 | $1.69 |
+| Medium | $4.99 | $4.24 |
+| Large | $9.99 | $8.49 |
 
----
+No custom amounts — StoreKit does not support arbitrary pricing. Three fixed tiers only.
 
-## Pricing Principles
+**Tip jar is NOT Pro.** A $9.99 tip does not unlock Pro features. Tips and Pro are separate purchases with separate value propositions.
 
-### What We Charge For
+#### Tip Jar Surfaces
 
-| Charge | Reasoning |
-| ------ | --------- |
-| Server-based features | Real ongoing costs |
-| Advanced analysis | Significant development effort, power user value |
-| Premium exports | Professional output, resale/warranty value |
-| Customization | Nice-to-have, not need-to-have |
+**1. Settings (passive, always available):**
+- "Support Checkpoint" row in Settings, visible to all users including Pro owners
+- Shows the three tip tiers with a brief thank-you message
+- Always accessible, never removed
 
-### What We Don't Charge For
+**2. Modal prompt (active, conditional):**
+- Appears once per session, triggered only after the user completes a meaningful action (logging a service, updating mileage, marking a service done)
+- **Suppressed permanently** if the user has purchased Pro
+- If dismissed, does not appear again until the next app session (next app launch from cold/background)
+- Gentle tone — "Enjoying Checkpoint? Help keep it going." Not guilt-tripping
 
-| Free | Reasoning |
-| ---- | --------- |
-| Core tracking | The app's primary purpose should work for everyone |
-| Basic reminders | Safety-critical — don't paywall maintenance alerts |
-| Unlimited vehicles | No marginal cost, strong differentiator |
-| Widgets | Part of the core "app comes to you" philosophy |
-| Basic OCR | On-device processing has no ongoing cost |
+#### Theme Gacha System
 
----
+Each tip unlocks **one random theme** from the exclusive tip-only collection:
 
-## Upgrade Flows
+| Theme Source | How to Unlock |
+|-------------|---------------|
+| Default (dark/amber) | Free — ships with the app |
+| Basic collection (4-6 themes) | Buy Pro |
+| Rare/exclusive themes | Tip (any amount) — one random theme per tip |
 
-### Principles
-
-- **Show value before asking** — Let users see what they're getting
-- **No dark patterns** — Clear pricing, easy cancellation, no tricks
-- **Contextual prompts** — Offer upgrades when features are relevant, not randomly
-- **Graceful degradation** — If subscription lapses, data remains accessible
-
-### Example Flows
-
-**PDF Export (Pro):**
-1. User taps "Export PDF"
-2. Preview generates with watermark: "Pro feature"
-3. "Unlock PDF Export with Pro Bundle — $X.XX one-time"
-4. Purchase → watermark removed, PDF ready to share
-
-**AI OCR (Subscription):**
-1. User scans receipt with basic OCR
-2. Some fields extracted, others missed
-3. "Want better accuracy? AI-Powered OCR catches more details."
-4. Subscribe → receipt re-processed with AI, fields populated
-
-**Family Sharing (Subscription):**
-1. User adds second vehicle
-2. Later, mentions in notes or service: "Sarah's car"
-3. "Share this vehicle with family members?"
-4. Subscribe → invite flow begins
+- **Rare themes are tip-exclusive** — they cannot be unlocked by purchasing Pro. This gives Pro owners a reason to tip.
+- If the user already owns all available tip themes, the tip still processes (it's a tip, not a purchase), but no new theme is unlocked. Show a "You've collected them all — thank you!" message.
+- Themes are dramatic: different typography, layout density, color palettes, light/dark variants — not just accent color swaps.
+- Each tip surfaces a reveal animation showing which theme was unlocked.
 
 ---
 
-## Revenue Considerations
+### Subscription (Future — NOT in v1)
 
-### Target Mix
+> Server-based features with genuine ongoing infrastructure costs. Not mentioned anywhere in the v1 UI.
 
-| Source | Estimated % of Revenue |
-| ------ | ---------------------- |
-| Pro Bundle | 40-50% |
+**Price point:** TBD (~$9.99–$14.99/year based on market research)
+
+**Planned features:**
+
+| Feature | Description | Server Cost Justification |
+|---------|-------------|--------------------------|
+| **AI-Powered OCR** | High-accuracy server-side receipt/invoice extraction | LLM API costs per scan |
+| **Cloud Account Sync** | Cross-platform sync via cloud infrastructure | Database hosting, real-time sync |
+| **Family Sharing** | Multi-user access to shared vehicles across Apple IDs | Multi-tenant infrastructure |
+| **Desktop/Web Access** | Browser-based access to vehicle data | Web hosting, API server |
+
+**Why not in v1:**
+- None of these features exist yet
+- Mentioning future paid features to new users risks souring first impressions
+- Subscription should only appear when the features are ready to deliver value on day one
+
+**Graceful degradation:** If a subscription lapses, data remains accessible (read-only). No data hostage situations.
+
+---
+
+## Revenue Model
+
+### Apple's Cut
+
+Checkpoint qualifies for Apple's **Small Business Program** (under $1M/year revenue): **15% commission** on all transactions.
+
+### Projected Revenue (per 10,000 downloads)
+
+| Source | Conservative (low conversion) | Moderate | Optimistic |
+|--------|-------------------------------|----------|------------|
+| Pro at $9.99 (2-4% conversion) | $1,698 | $2,548 | $3,397 |
+| Tips at avg $4 net (0.5-1.5% of users) | $170 | $425 | $764 |
+| **Total net revenue** | **$1,868** | **$2,973** | **$4,161** |
+
+Revenue scales linearly with downloads. At 50,000 downloads, moderate scenario = ~$14,800/year.
+
+### Target Revenue Mix (at maturity, post-subscription launch)
+
+| Source | Estimated % |
+|--------|-------------|
+| Pro Bundle | 35-45% |
 | Subscription | 40-50% |
-| Tip Jar | 5-10% |
+| Tip Jar | 5-15% |
 
-### Key Metrics to Track
+---
 
-- Free → Pro conversion rate
-- Free → Subscription conversion rate
-- Subscription retention rate
-- Average revenue per user (ARPU)
-- Tip jar contribution rate
+## Implementation Requirements (v1)
+
+### StoreKit 2 Infrastructure
+
+| Component | Description |
+|-----------|-------------|
+| **Product IDs** | `pro.unlock`, `tip.small`, `tip.medium`, `tip.large` |
+| **StoreManager** | Singleton class handling product loading, purchases, entitlement state |
+| **Entitlement checks** | `isPro` boolean gating vehicle limit and basic themes |
+| **Receipt validation** | On-device via StoreKit 2 (no server needed) |
+| **Transaction listener** | Background listener for purchases completed on other devices |
+| **Restore purchases** | Required by App Store — button in Settings |
+
+### UI Components
+
+| Component | Description |
+|-----------|-------------|
+| **Pro paywall sheet** | Triggered when adding 4th vehicle. Shows ~~$14.99~~ $9.99, feature list, purchase button |
+| **Tip jar view** | Settings row → detail view with 3 tiers and theme reveal |
+| **Tip modal** | Post-action modal, once per session, suppressed for Pro owners |
+| **Theme picker** | Settings view showing owned themes, locked themes with unlock method |
+| **Theme reveal animation** | Shown after tip purchase — reveals which theme was unlocked |
+
+### Theme System
+
+| Requirement | Detail |
+|-------------|--------|
+| **Theme model** | Name, preview, colors, typography, layout properties, rarity tier (basic/rare), unlock method |
+| **Theme storage** | UserDefaults or SwiftData for owned themes and active theme |
+| **Theme application** | Environment-based injection so all views respond to theme changes |
+| **Minimum themes for v1** | 1 default + 4-6 basic (Pro) + 3-5 rare (tip gacha) |
+
+---
+
+## What We Charge For vs. What's Free
+
+### Paid
+
+| Feature | Why it's paid |
+|---------|---------------|
+| 4+ vehicles | Natural upgrade path, funds development |
+| Custom themes | Nice-to-have, not need-to-have |
+| AI OCR (future) | Real server/API costs |
+| Cloud sync (future) | Real infrastructure costs |
+| Family sharing (future) | Real multi-tenant costs |
+
+### Free
+
+| Feature | Why it's free |
+|---------|---------------|
+| Core tracking & reminders | The app's primary purpose — never paywalled |
+| Cost analytics & charts | Part of the core value proposition |
+| Basic OCR | On-device, zero ongoing cost |
+| iCloud sync | Apple's CloudKit, zero server cost |
+| Widgets, Watch, Siri | Platform integration is core, not premium |
+| PDF export & CSV import | Data portability builds trust |
+| Recall alerts | Safety-critical — never paywalled |
+| 3 vehicles | Covers the vast majority of users |
+
+---
+
+## Upgrade Flow Principles
+
+- **Show value before asking** — Let users experience the app before any paywall appears
+- **No dark patterns** — Clear pricing, easy cancellation, no tricks, no hidden charges
+- **Contextual prompts** — Offer upgrades when relevant (adding 4th vehicle), not randomly
+- **Honest pricing** — Launch discount shown with original price, no bait-and-switch
+- **Graceful limits** — Free users never lose access to data they've already entered
 
 ---
 
 ## Competitive Positioning
 
-| Competitor Approach | Our Approach |
-| ------------------- | ------------ |
-| Free with intrusive ads | Free with no ads |
-| 2-vehicle limit on free | Unlimited vehicles |
-| Everything behind subscription | Core app fully free, subscription only for server features |
-| Monthly subscription ($5+/mo) | Annual subscription, reasonable price |
-| No one-time option | Pro bundle for non-server features |
+| Competitor Approach | Checkpoint's Approach |
+|--------------------|-----------------------|
+| Free with intrusive ads | Free with no ads, ever |
+| 1-2 vehicle limit on free | 3 vehicles free |
+| Everything behind subscription | Core app fully free; subscription only for server features |
+| Monthly subscription ($5+/mo) | One-time Pro purchase ($9.99) |
+| Surprise price increases | ~~$14.99~~ $9.99 launch price shown upfront |
+| Tips give nothing | Tips unlock exclusive themes |
+| Generic "premium" paywall | Specific, justified feature gates |
 
 ---
 
-## Open Questions
+## Key Metrics to Track
 
-- [ ] Exact price points for Pro bundle and Subscription
-- [ ] Should Pro bundle be included in Subscription, or separate?
+| Metric | What it tells you |
+|--------|-------------------|
+| Free → Pro conversion rate | Is the 3-vehicle limit an effective gate? |
+| Tip jar contribution rate | Is the modal timing/tone right? |
+| Tip repeat rate | Is the gacha system encouraging repeat tips? |
+| Theme collection completion | Do you need more rare themes? |
+| 4th vehicle attempt rate | How many users hit the gate? |
+| Pro purchase → tip rate | Are Pro users still tipping for rare themes? |
+
+---
+
+## Open Questions (Post-v1)
+
+- [ ] Exact subscription price point ($9.99 or $14.99/year)
+- [ ] Should Pro be included in subscription, or separate?
 - [ ] Family Sharing: free read-only access for invited members?
-- [ ] Regional pricing considerations?
-- [ ] Launch pricing vs long-term pricing?
+- [ ] Regional pricing adjustments?
+- [ ] When to raise Pro price to $14.99 (tied to AI OCR ship date)
+- [ ] How many rare themes to ship at launch vs. add over time?
 
 ---
 
-_Last updated: January 2026_
+_Last updated: February 2026_
