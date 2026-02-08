@@ -87,7 +87,10 @@ struct HomeTab: View {
 
                 // Quick Mileage Update Card (shown if never updated or 14+ days ago)
                 if let vehicle = vehicle, vehicle.shouldPromptMileageUpdate {
-                    QuickMileageUpdateCard(vehicle: vehicle) { newMileage in
+                    QuickMileageUpdateCard(
+                        vehicle: vehicle,
+                        mileageTrackedServiceCount: vehicleServices.filter { $0.dueMileage != nil }.count
+                    ) { newMileage in
                         AnalyticsService.shared.capture(.mileageUpdated(source: .quickUpdate))
                         updateMileage(newMileage, for: vehicle)
                     }

@@ -176,21 +176,8 @@ struct AddVehicleView: View {
                                     )
                                 }
 
-                                HStack {
-                                    Text("17-character Vehicle Identification Number")
-                                        .font(.caption)
-                                        .foregroundStyle(Theme.textTertiary)
-
-                                    Spacer()
-
-                                    if !vin.isEmpty {
-                                        Text("\(vin.count)/17")
-                                            .font(.brutalistLabel)
-                                            .foregroundStyle(isVINValid ? Theme.statusGood : Theme.textTertiary)
-                                            .tracking(1)
-                                    }
-                                }
-                                .padding(.leading, 4)
+                                VINCharacterCountView(vin: vin, isVINValid: isVINValid)
+                                    .padding(.leading, 4)
 
                                 // VIN OCR processing indicator
                                 if isProcessingVINOCR {
@@ -414,6 +401,38 @@ struct AddVehicleView: View {
         modelContext.insert(vehicle)
         ToastService.shared.show(L10n.toastVehicleSaved, icon: "checkmark", style: .success)
         dismiss()
+    }
+}
+
+// MARK: - VIN Character Count View
+
+private struct VINCharacterCountView: View {
+    let vin: String
+    let isVINValid: Bool
+
+    var body: some View {
+        if vin.isEmpty {
+            Text(L10n.vehicleVINHelp)
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(1.5)
+                .textCase(.uppercase)
+        } else if isVINValid {
+            HStack(spacing: Spacing.xs) {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 10, weight: .bold))
+                Text(L10n.addVehicleVINValidLookup)
+            }
+            .font(.brutalistLabel)
+            .foregroundStyle(Theme.statusGood)
+            .tracking(1.5)
+            .textCase(.uppercase)
+        } else {
+            Text("\(vin.count) / 17 CHARACTERS")
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(1.5)
+        }
     }
 }
 

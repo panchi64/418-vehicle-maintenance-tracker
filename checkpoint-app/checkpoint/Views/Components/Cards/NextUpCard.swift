@@ -177,6 +177,22 @@ struct NextUpCard: View {
                             .foregroundStyle(status.color)
                     }
 
+                    // Last service date
+                    if let lastPerformed = service.lastPerformed {
+                        HStack {
+                            Text("LAST_SERVICE")
+                                .font(.brutalistLabel)
+                                .foregroundStyle(Theme.textTertiary)
+                                .tracking(1)
+
+                            Spacer()
+
+                            Text(Formatters.mediumDate.string(from: lastPerformed).uppercased())
+                                .font(.brutalistBody)
+                                .foregroundStyle(Theme.textSecondary)
+                        }
+                    }
+
                     // Progress bar (simple, geometric)
                     progressBar
                         .padding(.top, 8)

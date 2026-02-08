@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftData
 import WidgetKit
 import Combine
 import CoreData
@@ -69,7 +70,7 @@ final class WidgetDataService {
         currentMileage: Int,
         estimatedMileage: Int? = nil,
         isEstimated: Bool = false,
-        services: [(name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?)]
+        services: [(serviceID: String?, name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?)]
     ) {
         guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
             widgetLogger.error("Failed to access App Group UserDefaults")
@@ -78,6 +79,7 @@ final class WidgetDataService {
 
         let sharedServices = services.prefix(3).map { service in
             WidgetSharedData.SharedService(
+                serviceID: service.serviceID,
                 name: service.name,
                 status: mapStatus(service.status),
                 dueDescription: service.dueDescription,
@@ -87,6 +89,7 @@ final class WidgetDataService {
         }
 
         let widgetData = WidgetSharedData(
+            vehicleID: vehicleID,
             vehicleName: vehicleName,
             currentMileage: currentMileage,
             estimatedMileage: estimatedMileage,
@@ -125,7 +128,7 @@ final class WidgetDataService {
         let pace = vehicle.dailyMilesPace
 
         // Create service items
-        var allItems: [(name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?, urgencyScore: Int)] = (vehicle.services ?? []).map { service in
+        var allItems: [(serviceID: String?, name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?, urgencyScore: Int)] = (vehicle.services ?? []).map { service in
             let status = service.status(currentMileage: effectiveMileage)
             let statusString: String
             switch status {
@@ -144,6 +147,7 @@ final class WidgetDataService {
             }
 
             return (
+                serviceID: service.id.uuidString,
                 name: service.name,
                 status: statusString,
                 dueDescription: service.primaryDescription ?? "Scheduled",
@@ -181,6 +185,7 @@ final class WidgetDataService {
             }
 
             allItems.append((
+                serviceID: nil,
                 name: "Marbete Renewal",
                 status: statusString,
                 dueDescription: dueDescription,
@@ -195,7 +200,7 @@ final class WidgetDataService {
 
         // Convert to service data format (dropping urgencyScore)
         let serviceData = sortedItems.map { item in
-            (name: item.name, status: item.status, dueDescription: item.dueDescription, dueMileage: item.dueMileage, daysRemaining: item.daysRemaining)
+            (serviceID: item.serviceID, name: item.name, status: item.status, dueDescription: item.dueDescription, dueMileage: item.dueMileage, daysRemaining: item.daysRemaining)
         }
 
         updateWidgetData(
@@ -244,6 +249,95 @@ final class WidgetDataService {
         WidgetCenter.shared.reloadAllTimelines()
     }
 
+    // MARK: - Pending Widget Completions
+
+    /// Process pending service completions queued by the widget "Done" button
+    /// Called when the main app enters foreground
+    func processPendingWidgetCompletions(context: ModelContext) {
+        let pending = PendingWidgetCompletion.loadAll()
+        guard !pending.isEmpty else { return }
+
+        widgetLogger.info("Processing \(pending.count) pending widget completion(s)")
+
+        // Clear immediately to avoid re-processing
+        PendingWidgetCompletion.clearAll()
+
+        for completion in pending {
+            do {
+                // Find vehicle by UUID
+                guard let vehicleUUID = UUID(uuidString: completion.vehicleID) else {
+                    widgetLogger.error("Invalid vehicle UUID: \(completion.vehicleID)")
+                    continue
+                }
+                let vehicles = try context.fetch(FetchDescriptor<Vehicle>())
+                guard let vehicle = vehicles.first(where: { $0.id == vehicleUUID }) else {
+                    widgetLogger.error("Vehicle not found for widget completion: \(completion.vehicleID)")
+                    continue
+                }
+
+                // Find service by UUID
+                guard let serviceUUID = UUID(uuidString: completion.serviceID) else {
+                    widgetLogger.error("Invalid service UUID: \(completion.serviceID)")
+                    continue
+                }
+                guard let service = (vehicle.services ?? []).first(where: { $0.id == serviceUUID }) else {
+                    widgetLogger.error("Service not found for widget completion: \(completion.serviceID)")
+                    continue
+                }
+
+                // Create service log
+                let log = ServiceLog(
+                    performedDate: completion.performedDate,
+                    mileageAtService: completion.mileageAtService,
+                    cost: 0,
+                    notes: "Completed via widget"
+                )
+                log.service = service
+                log.vehicle = vehicle
+                context.insert(log)
+
+                // Update service tracking
+                service.lastPerformed = completion.performedDate
+                service.lastMileage = completion.mileageAtService
+
+                // Recalculate next due
+                if let intervalMonths = service.intervalMonths {
+                    service.dueDate = Calendar.current.date(byAdding: .month, value: intervalMonths, to: completion.performedDate)
+                }
+                if let intervalMiles = service.intervalMiles {
+                    service.dueMileage = completion.mileageAtService + intervalMiles
+                }
+
+                // Update vehicle mileage if widget mileage is higher
+                if completion.mileageAtService > vehicle.currentMileage {
+                    vehicle.currentMileage = completion.mileageAtService
+                    vehicle.mileageUpdatedAt = completion.performedDate
+
+                    // Create mileage snapshot
+                    let snapshot = MileageSnapshot(
+                        mileage: completion.mileageAtService,
+                        recordedAt: completion.performedDate,
+                        source: .serviceCompletion
+                    )
+                    snapshot.vehicle = vehicle
+                }
+
+                widgetLogger.info("Processed widget completion: \(service.name) for \(vehicle.displayName)")
+
+                // Re-sync widget data
+                updateWidget(for: vehicle)
+            } catch {
+                widgetLogger.error("Failed to process widget completion: \(error.localizedDescription)")
+            }
+        }
+
+        do {
+            try context.save()
+        } catch {
+            widgetLogger.error("Failed to save widget completions: \(error.localizedDescription)")
+        }
+    }
+
     private func mapStatus(_ statusString: String) -> WidgetSharedData.ServiceStatus {
         switch statusString.lowercased() {
         case "overdue": return .overdue
@@ -258,6 +352,7 @@ final class WidgetDataService {
 
 /// Data structure matching the widget's expected format
 struct WidgetSharedData: Codable {
+    let vehicleID: String?
     let vehicleName: String
     let currentMileage: Int
     let estimatedMileage: Int?
@@ -266,6 +361,7 @@ struct WidgetSharedData: Codable {
     let updatedAt: Date
 
     struct SharedService: Codable {
+        let serviceID: String?      // UUID string of the Service entity (nil for marbete)
         let name: String
         let status: ServiceStatus
         let dueDescription: String
@@ -282,5 +378,39 @@ struct WidgetSharedData: Codable {
 struct VehicleListItem: Codable, Sendable {
     let id: String
     let displayName: String
+}
+
+/// Pending service completion from widget "Done" button
+/// Written by widget extension, read and processed by main app on foreground
+struct PendingWidgetCompletion: Codable {
+    let serviceID: String
+    let vehicleID: String
+    let performedDate: Date
+    let mileageAtService: Int
+
+    static let userDefaultsKey = "pendingWidgetCompletions"
+    static let appGroupID = "group.com.418-studio.checkpoint.shared"
+
+    static func save(_ completion: PendingWidgetCompletion) {
+        guard let userDefaults = UserDefaults(suiteName: appGroupID) else { return }
+        var pending = loadAll()
+        pending.append(completion)
+        if let data = try? JSONEncoder().encode(pending) {
+            userDefaults.set(data, forKey: userDefaultsKey)
+        }
+    }
+
+    static func loadAll() -> [PendingWidgetCompletion] {
+        guard let userDefaults = UserDefaults(suiteName: appGroupID),
+              let data = userDefaults.data(forKey: userDefaultsKey) else {
+            return []
+        }
+        return (try? JSONDecoder().decode([PendingWidgetCompletion].self, from: data)) ?? []
+    }
+
+    static func clearAll() {
+        guard let userDefaults = UserDefaults(suiteName: appGroupID) else { return }
+        userDefaults.removeObject(forKey: userDefaultsKey)
+    }
 }
 

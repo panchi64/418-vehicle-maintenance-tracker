@@ -21,7 +21,8 @@ Views/
 │   ├── ServiceDetailView.swift
 │   └── MarkServiceDoneSheet.swift
 ├── Settings/            # Settings views
-│   └── SettingsView.swift
+│   ├── SettingsView.swift
+│   └── CSVImportView.swift  # Import from Fuelly/Drivvo/Simply Auto
 └── Components/          # Reusable UI components
     ├── Attachments/     # Photo/document handling
     ├── Camera/          # Vision framework OCR views

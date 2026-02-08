@@ -15,12 +15,20 @@ checkpointTests/
 │   ├── ServiceLogTests.swift
 │   ├── ServicePresetTests.swift
 │   ├── ServiceTests.swift
+│   ├── SeasonalReminderTests.swift
 │   └── VehicleTests.swift
 ├── Views/                   # View tests
 ├── Services/                # Service tests
+│   └── CSVImportServiceTests.swift  # CSV import format detection & parsing
 ├── State/                   # AppState tests
 ├── Utilities/               # Utility tests
+├── Insights/                # Contextual insights tests
+│   └── ContextualInsightsTests.swift
+├── Vehicle/                 # Vehicle feature tests
+│   └── VINRegistrationTests.swift
 └── Widget/                  # Widget tests
+    ├── AccessoryWidgetTests.swift
+    └── PendingWidgetCompletionTests.swift
 ```
 
 ## Test Setup Pattern
@@ -104,6 +112,28 @@ func test_dailyMilesPace_lessThan7Days_returnsNil()
 - Expiration date calculation
 - Status computation
 - Days remaining calculation
+
+### CSVImportServiceTests
+- CSV format auto-detection (Fuelly, Drivvo, Simply Auto)
+- Row parsing and ServiceLog creation
+- Handling of malformed/incomplete rows
+- Import count accuracy
+
+### ContextualInsightsTests
+- Time since last service formatting
+- Miles since last service calculation
+- Average cost computation
+- Times serviced count
+
+### PendingWidgetCompletionTests
+- Encoding/decoding of pending completions
+- Queue and dequeue from UserDefaults
+- Processing into ServiceLog entries
+
+### VINRegistrationTests
+- Character count display logic
+- VIN validation state transitions
+- Auto-fill feedback after successful lookup
 
 ## Async Test Pattern
 

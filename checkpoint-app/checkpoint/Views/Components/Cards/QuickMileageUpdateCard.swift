@@ -11,6 +11,7 @@ import UIKit
 
 struct QuickMileageUpdateCard: View {
     let vehicle: Vehicle
+    var mileageTrackedServiceCount: Int = 0
     let onUpdate: (Int) -> Void
 
     @State private var showMileageSheet = false
@@ -79,6 +80,13 @@ struct QuickMileageUpdateCard: View {
                         Text(vehicle.mileageUpdateDescription)
                             .font(.brutalistSecondary)
                             .foregroundStyle(Theme.textTertiary)
+
+                        if mileageTrackedServiceCount > 0 {
+                            Text("KEEPS \(mileageTrackedServiceCount) SERVICE REMINDERS ACCURATE")
+                                .font(.brutalistLabel)
+                                .foregroundStyle(Theme.textTertiary)
+                                .tracking(1)
+                        }
                     }
 
                     Spacer()

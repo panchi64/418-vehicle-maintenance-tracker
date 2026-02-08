@@ -12,9 +12,13 @@ This directory contains the WidgetKit extension for home screen widgets.
 | `WidgetProvider.swift` | Timeline provider for widget data |
 | `VehicleEntity.swift` | App Entity for vehicle selection |
 | `VehicleEntityQuery.swift` | Entity query for vehicle picker |
+| `MarkServiceDoneIntent.swift` | App Intent for interactive "Done" button |
 | `Views/SmallWidgetView.swift` | Small widget layout |
-| `Views/MediumWidgetView.swift` | Medium widget layout |
+| `Views/MediumWidgetView.swift` | Medium widget layout (includes interactive Done button) |
 | `Shared/WidgetColors.swift` | Widget-specific color definitions |
+| `Shared/DistanceUnitWidget.swift` | Distance unit types for widget display |
+| `Shared/SharedWidgetSettings.swift` | Shared settings between app and widget |
+| `Shared/PendingWidgetCompletion.swift` | Queued service completions from widget actions |
 
 ## Widget Sizes
 
@@ -108,6 +112,23 @@ struct WidgetProvider: AppIntentTimelineProvider {
     }
 }
 ```
+
+## Interactive Widgets (iOS 17+)
+
+The medium widget includes a "Done" button (checkmark) on the most urgent service, allowing users to mark it complete without opening the app.
+
+**Flow:**
+1. User taps checkmark button on medium widget
+2. `MarkServiceDoneIntent` executes as an App Intent
+3. Completion is queued as `PendingWidgetCompletion` in shared UserDefaults
+4. Widget timeline reloads to reflect pending state
+5. When main app comes to foreground, `WidgetDataService.processPendingWidgetCompletions()` creates the actual `ServiceLog` entry
+6. Widget data refreshes with updated service status
+
+**Key Types:**
+- `MarkServiceDoneIntent` — App Intent that queues the completion
+- `PendingWidgetCompletion` — Codable struct stored in shared UserDefaults with serviceID, date, and vehicleID
+- `WidgetService.serviceID` — Persistent identifier linking widget data back to SwiftData `Service`
 
 ## Vehicle Selection (App Intents)
 

@@ -190,6 +190,8 @@ struct ContentView: View {
                 updateWidgetData()
                 // Check for pending Siri mileage update
                 handlePendingSiriMileageUpdate()
+                // Process pending widget service completions
+                processPendingWidgetCompletions()
                 // Analytics
                 AnalyticsService.shared.capture(.appOpened)
             } else if newPhase == .background {
@@ -505,6 +507,13 @@ struct ContentView: View {
         appState.selectedTab = .home
         siriPrefilledMileage = mileage
         showMileageUpdate = true
+    }
+
+    // MARK: - Widget Completions
+
+    /// Process pending service completions from the widget "Done" button
+    private func processPendingWidgetCompletions() {
+        WidgetDataService.shared.processPendingWidgetCompletions(context: modelContext)
     }
 
     // MARK: - Mileage Update

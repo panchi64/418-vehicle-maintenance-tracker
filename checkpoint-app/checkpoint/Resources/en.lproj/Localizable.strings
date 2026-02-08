@@ -54,6 +54,9 @@
 "addvehicle.vin_align_guide" = "ALIGN VIN HERE";
 "addvehicle.vin_lookup" = "Look Up VIN";
 "addvehicle.vin_lookup_loading" = "Looking Up...";
+"addvehicle.vin_value_prop" = "Enter your VIN to auto-fill make, model, and year — and check for open recalls.";
+"addvehicle.vin_details_filled" = "DETAILS FILLED FROM VIN";
+"addvehicle.vin_valid_lookup" = "VIN VALID — LOOK UP DETAILS";
 
 // MARK: - Settings
 

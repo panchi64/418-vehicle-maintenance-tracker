@@ -173,13 +173,13 @@ v1.0 features are tracked throughout this document. Future versions are outlined
 | Distance unit support | Medium   | ✅     | Miles or kilometers preference (global setting)            |
 | Vehicle notes         | Medium   | ✅     | Freeform notes area for quirks, history, or reminders      |
 
-#### VIN Registration Improvements (Planned)
+#### VIN Registration Improvements
 
-| Feature | Description |
-|---------|-------------|
-| VIN value prop banner | Inline callout above VIN input: "Enter your VIN to auto-fill make, model, and year — and check for open recalls." |
-| Always-visible character count | Show `12 / 17 CHARACTERS` below input, transitioning to `VIN VALID — LOOK UP DETAILS` when valid |
-| Auto-fill feedback | Checkmark + "DETAILS FILLED FROM VIN" message when VIN lookup succeeds; auto-filled fields get subtle accent flash |
+| Feature | Status | Description |
+|---------|--------|-------------|
+| VIN value prop banner | ✅ | Inline callout above VIN input: "Enter your VIN to auto-fill make, model, and year — and check for open recalls." |
+| Always-visible character count | ✅ | Show `12 / 17 CHARACTERS` below input, transitioning to `VIN VALID — LOOK UP DETAILS` when valid |
+| Auto-fill feedback | ✅ | Checkmark + "DETAILS FILLED FROM VIN" message when VIN lookup succeeds; auto-filled fields get subtle accent flash |
 
 ---
 
@@ -261,7 +261,7 @@ v1.0 features are tracked throughout this document. Future versions are outlined
 | Service history PDF      | High     | ✅   | Complete maintenance history for resale, warranty claims; shareable via iOS share sheet |
 | iCloud Sync              | High     | ✅     | Free native sync across iOS devices via CloudKit         |
 | Maintenance cost reports | Medium   | ✅   | Graphs and breakdowns (proportion bar, monthly trend, spending pace) |
-| CSV import               | Medium   | ⏳     | Import from Fuelly, Drivvo, Simply Auto — reduces switching cost |
+| CSV import               | Medium   | ✅     | Import from Fuelly, Drivvo, Simply Auto — reduces switching cost |
 
 #### iCloud Sync (Free Feature)
 
@@ -396,16 +396,16 @@ v1.0 features are tracked throughout this document. Future versions are outlined
 
 **Philosophy:** These are v2+ features. Ship without them, add later when we have enough data and can do them well.
 
-#### Contextual Insights (Planned)
+#### Contextual Insights
 
 Surface meaningful context alongside existing data to help users understand trends and take action.
 
-| Feature | Location | Description |
-|---------|----------|-------------|
-| Service detail insights | ServiceDetailView | Time since last service, miles driven since, average cost, times serviced |
-| Service row context | ServiceRow | Subtle "Last: 5 mo ago" line below progress bar |
-| Mileage update motivation | QuickMileageUpdateCard | "Keeps N service reminders accurate" (N = services with dueMileage) |
-| NextUpCard last service | NextUpCard | "LAST SERVICE" data row when lastPerformed exists |
+| Feature | Location | Status | Description |
+|---------|----------|--------|-------------|
+| Service detail insights | ServiceDetailView | ✅ | Time since last service, miles driven since, average cost, times serviced |
+| Service row context | ServiceRow | ✅ | Subtle "Last: 5 mo ago" line below progress bar |
+| Mileage update motivation | QuickMileageUpdateCard | ✅ | "Keeps N service reminders accurate" (N = services with dueMileage) |
+| NextUpCard last service | NextUpCard | ✅ | "LAST SERVICE" data row when lastPerformed exists |
 
 ---
 
@@ -457,7 +457,7 @@ Surface meaningful context alongside existing data to help users understand tren
 | Siri integration             | Medium   | ✅     | "Hey Siri, what's due on my car?"              |
 | CarPlay Dashboard Widget     | Medium   | ✅     | iOS 16+ compact widget on CarPlay home screen  |
 | Dynamic App Icon             | Medium   | ✅     | Icon changes based on service urgency (configurable in Settings) |
-| Interactive Widgets          | Medium   | ⏳     | iOS 17+ button on medium widget to mark service complete |
+| Interactive Widgets          | Medium   | ✅     | iOS 17+ button on medium widget to mark service complete |
 
 **Notification philosophy:**
 

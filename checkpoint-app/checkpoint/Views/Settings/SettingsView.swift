@@ -33,6 +33,8 @@ struct SettingsView: View {
                         widgetSettingsSection
 
                         // DATA & SYNC — rarely changed after setup
+                        dataSection
+
                         SyncSettingsSection()
 
                         // PRIVACY — analytics opt-out
@@ -257,6 +259,48 @@ struct SettingsView: View {
                 Rectangle()
                     .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
             )
+        }
+    }
+
+    // MARK: - Data Section
+
+    @State private var showCSVImport = false
+
+    private var dataSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            Text("DATA")
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(2)
+
+            VStack(spacing: 0) {
+                Button {
+                    showCSVImport = true
+                } label: {
+                    HStack {
+                        Text("Import Service History")
+                            .font(.brutalistBody)
+                            .foregroundStyle(Theme.textPrimary)
+
+                        Spacer()
+
+                        Image(systemName: "square.and.arrow.down")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+                    .padding(Spacing.md)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+            .background(Theme.surfaceInstrument)
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+            )
+        }
+        .sheet(isPresented: $showCSVImport) {
+            CSVImportView()
         }
     }
 

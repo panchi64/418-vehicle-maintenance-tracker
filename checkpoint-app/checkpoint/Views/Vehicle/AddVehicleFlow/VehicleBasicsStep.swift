@@ -34,6 +34,12 @@ struct VehicleBasicsStep: View {
                             placeholder: L10n.vehicleMakePlaceholder,
                             isRequired: true
                         )
+                        .overlay(
+                            Rectangle()
+                                .strokeBorder(Theme.accent, lineWidth: Theme.borderWidth)
+                                .opacity(formState.autoFilledFields.contains("make") ? 1 : 0)
+                                .animation(.easeOut(duration: Theme.animationMedium), value: formState.autoFilledFields)
+                        )
 
                         InstrumentTextField(
                             label: L10n.vehicleModel,
@@ -41,12 +47,24 @@ struct VehicleBasicsStep: View {
                             placeholder: L10n.vehicleModelPlaceholder,
                             isRequired: true
                         )
+                        .overlay(
+                            Rectangle()
+                                .strokeBorder(Theme.accent, lineWidth: Theme.borderWidth)
+                                .opacity(formState.autoFilledFields.contains("model") ? 1 : 0)
+                                .animation(.easeOut(duration: Theme.animationMedium), value: formState.autoFilledFields)
+                        )
 
                         InstrumentNumberField(
                             label: L10n.vehicleYear,
                             value: $formState.year,
                             placeholder: L10n.vehicleYearPlaceholder,
                             isRequired: true
+                        )
+                        .overlay(
+                            Rectangle()
+                                .strokeBorder(Theme.accent, lineWidth: Theme.borderWidth)
+                                .opacity(formState.autoFilledFields.contains("year") ? 1 : 0)
+                                .animation(.easeOut(duration: Theme.animationMedium), value: formState.autoFilledFields)
                         )
                     }
                 }
@@ -96,6 +114,12 @@ private struct VINInputSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
+            // Value prop banner — visible when VIN is empty
+            if formState.vin.isEmpty {
+                VINValuePropBanner()
+                    .transition(.opacity)
+            }
+
             // VIN input with camera button
             VStack(alignment: .leading, spacing: 6) {
                 Text(L10n.vehicleVIN)
@@ -114,6 +138,7 @@ private struct VINInputSection: View {
                         .background(Theme.surfaceInstrument)
                         .onChange(of: formState.vin) {
                             formState.clearVINErrors()
+                            formState.clearAutoFillFeedback()
                         }
 
                     // Camera scan button
@@ -140,10 +165,15 @@ private struct VINInputSection: View {
                 )
             }
 
-            Text(L10n.vehicleVINHelp)
-                .font(.caption)
-                .foregroundStyle(Theme.textTertiary)
+            // Dynamic character count
+            VINCharacterCountLabel(vin: formState.vin, isValid: formState.isVINValid)
                 .padding(.leading, 4)
+
+            // Auto-fill success banner
+            if formState.vinLookupSucceeded {
+                VINAutoFillBanner()
+                    .transition(.opacity)
+            }
 
             // VIN OCR processing indicator
             if formState.isProcessingVINOCR {
@@ -169,6 +199,86 @@ private struct VINInputSection: View {
                 }
             }
         }
+        .animation(.easeOut(duration: Theme.animationMedium), value: formState.vin.isEmpty)
+        .animation(.easeOut(duration: Theme.animationMedium), value: formState.vinLookupSucceeded)
+    }
+}
+
+// MARK: - VIN Value Prop Banner
+
+private struct VINValuePropBanner: View {
+    var body: some View {
+        HStack(alignment: .top, spacing: Spacing.sm) {
+            Image(systemName: "info.circle")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(Theme.accent)
+
+            Text(L10n.addVehicleVINValueProp)
+                .font(.brutalistSecondary)
+                .foregroundStyle(Theme.textSecondary)
+        }
+        .padding(Spacing.listItem)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.accent.opacity(0.08))
+        .overlay(
+            Rectangle()
+                .strokeBorder(Theme.accent.opacity(0.2), lineWidth: Theme.borderWidth)
+        )
+    }
+}
+
+// MARK: - VIN Character Count Label
+
+private struct VINCharacterCountLabel: View {
+    let vin: String
+    let isValid: Bool
+
+    var body: some View {
+        if vin.isEmpty {
+            Text(L10n.vehicleVINHelp)
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(1.5)
+                .textCase(.uppercase)
+        } else if isValid {
+            HStack(spacing: Spacing.xs) {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 10, weight: .bold))
+                Text(L10n.addVehicleVINValidLookup)
+            }
+            .font(.brutalistLabel)
+            .foregroundStyle(Theme.statusGood)
+            .tracking(1.5)
+            .textCase(.uppercase)
+        } else {
+            Text("\(vin.count) / 17 CHARACTERS")
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(1.5)
+        }
+    }
+}
+
+// MARK: - VIN Auto-Fill Banner
+
+private struct VINAutoFillBanner: View {
+    var body: some View {
+        HStack(spacing: Spacing.sm) {
+            Image(systemName: "checkmark")
+                .font(.system(size: 10, weight: .bold))
+
+            Text(L10n.addVehicleVINDetailsFilled)
+        }
+        .font(.brutalistLabel)
+        .foregroundStyle(Theme.statusGood)
+        .tracking(1.5)
+        .padding(Spacing.listItem)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.statusGood.opacity(0.1))
+        .overlay(
+            Rectangle()
+                .strokeBorder(Theme.statusGood.opacity(0.3), lineWidth: Theme.borderWidth)
+        )
     }
 }
 
@@ -205,10 +315,32 @@ private struct VINLookupButton: View {
                 await MainActor.run {
                     formState.isDecodingVIN = false
                     formState.usedVINLookup = true
+
+                    var filled: Set<String> = []
                     // Auto-fill only empty fields
-                    if formState.make.isEmpty { formState.make = result.make }
-                    if formState.model.isEmpty { formState.model = result.model }
-                    if formState.year == nil { formState.year = result.modelYear }
+                    if formState.make.isEmpty {
+                        formState.make = result.make
+                        filled.insert("make")
+                    }
+                    if formState.model.isEmpty {
+                        formState.model = result.model
+                        filled.insert("model")
+                    }
+                    if formState.year == nil {
+                        formState.year = result.modelYear
+                        filled.insert("year")
+                    }
+
+                    if !filled.isEmpty {
+                        formState.autoFilledFields = filled
+                        formState.vinLookupSucceeded = true
+
+                        // Auto-clear feedback after 3 seconds
+                        Task {
+                            try? await Task.sleep(for: .seconds(3))
+                            formState.clearAutoFillFeedback()
+                        }
+                    }
                 }
             } catch {
                 await MainActor.run {

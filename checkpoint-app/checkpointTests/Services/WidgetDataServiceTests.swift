@@ -265,12 +265,14 @@ final class WidgetDataServiceTests: XCTestCase {
 
     func testWidgetSharedData_EncodesAndDecodes() throws {
         let sharedData = WidgetSharedData(
+            vehicleID: "test-vehicle-id",
             vehicleName: "My Car",
             currentMileage: 50000,
             estimatedMileage: 50500,
             isEstimatedMileage: true,
             services: [
                 WidgetSharedData.SharedService(
+                    serviceID: "test-service-id",
                     name: "Oil Change",
                     status: .dueSoon,
                     dueDescription: "Due in 500 miles",

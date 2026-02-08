@@ -62,6 +62,14 @@ struct ServiceRow: View {
                     .font(.brutalistBody)
                     .foregroundStyle(Theme.textPrimary)
 
+                // Last performed context
+                if let lastPerformed = service.lastPerformed {
+                    Text("LAST: \(TimeSinceFormatter.abbreviated(from: lastPerformed))")
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.textTertiary)
+                        .tracking(0.5)
+                }
+
                 // Mini progress bar + due info - miles first
                 HStack(spacing: Spacing.sm) {
                     // Mini progress indicator

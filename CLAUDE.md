@@ -73,15 +73,17 @@ xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPh
 ### Key Services (in `Services/`)
 - **Notifications/:** modular architecture with focused schedulers (Service, Mileage, Marbete, YearlyRoundup); core `NotificationService` uses `@Observable @MainActor`
 - **OCR/OdometerOCRService, VINOCRService:** Vision framework OCR for camera capture
+- **Import/CSVImportService:** CSV import from Fuelly, Drivvo, Simply Auto with format auto-detection
 - **Utilities/NHTSAService:** VIN decoding and recall alerts via NHTSA API
-- **Widget/WidgetDataService:** App Groups data sharing with widget (`@MainActor`)
+- **Widget/WidgetDataService:** App Groups data sharing with widget (`@MainActor`), processes pending widget completions on foreground
 - **WatchConnectivity/WatchSessionService:** iPhone-side WCSession delegate for Apple Watch communication
 - **Sync/CloudSyncStatusService, SyncStatusService:** iCloud sync status monitoring
 
 ### Widget Extension
 - Uses App Groups: `group.com.418-studio.checkpoint.shared`
 - Small widget: next upcoming service
-- Medium widget: next 2-3 services
+- Medium widget: next 2-3 services with interactive "Done" button (iOS 17+ App Intents)
+- `MarkServiceDoneIntent` queues completion in shared UserDefaults; main app processes on foreground
 - Data synced via UserDefaults in shared container
 
 ### Apple Watch App (CheckpointWatch)
@@ -115,6 +117,7 @@ checkpoint-app/
 │   │       └── Sync/         # Data sync UI
 │   ├── DesignSystem/     # Theme, Typography, Spacing tokens (see DesignSystem/CLAUDE.md)
 │   ├── Services/         # Business logic services (see Services/CLAUDE.md)
+│   │   ├── Import/           # CSV import (Fuelly, Drivvo, Simply Auto)
 │   │   ├── Notifications/    # Local notification management
 │   │   ├── OCR/              # Vision framework services
 │   │   ├── Sync/             # iCloud & data sync
@@ -128,6 +131,7 @@ checkpoint-app/
 ├── CheckpointWatchWidget/ # watchOS widget extension (complications)
 ├── CheckpointWatchTests/ # watchOS unit tests
 ├── CheckpointWidget/     # WidgetKit extension (see CheckpointWidget/CLAUDE.md)
+│   └── Shared/           # Shared types (colors, settings, pending completions)
 ├── checkpointTests/      # Unit tests (see checkpointTests/CLAUDE.md)
 └── checkpointUITests/    # UI tests
 ```

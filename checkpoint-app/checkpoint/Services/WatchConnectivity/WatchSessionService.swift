@@ -61,7 +61,7 @@ final class WatchSessionService: NSObject {
         currentMileage: Int,
         estimatedMileage: Int?,
         isEstimated: Bool,
-        services: [(name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?)]
+        services: [(serviceID: String?, name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?)]
     ) {
         guard WCSession.isSupported() else { return }
 

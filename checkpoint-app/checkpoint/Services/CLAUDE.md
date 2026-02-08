@@ -31,6 +31,8 @@ Services/
 │   ├── UpdateMileageIntent.swift           # "Update mileage to X miles"
 │   ├── CheckpointShortcuts.swift           # AppShortcutsProvider with phrases
 │   └── SiriDataProvider.swift              # Reads data from App Groups
+├── Import/              # CSV import from competitor apps
+│   └── CSVImportService.swift
 ├── Sync/                # iCloud & data sync
 │   ├── CloudSyncStatusService.swift
 │   ├── DataMigrationService.swift
@@ -99,6 +101,27 @@ if let url = ServiceHistoryPDFService.shared.generatePDF(
 - Chronological service history (date, mileage, cost, notes)
 - Total spent (optional)
 - Footer with generation timestamp and page numbers
+
+### Import/CSVImportService
+Imports maintenance history from competitor apps via CSV files.
+
+**Supported Formats:**
+- **Fuelly** — fuel and service logs
+- **Drivvo** — maintenance records
+- **Simply Auto** — service history
+
+**Features:**
+- Auto-detects CSV format from column headers
+- Maps competitor service types to Checkpoint presets
+- Creates ServiceLog entries with date, mileage, cost, and notes
+- Returns import summary with count of imported/skipped records
+
+**Usage:**
+```swift
+let service = CSVImportService()
+let result = try await service.importCSV(from: fileURL, for: vehicle, in: modelContext)
+// result.imported: Int, result.skipped: Int
+```
 
 ### Notifications/ (Modular Architecture)
 Manages local notifications with focused, single-responsibility schedulers.

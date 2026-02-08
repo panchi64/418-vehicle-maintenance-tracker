@@ -62,6 +62,9 @@ enum L10n {
     static var addVehicleVINAlignGuide: String { localized("addvehicle.vin_align_guide") }
     static var addVehicleVINLookup: String { localized("addvehicle.vin_lookup") }
     static var addVehicleVINLookupLoading: String { localized("addvehicle.vin_lookup_loading") }
+    static var addVehicleVINValueProp: String { localized("addvehicle.vin_value_prop") }
+    static var addVehicleVINDetailsFilled: String { localized("addvehicle.vin_details_filled") }
+    static var addVehicleVINValidLookup: String { localized("addvehicle.vin_valid_lookup") }
 
     // MARK: - Settings
 

@@ -13,6 +13,7 @@ import AppIntents
 
 struct ServiceEntry: TimelineEntry {
     let date: Date
+    let vehicleID: String?
     let vehicleName: String
     let currentMileage: Int
     let services: [WidgetService]
@@ -21,19 +22,20 @@ struct ServiceEntry: TimelineEntry {
     static var placeholder: ServiceEntry {
         ServiceEntry(
             date: Date(),
+            vehicleID: nil,
             vehicleName: "My Vehicle",
             currentMileage: 34500,
             services: [
-                WidgetService(name: "Oil Change", status: .dueSoon, dueDescription: "Due in 5 days", dueMileage: 35000, daysRemaining: 5),
-                WidgetService(name: "Tire Rotation", status: .good, dueDescription: "Due in 30 days", dueMileage: 38000, daysRemaining: 30),
-                WidgetService(name: "Brake Inspection", status: .overdue, dueDescription: "5 days overdue", dueMileage: 32000, daysRemaining: -5)
+                WidgetService(serviceID: nil, name: "Oil Change", status: .dueSoon, dueDescription: "Due in 5 days", dueMileage: 35000, daysRemaining: 5),
+                WidgetService(serviceID: nil, name: "Tire Rotation", status: .good, dueDescription: "Due in 30 days", dueMileage: 38000, daysRemaining: 30),
+                WidgetService(serviceID: nil, name: "Brake Inspection", status: .overdue, dueDescription: "5 days overdue", dueMileage: 32000, daysRemaining: -5)
             ],
             configuration: CheckpointWidgetConfigurationIntent()
         )
     }
 
     static var empty: ServiceEntry {
-        ServiceEntry(date: Date(), vehicleName: "No Vehicle", currentMileage: 0, services: [], configuration: CheckpointWidgetConfigurationIntent())
+        ServiceEntry(date: Date(), vehicleID: nil, vehicleName: "No Vehicle", currentMileage: 0, services: [], configuration: CheckpointWidgetConfigurationIntent())
     }
 }
 
@@ -41,6 +43,7 @@ struct ServiceEntry: TimelineEntry {
 
 struct WidgetService: Identifiable {
     let id = UUID()
+    let serviceID: String?      // UUID string of the Service entity (nil for marbete)
     let name: String
     let status: WidgetServiceStatus
     let dueDescription: String
@@ -75,12 +78,14 @@ enum WidgetServiceStatus: String, Codable {
 
 /// Data structure for sharing between main app and widget via UserDefaults
 struct WidgetData: Codable {
+    let vehicleID: String?
     let vehicleName: String
     let currentMileage: Int
     let services: [SharedService]
     let updatedAt: Date
 
     struct SharedService: Codable {
+        let serviceID: String?      // UUID string of the Service entity (nil for marbete)
         let name: String
         let status: WidgetServiceStatus
         let dueDescription: String
@@ -88,9 +93,10 @@ struct WidgetData: Codable {
         let daysRemaining: Int?     // Days until due (negative = overdue)
     }
 
-    /// Provide fallback for older data without currentMileage
+    /// Provide fallback for older data without currentMileage or vehicleID
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        vehicleID = try container.decodeIfPresent(String.self, forKey: .vehicleID)
         vehicleName = try container.decode(String.self, forKey: .vehicleName)
         currentMileage = try container.decodeIfPresent(Int.self, forKey: .currentMileage) ?? 0
         services = try container.decode([SharedService].self, forKey: .services)
@@ -98,7 +104,7 @@ struct WidgetData: Codable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case vehicleName, currentMileage, services, updatedAt
+        case vehicleID, vehicleName, currentMileage, services, updatedAt
     }
 }
 
@@ -176,6 +182,7 @@ struct WidgetProvider: AppIntentTimelineProvider {
 
             let widgetServices = widgetData.services.map { service in
                 WidgetService(
+                    serviceID: service.serviceID,
                     name: service.name,
                     status: service.status,
                     dueDescription: service.dueDescription,
@@ -186,6 +193,7 @@ struct WidgetProvider: AppIntentTimelineProvider {
 
             return ServiceEntry(
                 date: Date(),
+                vehicleID: widgetData.vehicleID,
                 vehicleName: widgetData.vehicleName,
                 currentMileage: widgetData.currentMileage,
                 services: widgetServices,
@@ -200,6 +208,7 @@ struct WidgetProvider: AppIntentTimelineProvider {
     private func makeEmptyEntry(configuration: CheckpointWidgetConfigurationIntent) -> ServiceEntry {
         ServiceEntry(
             date: Date(),
+            vehicleID: nil,
             vehicleName: "No Vehicle",
             currentMileage: 0,
             services: [],

@@ -8,6 +8,7 @@
 
 import SwiftUI
 import WidgetKit
+import AppIntents
 
 struct MediumWidgetView: View {
     let entry: ServiceEntry
@@ -94,11 +95,35 @@ struct MediumWidgetView: View {
 
                 Spacer()
 
-                // Service name
-                Text(service.name.uppercased())
-                    .font(.widgetBody)
-                    .foregroundStyle(WidgetColors.textPrimary)
-                    .lineLimit(1)
+                // Service name with done button
+                HStack(spacing: 8) {
+                    Text(service.name.uppercased())
+                        .font(.widgetBody)
+                        .foregroundStyle(WidgetColors.textPrimary)
+                        .lineLimit(1)
+
+                    Spacer()
+
+                    if let serviceID = service.serviceID,
+                       let vehicleID = entry.vehicleID {
+                        Button(intent: MarkServiceDoneIntent(
+                            serviceID: serviceID,
+                            vehicleID: vehicleID,
+                            mileage: entry.currentMileage
+                        )) {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundStyle(WidgetColors.statusGood)
+                                .frame(width: 24, height: 24)
+                                .background(WidgetColors.backgroundPrimary.opacity(0.8))
+                                .overlay(
+                                    Rectangle()
+                                        .strokeBorder(WidgetColors.gridLine, lineWidth: 1)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
 
                 // Status indicator
                 HStack(spacing: 6) {

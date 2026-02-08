@@ -29,6 +29,8 @@ final class VehicleFormState {
     // MARK: - VIN Lookup State
     var isDecodingVIN = false
     var vinLookupError: String?
+    var vinLookupSucceeded = false
+    var autoFilledFields: Set<String> = []
 
     // MARK: - VIN OCR State
     var showVINCamera = false
@@ -83,5 +85,11 @@ final class VehicleFormState {
     /// Clear VIN OCR error
     func clearVINOCRError() {
         vinOCRError = nil
+    }
+
+    /// Clear auto-fill feedback state
+    func clearAutoFillFeedback() {
+        vinLookupSucceeded = false
+        autoFilledFields = []
     }
 }

@@ -42,6 +42,11 @@ struct ServiceDetailView: View {
                     historySection
                 }
 
+                // Insights (only when there's history)
+                if !(service.logs ?? []).isEmpty {
+                    insightsSection
+                }
+
                 // Attachments from all logs
                 let allAttachments = (service.logs ?? [])
                     .sorted(by: { $0.performedDate > $1.performedDate })
@@ -261,6 +266,61 @@ struct ServiceDetailView: View {
         }
         .padding(Spacing.md)
         .contentShape(Rectangle())
+    }
+
+    // MARK: - Insights Section
+
+    private var insightsSection: some View {
+        let sortedLogs = (service.logs ?? []).sorted(by: { $0.performedDate > $1.performedDate })
+
+        return VStack(alignment: .leading, spacing: Spacing.md) {
+            InstrumentSectionHeader(title: "Insights")
+
+            VStack(spacing: 0) {
+                // Time since last
+                if let lastLog = sortedLogs.first {
+                    infoRow(
+                        title: "Time Since Last",
+                        value: TimeSinceFormatter.full(from: lastLog.performedDate)
+                    )
+                    Divider()
+
+                    // Miles since last
+                    let milesSince = vehicle.currentMileage - lastLog.mileageAtService
+                    if milesSince >= 0 {
+                        infoRow(
+                            title: "Miles Since Last",
+                            value: Formatters.mileage(milesSince)
+                        )
+                        Divider()
+                    }
+                }
+
+                // Average cost
+                let logsWithCost = sortedLogs.filter { $0.cost != nil }
+                if !logsWithCost.isEmpty {
+                    let totalCost = logsWithCost.compactMap { $0.cost }.reduce(Decimal.zero, +)
+                    let averageCost = totalCost / Decimal(logsWithCost.count)
+                    infoRow(
+                        title: "Average Cost",
+                        value: Formatters.currency.string(from: averageCost as NSDecimalNumber) ?? "$0"
+                    )
+                    Divider()
+                }
+
+                // Times serviced
+                infoRow(
+                    title: "Times Serviced",
+                    value: "\(sortedLogs.count)"
+                )
+            }
+            .background(Theme.surfaceInstrument)
+            .clipShape(Rectangle())
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+            )
+        }
     }
 
     // MARK: - App Icon
