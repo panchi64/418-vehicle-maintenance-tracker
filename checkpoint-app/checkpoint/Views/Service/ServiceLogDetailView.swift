@@ -11,7 +11,9 @@ import SwiftData
 struct ServiceLogDetailView: View {
     @Environment(\.dismiss) private var dismiss
 
-    let log: ServiceLog
+    @Bindable var log: ServiceLog
+
+    @State private var showEditSheet = false
 
     var body: some View {
         ScrollView {
@@ -49,6 +51,17 @@ struct ServiceLogDetailView: View {
                         .foregroundStyle(Theme.textSecondary)
                 }
             }
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showEditSheet = true
+                } label: {
+                    Image(systemName: "pencil")
+                }
+                .toolbarButtonStyle()
+            }
+        }
+        .sheet(isPresented: $showEditSheet) {
+            EditServiceLogView(log: log)
         }
     }
 
@@ -144,19 +157,15 @@ struct ServiceLogDetailView: View {
 }
 
 #Preview {
-    let vehicle = Vehicle(
-        name: "Test Car",
-        make: "Toyota",
-        model: "Camry",
-        year: 2022,
-        currentMileage: 32500
-    )
-
-    let service = Service(name: "Oil Change", dueDate: nil)
-
-    let log = ServiceLog(
-        service: service,
-        vehicle: vehicle,
+    @Previewable @State var log = ServiceLog(
+        service: Service(name: "Oil Change", dueDate: nil),
+        vehicle: Vehicle(
+            name: "Test Car",
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            currentMileage: 32500
+        ),
         performedDate: Date.now,
         mileageAtService: 32000,
         cost: 45.99,

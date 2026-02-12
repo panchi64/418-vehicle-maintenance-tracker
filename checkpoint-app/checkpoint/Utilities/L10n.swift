@@ -118,6 +118,7 @@ enum L10n {
     static var toastPDFReady: String { localized("toast.pdf_ready") }
     static var toastSyncError: String { localized("toast.sync_error") }
     static var toastReadingCaptured: String { localized("toast.reading_captured") }
+    static var toastServiceLogUpdated: String { localized("toast.service_log_updated") }
 
     // MARK: - OCR Errors
 

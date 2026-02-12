@@ -36,6 +36,7 @@ struct AddServiceView: View {
     @State private var costError: String?
     @State private var costCategory: CostCategory = .maintenance
     @State private var notes: String = ""
+    @State private var scheduleRecurring: Bool = false
     @State private var pendingAttachments: [AttachmentPicker.AttachmentData] = []
 
     // Schedule mode fields
@@ -112,6 +113,11 @@ struct AddServiceView: View {
                     if let miles = preset.defaultIntervalMiles {
                         intervalMiles = miles
                     }
+                    // Default to recurring if preset has intervals
+                    let hasIntervals = (preset.defaultIntervalMonths != nil) || (preset.defaultIntervalMiles != nil)
+                    scheduleRecurring = hasIntervals
+                } else {
+                    scheduleRecurring = false
                 }
             }
             .trackScreen(.addService)
@@ -193,6 +199,29 @@ struct AddServiceView: View {
         }
 
         VStack(alignment: .leading, spacing: Spacing.sm) {
+            InstrumentSectionHeader(title: "Recurring")
+
+            HStack {
+                Text("SCHEDULE RECURRING")
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.textTertiary)
+                    .tracking(1)
+
+                Spacer()
+
+                Toggle("", isOn: $scheduleRecurring)
+                    .labelsHidden()
+                    .tint(Theme.accent)
+            }
+            .padding(Spacing.md)
+            .background(Theme.surfaceInstrument)
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+            )
+        }
+
+        VStack(alignment: .leading, spacing: Spacing.sm) {
             InstrumentSectionHeader(title: "Notes")
 
             InstrumentTextEditor(
@@ -259,7 +288,7 @@ struct AddServiceView: View {
         // Analytics
         let isPreset = selectedPreset != nil
         let category = selectedPreset?.category
-        let hasInterval = (intervalMonths != nil && intervalMonths != 0) || (intervalMiles != nil && intervalMiles != 0)
+        let hasInterval = scheduleRecurring && ((intervalMonths != nil && intervalMonths != 0) || (intervalMiles != nil && intervalMiles != 0))
 
         HapticService.shared.success()
 
@@ -308,17 +337,19 @@ struct AddServiceView: View {
             name: serviceName,
             lastPerformed: performedDate,
             lastMileage: mileage,
-            intervalMonths: intervalMonths,
-            intervalMiles: intervalMiles
+            intervalMonths: scheduleRecurring ? intervalMonths : nil,
+            intervalMiles: scheduleRecurring ? intervalMiles : nil
         )
         service.vehicle = vehicle
 
-        // Calculate next due date/mileage
-        if let months = intervalMonths, months > 0 {
-            service.dueDate = Calendar.current.date(byAdding: .month, value: months, to: performedDate)
-        }
-        if let miles = intervalMiles, miles > 0 {
-            service.dueMileage = mileage + miles
+        // Calculate next due date/mileage (only when recurring)
+        if scheduleRecurring {
+            if let months = intervalMonths, months > 0 {
+                service.dueDate = Calendar.current.date(byAdding: .month, value: months, to: performedDate)
+            }
+            if let miles = intervalMiles, miles > 0 {
+                service.dueMileage = mileage + miles
+            }
         }
 
         modelContext.insert(service)

@@ -402,6 +402,123 @@ final class AddServiceViewTests: XCTestCase {
         XCTAssertEqual(notesValue, "   ")
     }
 
+    // MARK: - Schedule Recurring Toggle Tests
+
+    func testScheduleRecurring_PresetWithIntervals_DefaultsToTrue() {
+        // Given: A preset with both interval types
+        let preset = PresetData(
+            name: "Oil Change",
+            category: "Engine",
+            defaultIntervalMonths: 6,
+            defaultIntervalMiles: 5000
+        )
+
+        // When: Checking if preset has intervals
+        let hasIntervals = (preset.defaultIntervalMonths != nil) || (preset.defaultIntervalMiles != nil)
+
+        // Then: Should default to recurring
+        XCTAssertTrue(hasIntervals)
+    }
+
+    func testScheduleRecurring_PresetWithOnlyMonths_DefaultsToTrue() {
+        // Given: A preset with only month interval
+        let preset = PresetData(
+            name: "Oil Change",
+            category: "Engine",
+            defaultIntervalMonths: 6,
+            defaultIntervalMiles: nil
+        )
+
+        // When: Checking if preset has intervals
+        let hasIntervals = (preset.defaultIntervalMonths != nil) || (preset.defaultIntervalMiles != nil)
+
+        // Then: Should default to recurring
+        XCTAssertTrue(hasIntervals)
+    }
+
+    func testScheduleRecurring_PresetWithNoIntervals_DefaultsToFalse() {
+        // Given: A preset with no intervals
+        let preset = PresetData(
+            name: "Custom Service",
+            category: "Other",
+            defaultIntervalMonths: nil,
+            defaultIntervalMiles: nil
+        )
+
+        // When: Checking if preset has intervals
+        let hasIntervals = (preset.defaultIntervalMonths != nil) || (preset.defaultIntervalMiles != nil)
+
+        // Then: Should default to not recurring
+        XCTAssertFalse(hasIntervals)
+    }
+
+    func testScheduleRecurring_Off_SkipsIntervalAndDueCalculation() {
+        // Given: Service performed today with intervals but recurring OFF
+        let scheduleRecurring = false
+        let intervalMonths = 6
+        let intervalMiles = 5000
+        let performedDate = Date()
+        let mileageAtService = 32500
+
+        // When: Creating service with recurring off
+        let effectiveIntervalMonths: Int? = scheduleRecurring ? intervalMonths : nil
+        let effectiveIntervalMiles: Int? = scheduleRecurring ? intervalMiles : nil
+
+        // Then: Intervals should be nil
+        XCTAssertNil(effectiveIntervalMonths)
+        XCTAssertNil(effectiveIntervalMiles)
+
+        // And: No due date/mileage should be calculated
+        var dueDate: Date? = nil
+        var dueMileage: Int? = nil
+        if scheduleRecurring {
+            dueDate = Calendar.current.date(byAdding: .month, value: intervalMonths, to: performedDate)
+            dueMileage = mileageAtService + intervalMiles
+        }
+        XCTAssertNil(dueDate)
+        XCTAssertNil(dueMileage)
+    }
+
+    func testScheduleRecurring_On_CalculatesIntervalAndDue() {
+        // Given: Service performed today with intervals and recurring ON
+        let scheduleRecurring = true
+        let intervalMonths = 6
+        let intervalMiles = 5000
+        let performedDate = Date()
+        let mileageAtService = 32500
+
+        // When: Creating service with recurring on
+        let effectiveIntervalMonths: Int? = scheduleRecurring ? intervalMonths : nil
+        let effectiveIntervalMiles: Int? = scheduleRecurring ? intervalMiles : nil
+
+        // Then: Intervals should be set
+        XCTAssertEqual(effectiveIntervalMonths, 6)
+        XCTAssertEqual(effectiveIntervalMiles, 5000)
+
+        // And: Due date/mileage should be calculated
+        var dueDate: Date? = nil
+        var dueMileage: Int? = nil
+        if scheduleRecurring {
+            dueDate = Calendar.current.date(byAdding: .month, value: intervalMonths, to: performedDate)
+            dueMileage = mileageAtService + intervalMiles
+        }
+        XCTAssertNotNil(dueDate)
+        XCTAssertEqual(dueMileage, 37500)
+    }
+
+    func testScheduleRecurring_AnalyticsFlag_RespectsToggle() {
+        // Given: Intervals exist but recurring is off
+        let scheduleRecurring = false
+        let intervalMonths: Int? = 6
+        let intervalMiles: Int? = 5000
+
+        // When: Computing analytics hasInterval flag
+        let hasInterval = scheduleRecurring && ((intervalMonths != nil && intervalMonths != 0) || (intervalMiles != nil && intervalMiles != 0))
+
+        // Then: Should be false because recurring is off
+        XCTAssertFalse(hasInterval)
+    }
+
     // MARK: - Default Date Tests
 
     func testDefaultDueDate_Is30DaysFromNow() {

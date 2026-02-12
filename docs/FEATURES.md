@@ -51,6 +51,8 @@ v1.0 features are tracked throughout this document. Future versions are outlined
 | Custom service types   | Medium   | ✅     | User-defined categories                              |
 | Attachments            | Medium   | ✅     | Photos, PDFs, receipts                               |
 | Service log detail     | Medium   | ✅     | Tap any history/activity/expense row to view full log details |
+| Edit service log       | Medium   | ✅     | Edit notes and add attachments to existing service logs |
+| One-off service logging| Medium   | ✅     | "Schedule Recurring" toggle — log without creating a recurring schedule |
 
 #### On-Device Document Intelligence
 

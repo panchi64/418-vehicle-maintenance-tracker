@@ -110,6 +110,7 @@
 "toast.pdf_ready" = "PDF ready";
 "toast.sync_error" = "Sync issue — data saved locally";
 "toast.reading_captured" = "Reading captured";
+"toast.service_log_updated" = "Service log updated";
 
 // MARK: - OCR Errors
 

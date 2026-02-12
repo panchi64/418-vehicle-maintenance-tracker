@@ -28,6 +28,7 @@ enum AnalyticsEvent {
         case vehiclePicker = "vehicle_picker"
         case mileageUpdate = "mileage_update"
         case serviceLogDetail = "service_log_detail"
+        case editServiceLog = "edit_service_log"
     }
 
     // MARK: - Tab Names
@@ -81,6 +82,7 @@ enum AnalyticsEvent {
     case serviceLogged(isPreset: Bool, category: String?, hasInterval: Bool)
     case serviceMarkedDone(hasCost: Bool, hasNotes: Bool, hasAttachments: Bool, attachmentCount: Int)
     case serviceEdited
+    case serviceLogEdited(notesChanged: Bool, attachmentsAdded: Int)
     case serviceDeleted
 
     // MARK: - Mileage
@@ -165,6 +167,7 @@ enum AnalyticsEvent {
         case .serviceLogged: return "service_logged"
         case .serviceMarkedDone: return "service_marked_done"
         case .serviceEdited: return "service_edited"
+        case .serviceLogEdited: return "service_log_edited"
         case .serviceDeleted: return "service_deleted"
         case .mileageUpdated: return "mileage_updated"
         case .mileagePromptShown: return "mileage_prompt_shown"
@@ -234,6 +237,8 @@ enum AnalyticsEvent {
                 "has_attachments": hasAttachments,
                 "attachment_count": attachmentCount
             ]
+        case .serviceLogEdited(let notesChanged, let attachmentsAdded):
+            return ["notes_changed": notesChanged, "attachments_added": attachmentsAdded]
         case .mileageUpdated(let source):
             return ["source": source.rawValue]
         case .ocrAttempted(let ocrType):
