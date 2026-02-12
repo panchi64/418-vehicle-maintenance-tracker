@@ -58,6 +58,9 @@ final class SyncStatusService {
     /// Whether the user has an iCloud account available
     private(set) var hasICloudAccount: Bool = false
 
+    /// Whether existing Checkpoint data was found in iCloud (from a previous install)
+    private(set) var hasExistingCloudData: Bool = false
+
     // MARK: - Computed Properties
 
     /// Human-readable last sync description
@@ -104,6 +107,39 @@ final class SyncStatusService {
             if isSyncEnabled {
                 syncState = .error("Unable to check iCloud status")
             }
+        }
+    }
+
+    // MARK: - Cloud Data Check
+
+    /// Query CloudKit to see if the user has existing Checkpoint vehicle data
+    /// (e.g. from a previous install). Only meaningful during onboarding.
+    func checkForExistingCloudData() async {
+        guard hasICloudAccount else {
+            hasExistingCloudData = false
+            return
+        }
+
+        do {
+            let container = CKContainer(identifier: "iCloud.com.418-studio.checkpoint")
+            let database = container.privateCloudDatabase
+
+            // CoreData+CloudKit stores in this zone with CD_ prefix on record types
+            let zoneID = CKRecordZone.ID(
+                zoneName: "com.apple.coredata.cloudkit.zone",
+                ownerName: CKCurrentUserDefaultName
+            )
+            let query = CKQuery(recordType: "CD_Vehicle", predicate: NSPredicate(value: true))
+            let (matchResults, _) = try await database.records(
+                matching: query,
+                inZoneWith: zoneID,
+                desiredKeys: [],
+                resultsLimit: 1
+            )
+            hasExistingCloudData = !matchResults.isEmpty
+        } catch {
+            // Network error or zone doesn't exist — no data to offer
+            hasExistingCloudData = false
         }
     }
 

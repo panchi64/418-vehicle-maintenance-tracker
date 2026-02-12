@@ -186,4 +186,6 @@
 "onboarding.getstarted.add_vehicle" = "Add Vehicle";
 "onboarding.getstarted.manual" = "Enter Details Manually";
 "onboarding.getstarted.or" = "OR";
+"onboarding.getstarted.use_icloud" = "Use Your iCloud Vehicles";
+"onboarding.getstarted.icloud_help" = "Sync vehicles from a previous install";
 "onboarding.getstarted.skip" = "Skip for Now";

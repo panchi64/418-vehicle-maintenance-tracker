@@ -146,6 +146,7 @@ enum AnalyticsEvent {
     case onboardingVINLookupUsed
     case onboardingManualEntry
     case onboardingSkippedGetStarted
+    case onboardingICloudSync
     case onboardingCompleted
 
     // MARK: - Event Properties
@@ -207,6 +208,7 @@ enum AnalyticsEvent {
         case .onboardingVINLookupUsed: return "onboarding_vin_lookup_used"
         case .onboardingManualEntry: return "onboarding_manual_entry"
         case .onboardingSkippedGetStarted: return "onboarding_skipped_get_started"
+        case .onboardingICloudSync: return "onboarding_icloud_sync"
         case .onboardingCompleted: return "onboarding_completed"
         }
     }

@@ -10,6 +10,7 @@ import SwiftUI
 struct OnboardingGetStartedView: View {
     let onVINLookupComplete: (VINDecodeResult, String) -> Void
     let onManualEntry: () -> Void
+    let onUseICloudVehicles: () -> Void
     let onSkip: () -> Void
 
     // Marbete bindings (flow back to parent for prefill)
@@ -234,6 +235,27 @@ struct OnboardingGetStartedView: View {
                                     .frame(height: 1)
                             }
 
+                            // iCloud sync option (only when iCloud account exists AND has app data)
+                            if SyncStatusService.shared.hasICloudAccount && SyncStatusService.shared.hasExistingCloudData {
+                                VStack(spacing: Spacing.sm) {
+                                    Button {
+                                        onUseICloudVehicles()
+                                    } label: {
+                                        HStack(spacing: Spacing.sm) {
+                                            Image(systemName: "icloud.fill")
+                                                .font(.system(size: 16, weight: .medium))
+                                            Text(L10n.onboardingGetStartedUseICloud)
+                                        }
+                                    }
+                                    .buttonStyle(.secondary)
+
+                                    Text(L10n.onboardingGetStartedICloudHelp)
+                                        .font(.brutalistSecondary)
+                                        .foregroundStyle(Theme.textTertiary)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                }
+                            }
+
                             // Manual entry
                             Button {
                                 onManualEntry()
@@ -338,6 +360,7 @@ struct OnboardingGetStartedView: View {
     OnboardingGetStartedView(
         onVINLookupComplete: { _, _ in },
         onManualEntry: {},
+        onUseICloudVehicles: {},
         onSkip: {},
         marbeteMonth: .constant(nil),
         marbeteYear: .constant(nil)

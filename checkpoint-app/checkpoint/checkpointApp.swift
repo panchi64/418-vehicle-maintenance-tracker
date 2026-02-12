@@ -20,7 +20,13 @@ struct checkpointApp: App {
     // CloudKit container identifier for iCloud sync
     private static let cloudKitContainerID = "iCloud.com.418-studio.checkpoint"
 
-    var sharedModelContainer: ModelContainer = {
+    @State private var modelContainer: ModelContainer
+
+    /// Create a ModelContainer with or without CloudKit sync.
+    /// During onboarding, sync is deferred to prevent iCloud data from interfering
+    /// with the sample-data tour. Once onboarding completes, a notification triggers
+    /// re-creation with CloudKit enabled.
+    static func createContainer(syncEnabled: Bool) -> ModelContainer {
         let schema = Schema([
             Vehicle.self,
             Service.self,
@@ -29,11 +35,6 @@ struct checkpointApp: App {
             MileageSnapshot.self,
             ServiceAttachment.self,
         ])
-
-        // Check if user has iCloud sync enabled
-        // Note: We read directly from UserDefaults here since SyncSettings
-        // may not be initialized yet during static property initialization
-        let syncEnabled = UserDefaults.standard.object(forKey: "iCloudSyncEnabled") as? Bool ?? true
 
         // Use App Group container for shared access with widget
         let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppGroupConstants.iPhoneWidget)
@@ -77,7 +78,7 @@ struct checkpointApp: App {
             appLogger.fault("Could not create ModelContainer: \(error.localizedDescription)")
             fatalError("Could not create ModelContainer: \(error)")
         }
-    }()
+    }
 
     init() {
         // Register UserDefaults defaults
@@ -98,8 +99,16 @@ struct checkpointApp: App {
         // Initialize analytics
         AnalyticsService.shared.initialize()
 
+        // Determine whether to enable CloudKit sync at launch.
+        // Defer sync during onboarding so iCloud data doesn't interfere with the tour.
+        let hasCompleted = OnboardingState.hasCompletedOnboarding
+        let userSyncPref = UserDefaults.standard.object(forKey: "iCloudSyncEnabled") as? Bool ?? true
+        let syncEnabled = hasCompleted && userSyncPref
+        let container = Self.createContainer(syncEnabled: syncEnabled)
+        _modelContainer = State(initialValue: container)
+
         // Initialize Watch connectivity
-        WatchSessionService.shared.modelContainer = sharedModelContainer
+        WatchSessionService.shared.modelContainer = container
         WatchSessionService.shared.activate()
     }
 
@@ -131,10 +140,23 @@ struct checkpointApp: App {
                     // Check iCloud account status
                     await SyncStatusService.shared.checkAccountStatus()
 
+                    // During onboarding, check if user has existing data in iCloud
+                    if !OnboardingState.hasCompletedOnboarding {
+                        await SyncStatusService.shared.checkForExistingCloudData()
+                    }
+
                     // Load StoreKit products
                     await StoreManager.shared.loadProducts()
                 }
+                .onReceive(NotificationCenter.default.publisher(for: .enableCloudSyncAfterOnboarding)) { _ in
+                    let userSyncPref = UserDefaults.standard.object(forKey: "iCloudSyncEnabled") as? Bool ?? true
+                    guard userSyncPref else { return }
+                    appLogger.info("Onboarding complete — enabling CloudKit sync")
+                    let newContainer = Self.createContainer(syncEnabled: true)
+                    modelContainer = newContainer
+                    WatchSessionService.shared.modelContainer = newContainer
+                }
         }
-        .modelContainer(sharedModelContainer)
+        .modelContainer(modelContainer)
     }
 }

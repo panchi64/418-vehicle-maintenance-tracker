@@ -167,6 +167,8 @@ struct ContentView: View {
                 }
             } else if newPhase == .completed {
                 AnalyticsService.shared.capture(.onboardingCompleted)
+                // Enable CloudKit sync now that onboarding is done
+                NotificationCenter.default.post(name: .enableCloudSyncAfterOnboarding, object: nil)
                 // Request notification permission after onboarding completes
                 Task {
                     let granted = await NotificationService.shared.requestAuthorization()
@@ -214,6 +216,10 @@ struct ContentView: View {
             AnalyticsService.shared.capture(.vehicleSwitched)
         }
         .onChange(of: vehicles) { oldVehicles, newVehicles in
+            // Auto-select first vehicle when none is selected (e.g. iCloud sync after reinstall)
+            if appState.selectedVehicle == nil, let first = newVehicles.first {
+                appState.selectedVehicle = first
+            }
             // Update selection if current vehicle was deleted
             if let selected = appState.selectedVehicle,
                !newVehicles.contains(where: { $0.id == selected.id }) {
@@ -392,6 +398,11 @@ struct ContentView: View {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                         appState.showAddVehicle = true
                     }
+                },
+                onUseICloudVehicles: {
+                    AnalyticsService.shared.capture(.onboardingICloudSync)
+                    clearSampleData()
+                    onboardingState.complete()
                 },
                 onSkip: {
                     AnalyticsService.shared.capture(.onboardingSkippedGetStarted)

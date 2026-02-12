@@ -192,10 +192,15 @@ extension ContentView {
         seedSampleVehicles()
     }
 
-    /// Seed sample data specifically for the onboarding tour
+    /// Seed sample data specifically for the onboarding tour.
+    /// If iCloud has already synced real vehicles, use those instead of creating dummy data.
     func seedSampleDataForTour() {
-        guard vehicles.isEmpty else { return }
-        seedSampleVehicles()
+        if vehicles.isEmpty {
+            seedSampleVehicles()
+        } else {
+            // iCloud data arrived during onboarding intro — use real data for tour
+            appState.selectedVehicle = vehicles.first
+        }
     }
 
     func seedSampleVehicles() {

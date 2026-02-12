@@ -28,4 +28,7 @@ extension Notification.Name {
 
     // Cluster notifications
     static let navigateToClusterFromNotification = Notification.Name("navigateToClusterFromNotification")
+
+    // Onboarding sync
+    static let enableCloudSyncAfterOnboarding = Notification.Name("enableCloudSyncAfterOnboarding")
 }

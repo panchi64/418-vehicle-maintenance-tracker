@@ -200,6 +200,8 @@ enum L10n {
     static var onboardingGetStartedAddVehicle: String { localized("onboarding.getstarted.add_vehicle") }
     static var onboardingGetStartedManual: String { localized("onboarding.getstarted.manual") }
     static var onboardingGetStartedOr: String { localized("onboarding.getstarted.or") }
+    static var onboardingGetStartedUseICloud: String { localized("onboarding.getstarted.use_icloud") }
+    static var onboardingGetStartedICloudHelp: String { localized("onboarding.getstarted.icloud_help") }
     static var onboardingGetStartedSkip: String { localized("onboarding.getstarted.skip") }
 
     // MARK: - Helper
