@@ -108,9 +108,15 @@ final class WatchDataStore {
     }
 
     /// Optimistically mark a service as done locally
-    func markServiceDoneOptimistically(_ serviceName: String) {
+    /// Prefers serviceID match; falls back to name match for backward compatibility
+    func markServiceDoneOptimistically(serviceID: String?, serviceName: String) {
         guard let current = vehicleData else { return }
-        let updatedServices = current.services.filter { $0.name != serviceName }
+        let updatedServices = current.services.filter { service in
+            if let serviceID, let sid = service.serviceID {
+                return sid != serviceID
+            }
+            return service.name != serviceName
+        }
         vehicleData = WatchVehicleData(
             vehicleID: current.vehicleID,
             vehicleName: current.vehicleName,

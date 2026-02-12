@@ -72,6 +72,9 @@ struct MileageInputField: View {
                 textValue = formatMileage(val)
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Mileage input")
+        .accessibilityValue(value.map { "\(formatMileage($0)) \(suffix)" } ?? "Empty")
     }
 
     private func formatMileage(_ miles: Int) -> String {

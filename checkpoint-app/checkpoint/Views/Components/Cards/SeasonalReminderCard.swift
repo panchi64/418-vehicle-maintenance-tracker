@@ -35,7 +35,7 @@ struct SeasonalReminderCard: View {
 
                 Spacer()
             }
-            .padding(.bottom, 12)
+            .padding(.bottom, Spacing.listItem)
 
             // Divider
             Rectangle()
@@ -46,7 +46,7 @@ struct SeasonalReminderCard: View {
             Text(reminder.description)
                 .font(.brutalistSecondary)
                 .foregroundStyle(Theme.textSecondary)
-                .padding(.vertical, 12)
+                .padding(.vertical, Spacing.listItem)
 
             // Divider
             Rectangle()
@@ -69,7 +69,7 @@ struct SeasonalReminderCard: View {
                 }
                 .buttonStyle(.secondary)
             }
-            .padding(.top, 12)
+            .padding(.top, Spacing.listItem)
         }
         .glassCardStyle(intensity: .subtle)
         .contextMenu {

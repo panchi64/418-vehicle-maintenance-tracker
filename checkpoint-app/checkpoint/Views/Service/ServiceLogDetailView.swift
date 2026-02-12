@@ -50,6 +50,7 @@ struct ServiceLogDetailView: View {
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(Theme.textSecondary)
                 }
+                .accessibilityLabel("Close")
             }
             ToolbarItem(placement: .primaryAction) {
                 Button {
@@ -58,6 +59,7 @@ struct ServiceLogDetailView: View {
                     Image(systemName: "pencil")
                 }
                 .toolbarButtonStyle()
+                .accessibilityLabel("Edit service log")
             }
         }
         .sheet(isPresented: $showEditSheet) {
@@ -91,6 +93,8 @@ struct ServiceLogDetailView: View {
         .frame(maxWidth: .infinity)
         .padding(Spacing.xl)
         .glassCardStyle(intensity: .subtle, padding: 0)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(log.service?.name ?? "Service"), \(Formatters.mediumDate.string(from: log.performedDate))")
     }
 
     // MARK: - Details Section
@@ -102,12 +106,12 @@ struct ServiceLogDetailView: View {
             VStack(spacing: 0) {
                 if let cost = log.formattedCost {
                     detailRow(title: "Cost", value: cost)
-                    Divider()
+                    ListDivider(leadingPadding: 0)
                 }
 
                 if let category = log.costCategory {
                     detailRow(title: "Category", value: category.displayName)
-                    Divider()
+                    ListDivider(leadingPadding: 0)
                 }
 
                 detailRow(title: "Mileage", value: Formatters.mileage(log.mileageAtService))

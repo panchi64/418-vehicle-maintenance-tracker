@@ -51,6 +51,7 @@ struct RecentActivityFeed: View {
                 .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(Theme.statusGood)
                 .frame(width: 20)
+                .accessibilityHidden(true)
 
             // Service name and date
             VStack(alignment: .leading, spacing: 2) {
@@ -74,6 +75,9 @@ struct RecentActivityFeed: View {
             }
         }
         .padding(Spacing.md)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(log.service?.name ?? "Service") completed \(formatDate(log.performedDate))")
+        .accessibilityValue(log.formattedCost ?? "")
     }
 
     private func formatDate(_ date: Date) -> String {

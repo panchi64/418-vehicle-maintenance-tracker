@@ -73,6 +73,8 @@ struct EmptyStateView: View {
             }
         }
         .padding(Spacing.xxl)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title). \(message)")
     }
 }
 

@@ -70,9 +70,10 @@ final class WatchConnectivityService: NSObject {
     }
 
     /// Send mark-service-done to iPhone
-    func sendMarkServiceDone(vehicleID: String, serviceName: String, mileageAtService: Int) {
+    func sendMarkServiceDone(vehicleID: String, serviceID: String?, serviceName: String, mileageAtService: Int) {
         let completion = WatchMarkServiceDone(
             vehicleID: vehicleID,
+            serviceID: serviceID,
             serviceName: serviceName,
             mileageAtService: mileageAtService,
             performedDate: Date()
@@ -87,7 +88,7 @@ final class WatchConnectivityService: NSObject {
         sendToPhone(message: message, key: WatchMarkServiceDone.messageKey, data: data)
 
         // Optimistic local update
-        dataStore.markServiceDoneOptimistically(serviceName)
+        dataStore.markServiceDoneOptimistically(serviceID: serviceID, serviceName: serviceName)
     }
 
     // MARK: - Private Helpers

@@ -27,11 +27,7 @@ struct ServicesTab: View {
 
     private var vehicleServices: [Service] {
         guard let vehicle = vehicle else { return [] }
-        let effectiveMileage = vehicle.effectiveMileage
-        let pace = vehicle.dailyMilesPace
-        return services
-            .filter { $0.vehicle?.id == vehicle.id }
-            .sorted { $0.urgencyScore(currentMileage: effectiveMileage, dailyPace: pace) < $1.urgencyScore(currentMileage: effectiveMileage, dailyPace: pace) }
+        return services.forVehicle(vehicle)
     }
 
     private var filteredServices: [Service] {

@@ -12,7 +12,7 @@ import XCTest
 final class VehicleSelectionPersistenceTests: XCTestCase {
 
     private let selectedVehicleIDKey = "appSelectedVehicleID"
-    private let appGroupID = "group.com.418-studio.checkpoint.shared"
+    private let appGroupID = AppGroupConstants.iPhoneWidget
 
     override func setUp() {
         super.setUp()

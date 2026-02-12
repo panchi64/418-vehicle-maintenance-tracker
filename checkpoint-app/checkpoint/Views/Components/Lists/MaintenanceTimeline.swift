@@ -211,6 +211,9 @@ struct MaintenanceTimeline: View {
                     onServiceTap(service)
                 }
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("\(item.type == .completed ? "Completed" : "Upcoming"): \(item.service?.name ?? "Service")")
+            .accessibilityHint("Double tap to view details")
         }
         .padding(.leading, 4)
     }

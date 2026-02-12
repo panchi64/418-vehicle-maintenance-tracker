@@ -54,8 +54,9 @@ struct ServiceClusterCard: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Dismiss bundle suggestion")
             }
-            .padding(.bottom, 16)
+            .padding(.bottom, Spacing.md)
 
             // Divider
             Rectangle()
@@ -84,7 +85,7 @@ struct ServiceClusterCard: View {
                         .tracking(1)
                 }
             }
-            .padding(.vertical, 12)
+            .padding(.vertical, Spacing.listItem)
 
             // Divider
             Rectangle()
@@ -92,7 +93,7 @@ struct ServiceClusterCard: View {
                 .frame(height: 1)
 
             // Technical data rows
-            VStack(spacing: 8) {
+            VStack(spacing: Spacing.sm) {
                 HStack {
                     Text("WINDOW")
                         .font(.brutalistLabel)
@@ -121,7 +122,7 @@ struct ServiceClusterCard: View {
                     }
                 }
             }
-            .padding(.top, 12)
+            .padding(.top, Spacing.listItem)
         }
         .glassCardStyle(intensity: .subtle)
         .tappableCard(action: onTap)

@@ -86,6 +86,8 @@ struct CumulativeCostChartCard: View {
                     .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
             )
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Spending pace chart showing cumulative costs over time")
     }
 
     private static let dateFormatter: DateFormatter = {

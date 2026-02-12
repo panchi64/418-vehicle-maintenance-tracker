@@ -47,6 +47,8 @@ struct MonthlyTrendChartCard: View {
             // Preserve text rows below chart
             textRows
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Monthly spending trend chart")
     }
 
     // MARK: - Chart

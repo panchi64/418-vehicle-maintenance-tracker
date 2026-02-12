@@ -69,13 +69,6 @@ struct EditVehicleView: View {
         !make.isEmpty && !model.isEmpty && year != nil
     }
 
-    private var isVINValid: Bool {
-        let trimmed = vin.trimmingCharacters(in: .whitespaces)
-        guard trimmed.count == 17 else { return false }
-        let forbidden = CharacterSet(charactersIn: "IOQioq")
-        return trimmed.unicodeScalars.allSatisfy { !forbidden.contains($0) && CharacterSet.alphanumerics.contains($0) }
-    }
-
     /// Check if camera is available (requires physical device)
     private var isCameraAvailable: Bool {
         UIImagePickerController.isSourceTypeAvailable(.camera)
@@ -123,137 +116,28 @@ struct EditVehicleView: View {
                         }
 
                         // Odometer Section
-                        VStack(alignment: .leading, spacing: Spacing.sm) {
-                            InstrumentSectionHeader(title: "Odometer")
-
-                            InstrumentNumberField(
-                                label: "Current Mileage",
-                                value: $currentMileage,
-                                placeholder: "0",
-                                suffix: "mi",
-                                showCameraButton: isCameraAvailable,
-                                onCameraTap: {
-                                    odometerOCRError = nil
-                                    showOdometerCamera = true
-                                }
-                            )
-
-                            // Odometer OCR processing indicator
-                            if isProcessingOdometerOCR {
-                                OCRProcessingIndicator(text: "Scanning odometer...")
-                            }
-
-                            // Odometer OCR error
-                            if let error = odometerOCRError {
-                                ErrorMessageRow(message: error) {
-                                    odometerOCRError = nil
-                                }
-                            }
-                        }
+                        EditVehicleOdometerSection(
+                            currentMileage: $currentMileage,
+                            showOdometerCamera: $showOdometerCamera,
+                            isProcessingOdometerOCR: $isProcessingOdometerOCR,
+                            odometerOCRError: $odometerOCRError,
+                            isCameraAvailable: isCameraAvailable
+                        )
 
                         // VIN Section
-                        VStack(alignment: .leading, spacing: Spacing.sm) {
-                            InstrumentSectionHeader(title: "Identification")
-
-                            VStack(alignment: .leading, spacing: 4) {
-                                // VIN input with camera button
-                                VStack(alignment: .leading, spacing: 6) {
-                                    Text("VIN")
-                                        .font(.instrumentLabel)
-                                        .foregroundStyle(Theme.textTertiary)
-                                        .tracking(1.5)
-                                        .textCase(.uppercase)
-
-                                    HStack(spacing: 0) {
-                                        TextField("Optional", text: $vin)
-                                            .font(.instrumentBody)
-                                            .foregroundStyle(Theme.textPrimary)
-                                            .textInputAutocapitalization(.characters)
-                                            .autocorrectionDisabled()
-                                            .padding(16)
-                                            .background(Theme.surfaceInstrument)
-                                            .onChange(of: vin) {
-                                                vinLookupError = nil
-                                            }
-
-                                        // Camera scan button
-                                        if isCameraAvailable {
-                                            Button {
-                                                vinOCRError = nil
-                                                showVINCamera = true
-                                            } label: {
-                                                Image(systemName: "camera.fill")
-                                                    .font(.system(size: 18, weight: .medium))
-                                                    .foregroundStyle(Theme.accent)
-                                                    .frame(width: 52, height: 52)
-                                                    .background(Theme.surfaceInstrument)
-                                            }
-                                            .overlay(
-                                                Rectangle()
-                                                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                                            )
-                                        }
-                                    }
-                                    .overlay(
-                                        Rectangle()
-                                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                                    )
-                                }
-
-                                HStack {
-                                    Text("17-character Vehicle Identification Number")
-                                        .font(.caption)
-                                        .foregroundStyle(Theme.textTertiary)
-
-                                    Spacer()
-
-                                    if !vin.isEmpty {
-                                        Text("\(vin.count)/17")
-                                            .font(.brutalistLabel)
-                                            .foregroundStyle(isVINValid ? Theme.statusGood : Theme.textTertiary)
-                                            .tracking(1)
-                                    }
-                                }
-                                .padding(.leading, 4)
-
-                                // VIN OCR processing indicator
-                                if isProcessingVINOCR {
-                                    OCRProcessingIndicator(text: "Scanning VIN...")
-                                }
-
-                                // VIN OCR error
-                                if let error = vinOCRError {
-                                    ErrorMessageRow(message: error) {
-                                        vinOCRError = nil
-                                    }
-                                }
-
-                                // Look Up VIN button
-                                if isVINValid {
-                                    Button {
-                                        lookUpVIN()
-                                    } label: {
-                                        HStack(spacing: Spacing.sm) {
-                                            if isDecodingVIN {
-                                                ProgressView()
-                                                    .tint(Theme.surfaceInstrument)
-                                            }
-                                            Text(isDecodingVIN ? "Looking Up..." : "Look Up VIN")
-                                        }
-                                    }
-                                    .buttonStyle(.secondary)
-                                    .disabled(isDecodingVIN)
-                                    .padding(.top, Spacing.xs)
-                                }
-
-                                // VIN lookup error
-                                if let error = vinLookupError {
-                                    ErrorMessageRow(message: error) {
-                                        vinLookupError = nil
-                                    }
-                                }
-                            }
-                        }
+                        EditVehicleVINSection(
+                            vin: $vin,
+                            make: $make,
+                            model: $model,
+                            year: $year,
+                            isDecodingVIN: $isDecodingVIN,
+                            vinLookupError: $vinLookupError,
+                            showVINCamera: $showVINCamera,
+                            isProcessingVINOCR: $isProcessingVINOCR,
+                            vinOCRError: $vinOCRError,
+                            vinOCROriginal: $vinOCROriginal,
+                            isCameraAvailable: isCameraAvailable
+                        )
 
                         // Specifications Section
                         VStack(alignment: .leading, spacing: Spacing.sm) {
@@ -378,32 +262,6 @@ struct EditVehicleView: View {
                         debugImage: ocrDebugImage
                     )
                     .presentationDetents([.medium])
-                }
-            }
-        }
-    }
-
-    // MARK: - VIN Lookup
-
-    private func lookUpVIN() {
-        isDecodingVIN = true
-        vinLookupError = nil
-
-        Task {
-            do {
-                let result = try await NHTSAService.shared.decodeVIN(vin)
-
-                await MainActor.run {
-                    isDecodingVIN = false
-                    // Auto-fill only empty fields
-                    if make.isEmpty { make = result.make }
-                    if model.isEmpty { model = result.model }
-                    if year == nil { year = result.modelYear }
-                }
-            } catch {
-                await MainActor.run {
-                    isDecodingVIN = false
-                    vinLookupError = error.localizedDescription
                 }
             }
         }

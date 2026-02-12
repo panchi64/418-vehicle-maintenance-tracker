@@ -53,7 +53,6 @@ nonisolated enum SiriServiceStatus: String {
 /// Reads vehicle and service data from App Groups for Siri intents
 nonisolated struct SiriDataProvider {
     private static let logger = Logger(subsystem: "com.418-studio.checkpoint", category: "Siri")
-    private static let appGroupID = "group.com.418-studio.checkpoint.shared"
     private static let widgetDataKey = "widgetData"
     private static let vehicleListKey = "vehicleList"
 
@@ -63,7 +62,7 @@ nonisolated struct SiriDataProvider {
     /// - Parameter vehicleID: Optional vehicle ID. If nil, loads the default (currently selected) vehicle
     /// - Returns: Service data for Siri responses, or nil if no data available
     static func loadServiceData(for vehicleID: String? = nil) -> SiriServiceData? {
-        guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
+        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else {
             return nil
         }
 
@@ -86,7 +85,7 @@ nonisolated struct SiriDataProvider {
     /// Load list of all vehicles
     /// - Returns: Array of vehicle entities available for selection
     static func loadVehicleList() -> [SiriVehicleInfo] {
-        guard let userDefaults = UserDefaults(suiteName: appGroupID),
+        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget),
               let data = userDefaults.data(forKey: vehicleListKey) else {
             return []
         }

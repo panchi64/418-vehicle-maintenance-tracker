@@ -14,10 +14,10 @@ struct WatchDataStoreTests {
 
     @Test func sortedServicesOrdersByUrgency() {
         let services = [
-            WatchService(vehicleID: "v1", name: "Good Service", status: .good, dueDescription: "30 days", dueMileage: nil, daysRemaining: 30),
-            WatchService(vehicleID: "v1", name: "Overdue Service", status: .overdue, dueDescription: "5 days overdue", dueMileage: nil, daysRemaining: -5),
-            WatchService(vehicleID: "v1", name: "Due Soon Service", status: .dueSoon, dueDescription: "3 days", dueMileage: nil, daysRemaining: 3),
-            WatchService(vehicleID: "v1", name: "Neutral Service", status: .neutral, dueDescription: "Scheduled", dueMileage: nil, daysRemaining: nil),
+            WatchService(vehicleID: "v1", serviceID: "sid-1", name: "Good Service", status: .good, dueDescription: "30 days", dueMileage: nil, daysRemaining: 30),
+            WatchService(vehicleID: "v1", serviceID: "sid-2", name: "Overdue Service", status: .overdue, dueDescription: "5 days overdue", dueMileage: nil, daysRemaining: -5),
+            WatchService(vehicleID: "v1", serviceID: "sid-3", name: "Due Soon Service", status: .dueSoon, dueDescription: "3 days", dueMileage: nil, daysRemaining: 3),
+            WatchService(vehicleID: "v1", serviceID: "sid-4", name: "Neutral Service", status: .neutral, dueDescription: "Scheduled", dueMileage: nil, daysRemaining: nil),
         ]
 
         // Verify sort order enum values

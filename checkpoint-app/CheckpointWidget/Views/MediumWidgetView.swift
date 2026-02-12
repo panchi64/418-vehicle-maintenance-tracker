@@ -201,11 +201,15 @@ struct MediumWidgetView: View {
 
     // MARK: - Display Helpers
 
-    /// Format large number with comma separators
-    private func formatNumber(_ number: Int) -> String {
+    private static let numberFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
-        return formatter.string(from: NSNumber(value: number)) ?? "\(number)"
+        return formatter
+    }()
+
+    /// Format large number with comma separators
+    private func formatNumber(_ number: Int) -> String {
+        Self.numberFormatter.string(from: NSNumber(value: number)) ?? "\(number)"
     }
 
     /// Format mileage in user's preferred unit

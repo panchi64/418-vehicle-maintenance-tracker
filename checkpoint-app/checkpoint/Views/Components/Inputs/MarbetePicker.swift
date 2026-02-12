@@ -64,7 +64,7 @@ struct MarbetePicker: View {
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(Theme.accent)
                 }
-                .padding(16)
+                .padding(Spacing.md)
                 .background(Theme.surfaceInstrument)
                 .overlay(
                     Rectangle()
@@ -115,7 +115,7 @@ struct MarbetePicker: View {
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(Theme.accent)
                 }
-                .padding(16)
+                .padding(Spacing.md)
                 .background(Theme.surfaceInstrument)
                 .overlay(
                     Rectangle()
@@ -135,6 +135,7 @@ struct MarbetePicker: View {
             Rectangle()
                 .fill(status.color)
                 .frame(width: 8, height: 8)
+                .accessibilityHidden(true)
 
             Text(statusText)
                 .font(.brutalistSecondary)
@@ -154,6 +155,9 @@ struct MarbetePicker: View {
             Rectangle()
                 .strokeBorder(status.color.opacity(0.3), lineWidth: Theme.borderWidth)
         )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Marbete status: \(statusText)")
+        .accessibilityValue(formattedExpiration() ?? "")
     }
 
     // MARK: - Status Helpers

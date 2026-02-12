@@ -11,7 +11,7 @@ import XCTest
 @MainActor
 final class WidgetDataServiceTests: XCTestCase {
 
-    private let appGroupID = "group.com.418-studio.checkpoint.shared"
+    private let appGroupID = AppGroupConstants.iPhoneWidget
     private let vehicleListKey = "vehicleList"
     private let widgetDataKey = "widgetData"
     private let appSelectedVehicleIDKey = "appSelectedVehicleID"

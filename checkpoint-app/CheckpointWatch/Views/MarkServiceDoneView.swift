@@ -107,6 +107,7 @@ struct MarkServiceDoneView: View {
 
         connectivity.sendMarkServiceDone(
             vehicleID: vehicleID,
+            serviceID: service.serviceID,
             serviceName: service.name,
             mileageAtService: Int(mileage)
         )

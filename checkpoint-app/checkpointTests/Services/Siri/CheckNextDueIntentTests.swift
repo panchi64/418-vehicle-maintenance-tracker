@@ -9,7 +9,7 @@ import XCTest
 @testable import checkpoint
 
 final class CheckNextDueIntentTests: XCTestCase {
-    private let appGroupID = "group.com.418-studio.checkpoint.shared"
+    private let appGroupID = AppGroupConstants.iPhoneWidget
     private let widgetDataKey = "widgetData"
 
     override func tearDown() {

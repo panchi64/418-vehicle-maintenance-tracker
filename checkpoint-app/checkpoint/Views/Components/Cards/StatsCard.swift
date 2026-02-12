@@ -38,6 +38,8 @@ struct StatsCard: View {
             Rectangle()
                 .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
         )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(label): \(value)")
     }
 }
 

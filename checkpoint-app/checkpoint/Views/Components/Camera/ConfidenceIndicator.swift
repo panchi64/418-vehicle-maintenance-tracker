@@ -56,6 +56,9 @@ struct ConfidenceBar: View {
                     .frame(height: 8)
             }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Confidence: \(level.label)")
+        .accessibilityValue("\(Int(confidence * 100)) percent")
     }
 }
 
@@ -83,6 +86,8 @@ struct CompactConfidenceBar: View {
                     .frame(width: 6, height: 4)
             }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Confidence: \(level.label)")
     }
 }
 
@@ -115,7 +120,7 @@ struct CompactConfidenceBar: View {
                 ConfidenceBar(confidence: 0.35, level: .low)
             }
 
-            Divider()
+            ListDivider(leadingPadding: 0)
 
             HStack(spacing: Spacing.xl) {
                 VStack(spacing: Spacing.xs) {

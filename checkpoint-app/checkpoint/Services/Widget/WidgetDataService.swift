@@ -19,7 +19,6 @@ private let widgetLogger = Logger(subsystem: "com.418-studio.checkpoint", catego
 final class WidgetDataService {
     static let shared = WidgetDataService()
 
-    private let appGroupID = "group.com.418-studio.checkpoint.shared"
     private let widgetDataKey = "widgetData"
     private let vehicleListKey = "vehicleList"
 
@@ -72,7 +71,7 @@ final class WidgetDataService {
         isEstimated: Bool = false,
         services: [(serviceID: String?, name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?)]
     ) {
-        guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
+        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else {
             widgetLogger.error("Failed to access App Group UserDefaults")
             return
         }
@@ -216,7 +215,7 @@ final class WidgetDataService {
     /// Update the list of vehicles available for widget selection
     /// - Parameter vehicles: All vehicles to make available in widget configuration
     func updateVehicleList(_ vehicles: [Vehicle]) {
-        guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
+        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else {
             widgetLogger.error("Failed to access App Group UserDefaults")
             return
         }
@@ -236,14 +235,14 @@ final class WidgetDataService {
     /// Remove widget data for a deleted vehicle
     /// - Parameter vehicleID: The UUID string of the deleted vehicle
     func removeWidgetData(for vehicleID: String) {
-        guard let userDefaults = UserDefaults(suiteName: appGroupID) else { return }
+        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else { return }
         userDefaults.removeObject(forKey: widgetDataKey(for: vehicleID))
         WidgetCenter.shared.reloadAllTimelines()
     }
 
     /// Clear all widget data
     func clearWidgetData() {
-        guard let userDefaults = UserDefaults(suiteName: appGroupID) else { return }
+        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else { return }
         userDefaults.removeObject(forKey: widgetDataKey)
         userDefaults.removeObject(forKey: vehicleListKey)
         WidgetCenter.shared.reloadAllTimelines()
@@ -389,10 +388,9 @@ struct PendingWidgetCompletion: Codable {
     let mileageAtService: Int
 
     static let userDefaultsKey = "pendingWidgetCompletions"
-    static let appGroupID = "group.com.418-studio.checkpoint.shared"
 
     static func save(_ completion: PendingWidgetCompletion) {
-        guard let userDefaults = UserDefaults(suiteName: appGroupID) else { return }
+        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else { return }
         var pending = loadAll()
         pending.append(completion)
         if let data = try? JSONEncoder().encode(pending) {
@@ -401,7 +399,7 @@ struct PendingWidgetCompletion: Codable {
     }
 
     static func loadAll() -> [PendingWidgetCompletion] {
-        guard let userDefaults = UserDefaults(suiteName: appGroupID),
+        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget),
               let data = userDefaults.data(forKey: userDefaultsKey) else {
             return []
         }
@@ -409,7 +407,7 @@ struct PendingWidgetCompletion: Codable {
     }
 
     static func clearAll() {
-        guard let userDefaults = UserDefaults(suiteName: appGroupID) else { return }
+        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else { return }
         userDefaults.removeObject(forKey: userDefaultsKey)
     }
 }

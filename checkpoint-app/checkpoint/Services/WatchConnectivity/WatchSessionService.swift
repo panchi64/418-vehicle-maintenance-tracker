@@ -78,6 +78,7 @@ final class WatchSessionService: NSObject {
         let watchServices = services.prefix(3).map { service in
             WatchServiceDTO(
                 vehicleID: vehicleID,
+                serviceID: service.serviceID,
                 name: service.name,
                 status: mapStatus(service.status),
                 dueDescription: service.dueDescription,
@@ -185,9 +186,17 @@ final class WatchSessionService: NSObject {
                 return
             }
 
-            // Find service by name
-            guard let service = (vehicle.services ?? []).first(where: { $0.name == completion.serviceName }) else {
-                WatchLog.logger.error("Service not found: \(completion.serviceName)")
+            // Find service by UUID (preferred) or fall back to name
+            let service: Service? = {
+                if let serviceIDString = completion.serviceID,
+                   let serviceUUID = UUID(uuidString: serviceIDString) {
+                    return (vehicle.services ?? []).first(where: { $0.id == serviceUUID })
+                }
+                return nil
+            }() ?? (vehicle.services ?? []).first(where: { $0.name == completion.serviceName })
+
+            guard let service else {
+                WatchLog.logger.error("Service not found: \(completion.serviceID ?? completion.serviceName)")
                 return
             }
 
@@ -321,6 +330,7 @@ private struct WatchVehicleDTO: Codable {
 /// Service DTO for encoding to Watch
 private struct WatchServiceDTO: Codable {
     let vehicleID: String
+    let serviceID: String?
     let name: String
     let status: String
     let dueDescription: String
@@ -345,6 +355,7 @@ struct WatchMileageUpdateDTO: Codable {
 /// Mark service done DTO from Watch
 struct WatchMarkServiceDoneDTO: Codable {
     let vehicleID: String
+    let serviceID: String?
     let serviceName: String
     let mileageAtService: Int
     let performedDate: Date

@@ -18,13 +18,11 @@ final class AppIconSettings {
     // MARK: - Storage Keys
 
     static let autoChangeIconKey = "autoChangeAppIcon"
-    private static let appGroupID = "group.com.418-studio.checkpoint.shared"
-
     // MARK: - UserDefaults
 
     private static var standardDefaults: UserDefaults { .standard }
     private static var sharedDefaults: UserDefaults? {
-        UserDefaults(suiteName: appGroupID)
+        UserDefaults(suiteName: AppGroupConstants.iPhoneWidget)
     }
 
     // MARK: - Properties

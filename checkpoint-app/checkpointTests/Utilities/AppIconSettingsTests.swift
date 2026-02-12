@@ -12,7 +12,7 @@ import XCTest
 final class AppIconSettingsTests: XCTestCase {
 
     private let autoChangeKey = AppIconSettings.autoChangeIconKey
-    private let appGroupID = "group.com.418-studio.checkpoint.shared"
+    private let appGroupID = AppGroupConstants.iPhoneWidget
 
     override func setUp() {
         super.setUp()

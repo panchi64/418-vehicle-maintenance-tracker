@@ -21,8 +21,6 @@ enum MigrationResult {
 final class DataMigrationService {
     static let shared = DataMigrationService()
 
-    private let appGroupID = "group.com.418-studio.checkpoint.shared"
-
     private init() {}
 
     // MARK: - Migration Check
@@ -35,7 +33,7 @@ final class DataMigrationService {
         }
 
         // Check if old store file exists
-        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
+        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppGroupConstants.iPhoneWidget) else {
             return false
         }
 
@@ -45,7 +43,7 @@ final class DataMigrationService {
 
     /// Get the URL of the old App Group store
     func oldStoreURL() -> URL? {
-        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
+        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppGroupConstants.iPhoneWidget) else {
             return nil
         }
         return containerURL.appendingPathComponent("checkpoint.store")

@@ -70,6 +70,7 @@ struct ServiceDetailView: View {
                     Image(systemName: "pencil")
                 }
                 .toolbarButtonStyle()
+                .accessibilityLabel("Edit service")
             }
         }
         .sheet(isPresented: $showEditSheet, onDismiss: { updateAppIcon(); updateWidgetData() }) {
@@ -110,7 +111,7 @@ struct ServiceDetailView: View {
                     .textCase(.uppercase)
                     .tracking(1.5)
             }
-            .padding(.horizontal, 12)
+            .padding(.horizontal, Spacing.listItem)
             .padding(.vertical, 6)
             .background(status.color.opacity(0.15))
             .clipShape(Rectangle())
@@ -134,6 +135,9 @@ struct ServiceDetailView: View {
         .padding(Spacing.xl)
         .glassCardStyle(intensity: .subtle, padding: 0)
         .padding(Spacing.xl)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Status: \(status.label)")
+        .accessibilityValue(service.primaryDescription ?? service.dueDescription ?? "")
     }
 
     // MARK: - Due Info Section
@@ -145,17 +149,17 @@ struct ServiceDetailView: View {
             VStack(spacing: 0) {
                 if let dueDate = service.dueDate {
                     infoRow(title: "Due Date", value: formatDate(dueDate))
-                    Divider()
+                    ListDivider(leadingPadding: 0)
                 }
 
                 if let dueMileage = service.dueMileage {
                     infoRow(title: "Due Mileage", value: formatMileage(dueMileage))
-                    Divider()
+                    ListDivider(leadingPadding: 0)
                 }
 
                 if let intervalMonths = service.intervalMonths {
                     infoRow(title: "Repeat Every", value: "\(intervalMonths) months")
-                    Divider()
+                    ListDivider(leadingPadding: 0)
                 }
 
                 if let intervalMiles = service.intervalMiles {
@@ -198,6 +202,8 @@ struct ServiceDetailView: View {
                 }
             }
             .buttonStyle(.primary)
+            .accessibilityLabel("Mark as done")
+            .accessibilityHint("Opens service completion form")
         }
     }
 
@@ -218,8 +224,7 @@ struct ServiceDetailView: View {
                     .buttonStyle(.plain)
 
                     if log.id != sortedLogs.last?.id {
-                        Divider()
-                            .padding(.leading, Spacing.md)
+                        ListDivider(leadingPadding: Spacing.md)
                     }
                 }
             }
@@ -266,6 +271,10 @@ struct ServiceDetailView: View {
         }
         .padding(Spacing.md)
         .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Service on \(formatDate(log.performedDate)), \(formatMileage(log.mileageAtService))")
+        .accessibilityValue(log.formattedCost ?? "No cost")
+        .accessibilityHint("Double tap to view details")
     }
 
     // MARK: - Insights Section
@@ -283,7 +292,7 @@ struct ServiceDetailView: View {
                         title: "Time Since Last",
                         value: TimeSinceFormatter.full(from: lastLog.performedDate)
                     )
-                    Divider()
+                    ListDivider(leadingPadding: 0)
 
                     // Miles since last
                     let milesSince = vehicle.currentMileage - lastLog.mileageAtService
@@ -292,7 +301,7 @@ struct ServiceDetailView: View {
                             title: "Miles Since Last",
                             value: Formatters.mileage(milesSince)
                         )
-                        Divider()
+                        ListDivider(leadingPadding: 0)
                     }
                 }
 
@@ -305,7 +314,7 @@ struct ServiceDetailView: View {
                         title: "Average Cost",
                         value: Formatters.currency.string(from: averageCost as NSDecimalNumber) ?? "$0"
                     )
-                    Divider()
+                    ListDivider(leadingPadding: 0)
                 }
 
                 // Times serviced

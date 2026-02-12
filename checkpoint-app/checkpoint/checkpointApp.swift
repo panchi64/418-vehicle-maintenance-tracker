@@ -17,9 +17,6 @@ private let appLogger = Logger(subsystem: "com.418-studio.checkpoint", category:
 @main
 struct checkpointApp: App {
 
-    // App Group identifier for sharing data with widget
-    private static let appGroupID = "group.com.418-studio.checkpoint.shared"
-
     // CloudKit container identifier for iCloud sync
     private static let cloudKitContainerID = "iCloud.com.418-studio.checkpoint"
 
@@ -39,7 +36,7 @@ struct checkpointApp: App {
         let syncEnabled = UserDefaults.standard.object(forKey: "iCloudSyncEnabled") as? Bool ?? true
 
         // Use App Group container for shared access with widget
-        let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)
+        let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppGroupConstants.iPhoneWidget)
         let storeURL = containerURL?.appendingPathComponent("checkpoint.store")
 
         if syncEnabled {

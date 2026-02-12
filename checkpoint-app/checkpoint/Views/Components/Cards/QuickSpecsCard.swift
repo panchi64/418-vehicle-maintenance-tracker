@@ -79,6 +79,9 @@ struct QuickSpecsCard: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Vehicle specs")
+            .accessibilityValue(isExpanded ? "Expanded" : "Collapsed")
+            .accessibilityHint(isExpanded ? "Double tap to collapse" : "Double tap to expand")
 
             // Expandable content
             if isExpanded {
@@ -185,9 +188,10 @@ struct QuickSpecsCard: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, Spacing.sm)
                     }
+                    .accessibilityLabel(hasAnySpecs ? "Edit vehicle specs" : "Add vehicle specs")
                 }
                 .background(Theme.surfaceInstrument)
-                .transition(.opacity.combined(with: .move(edge: .top)))
+                .transition(.opacity)
             }
         }
         .overlay(

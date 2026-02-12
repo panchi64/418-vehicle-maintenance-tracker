@@ -83,6 +83,10 @@ struct ExpenseRow: View {
         }
         .padding(Spacing.md)
         .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(log.service?.name ?? "Service"), \(formatDate(log.performedDate))")
+        .accessibilityValue(log.formattedCost ?? "No cost recorded")
+        .accessibilityHint(onTap != nil ? "Double tap to view details" : "")
     }
 
     private func formatDate(_ date: Date) -> String {

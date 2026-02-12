@@ -30,6 +30,8 @@ struct VehicleHeader: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(vehicle?.displayName ?? "Select vehicle")
+                .accessibilityHint("Double tap to choose a vehicle")
 
                 // Mileage + model info
                 if let vehicle = vehicle {
@@ -45,6 +47,8 @@ struct VehicleHeader: View {
                                 .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel("Mileage: \(Formatters.mileage(vehicle.currentMileage))")
+                        .accessibilityHint(onMileageTap != nil ? "Double tap to update mileage" : "")
 
                         // Separator and model info - tap goes to vehicle picker
                         Button {
@@ -86,6 +90,8 @@ struct VehicleHeader: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Sync error")
+                .accessibilityHint("Double tap to open settings")
             }
 
             // Settings button
@@ -100,10 +106,11 @@ struct VehicleHeader: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Settings")
             }
         }
         .padding(.horizontal, Theme.screenHorizontalPadding)
-        .padding(.vertical, 12)
+        .padding(.vertical, Spacing.listItem)
         .overlay(alignment: .bottom) {
             Rectangle()
                 .fill(Theme.gridLine)

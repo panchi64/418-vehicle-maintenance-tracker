@@ -48,6 +48,7 @@ struct CategoryBreakdownCard: View {
                             .font(.system(size: 14, weight: .medium))
                             .foregroundStyle(item.category.color)
                             .frame(width: 20)
+                            .accessibilityHidden(true)
 
                         Text(item.category.displayName)
                             .font(.brutalistBody)
@@ -68,6 +69,8 @@ struct CategoryBreakdownCard: View {
                             .frame(minWidth: 60, alignment: .trailing)
                     }
                     .padding(Spacing.md)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("\(item.category.displayName), \(formatCurrency(item.amount)), \(String(format: "%.0f", item.percentage)) percent")
 
                     if item.category != breakdown.last?.category {
                         Rectangle()

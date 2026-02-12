@@ -71,7 +71,7 @@ struct NextUpCard: View {
 
                 Spacer()
             }
-            .padding(.bottom, 16)
+            .padding(.bottom, Spacing.md)
 
             // Divider
             Rectangle()
@@ -80,7 +80,7 @@ struct NextUpCard: View {
 
             // Hero data display - miles first, days as fallback
             if let miles = milesUntilDue {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
                     HStack(alignment: .lastTextBaseline, spacing: 4) {
                         Text(Formatters.mileageNumber(abs(miles)))
                             .font(.brutalistHero)
@@ -111,10 +111,10 @@ struct NextUpCard: View {
                             .padding(.top, 4)
                     }
                 }
-                .padding(.vertical, 20)
+                .padding(.vertical, Spacing.screenHorizontal)
             } else if let days = daysUntilDue {
                 // Fallback to days for date-only services (e.g., battery check, wiper blades)
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
                     HStack(alignment: .lastTextBaseline, spacing: 4) {
                         Text("\(abs(days))")
                             .font(.brutalistHero)
@@ -131,7 +131,7 @@ struct NextUpCard: View {
                         .foregroundStyle(Theme.textTertiary)
                         .tracking(1.5)
                 }
-                .padding(.vertical, 20)
+                .padding(.vertical, Spacing.screenHorizontal)
             }
 
             // Divider
@@ -140,7 +140,7 @@ struct NextUpCard: View {
                 .frame(height: 1)
 
             // Data rows
-            VStack(spacing: 8) {
+            VStack(spacing: Spacing.sm) {
                 if let dueMileage = service.dueMileage {
                     HStack {
                         Text("CURRENT")
@@ -198,7 +198,7 @@ struct NextUpCard: View {
                         .padding(.top, 8)
                 }
             }
-            .padding(.top, 12)
+            .padding(.top, Spacing.listItem)
         }
         .glassCardStyle(intensity: .subtle)
         .tappableCard(action: onTap)
@@ -288,7 +288,7 @@ struct MarbeteNextUpCard: View {
 
                 Spacer()
             }
-            .padding(.bottom, 16)
+            .padding(.bottom, Spacing.md)
 
             // Divider
             Rectangle()
@@ -297,8 +297,8 @@ struct MarbeteNextUpCard: View {
 
             // Hero data display - days only for marbete
             if let days = daysUntilDue {
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(alignment: .lastTextBaseline, spacing: 4) {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    HStack(alignment: .lastTextBaseline, spacing: Spacing.xs) {
                         Text("\(abs(days))")
                             .font(.brutalistHero)
                             .foregroundStyle(status.color)
@@ -314,7 +314,7 @@ struct MarbeteNextUpCard: View {
                         .foregroundStyle(Theme.textTertiary)
                         .tracking(1.5)
                 }
-                .padding(.vertical, 20)
+                .padding(.vertical, Spacing.screenHorizontal)
             }
 
             // Divider
@@ -323,7 +323,7 @@ struct MarbeteNextUpCard: View {
                 .frame(height: 1)
 
             // Expiration info
-            VStack(spacing: 8) {
+            VStack(spacing: Spacing.sm) {
                 HStack {
                     Text("EXPIRES")
                         .font(.brutalistLabel)
@@ -339,7 +339,7 @@ struct MarbeteNextUpCard: View {
                     }
                 }
             }
-            .padding(.top, 12)
+            .padding(.top, Spacing.listItem)
         }
         .glassCardStyle(intensity: .subtle)
         .tappableCard(action: onTap)

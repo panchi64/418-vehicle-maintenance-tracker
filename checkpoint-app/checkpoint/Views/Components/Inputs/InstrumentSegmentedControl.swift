@@ -20,7 +20,7 @@ struct InstrumentSegmentedControl<T: Hashable>: View {
                 segmentButton(for: option)
             }
         }
-        .padding(4)
+        .padding(Spacing.xs)
         .background(Theme.surfaceInstrument)
         .overlay(
             Rectangle()
@@ -42,8 +42,8 @@ struct InstrumentSegmentedControl<T: Hashable>: View {
                 .foregroundStyle(isSelected ? Theme.surfaceInstrument : Theme.textSecondary)
                 .tracking(1)
                 .lineLimit(1)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 12)
+                .padding(.horizontal, Spacing.listItem)
+                .padding(.vertical, Spacing.listItem)
                 .frame(maxWidth: .infinity)
                 .background {
                     if isSelected {
@@ -54,6 +54,8 @@ struct InstrumentSegmentedControl<T: Hashable>: View {
                 }
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(labelFor(option))
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 

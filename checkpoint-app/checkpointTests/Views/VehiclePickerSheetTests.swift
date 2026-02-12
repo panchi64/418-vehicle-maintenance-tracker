@@ -15,7 +15,7 @@ final class VehiclePickerSheetTests: XCTestCase {
     var modelContainer: ModelContainer!
     var modelContext: ModelContext!
 
-    private let appGroupID = "group.com.418-studio.checkpoint.shared"
+    private let appGroupID = AppGroupConstants.iPhoneWidget
     private let appSelectedVehicleIDKey = "appSelectedVehicleID"
 
     override func setUp() {

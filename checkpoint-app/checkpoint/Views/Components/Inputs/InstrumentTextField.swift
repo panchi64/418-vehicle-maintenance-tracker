@@ -42,7 +42,7 @@ struct InstrumentTextField: View {
                 .textContentType(textContentType)
                 .textInputAutocapitalization(autocapitalization)
                 .focused($isFocused)
-                .padding(16)
+                .padding(Spacing.md)
                 .background(Theme.surfaceInstrument)
                 .clipShape(Rectangle())
                 .overlay(
@@ -126,7 +126,7 @@ struct InstrumentNumberField: View {
                             .foregroundStyle(Theme.textTertiary)
                     }
                 }
-                .padding(16)
+                .padding(Spacing.md)
                 .background(Theme.surfaceInstrument)
 
                 // Camera button accessory
@@ -180,7 +180,7 @@ struct InstrumentDatePicker: View {
                 .labelsHidden()
                 .datePickerStyle(.compact)
                 .tint(Theme.accent)
-                .padding(12)
+                .padding(Spacing.listItem)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Theme.surfaceInstrument)
                 .clipShape(Rectangle())
@@ -206,11 +206,12 @@ struct InstrumentToggle: View {
 
             Spacer()
 
-            Toggle("", isOn: $isOn)
+            Toggle(label, isOn: $isOn)
                 .labelsHidden()
                 .tint(Theme.accent)
+                .accessibilityLabel(label)
         }
-        .padding(16)
+        .padding(Spacing.md)
         .background(Theme.surfaceInstrument)
         .clipShape(Rectangle())
         .overlay(
@@ -244,8 +245,8 @@ struct InstrumentTextEditor: View {
                     Text(placeholder)
                         .font(.instrumentBody)
                         .foregroundStyle(Theme.textTertiary)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 16)
+                        .padding(.horizontal, Spacing.listItem)
+                        .padding(.vertical, Spacing.md)
                 }
 
                 TextEditor(text: $text)
@@ -253,7 +254,7 @@ struct InstrumentTextEditor: View {
                     .foregroundStyle(Theme.textPrimary)
                     .focused($isFocused)
                     .scrollContentBackground(.hidden)
-                    .padding(12)
+                    .padding(Spacing.listItem)
             }
             .frame(minHeight: minHeight)
             .background(Theme.surfaceInstrument)

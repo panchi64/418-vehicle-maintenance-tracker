@@ -37,6 +37,8 @@ struct BrutalistTabBar: View {
                 .buttonStyle(.borderedProminent)
                 .tint(Theme.accent)
                 .buttonBorderShape(.circle)
+                .accessibilityLabel("Add service")
+                .accessibilityHint("Opens service creation form")
             }
         }
         .padding(.horizontal, Spacing.md)
@@ -66,6 +68,8 @@ struct BrutalistTabBar: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(tab.title)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 

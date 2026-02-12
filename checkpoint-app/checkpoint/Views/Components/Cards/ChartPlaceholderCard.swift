@@ -15,6 +15,7 @@ struct ChartPlaceholderCard: View {
             Image(systemName: "chart.line.uptrend.xyaxis")
                 .font(.system(size: 24))
                 .foregroundStyle(Theme.textTertiary)
+                .accessibilityHidden(true)
 
             Text(message.uppercased())
                 .font(.brutalistLabel)
@@ -24,6 +25,8 @@ struct ChartPlaceholderCard: View {
         .frame(maxWidth: .infinity)
         .frame(height: ChartConstants.chartHeight)
         .cardStyle()
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(message)
     }
 }
 

@@ -108,7 +108,7 @@ final class PendingWidgetCompletionTests: XCTestCase {
         )
 
         // Write to UserDefaults (same key as PendingWidgetCompletion.save)
-        let userDefaults = UserDefaults(suiteName: PendingWidgetCompletion.appGroupID)
+        let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget)
         if let data = try? JSONEncoder().encode([completion]) {
             userDefaults?.set(data, forKey: PendingWidgetCompletion.userDefaultsKey)
         }
@@ -165,7 +165,7 @@ final class PendingWidgetCompletionTests: XCTestCase {
             mileageAtService: 50000
         )
 
-        let userDefaults = UserDefaults(suiteName: PendingWidgetCompletion.appGroupID)
+        let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget)
         if let data = try? JSONEncoder().encode([completion]) {
             userDefaults?.set(data, forKey: PendingWidgetCompletion.userDefaultsKey)
         }
@@ -204,7 +204,7 @@ final class PendingWidgetCompletionTests: XCTestCase {
             mileageAtService: 50000
         )
 
-        let userDefaults = UserDefaults(suiteName: PendingWidgetCompletion.appGroupID)
+        let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget)
         if let data = try? JSONEncoder().encode([completion]) {
             userDefaults?.set(data, forKey: PendingWidgetCompletion.userDefaultsKey)
         }

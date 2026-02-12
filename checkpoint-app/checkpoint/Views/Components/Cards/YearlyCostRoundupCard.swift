@@ -122,6 +122,8 @@ struct YearlyCostRoundupCard: View {
             Rectangle()
                 .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
         )
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("\(year) yearly cost roundup, total spent \(formatCurrency(totalSpent))")
     }
 
     // MARK: - Header Section
@@ -161,11 +163,13 @@ struct YearlyCostRoundupCard: View {
                 HStack(spacing: 4) {
                     Image(systemName: change >= 0 ? "arrow.up" : "arrow.down")
                         .font(.system(size: 12, weight: .bold))
+                        .accessibilityHidden(true)
 
                     Text(String(format: "%.0f%% from %d", abs(change), year - 1))
                         .font(.brutalistSecondary)
                 }
                 .foregroundStyle(change >= 0 ? Theme.statusOverdue : Theme.statusGood)
+                .accessibilityLabel("\(change >= 0 ? "Up" : "Down") \(String(format: "%.0f", abs(change))) percent from \(year - 1)")
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

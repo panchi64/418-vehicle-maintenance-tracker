@@ -10,17 +10,17 @@ import SwiftData
 
 struct HomeTab: View {
     @Bindable var appState: AppState
-    @Environment(\.modelContext) private var modelContext
-    @Query private var services: [Service]
+    @Environment(\.modelContext) var modelContext
+    @Query var services: [Service]
     @Query private var serviceLogs: [ServiceLog]
 
     // Cluster state
-    @State private var primaryCluster: ServiceCluster?
-    @State private var dismissedClusterHashes: Set<String> = []
-    @AppStorage("dismissedClusterHashes") private var dismissedClusterHashesStorage: String = ""
+    @State var primaryCluster: ServiceCluster?
+    @State var dismissedClusterHashes: Set<String> = []
+    @AppStorage("dismissedClusterHashes") var dismissedClusterHashesStorage: String = ""
 
     // Seasonal reminders
-    @State private var activeSeasonalReminders: [SeasonalReminder] = []
+    @State var activeSeasonalReminders: [SeasonalReminder] = []
 
     private var syncService: CloudSyncStatusService {
         CloudSyncStatusService.shared
@@ -30,13 +30,9 @@ struct HomeTab: View {
         appState.selectedVehicle
     }
 
-    private var vehicleServices: [Service] {
+    var vehicleServices: [Service] {
         guard let vehicle = vehicle else { return [] }
-        let effectiveMileage = vehicle.effectiveMileage
-        let pace = vehicle.dailyMilesPace
-        return services
-            .filter { $0.vehicle?.id == vehicle.id }
-            .sorted { $0.urgencyScore(currentMileage: effectiveMileage, dailyPace: pace) < $1.urgencyScore(currentMileage: effectiveMileage, dailyPace: pace) }
+        return services.forVehicle(vehicle)
     }
 
     /// The most urgent upcoming item (service or marbete)
@@ -303,180 +299,6 @@ struct HomeTab: View {
                 detectClusters()
             }
         }
-    }
-
-    // MARK: - Activity Row
-
-    private func activityRow(log: ServiceLog) -> some View {
-        HStack(spacing: Spacing.sm) {
-            Image(systemName: "checkmark")
-                .font(.system(size: 12, weight: .bold))
-                .foregroundStyle(Theme.statusGood)
-                .frame(width: 20)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(log.service?.name ?? "Service")
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textPrimary)
-                    .lineLimit(1)
-
-                Text(Formatters.shortDate.string(from: log.performedDate))
-                    .font(.brutalistSecondary)
-                    .foregroundStyle(Theme.textTertiary)
-            }
-
-            Spacer()
-
-            if let cost = log.formattedCost {
-                Text(cost)
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.accent)
-            }
-
-            Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(Theme.textTertiary)
-        }
-        .padding(Spacing.md)
-        .contentShape(Rectangle())
-    }
-
-    // MARK: - Empty States
-
-    private var syncingDataState: some View {
-        VStack(spacing: Spacing.lg) {
-            ZStack {
-                Rectangle()
-                    .fill(Theme.accent.opacity(0.1))
-                    .frame(width: 100, height: 100)
-
-                Image(systemName: "icloud.and.arrow.down")
-                    .font(.system(size: 40, weight: .light))
-                    .foregroundStyle(Theme.accent)
-                    .symbolEffect(.pulse, options: .repeating)
-            }
-
-            VStack(spacing: Spacing.xs) {
-                Text("Syncing Your Data")
-                    .font(.brutalistHeading)
-                    .foregroundStyle(Theme.textPrimary)
-
-                Text("Restoring your vehicles and maintenance\nhistory from iCloud")
-                    .font(.brutalistSecondary)
-                    .foregroundStyle(Theme.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
-            }
-
-            ProgressView()
-                .tint(Theme.accent)
-                .padding(.top, Spacing.sm)
-        }
-        .padding(Spacing.xxl)
-    }
-
-    private var emptyVehicleState: some View {
-        EmptyStateView(
-            icon: "car.side.fill",
-            title: "No Vehicles",
-            message: "Add your first vehicle to start\ntracking maintenance",
-            action: { appState.requestAddVehicle(vehicleCount: 0) },
-            actionLabel: "Add Vehicle"
-        )
-    }
-
-    private var noServicesState: some View {
-        EmptyStateView(
-            icon: "checkmark",
-            title: "All Clear",
-            message: "No maintenance services scheduled\nfor this vehicle"
-        )
-    }
-
-    // MARK: - Cluster Management
-
-    private func detectClusters() {
-        guard let vehicle = vehicle else {
-            primaryCluster = nil
-            return
-        }
-        primaryCluster = ServiceClusteringService.primaryCluster(
-            for: vehicle,
-            services: vehicleServices
-        )
-    }
-
-    private func dismissCluster(_ cluster: ServiceCluster) {
-        dismissedClusterHashes.insert(cluster.contentHash)
-        saveDismissedClusters()
-    }
-
-    private func loadDismissedClusters() {
-        dismissedClusterHashes = Set(
-            dismissedClusterHashesStorage
-                .split(separator: ",")
-                .map(String.init)
-        )
-    }
-
-    private func saveDismissedClusters() {
-        dismissedClusterHashesStorage = dismissedClusterHashes.joined(separator: ",")
-    }
-
-    // MARK: - Seasonal Reminders
-
-    private func refreshSeasonalReminders() {
-        let zone = SeasonalSettings.shared.climateZone
-        activeSeasonalReminders = SeasonalReminder.activeReminders(for: zone, on: Date())
-    }
-
-    private func scheduleSeasonalService(_ reminder: SeasonalReminder) {
-        let year = Calendar.current.component(.year, from: Date())
-        SeasonalSettings.shared.dismissForYear(reminder.id, year: year)
-        appState.seasonalPrefill = reminder.toPrefill()
-        appState.showAddService = true
-        refreshSeasonalReminders()
-    }
-
-    private func dismissSeasonalReminder(_ reminder: SeasonalReminder) {
-        let year = Calendar.current.component(.year, from: Date())
-        SeasonalSettings.shared.dismissForYear(reminder.id, year: year)
-        withAnimation(.easeOut(duration: Theme.animationMedium)) {
-            refreshSeasonalReminders()
-        }
-    }
-
-    // MARK: - Helpers
-
-    private func updateMileage(_ newMileage: Int, for vehicle: Vehicle) {
-        vehicle.currentMileage = newMileage
-        vehicle.mileageUpdatedAt = .now
-
-        let shouldCreateSnapshot = !MileageSnapshot.hasSnapshotToday(
-            snapshots: vehicle.mileageSnapshots ?? []
-        )
-
-        if shouldCreateSnapshot {
-            let snapshot = MileageSnapshot(
-                vehicle: vehicle,
-                mileage: newMileage,
-                recordedAt: .now,
-                source: .manual
-            )
-            modelContext.insert(snapshot)
-        }
-
-        // Force immediate save to trigger SwiftUI observation for dependent views
-        try? modelContext.save()
-
-        // Update app icon based on new mileage affecting service status
-        AppIconService.shared.updateIcon(for: vehicle, services: services)
-
-        // Reschedule mileage reminder for 14 days from now
-        NotificationService.shared.scheduleMileageReminder(for: vehicle, lastUpdateDate: .now)
-
-        // Reschedule service notifications with updated pace data
-        NotificationService.shared.rescheduleNotifications(for: vehicle)
     }
 }
 

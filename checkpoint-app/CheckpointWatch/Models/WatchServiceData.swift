@@ -28,10 +28,11 @@ struct WatchVehicleData: Codable, Sendable {
 // MARK: - Service Data
 
 struct WatchService: Codable, Identifiable, Sendable {
-    /// Composite ID: vehicleID + service name (no SwiftData UUIDs on Watch)
-    var id: String { "\(vehicleID)_\(name)" }
+    /// Uses serviceID (iPhone-side UUID) when available, falls back to composite ID
+    var id: String { serviceID ?? "\(vehicleID)_\(name)" }
 
     let vehicleID: String
+    let serviceID: String?
     let name: String
     let status: WatchServiceStatus
     let dueDescription: String
@@ -59,6 +60,7 @@ struct WatchMileageUpdate: Codable, Sendable {
 /// Message sent from Watch to iPhone to mark a service as done
 struct WatchMarkServiceDone: Codable, Sendable {
     let vehicleID: String
+    let serviceID: String?
     let serviceName: String
     let mileageAtService: Int
     let performedDate: Date

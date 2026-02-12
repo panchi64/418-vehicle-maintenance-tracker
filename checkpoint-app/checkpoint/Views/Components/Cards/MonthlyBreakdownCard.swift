@@ -70,6 +70,8 @@ struct MonthlyBreakdownCard: View {
                     .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
             )
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Monthly cost breakdown")
     }
 
     private func formatMonthYear(_ date: Date) -> String {

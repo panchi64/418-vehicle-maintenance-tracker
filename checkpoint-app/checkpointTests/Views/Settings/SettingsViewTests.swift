@@ -13,7 +13,7 @@ import SwiftUI
 final class SettingsViewTests: XCTestCase {
 
     private let unitKey = "distanceUnit"
-    private let appGroupID = "group.com.418-studio.checkpoint.shared"
+    private let appGroupID = AppGroupConstants.iPhoneWidget
 
     override func setUp() {
         super.setUp()

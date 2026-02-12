@@ -55,6 +55,8 @@ struct QuickStatsBar: View {
             Rectangle()
                 .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
         )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Year to date: \(formattedYTDSpend) spent, \(ytdServicesCount) services completed")
     }
 
     private func statItem(label: String, value: String, valueColor: Color) -> some View {
