@@ -84,6 +84,10 @@ Tests should verify actual functionality - avoid hacky workarounds that circumve
 2. Add static property in `Theme.swift`
 3. Update `ServiceStatus.color` in `Service.swift`
 
+## Concurrency
+
+- Never use `nonisolated(unsafe)` or `@unchecked Sendable`. For static constants with `Sendable` types (e.g., `String`), use `nonisolated static let` to opt out of actor isolation safely.
+
 ## Important Notes
 
 - All data persisted via SwiftData with automatic iCloud sync (when configured)
