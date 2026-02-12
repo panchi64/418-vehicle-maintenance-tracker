@@ -332,7 +332,7 @@ final class WidgetDataServiceTests: XCTestCase {
         // Main app saves selected vehicle ID
         userDefaults.set(testVehicleID, forKey: appSelectedVehicleIDKey)
 
-        // Widget reads via the same key (simulating SharedWidgetSettings.load())
+        // Widget reads via the same key (used by WidgetProvider for "Match App" resolution)
         let widgetReadValue = userDefaults.string(forKey: appSelectedVehicleIDKey)
         XCTAssertEqual(widgetReadValue, testVehicleID,
                        "Widget should be able to read app's selected vehicle ID")

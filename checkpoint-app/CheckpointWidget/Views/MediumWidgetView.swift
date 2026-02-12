@@ -18,7 +18,7 @@ struct MediumWidgetView: View {
     }
 
     private var distanceUnit: WidgetDistanceUnit {
-        WidgetDistanceUnit.current()
+        entry.distanceUnit
     }
 
     /// Services excluding the first one (for the right panel)

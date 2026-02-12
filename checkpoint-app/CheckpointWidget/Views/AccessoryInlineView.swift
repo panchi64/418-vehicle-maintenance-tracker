@@ -28,7 +28,7 @@ struct AccessoryInlineView: View {
 
     /// Abbreviate due description for inline: "500 miles remaining" → "500 MI" or "500 KM"
     private func formatDue(_ description: String) -> String {
-        let unit = WidgetDistanceUnit.current()
+        let unit = entry.distanceUnit
         let upper = description.uppercased()
         if upper.contains("MILES") || upper.contains("KILOMETERS") {
             // Extract number

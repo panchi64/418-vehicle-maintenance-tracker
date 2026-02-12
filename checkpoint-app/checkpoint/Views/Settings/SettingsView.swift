@@ -2,7 +2,7 @@
 //  SettingsView.swift
 //  checkpoint
 //
-//  Settings screen organized by: Display, Reminders, Smart Features, Widgets, Data & Sync, Privacy
+//  Settings screen organized by: Display, Reminders, Smart Features, Data & Sync, Privacy
 //
 
 import SwiftUI
@@ -30,9 +30,6 @@ struct SettingsView: View {
 
                         // SMART FEATURES — service bundling
                         smartFeaturesSection
-
-                        // WIDGETS
-                        widgetSettingsSection
 
                         // DATA & SYNC — rarely changed after setup
                         dataSection
@@ -242,50 +239,6 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Widget Settings Section
-
-    private var widgetSettingsSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text(L10n.settingsWidgets)
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(2)
-
-            VStack(spacing: 0) {
-                // Default Vehicle
-                NavigationLink {
-                    WidgetVehiclePicker(vehicles: vehicles)
-                } label: {
-                    settingRow(
-                        title: L10n.settingsDefaultVehicle,
-                        value: selectedVehicleName
-                    )
-                }
-                .buttonStyle(.plain)
-
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
-
-                // Mileage Display Mode
-                NavigationLink {
-                    WidgetMileageModePicker()
-                } label: {
-                    settingRow(
-                        title: L10n.settingsMileageDisplay,
-                        value: WidgetSettingsManager.shared.mileageDisplayMode.displayName
-                    )
-                }
-                .buttonStyle(.plain)
-            }
-            .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
-        }
-    }
-
     // MARK: - Data Section
 
     @State private var showCSVImport = false
@@ -424,14 +377,6 @@ struct SettingsView: View {
         }
     }
     #endif
-
-    private var selectedVehicleName: String {
-        if let vehicleID = WidgetSettingsManager.shared.defaultVehicleID,
-           let vehicle = vehicles.first(where: { $0.id.uuidString == vehicleID }) {
-            return vehicle.name
-        }
-        return L10n.vehicleFirstVehicle
-    }
 
     private func settingRow(title: String, value: String) -> some View {
         HStack {

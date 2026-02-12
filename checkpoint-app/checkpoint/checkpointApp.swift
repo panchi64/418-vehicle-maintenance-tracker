@@ -86,7 +86,6 @@ struct checkpointApp: App {
         // Register UserDefaults defaults
         DistanceSettings.registerDefaults()
         AppIconSettings.registerDefaults()
-        WidgetSettingsManager.registerDefaults()
         SyncSettings.registerDefaults()
         AnalyticsSettings.registerDefaults()
         PurchaseSettings.registerDefaults()

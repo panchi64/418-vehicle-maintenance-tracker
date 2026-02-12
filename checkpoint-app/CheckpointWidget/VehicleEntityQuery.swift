@@ -26,17 +26,25 @@ struct VehicleEntityQuery: EntityQuery {
     private let appGroupID = "group.com.418-studio.checkpoint.shared"
     private let vehicleListKey = "vehicleList"
 
+    /// Pseudo-entity representing "use the app's current vehicle selection"
+    private static let matchAppEntity = VehicleEntity(id: "match-app", displayName: "Match App")
+
     func entities(for identifiers: [VehicleEntity.ID]) async throws -> [VehicleEntity] {
         let allVehicles = loadVehicles()
-        return allVehicles.filter { identifiers.contains($0.id) }
+        return identifiers.compactMap { id in
+            if id == "match-app" {
+                return Self.matchAppEntity
+            }
+            return allVehicles.first { $0.id == id }
+        }
     }
 
     func suggestedEntities() async throws -> [VehicleEntity] {
-        loadVehicles()
+        [Self.matchAppEntity] + loadVehicles()
     }
 
     func defaultResult() async -> VehicleEntity? {
-        loadVehicles().first
+        Self.matchAppEntity
     }
 
     private func loadVehicles() -> [VehicleEntity] {

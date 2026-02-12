@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import WidgetKit
 
 @Observable
 @MainActor
@@ -54,6 +55,9 @@ final class DistanceSettings {
 
         // Sync to App Group for widget access
         Self.sharedDefaults?.set(unit.rawValue, forKey: Self.unitKey)
+
+        // Reload widgets so "Match App" distance unit picks up the change immediately
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     // MARK: - Widget Access (Non-reactive)

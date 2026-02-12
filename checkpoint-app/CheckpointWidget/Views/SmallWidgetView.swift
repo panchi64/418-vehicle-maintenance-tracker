@@ -18,7 +18,7 @@ struct SmallWidgetView: View {
     }
 
     private var distanceUnit: WidgetDistanceUnit {
-        WidgetDistanceUnit.current()
+        entry.distanceUnit
     }
 
     var body: some View {

@@ -18,6 +18,7 @@ struct ServiceEntry: TimelineEntry {
     let currentMileage: Int
     let services: [WidgetService]
     let configuration: CheckpointWidgetConfigurationIntent
+    let distanceUnit: WidgetDistanceUnit
 
     static var placeholder: ServiceEntry {
         ServiceEntry(
@@ -30,12 +31,13 @@ struct ServiceEntry: TimelineEntry {
                 WidgetService(serviceID: nil, name: "Tire Rotation", status: .good, dueDescription: "Due in 30 days", dueMileage: 38000, daysRemaining: 30),
                 WidgetService(serviceID: nil, name: "Brake Inspection", status: .overdue, dueDescription: "5 days overdue", dueMileage: 32000, daysRemaining: -5)
             ],
-            configuration: CheckpointWidgetConfigurationIntent()
+            configuration: CheckpointWidgetConfigurationIntent(),
+            distanceUnit: WidgetDistanceUnit.current()
         )
     }
 
     static var empty: ServiceEntry {
-        ServiceEntry(date: Date(), vehicleID: nil, vehicleName: "No Vehicle", currentMileage: 0, services: [], configuration: CheckpointWidgetConfigurationIntent())
+        ServiceEntry(date: Date(), vehicleID: nil, vehicleName: "No Vehicle", currentMileage: 0, services: [], configuration: CheckpointWidgetConfigurationIntent(), distanceUnit: WidgetDistanceUnit.current())
     }
 }
 
@@ -146,40 +148,33 @@ struct WidgetProvider: AppIntentTimelineProvider {
         // Load pending completion IDs to filter out already-logged services
         let pendingIDs = Set(PendingWidgetCompletion.loadAll().map { $0.serviceID })
 
-        // Load shared settings for mileage display mode
-        let sharedSettings = SharedWidgetSettings.load()
+        // Resolve distance unit from intent (single source of truth)
+        let resolvedUnit = configuration.distanceUnit.resolve()
 
         // Determine which vehicle to load:
-        // 1. Use configured vehicle if available (explicit per-widget config)
-        // 2. Fall back to widgetData key (always has app's current selection)
-        //
-        // Note: We use the widgetData key as primary fallback because it's written
-        // in the same operation as reloadAllTimelines(), avoiding cross-process
-        // UserDefaults synchronization issues with a separate vehicle ID key.
-        let effectiveConfig = CheckpointWidgetConfigurationIntent(
-            vehicle: configuration.vehicle,
-            mileageDisplayMode: sharedSettings.displayMode
-        )
+        // - "match-app" or nil → use widgetData key (app's current selection)
+        // - Specific vehicle → use per-vehicle key, fallback to widgetData
+        let isMatchApp = configuration.vehicle == nil || configuration.vehicle?.id == "match-app"
 
-        // If widget is explicitly configured with a vehicle, try that vehicle's data first
-        if let configuredVehicle = configuration.vehicle {
+        if !isMatchApp, let configuredVehicle = configuration.vehicle {
+            // Explicit per-widget vehicle selection
             let vehicleKey = "widgetData_\(configuredVehicle.id)"
             if let data = userDefaults.data(forKey: vehicleKey),
-               let entry = decodeEntry(from: data, configuration: effectiveConfig, pendingIDs: pendingIDs) {
+               let entry = decodeEntry(from: data, configuration: configuration, distanceUnit: resolvedUnit, pendingIDs: pendingIDs) {
                 return entry
             }
         }
 
-        // Use the widgetData key which always contains the app's currently selected vehicle
+        // Use the widgetData key (app's currently selected vehicle)
         if let data = userDefaults.data(forKey: widgetDataKey),
-           let entry = decodeEntry(from: data, configuration: effectiveConfig, pendingIDs: pendingIDs) {
+           let entry = decodeEntry(from: data, configuration: configuration, distanceUnit: resolvedUnit, pendingIDs: pendingIDs) {
             return entry
         }
 
-        return makeEmptyEntry(configuration: effectiveConfig)
+        return makeEmptyEntry(configuration: configuration, distanceUnit: resolvedUnit)
     }
 
-    private func decodeEntry(from data: Data, configuration: CheckpointWidgetConfigurationIntent, pendingIDs: Set<String>) -> ServiceEntry? {
+    private func decodeEntry(from data: Data, configuration: CheckpointWidgetConfigurationIntent, distanceUnit: WidgetDistanceUnit, pendingIDs: Set<String>) -> ServiceEntry? {
         do {
             let widgetData = try JSONDecoder().decode(WidgetData.self, from: data)
 
@@ -205,7 +200,8 @@ struct WidgetProvider: AppIntentTimelineProvider {
                 vehicleName: widgetData.vehicleName,
                 currentMileage: widgetData.currentMileage,
                 services: widgetServices,
-                configuration: configuration
+                configuration: configuration,
+                distanceUnit: distanceUnit
             )
         } catch {
             print("Widget failed to decode data: \(error)")
@@ -213,14 +209,15 @@ struct WidgetProvider: AppIntentTimelineProvider {
         }
     }
 
-    private func makeEmptyEntry(configuration: CheckpointWidgetConfigurationIntent) -> ServiceEntry {
+    private func makeEmptyEntry(configuration: CheckpointWidgetConfigurationIntent, distanceUnit: WidgetDistanceUnit = .miles) -> ServiceEntry {
         ServiceEntry(
             date: Date(),
             vehicleID: nil,
             vehicleName: "No Vehicle",
             currentMileage: 0,
             services: [],
-            configuration: configuration
+            configuration: configuration,
+            distanceUnit: distanceUnit
         )
     }
 }

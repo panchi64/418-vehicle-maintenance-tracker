@@ -32,11 +32,49 @@ enum MileageDisplayMode: String, CaseIterable, AppEnum {
     }
 }
 
+// MARK: - Distance Unit Option Enum
+
+enum WidgetDistanceUnitOption: String, CaseIterable, AppEnum {
+    case matchApp = "matchApp"
+    case miles = "miles"
+    case kilometers = "kilometers"
+
+    static var typeDisplayRepresentation: TypeDisplayRepresentation {
+        "Distance Unit"
+    }
+
+    static var caseDisplayRepresentations: [WidgetDistanceUnitOption: DisplayRepresentation] {
+        [
+            .matchApp: DisplayRepresentation(
+                title: "Match App",
+                subtitle: "Use the distance unit from the app"
+            ),
+            .miles: DisplayRepresentation(
+                title: "Miles",
+                subtitle: "Always show miles (MI)"
+            ),
+            .kilometers: DisplayRepresentation(
+                title: "Kilometers",
+                subtitle: "Always show kilometers (KM)"
+            )
+        ]
+    }
+
+    /// Resolve to a concrete WidgetDistanceUnit
+    func resolve() -> WidgetDistanceUnit {
+        switch self {
+        case .matchApp: return WidgetDistanceUnit.current()
+        case .miles: return .miles
+        case .kilometers: return .kilometers
+        }
+    }
+}
+
 // MARK: - Widget Configuration Intent
 
 struct CheckpointWidgetConfigurationIntent: WidgetConfigurationIntent {
     static var title: LocalizedStringResource = "Checkpoint Widget"
-    static var description = IntentDescription("Configure which vehicle to display and how mileage is shown")
+    static var description = IntentDescription("Configure which vehicle to display, how mileage is shown, and distance units")
 
     @Parameter(title: "Vehicle")
     var vehicle: VehicleEntity?
@@ -44,13 +82,18 @@ struct CheckpointWidgetConfigurationIntent: WidgetConfigurationIntent {
     @Parameter(title: "Mileage Display", default: .absolute)
     var mileageDisplayMode: MileageDisplayMode
 
+    @Parameter(title: "Distance Unit", default: .matchApp)
+    var distanceUnit: WidgetDistanceUnitOption
+
     init() {
         self.vehicle = nil
         self.mileageDisplayMode = .absolute
+        self.distanceUnit = .matchApp
     }
 
-    init(vehicle: VehicleEntity?, mileageDisplayMode: MileageDisplayMode) {
+    init(vehicle: VehicleEntity?, mileageDisplayMode: MileageDisplayMode, distanceUnit: WidgetDistanceUnitOption = .matchApp) {
         self.vehicle = vehicle
         self.mileageDisplayMode = mileageDisplayMode
+        self.distanceUnit = distanceUnit
     }
 }
