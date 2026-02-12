@@ -301,11 +301,12 @@ final class VehicleTests: XCTestCase {
     // MARK: - Should Prompt Mileage Update Tests
 
     func testShouldPromptMileageUpdate_NeverUpdated() {
-        // Given - vehicle with no mileage update date
+        // Given - vehicle with mileage but no update date
         let vehicle = Vehicle(
             make: "Toyota",
             model: "Camry",
             year: 2022,
+            currentMileage: 50000,
             mileageUpdatedAt: nil
         )
 
@@ -313,12 +314,27 @@ final class VehicleTests: XCTestCase {
         XCTAssertTrue(vehicle.shouldPromptMileageUpdate)
     }
 
-    func testShouldPromptMileageUpdate_UpdatedToday() {
-        // Given - vehicle updated today
+    func testShouldPromptMileageUpdate_ZeroMileage() {
+        // Given - vehicle with zero mileage (even if recently updated)
         let vehicle = Vehicle(
             make: "Toyota",
             model: "Camry",
             year: 2022,
+            currentMileage: 0,
+            mileageUpdatedAt: Date()
+        )
+
+        // Then - should prompt because mileage is zero
+        XCTAssertTrue(vehicle.shouldPromptMileageUpdate)
+    }
+
+    func testShouldPromptMileageUpdate_UpdatedToday() {
+        // Given - vehicle with mileage, updated today
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            currentMileage: 50000,
             mileageUpdatedAt: Date()
         )
 
@@ -333,6 +349,7 @@ final class VehicleTests: XCTestCase {
             make: "Toyota",
             model: "Camry",
             year: 2022,
+            currentMileage: 50000,
             mileageUpdatedAt: thirteenDaysAgo
         )
 
@@ -347,6 +364,7 @@ final class VehicleTests: XCTestCase {
             make: "Toyota",
             model: "Camry",
             year: 2022,
+            currentMileage: 50000,
             mileageUpdatedAt: fourteenDaysAgo
         )
 
@@ -361,6 +379,7 @@ final class VehicleTests: XCTestCase {
             make: "Toyota",
             model: "Camry",
             year: 2022,
+            currentMileage: 50000,
             mileageUpdatedAt: thirtyDaysAgo
         )
 
