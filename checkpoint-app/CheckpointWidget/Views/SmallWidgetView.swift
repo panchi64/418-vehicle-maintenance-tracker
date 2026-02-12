@@ -8,6 +8,7 @@
 
 import SwiftUI
 import WidgetKit
+import AppIntents
 
 struct SmallWidgetView: View {
     let entry: ServiceEntry
@@ -61,18 +62,49 @@ struct SmallWidgetView: View {
 
                 Spacer()
 
-                // Status indicator - square (brutalist)
-                HStack(spacing: 6) {
-                    Rectangle()
-                        .fill(service.status.color)
-                        .frame(width: 8, height: 8)
+                // Status indicator and mark done button
+                HStack(spacing: 0) {
+                    // Status indicator - square (brutalist)
+                    HStack(spacing: 6) {
+                        Rectangle()
+                            .fill(service.status.color)
+                            .frame(width: 8, height: 8)
 
-                    Text(statusLabel(for: service.status))
-                        .font(.widgetCaption)
-                        .foregroundStyle(service.status.color)
-                        .tracking(0.5)
+                        Text(statusLabel(for: service.status))
+                            .font(.widgetCaption)
+                            .foregroundStyle(service.status.color)
+                            .tracking(0.5)
+                    }
+
+                    Spacer()
+
+                    // Mark done button (only for due soon or overdue services)
+                    if let serviceID = service.serviceID,
+                       let vehicleID = entry.vehicleID,
+                       service.status == .dueSoon || service.status == .overdue {
+                        Button(intent: MarkServiceDoneIntent(
+                            serviceID: serviceID,
+                            vehicleID: vehicleID,
+                            mileage: entry.currentMileage
+                        )) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 8, weight: .bold))
+                                Text("DONE")
+                                    .font(.widgetCaption)
+                                    .tracking(0.5)
+                            }
+                            .foregroundStyle(WidgetColors.statusGood)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .overlay(
+                                Rectangle()
+                                    .strokeBorder(WidgetColors.statusGood.opacity(0.4), lineWidth: 1)
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
-                .frame(maxWidth: .infinity, alignment: .center)
             } else {
                 Spacer()
 

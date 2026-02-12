@@ -143,6 +143,9 @@ struct WidgetProvider: AppIntentTimelineProvider {
             return makeEmptyEntry(configuration: configuration)
         }
 
+        // Load pending completion IDs to filter out already-logged services
+        let pendingIDs = Set(PendingWidgetCompletion.loadAll().map { $0.serviceID })
+
         // Load shared settings for mileage display mode
         let sharedSettings = SharedWidgetSettings.load()
 
@@ -162,26 +165,31 @@ struct WidgetProvider: AppIntentTimelineProvider {
         if let configuredVehicle = configuration.vehicle {
             let vehicleKey = "widgetData_\(configuredVehicle.id)"
             if let data = userDefaults.data(forKey: vehicleKey),
-               let entry = decodeEntry(from: data, configuration: effectiveConfig) {
+               let entry = decodeEntry(from: data, configuration: effectiveConfig, pendingIDs: pendingIDs) {
                 return entry
             }
         }
 
         // Use the widgetData key which always contains the app's currently selected vehicle
         if let data = userDefaults.data(forKey: widgetDataKey),
-           let entry = decodeEntry(from: data, configuration: effectiveConfig) {
+           let entry = decodeEntry(from: data, configuration: effectiveConfig, pendingIDs: pendingIDs) {
             return entry
         }
 
         return makeEmptyEntry(configuration: effectiveConfig)
     }
 
-    private func decodeEntry(from data: Data, configuration: CheckpointWidgetConfigurationIntent) -> ServiceEntry? {
+    private func decodeEntry(from data: Data, configuration: CheckpointWidgetConfigurationIntent, pendingIDs: Set<String>) -> ServiceEntry? {
         do {
             let widgetData = try JSONDecoder().decode(WidgetData.self, from: data)
 
-            let widgetServices = widgetData.services.map { service in
-                WidgetService(
+            // Filter out services that have pending completions so the widget
+            // advances to the next service immediately after marking one done
+            let widgetServices = widgetData.services.compactMap { service -> WidgetService? in
+                if let serviceID = service.serviceID, pendingIDs.contains(serviceID) {
+                    return nil
+                }
+                return WidgetService(
                     serviceID: service.serviceID,
                     name: service.name,
                     status: service.status,

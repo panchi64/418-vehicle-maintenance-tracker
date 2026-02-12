@@ -95,35 +95,11 @@ struct MediumWidgetView: View {
 
                 Spacer()
 
-                // Service name with done button
-                HStack(spacing: 8) {
-                    Text(service.name.uppercased())
-                        .font(.widgetBody)
-                        .foregroundStyle(WidgetColors.textPrimary)
-                        .lineLimit(1)
-
-                    Spacer()
-
-                    if let serviceID = service.serviceID,
-                       let vehicleID = entry.vehicleID {
-                        Button(intent: MarkServiceDoneIntent(
-                            serviceID: serviceID,
-                            vehicleID: vehicleID,
-                            mileage: entry.currentMileage
-                        )) {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 12, weight: .bold))
-                                .foregroundStyle(WidgetColors.statusGood)
-                                .frame(width: 24, height: 24)
-                                .background(WidgetColors.backgroundPrimary.opacity(0.8))
-                                .overlay(
-                                    Rectangle()
-                                        .strokeBorder(WidgetColors.gridLine, lineWidth: 1)
-                                )
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
+                // Service name
+                Text(service.name.uppercased())
+                    .font(.widgetBody)
+                    .foregroundStyle(WidgetColors.textPrimary)
+                    .lineLimit(1)
 
                 // Status indicator
                 HStack(spacing: 6) {
@@ -181,11 +157,46 @@ struct MediumWidgetView: View {
                             .lineLimit(1)
                     }
                 }
-
-                Spacer()
             }
+
+            Spacer()
+
+            // Log service button
+            markDoneButton
         }
         .padding(.leading, 12)
+    }
+
+    // MARK: - Mark Done Button
+
+    @ViewBuilder
+    private var markDoneButton: some View {
+        if let service = entry.services.first,
+           let serviceID = service.serviceID,
+           let vehicleID = entry.vehicleID,
+           service.status == .dueSoon || service.status == .overdue {
+            Button(intent: MarkServiceDoneIntent(
+                serviceID: serviceID,
+                vehicleID: vehicleID,
+                mileage: entry.currentMileage
+            )) {
+                HStack(spacing: 6) {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 10, weight: .bold))
+                    Text("MARK DONE")
+                        .font(.widgetCaption)
+                        .tracking(0.5)
+                }
+                .foregroundStyle(WidgetColors.statusGood)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 6)
+                .overlay(
+                    Rectangle()
+                        .strokeBorder(WidgetColors.statusGood.opacity(0.4), lineWidth: 1)
+                )
+            }
+            .buttonStyle(.plain)
+        }
     }
 
     // MARK: - Display Helpers
