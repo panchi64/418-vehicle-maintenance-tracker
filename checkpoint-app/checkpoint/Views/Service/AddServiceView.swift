@@ -10,8 +10,8 @@ import SwiftUI
 import SwiftData
 
 enum ServiceMode: String, CaseIterable {
-    case log = "Log"
-    case schedule = "Schedule"
+    case record = "Record"
+    case remind = "Remind"
 }
 
 struct AddServiceView: View {
@@ -23,7 +23,7 @@ struct AddServiceView: View {
     var seasonalPrefill: SeasonalPrefill?
 
     // Mode selection
-    @State private var mode: ServiceMode = .log
+    @State private var mode: ServiceMode = .record
 
     // Service type selection
     @State private var selectedPreset: PresetData? = nil
@@ -50,7 +50,29 @@ struct AddServiceView: View {
     }
 
     var isFormValid: Bool {
-        !serviceName.isEmpty && (mode == .log ? mileageAtService != nil : true)
+        !serviceName.isEmpty && (mode == .record ? mileageAtService != nil : true)
+    }
+
+    /// Preview text showing when the next service would be due
+    private var nextDuePreview: String? {
+        guard scheduleRecurring else { return nil }
+        var parts: [String] = []
+
+        if let months = intervalMonths, months > 0 {
+            if let nextDate = Calendar.current.date(byAdding: .month, value: months, to: performedDate) {
+                let formatter = DateFormatter()
+                formatter.dateFormat = "MMM yyyy"
+                parts.append(formatter.string(from: nextDate))
+            }
+        }
+
+        if let miles = intervalMiles, miles > 0, let currentMileage = mileageAtService {
+            let nextMileage = currentMileage + miles
+            parts.append("at \(Formatters.mileage(nextMileage))")
+        }
+
+        guard !parts.isEmpty else { return nil }
+        return "Next due: \(parts.joined(separator: " or "))"
     }
 
     var body: some View {
@@ -79,7 +101,7 @@ struct AddServiceView: View {
                         }
 
                         // Mode-specific fields
-                        if mode == .log {
+                        if mode == .record {
                             logModeFields
                         } else {
                             scheduleModeFields
@@ -89,7 +111,7 @@ struct AddServiceView: View {
                     .padding(.bottom, Spacing.xxl)
                 }
             }
-            .navigationTitle(mode == .log ? "Log Service" : "Schedule Service")
+            .navigationTitle(mode == .record ? "Record Service" : "Set Reminder")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
@@ -105,7 +127,7 @@ struct AddServiceView: View {
                 }
             }
             .onChange(of: selectedPreset) { _, newPreset in
-                // Auto-fill intervals from preset
+                // Auto-fill intervals from preset (but don't auto-enable reminder)
                 if let preset = newPreset {
                     if let months = preset.defaultIntervalMonths {
                         intervalMonths = months
@@ -113,11 +135,6 @@ struct AddServiceView: View {
                     if let miles = preset.defaultIntervalMiles {
                         intervalMiles = miles
                     }
-                    // Default to recurring if preset has intervals
-                    let hasIntervals = (preset.defaultIntervalMonths != nil) || (preset.defaultIntervalMiles != nil)
-                    scheduleRecurring = hasIntervals
-                } else {
-                    scheduleRecurring = false
                 }
             }
             .trackScreen(.addService)
@@ -128,7 +145,7 @@ struct AddServiceView: View {
                 }
                 // Apply seasonal reminder pre-fill
                 if let prefill = seasonalPrefill {
-                    mode = .schedule
+                    mode = .remind
                     customServiceName = prefill.serviceName
                     dueDate = prefill.dueDate
                     intervalMonths = prefill.intervalMonths
@@ -199,26 +216,42 @@ struct AddServiceView: View {
         }
 
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "Recurring")
+            InstrumentSectionHeader(title: "Reminder")
 
-            HStack {
-                Text("SCHEDULE RECURRING")
-                    .font(.brutalistLabel)
-                    .foregroundStyle(Theme.textTertiary)
-                    .tracking(1)
+            VStack(spacing: Spacing.sm) {
+                HStack {
+                    Text("REMIND ME NEXT TIME")
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.textTertiary)
+                        .tracking(1)
 
-                Spacer()
+                    Spacer()
 
-                Toggle("", isOn: $scheduleRecurring)
-                    .labelsHidden()
-                    .tint(Theme.accent)
+                    Toggle("", isOn: $scheduleRecurring)
+                        .labelsHidden()
+                        .tint(Theme.accent)
+                }
+                .padding(Spacing.md)
+                .background(Theme.surfaceInstrument)
+                .overlay(
+                    Rectangle()
+                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+                )
+
+                if scheduleRecurring {
+                    Text(L10n.reminderHelperText)
+                        .font(.brutalistSecondary)
+                        .foregroundStyle(Theme.textTertiary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    if let preview = nextDuePreview {
+                        Text(preview)
+                            .font(.brutalistSecondary)
+                            .foregroundStyle(Theme.accent)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
             }
-            .padding(Spacing.md)
-            .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
         }
 
         VStack(alignment: .leading, spacing: Spacing.sm) {
@@ -292,7 +325,7 @@ struct AddServiceView: View {
 
         HapticService.shared.success()
 
-        if mode == .log {
+        if mode == .record {
             AnalyticsService.shared.capture(.serviceLogged(
                 isPreset: isPreset,
                 category: category,
@@ -309,10 +342,10 @@ struct AddServiceView: View {
         }
         updateAppIcon()
         updateWidgetData()
-        if mode == .log {
-            ToastService.shared.show(L10n.toastServiceAdded, icon: "checkmark", style: .success)
+        if mode == .record {
+            ToastService.shared.show(L10n.toastServiceRecorded, icon: "checkmark", style: .success)
         } else {
-            ToastService.shared.show(L10n.toastServiceScheduled, icon: "clock", style: .success)
+            ToastService.shared.show(L10n.toastReminderSet, icon: "clock", style: .success)
         }
         dismiss()
     }

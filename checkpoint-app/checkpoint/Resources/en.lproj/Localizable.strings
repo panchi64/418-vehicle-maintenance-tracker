@@ -111,6 +111,9 @@
 "toast.sync_error" = "Sync issue — data saved locally";
 "toast.reading_captured" = "Reading captured";
 "toast.service_log_updated" = "Service log updated";
+"toast.service_recorded" = "Service Recorded";
+"toast.reminder_set" = "Reminder Set";
+"reminder.helper_text" = "You'll be notified when this service is due again";
 
 // MARK: - OCR Errors
 

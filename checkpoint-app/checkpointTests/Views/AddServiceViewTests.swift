@@ -18,26 +18,26 @@ final class AddServiceViewTests: XCTestCase {
 
         // Then: Should have exactly two cases
         XCTAssertEqual(allCases.count, 2)
-        XCTAssertTrue(allCases.contains(.log))
-        XCTAssertTrue(allCases.contains(.schedule))
+        XCTAssertTrue(allCases.contains(.record))
+        XCTAssertTrue(allCases.contains(.remind))
     }
 
     func testServiceMode_HasCorrectRawValues() {
         // Then: Raw values should match expected labels
-        XCTAssertEqual(ServiceMode.log.rawValue, "Log")
-        XCTAssertEqual(ServiceMode.schedule.rawValue, "Schedule")
+        XCTAssertEqual(ServiceMode.record.rawValue, "Record")
+        XCTAssertEqual(ServiceMode.remind.rawValue, "Remind")
     }
 
     // MARK: - Form Validation Tests (Log Mode)
 
     func testFormValidation_LogMode_ValidWhenServiceNameAndMileageFilled() {
         // Given: Log mode with service name and mileage
-        let mode = ServiceMode.log
+        let mode = ServiceMode.record
         let serviceName = "Oil Change"
         let mileageAtService = "32500"
 
         // When: Checking validation logic
-        let isValid = !serviceName.isEmpty && (mode == .log ? !mileageAtService.isEmpty : true)
+        let isValid = !serviceName.isEmpty && (mode == .record ? !mileageAtService.isEmpty : true)
 
         // Then: Form should be valid
         XCTAssertTrue(isValid, "Log mode should be valid when service name and mileage are filled")
@@ -45,12 +45,12 @@ final class AddServiceViewTests: XCTestCase {
 
     func testFormValidation_LogMode_InvalidWhenServiceNameEmpty() {
         // Given: Log mode with empty service name
-        let mode = ServiceMode.log
+        let mode = ServiceMode.record
         let serviceName = ""
         let mileageAtService = "32500"
 
         // When: Checking validation logic
-        let isValid = !serviceName.isEmpty && (mode == .log ? !mileageAtService.isEmpty : true)
+        let isValid = !serviceName.isEmpty && (mode == .record ? !mileageAtService.isEmpty : true)
 
         // Then: Form should be invalid
         XCTAssertFalse(isValid, "Log mode should be invalid when service name is empty")
@@ -58,12 +58,12 @@ final class AddServiceViewTests: XCTestCase {
 
     func testFormValidation_LogMode_InvalidWhenMileageEmpty() {
         // Given: Log mode with empty mileage
-        let mode = ServiceMode.log
+        let mode = ServiceMode.record
         let serviceName = "Oil Change"
         let mileageAtService = ""
 
         // When: Checking validation logic
-        let isValid = !serviceName.isEmpty && (mode == .log ? !mileageAtService.isEmpty : true)
+        let isValid = !serviceName.isEmpty && (mode == .record ? !mileageAtService.isEmpty : true)
 
         // Then: Form should be invalid
         XCTAssertFalse(isValid, "Log mode should be invalid when mileage is empty")
@@ -71,12 +71,12 @@ final class AddServiceViewTests: XCTestCase {
 
     func testFormValidation_LogMode_InvalidWhenBothEmpty() {
         // Given: Log mode with both fields empty
-        let mode = ServiceMode.log
+        let mode = ServiceMode.record
         let serviceName = ""
         let mileageAtService = ""
 
         // When: Checking validation logic
-        let isValid = !serviceName.isEmpty && (mode == .log ? !mileageAtService.isEmpty : true)
+        let isValid = !serviceName.isEmpty && (mode == .record ? !mileageAtService.isEmpty : true)
 
         // Then: Form should be invalid
         XCTAssertFalse(isValid, "Log mode should be invalid when both fields are empty")
@@ -86,12 +86,12 @@ final class AddServiceViewTests: XCTestCase {
 
     func testFormValidation_ScheduleMode_ValidWhenOnlyServiceNameFilled() {
         // Given: Schedule mode with only service name (mileage not required)
-        let mode = ServiceMode.schedule
+        let mode = ServiceMode.remind
         let serviceName = "Tire Rotation"
         let mileageAtService = ""
 
         // When: Checking validation logic
-        let isValid = !serviceName.isEmpty && (mode == .log ? !mileageAtService.isEmpty : true)
+        let isValid = !serviceName.isEmpty && (mode == .record ? !mileageAtService.isEmpty : true)
 
         // Then: Form should be valid
         XCTAssertTrue(isValid, "Schedule mode should be valid when only service name is filled")
@@ -99,12 +99,12 @@ final class AddServiceViewTests: XCTestCase {
 
     func testFormValidation_ScheduleMode_InvalidWhenServiceNameEmpty() {
         // Given: Schedule mode with empty service name
-        let mode = ServiceMode.schedule
+        let mode = ServiceMode.remind
         let serviceName = ""
         let mileageAtService = "35000"
 
         // When: Checking validation logic
-        let isValid = !serviceName.isEmpty && (mode == .log ? !mileageAtService.isEmpty : true)
+        let isValid = !serviceName.isEmpty && (mode == .record ? !mileageAtService.isEmpty : true)
 
         // Then: Form should be invalid
         XCTAssertFalse(isValid, "Schedule mode should be invalid when service name is empty")
@@ -112,12 +112,12 @@ final class AddServiceViewTests: XCTestCase {
 
     func testFormValidation_ScheduleMode_ValidWithAllFields() {
         // Given: Schedule mode with all fields filled
-        let mode = ServiceMode.schedule
+        let mode = ServiceMode.remind
         let serviceName = "Brake Inspection"
         let mileageAtService = "40000"
 
         // When: Checking validation logic
-        let isValid = !serviceName.isEmpty && (mode == .log ? !mileageAtService.isEmpty : true)
+        let isValid = !serviceName.isEmpty && (mode == .record ? !mileageAtService.isEmpty : true)
 
         // Then: Form should be valid
         XCTAssertTrue(isValid, "Schedule mode should be valid with all fields filled")
@@ -404,7 +404,7 @@ final class AddServiceViewTests: XCTestCase {
 
     // MARK: - Schedule Recurring Toggle Tests
 
-    func testScheduleRecurring_PresetWithIntervals_DefaultsToTrue() {
+    func testScheduleRecurring_PresetWithIntervals_DoesNotAutoEnable() {
         // Given: A preset with both interval types
         let preset = PresetData(
             name: "Oil Change",
@@ -413,14 +413,16 @@ final class AddServiceViewTests: XCTestCase {
             defaultIntervalMiles: 5000
         )
 
-        // When: Checking if preset has intervals
+        // When: Preset has intervals but recurring starts OFF (opt-in behavior)
         let hasIntervals = (preset.defaultIntervalMonths != nil) || (preset.defaultIntervalMiles != nil)
+        let scheduleRecurring = false // New behavior: toggle stays OFF
 
-        // Then: Should default to recurring
-        XCTAssertTrue(hasIntervals)
+        // Then: Intervals exist but recurring is not auto-enabled
+        XCTAssertTrue(hasIntervals, "Preset should have intervals")
+        XCTAssertFalse(scheduleRecurring, "Recurring should NOT be auto-enabled from preset")
     }
 
-    func testScheduleRecurring_PresetWithOnlyMonths_DefaultsToTrue() {
+    func testScheduleRecurring_PresetWithOnlyMonths_DoesNotAutoEnable() {
         // Given: A preset with only month interval
         let preset = PresetData(
             name: "Oil Change",
@@ -429,11 +431,13 @@ final class AddServiceViewTests: XCTestCase {
             defaultIntervalMiles: nil
         )
 
-        // When: Checking if preset has intervals
+        // When: Preset has intervals but recurring stays OFF
         let hasIntervals = (preset.defaultIntervalMonths != nil) || (preset.defaultIntervalMiles != nil)
+        let scheduleRecurring = false // New behavior: toggle stays OFF
 
-        // Then: Should default to recurring
-        XCTAssertTrue(hasIntervals)
+        // Then: Intervals exist but recurring is not auto-enabled
+        XCTAssertTrue(hasIntervals, "Preset should have intervals")
+        XCTAssertFalse(scheduleRecurring, "Recurring should NOT be auto-enabled from preset")
     }
 
     func testScheduleRecurring_PresetWithNoIntervals_DefaultsToFalse() {

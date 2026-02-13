@@ -52,12 +52,12 @@ struct EditServiceView: View {
 
                         // Due Date Section
                         VStack(alignment: .leading, spacing: Spacing.sm) {
-                            InstrumentSectionHeader(title: "Due Date")
+                            InstrumentSectionHeader(title: "When Is It Due?")
 
                             VStack(spacing: Spacing.md) {
                                 // Due date toggle
                                 HStack {
-                                    Text("HAS DUE DATE")
+                                    Text("SET DUE DATE")
                                         .font(.brutalistLabel)
                                         .foregroundStyle(Theme.textTertiary)
                                         .tracking(1)
@@ -91,9 +91,9 @@ struct EditServiceView: View {
                             }
                         }
 
-                        // Repeat Interval Section
+                        // Repeat Section
                         VStack(alignment: .leading, spacing: Spacing.sm) {
-                            InstrumentSectionHeader(title: "Repeat Interval")
+                            InstrumentSectionHeader(title: "Repeat")
 
                             VStack(spacing: Spacing.md) {
                                 InstrumentNumberField(

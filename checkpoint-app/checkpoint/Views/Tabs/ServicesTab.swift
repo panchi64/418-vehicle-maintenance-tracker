@@ -33,7 +33,8 @@ struct ServicesTab: View {
     private var filteredServices: [Service] {
         guard let vehicle = vehicle else { return [] }
 
-        var filtered = vehicleServices
+        // Only show services that have due tracking (exclude log-only/neutral services)
+        var filtered = vehicleServices.filter { $0.dueDate != nil || $0.dueMileage != nil }
         let effectiveMileage = vehicle.effectiveMileage
 
         // Apply search filter
@@ -166,7 +167,7 @@ struct ServicesTab: View {
                 // Upcoming services section (list mode)
                 if appState.servicesViewMode == .list && !filteredServices.isEmpty, let vehicle = vehicle {
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        InstrumentSectionHeader(title: "Scheduled Services")
+                        InstrumentSectionHeader(title: "Upcoming")
 
                         VStack(spacing: 0) {
                             ForEach(Array(filteredServices.enumerated()), id: \.element.id) { index, service in

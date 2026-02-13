@@ -114,6 +114,9 @@ enum L10n {
     static var toastVehicleDeleted: String { localized("toast.vehicle_deleted") }
     static var toastServiceAdded: String { localized("toast.service_added") }
     static var toastServiceScheduled: String { localized("toast.service_scheduled") }
+    static var toastServiceRecorded: String { localized("toast.service_recorded") }
+    static var toastReminderSet: String { localized("toast.reminder_set") }
+    static var reminderHelperText: String { localized("reminder.helper_text") }
     static var toastMileageUpdated: String { localized("toast.mileage_updated") }
     static var toastPDFReady: String { localized("toast.pdf_ready") }
     static var toastSyncError: String { localized("toast.sync_error") }

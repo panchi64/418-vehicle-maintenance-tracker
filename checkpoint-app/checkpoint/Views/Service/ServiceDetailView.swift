@@ -28,11 +28,15 @@ struct ServiceDetailView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: Spacing.xl) {
-                // Status header card
-                statusCard
+                // Status header card (hide for log-only/neutral services)
+                if status != .neutral {
+                    statusCard
+                }
 
-                // Due info section
-                dueInfoSection
+                // Due info section (hide for log-only services with no schedule data)
+                if service.dueDate != nil || service.dueMileage != nil || service.intervalMonths != nil || service.intervalMiles != nil {
+                    dueInfoSection
+                }
 
                 // Actions
                 actionButtons
@@ -193,17 +197,31 @@ struct ServiceDetailView: View {
 
     private var actionButtons: some View {
         VStack(spacing: Spacing.sm) {
-            Button {
-                showMarkDoneSheet = true
-            } label: {
-                HStack {
-                    Image(systemName: "checkmark.circle.fill")
-                    Text("Mark as Done")
+            if status == .neutral {
+                Button {
+                    showEditSheet = true
+                } label: {
+                    HStack {
+                        Image(systemName: "bell.badge")
+                        Text("Set Up Reminder")
+                    }
                 }
+                .buttonStyle(.primary)
+                .accessibilityLabel("Set up reminder")
+                .accessibilityHint("Opens edit form to configure due dates")
+            } else {
+                Button {
+                    showMarkDoneSheet = true
+                } label: {
+                    HStack {
+                        Image(systemName: "checkmark.circle.fill")
+                        Text("Mark as Done")
+                    }
+                }
+                .buttonStyle(.primary)
+                .accessibilityLabel("Mark as done")
+                .accessibilityHint("Opens service completion form")
             }
-            .buttonStyle(.primary)
-            .accessibilityLabel("Mark as done")
-            .accessibilityHint("Opens service completion form")
         }
     }
 
