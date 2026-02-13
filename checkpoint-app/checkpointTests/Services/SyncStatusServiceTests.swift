@@ -2,10 +2,11 @@
 //  SyncStatusServiceTests.swift
 //  checkpointTests
 //
-//  Tests for SyncStatusService sync state tracking
+//  Tests for SyncStatusService sync state tracking and SyncError properties
 //
 
 import XCTest
+import SwiftUI
 @testable import checkpoint
 
 @MainActor
@@ -13,7 +14,6 @@ final class SyncStatusServiceTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        // Register defaults and clear state before each test
         SyncSettings.registerDefaults()
         UserDefaults.standard.removeObject(forKey: "lastSyncDate")
         UserDefaults.standard.set(true, forKey: "iCloudSyncEnabled")
@@ -25,58 +25,96 @@ final class SyncStatusServiceTests: XCTestCase {
         super.tearDown()
     }
 
+    // MARK: - SyncError Tests
+
+    func testSyncErrorNotSignedIn_Properties() {
+        let error = SyncError.notSignedIn
+        XCTAssertEqual(error.userMessage, "Sign in to iCloud to sync across devices")
+        XCTAssertEqual(error.actionLabel, "Open Settings")
+        XCTAssertEqual(error.systemImage, "icloud.slash")
+        XCTAssertEqual(error.iconColor, Theme.textTertiary)
+        XCTAssertFalse(error.isTransient)
+    }
+
+    func testSyncErrorQuotaExceeded_Properties() {
+        let error = SyncError.quotaExceeded
+        XCTAssertEqual(error.userMessage, "iCloud storage full. Data safe locally.")
+        XCTAssertEqual(error.actionLabel, "Manage Storage")
+        XCTAssertEqual(error.systemImage, "exclamationmark.icloud")
+        XCTAssertEqual(error.iconColor, Theme.statusOverdue)
+        XCTAssertFalse(error.isTransient)
+    }
+
+    func testSyncErrorNetworkUnavailable_Properties() {
+        let error = SyncError.networkUnavailable
+        XCTAssertEqual(error.userMessage, "Offline. Changes sync when connected.")
+        XCTAssertNil(error.actionLabel)
+        XCTAssertEqual(error.systemImage, "wifi.slash")
+        XCTAssertEqual(error.iconColor, Theme.textTertiary)
+        XCTAssertTrue(error.isTransient)
+    }
+
+    func testSyncErrorUnknown_Properties() {
+        let error = SyncError.unknown("Something went wrong")
+        XCTAssertEqual(error.userMessage, "Something went wrong")
+        XCTAssertNil(error.actionLabel)
+        XCTAssertEqual(error.systemImage, "exclamationmark.icloud")
+        XCTAssertEqual(error.iconColor, Theme.statusOverdue)
+        XCTAssertTrue(error.isTransient)
+    }
+
+    // MARK: - SyncError Equality Tests
+
+    func testSyncErrorEquality_SameType() {
+        XCTAssertEqual(SyncError.notSignedIn, SyncError.notSignedIn)
+        XCTAssertEqual(SyncError.quotaExceeded, SyncError.quotaExceeded)
+        XCTAssertEqual(SyncError.networkUnavailable, SyncError.networkUnavailable)
+        XCTAssertEqual(SyncError.unknown("test"), SyncError.unknown("test"))
+    }
+
+    func testSyncErrorInequality_DifferentTypes() {
+        XCTAssertNotEqual(SyncError.notSignedIn, SyncError.quotaExceeded)
+        XCTAssertNotEqual(SyncError.networkUnavailable, SyncError.notSignedIn)
+    }
+
+    func testSyncErrorInequality_DifferentUnknownMessages() {
+        XCTAssertNotEqual(SyncError.unknown("test1"), SyncError.unknown("test2"))
+    }
+
     // MARK: - SyncState Tests
 
     func testSyncStateIdleDisplayText() {
-        // Given idle state
         let state = SyncState.idle
-
-        // Then display text should be "Ready"
-        XCTAssertEqual(state.displayText, "Ready")
+        XCTAssertEqual(state.displayText, "Synced")
         XCTAssertFalse(state.isError)
     }
 
     func testSyncStateSyncingDisplayText() {
-        // Given syncing state
         let state = SyncState.syncing
-
-        // Then display text should be "Syncing..."
         XCTAssertEqual(state.displayText, "Syncing...")
         XCTAssertFalse(state.isError)
     }
 
     func testSyncStateSyncedDisplayText() {
-        // Given synced state
         let state = SyncState.synced
-
-        // Then display text should be "Synced"
         XCTAssertEqual(state.displayText, "Synced")
         XCTAssertFalse(state.isError)
     }
 
     func testSyncStateErrorDisplayText() {
-        // Given error state
-        let state = SyncState.error("Network error")
-
-        // Then display text should be the error message
-        XCTAssertEqual(state.displayText, "Network error")
+        let state = SyncState.error(.networkUnavailable)
+        XCTAssertEqual(state.displayText, "Offline. Changes sync when connected.")
         XCTAssertTrue(state.isError)
     }
 
     func testSyncStateDisabledDisplayText() {
-        // Given disabled state
         let state = SyncState.disabled
-
-        // Then display text should be "Sync disabled"
         XCTAssertEqual(state.displayText, "Sync disabled")
         XCTAssertFalse(state.isError)
     }
 
     func testSyncStateNoAccountDisplayText() {
-        // Given no account state
         let state = SyncState.noAccount
-
-        // Then display text should prompt sign in
         XCTAssertEqual(state.displayText, "Sign in to iCloud")
         XCTAssertTrue(state.isError)
     }
@@ -84,162 +122,140 @@ final class SyncStatusServiceTests: XCTestCase {
     // MARK: - SyncState Equality Tests
 
     func testSyncStateEquality() {
-        // Given two identical states
-        let state1 = SyncState.error("Test")
-        let state2 = SyncState.error("Test")
-
-        // Then they should be equal
+        let state1 = SyncState.error(.notSignedIn)
+        let state2 = SyncState.error(.notSignedIn)
         XCTAssertEqual(state1, state2)
     }
 
     func testSyncStateInequality() {
-        // Given two different error states
-        let state1 = SyncState.error("Error 1")
-        let state2 = SyncState.error("Error 2")
-
-        // Then they should not be equal
+        let state1 = SyncState.error(.notSignedIn)
+        let state2 = SyncState.error(.quotaExceeded)
         XCTAssertNotEqual(state1, state2)
     }
 
     // MARK: - Service Property Tests
 
     func testIsSyncEnabledReflectsSettings() {
-        // Given sync is enabled in settings
         SyncSettings.shared.iCloudSyncEnabled = true
-
-        // When checking service
         let service = SyncStatusService.shared
-
-        // Then isSyncEnabled should be true
         XCTAssertTrue(service.isSyncEnabled)
     }
 
     func testIsSyncEnabledWhenDisabled() {
-        // Given sync is disabled in settings
         SyncSettings.shared.iCloudSyncEnabled = false
-
-        // When checking service
         let service = SyncStatusService.shared
-
-        // Then isSyncEnabled should be false
         XCTAssertFalse(service.isSyncEnabled)
+    }
+
+    // MARK: - Testing Instance Tests
+
+    func testTestingInstanceInitialState() {
+        let service = SyncStatusService(forTesting: true)
+        XCTAssertEqual(service.syncState, .idle)
+        XCTAssertNil(service.lastSyncDate)
+        XCTAssertFalse(service.hasICloudAccount)
+        XCTAssertFalse(service.hasError)
+        XCTAssertNil(service.currentError)
     }
 
     // MARK: - Sync Status Update Tests
 
     func testDidStartSync() {
-        // Given service with sync enabled
         let service = SyncStatusService.shared
         SyncSettings.shared.iCloudSyncEnabled = true
-
-        // When sync starts
         service.didStartSync()
-
-        // Then state should be syncing
         XCTAssertEqual(service.syncState, .syncing)
     }
 
     func testDidStartSyncWhenDisabled() {
-        // Given service with sync disabled
         let service = SyncStatusService.shared
         SyncSettings.shared.iCloudSyncEnabled = false
-
-        // When sync starts
         service.didStartSync()
-
-        // Then state should be disabled
         XCTAssertEqual(service.syncState, .disabled)
     }
 
     func testDidCompleteSync() {
-        // Given service
         let service = SyncStatusService.shared
         let beforeSync = service.lastSyncDate
-
-        // When sync completes
         service.didCompleteSync()
-
-        // Then state should be synced and last sync date updated
         XCTAssertEqual(service.syncState, .synced)
         XCTAssertNotNil(service.lastSyncDate)
-
-        // And last sync date should be newer than before
         if let before = beforeSync, let after = service.lastSyncDate {
             XCTAssertGreaterThanOrEqual(after, before)
         }
     }
 
     func testDidReceiveRemoteChanges() {
-        // Given service
         let service = SyncStatusService.shared
-
-        // When remote changes are received
         service.didReceiveRemoteChanges()
-
-        // Then state should be synced and last sync date updated
         XCTAssertEqual(service.syncState, .synced)
         XCTAssertNotNil(service.lastSyncDate)
     }
 
     func testDidFailSyncWithNetworkError() {
-        // Given service
         let service = SyncStatusService.shared
-        let networkError = NSError(domain: "CKErrorDomain", code: 4, userInfo: nil) // CKError.networkUnavailable
-
-        // When sync fails
+        let networkError = NSError(domain: "CKErrorDomain", code: 4, userInfo: nil)
         service.didFailSync(with: networkError)
-
-        // Then state should be error
         XCTAssertTrue(service.syncState.isError)
     }
 
     func testDidFailSyncWithGenericError() {
-        // Given service and generic error
         let service = SyncStatusService.shared
         let genericError = NSError(domain: "TestDomain", code: 1, userInfo: nil)
-
-        // When sync fails
         service.didFailSync(with: genericError)
-
-        // Then state should be error with generic message
-        if case .error(let message) = service.syncState {
-            XCTAssertEqual(message, "Sync error")
+        if case .error(let syncError) = service.syncState {
+            XCTAssertEqual(syncError, .unknown("Sync error"))
         } else {
             XCTFail("Expected error state")
         }
     }
 
+    // MARK: - HasError / CurrentError Tests
+
+    func testHasError_TrueWhenError() {
+        let service = SyncStatusService.shared
+        let error = NSError(domain: "CKErrorDomain", code: 4, userInfo: nil)
+        service.didFailSync(with: error)
+        XCTAssertTrue(service.hasError)
+        XCTAssertNotNil(service.currentError)
+    }
+
+    func testHasError_FalseWhenIdle() {
+        let service = SyncStatusService(forTesting: true)
+        XCTAssertFalse(service.hasError)
+        XCTAssertNil(service.currentError)
+    }
+
     // MARK: - Sync Setting Changed Tests
 
     func testSyncSettingChangedToDisabled() {
-        // Given service
         let service = SyncStatusService.shared
-
-        // When sync is disabled
         service.syncSettingChanged(enabled: false)
-
-        // Then state should be disabled
         XCTAssertEqual(service.syncState, .disabled)
     }
 
     // MARK: - Last Sync Description Tests
 
     func testLastSyncDescriptionWhenNil() {
-        // Given service with no last sync date
-        let service = SyncStatusService.shared
-        SyncSettings.shared.lastSyncDate = nil
-
-        // Note: Since SyncStatusService is a singleton, we can't easily reset its state
-        // This test verifies the property works when lastSyncDate is nil
-        // In production, a new installation would have nil lastSyncDate
+        let service = SyncStatusService(forTesting: true)
+        XCTAssertNil(service.lastSyncDescription)
     }
 
     func testLastSyncDescriptionWhenSet() {
-        // Given service with a recent last sync date
         let service = SyncStatusService.shared
         service.didCompleteSync()
-
-        // Then description should not be nil
         XCTAssertNotNil(service.lastSyncDescription)
+    }
+
+    // MARK: - SyncError IsTransient Tests
+
+    func testTransientErrors() {
+        XCTAssertTrue(SyncError.networkUnavailable.isTransient)
+        XCTAssertTrue(SyncError.unknown("test").isTransient)
+    }
+
+    func testNonTransientErrors() {
+        XCTAssertFalse(SyncError.notSignedIn.isTransient)
+        XCTAssertFalse(SyncError.quotaExceeded.isTransient)
     }
 }

@@ -10,7 +10,6 @@ import SwiftUI
 
 struct SyncSettingsSection: View {
     @State private var syncService = SyncStatusService.shared
-    @State private var cloudSyncService = CloudSyncStatusService.shared
     @State private var isEnabled: Bool = SyncSettings.shared.iCloudSyncEnabled
     @State private var showRestartAlert = false
 
@@ -94,7 +93,7 @@ struct SyncSettingsSection: View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: Spacing.sm) {
-                    // Status icon from CloudSyncStatusService
+                    // Status icon
                     statusIcon
 
                     Text(statusDisplayText)
@@ -103,7 +102,7 @@ struct SyncSettingsSection: View {
                 }
 
                 // Last sync time
-                if let lastSync = cloudSyncService.lastSyncDate {
+                if let lastSync = syncService.lastSyncDate {
                     Text("Last synced \(lastSync.formatted(.relative(presentation: .named)))")
                         .font(.brutalistSecondary)
                         .foregroundStyle(Theme.textTertiary)
@@ -113,7 +112,7 @@ struct SyncSettingsSection: View {
             Spacer()
 
             // Action button for errors
-            if let error = cloudSyncService.currentError, let actionLabel = error.actionLabel, isEnabled {
+            if let error = syncService.currentError, let actionLabel = error.actionLabel, isEnabled {
                 Button {
                     handleErrorAction(error)
                 } label: {
@@ -136,8 +135,8 @@ struct SyncSettingsSection: View {
             Image(systemName: "icloud.slash")
                 .foregroundStyle(Theme.textTertiary)
         } else {
-            switch cloudSyncService.status {
-            case .idle:
+            switch syncService.syncState {
+            case .idle, .synced:
                 Image(systemName: "checkmark.icloud")
                     .foregroundStyle(Theme.statusGood)
             case .syncing:
@@ -147,6 +146,9 @@ struct SyncSettingsSection: View {
             case .error(let error):
                 Image(systemName: error.systemImage)
                     .foregroundStyle(error.iconColor)
+            case .disabled, .noAccount:
+                Image(systemName: "icloud.slash")
+                    .foregroundStyle(Theme.textTertiary)
             }
         }
     }
@@ -157,17 +159,17 @@ struct SyncSettingsSection: View {
         if !isEnabled {
             return "Sync disabled"
         }
-        return cloudSyncService.statusDisplayText
+        return syncService.syncState.displayText
     }
 
     // MARK: - Error Actions
 
-    private func handleErrorAction(_ error: CloudSyncStatusService.CloudSyncError) {
+    private func handleErrorAction(_ error: SyncError) {
         switch error {
         case .notSignedIn:
-            cloudSyncService.openSettings()
+            syncService.openSettings()
         case .quotaExceeded:
-            cloudSyncService.openStorageSettings()
+            syncService.openStorageSettings()
         default:
             break
         }

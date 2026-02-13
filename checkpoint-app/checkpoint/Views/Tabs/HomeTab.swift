@@ -22,8 +22,8 @@ struct HomeTab: View {
     // Seasonal reminders
     @State var activeSeasonalReminders: [SeasonalReminder] = []
 
-    private var syncService: CloudSyncStatusService {
-        CloudSyncStatusService.shared
+    private var syncService: SyncStatusService {
+        SyncStatusService.shared
     }
 
     private var vehicle: Vehicle? {
@@ -252,7 +252,7 @@ struct HomeTab: View {
 
                 // Empty states
                 if appState.selectedVehicle == nil {
-                    if case .syncing = syncService.status {
+                    if case .syncing = syncService.syncState {
                         syncingDataState
                             .revealAnimation(delay: 0.2)
                     } else {

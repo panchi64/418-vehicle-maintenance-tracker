@@ -13,8 +13,8 @@ struct VehicleHeader: View {
     var onMileageTap: (() -> Void)? = nil
     var onSettingsTap: (() -> Void)? = nil
 
-    private var syncService: CloudSyncStatusService {
-        CloudSyncStatusService.shared
+    private var syncService: SyncStatusService {
+        SyncStatusService.shared
     }
 
     var body: some View {

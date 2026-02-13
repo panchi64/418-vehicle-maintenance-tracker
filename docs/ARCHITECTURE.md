@@ -80,8 +80,7 @@ checkpoint-app/
 │   │       ├── Feedback/       # Toasts & feature hints
 │   │       ├── Inputs/         # Form input controls
 │   │       ├── Lists/          # List/timeline components
-│   │       ├── Navigation/     # Navigation & structural
-│   │       └── Sync/           # Data sync UI
+│   │       └── Navigation/     # Navigation & structural
 │   ├── DesignSystem/
 │   │   ├── Theme.swift             # Color tokens
 │   │   ├── ThemeDefinition.swift   # Theme definitions (colors, names)
@@ -291,8 +290,7 @@ StoreKit 2 purchase engine for Pro unlock and tip jar:
 - **UI:** `TipJarView` in Settings for tip purchases
 
 ### Sync/
-- `CloudSyncStatusService` — Monitors iCloud sync via NSPersistentCloudKitContainer events
-- `SyncStatusService` — UI-facing sync status (`.synced`, `.syncing`, `.error`, `.offline`)
+- `SyncStatusService` — Consolidated iCloud sync status, network monitoring, remote change observation, and retry with backoff (`.synced`, `.syncing`, `.error`, `.disabled`, `.noAccount`)
 - `DataMigrationService` — Local to iCloud migration, schema upgrades
 
 ### Utilities/
@@ -474,11 +472,6 @@ struct WidgetColors {
 | `VehicleHeader.swift` | Vehicle info header |
 | `VehicleSelector.swift` | Vehicle picker button |
 
-### Components/Sync/
-| Component | Purpose |
-|-----------|---------|
-| `ConflictResolutionView.swift` | iCloud conflict resolution UI |
-
 ## Tab Architecture
 
 ```
@@ -527,8 +520,7 @@ ContentView
 - **OdometerImagePreprocessorTests** — Image preprocessing pipeline
 - **ReceiptOCRServiceTests** — Receipt text extraction
 - **OCRErrorTests** — Error type handling
-- **CloudSyncStatusServiceTests** — iCloud sync monitoring
-- **SyncStatusServiceTests** — Sync status state machine
+- **SyncStatusServiceTests** — Consolidated sync status, SyncError properties, retry logic
 - **DataMigrationServiceTests** — Migration logic
 - **ServiceHistoryPDFServiceTests** — PDF generation
 - **WidgetDataServiceTests** — Widget data serialization
@@ -559,7 +551,6 @@ ContentView
 - **OdometerCaptureViewTests** — OCR capture flow
 - **YearlyCostRoundupCardTests** — Annual summary card
 - **OCRConfirmationViewTests** — OCR result confirmation
-- **ConflictResolutionViewTests** — Sync conflict UI
 - **BrutalistTabBarTests** — Tab bar rendering
 - **RecallAlertCardTests** — Recall card display
 - **QuickSpecsCardTests** — Vehicle specs card

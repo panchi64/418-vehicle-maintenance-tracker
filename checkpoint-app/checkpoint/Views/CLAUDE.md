@@ -17,8 +17,7 @@ Views/
     ├── Cards/           # Dashboard cards
     ├── Inputs/          # Form input controls
     ├── Lists/           # List/timeline components
-    ├── Navigation/      # Navigation & structural
-    └── Sync/            # Data sync UI
+    └── Navigation/      # Navigation & structural
 ```
 
 For component inventories, see `docs/ARCHITECTURE.md`.

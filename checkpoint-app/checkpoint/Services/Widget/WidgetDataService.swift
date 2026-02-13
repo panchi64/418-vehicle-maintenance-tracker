@@ -235,14 +235,20 @@ final class WidgetDataService {
     /// Remove widget data for a deleted vehicle
     /// - Parameter vehicleID: The UUID string of the deleted vehicle
     func removeWidgetData(for vehicleID: String) {
-        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else { return }
+        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else {
+            widgetLogger.error("Failed to access App Group UserDefaults (\(AppGroupConstants.iPhoneWidget)) in removeWidgetData()")
+            return
+        }
         userDefaults.removeObject(forKey: widgetDataKey(for: vehicleID))
         WidgetCenter.shared.reloadAllTimelines()
     }
 
     /// Clear all widget data
     func clearWidgetData() {
-        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else { return }
+        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else {
+            widgetLogger.error("Failed to access App Group UserDefaults (\(AppGroupConstants.iPhoneWidget)) in clearWidgetData()")
+            return
+        }
         userDefaults.removeObject(forKey: widgetDataKey)
         userDefaults.removeObject(forKey: vehicleListKey)
         WidgetCenter.shared.reloadAllTimelines()
@@ -390,7 +396,10 @@ struct PendingWidgetCompletion: Codable {
     static let userDefaultsKey = "pendingWidgetCompletions"
 
     static func save(_ completion: PendingWidgetCompletion) {
-        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else { return }
+        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else {
+            widgetLogger.error("Failed to access App Group UserDefaults (\(AppGroupConstants.iPhoneWidget)) in PendingWidgetCompletion.save()")
+            return
+        }
         var pending = loadAll()
         pending.append(completion)
         if let data = try? JSONEncoder().encode(pending) {
@@ -399,15 +408,21 @@ struct PendingWidgetCompletion: Codable {
     }
 
     static func loadAll() -> [PendingWidgetCompletion] {
-        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget),
-              let data = userDefaults.data(forKey: userDefaultsKey) else {
+        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else {
+            widgetLogger.error("Failed to access App Group UserDefaults (\(AppGroupConstants.iPhoneWidget)) in PendingWidgetCompletion.loadAll()")
+            return []
+        }
+        guard let data = userDefaults.data(forKey: userDefaultsKey) else {
             return []
         }
         return (try? JSONDecoder().decode([PendingWidgetCompletion].self, from: data)) ?? []
     }
 
     static func clearAll() {
-        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else { return }
+        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else {
+            widgetLogger.error("Failed to access App Group UserDefaults (\(AppGroupConstants.iPhoneWidget)) in PendingWidgetCompletion.clearAll()")
+            return
+        }
         userDefaults.removeObject(forKey: userDefaultsKey)
     }
 }

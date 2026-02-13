@@ -7,6 +7,9 @@
 //
 
 import Foundation
+import os
+
+private let widgetLogger = Logger(subsystem: "com.418-studio.checkpoint.widget", category: "PendingCompletion")
 
 struct PendingWidgetCompletion: Codable {
     let serviceID: String
@@ -19,7 +22,10 @@ struct PendingWidgetCompletion: Codable {
 
     /// Save a pending completion to App Group UserDefaults
     static func save(_ completion: PendingWidgetCompletion) {
-        guard let userDefaults = UserDefaults(suiteName: appGroupID) else { return }
+        guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
+            widgetLogger.error("Failed to access App Group UserDefaults (\(appGroupID)) in save()")
+            return
+        }
 
         var pending = loadAll()
         pending.append(completion)
@@ -31,8 +37,11 @@ struct PendingWidgetCompletion: Codable {
 
     /// Load all pending completions from App Group UserDefaults
     static func loadAll() -> [PendingWidgetCompletion] {
-        guard let userDefaults = UserDefaults(suiteName: appGroupID),
-              let data = userDefaults.data(forKey: userDefaultsKey) else {
+        guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
+            widgetLogger.error("Failed to access App Group UserDefaults (\(appGroupID)) in loadAll()")
+            return []
+        }
+        guard let data = userDefaults.data(forKey: userDefaultsKey) else {
             return []
         }
 
@@ -41,7 +50,10 @@ struct PendingWidgetCompletion: Codable {
 
     /// Clear all pending completions from App Group UserDefaults
     static func clearAll() {
-        guard let userDefaults = UserDefaults(suiteName: appGroupID) else { return }
+        guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
+            widgetLogger.error("Failed to access App Group UserDefaults (\(appGroupID)) in clearAll()")
+            return
+        }
         userDefaults.removeObject(forKey: userDefaultsKey)
     }
 }
