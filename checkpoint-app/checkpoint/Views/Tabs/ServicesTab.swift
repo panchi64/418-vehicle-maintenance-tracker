@@ -34,7 +34,7 @@ struct ServicesTab: View {
         guard let vehicle = vehicle else { return [] }
 
         // Only show services that have due tracking (exclude log-only/neutral services)
-        var filtered = vehicleServices.filter { $0.dueDate != nil || $0.dueMileage != nil }
+        var filtered = vehicleServices.filter { $0.hasDueTracking }
         let effectiveMileage = vehicle.effectiveMileage
 
         // Apply search filter

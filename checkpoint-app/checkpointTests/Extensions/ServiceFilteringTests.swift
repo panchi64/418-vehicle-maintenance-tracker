@@ -2,7 +2,7 @@
 //  ServiceFilteringTests.swift
 //  checkpointTests
 //
-//  Tests for [Service].forVehicle() extension — filtering and urgency sorting
+//  Tests for [Service].forVehicle(), forVehicleUpcoming(), and Service.hasDueTracking
 //
 
 import XCTest
@@ -123,5 +123,99 @@ final class ServiceFilteringTests: XCTestCase {
 
         // Then
         XCTAssertTrue(filtered.isEmpty, "Should return empty when no services belong to the vehicle")
+    }
+
+    // MARK: - hasDueTracking Tests
+
+    @MainActor
+    func testHasDueTracking_trueWithDueDate() {
+        let service = Service(name: "Oil Change", dueDate: Date())
+        XCTAssertTrue(service.hasDueTracking)
+    }
+
+    @MainActor
+    func testHasDueTracking_trueWithDueMileage() {
+        let service = Service(name: "Oil Change", dueMileage: 50000)
+        XCTAssertTrue(service.hasDueTracking)
+    }
+
+    @MainActor
+    func testHasDueTracking_trueWithBoth() {
+        let service = Service(name: "Oil Change", dueDate: Date(), dueMileage: 50000)
+        XCTAssertTrue(service.hasDueTracking)
+    }
+
+    @MainActor
+    func testHasDueTracking_falseWithNeither() {
+        let service = Service(name: "Wiper Blades", lastPerformed: Date())
+        XCTAssertFalse(service.hasDueTracking)
+    }
+
+    // MARK: - forVehicleUpcoming Tests
+
+    @MainActor
+    func testForVehicleUpcoming_excludesNeutralServices() {
+        let vehicle = Vehicle(name: "Test Car", make: "Toyota", model: "Camry", year: 2022, currentMileage: 30000)
+
+        let tracked = Service(name: "Oil Change", dueDate: Calendar.current.date(byAdding: .day, value: 30, to: .now))
+        tracked.vehicle = vehicle
+
+        let neutral = Service(name: "Wiper Blades", lastPerformed: Date())
+        neutral.vehicle = vehicle
+
+        let allServices = [tracked, neutral]
+
+        // When
+        let upcoming = allServices.forVehicleUpcoming(vehicle)
+
+        // Then
+        XCTAssertEqual(upcoming.count, 1, "Should exclude log-only services")
+        XCTAssertEqual(upcoming[0].name, "Oil Change")
+    }
+
+    @MainActor
+    func testForVehicleUpcoming_includesAllTrackedServices() {
+        let vehicle = Vehicle(name: "Test Car", make: "Toyota", model: "Camry", year: 2022, currentMileage: 30000)
+
+        let dateTracked = Service(name: "Battery Check", dueDate: Calendar.current.date(byAdding: .day, value: 30, to: .now))
+        dateTracked.vehicle = vehicle
+
+        let mileageTracked = Service(name: "Oil Change", dueMileage: 35000)
+        mileageTracked.vehicle = vehicle
+
+        let bothTracked = Service(name: "Brake Inspection", dueDate: Calendar.current.date(byAdding: .day, value: 60, to: .now), dueMileage: 40000)
+        bothTracked.vehicle = vehicle
+
+        let allServices = [dateTracked, mileageTracked, bothTracked]
+
+        // When
+        let upcoming = allServices.forVehicleUpcoming(vehicle)
+
+        // Then
+        XCTAssertEqual(upcoming.count, 3, "Should include all services with due tracking")
+    }
+
+    @MainActor
+    func testForVehicleUpcoming_stillSortsByUrgency() {
+        let vehicle = Vehicle(name: "Test Car", make: "Toyota", model: "Camry", year: 2022, currentMileage: 30000)
+
+        let farAway = Service(name: "Far Away", dueDate: Calendar.current.date(byAdding: .day, value: 90, to: .now))
+        farAway.vehicle = vehicle
+
+        let urgent = Service(name: "Urgent", dueDate: Calendar.current.date(byAdding: .day, value: 5, to: .now))
+        urgent.vehicle = vehicle
+
+        let neutral = Service(name: "Log Only", lastPerformed: Date())
+        neutral.vehicle = vehicle
+
+        let allServices = [farAway, urgent, neutral]
+
+        // When
+        let upcoming = allServices.forVehicleUpcoming(vehicle)
+
+        // Then
+        XCTAssertEqual(upcoming.count, 2, "Should exclude neutral service")
+        XCTAssertEqual(upcoming[0].name, "Urgent", "Most urgent should be first")
+        XCTAssertEqual(upcoming[1].name, "Far Away")
     }
 }

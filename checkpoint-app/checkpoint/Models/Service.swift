@@ -49,6 +49,35 @@ final class Service: Identifiable {
 
 // MARK: - Service Status
 
+/// Whether this service has due-date or due-mileage tracking configured.
+/// Services without tracking are log-only (neutral) and should not appear in upcoming lists.
+extension Service {
+    var hasDueTracking: Bool {
+        dueDate != nil || dueMileage != nil
+    }
+}
+
+/// Recalculate due dates after a service is marked as completed.
+/// - For recurring services (with intervals): advances dueDate/dueMileage to the next occurrence.
+/// - For non-recurring services: clears dueDate/dueMileage so the service becomes neutral.
+extension Service {
+    func recalculateDueDates(performedDate: Date, mileage: Int) {
+        lastPerformed = performedDate
+        lastMileage = mileage
+
+        if let months = intervalMonths, months > 0 {
+            dueDate = Calendar.current.date(byAdding: .month, value: months, to: performedDate)
+        } else {
+            dueDate = nil
+        }
+        if let miles = intervalMiles, miles > 0 {
+            dueMileage = mileage + miles
+        } else {
+            dueMileage = nil
+        }
+    }
+}
+
 enum ServiceStatus {
     case overdue
     case dueSoon

@@ -45,8 +45,7 @@ struct HomeTab: View {
     }
 
     private var remainingServices: [Service] {
-        // Only include services with due tracking (exclude log-only/neutral services)
-        let tracked = vehicleServices.filter { $0.dueDate != nil || $0.dueMileage != nil }
+        let tracked = vehicleServices.filter { $0.hasDueTracking }
         // If marbete is the most urgent, don't drop a service from remaining
         if let nextUp = nextUpItem, nextUp.itemType == .marbete {
             return tracked

@@ -261,16 +261,8 @@ final class ServiceDetailViewTests: XCTestCase {
             intervalMiles: 5000
         )
 
-        // When: Updating service after marking done (simulating markAsDone logic)
-        service.lastPerformed = performedDate
-        service.lastMileage = mileageAtService
-
-        if let months = service.intervalMonths, months > 0 {
-            service.dueDate = Calendar.current.date(byAdding: .month, value: months, to: performedDate)
-        }
-        if let miles = service.intervalMiles, miles > 0 {
-            service.dueMileage = mileageAtService + miles
-        }
+        // When
+        service.recalculateDueDates(performedDate: performedDate, mileage: mileageAtService)
 
         // Then: Due dates should be updated correctly
         XCTAssertEqual(service.lastPerformed, performedDate)
@@ -323,16 +315,8 @@ final class ServiceDetailViewTests: XCTestCase {
             intervalMiles: 5000
         )
 
-        // When: Updating service (simulating markAsDone logic)
-        service.lastPerformed = performedDate
-        service.lastMileage = mileageAtService
-
-        if let months = service.intervalMonths, months > 0 {
-            service.dueDate = Calendar.current.date(byAdding: .month, value: months, to: performedDate)
-        }
-        if let miles = service.intervalMiles, miles > 0 {
-            service.dueMileage = mileageAtService + miles
-        }
+        // When
+        service.recalculateDueDates(performedDate: performedDate, mileage: mileageAtService)
 
         // Then: Only mileage should be updated, date remains nil
         XCTAssertNil(service.dueDate, "Due date should remain nil when no interval months")
@@ -352,16 +336,8 @@ final class ServiceDetailViewTests: XCTestCase {
             intervalMiles: nil
         )
 
-        // When: Updating service (simulating markAsDone logic)
-        service.lastPerformed = performedDate
-        service.lastMileage = mileageAtService
-
-        if let months = service.intervalMonths, months > 0 {
-            service.dueDate = Calendar.current.date(byAdding: .month, value: months, to: performedDate)
-        }
-        if let miles = service.intervalMiles, miles > 0 {
-            service.dueMileage = mileageAtService + miles
-        }
+        // When
+        service.recalculateDueDates(performedDate: performedDate, mileage: mileageAtService)
 
         // Then: Only date should be updated, mileage remains nil
         XCTAssertNil(service.dueMileage, "Due mileage should remain nil when no interval miles")
