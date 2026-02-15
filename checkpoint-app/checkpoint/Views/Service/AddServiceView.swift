@@ -455,9 +455,19 @@ struct AddServiceView: View {
     }
 
     private func saveScheduledService() {
+        // If user picked a custom date, use it.
+        // Otherwise derive from interval months so the upcoming card has useful timing.
+        let effectiveDueDate: Date? = if hasDueDate {
+            dueDate
+        } else if let months = intervalMonths, months > 0 {
+            Calendar.current.date(byAdding: .month, value: months, to: Date())
+        } else {
+            nil
+        }
+
         let service = Service(
             name: serviceName,
-            dueDate: hasDueDate ? dueDate : nil,
+            dueDate: effectiveDueDate,
             dueMileage: dueMileage,
             intervalMonths: intervalMonths,
             intervalMiles: intervalMiles
