@@ -126,8 +126,10 @@ final class WidgetDataService {
         let effectiveMileage = vehicle.effectiveMileage
         let pace = vehicle.dailyMilesPace
 
-        // Create service items
-        var allItems: [(serviceID: String?, name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?, urgencyScore: Int)] = (vehicle.services ?? []).map { service in
+        // Create service items (only services with due tracking)
+        var allItems: [(serviceID: String?, name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?, urgencyScore: Int)] = (vehicle.services ?? [])
+            .filter { $0.dueDate != nil || $0.dueMileage != nil }
+            .map { service in
             let status = service.status(currentMileage: effectiveMileage)
             let statusString: String
             switch status {
