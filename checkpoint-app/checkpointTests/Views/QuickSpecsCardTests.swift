@@ -258,7 +258,76 @@ final class QuickSpecsCardTests: XCTestCase {
         XCTAssertNil(truncated, "Empty notes should return nil")
     }
 
-    // MARK: - Helper
+    // MARK: - isNotesTruncated Tests
+
+    func testIsNotesTruncated_ShortNotes() {
+        // Given
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            notes: "Short note"
+        )
+
+        // Then
+        XCTAssertFalse(isNotesTruncated(vehicle.notes), "Short notes should not be marked as truncated")
+    }
+
+    func testIsNotesTruncated_ExactlyFiftyChars() {
+        // Given
+        let notes = String(repeating: "a", count: 50)
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            notes: notes
+        )
+
+        // Then
+        XCTAssertFalse(isNotesTruncated(vehicle.notes), "Notes at exactly 50 chars should not be marked as truncated")
+    }
+
+    func testIsNotesTruncated_LongNotes() {
+        // Given
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            notes: "This is a very long note that exceeds the fifty character limit for truncation"
+        )
+
+        // Then
+        XCTAssertTrue(isNotesTruncated(vehicle.notes), "Long notes should be marked as truncated")
+    }
+
+    func testIsNotesTruncated_NilNotes() {
+        // Given
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            notes: nil
+        )
+
+        // Then
+        XCTAssertFalse(isNotesTruncated(vehicle.notes), "Nil notes should not be marked as truncated")
+    }
+
+    func testIsNotesTruncated_FiftyOneChars() {
+        // Given
+        let notes = String(repeating: "a", count: 51)
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            notes: notes
+        )
+
+        // Then
+        XCTAssertTrue(isNotesTruncated(vehicle.notes), "Notes at 51 chars should be marked as truncated")
+    }
+
+    // MARK: - Helpers
 
     private func truncateNotes(_ notes: String?) -> String? {
         guard let notes = notes, !notes.isEmpty else { return nil }
@@ -266,5 +335,10 @@ final class QuickSpecsCardTests: XCTestCase {
             return notes
         }
         return String(notes.prefix(50)) + "..."
+    }
+
+    private func isNotesTruncated(_ notes: String?) -> Bool {
+        guard let notes = notes else { return false }
+        return notes.count > 50
     }
 }

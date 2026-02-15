@@ -13,6 +13,7 @@ struct QuickSpecsCard: View {
     let onEdit: () -> Void
 
     @State private var isExpanded = false
+    @State private var showFullNotes = false
 
     private var hasAnySpecs: Bool {
         vehicle.vin != nil || vehicle.licensePlate != nil || vehicle.tireSize != nil || vehicle.oilType != nil || !(vehicle.notes ?? "").isEmpty || vehicle.hasMarbeteExpiration
@@ -29,6 +30,12 @@ struct QuickSpecsCard: View {
             return notes
         }
         return String(notes.prefix(50)) + "..."
+    }
+
+    /// Whether notes are long enough to be truncated
+    private var isNotesTruncated: Bool {
+        guard let notes = vehicle.notes else { return false }
+        return notes.count > 50
     }
 
     var body: some View {
@@ -161,11 +168,31 @@ struct QuickSpecsCard: View {
                                     .tracking(1)
                                     .padding(.bottom, 4)
 
-                                // Notes content
-                                Text(truncatedNotes ?? "")
-                                    .font(.brutalistBody)
-                                    .foregroundStyle(Theme.textPrimary)
-                                    .lineLimit(3)
+                                // Notes content - tappable when truncated
+                                if isNotesTruncated {
+                                    Button {
+                                        showFullNotes = true
+                                    } label: {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(truncatedNotes ?? "")
+                                                .font(.brutalistBody)
+                                                .foregroundStyle(Theme.textPrimary)
+                                                .lineLimit(3)
+                                                .multilineTextAlignment(.leading)
+
+                                            Text("TAP TO READ MORE")
+                                                .font(.brutalistLabel)
+                                                .foregroundStyle(Theme.accent)
+                                                .tracking(1)
+                                        }
+                                    }
+                                    .buttonStyle(.plain)
+                                } else {
+                                    Text(truncatedNotes ?? "")
+                                        .font(.brutalistBody)
+                                        .foregroundStyle(Theme.textPrimary)
+                                        .lineLimit(3)
+                                }
                             }
                         }
 
@@ -211,6 +238,9 @@ struct QuickSpecsCard: View {
                 .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
         )
         .clipped()
+        .sheet(isPresented: $showFullNotes) {
+            FullNotesView(notes: vehicle.notes ?? "")
+        }
     }
 
     /// Spec block with large value and small label below
@@ -266,13 +296,50 @@ struct QuickSpecsCard: View {
     }
 }
 
+// MARK: - Full Notes View
+
+struct FullNotesView: View {
+    let notes: String
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                Text(notes)
+                    .font(.brutalistBody)
+                    .foregroundStyle(Theme.textPrimary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(Spacing.md)
+            }
+            .background(Theme.backgroundPrimary)
+            .navigationTitle("NOTES")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                }
+            }
+            .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+        }
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+    }
+}
+
 #Preview {
     ZStack {
         AtmosphericBackground()
 
         ScrollView {
             VStack(spacing: Spacing.lg) {
-                // With all specs - expanded
+                // With all specs + long notes
                 QuickSpecsCard(
                     vehicle: Vehicle(
                         name: "Daily Driver",
@@ -282,7 +349,8 @@ struct QuickSpecsCard: View {
                         currentMileage: 32500,
                         vin: "1HGBH41JXMN109186",
                         tireSize: "225/45R17",
-                        oilType: "0W-20 Synthetic"
+                        oilType: "0W-20 Synthetic",
+                        notes: "This car has a slight vibration at highway speeds above 70mph. The dealer mentioned it could be related to the alignment or tire balance. Need to get it checked at the next service appointment. Also, the rear passenger window makes a clicking noise when going down."
                     )
                 ) {
                     print("Edit tapped")
