@@ -523,87 +523,72 @@ final class AddServiceViewTests: XCTestCase {
         XCTAssertFalse(hasInterval)
     }
 
-    // MARK: - Default Due Date Tests
+    // MARK: - Effective Due Date Tests
 
-    func testDefaultDueDate_IsNotPreFilled() {
-        // Given: Default state of hasDueDate toggle
-        let hasDueDate = false
-
-        // Then: Due date should be opt-in, not pre-filled
-        XCTAssertFalse(hasDueDate, "Due date toggle should default to off so users aren't forced into an arbitrary date")
+    /// Helper mirroring AddServiceView.effectiveDueDate computed property
+    private func effectiveDueDate(hasCustomDate: Bool, dueDate: Date, intervalMonths: Int?) -> Date? {
+        if hasCustomDate {
+            return dueDate
+        } else if let months = intervalMonths, months > 0 {
+            return Calendar.current.date(byAdding: .month, value: months, to: Date())
+        } else {
+            return nil
+        }
     }
 
-    func testScheduledService_DerivesDateFromInterval_WhenToggleOff() {
-        // Given: Schedule mode with hasDueDate off but interval set
-        let hasDueDate = false
-        let intervalMonths = 6
+    func testEffectiveDueDate_DerivesFromInterval() {
+        // Given: No custom date, interval is 6 months
         let now = Date()
 
-        // When: Computing effective due date (mirrors saveScheduledService logic)
-        let effectiveDueDate: Date? = if hasDueDate {
-            now
-        } else if intervalMonths > 0 {
-            Calendar.current.date(byAdding: .month, value: intervalMonths, to: now)
-        } else {
-            nil
-        }
+        // When: Computing effective due date
+        let result = effectiveDueDate(hasCustomDate: false, dueDate: now, intervalMonths: 6)
 
-        // Then: Due date should be derived from interval, not nil
-        XCTAssertNotNil(effectiveDueDate, "Should derive due date from interval when toggle is off")
-        let monthsDiff = Calendar.current.dateComponents([.month], from: now, to: effectiveDueDate!).month
+        // Then: Should be 6 months from now
+        XCTAssertNotNil(result)
+        let monthsDiff = Calendar.current.dateComponents([.month], from: now, to: result!).month
         XCTAssertEqual(monthsDiff, 6)
     }
 
-    func testScheduledService_NilDueDate_WhenNoIntervalAndToggleOff() {
-        // Given: Schedule mode with hasDueDate off and no interval
-        let hasDueDate = false
-        let intervalMonths: Int? = nil
+    func testEffectiveDueDate_NilWhenNoIntervalNoCustomDate() {
+        // Given: No custom date, no interval (mileage-only)
+        let result = effectiveDueDate(hasCustomDate: false, dueDate: Date(), intervalMonths: nil)
 
-        // When: Computing effective due date
-        let effectiveDueDate: Date? = if hasDueDate {
-            Date()
-        } else if let months = intervalMonths, months > 0 {
-            Calendar.current.date(byAdding: .month, value: months, to: Date())
-        } else {
-            nil
-        }
-
-        // Then: Due date should be nil (mileage-only tracking)
-        XCTAssertNil(effectiveDueDate, "Should not set a due date when there's no interval and toggle is off")
+        // Then: Should be nil
+        XCTAssertNil(result, "Mileage-only service should have no due date")
     }
 
-    func testScheduledService_SavesCustomDate_WhenToggleOn() {
-        // Given: Schedule mode with hasDueDate on and user-picked date
-        let hasDueDate = true
-        let customDate = Date().addingTimeInterval(86400 * 90)
-        let intervalMonths = 6
+    func testEffectiveDueDate_UsesCustomDateOverInterval() {
+        // Given: Custom date set (e.g., seasonal prefill), interval also set
+        let customDate = Date().addingTimeInterval(86400 * 60)
+        let result = effectiveDueDate(hasCustomDate: true, dueDate: customDate, intervalMonths: 12)
 
-        // When: Computing effective due date
-        let effectiveDueDate: Date? = if hasDueDate {
-            customDate
-        } else if intervalMonths > 0 {
-            Calendar.current.date(byAdding: .month, value: intervalMonths, to: Date())
-        } else {
-            nil
-        }
-
-        // Then: Should use the user's custom date, not the interval-derived one
-        XCTAssertNotNil(effectiveDueDate)
-        XCTAssertEqual(effectiveDueDate, customDate)
+        // Then: Custom date wins over interval-derived date
+        XCTAssertEqual(result, customDate)
     }
 
-    func testSeasonalPrefill_EnablesDueDateToggle() {
-        // Given: A seasonal prefill provides a specific date
-        let prefillDate = Date().addingTimeInterval(86400 * 60)
+    func testEffectiveDueDate_CustomDateWithoutInterval() {
+        // Given: Custom one-off date, no interval
+        let customDate = Date().addingTimeInterval(86400 * 45)
+        let result = effectiveDueDate(hasCustomDate: true, dueDate: customDate, intervalMonths: nil)
+
+        // Then: Should use the custom date
+        XCTAssertEqual(result, customDate)
+    }
+
+    func testSeasonalPrefill_SetsCustomDateAndInterval() {
+        // Given: Seasonal prefill with meaningful date and yearly interval
+        let seasonalDate = Date().addingTimeInterval(86400 * 120)
 
         // When: Applying prefill (simulating onAppear logic)
-        var hasDueDate = false
+        var hasCustomDate = false
         var dueDate = Date()
-        hasDueDate = true
-        dueDate = prefillDate
+        var intervalMonths: Int? = nil
+        hasCustomDate = true
+        dueDate = seasonalDate
+        intervalMonths = 12
 
-        // Then: Toggle should be on and date should match prefill
-        XCTAssertTrue(hasDueDate, "Seasonal prefill should enable the due date toggle")
-        XCTAssertEqual(dueDate, prefillDate)
+        // Then: Custom date preserves the seasonal date
+        let result = effectiveDueDate(hasCustomDate: hasCustomDate, dueDate: dueDate, intervalMonths: intervalMonths)
+        XCTAssertEqual(result, seasonalDate, "Seasonal prefill date should take priority over interval derivation")
     }
 }

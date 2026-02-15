@@ -48,11 +48,23 @@ struct AddServiceView: View {
     @State private var pendingAttachments: [AttachmentPicker.AttachmentData] = []
 
     // Schedule mode fields
-    @State private var hasDueDate: Bool = false
+    @State private var hasCustomDate: Bool = false
     @State private var dueDate: Date = Date()
     @State private var dueMileage: Int? = nil
     @State private var intervalMonths: Int? = nil
     @State private var intervalMiles: Int? = nil
+
+    /// The due date that will be saved — derived from interval, custom pick, or nil.
+    /// Used by both the UI (to show the derived date) and save logic.
+    private var effectiveDueDate: Date? {
+        if hasCustomDate {
+            return dueDate
+        } else if let months = intervalMonths, months > 0 {
+            return Calendar.current.date(byAdding: .month, value: months, to: Date())
+        } else {
+            return nil
+        }
+    }
 
     var serviceName: String {
         selectedPreset?.name ?? customServiceName
@@ -153,10 +165,12 @@ struct AddServiceView: View {
                     mileageAtService = vehicle.currentMileage
                 }
                 // Apply seasonal reminder pre-fill
+                // Seasonal dates are seasonally meaningful (e.g., Oct 1 for antifreeze),
+                // so we use the prefill date as a custom override rather than deriving from interval.
                 if let prefill = seasonalPrefill {
                     mode = .remind
                     customServiceName = prefill.serviceName
-                    hasDueDate = true
+                    hasCustomDate = true
                     dueDate = prefill.dueDate
                     intervalMonths = prefill.intervalMonths
                 }
@@ -286,45 +300,7 @@ struct AddServiceView: View {
 
     @ViewBuilder
     private var scheduleModeFields: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "When Is It Due?")
-
-            VStack(spacing: Spacing.md) {
-                HStack {
-                    Text("SET DUE DATE")
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
-                        .tracking(1)
-
-                    Spacer()
-
-                    Toggle("", isOn: $hasDueDate)
-                        .labelsHidden()
-                        .tint(Theme.accent)
-                }
-                .padding(Spacing.md)
-                .background(Theme.surfaceInstrument)
-                .overlay(
-                    Rectangle()
-                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                )
-
-                if hasDueDate {
-                    InstrumentDatePicker(
-                        label: "Due Date",
-                        date: $dueDate
-                    )
-                }
-
-                InstrumentNumberField(
-                    label: "Due Mileage",
-                    value: $dueMileage,
-                    placeholder: "Optional",
-                    suffix: "mi"
-                )
-            }
-        }
-
+        // Interval first — this drives the derived due date
         VStack(alignment: .leading, spacing: Spacing.sm) {
             InstrumentSectionHeader(title: "Repeat Interval")
 
@@ -341,6 +317,76 @@ struct AddServiceView: View {
                     value: $intervalMiles,
                     placeholder: "5000",
                     suffix: "miles"
+                )
+            }
+        }
+
+        // Due section — adapts based on whether an interval is set
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            InstrumentSectionHeader(title: "When Is It Due?")
+
+            VStack(spacing: Spacing.md) {
+                if let months = intervalMonths, months > 0 {
+                    // Interval is set — show derived date as informational text
+                    if let date = effectiveDueDate {
+                        let formatter = {
+                            let f = DateFormatter()
+                            f.dateFormat = "MMM d, yyyy"
+                            return f
+                        }()
+                        HStack {
+                            Text("DUE DATE")
+                                .font(.brutalistLabel)
+                                .foregroundStyle(Theme.textTertiary)
+                                .tracking(1)
+
+                            Spacer()
+
+                            Text(formatter.string(from: date))
+                                .font(.brutalistBody)
+                                .foregroundStyle(Theme.accent)
+                        }
+                        .padding(Spacing.md)
+                        .background(Theme.surfaceInstrument)
+                        .overlay(
+                            Rectangle()
+                                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+                        )
+                    }
+                } else {
+                    // No interval — allow a one-off custom date
+                    HStack {
+                        Text("SET DUE DATE")
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.textTertiary)
+                            .tracking(1)
+
+                        Spacer()
+
+                        Toggle("", isOn: $hasCustomDate)
+                            .labelsHidden()
+                            .tint(Theme.accent)
+                    }
+                    .padding(Spacing.md)
+                    .background(Theme.surfaceInstrument)
+                    .overlay(
+                        Rectangle()
+                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+                        )
+
+                    if hasCustomDate {
+                        InstrumentDatePicker(
+                            label: "Due Date",
+                            date: $dueDate
+                        )
+                    }
+                }
+
+                InstrumentNumberField(
+                    label: "Due Mileage",
+                    value: $dueMileage,
+                    placeholder: "Optional",
+                    suffix: "mi"
                 )
             }
         }
@@ -455,16 +501,6 @@ struct AddServiceView: View {
     }
 
     private func saveScheduledService() {
-        // If user picked a custom date, use it.
-        // Otherwise derive from interval months so the upcoming card has useful timing.
-        let effectiveDueDate: Date? = if hasDueDate {
-            dueDate
-        } else if let months = intervalMonths, months > 0 {
-            Calendar.current.date(byAdding: .month, value: months, to: Date())
-        } else {
-            nil
-        }
-
         let service = Service(
             name: serviceName,
             dueDate: effectiveDueDate,
