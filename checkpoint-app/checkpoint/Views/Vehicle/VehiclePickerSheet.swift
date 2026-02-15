@@ -35,6 +35,7 @@ struct VehiclePickerSheet: View {
         let year: Int
         let currentMileage: Int
         let vin: String?
+        let licensePlate: String?
         let tireSize: String?
         let oilType: String?
         let notes: String?
@@ -51,6 +52,7 @@ struct VehiclePickerSheet: View {
             self.year = vehicle.year
             self.currentMileage = vehicle.currentMileage
             self.vin = vehicle.vin
+            self.licensePlate = vehicle.licensePlate
             self.tireSize = vehicle.tireSize
             self.oilType = vehicle.oilType
             self.notes = vehicle.notes
@@ -68,6 +70,7 @@ struct VehiclePickerSheet: View {
                 year: year,
                 currentMileage: currentMileage,
                 vin: vin,
+                licensePlate: licensePlate,
                 tireSize: tireSize,
                 oilType: oilType,
                 notes: notes,

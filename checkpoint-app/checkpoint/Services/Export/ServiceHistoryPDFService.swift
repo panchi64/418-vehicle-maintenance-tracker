@@ -200,6 +200,9 @@ final class ServiceHistoryPDFService {
         if !vehicle.make.isEmpty && !vehicle.model.isEmpty {
             detailParts.append("\(vehicle.make) \(vehicle.model)")
         }
+        if let licensePlate = vehicle.licensePlate, !licensePlate.isEmpty {
+            detailParts.append("Plate: \(licensePlate)")
+        }
         if let vin = vehicle.vin, !vin.isEmpty {
             detailParts.append("VIN: \(vin)")
         }

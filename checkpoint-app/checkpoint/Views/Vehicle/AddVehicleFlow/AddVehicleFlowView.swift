@@ -223,6 +223,7 @@ struct AddVehicleFlowView: View {
             year: formState.year ?? 0,
             currentMileage: formState.currentMileage ?? 0,
             vin: formState.vin.isEmpty ? nil : formState.vin,
+            licensePlate: formState.licensePlate.isEmpty ? nil : formState.licensePlate,
             tireSize: formState.tireSize.isEmpty ? nil : formState.tireSize,
             oilType: formState.oilType.isEmpty ? nil : formState.oilType,
             notes: formState.notes.isEmpty ? nil : formState.notes

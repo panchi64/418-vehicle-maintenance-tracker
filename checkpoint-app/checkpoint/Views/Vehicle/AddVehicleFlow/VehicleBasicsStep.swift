@@ -74,6 +74,12 @@ struct VehicleBasicsStep: View {
                     InstrumentSectionHeader(title: L10n.vehicleIdentification)
 
                     VINInputSection(formState: formState)
+
+                    InstrumentTextField(
+                        label: "License Plate",
+                        text: $formState.licensePlate,
+                        placeholder: "ABC-1234 (Optional)"
+                    )
                 }
 
             }

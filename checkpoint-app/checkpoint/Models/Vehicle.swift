@@ -18,6 +18,7 @@ final class Vehicle: Identifiable {
     var year: Int = 0
     var currentMileage: Int = 0
     var vin: String?
+    var licensePlate: String?
 
     // Specifications
     var tireSize: String?
@@ -205,6 +206,7 @@ final class Vehicle: Identifiable {
         year: Int,
         currentMileage: Int = 0,
         vin: String? = nil,
+        licensePlate: String? = nil,
         tireSize: String? = nil,
         oilType: String? = nil,
         notes: String? = nil,
@@ -218,6 +220,7 @@ final class Vehicle: Identifiable {
         self.year = year
         self.currentMileage = currentMileage
         self.vin = vin
+        self.licensePlate = licensePlate
         self.tireSize = tireSize
         self.oilType = oilType
         self.notes = notes
@@ -238,6 +241,7 @@ extension Vehicle {
             year: 2022,
             currentMileage: 32500,
             vin: "4T1BF1FK5CU123456",
+            licensePlate: "ABC-1234",
             tireSize: "215/55R17",
             oilType: "0W-20 Synthetic",
             notes: "Purchased certified pre-owned. Runs great!",

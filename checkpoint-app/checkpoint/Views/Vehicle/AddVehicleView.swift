@@ -19,6 +19,7 @@ struct AddVehicleView: View {
     @State private var year: Int? = nil
     @State private var currentMileage: Int? = nil
     @State private var vin: String = ""
+    @State private var licensePlate: String = ""
     @State private var tireSize: String = ""
     @State private var oilType: String = ""
     @State private var notes: String = ""
@@ -216,6 +217,12 @@ struct AddVehicleView: View {
                                     }
                                 }
                             }
+
+                            InstrumentTextField(
+                                label: "License Plate",
+                                text: $licensePlate,
+                                placeholder: "ABC-1234 (Optional)"
+                            )
                         }
 
                         // Specifications Section
@@ -393,6 +400,7 @@ struct AddVehicleView: View {
             year: year ?? 0,
             currentMileage: currentMileage ?? 0,
             vin: vin.isEmpty ? nil : vin,
+            licensePlate: licensePlate.isEmpty ? nil : licensePlate,
             tireSize: tireSize.isEmpty ? nil : tireSize,
             oilType: oilType.isEmpty ? nil : oilType,
             notes: notes.isEmpty ? nil : notes,

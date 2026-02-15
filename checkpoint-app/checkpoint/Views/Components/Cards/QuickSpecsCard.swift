@@ -15,7 +15,7 @@ struct QuickSpecsCard: View {
     @State private var isExpanded = false
 
     private var hasAnySpecs: Bool {
-        vehicle.vin != nil || vehicle.tireSize != nil || vehicle.oilType != nil || !(vehicle.notes ?? "").isEmpty || vehicle.hasMarbeteExpiration
+        vehicle.vin != nil || vehicle.licensePlate != nil || vehicle.tireSize != nil || vehicle.oilType != nil || !(vehicle.notes ?? "").isEmpty || vehicle.hasMarbeteExpiration
     }
 
     private var hasNotes: Bool {
@@ -50,16 +50,18 @@ struct QuickSpecsCard: View {
                     // Quick preview when collapsed (if has data)
                     if !isExpanded && hasAnySpecs {
                         HStack(spacing: Spacing.sm) {
-                            if let truncatedVIN = vehicle.truncatedVIN {
-                                Text(truncatedVIN)
+                            if let licensePlate = vehicle.licensePlate {
+                                Text(licensePlate)
                                     .font(.brutalistSecondary)
                                     .foregroundStyle(Theme.textSecondary)
                             }
 
                             if let tireSize = vehicle.tireSize {
-                                Text("•")
-                                    .font(.brutalistSecondary)
-                                    .foregroundStyle(Theme.gridLine)
+                                if vehicle.licensePlate != nil {
+                                    Text("•")
+                                        .font(.brutalistSecondary)
+                                        .foregroundStyle(Theme.gridLine)
+                                }
 
                                 Text(tireSize)
                                     .font(.brutalistSecondary)
@@ -92,16 +94,26 @@ struct QuickSpecsCard: View {
 
                     // Specs grid - values first, labels below
                     VStack(spacing: Spacing.lg) {
-                        // Main specs in a horizontal layout
-                        HStack(alignment: .top, spacing: Spacing.lg) {
-                            // VIN (takes more space)
-                            if let vin = vehicle.vin {
-                                specBlock(
-                                    value: vin,
-                                    label: "VIN",
-                                    isMonospace: true
-                                )
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                        // License Plate and VIN
+                        if vehicle.licensePlate != nil || vehicle.vin != nil {
+                            HStack(alignment: .top, spacing: Spacing.lg) {
+                                if let licensePlate = vehicle.licensePlate {
+                                    specBlock(
+                                        value: licensePlate,
+                                        label: "PLATE",
+                                        isMonospace: false
+                                    )
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+
+                                if let vin = vehicle.vin {
+                                    specBlock(
+                                        value: vin,
+                                        label: "VIN",
+                                        isMonospace: true
+                                    )
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
                             }
                         }
 

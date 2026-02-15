@@ -18,6 +18,7 @@ final class VehicleFormState {
     // MARK: - Step 2: Details
     var currentMileage: Int? = nil
     var vin: String = ""
+    var licensePlate: String = ""
     var tireSize: String = ""
     var oilType: String = ""
     var notes: String = ""

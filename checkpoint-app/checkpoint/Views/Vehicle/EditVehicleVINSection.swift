@@ -9,6 +9,7 @@ import SwiftUI
 
 struct EditVehicleVINSection: View {
     @Binding var vin: String
+    @Binding var licensePlate: String
     @Binding var make: String
     @Binding var model: String
     @Binding var year: Int?
@@ -132,6 +133,12 @@ struct EditVehicleVINSection: View {
                     }
                 }
             }
+
+            InstrumentTextField(
+                label: "License Plate",
+                text: $licensePlate,
+                placeholder: "ABC-1234 (Optional)"
+            )
         }
     }
 

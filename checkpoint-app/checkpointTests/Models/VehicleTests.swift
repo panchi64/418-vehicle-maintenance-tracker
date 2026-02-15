@@ -76,6 +76,65 @@ final class VehicleTests: XCTestCase {
         XCTAssertNil(vehicle.notes)
     }
 
+    // MARK: - License Plate Tests
+
+    func testLicensePlate_CanBeSet() {
+        // Given
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            licensePlate: "ABC-1234"
+        )
+
+        // Then
+        XCTAssertEqual(vehicle.licensePlate, "ABC-1234")
+    }
+
+    func testLicensePlate_DefaultsToNil() {
+        // Given
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022
+        )
+
+        // Then
+        XCTAssertNil(vehicle.licensePlate)
+    }
+
+    func testLicensePlate_CanBeUpdated() {
+        // Given
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            licensePlate: "ABC-1234"
+        )
+
+        // When
+        vehicle.licensePlate = "XYZ-9876"
+
+        // Then
+        XCTAssertEqual(vehicle.licensePlate, "XYZ-9876")
+    }
+
+    func testLicensePlate_CanBeCleared() {
+        // Given
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            licensePlate: "ABC-1234"
+        )
+
+        // When
+        vehicle.licensePlate = nil
+
+        // Then
+        XCTAssertNil(vehicle.licensePlate)
+    }
+
     // MARK: - Notes Property Tests
 
     func testNotes_CanBeSetToString() {

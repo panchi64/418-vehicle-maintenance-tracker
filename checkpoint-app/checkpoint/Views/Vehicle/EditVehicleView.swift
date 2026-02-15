@@ -24,6 +24,7 @@ struct EditVehicleView: View {
     @State private var year: Int?
     @State private var currentMileage: Int?
     @State private var vin: String
+    @State private var licensePlate: String
     @State private var tireSize: String
     @State private var oilType: String
     @State private var notes: String
@@ -58,6 +59,7 @@ struct EditVehicleView: View {
         _year = State(initialValue: vehicle.year)
         _currentMileage = State(initialValue: vehicle.currentMileage)
         _vin = State(initialValue: vehicle.vin ?? "")
+        _licensePlate = State(initialValue: vehicle.licensePlate ?? "")
         _tireSize = State(initialValue: vehicle.tireSize ?? "")
         _oilType = State(initialValue: vehicle.oilType ?? "")
         _notes = State(initialValue: vehicle.notes ?? "")
@@ -127,6 +129,7 @@ struct EditVehicleView: View {
                         // VIN Section
                         EditVehicleVINSection(
                             vin: $vin,
+                            licensePlate: $licensePlate,
                             make: $make,
                             model: $model,
                             year: $year,
@@ -344,6 +347,7 @@ struct EditVehicleView: View {
         vehicle.year = year ?? vehicle.year
         vehicle.currentMileage = currentMileage ?? vehicle.currentMileage
         vehicle.vin = vin.isEmpty ? nil : vin
+        vehicle.licensePlate = licensePlate.isEmpty ? nil : licensePlate
         vehicle.tireSize = tireSize.isEmpty ? nil : tireSize
         vehicle.oilType = oilType.isEmpty ? nil : oilType
         vehicle.notes = notes.isEmpty ? nil : notes

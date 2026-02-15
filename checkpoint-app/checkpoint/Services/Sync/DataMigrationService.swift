@@ -91,6 +91,7 @@ final class DataMigrationService {
                     year: vehicle.year,
                     currentMileage: vehicle.currentMileage,
                     vin: vehicle.vin,
+                    licensePlate: vehicle.licensePlate,
                     tireSize: vehicle.tireSize,
                     oilType: vehicle.oilType,
                     notes: vehicle.notes,

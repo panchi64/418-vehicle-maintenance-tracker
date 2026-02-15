@@ -101,6 +101,20 @@ final class QuickSpecsCardTests: XCTestCase {
         XCTAssertFalse(hasSpecs, "Empty notes should not count as having specs")
     }
 
+    func testHasAnySpecs_WithLicensePlateOnly() {
+        // Given
+        let vehicle = Vehicle(
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            licensePlate: "ABC-1234"
+        )
+
+        // Then
+        let hasSpecs = vehicle.vin != nil || vehicle.licensePlate != nil || vehicle.tireSize != nil || vehicle.oilType != nil || (vehicle.notes != nil && !vehicle.notes!.isEmpty)
+        XCTAssertTrue(hasSpecs, "Should have specs when license plate is present")
+    }
+
     func testHasAnySpecs_WithNoSpecs() {
         // Given
         let vehicle = Vehicle(
