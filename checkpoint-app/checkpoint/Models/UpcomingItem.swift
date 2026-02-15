@@ -83,7 +83,7 @@ extension Vehicle {
     var allUpcomingItems: [any UpcomingItem] {
         // Only include services with due tracking (exclude log-only/neutral services)
         var items: [any UpcomingItem] = (services ?? [])
-            .filter { $0.dueDate != nil || $0.dueMileage != nil }
+            .filter { $0.hasDueTracking }
             .map { $0 as any UpcomingItem }
 
         // Include marbete if configured

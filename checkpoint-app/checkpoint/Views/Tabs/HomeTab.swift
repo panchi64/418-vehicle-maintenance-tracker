@@ -45,11 +45,12 @@ struct HomeTab: View {
     }
 
     private var remainingServices: [Service] {
+        let tracked = vehicleServices.filter { $0.hasDueTracking }
         // If marbete is the most urgent, don't drop a service from remaining
         if let nextUp = nextUpItem, nextUp.itemType == .marbete {
-            return vehicleServices
+            return tracked
         }
-        return Array(vehicleServices.dropFirst())
+        return Array(tracked.dropFirst())
     }
 
     private var vehicleServiceLogs: [ServiceLog] {

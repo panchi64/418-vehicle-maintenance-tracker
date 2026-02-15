@@ -211,17 +211,8 @@ final class WatchSessionService: NSObject {
             log.vehicle = vehicle
             context.insert(log)
 
-            // Update service tracking
-            service.lastPerformed = completion.performedDate
-            service.lastMileage = completion.mileageAtService
-
-            // Recalculate next due
-            if let intervalMonths = service.intervalMonths {
-                service.dueDate = Calendar.current.date(byAdding: .month, value: intervalMonths, to: completion.performedDate)
-            }
-            if let intervalMiles = service.intervalMiles {
-                service.dueMileage = completion.mileageAtService + intervalMiles
-            }
+            // Update service tracking and recalculate due dates
+            service.recalculateDueDates(performedDate: completion.performedDate, mileage: completion.mileageAtService)
 
             try context.save()
             WatchLog.logger.info("Marked service done from Watch: \(completion.serviceName)")

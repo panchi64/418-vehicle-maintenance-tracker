@@ -126,8 +126,10 @@ final class WidgetDataService {
         let effectiveMileage = vehicle.effectiveMileage
         let pace = vehicle.dailyMilesPace
 
-        // Create service items
-        var allItems: [(serviceID: String?, name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?, urgencyScore: Int)] = (vehicle.services ?? []).map { service in
+        // Create service items (only services with due tracking)
+        var allItems: [(serviceID: String?, name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?, urgencyScore: Int)] = (vehicle.services ?? [])
+            .filter { $0.hasDueTracking }
+            .map { service in
             let status = service.status(currentMileage: effectiveMileage)
             let statusString: String
             switch status {
@@ -301,17 +303,8 @@ final class WidgetDataService {
                 log.vehicle = vehicle
                 context.insert(log)
 
-                // Update service tracking
-                service.lastPerformed = completion.performedDate
-                service.lastMileage = completion.mileageAtService
-
-                // Recalculate next due
-                if let intervalMonths = service.intervalMonths {
-                    service.dueDate = Calendar.current.date(byAdding: .month, value: intervalMonths, to: completion.performedDate)
-                }
-                if let intervalMiles = service.intervalMiles {
-                    service.dueMileage = completion.mileageAtService + intervalMiles
-                }
+                // Update service tracking and recalculate due dates
+                service.recalculateDueDates(performedDate: completion.performedDate, mileage: completion.mileageAtService)
 
                 // Update vehicle mileage if widget mileage is higher
                 if completion.mileageAtService > vehicle.currentMileage {

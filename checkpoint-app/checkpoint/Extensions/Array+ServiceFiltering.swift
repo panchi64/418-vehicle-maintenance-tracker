@@ -16,4 +16,10 @@ extension Array where Element: Service {
             .filter { $0.vehicle?.id == vehicle.id }
             .sorted { $0.urgencyScore(currentMileage: effectiveMileage, dailyPace: pace) < $1.urgencyScore(currentMileage: effectiveMileage, dailyPace: pace) }
     }
+
+    /// Filter services with due tracking for a vehicle, sorted by urgency (most urgent first).
+    /// Excludes log-only / neutral services that have no dueDate or dueMileage.
+    func forVehicleUpcoming(_ vehicle: Vehicle) -> [Service] {
+        forVehicle(vehicle).filter { $0.hasDueTracking }
+    }
 }

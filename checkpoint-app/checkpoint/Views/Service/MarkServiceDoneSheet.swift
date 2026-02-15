@@ -153,15 +153,7 @@ struct MarkServiceDoneSheet: View {
         }
 
         // Update service with new due dates
-        service.lastPerformed = performedDate
-        service.lastMileage = mileageInt
-
-        if let months = service.intervalMonths, months > 0 {
-            service.dueDate = Calendar.current.date(byAdding: .month, value: months, to: performedDate)
-        }
-        if let miles = service.intervalMiles, miles > 0 {
-            service.dueMileage = mileageInt + miles
-        }
+        service.recalculateDueDates(performedDate: performedDate, mileage: mileageInt)
 
         // Update vehicle mileage if service mileage is higher
         if mileageInt > vehicle.currentMileage {
