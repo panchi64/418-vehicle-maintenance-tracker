@@ -114,7 +114,7 @@ extension MileageInputField {
             MileageInputField(value: .constant(nil))
                 .padding(Spacing.md)
                 .background(Theme.backgroundElevated)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .clipShape(Rectangle())
         }
 
         // With value
@@ -127,7 +127,7 @@ extension MileageInputField {
             MileageInputField(value: .constant(32500))
                 .padding(Spacing.md)
                 .background(Theme.backgroundElevated)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .clipShape(Rectangle())
         }
 
         // Large number
@@ -140,7 +140,7 @@ extension MileageInputField {
             MileageInputField(value: .constant(1234567))
                 .padding(Spacing.md)
                 .background(Theme.backgroundElevated)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .clipShape(Rectangle())
         }
 
         // Custom suffix
@@ -153,7 +153,7 @@ extension MileageInputField {
             MileageInputField(value: .constant(150000), suffix: "km")
                 .padding(Spacing.md)
                 .background(Theme.backgroundElevated)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .clipShape(Rectangle())
         }
 
         // No suffix
@@ -166,7 +166,7 @@ extension MileageInputField {
             MileageInputField(value: .constant(75000), suffix: "")
                 .padding(Spacing.md)
                 .background(Theme.backgroundElevated)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .clipShape(Rectangle())
         }
     }
     .padding(Spacing.xl)
@@ -184,7 +184,7 @@ extension MileageInputField {
         MileageInputField(value: $mileage)
             .padding(Spacing.md)
             .background(Theme.backgroundElevated)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .clipShape(Rectangle())
 
         HStack(spacing: Spacing.sm) {
             Button("Set 1,000") { mileage = 1000 }

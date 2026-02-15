@@ -12,6 +12,7 @@ struct ServiceTypePicker: View {
     @Binding var customServiceName: String
     @State private var showingPicker = false
     @State private var selectedCategory: ServiceCategory = .engine
+    @FocusState private var isFocused: Bool
 
     private let presetService = PresetDataService.shared
 
@@ -45,11 +46,11 @@ struct ServiceTypePicker: View {
                             .foregroundStyle(Theme.textTertiary)
                     }
                     .padding(Spacing.md)
-                    .background(Theme.backgroundElevated)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .background(Theme.surfaceInstrument)
+                    .clipShape(Rectangle())
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .strokeBorder(Theme.borderSubtle, lineWidth: 1)
+                        Rectangle()
+                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
                     )
                 }
                 .buttonStyle(.plain)
@@ -57,13 +58,21 @@ struct ServiceTypePicker: View {
                 // No selection - show button to pick or custom field
                 VStack(spacing: Spacing.sm) {
                     TextField("Service name", text: $customServiceName)
+                        .font(.instrumentBody)
+                        .foregroundStyle(Theme.textPrimary)
+                        .focused($isFocused)
                         .padding(Spacing.md)
-                        .background(Theme.backgroundElevated)
-                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .background(Theme.surfaceInstrument)
+                        .clipShape(Rectangle())
                         .overlay(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .strokeBorder(Theme.borderSubtle, lineWidth: 1)
+                            Rectangle()
+                                .strokeBorder(
+                                    isFocused ? Theme.accent : Theme.gridLine,
+                                    lineWidth: Theme.borderWidth
+                                )
                         )
+                        .focusGlow(isActive: isFocused)
+                        .animation(.easeOut(duration: Theme.animationFast), value: isFocused)
 
                     Button {
                         showingPicker = true
