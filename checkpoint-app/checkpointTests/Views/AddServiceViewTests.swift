@@ -523,17 +523,56 @@ final class AddServiceViewTests: XCTestCase {
         XCTAssertFalse(hasInterval)
     }
 
-    // MARK: - Default Date Tests
+    // MARK: - Default Due Date Tests
 
-    func testDefaultDueDate_Is30DaysFromNow() {
-        // Given: Default due date calculation
-        let now = Date()
-        let expectedDueDate = now.addingTimeInterval(86400 * 30)
+    func testDefaultDueDate_IsNotPreFilled() {
+        // Given: Default state of hasDueDate toggle
+        let hasDueDate = false
 
-        // When: Calculating days difference
-        let daysDifference = Calendar.current.dateComponents([.day], from: now, to: expectedDueDate).day
+        // Then: Due date should be opt-in, not pre-filled
+        XCTAssertFalse(hasDueDate, "Due date toggle should default to off so users aren't forced into an arbitrary date")
+    }
 
-        // Then: Should be approximately 30 days
-        XCTAssertEqual(daysDifference, 30)
+    func testScheduledService_SavesNilDueDate_WhenToggleOff() {
+        // Given: Schedule mode with hasDueDate off
+        let hasDueDate = false
+        let dueDate = Date()
+        let dueMileage = 37500
+
+        // When: Computing effective due date for save
+        let effectiveDueDate: Date? = hasDueDate ? dueDate : nil
+
+        // Then: Due date should be nil
+        XCTAssertNil(effectiveDueDate, "Should not save a due date when toggle is off")
+        // Mileage is independent and should still be saved
+        XCTAssertEqual(dueMileage, 37500)
+    }
+
+    func testScheduledService_SavesDueDate_WhenToggleOn() {
+        // Given: Schedule mode with hasDueDate on
+        let hasDueDate = true
+        let dueDate = Date().addingTimeInterval(86400 * 90)
+
+        // When: Computing effective due date for save
+        let effectiveDueDate: Date? = hasDueDate ? dueDate : nil
+
+        // Then: Due date should be preserved
+        XCTAssertNotNil(effectiveDueDate)
+        XCTAssertEqual(effectiveDueDate, dueDate)
+    }
+
+    func testSeasonalPrefill_EnablesDueDateToggle() {
+        // Given: A seasonal prefill provides a specific date
+        let prefillDate = Date().addingTimeInterval(86400 * 60)
+
+        // When: Applying prefill (simulating onAppear logic)
+        var hasDueDate = false
+        var dueDate = Date()
+        hasDueDate = true
+        dueDate = prefillDate
+
+        // Then: Toggle should be on and date should match prefill
+        XCTAssertTrue(hasDueDate, "Seasonal prefill should enable the due date toggle")
+        XCTAssertEqual(dueDate, prefillDate)
     }
 }

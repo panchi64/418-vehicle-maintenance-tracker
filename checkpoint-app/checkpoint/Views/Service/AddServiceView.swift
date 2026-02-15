@@ -48,7 +48,8 @@ struct AddServiceView: View {
     @State private var pendingAttachments: [AttachmentPicker.AttachmentData] = []
 
     // Schedule mode fields
-    @State private var dueDate: Date = Date().addingTimeInterval(86400 * 30) // 30 days from now
+    @State private var hasDueDate: Bool = false
+    @State private var dueDate: Date = Date()
     @State private var dueMileage: Int? = nil
     @State private var intervalMonths: Int? = nil
     @State private var intervalMiles: Int? = nil
@@ -155,6 +156,7 @@ struct AddServiceView: View {
                 if let prefill = seasonalPrefill {
                     mode = .remind
                     customServiceName = prefill.serviceName
+                    hasDueDate = true
                     dueDate = prefill.dueDate
                     intervalMonths = prefill.intervalMonths
                 }
@@ -285,13 +287,34 @@ struct AddServiceView: View {
     @ViewBuilder
     private var scheduleModeFields: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "Due Date")
+            InstrumentSectionHeader(title: "When Is It Due?")
 
             VStack(spacing: Spacing.md) {
-                InstrumentDatePicker(
-                    label: "Due Date",
-                    date: $dueDate
+                HStack {
+                    Text("SET DUE DATE")
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.textTertiary)
+                        .tracking(1)
+
+                    Spacer()
+
+                    Toggle("", isOn: $hasDueDate)
+                        .labelsHidden()
+                        .tint(Theme.accent)
+                }
+                .padding(Spacing.md)
+                .background(Theme.surfaceInstrument)
+                .overlay(
+                    Rectangle()
+                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
                 )
+
+                if hasDueDate {
+                    InstrumentDatePicker(
+                        label: "Due Date",
+                        date: $dueDate
+                    )
+                }
 
                 InstrumentNumberField(
                     label: "Due Mileage",
@@ -434,7 +457,7 @@ struct AddServiceView: View {
     private func saveScheduledService() {
         let service = Service(
             name: serviceName,
-            dueDate: dueDate,
+            dueDate: hasDueDate ? dueDate : nil,
             dueMileage: dueMileage,
             intervalMonths: intervalMonths,
             intervalMiles: intervalMiles
