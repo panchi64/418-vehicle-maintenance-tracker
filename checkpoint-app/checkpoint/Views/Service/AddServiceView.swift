@@ -21,9 +21,17 @@ struct AddServiceView: View {
 
     let vehicle: Vehicle
     var seasonalPrefill: SeasonalPrefill?
+    var initialMode: ServiceMode = .record
 
     // Mode selection
-    @State private var mode: ServiceMode = .record
+    @State private var mode: ServiceMode
+
+    init(vehicle: Vehicle, seasonalPrefill: SeasonalPrefill? = nil, initialMode: ServiceMode = .record) {
+        self.vehicle = vehicle
+        self.seasonalPrefill = seasonalPrefill
+        self.initialMode = initialMode
+        _mode = State(initialValue: initialMode)
+    }
 
     // Service type selection
     @State private var selectedPreset: PresetData? = nil

@@ -3,17 +3,24 @@
 //  checkpoint
 //
 //  Custom tab bar with brutalist monospace aesthetic + Liquid Glass
-//  Following AESTHETIC.md: underline indicators, minimal animations
+//  Following AESTHETIC.md: sharp corners, underline indicators, fade-only transitions
 //
 
 import SwiftUI
 
 struct BrutalistTabBar: View {
     @Binding var selectedTab: AppState.Tab
-    var onAddTapped: (() -> Void)?
+    var onLogTapped: (() -> Void)?
+    var onScheduleTapped: (() -> Void)?
+
+    @State private var isAddExpanded = false
+
+    private var hasAddActions: Bool {
+        onLogTapped != nil || onScheduleTapped != nil
+    }
 
     var body: some View {
-        HStack(spacing: Spacing.sm) {
+        HStack(alignment: .bottom, spacing: Spacing.sm) {
             // Tab buttons in glass container
             HStack(spacing: 0) {
                 ForEach(AppState.Tab.allCases, id: \.self) { tab in
@@ -21,24 +28,80 @@ struct BrutalistTabBar: View {
                 }
             }
             .frame(height: 48)
-            .glassEffect(.clear.tint(Theme.surfaceInstrument), in: RoundedRectangle(cornerRadius: 6))
+            .glassEffect(.clear.tint(Theme.surfaceInstrument), in: Rectangle())
 
-            // Circular FAB to the right
-            if let onAddTapped {
-                Button {
-                    HapticService.shared.lightImpact()
-                    onAddTapped()
-                } label: {
-                    Image(systemName: "plus")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundStyle(Theme.backgroundPrimary)
-                        .frame(width: 48, height: 48)
+            // Add actions
+            if hasAddActions {
+                if isAddExpanded {
+                    VStack(spacing: Spacing.xs) {
+                        if onScheduleTapped != nil {
+                            Button {
+                                HapticService.shared.lightImpact()
+                                withAnimation(.easeOut(duration: Theme.animationFast)) {
+                                    isAddExpanded = false
+                                }
+                                onScheduleTapped?()
+                            } label: {
+                                Text("[SCHEDULE]")
+                                    .font(.brutalistLabel)
+                                    .foregroundStyle(Theme.backgroundPrimary)
+                                    .tracking(1)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, Spacing.md)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .glassEffect(.clear.tint(Theme.textPrimary), in: Rectangle())
+                            .transition(.opacity)
+                            .accessibilityLabel("Schedule service")
+                        }
+
+                        if onLogTapped != nil {
+                            Button {
+                                HapticService.shared.lightImpact()
+                                withAnimation(.easeOut(duration: Theme.animationFast)) {
+                                    isAddExpanded = false
+                                }
+                                onLogTapped?()
+                            } label: {
+                                Text("[LOG]")
+                                    .font(.brutalistLabel)
+                                    .foregroundStyle(Theme.backgroundPrimary)
+                                    .tracking(1)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, Spacing.md)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .glassEffect(.clear.tint(Theme.textPrimary), in: Rectangle())
+                            .transition(.opacity)
+                            .accessibilityLabel("Log service")
+                        }
+                    }
+                    .animation(.easeOut(duration: Theme.animationFast), value: isAddExpanded)
+                } else {
+                    Button {
+                        HapticService.shared.lightImpact()
+                        withAnimation(.easeOut(duration: Theme.animationFast)) {
+                            isAddExpanded = true
+                        }
+                    } label: {
+                        Text("[+]")
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.backgroundPrimary)
+                            .tracking(1)
+                            .padding(.horizontal, Spacing.md)
+                            .frame(maxHeight: .infinity)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .frame(height: 48)
+                    .glassEffect(.clear.tint(Theme.textPrimary), in: Rectangle())
+                    .transition(.opacity)
+                    .accessibilityLabel("Add service")
+                    .accessibilityHint("Expands to show log and schedule options")
+                    .animation(.easeOut(duration: Theme.animationFast), value: isAddExpanded)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(Theme.accent)
-                .buttonBorderShape(.circle)
-                .accessibilityLabel("Add service")
-                .accessibilityHint("Opens service creation form")
             }
         }
         .padding(.horizontal, Spacing.md)
@@ -49,23 +112,40 @@ struct BrutalistTabBar: View {
         let isSelected = selectedTab == tab
 
         return Button {
+            if isAddExpanded {
+                withAnimation(.easeOut(duration: Theme.animationFast)) {
+                    isAddExpanded = false
+                }
+            }
             selectedTab = tab
             HapticService.shared.tabChanged()
         } label: {
-            Text(tab.title)
-                .font(.brutalistLabel)
-                .foregroundStyle(isSelected ? Theme.accent : Theme.textTertiary)
-                .tracking(2)
-                .padding(.horizontal, Spacing.md)
-                .padding(.vertical, Spacing.listItem)
-                .background {
-                    if isSelected {
-                        RoundedRectangle(cornerRadius: 6)
-                            .fill(Theme.textPrimary.opacity(0.1))
-                    }
+            HStack(spacing: Spacing.xs) {
+                Image(systemName: tab.icon)
+                    .font(.system(size: 14, weight: .semibold))
+
+                if !isAddExpanded {
+                    Text(tab.title)
+                        .font(.brutalistLabel)
+                        .tracking(2)
+                        .fixedSize()
+                        .transition(.opacity)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                .contentShape(Rectangle())
+            }
+            .foregroundStyle(isSelected ? Theme.accent : Theme.textTertiary)
+            .padding(.horizontal, isAddExpanded ? Spacing.xs : Spacing.sm)
+            .padding(.vertical, Spacing.listItem)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+            .contentShape(Rectangle())
+            .overlay(alignment: .bottom) {
+                if isSelected {
+                    Rectangle()
+                        .fill(Theme.accent)
+                        .frame(height: Theme.borderWidth)
+                        .padding(.horizontal, Spacing.xs)
+                }
+            }
+            .animation(.easeOut(duration: Theme.animationFast), value: isAddExpanded)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(tab.title)
@@ -100,7 +180,8 @@ struct BrutalistTabBar: View {
             .overlay(alignment: .bottom) {
                 BrutalistTabBar(
                     selectedTab: $selectedTab,
-                    onAddTapped: { print("Add tapped") }
+                    onLogTapped: { print("Log tapped") },
+                    onScheduleTapped: { print("Schedule tapped") }
                 )
             }
             .preferredColorScheme(.dark)

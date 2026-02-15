@@ -37,6 +37,10 @@ final class AppState {
 
     var seasonalPrefill: SeasonalPrefill?
 
+    // MARK: - Add Service Mode
+
+    var addServiceMode: ServiceMode?
+
     // MARK: - Recall State
 
     enum RecallFetchState {

@@ -118,7 +118,14 @@ struct ContentView: View {
         .overlay(alignment: .bottom) {
             BrutalistTabBar(
                 selectedTab: $appState.selectedTab,
-                onAddTapped: currentVehicle != nil ? { appState.showAddService = true } : nil
+                onLogTapped: currentVehicle != nil ? {
+                    appState.addServiceMode = .record
+                    appState.showAddService = true
+                } : nil,
+                onScheduleTapped: currentVehicle != nil ? {
+                    appState.addServiceMode = .remind
+                    appState.showAddService = true
+                } : nil
             )
             .revealAnimation(delay: 0.3)
         }
@@ -264,9 +271,14 @@ struct ContentView: View {
         }
         .sheet(isPresented: $appState.showAddService, onDismiss: {
             appState.seasonalPrefill = nil
+            appState.addServiceMode = nil
         }) {
             if let vehicle = currentVehicle {
-                AddServiceView(vehicle: vehicle, seasonalPrefill: appState.seasonalPrefill)
+                AddServiceView(
+                    vehicle: vehicle,
+                    seasonalPrefill: appState.seasonalPrefill,
+                    initialMode: appState.addServiceMode ?? .record
+                )
             }
         }
         .sheet(item: $appState.selectedService) { service in
