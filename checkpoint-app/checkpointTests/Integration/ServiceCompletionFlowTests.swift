@@ -121,6 +121,115 @@ final class ServiceCompletionFlowTests: XCTestCase {
     }
 
     @MainActor
+    func testServiceCompletion_clearsDueDateWhenNoInterval() {
+        // Given: Vehicle and service with a due date but NO recurring interval
+        let vehicle = Vehicle(
+            name: "Test Car",
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            currentMileage: 50000
+        )
+        modelContext.insert(vehicle)
+
+        let service = Service(
+            name: "Brake Inspection",
+            dueDate: Calendar.current.date(byAdding: .day, value: -5, to: .now),  // overdue
+            dueMileage: 49000  // also overdue by mileage
+        )
+        service.vehicle = vehicle
+        modelContext.insert(service)
+
+        let performedDate = Date.now
+        let mileageAtService = 50000
+
+        // When: Simulate service completion (mirrors MarkServiceDoneSheet logic)
+        let log = ServiceLog(
+            service: service,
+            vehicle: vehicle,
+            performedDate: performedDate,
+            mileageAtService: mileageAtService
+        )
+        modelContext.insert(log)
+
+        service.lastPerformed = performedDate
+        service.lastMileage = mileageAtService
+
+        if let months = service.intervalMonths, months > 0 {
+            service.dueDate = Calendar.current.date(byAdding: .month, value: months, to: performedDate)
+        } else {
+            service.dueDate = nil
+        }
+        if let miles = service.intervalMiles, miles > 0 {
+            service.dueMileage = mileageAtService + miles
+        } else {
+            service.dueMileage = nil
+        }
+
+        // Then: Due date and mileage should be cleared (no recurring schedule)
+        XCTAssertNil(service.dueDate, "Due date should be cleared for non-recurring service")
+        XCTAssertNil(service.dueMileage, "Due mileage should be cleared for non-recurring service")
+        // Service should become neutral status
+        XCTAssertEqual(service.status(currentMileage: 50000), .neutral)
+    }
+
+    @MainActor
+    func testServiceCompletion_keepsDueDateWhenHasInterval() {
+        // Given: Vehicle and service with a due date AND recurring intervals
+        let vehicle = Vehicle(
+            name: "Test Car",
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            currentMileage: 50000
+        )
+        modelContext.insert(vehicle)
+
+        let service = Service(
+            name: "Oil Change",
+            dueDate: Calendar.current.date(byAdding: .day, value: -5, to: .now),
+            dueMileage: 49000,
+            intervalMonths: 6,
+            intervalMiles: 5000
+        )
+        service.vehicle = vehicle
+        modelContext.insert(service)
+
+        let performedDate = Date.now
+        let mileageAtService = 50000
+
+        // When: Simulate service completion
+        let log = ServiceLog(
+            service: service,
+            vehicle: vehicle,
+            performedDate: performedDate,
+            mileageAtService: mileageAtService
+        )
+        modelContext.insert(log)
+
+        service.lastPerformed = performedDate
+        service.lastMileage = mileageAtService
+
+        if let months = service.intervalMonths, months > 0 {
+            service.dueDate = Calendar.current.date(byAdding: .month, value: months, to: performedDate)
+        } else {
+            service.dueDate = nil
+        }
+        if let miles = service.intervalMiles, miles > 0 {
+            service.dueMileage = mileageAtService + miles
+        } else {
+            service.dueMileage = nil
+        }
+
+        // Then: Due date and mileage should be recalculated
+        XCTAssertNotNil(service.dueDate, "Due date should be set for recurring service")
+        let expectedDueDate = Calendar.current.date(byAdding: .month, value: 6, to: performedDate)!
+        let daysDifference = Calendar.current.dateComponents([.day], from: service.dueDate!, to: expectedDueDate).day ?? 99
+        XCTAssertEqual(daysDifference, 0, "Due date should be 6 months from performed date")
+        XCTAssertEqual(service.dueMileage, 55000, "Due mileage should be 50000 + 5000")
+    }
+
+    @MainActor
     func testServiceCompletion_updatesDueMileage() {
         // Given: Vehicle and service with 5000-mile interval
         let vehicle = Vehicle(

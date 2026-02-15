@@ -306,11 +306,15 @@ final class WidgetDataService {
                 service.lastMileage = completion.mileageAtService
 
                 // Recalculate next due
-                if let intervalMonths = service.intervalMonths {
+                if let intervalMonths = service.intervalMonths, intervalMonths > 0 {
                     service.dueDate = Calendar.current.date(byAdding: .month, value: intervalMonths, to: completion.performedDate)
+                } else {
+                    service.dueDate = nil
                 }
-                if let intervalMiles = service.intervalMiles {
+                if let intervalMiles = service.intervalMiles, intervalMiles > 0 {
                     service.dueMileage = completion.mileageAtService + intervalMiles
+                } else {
+                    service.dueMileage = nil
                 }
 
                 // Update vehicle mileage if widget mileage is higher

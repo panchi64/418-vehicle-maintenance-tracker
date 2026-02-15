@@ -157,9 +157,13 @@ struct MarkClusterDoneSheet: View {
             // Update due dates based on intervals
             if let months = service.intervalMonths, months > 0 {
                 service.dueDate = Calendar.current.date(byAdding: .month, value: months, to: performedDate)
+            } else {
+                service.dueDate = nil
             }
             if let miles = service.intervalMiles, miles > 0 {
                 service.dueMileage = mileageInt + miles
+            } else {
+                service.dueMileage = nil
             }
         }
 
