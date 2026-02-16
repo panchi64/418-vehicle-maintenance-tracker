@@ -66,6 +66,19 @@ struct AddServiceView: View {
         }
     }
 
+    /// The due mileage that will be saved — explicit value or derived from interval + current mileage.
+    /// Mirrors effectiveDueDate: when the user sets a mile interval but no explicit due mileage,
+    /// we compute it as currentMileage + intervalMiles so the service has due tracking.
+    private var effectiveDueMileage: Int? {
+        if let explicit = dueMileage {
+            return explicit
+        } else if let miles = intervalMiles, miles > 0 {
+            return vehicle.currentMileage + miles
+        } else {
+            return nil
+        }
+    }
+
     var serviceName: String {
         selectedPreset?.name ?? customServiceName
     }
@@ -382,12 +395,35 @@ struct AddServiceView: View {
                     }
                 }
 
-                InstrumentNumberField(
-                    label: "Due Mileage",
-                    value: $dueMileage,
-                    placeholder: "Optional",
-                    suffix: "mi"
-                )
+                if let miles = intervalMiles, miles > 0 {
+                    // Interval is set — show derived mileage as informational text
+                    HStack {
+                        Text("DUE MILEAGE")
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.textTertiary)
+                            .tracking(1)
+
+                        Spacer()
+
+                        Text(Formatters.mileage(vehicle.currentMileage + miles))
+                            .font(.brutalistBody)
+                            .foregroundStyle(Theme.accent)
+                    }
+                    .padding(Spacing.md)
+                    .background(Theme.surfaceInstrument)
+                    .overlay(
+                        Rectangle()
+                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+                    )
+                } else {
+                    // No mile interval — allow explicit due mileage
+                    InstrumentNumberField(
+                        label: "Due Mileage",
+                        value: $dueMileage,
+                        placeholder: "Optional",
+                        suffix: "mi"
+                    )
+                }
             }
         }
     }
@@ -504,7 +540,7 @@ struct AddServiceView: View {
         let service = Service(
             name: serviceName,
             dueDate: effectiveDueDate,
-            dueMileage: dueMileage,
+            dueMileage: effectiveDueMileage,
             intervalMonths: intervalMonths,
             intervalMiles: intervalMiles
         )

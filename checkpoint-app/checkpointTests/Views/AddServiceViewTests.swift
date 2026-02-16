@@ -575,6 +575,79 @@ final class AddServiceViewTests: XCTestCase {
         XCTAssertEqual(result, customDate)
     }
 
+    // MARK: - Effective Due Mileage Tests
+
+    /// Helper mirroring AddServiceView.effectiveDueMileage computed property
+    private func effectiveDueMileage(dueMileage: Int?, intervalMiles: Int?, currentMileage: Int) -> Int? {
+        if let explicit = dueMileage {
+            return explicit
+        } else if let miles = intervalMiles, miles > 0 {
+            return currentMileage + miles
+        } else {
+            return nil
+        }
+    }
+
+    func testEffectiveDueMileage_DerivesFromInterval() {
+        // Given: No explicit due mileage, interval is 10000 miles, vehicle at 50000
+        let result = effectiveDueMileage(dueMileage: nil, intervalMiles: 10000, currentMileage: 50000)
+
+        // Then: Should be current mileage + interval = 60000
+        XCTAssertEqual(result, 60000)
+    }
+
+    func testEffectiveDueMileage_NilWhenNoIntervalNoDueMileage() {
+        // Given: No explicit due mileage, no interval (date-only service)
+        let result = effectiveDueMileage(dueMileage: nil, intervalMiles: nil, currentMileage: 50000)
+
+        // Then: Should be nil
+        XCTAssertNil(result, "Date-only service should have no due mileage")
+    }
+
+    func testEffectiveDueMileage_UsesExplicitOverInterval() {
+        // Given: Explicit due mileage set, interval also set
+        let result = effectiveDueMileage(dueMileage: 55000, intervalMiles: 10000, currentMileage: 50000)
+
+        // Then: Explicit value wins over interval-derived value
+        XCTAssertEqual(result, 55000)
+    }
+
+    func testEffectiveDueMileage_ExplicitWithoutInterval() {
+        // Given: Explicit due mileage, no interval
+        let result = effectiveDueMileage(dueMileage: 55000, intervalMiles: nil, currentMileage: 50000)
+
+        // Then: Should use the explicit value
+        XCTAssertEqual(result, 55000)
+    }
+
+    func testEffectiveDueMileage_ZeroIntervalReturnsNil() {
+        // Given: Zero interval should not produce a due mileage
+        let result = effectiveDueMileage(dueMileage: nil, intervalMiles: 0, currentMileage: 50000)
+
+        // Then: Should be nil (zero interval = no tracking)
+        XCTAssertNil(result)
+    }
+
+    func testScheduledService_MileageOnlyPreset_HasDueTracking() {
+        // Given: User selects preset, clears month interval, sets mile interval only
+        // This is the exact scenario from the bug report:
+        // Tire Rotation preset → clear months → change miles to 10000
+        let intervalMonths: Int? = nil
+        let intervalMiles: Int? = 10000
+        let currentMileage = 50000
+
+        // When: Computing effective values (same logic as save)
+        let dueDate = effectiveDueDate(hasCustomDate: false, dueDate: Date(), intervalMonths: intervalMonths)
+        let dueMileage = effectiveDueMileage(dueMileage: nil, intervalMiles: intervalMiles, currentMileage: currentMileage)
+
+        // Then: Service should have due tracking via mileage
+        XCTAssertNil(dueDate, "No month interval means no due date")
+        XCTAssertEqual(dueMileage, 60000, "Due mileage should be derived from current + interval")
+
+        let hasDueTracking = dueDate != nil || dueMileage != nil
+        XCTAssertTrue(hasDueTracking, "Service with mile interval should have due tracking")
+    }
+
     func testSeasonalPrefill_SetsCustomDateAndInterval() {
         // Given: Seasonal prefill with meaningful date and yearly interval
         let seasonalDate = Date().addingTimeInterval(86400 * 120)
