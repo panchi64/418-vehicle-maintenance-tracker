@@ -24,6 +24,7 @@ struct EditServiceView: View {
     @State private var dueMileage: Int? = nil
     @State private var intervalMonths: Int? = nil
     @State private var intervalMiles: Int? = nil
+    @State private var notes: String = ""
 
     @State private var showDeleteConfirmation = false
 
@@ -112,6 +113,18 @@ struct EditServiceView: View {
                             }
                         }
 
+                        // Notes Section
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                            InstrumentSectionHeader(title: "Notes")
+
+                            InstrumentTextEditor(
+                                label: "Notes",
+                                text: $notes,
+                                placeholder: "Add notes...",
+                                minHeight: 80
+                            )
+                        }
+
                         // Delete Button
                         Button {
                             showDeleteConfirmation = true
@@ -177,6 +190,7 @@ struct EditServiceView: View {
         dueMileage = service.dueMileage
         intervalMonths = service.intervalMonths
         intervalMiles = service.intervalMiles
+        notes = service.notes ?? ""
     }
 
     // MARK: - Save Logic
@@ -189,6 +203,7 @@ struct EditServiceView: View {
         service.dueMileage = dueMileage
         service.intervalMonths = intervalMonths
         service.intervalMiles = intervalMiles
+        service.notes = notes.isEmpty ? nil : notes
 
         updateAppIcon()
         updateWidgetData()

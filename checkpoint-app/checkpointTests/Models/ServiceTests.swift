@@ -186,6 +186,42 @@ final class ServiceTests: XCTestCase {
         XCTAssertEqual(score, 15, accuracy: 1)
     }
 
+    // MARK: - Notes Tests
+
+    func testServiceNotes_DefaultsToNil() {
+        // Given
+        let service = Service(name: "Oil Change")
+
+        // Then
+        XCTAssertNil(service.notes, "New service should have nil notes by default")
+    }
+
+    func testServiceNotes_PersistsValue() {
+        // Given
+        let service = Service(name: "Brake Inspection", notes: "Check pads, rotors, fluid level")
+
+        // Then
+        XCTAssertEqual(service.notes, "Check pads, rotors, fluid level")
+    }
+
+    func testRecalculateDueDates_PreservesNotes() {
+        // Given
+        let service = Service(
+            name: "Oil Change",
+            dueDate: Calendar.current.date(byAdding: .month, value: 6, to: .now),
+            dueMileage: 55000,
+            intervalMonths: 6,
+            intervalMiles: 5000,
+            notes: "Use synthetic 5W-30"
+        )
+
+        // When
+        service.recalculateDueDates(performedDate: .now, mileage: 50000)
+
+        // Then
+        XCTAssertEqual(service.notes, "Use synthetic 5W-30", "recalculateDueDates should not clear notes")
+    }
+
     func testUrgencyScore_Overdue_ReturnsNegative() {
         // Given: Service past due
         let calendar = Calendar.current

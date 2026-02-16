@@ -413,6 +413,17 @@ struct AddServiceView: View {
                 }
             }
         }
+
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            InstrumentSectionHeader(title: "Notes")
+
+            InstrumentTextEditor(
+                label: "Notes",
+                text: $notes,
+                placeholder: "Add notes...",
+                minHeight: 80
+            )
+        }
     }
 
     // MARK: - Save Logic
@@ -522,7 +533,8 @@ struct AddServiceView: View {
         let service = Service(
             name: serviceName,
             intervalMonths: intervalMonths,
-            intervalMiles: intervalMiles
+            intervalMiles: intervalMiles,
+            notes: notes.isEmpty ? nil : notes
         )
         service.vehicle = vehicle
 

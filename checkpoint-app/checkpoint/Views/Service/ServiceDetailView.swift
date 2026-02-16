@@ -168,6 +168,24 @@ struct ServiceDetailView: View {
 
                 if let intervalMiles = service.intervalMiles {
                     infoRow(title: "Or Every", value: formatMileage(intervalMiles))
+                    if let notes = service.notes, !notes.isEmpty {
+                        ListDivider(leadingPadding: 0)
+                    }
+                }
+
+                if let notes = service.notes, !notes.isEmpty {
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        Text("NOTES")
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.textTertiary)
+                            .tracking(1)
+                        Text(notes)
+                            .font(.brutalistBody)
+                            .foregroundStyle(Theme.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(Spacing.md)
                 }
             }
             .background(Theme.surfaceInstrument)

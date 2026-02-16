@@ -34,6 +34,25 @@ struct MarkServiceDoneSheet: View {
 
                 ScrollView {
                     VStack(spacing: Spacing.lg) {
+                        // Planned Notes (from scheduled service)
+                        if let plannedNotes = service.notes, !plannedNotes.isEmpty {
+                            VStack(alignment: .leading, spacing: Spacing.md) {
+                                InstrumentSectionHeader(title: "Planned Notes")
+
+                                Text(plannedNotes)
+                                    .font(.brutalistBody)
+                                    .foregroundStyle(Theme.textSecondary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(Spacing.md)
+                                    .background(Theme.surfaceInstrument)
+                                    .overlay(
+                                        Rectangle()
+                                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+                                    )
+                            }
+                        }
+
                         // Service Details Section
                         VStack(alignment: .leading, spacing: Spacing.md) {
                             InstrumentSectionHeader(title: "Service Details")

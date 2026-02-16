@@ -20,6 +20,7 @@ final class Service: Identifiable {
     var intervalMonths: Int?
     var intervalMiles: Int?
     var notificationID: String?
+    var notes: String?
 
     var vehicle: Vehicle?
 
@@ -34,7 +35,8 @@ final class Service: Identifiable {
         lastMileage: Int? = nil,
         intervalMonths: Int? = nil,
         intervalMiles: Int? = nil,
-        notificationID: String? = nil
+        notificationID: String? = nil,
+        notes: String? = nil
     ) {
         self.name = name
         self.dueDate = dueDate
@@ -44,6 +46,7 @@ final class Service: Identifiable {
         self.intervalMonths = intervalMonths
         self.intervalMiles = intervalMiles
         self.notificationID = notificationID
+        self.notes = notes
     }
 }
 

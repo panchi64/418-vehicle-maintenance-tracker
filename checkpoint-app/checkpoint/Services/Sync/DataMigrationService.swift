@@ -112,7 +112,8 @@ final class DataMigrationService {
                         lastMileage: service.lastMileage,
                         intervalMonths: service.intervalMonths,
                         intervalMiles: service.intervalMiles,
-                        notificationID: service.notificationID
+                        notificationID: service.notificationID,
+                        notes: service.notes
                     )
                     newService.vehicle = newVehicle
 

@@ -70,16 +70,26 @@ struct MarkClusterDoneSheet: View {
 
             VStack(spacing: 0) {
                 ForEach(Array(cluster.services.enumerated()), id: \.element.id) { index, service in
-                    HStack(spacing: Spacing.sm) {
-                        Rectangle()
-                            .fill(Theme.statusGood)
-                            .frame(width: 4, height: 4)
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        HStack(spacing: Spacing.sm) {
+                            Rectangle()
+                                .fill(Theme.statusGood)
+                                .frame(width: 4, height: 4)
 
-                        Text(service.name.uppercased())
-                            .font(.brutalistBody)
-                            .foregroundStyle(Theme.textPrimary)
+                            Text(service.name.uppercased())
+                                .font(.brutalistBody)
+                                .foregroundStyle(Theme.textPrimary)
 
-                        Spacer()
+                            Spacer()
+                        }
+
+                        if let notes = service.notes, !notes.isEmpty {
+                            Text(notes)
+                                .font(.brutalistSecondary)
+                                .foregroundStyle(Theme.textTertiary)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .padding(.leading, Spacing.sm + 4)
+                        }
                     }
                     .padding(Spacing.md)
 
