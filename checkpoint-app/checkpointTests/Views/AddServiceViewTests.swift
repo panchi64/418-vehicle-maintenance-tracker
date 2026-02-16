@@ -575,6 +575,50 @@ final class AddServiceViewTests: XCTestCase {
         XCTAssertEqual(result, customDate)
     }
 
+    // MARK: - Scheduled Service Save Logic Tests
+    // These tests verify the save flow for remind mode, which uses
+    // Service.deriveDueFromIntervals() then applies user overrides.
+
+    func testScheduledService_MileageOnlyPreset_HasDueTracking() {
+        // Given: The exact bug scenario — user selects Tire Rotation preset,
+        // clears month interval, changes miles to 10000
+        let service = Service(name: "Tire Rotation", intervalMiles: 10000)
+        let currentMileage = 50000
+
+        // When: deriveDueFromIntervals (same as saveScheduledService)
+        service.deriveDueFromIntervals(anchorDate: Date(), anchorMileage: currentMileage)
+
+        // Then: Service has due tracking via mileage
+        XCTAssertNil(service.dueDate, "No month interval means no due date")
+        XCTAssertEqual(service.dueMileage, 60000, "Due mileage derived from current + interval")
+        XCTAssertTrue(service.hasDueTracking, "Mile-only service must appear in upcoming views")
+    }
+
+    func testScheduledService_CustomDateOverridesInterval() {
+        // Given: Service with month interval, but user sets a custom date
+        let service = Service(name: "Antifreeze", intervalMonths: 12)
+        let customDate = Date().addingTimeInterval(86400 * 60)
+
+        // When: Derive then override (same as saveScheduledService with hasCustomDate)
+        service.deriveDueFromIntervals(anchorDate: Date(), anchorMileage: 50000)
+        service.dueDate = customDate  // user override
+
+        // Then: Custom date takes precedence
+        XCTAssertEqual(service.dueDate, customDate)
+    }
+
+    func testScheduledService_ExplicitMileageOverridesInterval() {
+        // Given: Service with mile interval, but user types explicit due mileage
+        let service = Service(name: "Tire Rotation", intervalMiles: 10000)
+
+        // When: Derive then override (same as saveScheduledService with explicit dueMileage)
+        service.deriveDueFromIntervals(anchorDate: Date(), anchorMileage: 50000)
+        service.dueMileage = 55000  // user override
+
+        // Then: Explicit value takes precedence
+        XCTAssertEqual(service.dueMileage, 55000)
+    }
+
     func testSeasonalPrefill_SetsCustomDateAndInterval() {
         // Given: Seasonal prefill with meaningful date and yearly interval
         let seasonalDate = Date().addingTimeInterval(86400 * 120)

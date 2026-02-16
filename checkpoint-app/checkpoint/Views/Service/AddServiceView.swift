@@ -382,12 +382,35 @@ struct AddServiceView: View {
                     }
                 }
 
-                InstrumentNumberField(
-                    label: "Due Mileage",
-                    value: $dueMileage,
-                    placeholder: "Optional",
-                    suffix: "mi"
-                )
+                if let miles = intervalMiles, miles > 0 {
+                    // Interval is set — show derived mileage as informational text
+                    HStack {
+                        Text("DUE MILEAGE")
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.textTertiary)
+                            .tracking(1)
+
+                        Spacer()
+
+                        Text(Formatters.mileage(vehicle.currentMileage + miles))
+                            .font(.brutalistBody)
+                            .foregroundStyle(Theme.accent)
+                    }
+                    .padding(Spacing.md)
+                    .background(Theme.surfaceInstrument)
+                    .overlay(
+                        Rectangle()
+                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+                    )
+                } else {
+                    // No mile interval — allow explicit due mileage
+                    InstrumentNumberField(
+                        label: "Due Mileage",
+                        value: $dueMileage,
+                        placeholder: "Optional",
+                        suffix: "mi"
+                    )
+                }
             }
         }
     }
@@ -452,14 +475,9 @@ struct AddServiceView: View {
         )
         service.vehicle = vehicle
 
-        // Calculate next due date/mileage (only when recurring)
+        // Derive next due date/mileage from intervals (only when recurring)
         if scheduleRecurring {
-            if let months = intervalMonths, months > 0 {
-                service.dueDate = Calendar.current.date(byAdding: .month, value: months, to: performedDate)
-            }
-            if let miles = intervalMiles, miles > 0 {
-                service.dueMileage = mileage + miles
-            }
+            service.deriveDueFromIntervals(anchorDate: performedDate, anchorMileage: mileage)
         }
 
         modelContext.insert(service)
@@ -503,12 +521,22 @@ struct AddServiceView: View {
     private func saveScheduledService() {
         let service = Service(
             name: serviceName,
-            dueDate: effectiveDueDate,
-            dueMileage: dueMileage,
             intervalMonths: intervalMonths,
             intervalMiles: intervalMiles
         )
         service.vehicle = vehicle
+
+        // Derive deadlines from intervals (same logic as record mode and mark-complete)
+        service.deriveDueFromIntervals(anchorDate: Date(), anchorMileage: vehicle.currentMileage)
+
+        // Apply user overrides: custom date or explicit due mileage take precedence
+        if hasCustomDate {
+            service.dueDate = dueDate
+        }
+        if let explicit = dueMileage {
+            service.dueMileage = explicit
+        }
+
         modelContext.insert(service)
     }
 }

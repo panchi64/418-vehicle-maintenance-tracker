@@ -57,6 +57,25 @@ extension Service {
     }
 }
 
+/// Derive due deadlines from intervals, anchored to a reference point.
+/// This is the single source of truth for the "interval → deadline" contract.
+/// - For intervals with positive values: sets dueDate/dueMileage relative to anchor.
+/// - For nil/zero intervals: clears the corresponding deadline.
+extension Service {
+    func deriveDueFromIntervals(anchorDate: Date, anchorMileage: Int) {
+        if let months = intervalMonths, months > 0 {
+            dueDate = Calendar.current.date(byAdding: .month, value: months, to: anchorDate)
+        } else {
+            dueDate = nil
+        }
+        if let miles = intervalMiles, miles > 0 {
+            dueMileage = anchorMileage + miles
+        } else {
+            dueMileage = nil
+        }
+    }
+}
+
 /// Recalculate due dates after a service is marked as completed.
 /// - For recurring services (with intervals): advances dueDate/dueMileage to the next occurrence.
 /// - For non-recurring services: clears dueDate/dueMileage so the service becomes neutral.
@@ -64,17 +83,7 @@ extension Service {
     func recalculateDueDates(performedDate: Date, mileage: Int) {
         lastPerformed = performedDate
         lastMileage = mileage
-
-        if let months = intervalMonths, months > 0 {
-            dueDate = Calendar.current.date(byAdding: .month, value: months, to: performedDate)
-        } else {
-            dueDate = nil
-        }
-        if let miles = intervalMiles, miles > 0 {
-            dueMileage = mileage + miles
-        } else {
-            dueMileage = nil
-        }
+        deriveDueFromIntervals(anchorDate: performedDate, anchorMileage: mileage)
     }
 }
 

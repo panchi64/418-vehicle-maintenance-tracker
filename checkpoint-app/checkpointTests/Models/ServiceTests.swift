@@ -198,4 +198,92 @@ final class ServiceTests: XCTestCase {
         // Then
         XCTAssertLessThan(score, 0, "Overdue services should have negative score")
     }
+
+    // MARK: - deriveDueFromIntervals Tests
+
+    func testDeriveDue_BothIntervals_SetsBothDeadlines() {
+        // Given: Service with both interval types
+        let service = Service(name: "Oil Change", intervalMonths: 6, intervalMiles: 5000)
+        let anchorDate = Date()
+        let anchorMileage = 50000
+
+        // When
+        service.deriveDueFromIntervals(anchorDate: anchorDate, anchorMileage: anchorMileage)
+
+        // Then
+        XCTAssertNotNil(service.dueDate)
+        let months = Calendar.current.dateComponents([.month], from: anchorDate, to: service.dueDate!).month
+        XCTAssertEqual(months, 6)
+        XCTAssertEqual(service.dueMileage, 55000)
+    }
+
+    func testDeriveDue_MonthsOnly_SetsDateClearsMileage() {
+        // Given: Service with only month interval
+        let service = Service(name: "Battery Check", intervalMonths: 6)
+
+        // When
+        service.deriveDueFromIntervals(anchorDate: Date(), anchorMileage: 50000)
+
+        // Then
+        XCTAssertNotNil(service.dueDate)
+        XCTAssertNil(service.dueMileage)
+    }
+
+    func testDeriveDue_MilesOnly_SetsMileageClearsDate() {
+        // Given: Service with only mile interval (the bug scenario)
+        let service = Service(name: "Tire Rotation", intervalMiles: 10000)
+
+        // When
+        service.deriveDueFromIntervals(anchorDate: Date(), anchorMileage: 50000)
+
+        // Then
+        XCTAssertNil(service.dueDate)
+        XCTAssertEqual(service.dueMileage, 60000)
+        XCTAssertTrue(service.hasDueTracking, "Mile-only service should have due tracking")
+    }
+
+    func testDeriveDue_NoIntervals_ClearsBoth() {
+        // Given: Service with existing deadlines but no intervals
+        let service = Service(
+            name: "Custom Service",
+            dueDate: Date(),
+            dueMileage: 55000
+        )
+
+        // When
+        service.deriveDueFromIntervals(anchorDate: Date(), anchorMileage: 50000)
+
+        // Then: Both cleared
+        XCTAssertNil(service.dueDate)
+        XCTAssertNil(service.dueMileage)
+        XCTAssertFalse(service.hasDueTracking)
+    }
+
+    func testDeriveDue_ZeroIntervals_TreatedAsNil() {
+        // Given: Zero-value intervals
+        let service = Service(name: "Service", intervalMonths: 0, intervalMiles: 0)
+
+        // When
+        service.deriveDueFromIntervals(anchorDate: Date(), anchorMileage: 50000)
+
+        // Then: Zero is not a valid interval
+        XCTAssertNil(service.dueDate)
+        XCTAssertNil(service.dueMileage)
+    }
+
+    func testDeriveDue_RecalculateUsesDerive() {
+        // Given: Service with both intervals — verify recalculateDueDates delegates correctly
+        let service = Service(name: "Oil Change", intervalMonths: 6, intervalMiles: 5000)
+        let performedDate = Date()
+        let mileage = 50000
+
+        // When
+        service.recalculateDueDates(performedDate: performedDate, mileage: mileage)
+
+        // Then: Same results as deriveDueFromIntervals
+        XCTAssertNotNil(service.dueDate)
+        XCTAssertEqual(service.dueMileage, 55000)
+        XCTAssertEqual(service.lastPerformed, performedDate)
+        XCTAssertEqual(service.lastMileage, mileage)
+    }
 }

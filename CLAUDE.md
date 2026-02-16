@@ -55,6 +55,15 @@ xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPh
 - Push navigation for detail views
 - Vehicle selector persists at top of all tabs
 
+### Service Model: Dual-Axis Tracking
+- Services track due status on **two parallel axes**: date (`dueDate`) and mileage (`dueMileage`). Any logic that applies to one axis must apply to the other — if you add/change date-based behavior, check the mileage equivalent and vice versa.
+- `Service.deriveDueFromIntervals(anchorDate:anchorMileage:)` is the single source of truth for converting intervals into deadlines. All code paths that create or recalculate service deadlines must use this method rather than reimplementing the derivation inline.
+- `hasDueTracking` (`dueDate != nil || dueMileage != nil`) gates all upcoming/scheduled views. A service without at least one deadline is invisible to the user.
+
+### Business Logic Placement
+- Derivation and computation logic belongs in `@Model` classes, not in views. Views should call model methods, then apply UI-specific overrides if needed (e.g., user-entered custom dates).
+- When multiple code paths need the same computation, extract it to one method on the model rather than duplicating across views. If you find yourself writing the same `if let` derivation in two places, that's a signal to consolidate.
+
 ## Design System
 
 Use tokens from `DesignSystem/`:
