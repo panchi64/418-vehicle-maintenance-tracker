@@ -10,7 +10,6 @@ import SwiftData
 
 struct ServiceDetailView: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext
     @Query private var services: [Service]
 
     @Bindable var service: Service
@@ -383,9 +382,7 @@ struct ServiceDetailView: View {
     // MARK: - Helpers
 
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: date)
+        Formatters.mediumDate.string(from: date)
     }
 
     private func formatMileage(_ miles: Int) -> String {

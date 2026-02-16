@@ -26,9 +26,10 @@ struct CategoryBreakdownCard: View {
                             ForEach(breakdown, id: \.category) { item in
                                 let fraction = CGFloat(NSDecimalNumber(decimal: item.amount).doubleValue
                                     / NSDecimalNumber(decimal: totalAmount).doubleValue)
+                                let minWidth: CGFloat = 4
                                 Rectangle()
                                     .fill(item.category.color)
-                                    .frame(width: fraction * geo.size.width)
+                                    .frame(width: max(minWidth, fraction * geo.size.width))
                             }
                         }
                     }

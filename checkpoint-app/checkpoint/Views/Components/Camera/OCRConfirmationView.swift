@@ -207,7 +207,7 @@ struct OCRConfirmationView: View {
 
             HStack {
                 Text(rawText.isEmpty ? "(empty)" : rawText)
-                    .font(.system(.caption, design: .monospaced))
+                    .font(.instrumentLabel)
                     .foregroundStyle(Theme.textSecondary)
                     .lineLimit(nil)
                     .fixedSize(horizontal: false, vertical: true)

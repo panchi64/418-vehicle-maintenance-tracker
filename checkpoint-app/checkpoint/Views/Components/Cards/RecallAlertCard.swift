@@ -87,6 +87,7 @@ struct RecallAlertCard: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(isExpanded ? "Collapse recall details" : "Expand recall details, \(countText)")
 
             // Expanded recall list (capped at inlineLimit)
             if isExpanded {
@@ -127,10 +128,12 @@ struct RecallAlertCard: View {
                                     .font(.system(size: 11, weight: .bold))
                                     .foregroundStyle(Theme.statusOverdue)
                             }
-                            .padding(Spacing.md)
+                            .frame(minHeight: 44)
+                            .padding(.horizontal, Spacing.md)
                             .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel("View all \(recalls.count) recalls")
                     }
 
                     // Collapse footer
@@ -155,10 +158,11 @@ struct RecallAlertCard: View {
                                 .tracking(1.5)
                             Spacer()
                         }
-                        .padding(.vertical, Spacing.sm)
+                        .frame(minHeight: 44)
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Collapse recall details")
                 }
                 .transition(.opacity)
             }
@@ -252,6 +256,28 @@ struct RecallAlertCard: View {
                 }
             }
             .padding(.top, Spacing.xs)
+
+            // NHTSA link
+            if let nhtsaURL = URL(string: "https://www.nhtsa.gov/recalls") {
+                Link(destination: nhtsaURL) {
+                    HStack(spacing: Spacing.xs) {
+                        Text("VIEW ON NHTSA")
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.accent)
+                            .tracking(1.5)
+
+                        Image(systemName: "arrow.up.right")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(Theme.accent)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, Spacing.sm)
+                    .background(Theme.accent.opacity(0.1))
+                    .contentShape(Rectangle())
+                }
+                .padding(.top, Spacing.sm)
+                .accessibilityLabel("View recall \(recall.campaignNumber) on NHTSA website")
+            }
         }
         .padding(Spacing.md)
     }
@@ -308,7 +334,10 @@ struct RecallListSheet: View {
                         Image(systemName: "xmark")
                             .font(.system(size: 14, weight: .bold))
                             .foregroundStyle(Theme.textSecondary)
+                            .frame(minWidth: 44, minHeight: 44)
+                            .contentShape(Rectangle())
                     }
+                    .accessibilityLabel("Close")
                 }
             }
         }
@@ -358,6 +387,8 @@ private struct RecallAccordionCard: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("\(recall.component), \(isExpanded ? "expanded" : "collapsed")")
+            .accessibilityHint(isExpanded ? "Double tap to collapse" : "Double tap to expand details")
 
             // Expanded detail
             if isExpanded {

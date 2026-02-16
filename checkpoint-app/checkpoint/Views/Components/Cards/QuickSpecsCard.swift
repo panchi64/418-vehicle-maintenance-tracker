@@ -157,7 +157,7 @@ struct QuickSpecsCard: View {
                             VStack(alignment: .leading, spacing: 0) {
                                 // Separator
                                 Rectangle()
-                                    .fill(Color.white.opacity(0.2))
+                                    .fill(Theme.gridLine)
                                     .frame(height: 2)
                                     .padding(.bottom, Spacing.sm)
 
@@ -185,8 +185,11 @@ struct QuickSpecsCard: View {
                                                 .foregroundStyle(Theme.accent)
                                                 .tracking(1)
                                         }
+                                        .contentShape(Rectangle())
                                     }
                                     .buttonStyle(.plain)
+                                    .accessibilityLabel("Vehicle notes")
+                                    .accessibilityHint("Double tap to read full notes")
                                 } else {
                                     Text(truncatedNotes ?? "")
                                         .font(.brutalistBody)
@@ -225,7 +228,8 @@ struct QuickSpecsCard: View {
                         }
                         .foregroundStyle(Theme.accent)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, Spacing.sm)
+                        .frame(minHeight: 44)
+                        .contentShape(Rectangle())
                     }
                     .accessibilityLabel(hasAnySpecs ? "Edit vehicle specs" : "Add vehicle specs")
                 }
@@ -312,7 +316,7 @@ struct FullNotesView: View {
                     .padding(Spacing.md)
             }
             .background(Theme.backgroundPrimary)
-            .navigationTitle("NOTES")
+            .navigationTitle("Notes")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -322,7 +326,10 @@ struct FullNotesView: View {
                         Image(systemName: "xmark")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundStyle(Theme.textSecondary)
+                            .frame(minWidth: 44, minHeight: 44)
+                            .contentShape(Rectangle())
                     }
+                    .accessibilityLabel("Close")
                 }
             }
             .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)

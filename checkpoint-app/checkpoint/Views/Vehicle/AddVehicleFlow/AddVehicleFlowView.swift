@@ -4,6 +4,11 @@
 //
 //  Coordinator view for the 2-step add vehicle wizard flow
 //
+//  TODO: [OB-C2] FeatureHintView is built but not integrated in production views.
+//  VIN hint (.vinLookup) should be placed in VehicleBasicsStep after VIN input;
+//  Odometer hint (.odometerOCR) should be placed in VehicleDetailsStep after odometer input.
+//  See checkpoint/Views/Components/Feedback/INTEGRATION_GUIDE.md for details.
+//
 
 import SwiftUI
 import SwiftData
@@ -30,18 +35,12 @@ struct AddVehicleFlowView: View {
                 case .basics:
                     VehicleBasicsStep(formState: formState)
                         .trackScreen(.addVehicleBasics)
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .leading),
-                            removal: .move(edge: .leading)
-                        ))
+                        .transition(.opacity)
 
                 case .details:
                     VehicleDetailsStep(formState: formState)
                         .trackScreen(.addVehicleDetails)
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .trailing),
-                            removal: .move(edge: .trailing)
-                        ))
+                        .transition(.opacity)
                 }
             }
             .navigationTitle(navigationTitle)
@@ -93,6 +92,15 @@ struct AddVehicleFlowView: View {
                 }
                 if let year = appState.onboardingMarbeteYear {
                     formState.marbeteExpirationYear = year
+                }
+                // Apply VIN lookup result from onboarding if available
+                if let vinResult = appState.vinLookupResult {
+                    formState.vin = vinResult.vin
+                    formState.make = vinResult.make
+                    formState.model = vinResult.model
+                    formState.year = vinResult.year
+                    formState.usedVINLookup = true
+                    appState.vinLookupResult = nil
                 }
             }
             .fullScreenCover(isPresented: $formState.showVINCamera) {
@@ -238,6 +246,8 @@ struct AddVehicleFlowView: View {
 
         modelContext.insert(vehicle)
         appState.selectedVehicle = vehicle
+        HapticService.shared.success()
+        ToastService.shared.show(L10n.toastVehicleSaved, icon: "checkmark.circle", style: .success)
         dismiss()
     }
 }

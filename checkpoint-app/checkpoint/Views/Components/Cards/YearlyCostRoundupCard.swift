@@ -140,6 +140,7 @@ struct YearlyCostRoundupCard: View {
             Image(systemName: "calendar")
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(Theme.textTertiary)
+                .accessibilityHidden(true)
         }
         .padding(Spacing.md)
     }

@@ -42,18 +42,30 @@ struct BrutalistTabBar: View {
                                 }
                                 onScheduleTapped?()
                             } label: {
-                                Text("[SCHEDULE]")
-                                    .font(.brutalistLabel)
-                                    .foregroundStyle(Theme.backgroundPrimary)
-                                    .tracking(1)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, Spacing.md)
-                                    .contentShape(Rectangle())
+                                HStack(spacing: Spacing.sm) {
+                                    Image(systemName: "clock")
+                                        .font(.system(size: 14, weight: .semibold))
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("[SCHEDULE]")
+                                            .font(.brutalistLabel)
+                                            .tracking(1)
+                                        Text("SET A REMINDER")
+                                            .font(.brutalistLabel)
+                                            .tracking(0.5)
+                                            .opacity(0.6)
+                                    }
+                                }
+                                .foregroundStyle(Theme.backgroundPrimary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, Spacing.md)
+                                .padding(.horizontal, Spacing.sm)
+                                .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
                             .glassEffect(.clear.tint(Theme.textPrimary), in: Rectangle())
                             .transition(.opacity)
                             .accessibilityLabel("Schedule service")
+                            .accessibilityHint("Set a reminder for future service")
                         }
 
                         if onLogTapped != nil {
@@ -64,18 +76,30 @@ struct BrutalistTabBar: View {
                                 }
                                 onLogTapped?()
                             } label: {
-                                Text("[LOG]")
-                                    .font(.brutalistLabel)
-                                    .foregroundStyle(Theme.backgroundPrimary)
-                                    .tracking(1)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, Spacing.md)
-                                    .contentShape(Rectangle())
+                                HStack(spacing: Spacing.sm) {
+                                    Image(systemName: "square.and.pencil")
+                                        .font(.system(size: 14, weight: .semibold))
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("[LOG]")
+                                            .font(.brutalistLabel)
+                                            .tracking(1)
+                                        Text("RECORD COMPLETED SERVICE")
+                                            .font(.brutalistLabel)
+                                            .tracking(0.5)
+                                            .opacity(0.6)
+                                    }
+                                }
+                                .foregroundStyle(Theme.backgroundPrimary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, Spacing.md)
+                                .padding(.horizontal, Spacing.sm)
+                                .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
                             .glassEffect(.clear.tint(Theme.textPrimary), in: Rectangle())
                             .transition(.opacity)
                             .accessibilityLabel("Log service")
+                            .accessibilityHint("Record a completed service")
                         }
                     }
                     .animation(.easeOut(duration: Theme.animationFast), value: isAddExpanded)

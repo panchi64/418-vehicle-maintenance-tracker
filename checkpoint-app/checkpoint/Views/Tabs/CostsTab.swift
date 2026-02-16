@@ -39,7 +39,7 @@ struct CostsTab: View {
 
     enum CategoryFilter: String, CaseIterable {
         case all = "All"
-        case maintenance = "Maint"
+        case maintenance = "Maint."
         case repair = "Repair"
         case upgrade = "Upgrade"
 
@@ -64,7 +64,7 @@ struct CostsTab: View {
             }
             .padding(.horizontal, Spacing.screenHorizontal)
             .padding(.top, Spacing.md)
-            .padding(.bottom, Spacing.xxl + 56)
+            .padding(.bottom, Spacing.xxl + Spacing.tabBarOffset)
         }
         .trackScreen(.costs)
         .onChange(of: periodFilter) { _, newValue in
@@ -134,7 +134,7 @@ struct CostsTab: View {
             CumulativeCostChartCard(data: cumulativeCostOverTime)
                 .revealAnimation(delay: 0.22)
         } else if !logsWithCosts.isEmpty {
-            ChartPlaceholderCard()
+            ChartPlaceholderCard(message: "3+ expenses to show spending pace")
                 .revealAnimation(delay: 0.22)
         }
 
@@ -167,7 +167,7 @@ struct CostsTab: View {
             )
             .revealAnimation(delay: 0.28)
         } else if logsWithCosts.count == 1 && periodFilter != .month {
-            ChartPlaceholderCard()
+            ChartPlaceholderCard(message: "Expenses in 2+ months to show trends")
                 .revealAnimation(delay: 0.28)
         }
     }

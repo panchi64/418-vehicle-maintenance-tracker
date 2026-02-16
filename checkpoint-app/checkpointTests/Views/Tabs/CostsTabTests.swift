@@ -344,7 +344,7 @@ final class CostsTabTests: XCTestCase {
     func testCategoryFilter_RawValues() {
         // Then
         XCTAssertEqual(CostsTab.CategoryFilter.all.rawValue, "All")
-        XCTAssertEqual(CostsTab.CategoryFilter.maintenance.rawValue, "Maint")
+        XCTAssertEqual(CostsTab.CategoryFilter.maintenance.rawValue, "Maint.")
         XCTAssertEqual(CostsTab.CategoryFilter.repair.rawValue, "Repair")
         XCTAssertEqual(CostsTab.CategoryFilter.upgrade.rawValue, "Upgrade")
     }

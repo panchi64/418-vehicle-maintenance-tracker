@@ -11,12 +11,8 @@ struct CSVImportSuccessStep: View {
     let result: CSVImportResult?
 
     var body: some View {
-        VStack(spacing: Spacing.lg) {
-            guard let result = result else {
-                return AnyView(EmptyView())
-            }
-
-            return AnyView(VStack(spacing: Spacing.lg) {
+        if let result = result {
+            VStack(spacing: Spacing.lg) {
                 Spacer()
                     .frame(height: Spacing.xl)
 
@@ -46,7 +42,7 @@ struct CSVImportSuccessStep: View {
                     )
                 }
             }
-            .frame(maxWidth: .infinity))
+            .frame(maxWidth: .infinity)
         }
     }
 

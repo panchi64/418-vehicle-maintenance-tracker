@@ -12,73 +12,97 @@ import Charts
 struct CumulativeCostChartCard: View {
     let data: [(date: Date, cumulativeAmount: Decimal)]
 
+    @State private var selectedDate: Date?
+
+    /// Find the data entry nearest to the selected date
+    private var selectedEntry: (date: Date, cumulativeAmount: Decimal)? {
+        guard let selectedDate else { return nil }
+        return data.min(by: {
+            abs($0.date.timeIntervalSince(selectedDate)) < abs($1.date.timeIntervalSince(selectedDate))
+        })
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             InstrumentSectionHeader(title: "Spending Pace")
 
-            Chart(data, id: \.date) { entry in
-                let amount = NSDecimalNumber(decimal: entry.cumulativeAmount).doubleValue
+            ZStack(alignment: .topLeading) {
+                Chart(data, id: \.date) { entry in
+                    let amount = NSDecimalNumber(decimal: entry.cumulativeAmount).doubleValue
 
-                AreaMark(
-                    x: .value("Date", entry.date),
-                    y: .value("Total", amount)
-                )
-                .foregroundStyle(
-                    .linearGradient(
-                        colors: [
-                            Theme.accent.opacity(0.15),
-                            Theme.accent.opacity(0.02)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
+                    AreaMark(
+                        x: .value("Date", entry.date),
+                        y: .value("Total", amount)
                     )
-                )
-                .interpolationMethod(.linear)
+                    .foregroundStyle(
+                        .linearGradient(
+                            colors: [
+                                Theme.accent.opacity(0.15),
+                                Theme.accent.opacity(0.02)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .interpolationMethod(.linear)
 
-                LineMark(
-                    x: .value("Date", entry.date),
-                    y: .value("Total", amount)
-                )
-                .foregroundStyle(Theme.accent)
-                .lineStyle(StrokeStyle(lineWidth: ChartConstants.chartLineWidth))
-                .interpolationMethod(.linear)
+                    LineMark(
+                        x: .value("Date", entry.date),
+                        y: .value("Total", amount)
+                    )
+                    .foregroundStyle(Theme.accent)
+                    .lineStyle(StrokeStyle(lineWidth: ChartConstants.chartLineWidth))
+                    .interpolationMethod(.linear)
 
-                PointMark(
-                    x: .value("Date", entry.date),
-                    y: .value("Total", amount)
-                )
-                .foregroundStyle(Theme.accent)
-                .symbolSize(ChartConstants.pointSize * ChartConstants.pointSize)
-                .symbol(.square)
-            }
-            .chartXAxis {
-                AxisMarks { value in
-                    AxisValueLabel {
-                        if let date = value.as(Date.self) {
-                            Text(Self.dateFormatter.string(from: date).uppercased())
-                                .font(.brutalistLabel)
-                                .foregroundStyle(Theme.textTertiary)
+                    PointMark(
+                        x: .value("Date", entry.date),
+                        y: .value("Total", amount)
+                    )
+                    .foregroundStyle(Theme.accent)
+                    .symbolSize(ChartConstants.pointSize * ChartConstants.pointSize)
+                    .symbol(.square)
+
+                    if let selected = selectedEntry, selected.date == entry.date {
+                        RuleMark(x: .value("Selected", selected.date))
+                            .foregroundStyle(Theme.textTertiary.opacity(0.5))
+                            .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
+                    }
+                }
+                .chartXSelection(value: $selectedDate)
+                .chartXAxis {
+                    AxisMarks { value in
+                        AxisValueLabel {
+                            if let date = value.as(Date.self) {
+                                Text(Self.dateFormatter.string(from: date).uppercased())
+                                    .font(.brutalistLabel)
+                                    .foregroundStyle(Theme.textTertiary)
+                            }
                         }
                     }
                 }
-            }
-            .chartYAxis {
-                AxisMarks { value in
-                    AxisGridLine(stroke: StrokeStyle(lineWidth: ChartConstants.chartGridLineWidth))
-                        .foregroundStyle(Theme.gridLine)
-                    AxisValueLabel {
-                        if let doubleValue = value.as(Double.self) {
-                            Text(ChartFormatting.abbreviatedCurrency(doubleValue))
-                                .font(.brutalistLabel)
-                                .foregroundStyle(Theme.textTertiary)
+                .chartYAxis {
+                    AxisMarks { value in
+                        AxisGridLine(stroke: StrokeStyle(lineWidth: ChartConstants.chartGridLineWidth))
+                            .foregroundStyle(Theme.gridLine)
+                        AxisValueLabel {
+                            if let doubleValue = value.as(Double.self) {
+                                Text(ChartFormatting.abbreviatedCurrency(doubleValue))
+                                    .font(.brutalistLabel)
+                                    .foregroundStyle(Theme.textTertiary)
+                            }
                         }
                     }
                 }
+                .chartPlotStyle { plotArea in
+                    plotArea.background(Color.clear)
+                }
+                .frame(height: ChartConstants.chartHeight)
+
+                // Selection overlay
+                if let entry = selectedEntry {
+                    selectionOverlay(date: entry.date, amount: entry.cumulativeAmount)
+                }
             }
-            .chartPlotStyle { plotArea in
-                plotArea.background(Color.clear)
-            }
-            .frame(height: ChartConstants.chartHeight)
             .padding(Spacing.md)
             .background(Theme.surfaceInstrument)
             .overlay(
@@ -88,6 +112,26 @@ struct CumulativeCostChartCard: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Spending pace chart showing cumulative costs over time")
+    }
+
+    private func selectionOverlay(date: Date, amount: Decimal) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(Self.dateFormatter.string(from: date).uppercased())
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(1)
+
+            Text(Formatters.currencyWhole(amount))
+                .font(.brutalistHeading)
+                .foregroundStyle(Theme.accent)
+        }
+        .padding(.horizontal, Spacing.sm)
+        .padding(.vertical, Spacing.xs)
+        .background(Theme.surfaceInstrument)
+        .overlay(
+            Rectangle()
+                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+        )
     }
 
     private static let dateFormatter: DateFormatter = {

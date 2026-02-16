@@ -28,6 +28,7 @@ struct FeatureHintView: View {
                 Image(systemName: icon)
                     .font(.system(size: 20, weight: .regular))
                     .foregroundStyle(Theme.accent)
+                    .accessibilityHidden(true)
 
                 // Message
                 Text(message)
@@ -45,8 +46,11 @@ struct FeatureHintView: View {
                         .foregroundStyle(Theme.accent)
                         .textCase(.uppercase)
                         .tracking(1)
+                        .frame(minHeight: 44)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Dismiss hint")
             }
             .padding(Spacing.md)
             .background(
@@ -60,10 +64,7 @@ struct FeatureHintView: View {
                         lineWidth: Theme.borderWidth
                     )
             )
-            .transition(.asymmetric(
-                insertion: .opacity.combined(with: .scale(scale: 0.98)),
-                removal: .opacity
-            ))
+            .transition(.opacity)
             .animation(.easeOut(duration: Theme.animationMedium), value: isVisible)
         }
     }

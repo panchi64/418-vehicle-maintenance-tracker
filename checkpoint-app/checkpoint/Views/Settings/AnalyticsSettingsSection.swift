@@ -35,8 +35,10 @@ struct AnalyticsSettingsSection: View {
                     Toggle("", isOn: $isEnabled)
                         .labelsHidden()
                         .tint(Theme.accent)
+                        .accessibilityLabel("Usage Analytics")
                 }
                 .padding(Spacing.md)
+                .accessibilityElement(children: .combine)
             }
             .background(Theme.surfaceInstrument)
             .overlay(

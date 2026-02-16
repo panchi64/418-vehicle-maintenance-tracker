@@ -58,14 +58,14 @@ struct SeasonalReminderCard: View {
                 Button {
                     onScheduleService()
                 } label: {
-                    Text("Schedule Service")
+                    Text("SCHEDULE SERVICE")
                 }
                 .buttonStyle(.primary)
 
                 Button {
                     onDismiss()
                 } label: {
-                    Text("Not This Year")
+                    Text("NOT THIS YEAR")
                 }
                 .buttonStyle(.secondary)
             }

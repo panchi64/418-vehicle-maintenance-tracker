@@ -119,4 +119,27 @@ enum Formatters {
         let formatted = decimal.string(from: NSNumber(value: displayValue)) ?? "\(displayValue)"
         return "~" + formatted
     }
+
+    // MARK: - Service Interval Formatting
+
+    /// Format a preset's default intervals as a readable string: "6 mo / 5,000 mi"
+    @MainActor
+    static func serviceInterval(months: Int?, miles: Int?) -> String? {
+        let unit = DistanceSettings.shared.unit
+        return serviceInterval(months: months, miles: miles, distanceUnit: unit)
+    }
+
+    /// Format a preset's default intervals with explicit distance unit
+    static func serviceInterval(months: Int?, miles: Int?, distanceUnit: DistanceUnit) -> String? {
+        var parts: [String] = []
+        if let months = months {
+            parts.append("\(months) mo")
+        }
+        if let miles = miles {
+            let displayValue = distanceUnit.fromMiles(miles)
+            let formatted = NumberFormatter.localizedString(from: NSNumber(value: displayValue), number: .decimal)
+            parts.append("\(formatted) \(distanceUnit.abbreviation)")
+        }
+        return parts.isEmpty ? nil : parts.joined(separator: " / ")
+    }
 }

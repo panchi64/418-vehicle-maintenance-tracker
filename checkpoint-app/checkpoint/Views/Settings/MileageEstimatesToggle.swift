@@ -27,8 +27,10 @@ struct MileageEstimatesToggle: View {
             Toggle("", isOn: $isEnabled)
                 .labelsHidden()
                 .tint(Theme.accent)
+                .accessibilityLabel("Mileage Estimation")
         }
         .padding(Spacing.md)
+        .accessibilityElement(children: .combine)
         .onChange(of: isEnabled) { _, newValue in
             Task { @MainActor in
                 HapticService.shared.selectionChanged()

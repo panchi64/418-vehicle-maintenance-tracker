@@ -127,9 +127,9 @@ struct VehiclePickerSheet: View {
                             }
                         }
                         .background(Theme.surfaceInstrument)
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .clipShape(Rectangle())
                         .overlay(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            Rectangle()
                                 .strokeBorder(Theme.gridLine, lineWidth: 1)
                         )
 
@@ -151,9 +151,9 @@ struct VehiclePickerSheet: View {
                             }
                             .padding(Spacing.md)
                             .background(Theme.surfaceInstrument)
-                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .clipShape(Rectangle())
                             .overlay(
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                Rectangle()
                                     .strokeBorder(Theme.accent.opacity(0.3), lineWidth: 1)
                             )
                         }

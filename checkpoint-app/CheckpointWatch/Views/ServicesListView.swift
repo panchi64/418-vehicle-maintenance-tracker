@@ -54,6 +54,14 @@ struct ServicesListView: View {
                     }
                     .listRowBackground(Color.clear)
                 }
+
+                if services.count > 3 {
+                    Text("\(services.count - 3) MORE")
+                        .font(.watchCaption)
+                        .foregroundStyle(WatchColors.textTertiary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .listRowBackground(Color.clear)
+                }
             }
         }
         .listStyle(.plain)
@@ -76,7 +84,8 @@ struct ServicesListView: View {
             } label: {
                 HStack(spacing: WatchSpacing.sm) {
                     let displayMileage = vehicle.estimatedMileage ?? vehicle.currentMileage
-                    Text("\(displayMileage.formatted()) MI")
+                    let unit = vehicle.resolvedDistanceUnit
+                    Text("\(unit.fromMiles(displayMileage).formatted()) \(unit.abbreviation)")
                         .font(.watchBody)
                         .foregroundStyle(WatchColors.textPrimary)
 

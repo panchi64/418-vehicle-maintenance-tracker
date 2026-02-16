@@ -32,10 +32,11 @@ struct ServiceTypePicker: View {
                         VStack(alignment: .leading, spacing: Spacing.xs) {
                             Text(preset.name)
                                 .foregroundStyle(Theme.textPrimary)
-                            if let interval = formatInterval(preset) {
-                                Text(interval)
-                                    .font(.caption)
+                            if let interval = Formatters.serviceInterval(months: preset.defaultIntervalMonths, miles: preset.defaultIntervalMiles) {
+                                Text(interval.uppercased())
+                                    .font(.brutalistLabel)
                                     .foregroundStyle(Theme.textSecondary)
+                                    .tracking(1)
                             }
                         }
 
@@ -81,9 +82,12 @@ struct ServiceTypePicker: View {
                             Image(systemName: "list.bullet")
                             Text("Browse Presets")
                         }
-                        .font(.subheadline)
+                        .font(.brutalistBody)
                         .foregroundStyle(Theme.accent)
+                        .frame(minHeight: 44)
+                        .contentShape(Rectangle())
                     }
+                    .accessibilityLabel("Browse service presets")
                 }
             }
         }
@@ -93,18 +97,6 @@ struct ServiceTypePicker: View {
                 selectedCategory: $selectedCategory
             )
         }
-    }
-
-    private func formatInterval(_ preset: PresetData) -> String? {
-        var parts: [String] = []
-        if let months = preset.defaultIntervalMonths {
-            parts.append("\(months) mo")
-        }
-        if let miles = preset.defaultIntervalMiles {
-            let formatted = NumberFormatter.localizedString(from: NSNumber(value: miles), number: .decimal)
-            parts.append("\(formatted) mi")
-        }
-        return parts.isEmpty ? nil : parts.joined(separator: " / ")
     }
 }
 
@@ -154,10 +146,11 @@ struct ServicePresetPickerSheet: View {
                                     Text(preset.name)
                                         .foregroundStyle(Theme.textPrimary)
 
-                                    if let interval = formatInterval(preset) {
-                                        Text(interval)
-                                            .font(.caption)
+                                    if let interval = Formatters.serviceInterval(months: preset.defaultIntervalMonths, miles: preset.defaultIntervalMiles) {
+                                        Text(interval.uppercased())
+                                            .font(.brutalistLabel)
                                             .foregroundStyle(Theme.textSecondary)
+                                            .tracking(1)
                                     }
                                 }
 
@@ -183,18 +176,6 @@ struct ServicePresetPickerSheet: View {
         }
         .presentationDetents([.medium, .large])
     }
-
-    private func formatInterval(_ preset: PresetData) -> String? {
-        var parts: [String] = []
-        if let months = preset.defaultIntervalMonths {
-            parts.append("\(months) mo")
-        }
-        if let miles = preset.defaultIntervalMiles {
-            let formatted = NumberFormatter.localizedString(from: NSNumber(value: miles), number: .decimal)
-            parts.append("\(formatted) mi")
-        }
-        return parts.isEmpty ? nil : parts.joined(separator: " / ")
-    }
 }
 
 // MARK: - Category Chip
@@ -211,12 +192,12 @@ struct CategoryChip: View {
                     .font(.system(size: 12))
                 Text(category.rawValue)
             }
-            .font(.subheadline)
+            .font(.brutalistBody)
             .padding(.horizontal, Spacing.md)
             .padding(.vertical, Spacing.sm)
             .background(isSelected ? Theme.accent : Theme.backgroundSubtle)
-            .foregroundStyle(isSelected ? Color(red: 0.071, green: 0.071, blue: 0.071) : Theme.textSecondary)
-            .clipShape(Capsule())
+            .foregroundStyle(isSelected ? Theme.backgroundPrimary : Theme.textSecondary)
+            .clipShape(Rectangle())
         }
         .buttonStyle(.plain)
     }

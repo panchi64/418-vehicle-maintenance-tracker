@@ -19,7 +19,11 @@ struct MarkClusterDoneSheet: View {
 
     @State private var performedDate: Date = Date()
     @State private var mileage: Int? = nil
+    @State private var cost: String = ""
+    @State private var costError: String?
+    @State private var costCategory: CostCategory = .maintenance
     @State private var notes: String = ""
+    @State private var pendingAttachments: [AttachmentPicker.AttachmentData] = []
 
     var body: some View {
         NavigationStack {
@@ -35,8 +39,14 @@ struct MarkClusterDoneSheet: View {
                         // Shared details
                         detailsSection
 
+                        // Cost section
+                        costSection
+
                         // Optional notes
                         notesSection
+
+                        // Attachments
+                        attachmentsSection
 
                         Spacer(minLength: Spacing.xl)
                     }
@@ -129,6 +139,45 @@ struct MarkClusterDoneSheet: View {
         }
     }
 
+    // MARK: - Cost Section
+
+    private var costSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            InstrumentSectionHeader(title: "Cost (Optional)")
+
+            InstrumentTextField(
+                label: "Total Cost",
+                text: $cost,
+                placeholder: "$0.00",
+                keyboardType: .decimalPad
+            )
+            .onChange(of: cost) { _, newValue in
+                cost = CostValidation.filterCostInput(newValue)
+                costError = CostValidation.validate(cost)
+            }
+
+            if let costError {
+                ErrorMessageRow(message: costError) {
+                    self.costError = nil
+                }
+            }
+
+            VStack(alignment: .leading, spacing: Spacing.xs) {
+                Text("CATEGORY")
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.textTertiary)
+                    .tracking(1)
+
+                InstrumentSegmentedControl(
+                    options: CostCategory.allCases,
+                    selection: $costCategory
+                ) { category in
+                    category.displayName
+                }
+            }
+        }
+    }
+
     // MARK: - Notes Section
 
     private var notesSection: some View {
@@ -144,10 +193,31 @@ struct MarkClusterDoneSheet: View {
         }
     }
 
+    // MARK: - Attachments Section
+
+    private var attachmentsSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            InstrumentSectionHeader(title: "Attachments")
+
+            AttachmentPicker(attachments: $pendingAttachments)
+        }
+    }
+
     // MARK: - Save Action
 
     private func saveAll() {
+        HapticService.shared.success()
+        AnalyticsService.shared.capture(.serviceClusterMarkAllDone)
+
         let mileageInt = mileage ?? cluster.vehicle.effectiveMileage
+        let costDecimal = Decimal(string: cost)
+        let serviceCount = cluster.services.count
+        // Split cost evenly across services when provided
+        let perServiceCost: Decimal? = if let total = costDecimal, serviceCount > 0 {
+            total / Decimal(serviceCount)
+        } else {
+            nil
+        }
 
         for service in cluster.services {
             // Create service log
@@ -156,10 +226,28 @@ struct MarkClusterDoneSheet: View {
                 vehicle: cluster.vehicle,
                 performedDate: performedDate,
                 mileageAtService: mileageInt,
-                cost: nil,  // User can edit individual logs later
+                cost: perServiceCost,
+                costCategory: perServiceCost != nil ? costCategory : nil,
                 notes: notes.isEmpty ? nil : notes
             )
             modelContext.insert(log)
+
+            // Save attachments for each service log
+            for attachmentData in pendingAttachments {
+                let thumbnailData = ServiceAttachment.generateThumbnailData(
+                    from: attachmentData.data,
+                    mimeType: attachmentData.mimeType
+                )
+                let attachment = ServiceAttachment(
+                    serviceLog: log,
+                    data: attachmentData.data,
+                    thumbnailData: thumbnailData,
+                    fileName: attachmentData.fileName,
+                    mimeType: attachmentData.mimeType,
+                    extractedText: attachmentData.extractedText
+                )
+                modelContext.insert(attachment)
+            }
 
             // Update service tracking and recalculate due dates
             service.recalculateDueDates(performedDate: performedDate, mileage: mileageInt)
@@ -190,6 +278,7 @@ struct MarkClusterDoneSheet: View {
         AppIconService.shared.updateIcon(for: cluster.vehicle, services: services)
         WidgetDataService.shared.updateWidget(for: cluster.vehicle)
 
+        ToastService.shared.show(L10n.toastServiceLogged, icon: "checkmark", style: .success)
         onSaved?()
         appState.recordCompletedAction()
         dismiss()

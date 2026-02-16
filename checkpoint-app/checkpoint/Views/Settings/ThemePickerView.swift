@@ -52,7 +52,14 @@ struct ThemePickerView: View {
             HapticService.shared.selectionChanged()
         } else if theme.tier == .pro {
             appState.showProPaywall = true
+        } else if theme.tier == .rare {
+            // Rare locked themes: show toast directing user to Tip Jar
+            ToastService.shared.show(
+                "Unlock in Tip Jar",
+                icon: "lock.open.fill",
+                style: .info
+            )
+            HapticService.shared.selectionChanged()
         }
-        // Rare locked themes: no action (hint text shown below list)
     }
 }

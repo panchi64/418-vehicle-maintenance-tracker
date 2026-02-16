@@ -103,6 +103,7 @@ extension HomeTab {
                 .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(Theme.statusGood)
                 .frame(width: 20)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(log.service?.name ?? "Service")
@@ -129,5 +130,8 @@ extension HomeTab {
         }
         .padding(Spacing.md)
         .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(log.service?.name ?? "Service") completed \(Formatters.shortDate.string(from: log.performedDate))")
+        .accessibilityValue(log.formattedCost ?? "")
     }
 }

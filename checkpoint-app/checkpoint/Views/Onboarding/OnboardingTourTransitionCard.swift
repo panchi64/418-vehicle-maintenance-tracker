@@ -13,6 +13,7 @@ struct OnboardingTourTransitionCard: View {
     let onContinue: () -> Void
 
     @State private var isVisible = false
+    @State private var autoAdvanceTask: Task<Void, Never>?
 
     private var sectionNumber: String {
         String(format: "%02d", targetStep + 1)
@@ -47,7 +48,6 @@ struct OnboardingTourTransitionCard: View {
                         .tracking(3)
                 }
                 .opacity(isVisible ? 1 : 0)
-                .scaleEffect(isVisible ? 1 : 0.95)
 
                 Spacer()
 
@@ -64,16 +64,24 @@ struct OnboardingTourTransitionCard: View {
         }
         .contentShape(Rectangle())
         .onTapGesture {
+            autoAdvanceTask?.cancel()
+            autoAdvanceTask = nil
             onContinue()
         }
         .onAppear {
             withAnimation(.easeOut(duration: 0.25)) {
                 isVisible = true
             }
-            // Auto-advance after 1.5 seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            // Auto-advance after 1.5 seconds (cancellable)
+            autoAdvanceTask = Task { @MainActor in
+                try? await Task.sleep(for: .seconds(1.5))
+                guard !Task.isCancelled else { return }
                 onContinue()
             }
+        }
+        .onDisappear {
+            autoAdvanceTask?.cancel()
+            autoAdvanceTask = nil
         }
     }
 }

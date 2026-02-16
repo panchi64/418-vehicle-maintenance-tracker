@@ -25,10 +25,7 @@ struct EditVehicleVINSection: View {
     var isCameraAvailable: Bool
 
     private var isVINValid: Bool {
-        let trimmed = vin.trimmingCharacters(in: .whitespaces)
-        guard trimmed.count == 17 else { return false }
-        let forbidden = CharacterSet(charactersIn: "IOQioq")
-        return trimmed.unicodeScalars.allSatisfy { !forbidden.contains($0) && CharacterSet.alphanumerics.contains($0) }
+        Vehicle.isValidVIN(vin)
     }
 
     var body: some View {
@@ -81,9 +78,10 @@ struct EditVehicleVINSection: View {
                 }
 
                 HStack {
-                    Text("17-character Vehicle Identification Number")
-                        .font(.caption)
+                    Text("17-CHARACTER VEHICLE IDENTIFICATION NUMBER")
+                        .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
+                        .tracking(1.5)
 
                     Spacer()
 
@@ -154,10 +152,24 @@ struct EditVehicleVINSection: View {
 
                 await MainActor.run {
                     isDecodingVIN = false
+                    // Track which fields were already populated
+                    let makeSkipped = !make.isEmpty
+                    let modelSkipped = !model.isEmpty
+                    let yearSkipped = year != nil
+
                     // Auto-fill only empty fields
-                    if make.isEmpty { make = result.make }
-                    if model.isEmpty { model = result.model }
-                    if year == nil { year = result.modelYear }
+                    if !makeSkipped { make = result.make }
+                    if !modelSkipped { model = result.model }
+                    if !yearSkipped { year = result.modelYear }
+
+                    // Notify user if all fields were already populated
+                    if makeSkipped && modelSkipped && yearSkipped {
+                        ToastService.shared.show("FIELDS ALREADY POPULATED", icon: "info.circle", style: .info)
+                    } else if makeSkipped || modelSkipped || yearSkipped {
+                        ToastService.shared.show("SOME FIELDS ALREADY POPULATED", icon: "info.circle", style: .info)
+                    } else {
+                        HapticService.shared.success()
+                    }
                 }
             } catch {
                 await MainActor.run {

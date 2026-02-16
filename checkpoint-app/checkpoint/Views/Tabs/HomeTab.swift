@@ -40,17 +40,15 @@ struct HomeTab: View {
         vehicle?.nextUpItem
     }
 
-    private var nextUpService: Service? {
-        vehicleServices.first
-    }
-
     private var remainingServices: [Service] {
         let tracked = vehicleServices.filter { $0.hasDueTracking }
+        guard let nextUp = nextUpItem else { return tracked }
         // If marbete is the most urgent, don't drop a service from remaining
-        if let nextUp = nextUpItem, nextUp.itemType == .marbete {
+        if nextUp.itemType == .marbete {
             return tracked
         }
-        return Array(tracked.dropFirst())
+        // Filter out the service matching the displayed Next Up by ID
+        return tracked.filter { $0.id != nextUp.id }
     }
 
     private var vehicleServiceLogs: [ServiceLog] {
@@ -75,21 +73,6 @@ struct HomeTab: View {
                             appState.showEditVehicle = true
                         }
                         .revealAnimation(delay: 0.1)
-                    }
-
-                    // Quick Mileage Update Card (shown if never updated or 14+ days ago)
-                    if let vehicle = vehicle, vehicle.shouldPromptMileageUpdate {
-                        QuickMileageUpdateCard(
-                            vehicle: vehicle,
-                            mileageTrackedServiceCount: vehicleServices.filter { $0.dueMileage != nil }.count
-                        ) { newMileage in
-                            AnalyticsService.shared.capture(.mileageUpdated(source: .quickUpdate))
-                            updateMileage(newMileage, for: vehicle)
-                        }
-                        .onAppear {
-                            AnalyticsService.shared.capture(.mileagePromptShown)
-                        }
-                        .revealAnimation(delay: 0.15)
                     }
                 }
 
@@ -124,6 +107,21 @@ struct HomeTab: View {
                             }
                         }
                     }
+                    .revealAnimation(delay: 0.15)
+                }
+
+                // Quick Mileage Update Card (shown if never updated or 14+ days ago)
+                if let vehicle = vehicle, vehicle.shouldPromptMileageUpdate {
+                    QuickMileageUpdateCard(
+                        vehicle: vehicle,
+                        mileageTrackedServiceCount: vehicleServices.filter { $0.dueMileage != nil }.count
+                    ) { newMileage in
+                        AnalyticsService.shared.capture(.mileageUpdated(source: .quickUpdate))
+                        updateMileage(newMileage, for: vehicle)
+                    }
+                    .onAppear {
+                        AnalyticsService.shared.capture(.mileagePromptShown)
+                    }
                     .revealAnimation(delay: 0.2)
                 }
 
@@ -142,6 +140,12 @@ struct HomeTab: View {
                         }
                     )
                     .revealAnimation(delay: 0.25)
+                }
+
+                // Quick Stats Bar (after cluster, before lists)
+                if vehicle != nil, !vehicleServiceLogs.isEmpty {
+                    QuickStatsBar(serviceLogs: vehicleServiceLogs)
+                        .revealAnimation(delay: 0.3)
                 }
 
                 // Seasonal Advisory Cards (max 2)
@@ -172,7 +176,10 @@ struct HomeTab: View {
                                         .font(.brutalistLabel)
                                         .foregroundStyle(Theme.accent)
                                         .tracking(1)
+                                        .frame(minHeight: 44)
+                                        .contentShape(Rectangle())
                                 }
+                                .accessibilityLabel("View all upcoming services")
                             }
                         }
 
@@ -208,13 +215,16 @@ struct HomeTab: View {
                             Spacer()
                             if vehicleServiceLogs.count > 3 {
                                 Button {
-                                    appState.navigateToServices()
+                                    appState.navigateToCosts()
                                 } label: {
                                     Text("View All")
                                         .font(.brutalistLabel)
                                         .foregroundStyle(Theme.accent)
                                         .tracking(1)
+                                        .frame(minHeight: 44)
+                                        .contentShape(Rectangle())
                                 }
+                                .accessibilityLabel("View all recent activity")
                             }
                         }
 
@@ -245,12 +255,6 @@ struct HomeTab: View {
                     .revealAnimation(delay: 0.35)
                 }
 
-                // Quick Stats Bar
-                if vehicle != nil {
-                    QuickStatsBar(serviceLogs: vehicleServiceLogs)
-                        .revealAnimation(delay: 0.4)
-                }
-
                 // Empty states
                 if appState.selectedVehicle == nil {
                     if case .syncing = syncService.syncState {
@@ -267,7 +271,7 @@ struct HomeTab: View {
             }
             .padding(.horizontal, Spacing.screenHorizontal)
             .padding(.top, Spacing.lg)
-            .padding(.bottom, Spacing.xxl + 56) // Extra padding for FAB and tab bar
+            .padding(.bottom, Spacing.xxl + Spacing.tabBarOffset)
         }
         .task(id: vehicle?.id) {
             detectClusters()

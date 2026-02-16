@@ -43,6 +43,8 @@ struct CSVImportView: View {
     @State private var errorMessage: String?
     @State private var importResult: CSVImportResult?
     @State private var selectedSource: CSVImportSource = .custom
+    @State private var pendingImportPreview: CSVImportPreview?
+    @State private var showImportConfirmation = false
 
     var body: some View {
         NavigationStack {
@@ -79,7 +81,10 @@ struct CSVImportView: View {
                                     newVehicleName: $newVehicleName,
                                     currentStep: $currentStep,
                                     errorMessage: $errorMessage,
-                                    onImport: { performImport(preview: $0) }
+                                    onImport: { preview in
+                                        pendingImportPreview = preview
+                                        showImportConfirmation = true
+                                    }
                                 )
                             }
                         case .success:
@@ -91,7 +96,7 @@ struct CSVImportView: View {
                     .padding(.bottom, Spacing.xxl)
                 }
             }
-            .navigationTitle("IMPORT")
+            .navigationTitle("Import")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -119,6 +124,22 @@ struct CSVImportView: View {
                 allowsMultipleSelection: false
             ) { result in
                 handleFileSelection(result)
+            }
+            .alert("CONFIRM IMPORT", isPresented: $showImportConfirmation) {
+                Button("CANCEL", role: .cancel) {
+                    pendingImportPreview = nil
+                }
+                Button("IMPORT") {
+                    if let preview = pendingImportPreview {
+                        performImport(preview: preview)
+                        pendingImportPreview = nil
+                    }
+                }
+            } message: {
+                if let preview = pendingImportPreview {
+                    let vehicleName = createNewVehicle ? newVehicleName : (selectedVehicle?.displayName ?? "vehicle")
+                    Text("Import \(preview.serviceCount) services with \(preview.logCount) logs to \(vehicleName)?")
+                }
             }
         }
     }

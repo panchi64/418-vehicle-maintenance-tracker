@@ -101,6 +101,16 @@ struct InstrumentNumberField: View {
                         .foregroundStyle(Theme.textPrimary)
                         .keyboardType(.numberPad)
                         .focused($isFocused)
+                        .toolbar {
+                            ToolbarItemGroup(placement: .keyboard) {
+                                Spacer()
+                                Button("DONE") {
+                                    isFocused = false
+                                }
+                                .font(.brutalistLabel)
+                                .foregroundStyle(Theme.accent)
+                            }
+                        }
                         .onChange(of: textValue) { _, newValue in
                             let filtered = newValue.filter { $0.isNumber }
                             if filtered != newValue {
@@ -140,6 +150,7 @@ struct InstrumentNumberField: View {
                             .frame(width: 52, height: 52)
                             .background(Theme.surfaceInstrument)
                     }
+                    .accessibilityLabel("Scan with camera")
                     .overlay(
                         Rectangle()
                             .strokeBorder(isFocused ? Theme.accent : Theme.gridLine, lineWidth: Theme.borderWidth)
@@ -180,6 +191,7 @@ struct InstrumentDatePicker: View {
                 .labelsHidden()
                 .datePickerStyle(.compact)
                 .tint(Theme.accent)
+                .accessibilityLabel(label)
                 .padding(Spacing.listItem)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Theme.surfaceInstrument)

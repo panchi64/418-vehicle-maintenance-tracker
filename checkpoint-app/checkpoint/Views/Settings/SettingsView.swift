@@ -14,7 +14,6 @@ import UserNotifications
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(AppState.self) private var appState
-    @Query private var vehicles: [Vehicle]
     var onboardingState: OnboardingState?
 
     var body: some View {
@@ -39,8 +38,6 @@ struct SettingsView: View {
 
                         // SUPPORT
                         supportSection
-
-                        SyncSettingsSection()
 
                         // PRIVACY — analytics opt-out
                         privacySection
@@ -172,7 +169,7 @@ struct SettingsView: View {
                     .fill(Theme.gridLine)
                     .frame(height: Theme.borderWidth)
 
-                // Climate Zone Picker
+                // Climate Zone Picker (only active when Seasonal Alerts is on)
                 NavigationLink {
                     ClimateZonePickerView()
                 } label: {
@@ -182,6 +179,8 @@ struct SettingsView: View {
                     )
                 }
                 .buttonStyle(.plain)
+                .disabled(!SeasonalSettings.shared.isEnabled)
+                .opacity(SeasonalSettings.shared.isEnabled ? 1.0 : 0.5)
             }
             .background(Theme.surfaceInstrument)
             .overlay(
@@ -208,7 +207,7 @@ struct SettingsView: View {
                     .fill(Theme.gridLine)
                     .frame(height: Theme.borderWidth)
 
-                // Mileage Window
+                // Mileage Window (only active when Service Bundling is on)
                 NavigationLink {
                     ClusteringMileageWindowPicker()
                 } label: {
@@ -218,12 +217,14 @@ struct SettingsView: View {
                     )
                 }
                 .buttonStyle(.plain)
+                .disabled(!ClusteringSettings.shared.isEnabled)
+                .opacity(ClusteringSettings.shared.isEnabled ? 1.0 : 0.5)
 
                 Rectangle()
                     .fill(Theme.gridLine)
                     .frame(height: Theme.borderWidth)
 
-                // Days Window
+                // Days Window (only active when Service Bundling is on)
                 NavigationLink {
                     ClusteringDaysWindowPicker()
                 } label: {
@@ -233,6 +234,8 @@ struct SettingsView: View {
                     )
                 }
                 .buttonStyle(.plain)
+                .disabled(!ClusteringSettings.shared.isEnabled)
+                .opacity(ClusteringSettings.shared.isEnabled ? 1.0 : 0.5)
             }
             .background(Theme.surfaceInstrument)
             .overlay(
@@ -247,37 +250,41 @@ struct SettingsView: View {
     @State private var showCSVImport = false
 
     private var dataSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("DATA")
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(2)
+        VStack(alignment: .leading, spacing: Spacing.lg) {
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                Text("DATA & SYNC")
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.textTertiary)
+                    .tracking(2)
 
-            VStack(spacing: 0) {
-                Button {
-                    showCSVImport = true
-                } label: {
-                    HStack {
-                        Text("Import Service History")
-                            .font(.brutalistBody)
-                            .foregroundStyle(Theme.textPrimary)
+                VStack(spacing: 0) {
+                    Button {
+                        showCSVImport = true
+                    } label: {
+                        HStack {
+                            Text("Import Service History")
+                                .font(.brutalistBody)
+                                .foregroundStyle(Theme.textPrimary)
 
-                        Spacer()
+                            Spacer()
 
-                        Image(systemName: "square.and.arrow.down")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(Theme.textTertiary)
+                            Image(systemName: "square.and.arrow.down")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(Theme.textTertiary)
+                        }
+                        .padding(Spacing.md)
+                        .contentShape(Rectangle())
                     }
-                    .padding(Spacing.md)
-                    .contentShape(Rectangle())
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
+                .background(Theme.surfaceInstrument)
+                .overlay(
+                    Rectangle()
+                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+                )
             }
-            .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+
+            SyncSettingsSection()
         }
         .sheet(isPresented: $showCSVImport) {
             CSVImportView()
@@ -483,9 +490,12 @@ struct SettingsView: View {
             Image(systemName: "chevron.right")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(Theme.textTertiary)
+                .accessibilityHidden(true)
         }
         .padding(Spacing.md)
+        .frame(minHeight: 44)
         .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
     }
 }
 

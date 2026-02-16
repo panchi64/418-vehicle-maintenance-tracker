@@ -25,7 +25,11 @@ struct QuickStatsBar: View {
     }
 
     private var formattedYTDSpend: String {
-        Formatters.currencyWhole(ytdSpend)
+        ytdLogs.isEmpty ? "\u{2014}" : Formatters.currencyWhole(ytdSpend)
+    }
+
+    private var formattedYTDCount: String {
+        ytdLogs.isEmpty ? "\u{2014}" : "\(ytdServicesCount)"
     }
 
     var body: some View {
@@ -45,7 +49,7 @@ struct QuickStatsBar: View {
             // Services Completed
             statItem(
                 label: "SERVICES",
-                value: "\(ytdServicesCount)",
+                value: formattedYTDCount,
                 valueColor: Theme.textPrimary
             )
         }

@@ -56,14 +56,26 @@ struct TipJarView: View {
                         #endif
                     }
 
-                    // All collected state
-                    if ThemeManager.shared.allThemes.filter({ $0.tier == .rare }).allSatisfy({ ThemeManager.shared.isOwned($0) }) {
+                    // Collection progress
+                    let rareThemes = ThemeManager.shared.allThemes.filter { $0.tier == .rare }
+                    let ownedRare = rareThemes.filter { ThemeManager.shared.isOwned($0) }
+                    if rareThemes.count > 0 {
                         HStack {
-                            Image(systemName: "checkmark.seal.fill")
-                                .foregroundStyle(Theme.accent)
-                            Text("You've collected all rare themes!")
-                                .font(.brutalistSecondary)
-                                .foregroundStyle(Theme.textSecondary)
+                            if ownedRare.count == rareThemes.count {
+                                Image(systemName: "checkmark.seal.fill")
+                                    .foregroundStyle(Theme.accent)
+                                Text("ALL RARE THEMES COLLECTED")
+                                    .font(.brutalistLabel)
+                                    .foregroundStyle(Theme.textSecondary)
+                                    .tracking(1)
+                            } else {
+                                Image(systemName: "square.grid.2x2")
+                                    .foregroundStyle(Theme.accent)
+                                Text("\(ownedRare.count)/\(rareThemes.count) RARE THEMES COLLECTED")
+                                    .font(.brutalistLabel)
+                                    .foregroundStyle(Theme.textSecondary)
+                                    .tracking(1)
+                            }
                         }
                         .padding(.top, Spacing.sm)
                     }

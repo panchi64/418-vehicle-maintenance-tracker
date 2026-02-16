@@ -170,9 +170,10 @@ struct EditVehicleView: View {
                                 year: $marbeteExpirationYear
                             )
 
-                            Text("Puerto Rico vehicle registration tag expiration (optional)")
-                                .font(.caption)
+                            Text("PUERTO RICO VEHICLE REGISTRATION TAG EXPIRATION (OPTIONAL)")
+                                .font(.brutalistLabel)
                                 .foregroundStyle(Theme.textTertiary)
+                                .tracking(1)
                                 .padding(.leading, 4)
                         }
 
@@ -200,9 +201,9 @@ struct EditVehicleView: View {
                             .frame(maxWidth: .infinity)
                             .frame(height: Theme.buttonHeight)
                             .background(Theme.statusOverdue.opacity(0.1))
-                            .clipShape(RoundedRectangle(cornerRadius: Theme.buttonCornerRadius, style: .continuous))
+                            .clipShape(Rectangle())
                             .overlay(
-                                RoundedRectangle(cornerRadius: Theme.buttonCornerRadius, style: .continuous)
+                                Rectangle()
                                     .strokeBorder(Theme.statusOverdue.opacity(0.3), lineWidth: 1)
                             )
                         }

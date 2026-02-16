@@ -47,6 +47,8 @@ struct ToastView: View {
                 Image(systemName: "xmark")
                     .font(.system(size: 12, weight: .bold))
                     .foregroundStyle(Theme.textTertiary)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.instrument)
         }
@@ -58,9 +60,9 @@ struct ToastView: View {
                 .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
         )
         .gesture(
-            DragGesture(minimumDistance: 10)
+            DragGesture(minimumDistance: 20)
                 .onEnded { value in
-                    if value.translation.height > 10 {
+                    if value.translation.height > 40 {
                         ToastService.shared.dismiss()
                     }
                 }

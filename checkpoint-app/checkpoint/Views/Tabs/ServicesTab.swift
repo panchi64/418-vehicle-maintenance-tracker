@@ -171,19 +171,13 @@ struct ServicesTab: View {
 
                         VStack(spacing: 0) {
                             ForEach(Array(filteredServices.enumerated()), id: \.element.id) { index, service in
-                                Button {
+                                ServiceRow(
+                                    service: service,
+                                    currentMileage: vehicle.effectiveMileage,
+                                    isEstimatedMileage: vehicle.isUsingEstimatedMileage
+                                ) {
                                     appState.selectedService = service
-                                } label: {
-                                    ServiceRow(
-                                        service: service,
-                                        currentMileage: vehicle.effectiveMileage,
-                                        isEstimatedMileage: vehicle.isUsingEstimatedMileage
-                                    ) {
-                                        appState.selectedService = service
-                                    }
-                                    .contentShape(Rectangle())
                                 }
-                                .buttonStyle(.plain)
                                 .staggeredReveal(index: index, baseDelay: 0.2)
 
                                 if index < filteredServices.count - 1 {
@@ -214,7 +208,10 @@ struct ServicesTab: View {
                                         .tracking(1)
                                 }
                                 .foregroundStyle(Theme.accent)
+                                .frame(minHeight: 44)
+                                .contentShape(Rectangle())
                             }
+                            .accessibilityLabel("Export service history")
                         }
 
                         VStack(spacing: 0) {
@@ -255,7 +252,7 @@ struct ServicesTab: View {
             }
             .padding(.horizontal, Spacing.screenHorizontal)
             .padding(.top, Spacing.md)
-            .padding(.bottom, Spacing.xxl + 56)
+            .padding(.bottom, Spacing.xxl + Spacing.tabBarOffset)
         }
         .trackScreen(.services)
         .onChange(of: appState.servicesViewMode) { _, newMode in
@@ -310,7 +307,10 @@ struct ServicesTab: View {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 16))
                         .foregroundStyle(Theme.textTertiary)
+                        .frame(minWidth: 44, minHeight: 44)
+                        .contentShape(Rectangle())
                 }
+                .accessibilityLabel("Clear search")
             }
         }
         .padding(Spacing.md)
@@ -329,6 +329,7 @@ struct ServicesTab: View {
                 .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(Theme.statusGood)
                 .frame(width: 20)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(log.service?.name ?? "Service")
@@ -364,6 +365,10 @@ struct ServicesTab: View {
                 .foregroundStyle(Theme.textTertiary)
         }
         .padding(Spacing.md)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(log.service?.name ?? "Service"), \(Formatters.mediumDate.string(from: log.performedDate))")
+        .accessibilityValue(log.formattedCost ?? "")
+        .accessibilityHint("Double tap to view details")
     }
 
     // MARK: - Empty States

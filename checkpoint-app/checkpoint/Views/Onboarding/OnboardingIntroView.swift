@@ -28,6 +28,8 @@ struct OnboardingIntroView: View {
                     } label: {
                         Text(L10n.onboardingSkip)
                             .brutalistLabelStyle(color: Theme.textTertiary)
+                            .frame(minWidth: 44, minHeight: 44)
+                            .contentShape(Rectangle())
                     }
                 }
                 .padding(.horizontal, Spacing.screenHorizontal)

@@ -132,6 +132,16 @@ final class Vehicle: Identifiable {
         return "..." + String(vin.suffix(4))
     }
 
+    /// Validate a VIN string: 17 alphanumeric characters, excluding I, O, Q
+    static func isValidVIN(_ vin: String) -> Bool {
+        let trimmed = vin.trimmingCharacters(in: .whitespaces)
+        guard trimmed.count == 17 else { return false }
+        let forbidden = CharacterSet(charactersIn: "IOQioq")
+        return trimmed.unicodeScalars.allSatisfy {
+            !forbidden.contains($0) && CharacterSet.alphanumerics.contains($0)
+        }
+    }
+
     // MARK: - Marbete Computed Properties
 
     /// Days threshold for "due soon" status (60 days for marbete)

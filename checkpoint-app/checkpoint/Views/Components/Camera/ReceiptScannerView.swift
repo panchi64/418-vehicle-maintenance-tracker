@@ -14,6 +14,8 @@ struct ReceiptScannerView: UIViewControllerRepresentable {
     let onImagesScanned: ([UIImage]) -> Void
     /// Callback when user cancels scanning
     let onCancel: () -> Void
+    /// Callback when scanner fails with an error
+    var onError: ((Error) -> Void)?
 
     func makeUIViewController(context: Context) -> VNDocumentCameraViewController {
         let scanner = VNDocumentCameraViewController()
@@ -24,16 +26,22 @@ struct ReceiptScannerView: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: VNDocumentCameraViewController, context: Context) {}
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(onImagesScanned: onImagesScanned, onCancel: onCancel)
+        Coordinator(onImagesScanned: onImagesScanned, onCancel: onCancel, onError: onError)
     }
 
     class Coordinator: NSObject, VNDocumentCameraViewControllerDelegate {
         let onImagesScanned: ([UIImage]) -> Void
         let onCancel: () -> Void
+        let onError: ((Error) -> Void)?
 
-        init(onImagesScanned: @escaping ([UIImage]) -> Void, onCancel: @escaping () -> Void) {
+        init(
+            onImagesScanned: @escaping ([UIImage]) -> Void,
+            onCancel: @escaping () -> Void,
+            onError: ((Error) -> Void)?
+        ) {
             self.onImagesScanned = onImagesScanned
             self.onCancel = onCancel
+            self.onError = onError
         }
 
         func documentCameraViewController(
@@ -62,7 +70,11 @@ struct ReceiptScannerView: UIViewControllerRepresentable {
             didFailWithError error: Error
         ) {
             controller.dismiss(animated: true) {
-                self.onCancel()
+                if let onError = self.onError {
+                    onError(error)
+                } else {
+                    self.onCancel()
+                }
             }
         }
     }

@@ -15,7 +15,7 @@ struct AccessoryInlineView: View {
     var body: some View {
         if let service = entry.services.first {
             Label {
-                Text("\(entry.vehicleName.uppercased()): \(service.name.uppercased()) \u{2022} \(formatDue(service.dueDescription))")
+                Text("\(service.name.uppercased()) \u{2022} \(formatDue(service.dueDescription))")
                     .font(.system(.caption, design: .monospaced))
             } icon: {
                 Image(systemName: statusIcon(for: service.status))

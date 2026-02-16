@@ -21,6 +21,7 @@ struct ContentView: View {
     @State var showMileageUpdate = false
     @State var showSettings = false
     @State var siriPrefilledMileage: Int?
+    @State private var delayedTask: Task<Void, Never>?
 
     // MARK: - Vehicle Selection Persistence
 
@@ -132,7 +133,7 @@ struct ContentView: View {
         .overlay(alignment: .bottom) {
             if let toast = ToastService.shared.currentToast {
                 ToastView(toast: toast)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .transition(.opacity)
                     .padding(.bottom, 72 + Spacing.lg)
                     .padding(.horizontal, Spacing.screenHorizontal)
                     .animation(.easeOut(duration: Theme.animationMedium), value: ToastService.shared.currentToast?.id)
@@ -265,6 +266,7 @@ struct ContentView: View {
         .sheet(isPresented: $appState.showAddVehicle, onDismiss: {
             appState.onboardingMarbeteMonth = nil
             appState.onboardingMarbeteYear = nil
+            appState.vinLookupResult = nil
         }) {
             AddVehicleFlowView()
                 .environment(appState)
@@ -396,11 +398,21 @@ struct ContentView: View {
             set: { if !$0 { /* dismiss handled by callbacks */ } }
         )) {
             OnboardingGetStartedView(
-                onVINLookupComplete: { _, _ in
+                onVINLookupComplete: { result, vin in
                     AnalyticsService.shared.capture(.onboardingVINLookupUsed)
+                    // Store VIN lookup result for AddVehicleFlowView to consume
+                    appState.vinLookupResult = AppState.VINLookupPassthrough(
+                        make: result.make,
+                        model: result.model,
+                        year: result.modelYear,
+                        vin: vin
+                    )
                     clearSampleData()
                     onboardingState.complete()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    delayedTask?.cancel()
+                    delayedTask = Task {
+                        try? await Task.sleep(for: .seconds(0.4))
+                        guard !Task.isCancelled else { return }
                         appState.showAddVehicle = true
                     }
                 },
@@ -408,7 +420,10 @@ struct ContentView: View {
                     AnalyticsService.shared.capture(.onboardingManualEntry)
                     clearSampleData()
                     onboardingState.complete()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    delayedTask?.cancel()
+                    delayedTask = Task {
+                        try? await Task.sleep(for: .seconds(0.4))
+                        guard !Task.isCancelled else { return }
                         appState.showAddVehicle = true
                     }
                 },

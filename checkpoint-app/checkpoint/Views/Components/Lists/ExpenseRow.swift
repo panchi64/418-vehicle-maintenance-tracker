@@ -67,6 +67,8 @@ struct ExpenseRow: View {
 
             Spacer()
 
+            // Expense rows show cents via Formatters.currency (e.g. "$125.50")
+            // while summary/stat cards use Formatters.currencyWhole (e.g. "$126")
             if let cost = log.formattedCost {
                 Text(cost)
                     .font(.brutalistHeading)
@@ -90,9 +92,7 @@ struct ExpenseRow: View {
     }
 
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d, yyyy"
-        return formatter.string(from: date)
+        Formatters.mediumDate.string(from: date)
     }
 }
 

@@ -101,24 +101,48 @@ struct MediumWidgetView: View {
                     .foregroundStyle(WidgetColors.textPrimary)
                     .lineLimit(1)
 
-                // Status indicator
-                HStack(spacing: 6) {
-                    Rectangle()
-                        .fill(service.status.color)
-                        .frame(width: 8, height: 8)
+                // Status indicator and mark done button
+                HStack(spacing: 0) {
+                    HStack(spacing: 6) {
+                        Rectangle()
+                            .fill(service.status.color)
+                            .frame(width: 8, height: 8)
 
-                    Text(statusLabel(for: service.status))
-                        .font(.widgetCaption)
-                        .foregroundStyle(service.status.color)
-                        .tracking(0.5)
+                        Text(statusLabel(for: service.status))
+                            .font(.widgetCaption)
+                            .foregroundStyle(service.status.color)
+                            .tracking(0.5)
+                    }
+
+                    Spacer()
+
+                    // Mark done button (in left panel, acting on the primary service)
+                    markDoneButton
                 }
             } else {
                 Spacer()
 
-                Text("NO SERVICES")
-                    .font(.widgetBody)
-                    .foregroundStyle(WidgetColors.textSecondary)
+                if entry.vehicleID == nil {
+                    VStack(spacing: 4) {
+                        Image(systemName: "car.fill")
+                            .font(.system(size: 20))
+                            .foregroundStyle(WidgetColors.textTertiary)
+                        Text("TAP TO SET UP")
+                            .font(.widgetBody)
+                            .foregroundStyle(WidgetColors.textSecondary)
+                    }
                     .frame(maxWidth: .infinity, alignment: .center)
+                } else {
+                    VStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle")
+                            .font(.system(size: 20))
+                            .foregroundStyle(WidgetColors.statusGood)
+                        Text("ALL CAUGHT UP")
+                            .font(.widgetBody)
+                            .foregroundStyle(WidgetColors.statusGood)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
+                }
 
                 Spacer()
             }
@@ -160,9 +184,6 @@ struct MediumWidgetView: View {
             }
 
             Spacer()
-
-            // Log service button
-            markDoneButton
         }
         .padding(.leading, 12)
     }
@@ -180,16 +201,16 @@ struct MediumWidgetView: View {
                 vehicleID: vehicleID,
                 mileage: entry.currentMileage
             )) {
-                HStack(spacing: 6) {
+                HStack(spacing: 4) {
                     Image(systemName: "checkmark")
-                        .font(.system(size: 10, weight: .bold))
-                    Text("MARK DONE")
+                        .font(.system(size: 8, weight: .bold))
+                    Text("DONE")
                         .font(.widgetCaption)
                         .tracking(0.5)
                 }
                 .foregroundStyle(WidgetColors.statusGood)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 6)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
                 .overlay(
                     Rectangle()
                         .strokeBorder(WidgetColors.statusGood.opacity(0.4), lineWidth: 1)
@@ -199,76 +220,22 @@ struct MediumWidgetView: View {
         }
     }
 
-    // MARK: - Display Helpers
+    // MARK: - Display Helpers (delegated to shared WidgetDisplayHelpers)
 
-    private static let numberFormatter: NumberFormatter = {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        return formatter
-    }()
-
-    /// Format large number with comma separators
-    private func formatNumber(_ number: Int) -> String {
-        Self.numberFormatter.string(from: NSNumber(value: number)) ?? "\(number)"
-    }
-
-    /// Format mileage in user's preferred unit
-    private func formatMileage(_ miles: Int) -> String {
-        let displayValue = distanceUnit.fromMiles(miles)
-        return formatNumber(displayValue)
-    }
-
-    /// Get the label text based on display mode and service type
     private func displayLabel(for service: WidgetService) -> String {
-        if service.dueMileage != nil {
-            switch displayMode {
-            case .absolute:
-                return "DUE AT"
-            case .relative:
-                if let dueMileage = service.dueMileage, entry.currentMileage > dueMileage {
-                    return "OVERDUE BY"
-                }
-                return "REMAINING"
-            }
-        }
-        return "DUE IN"
+        WidgetDisplayHelpers.displayLabel(for: service, displayMode: displayMode, currentMileage: entry.currentMileage)
     }
 
-    /// Get the display value (mileage or days) based on display mode
     private func displayValue(for service: WidgetService) -> String {
-        // Priority: dueMileage first, then daysRemaining
-        if let dueMileage = service.dueMileage {
-            switch displayMode {
-            case .absolute:
-                return formatMileage(dueMileage)
-            case .relative:
-                let remaining = dueMileage - entry.currentMileage
-                return formatMileage(abs(remaining))
-            }
-        } else if let days = service.daysRemaining {
-            return "\(abs(days))"
-        }
-        return "—"
+        WidgetDisplayHelpers.displayValue(for: service, displayMode: displayMode, currentMileage: entry.currentMileage, distanceUnit: distanceUnit)
     }
 
-    /// Get the unit label based on what we're displaying
     private func displayUnit(for service: WidgetService) -> String {
-        if service.dueMileage != nil {
-            return distanceUnit.uppercaseAbbreviation
-        } else if service.daysRemaining != nil {
-            return "DAYS"
-        }
-        return ""
+        WidgetDisplayHelpers.displayUnit(for: service, distanceUnit: distanceUnit)
     }
 
-    /// Get status label text
     private func statusLabel(for status: WidgetServiceStatus) -> String {
-        switch status {
-        case .overdue: return "OVERDUE"
-        case .dueSoon: return "DUE SOON"
-        case .good: return "GOOD"
-        case .neutral: return ""
-        }
+        WidgetDisplayHelpers.statusLabel(for: status)
     }
 }
 

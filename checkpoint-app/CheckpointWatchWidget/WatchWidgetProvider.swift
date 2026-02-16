@@ -17,6 +17,7 @@ struct WatchWidgetEntry: TimelineEntry {
     let currentMileage: Int
     let service: WatchWidgetService?
     let isStale: Bool
+    let distanceUnit: String  // "MI" or "KM"
 
     static var placeholder: WatchWidgetEntry {
         WatchWidgetEntry(
@@ -30,7 +31,8 @@ struct WatchWidgetEntry: TimelineEntry {
                 dueMileage: 35000,
                 daysRemaining: 5
             ),
-            isStale: false
+            isStale: false,
+            distanceUnit: "MI"
         )
     }
 
@@ -40,7 +42,8 @@ struct WatchWidgetEntry: TimelineEntry {
             vehicleName: "",
             currentMileage: 0,
             service: nil,
-            isStale: false
+            isStale: false,
+            distanceUnit: "MI"
         )
     }
 }
@@ -87,9 +90,15 @@ private struct WatchWidgetData: Codable {
     let isEstimated: Bool
     let services: [WatchWidgetSharedService]
     let updatedAt: Date
+    let distanceUnit: String?  // "miles" or "kilometers", nil for backward compat
 
     var isStale: Bool {
         Date().timeIntervalSince(updatedAt) > 3600
+    }
+
+    /// Uppercase abbreviation: "MI" or "KM"
+    var distanceUnitAbbreviation: String {
+        distanceUnit == "kilometers" ? "KM" : "MI"
     }
 }
 
@@ -154,7 +163,8 @@ struct WatchWidgetProvider: TimelineProvider {
                 vehicleName: vehicleData.vehicleName,
                 currentMileage: vehicleData.currentMileage,
                 service: firstService,
-                isStale: vehicleData.isStale
+                isStale: vehicleData.isStale,
+                distanceUnit: vehicleData.distanceUnitAbbreviation
             )
         } catch {
             return .empty

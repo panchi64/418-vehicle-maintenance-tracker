@@ -47,9 +47,9 @@ class OdometerCaptureViewController: UIViewController {
     // Viewfinder guide rect in view coordinates
     private var viewfinderRect: CGRect = .zero
 
-    // Theme colors (matches cerulean design system)
-    private let ceruleanPrimary = UIColor(red: 0.0, green: 0.2, blue: 0.745, alpha: 1.0)
-    private let accentOffWhite = UIColor(red: 0.961, green: 0.941, blue: 0.863, alpha: 1.0)
+    // Theme colors
+    private let themePrimary = UIColor(Theme.backgroundPrimary)
+    private let themeAccent = UIColor(Theme.accent)
 
     // UI elements
     private let viewfinderBorder = CAShapeLayer()
@@ -118,18 +118,18 @@ class OdometerCaptureViewController: UIViewController {
     private func setupViewfinderOverlay() {
         // Semi-transparent cerulean mask
         maskLayer.fillRule = .evenOdd
-        maskLayer.fillColor = ceruleanPrimary.withAlphaComponent(0.75).cgColor
+        maskLayer.fillColor = themePrimary.withAlphaComponent(0.75).cgColor
         view.layer.addSublayer(maskLayer)
 
         // Accent border rectangle
-        viewfinderBorder.strokeColor = accentOffWhite.cgColor
+        viewfinderBorder.strokeColor = themeAccent.cgColor
         viewfinderBorder.fillColor = UIColor.clear.cgColor
         viewfinderBorder.lineWidth = 2
         view.layer.addSublayer(viewfinderBorder)
 
         // Guide label
         guideLabel.text = guideText
-        guideLabel.textColor = accentOffWhite
+        guideLabel.textColor = themeAccent
         guideLabel.font = .systemFont(ofSize: 13, weight: .bold)
         guideLabel.textAlignment = .center
         guideLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -170,9 +170,9 @@ class OdometerCaptureViewController: UIViewController {
     private func setupControls() {
         // Capture button
         captureButton.setTitle("CAPTURE", for: .normal)
-        captureButton.setTitleColor(ceruleanPrimary, for: .normal)
+        captureButton.setTitleColor(themePrimary, for: .normal)
         captureButton.titleLabel?.font = .systemFont(ofSize: 15, weight: .bold)
-        captureButton.backgroundColor = accentOffWhite
+        captureButton.backgroundColor = themeAccent
         captureButton.translatesAutoresizingMaskIntoConstraints = false
         captureButton.addTarget(self, action: #selector(capturePhoto), for: .touchUpInside)
         captureButton.accessibilityLabel = "Capture odometer reading"
@@ -180,7 +180,7 @@ class OdometerCaptureViewController: UIViewController {
 
         // Cancel button
         cancelButton.setTitle("Cancel", for: .normal)
-        cancelButton.setTitleColor(accentOffWhite, for: .normal)
+        cancelButton.setTitleColor(themeAccent, for: .normal)
         cancelButton.titleLabel?.font = .systemFont(ofSize: 17, weight: .medium)
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
         cancelButton.addTarget(self, action: #selector(cancelCapture), for: .touchUpInside)
@@ -290,7 +290,9 @@ extension OdometerCaptureViewController: AVCapturePhotoCaptureDelegate {
         guard error == nil,
               let data = photo.fileDataRepresentation(),
               let fullImage = UIImage(data: data) else {
-            onCancel?()
+            DispatchQueue.main.async { [weak self] in
+                self?.onCancel?()
+            }
             return
         }
 
@@ -301,6 +303,8 @@ extension OdometerCaptureViewController: AVCapturePhotoCaptureDelegate {
             previewLayerSize: previewSize
         )
 
-        onImageCaptured?(croppedImage)
+        DispatchQueue.main.async { [weak self] in
+            self?.onImageCaptured?(croppedImage)
+        }
     }
 }

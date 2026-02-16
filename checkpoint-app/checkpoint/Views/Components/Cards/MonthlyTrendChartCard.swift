@@ -14,9 +14,17 @@ struct MonthlyTrendChartCard: View {
     let breakdownByCategory: [(month: Date, category: CostCategory, amount: Decimal)]?
     let isStacked: Bool
 
+    @State private var selectedMonth: Date?
+
     private static let monthFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "MMM"
+        return f
+    }()
+
+    private static let monthYearFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "MMM yyyy"
         return f
     }()
 
@@ -25,14 +33,29 @@ struct MonthlyTrendChartCard: View {
         breakdown.count > 8 ? 3 : 1
     }
 
+    /// Find the breakdown entry matching the selected month
+    private var selectedBreakdownEntry: (month: Date, amount: Decimal)? {
+        guard let selectedMonth else { return nil }
+        let calendar = Calendar.current
+        return breakdown.first { entry in
+            calendar.isDate(entry.month, equalTo: selectedMonth, toGranularity: .month)
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             InstrumentSectionHeader(title: "Monthly Trend")
 
             VStack(spacing: 0) {
-                chart
-                    .brutalistChartStyle()
-                    .padding(Spacing.md)
+                ZStack(alignment: .topLeading) {
+                    chart
+                        .brutalistChartStyle()
+
+                    if let entry = selectedBreakdownEntry {
+                        selectionOverlay(month: entry.month, amount: entry.amount)
+                    }
+                }
+                .padding(Spacing.md)
 
                 if isStacked, let byCategory = breakdownByCategory {
                     legend(for: byCategory)
@@ -44,11 +67,30 @@ struct MonthlyTrendChartCard: View {
                     .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
             )
 
-            // Preserve text rows below chart
             textRows
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Monthly spending trend chart")
+    }
+
+    private func selectionOverlay(month: Date, amount: Decimal) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(Self.monthYearFormatter.string(from: month).uppercased())
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(1)
+
+            Text(Formatters.currencyWhole(amount))
+                .font(.brutalistHeading)
+                .foregroundStyle(Theme.accent)
+        }
+        .padding(.horizontal, Spacing.sm)
+        .padding(.vertical, Spacing.xs)
+        .background(Theme.surfaceInstrument)
+        .overlay(
+            Rectangle()
+                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+        )
     }
 
     // MARK: - Chart
@@ -56,14 +98,17 @@ struct MonthlyTrendChartCard: View {
     @ViewBuilder
     private var chart: some View {
         if isStacked, let byCategory = breakdownByCategory {
-            Chart(byCategory, id: \.month) { entry in
-                BarMark(
-                    x: .value("Month", entry.month, unit: .month),
-                    y: .value("Amount", NSDecimalNumber(decimal: entry.amount).doubleValue)
-                )
-                .foregroundStyle(by: .value("Category", entry.category.displayName))
-                .cornerRadius(0)
+            Chart {
+                ForEach(Array(byCategory.enumerated()), id: \.offset) { _, entry in
+                    BarMark(
+                        x: .value("Month", entry.month, unit: .month),
+                        y: .value("Amount", NSDecimalNumber(decimal: entry.amount).doubleValue)
+                    )
+                    .foregroundStyle(by: .value("Category", entry.category.displayName))
+                    .cornerRadius(0)
+                }
             }
+            .chartXSelection(value: $selectedMonth)
             .chartForegroundStyleScale(categoryColorMapping(from: byCategory))
             .chartLegend(.hidden)
             .chartXAxis {
@@ -99,6 +144,7 @@ struct MonthlyTrendChartCard: View {
                 .foregroundStyle(Theme.accent)
                 .cornerRadius(0)
             }
+            .chartXSelection(value: $selectedMonth)
             .chartXAxis {
                 AxisMarks(values: .stride(by: .month, count: xAxisMonthStride)) { value in
                     AxisValueLabel {
@@ -137,6 +183,7 @@ struct MonthlyTrendChartCard: View {
                     Rectangle()
                         .fill(category.color)
                         .frame(width: 10, height: 10)
+                        .accessibilityHidden(true)
                     Text(category.displayName.uppercased())
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
@@ -149,9 +196,10 @@ struct MonthlyTrendChartCard: View {
 
     // MARK: - Text Rows
 
+    /// Text rows sorted chronologically to match the chart's left-to-right ordering
     private var textRows: some View {
         VStack(spacing: 0) {
-            ForEach(Array(breakdown.reversed().enumerated()), id: \.element.month) { index, item in
+            ForEach(Array(breakdown.enumerated()), id: \.element.month) { index, item in
                 HStack(spacing: Spacing.sm) {
                     Text(formatMonthYear(item.month))
                         .font(.brutalistBody)
@@ -220,9 +268,7 @@ struct MonthlyTrendChartCard: View {
     }
 
     private func formatMonthYear(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM yyyy"
-        return formatter.string(from: date)
+        Self.monthYearFormatter.string(from: date)
     }
 
     private func formatCurrency(_ amount: Decimal) -> String {

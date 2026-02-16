@@ -167,8 +167,14 @@ struct OnboardingGetStartedView: View {
                                             .font(.system(size: 16, weight: .medium))
                                             .foregroundStyle(Theme.accent)
 
-                                        Text("MARBETE / REGISTRATION TAG")
-                                            .brutalistLabelStyle(color: Theme.accent)
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text("REGISTRATION TAG")
+                                                .brutalistLabelStyle(color: Theme.accent)
+                                            Text("MARBETE")
+                                                .font(.brutalistLabel)
+                                                .foregroundStyle(Theme.textTertiary)
+                                                .tracking(1.5)
+                                        }
 
                                         Spacer()
 
@@ -198,9 +204,9 @@ struct OnboardingGetStartedView: View {
                             }
 
                             // Primary action button
-                            if vinResult != nil {
+                            if let result = vinResult {
                                 Button {
-                                    onVINLookupComplete(vinResult!, vin)
+                                    onVINLookupComplete(result, vin)
                                 } label: {
                                     Text(L10n.onboardingGetStartedAddVehicle)
                                 }

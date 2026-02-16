@@ -68,8 +68,10 @@ struct EditServiceView: View {
                                     Toggle("", isOn: $hasDueDate)
                                         .labelsHidden()
                                         .tint(Theme.accent)
+                                        .accessibilityLabel("Set due date")
                                 }
                                 .padding(Spacing.md)
+                                .accessibilityElement(children: .combine)
                                 .background(Theme.surfaceInstrument)
                                 .overlay(
                                     Rectangle()
@@ -198,12 +200,30 @@ struct EditServiceView: View {
     private func saveChanges() {
         HapticService.shared.success()
         AnalyticsService.shared.capture(.serviceEdited)
+
+        let intervalsChanged = service.intervalMonths != intervalMonths || service.intervalMiles != intervalMiles
+
         service.name = serviceName
-        service.dueDate = hasDueDate ? dueDate : nil
-        service.dueMileage = dueMileage
         service.intervalMonths = intervalMonths
         service.intervalMiles = intervalMiles
         service.notes = notes.isEmpty ? nil : notes
+
+        // Re-derive due dates from intervals when intervals changed
+        if intervalsChanged {
+            let anchorDate = service.lastPerformed ?? Date()
+            let anchorMileage = service.lastMileage ?? vehicle.currentMileage
+            service.deriveDueFromIntervals(anchorDate: anchorDate, anchorMileage: anchorMileage)
+        }
+
+        // Apply explicit user overrides on top of derived values
+        if hasDueDate {
+            service.dueDate = dueDate
+        } else if !intervalsChanged {
+            service.dueDate = nil
+        }
+        if let explicit = dueMileage, !intervalsChanged {
+            service.dueMileage = explicit
+        }
 
         updateAppIcon()
         updateWidgetData()

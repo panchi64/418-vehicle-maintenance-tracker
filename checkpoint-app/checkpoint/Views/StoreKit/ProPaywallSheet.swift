@@ -29,6 +29,7 @@ struct ProPaywallSheet: View {
                             // Price display
                             if let product = storeManager.proProduct() {
                                 HStack(spacing: Spacing.sm) {
+                                    // TODO: Replace hardcoded price with StoreKit original price when available
                                     Text("$14.99")
                                         .font(.brutalistBody)
                                         .foregroundStyle(Theme.textTertiary)

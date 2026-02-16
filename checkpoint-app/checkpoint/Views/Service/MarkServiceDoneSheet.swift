@@ -22,6 +22,7 @@ struct MarkServiceDoneSheet: View {
     @State private var mileage: Int? = nil
     @State private var cost: String = ""
     @State private var costError: String?
+    @State private var costCategory: CostCategory = .maintenance
     @State private var notes: String = ""
     @State private var pendingAttachments: [AttachmentPicker.AttachmentData] = []
 
@@ -66,7 +67,7 @@ struct MarkServiceDoneSheet: View {
                                 label: "Mileage",
                                 value: $mileage,
                                 placeholder: "Required",
-                                suffix: "mi"
+                                suffix: DistanceSettings.shared.unit.abbreviation
                             )
                         }
 
@@ -88,6 +89,20 @@ struct MarkServiceDoneSheet: View {
                             if let costError {
                                 ErrorMessageRow(message: costError) {
                                     self.costError = nil
+                                }
+                            }
+
+                            VStack(alignment: .leading, spacing: Spacing.xs) {
+                                Text("CATEGORY")
+                                    .font(.brutalistLabel)
+                                    .foregroundStyle(Theme.textTertiary)
+                                    .tracking(1)
+
+                                InstrumentSegmentedControl(
+                                    options: CostCategory.allCases,
+                                    selection: $costCategory
+                                ) { category in
+                                    category.displayName
                                 }
                             }
 
@@ -134,8 +149,9 @@ struct MarkServiceDoneSheet: View {
 
     private func markAsDone() {
         HapticService.shared.success()
+        let costDecimal = Decimal(string: cost)
         AnalyticsService.shared.capture(.serviceMarkedDone(
-            hasCost: !cost.isEmpty && Decimal(string: cost) != nil,
+            hasCost: costDecimal != nil,
             hasNotes: !notes.isEmpty,
             hasAttachments: !pendingAttachments.isEmpty,
             attachmentCount: pendingAttachments.count
@@ -149,7 +165,8 @@ struct MarkServiceDoneSheet: View {
             vehicle: vehicle,
             performedDate: performedDate,
             mileageAtService: mileageInt,
-            cost: Decimal(string: cost),
+            cost: costDecimal,
+            costCategory: costDecimal != nil ? costCategory : nil,
             notes: notes.isEmpty ? nil : notes
         )
         modelContext.insert(log)

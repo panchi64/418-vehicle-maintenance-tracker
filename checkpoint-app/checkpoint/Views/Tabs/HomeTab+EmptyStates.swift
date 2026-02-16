@@ -52,9 +52,11 @@ extension HomeTab {
 
     var noServicesState: some View {
         EmptyStateView(
-            icon: "checkmark",
-            title: "All Clear",
-            message: "No maintenance services scheduled\nfor this vehicle"
+            icon: "wrench.and.screwdriver",
+            title: "SET UP MAINTENANCE",
+            message: "Add your first service to start\ntracking maintenance schedules",
+            action: { appState.showAddService = true },
+            actionLabel: "ADD SERVICE"
         )
     }
 }

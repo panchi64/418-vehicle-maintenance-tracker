@@ -44,6 +44,7 @@ struct VehicleHeader: View {
                                 .font(.brutalistBody)
                                 .foregroundStyle(Theme.accent)
                                 .underline(onMileageTap != nil, color: Theme.accent.opacity(0.5))
+                                .frame(minHeight: 44)
                                 .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
@@ -86,7 +87,7 @@ struct VehicleHeader: View {
                     Image(systemName: error.systemImage)
                         .font(.system(size: 16, weight: .medium))
                         .foregroundStyle(error.iconColor)
-                        .frame(width: 32, height: 32)
+                        .frame(width: 44, height: 44)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)

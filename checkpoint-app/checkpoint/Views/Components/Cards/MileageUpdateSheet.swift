@@ -265,7 +265,12 @@ struct MileageUpdateSheet: View {
             HStack(spacing: 0) {
                 // Number input
                 HStack(spacing: 8) {
-                    TextField("", text: mileageBinding)
+                    TextField(
+                        vehicle.currentMileage > 0
+                            ? Formatters.mileageNumber(vehicle.currentMileage)
+                            : "Enter mileage",
+                        text: mileageBinding
+                    )
                         .font(.instrumentBody)
                         .foregroundStyle(Theme.textPrimary)
                         .keyboardType(.numberPad)
@@ -289,6 +294,7 @@ struct MileageUpdateSheet: View {
                             .frame(width: 52, height: 52)
                             .background(Theme.surfaceInstrument)
                     }
+                    .accessibilityLabel("Scan odometer with camera")
                     .overlay(
                         Rectangle()
                             .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
@@ -340,7 +346,10 @@ struct MileageUpdateSheet: View {
                 Image(systemName: "xmark")
                     .font(.system(size: 12, weight: .bold))
                     .foregroundStyle(Theme.textTertiary)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
             }
+            .accessibilityLabel("Dismiss error")
         }
         .padding(Spacing.md)
         .background(Theme.statusOverdue.opacity(0.1))

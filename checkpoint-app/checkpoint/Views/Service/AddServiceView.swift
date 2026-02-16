@@ -82,9 +82,7 @@ struct AddServiceView: View {
 
         if let months = intervalMonths, months > 0 {
             if let nextDate = Calendar.current.date(byAdding: .month, value: months, to: performedDate) {
-                let formatter = DateFormatter()
-                formatter.dateFormat = "MMM yyyy"
-                parts.append(formatter.string(from: nextDate))
+                parts.append(Formatters.shortDate.string(from: nextDate))
             }
         }
 
@@ -149,13 +147,19 @@ struct AddServiceView: View {
                 }
             }
             .onChange(of: selectedPreset) { _, newPreset in
-                // Auto-fill intervals from preset (but don't auto-enable reminder)
                 if let preset = newPreset {
                     if let months = preset.defaultIntervalMonths {
                         intervalMonths = months
                     }
                     if let miles = preset.defaultIntervalMiles {
                         intervalMiles = miles
+                    }
+                    // Auto-enable recurring when preset has intervals (Record mode)
+                    if mode == .record {
+                        let hasIntervals = (preset.defaultIntervalMonths ?? 0) > 0 || (preset.defaultIntervalMiles ?? 0) > 0
+                        if hasIntervals {
+                            scheduleRecurring = true
+                        }
                     }
                 }
             }
@@ -233,11 +237,18 @@ struct AddServiceView: View {
             InstrumentSectionHeader(title: "Mileage")
 
             InstrumentNumberField(
-                label: "Mileage",
+                label: "Mileage *",
                 value: $mileageAtService,
                 placeholder: "Required",
-                suffix: "mi"
+                suffix: DistanceSettings.shared.unit.abbreviation
             )
+
+            if mileageAtService == nil {
+                Text("MILEAGE IS REQUIRED TO SAVE")
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.statusOverdue.opacity(0.7))
+                    .tracking(1)
+            }
         }
 
         VStack(alignment: .leading, spacing: Spacing.sm) {
@@ -255,8 +266,10 @@ struct AddServiceView: View {
                     Toggle("", isOn: $scheduleRecurring)
                         .labelsHidden()
                         .tint(Theme.accent)
+                        .accessibilityLabel("Remind me next time")
                 }
                 .padding(Spacing.md)
+                .accessibilityElement(children: .combine)
                 .background(Theme.surfaceInstrument)
                 .overlay(
                     Rectangle()
@@ -330,11 +343,6 @@ struct AddServiceView: View {
                 if let months = intervalMonths, months > 0 {
                     // Interval is set — show derived date as informational text
                     if let date = effectiveDueDate {
-                        let formatter = {
-                            let f = DateFormatter()
-                            f.dateFormat = "MMM d, yyyy"
-                            return f
-                        }()
                         HStack {
                             Text("DUE DATE")
                                 .font(.brutalistLabel)
@@ -343,7 +351,7 @@ struct AddServiceView: View {
 
                             Spacer()
 
-                            Text(formatter.string(from: date))
+                            Text(Formatters.mediumDate.string(from: date))
                                 .font(.brutalistBody)
                                 .foregroundStyle(Theme.accent)
                         }
@@ -367,8 +375,10 @@ struct AddServiceView: View {
                         Toggle("", isOn: $hasCustomDate)
                             .labelsHidden()
                             .tint(Theme.accent)
+                            .accessibilityLabel("Set due date")
                     }
                     .padding(Spacing.md)
+                    .accessibilityElement(children: .combine)
                     .background(Theme.surfaceInstrument)
                     .overlay(
                         Rectangle()

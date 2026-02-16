@@ -27,10 +27,13 @@ struct ServiceBundlingToggle: View {
             Toggle("", isOn: $isEnabled)
                 .labelsHidden()
                 .tint(Theme.accent)
+                .accessibilityLabel("Service Bundling Suggestions")
         }
         .padding(Spacing.md)
+        .accessibilityElement(children: .combine)
         .onChange(of: isEnabled) { _, newValue in
             Task { @MainActor in
+                HapticService.shared.selectionChanged()
                 ClusteringSettings.shared.isEnabled = newValue
             }
         }

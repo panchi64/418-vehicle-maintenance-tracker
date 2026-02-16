@@ -61,7 +61,8 @@ final class WatchSessionService: NSObject {
         currentMileage: Int,
         estimatedMileage: Int?,
         isEstimated: Bool,
-        services: [(serviceID: String?, name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?)]
+        services: [(serviceID: String?, name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?)],
+        distanceUnit: String = "miles"
     ) {
         guard WCSession.isSupported() else { return }
 
@@ -94,7 +95,8 @@ final class WatchSessionService: NSObject {
             estimatedMileage: estimatedMileage,
             isEstimated: isEstimated,
             services: Array(watchServices),
-            updatedAt: Date()
+            updatedAt: Date(),
+            distanceUnit: distanceUnit
         )
 
         let context = WatchContextDTO(
@@ -316,6 +318,7 @@ private struct WatchVehicleDTO: Codable {
     let isEstimated: Bool
     let services: [WatchServiceDTO]
     let updatedAt: Date
+    let distanceUnit: String
 }
 
 /// Service DTO for encoding to Watch

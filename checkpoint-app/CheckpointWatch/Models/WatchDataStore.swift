@@ -103,7 +103,8 @@ final class WatchDataStore {
             estimatedMileage: nil,
             isEstimated: false,
             services: current.services,
-            updatedAt: current.updatedAt
+            updatedAt: current.updatedAt,
+            distanceUnit: current.distanceUnit
         )
     }
 
@@ -124,7 +125,8 @@ final class WatchDataStore {
             estimatedMileage: current.estimatedMileage,
             isEstimated: current.isEstimated,
             services: updatedServices,
-            updatedAt: current.updatedAt
+            updatedAt: current.updatedAt,
+            distanceUnit: current.distanceUnit
         )
     }
 }

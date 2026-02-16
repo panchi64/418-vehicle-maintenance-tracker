@@ -54,8 +54,9 @@ extension CostsTab {
         Formatters.currencyWhole(totalSpent)
     }
 
+    /// Count only logs with costs, consistent with AVG COST and other metrics
     var serviceCount: Int {
-        filteredLogs.count
+        logsWithCosts.count
     }
 
     var averageCostPerService: Decimal? {
@@ -70,13 +71,14 @@ extension CostsTab {
 
     // MARK: - Cost Per Mile
 
-    /// Calculate cost per mile for the filtered period
+    /// Calculate cost per mile for the filtered period.
+    /// Uses logsWithCosts for both spending and mileage range so the
+    /// numerator and denominator come from the same population.
     var costPerMile: Double? {
         guard vehicle != nil,
               logsWithCosts.count >= 2 else { return nil }
 
-        // Get oldest and newest logs in period
-        let sortedLogs = filteredLogs.sorted { $0.performedDate < $1.performedDate }
+        let sortedLogs = logsWithCosts.sorted { $0.performedDate < $1.performedDate }
         guard let oldest = sortedLogs.first,
               let newest = sortedLogs.last,
               newest.mileageAtService > oldest.mileageAtService else { return nil }
@@ -87,29 +89,10 @@ extension CostsTab {
         return NSDecimalNumber(decimal: totalSpent).doubleValue / Double(milesDriven)
     }
 
-    /// Calculate lifetime cost per mile
-    var lifetimeCostPerMile: Double? {
-        guard vehicle != nil else { return nil }
-
-        // Get all logs with costs for this vehicle (no period filter)
-        let allLogs = vehicleServiceLogs.filter { ($0.cost ?? 0) > 0 }
-        guard allLogs.count >= 2 else { return nil }
-
-        let sortedLogs = allLogs.sorted { $0.performedDate < $1.performedDate }
-        guard let oldest = sortedLogs.first,
-              let newest = sortedLogs.last,
-              newest.mileageAtService > oldest.mileageAtService else { return nil }
-
-        let milesDriven = newest.mileageAtService - oldest.mileageAtService
-        let totalCost = allLogs.compactMap { $0.cost }.reduce(0, +)
-        guard milesDriven > 0 else { return nil }
-
-        return NSDecimalNumber(decimal: totalCost).doubleValue / Double(milesDriven)
-    }
-
     var formattedCostPerMile: String {
         guard let cpm = costPerMile else { return "-" }
-        return String(format: "$%.2f/mi", cpm)
+        let unitAbbr = DistanceSettings.shared.unit.abbreviation
+        return String(format: "$%.2f/\(unitAbbr)", cpm)
     }
 
     // MARK: - Category Breakdown
@@ -210,8 +193,14 @@ extension CostsTab {
 
     // MARK: - Yearly Roundup
 
+    /// The year shown in the yearly roundup. When the period filter is "Year"
+    /// (rolling 12 months), use the year of the most recent log so the roundup
+    /// reflects the filtered window. Otherwise use the current calendar year.
     var currentYear: Int {
-        Calendar.current.component(.year, from: Date.now)
+        if periodFilter == .year, let newest = logsWithCosts.first {
+            return Calendar.current.component(.year, from: newest.performedDate)
+        }
+        return Calendar.current.component(.year, from: Date.now)
     }
 
     var previousYearLogs: [ServiceLog] {

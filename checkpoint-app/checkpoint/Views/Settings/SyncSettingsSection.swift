@@ -76,8 +76,10 @@ struct SyncSettingsSection: View {
             Toggle("", isOn: $isEnabled)
                 .labelsHidden()
                 .tint(Theme.accent)
+                .accessibilityLabel("iCloud Sync")
         }
         .padding(Spacing.md)
+        .accessibilityElement(children: .combine)
         .onChange(of: isEnabled) { _, newValue in
             Task { @MainActor in
                 SyncSettings.shared.iCloudSyncEnabled = newValue
@@ -120,10 +122,14 @@ struct SyncSettingsSection: View {
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.accent)
                         .tracking(1)
+                        .frame(minHeight: 44)
+                        .contentShape(Rectangle())
                 }
             }
         }
         .padding(Spacing.md)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Sync status: \(statusDisplayText)")
     }
 
     // MARK: - Status Icon

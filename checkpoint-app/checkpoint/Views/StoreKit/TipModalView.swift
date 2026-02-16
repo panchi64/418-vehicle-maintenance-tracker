@@ -157,7 +157,28 @@ struct TipModalView: View {
 
                     }
                     .padding(.horizontal, Spacing.screenHorizontal)
-                    .padding(.bottom, Spacing.lg)
+
+                    // Collection progress
+                    let rareThemes = ThemeManager.shared.allThemes.filter { $0.tier == .rare }
+                    let ownedRare = rareThemes.filter { ThemeManager.shared.isOwned($0) }
+                    if rareThemes.count > 0 && ownedRare.count < rareThemes.count {
+                        Text("\(ownedRare.count)/\(rareThemes.count) RARE THEMES COLLECTED")
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.textTertiary)
+                            .tracking(1)
+                    }
+
+                    // Dismiss
+                    Button {
+                        AnalyticsService.shared.capture(.tipModalDismissed)
+                        dismiss()
+                    } label: {
+                        Text("Not now")
+                            .font(.brutalistSecondary)
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+
+                    Spacer()
                     .opacity(isRevealed ? 1 : 0)
                 }
             }

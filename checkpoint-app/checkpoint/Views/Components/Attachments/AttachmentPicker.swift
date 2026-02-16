@@ -117,7 +117,11 @@ struct AttachmentPicker: View {
                                 await processScannedImages(images)
                             }
                         },
-                        onCancel: {}
+                        onCancel: {},
+                        onError: { error in
+                            attachmentLogger.error("Receipt scan failed: \(error.localizedDescription)")
+                            ToastService.shared.show("Scan failed. Please try again.", icon: "xmark.circle", style: .error)
+                        }
                     )
                 }
 
@@ -304,6 +308,8 @@ struct AttachmentPreviewItem: View {
                     .padding(4)
                     .background(Theme.statusOverdue)
             }
+            .frame(minWidth: 44, minHeight: 44)
+            .contentShape(Rectangle())
             .offset(x: 4, y: -4)
         }
         .overlay(

@@ -111,7 +111,7 @@ struct NextUpCard: View {
                             .padding(.top, 4)
                     }
                 }
-                .padding(.vertical, Spacing.screenHorizontal)
+                .padding(.vertical, Spacing.lg)
             } else if let days = daysUntilDue {
                 // Fallback to days for date-only services (e.g., battery check, wiper blades)
                 VStack(alignment: .leading, spacing: Spacing.xs) {
@@ -131,7 +131,7 @@ struct NextUpCard: View {
                         .foregroundStyle(Theme.textTertiary)
                         .tracking(1.5)
                 }
-                .padding(.vertical, Spacing.screenHorizontal)
+                .padding(.vertical, Spacing.lg)
             }
 
             // Divider
@@ -165,7 +165,7 @@ struct NextUpCard: View {
                     }
 
                     HStack {
-                        Text("DUE_AT")
+                        Text("DUE AT")
                             .font(.brutalistLabel)
                             .foregroundStyle(Theme.textTertiary)
                             .tracking(1)
@@ -314,7 +314,7 @@ struct MarbeteNextUpCard: View {
                         .foregroundStyle(Theme.textTertiary)
                         .tracking(1.5)
                 }
-                .padding(.vertical, Spacing.screenHorizontal)
+                .padding(.vertical, Spacing.lg)
             }
 
             // Divider

@@ -53,21 +53,23 @@ final class VehicleFormState {
 
     // MARK: - Validation
 
-    /// Step 1 is valid when Make, Model, and Year are all provided
+    /// Year is valid when between 1900 and two years from now
+    var isYearValid: Bool {
+        guard let year else { return false }
+        let maxYear = Calendar.current.component(.year, from: Date()) + 2
+        return (1900...maxYear).contains(year)
+    }
+
+    /// Step 1 is valid when Make, Model, and Year are all provided and year is in range
     var isBasicsValid: Bool {
         !make.trimmingCharacters(in: .whitespaces).isEmpty &&
         !model.trimmingCharacters(in: .whitespaces).isEmpty &&
-        year != nil
+        isYearValid
     }
 
     /// VIN is valid when it's 17 alphanumeric characters (excluding I, O, Q)
     var isVINValid: Bool {
-        let trimmed = vin.trimmingCharacters(in: .whitespaces)
-        guard trimmed.count == 17 else { return false }
-        let forbidden = CharacterSet(charactersIn: "IOQioq")
-        return trimmed.unicodeScalars.allSatisfy {
-            !forbidden.contains($0) && CharacterSet.alphanumerics.contains($0)
-        }
+        Vehicle.isValidVIN(vin)
     }
 
     /// Check if camera is available (requires physical device)

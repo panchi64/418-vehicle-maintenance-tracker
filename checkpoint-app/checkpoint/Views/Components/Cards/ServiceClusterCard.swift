@@ -50,7 +50,7 @@ struct ServiceClusterCard: View {
                     Image(systemName: "xmark")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(Theme.textTertiary)
-                        .frame(width: 24, height: 24)
+                        .frame(width: 44, height: 44)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)

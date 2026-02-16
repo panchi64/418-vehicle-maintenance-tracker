@@ -31,6 +31,9 @@ enum Spacing {
 
     /// 48pt - Hero spacing, top of screen
     static let xxl: CGFloat = 48
+
+    /// 56pt - Extra bottom clearance for tab bar overlap
+    static let tabBarOffset: CGFloat = 56
 }
 
 // MARK: - Screen Padding Modifier

@@ -94,6 +94,18 @@ final class AppState {
     var onboardingMarbeteMonth: Int?
     var onboardingMarbeteYear: Int?
 
+    // MARK: - VIN Lookup Result Passthrough (Onboarding -> AddVehicleFlow)
+
+    /// Stores VIN lookup result from onboarding to pre-fill AddVehicleFlowView
+    var vinLookupResult: VINLookupPassthrough?
+
+    struct VINLookupPassthrough {
+        let make: String
+        let model: String
+        let year: Int?
+        let vin: String
+    }
+
     // MARK: - Services Tab State (preserved across tab switches)
 
     var servicesSearchText = ""
