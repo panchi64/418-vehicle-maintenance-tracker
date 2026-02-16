@@ -66,19 +66,6 @@ struct AddServiceView: View {
         }
     }
 
-    /// The due mileage that will be saved — explicit value or derived from interval + current mileage.
-    /// Mirrors effectiveDueDate: when the user sets a mile interval but no explicit due mileage,
-    /// we compute it as currentMileage + intervalMiles so the service has due tracking.
-    private var effectiveDueMileage: Int? {
-        if let explicit = dueMileage {
-            return explicit
-        } else if let miles = intervalMiles, miles > 0 {
-            return vehicle.currentMileage + miles
-        } else {
-            return nil
-        }
-    }
-
     var serviceName: String {
         selectedPreset?.name ?? customServiceName
     }
@@ -488,14 +475,9 @@ struct AddServiceView: View {
         )
         service.vehicle = vehicle
 
-        // Calculate next due date/mileage (only when recurring)
+        // Derive next due date/mileage from intervals (only when recurring)
         if scheduleRecurring {
-            if let months = intervalMonths, months > 0 {
-                service.dueDate = Calendar.current.date(byAdding: .month, value: months, to: performedDate)
-            }
-            if let miles = intervalMiles, miles > 0 {
-                service.dueMileage = mileage + miles
-            }
+            service.deriveDueFromIntervals(anchorDate: performedDate, anchorMileage: mileage)
         }
 
         modelContext.insert(service)
@@ -539,12 +521,22 @@ struct AddServiceView: View {
     private func saveScheduledService() {
         let service = Service(
             name: serviceName,
-            dueDate: effectiveDueDate,
-            dueMileage: effectiveDueMileage,
             intervalMonths: intervalMonths,
             intervalMiles: intervalMiles
         )
         service.vehicle = vehicle
+
+        // Derive deadlines from intervals (same logic as record mode and mark-complete)
+        service.deriveDueFromIntervals(anchorDate: Date(), anchorMileage: vehicle.currentMileage)
+
+        // Apply user overrides: custom date or explicit due mileage take precedence
+        if hasCustomDate {
+            service.dueDate = dueDate
+        }
+        if let explicit = dueMileage {
+            service.dueMileage = explicit
+        }
+
         modelContext.insert(service)
     }
 }
