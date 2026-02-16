@@ -105,6 +105,7 @@ v1.0 features are tracked throughout this document. Future versions are outlined
 | Seasonal reminders           | Medium   | ✅     | Climate zone + season → contextual dashboard cards              |
 | Severe vs normal schedules   | Medium   | 🔮     | Moved to v2.0 — only meaningful with pre-loaded factory schedules |
 | Custom reminder intervals    | Medium   | ✅     | User-defined schedules                                          |
+| Service notes                | Medium   | ✅     | Optional notes on scheduled services — shown as context when marking done |
 
 #### Setup: Schedule Source Choice
 
