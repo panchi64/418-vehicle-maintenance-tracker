@@ -212,6 +212,7 @@ struct EditVehicleView: View {
                     .padding(.bottom, Spacing.xxl)
                 }
             }
+            .numberPadDoneButton()
             .navigationTitle("Edit Vehicle")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)

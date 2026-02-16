@@ -131,6 +131,7 @@ struct AddServiceView: View {
                     .padding(.bottom, Spacing.xxl)
                 }
             }
+            .numberPadDoneButton()
             .navigationTitle(mode == .record ? "Record Service" : "Set Reminder")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)

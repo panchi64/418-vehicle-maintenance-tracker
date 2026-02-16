@@ -127,6 +127,7 @@ struct MarkServiceDoneSheet: View {
                     .padding(.vertical, Spacing.lg)
                 }
             }
+            .numberPadDoneButton()
             .navigationTitle("Mark as Done")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

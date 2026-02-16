@@ -101,16 +101,6 @@ struct InstrumentNumberField: View {
                         .foregroundStyle(Theme.textPrimary)
                         .keyboardType(.numberPad)
                         .focused($isFocused)
-                        .toolbar {
-                            ToolbarItemGroup(placement: .keyboard) {
-                                Spacer()
-                                Button("DONE") {
-                                    isFocused = false
-                                }
-                                .font(.brutalistLabel)
-                                .foregroundStyle(Theme.accent)
-                            }
-                        }
                         .onChange(of: textValue) { _, newValue in
                             let filtered = newValue.filter { $0.isNumber }
                             if filtered != newValue {
@@ -230,6 +220,35 @@ struct InstrumentToggle: View {
             Rectangle()
                 .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
         )
+    }
+}
+
+// MARK: - Number Pad Done Button
+
+/// Apply once to a parent container (ScrollView, Form, NavigationStack)
+/// to add a single "DONE" button to the keyboard toolbar for all number pad fields.
+struct NumberPadDoneButton: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("DONE") {
+                        UIApplication.shared.sendAction(
+                            #selector(UIResponder.resignFirstResponder),
+                            to: nil, from: nil, for: nil
+                        )
+                    }
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.accent)
+                }
+            }
+    }
+}
+
+extension View {
+    func numberPadDoneButton() -> some View {
+        modifier(NumberPadDoneButton())
     }
 }
 

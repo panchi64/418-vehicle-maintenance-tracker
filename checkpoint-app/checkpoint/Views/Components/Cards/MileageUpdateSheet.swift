@@ -72,6 +72,7 @@ struct MileageUpdateSheet: View {
                 .padding(Spacing.screenHorizontal)
                 .padding(.top, Spacing.lg)
             }
+            .numberPadDoneButton()
             .navigationTitle("Update Mileage")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

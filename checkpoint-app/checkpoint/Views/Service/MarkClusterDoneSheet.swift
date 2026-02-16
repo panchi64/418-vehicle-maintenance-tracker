@@ -54,6 +54,7 @@ struct MarkClusterDoneSheet: View {
                     .padding(.vertical, Spacing.lg)
                 }
             }
+            .numberPadDoneButton()
             .navigationTitle("Mark All Done")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

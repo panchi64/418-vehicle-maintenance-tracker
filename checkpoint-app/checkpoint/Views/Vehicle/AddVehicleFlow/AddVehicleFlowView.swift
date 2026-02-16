@@ -43,6 +43,7 @@ struct AddVehicleFlowView: View {
                         .transition(.opacity)
                 }
             }
+            .numberPadDoneButton()
             .navigationTitle(navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)

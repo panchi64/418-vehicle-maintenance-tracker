@@ -151,6 +151,7 @@ struct EditServiceView: View {
                     .padding(.bottom, Spacing.xxl)
                 }
             }
+            .numberPadDoneButton()
             .navigationTitle("Edit Service")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
