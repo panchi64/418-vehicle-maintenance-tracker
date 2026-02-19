@@ -17,6 +17,7 @@ enum ServiceMode: String, CaseIterable {
 struct AddServiceView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(AppState.self) private var appState
     @Query private var services: [Service]
 
     let vehicle: Vehicle
@@ -458,6 +459,7 @@ struct AddServiceView: View {
         } else {
             ToastService.shared.show(L10n.toastReminderSet, icon: "clock", style: .success)
         }
+        appState.recordCompletedAction()
         dismiss()
     }
 
@@ -563,5 +565,6 @@ struct AddServiceView: View {
     )
 
     AddServiceView(vehicle: vehicle)
+        .environment(AppState())
         .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self], inMemory: true)
 }

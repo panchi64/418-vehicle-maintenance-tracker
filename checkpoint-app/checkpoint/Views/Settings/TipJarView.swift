@@ -97,7 +97,7 @@ struct TipJarView: View {
 
     private func debugPurchaseTip(_ productID: StoreManager.ProductID) async {
         await storeManager.simulatePurchase(productID)
-        PurchaseSettings.shared.totalTipCount += 1
+        PurchaseSettings.shared.recordTip()
         if let theme = ThemeManager.shared.unlockRandomRareTheme() {
             AnalyticsService.shared.capture(.themeUnlocked(themeID: theme.id, tier: "rare"))
             appState.unlockedTheme = theme
@@ -114,7 +114,7 @@ struct TipJarView: View {
             let transaction = try await storeManager.purchase(productID)
             if transaction != nil {
                 AnalyticsService.shared.capture(.purchaseSucceeded(product: product.id))
-                PurchaseSettings.shared.totalTipCount += 1
+                PurchaseSettings.shared.recordTip()
 
                 // Gacha: unlock random rare theme
                 if let theme = ThemeManager.shared.unlockRandomRareTheme() {

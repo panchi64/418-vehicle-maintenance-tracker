@@ -2,7 +2,8 @@
 //  TipModalView.swift
 //  checkpoint
 //
-//  Post-action modal that appears after logging a service
+//  Post-action modal that appears after completing maintenance actions.
+//  Uses context-aware messaging and progressive backoff to stay non-intrusive.
 //
 
 import SwiftUI
@@ -14,6 +15,13 @@ struct TipModalView: View {
 
     private var storeManager: StoreManager { StoreManager.shared }
 
+    private var promptContent: TipPromptContent {
+        TipPromptContent.select(
+            tipCount: PurchaseSettings.shared.totalTipCount,
+            dismissCount: PurchaseSettings.shared.tipPromptDismissCount
+        )
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -24,15 +32,17 @@ struct TipModalView: View {
 
                     // Header
                     VStack(spacing: Spacing.sm) {
-                        Text("ENJOYING CHECKPOINT?")
+                        Text(promptContent.headline)
                             .font(.brutalistHeading)
                             .foregroundStyle(Theme.textPrimary)
+                            .multilineTextAlignment(.center)
 
-                        Text("Help keep Checkpoint free for everyone.\nEvery tip unlocks an exclusive theme.")
+                        Text(promptContent.body)
                             .font(.brutalistSecondary)
                             .foregroundStyle(Theme.textSecondary)
                             .multilineTextAlignment(.center)
                     }
+                    .padding(.horizontal, Spacing.screenHorizontal)
 
                     // Tip buttons in a horizontal row
                     HStack(spacing: Spacing.sm) {
@@ -56,8 +66,7 @@ struct TipModalView: View {
 
                     // Dismiss
                     Button {
-                        AnalyticsService.shared.capture(.tipModalDismissed)
-                        dismiss()
+                        handleDismiss()
                     } label: {
                         Text("Not now")
                             .font(.brutalistSecondary)
@@ -70,8 +79,7 @@ struct TipModalView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
-                        AnalyticsService.shared.capture(.tipModalDismissed)
-                        dismiss()
+                        handleDismiss()
                     }
                     .toolbarButtonStyle()
                 }
@@ -80,12 +88,27 @@ struct TipModalView: View {
         .presentationDetents([.height(350)])
     }
 
+    // MARK: - Actions
+
+    private func handleDismiss() {
+        let dismissCount = PurchaseSettings.shared.tipPromptDismissCount
+        PurchaseSettings.shared.recordTipPromptDismiss()
+        AnalyticsService.shared.capture(.tipModalDismissed(dismissCount: dismissCount + 1))
+        dismiss()
+    }
+
+    private func handleSuccessfulTip() {
+        PurchaseSettings.shared.recordTip()
+    }
+
+    // MARK: - Debug Buttons
+
     #if DEBUG
     private func debugTipButton(label: String, price: String, productID: StoreManager.ProductID) -> some View {
         Button {
             Task {
                 await storeManager.simulatePurchase(productID)
-                PurchaseSettings.shared.totalTipCount += 1
+                handleSuccessfulTip()
                 dismiss()
                 if let theme = ThemeManager.shared.unlockRandomRareTheme() {
                     AnalyticsService.shared.capture(.themeUnlocked(themeID: theme.id, tier: "rare"))
@@ -121,6 +144,8 @@ struct TipModalView: View {
     }
     #endif
 
+    // MARK: - Tip Button
+
     private func tipButton(for product: Product) -> some View {
         Button {
             Task {
@@ -130,7 +155,7 @@ struct TipModalView: View {
                     let transaction = try await storeManager.purchase(productID)
                     if transaction != nil {
                         AnalyticsService.shared.capture(.purchaseSucceeded(product: product.id))
-                        PurchaseSettings.shared.totalTipCount += 1
+                        handleSuccessfulTip()
                         dismiss()
                         if let theme = ThemeManager.shared.unlockRandomRareTheme() {
                             AnalyticsService.shared.capture(.themeUnlocked(themeID: theme.id, tier: "rare"))
@@ -157,4 +182,64 @@ struct TipModalView: View {
         }
         .buttonStyle(.primary)
     }
+}
+
+// MARK: - Tip Prompt Content
+
+/// Context-aware messages for the tip prompt. Rotates based on user history
+/// to keep the messaging fresh and relevant.
+struct TipPromptContent {
+    let headline: String
+    let body: String
+
+    /// Selects a random prompt based on whether the user has tipped before.
+    /// Randomized so that repeat appearances don't feel scripted.
+    static func select(tipCount: Int, dismissCount: Int) -> TipPromptContent {
+        if tipCount > 0 {
+            return returningTipperPrompts.randomElement()!
+        }
+        return firstTimePrompts.randomElement()!
+    }
+
+    // MARK: - First-Time Prompts
+
+    /// Messages for users who haven't tipped yet. Each successive dismiss
+    /// shows a different angle to find what resonates.
+    private static let firstTimePrompts: [TipPromptContent] = [
+        // First time: friendly, value-focused
+        TipPromptContent(
+            headline: "YOU'RE ON TOP OF IT",
+            body: "Checkpoint is built by one developer.\nA small tip keeps it free and improving — plus unlocks an exclusive theme."
+        ),
+        // Second time: community angle
+        TipPromptContent(
+            headline: "KEEPING YOUR RIDE SHARP",
+            body: "Tips from drivers like you fund every update.\nEach one also unlocks a rare theme for your dashboard."
+        ),
+        // Third time: short and direct
+        TipPromptContent(
+            headline: "LIKE CHECKPOINT?",
+            body: "A quick tip goes a long way.\nEvery tip unlocks an exclusive theme."
+        ),
+        // Fourth+: minimal, low-pressure
+        TipPromptContent(
+            headline: "STILL HERE FOR YOU",
+            body: "Checkpoint is free — tips help keep it that way.\nPlus, you'll unlock a rare theme."
+        ),
+    ]
+
+    // MARK: - Returning Tipper Prompts
+
+    /// Messages for users who have tipped before. Grateful tone,
+    /// acknowledges their support, entices with more themes.
+    private static let returningTipperPrompts: [TipPromptContent] = [
+        TipPromptContent(
+            headline: "THANKS FOR YOUR SUPPORT",
+            body: "Your tips keep Checkpoint going.\nTip again to unlock another rare theme."
+        ),
+        TipPromptContent(
+            headline: "YOU'RE A CHAMPION",
+            body: "Every tip helps build the next feature.\nThere are more rare themes waiting for you."
+        ),
+    ]
 }

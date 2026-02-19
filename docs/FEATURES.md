@@ -890,6 +890,19 @@ These features require ongoing server infrastructure and justify an annual subsc
 | **Pro Bundle** | One-time ($7.99–$14.99) | Advanced reports, PDF export, theme customization |
 | **Subscription** | Annual ($9.99–$14.99) | AI OCR, cloud sync, family sharing, desktop/web |
 
+#### Tip Prompt System
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| Post-action tip modal | ✅ | Shows after mileage updates, service logging, service completion, cluster completion |
+| Action-count gating | ✅ | Prompt only after 3+ completed actions (not on first use) |
+| Post-tip cooldown | ✅ | 30-day suppression after any tip |
+| Progressive backoff on dismiss | ✅ | Each dismiss raises threshold by 3 actions (capped at 15) |
+| Session limit | ✅ | Max one prompt per app session |
+| Context-aware messaging | ✅ | Randomized messages: first-time vs returning tipper copy |
+| Tip Jar in Settings | ✅ | Dedicated tip page with all tiers |
+| Gacha theme unlock | ✅ | Every tip unlocks a random rare theme |
+
 See [MONETIZATION.md](./MONETIZATION.md) for full pricing strategy, upgrade flows, and competitive positioning.
 
 ---

@@ -299,6 +299,7 @@ struct HomeTab: View {
             MarkClusterDoneSheet(cluster: cluster) {
                 detectClusters()
             }
+            .environment(appState)
         }
     }
 }

@@ -130,8 +130,8 @@ enum AnalyticsEvent {
     case purchaseSucceeded(product: String)
     case purchaseFailed(product: String, error: String)
     case purchaseRestored(product: String)
-    case tipModalShown
-    case tipModalDismissed
+    case tipModalShown(actionCount: Int, dismissCount: Int)
+    case tipModalDismissed(dismissCount: Int)
     case themeUnlocked(themeID: String, tier: String)
     case themeActivated(themeID: String)
     case vehicleLimitReached(vehicleCount: Int)
@@ -279,6 +279,10 @@ enum AnalyticsEvent {
             return ["theme_id": themeID, "tier": tier]
         case .themeActivated(let themeID):
             return ["theme_id": themeID]
+        case .tipModalShown(let actionCount, let dismissCount):
+            return ["action_count": actionCount, "dismiss_count": dismissCount]
+        case .tipModalDismissed(let dismissCount):
+            return ["dismiss_count": dismissCount]
         case .vehicleLimitReached(let vehicleCount):
             return ["vehicle_count": vehicleCount]
         default:
