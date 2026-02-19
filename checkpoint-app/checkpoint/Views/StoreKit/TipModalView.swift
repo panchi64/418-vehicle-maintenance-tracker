@@ -3,23 +3,35 @@
 //  checkpoint
 //
 //  Post-action modal that appears after completing maintenance actions.
-//  Uses context-aware messaging and progressive backoff to stay non-intrusive.
+//  Shows personalized stats about how the app has helped the user,
+//  with progressive backoff and cooldown to stay non-intrusive.
 //
 
 import SwiftUI
+import SwiftData
 import StoreKit
 
 struct TipModalView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(AppState.self) private var appState
+    @Query private var serviceLogs: [ServiceLog]
+    @Query private var vehicles: [Vehicle]
+    @Query private var services: [Service]
 
     private var storeManager: StoreManager { StoreManager.shared }
 
-    private var promptContent: TipPromptContent {
-        TipPromptContent.select(
-            tipCount: PurchaseSettings.shared.totalTipCount,
-            dismissCount: PurchaseSettings.shared.tipPromptDismissCount
+    private var stats: TipPromptStats {
+        TipPromptStats(
+            servicesLogged: serviceLogs.count,
+            servicesTracked: services.count,
+            vehicleCount: vehicles.count,
+            totalCost: serviceLogs.compactMap(\.cost).reduce(Decimal.zero, +),
+            hasTippedBefore: PurchaseSettings.shared.totalTipCount > 0
         )
+    }
+
+    private var promptContent: TipPromptContent {
+        TipPromptContent.select(from: stats)
     }
 
     var body: some View {
@@ -30,7 +42,7 @@ struct TipModalView: View {
                 VStack(spacing: Spacing.lg) {
                     Spacer()
 
-                    // Header
+                    // Stats-driven header
                     VStack(spacing: Spacing.sm) {
                         Text(promptContent.headline)
                             .font(.brutalistHeading)
@@ -41,6 +53,11 @@ struct TipModalView: View {
                             .font(.brutalistSecondary)
                             .foregroundStyle(Theme.textSecondary)
                             .multilineTextAlignment(.center)
+
+                        Text("Every tip also unlocks a rare theme.")
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.accent)
+                            .padding(.top, Spacing.xs)
                     }
                     .padding(.horizontal, Spacing.screenHorizontal)
 
@@ -85,7 +102,7 @@ struct TipModalView: View {
                 }
             }
         }
-        .presentationDetents([.height(350)])
+        .presentationDetents([.height(380)])
     }
 
     // MARK: - Actions
@@ -184,62 +201,103 @@ struct TipModalView: View {
     }
 }
 
+// MARK: - Stats
+
+/// Aggregated user stats used to personalize the tip prompt.
+struct TipPromptStats {
+    let servicesLogged: Int
+    let servicesTracked: Int
+    let vehicleCount: Int
+    let totalCost: Decimal
+    let hasTippedBefore: Bool
+
+    var formattedCost: String? {
+        guard totalCost > 0 else { return nil }
+        return Formatters.currency.string(from: totalCost as NSDecimalNumber)
+    }
+}
+
 // MARK: - Tip Prompt Content
 
-/// Context-aware messages for the tip prompt. Rotates based on user history
-/// to keep the messaging fresh and relevant.
+/// Builds personalized, stats-driven messages for the tip prompt.
+/// Instead of generic "enjoying the app?" copy, it reflects what the user
+/// has actually accomplished with Checkpoint.
 struct TipPromptContent {
     let headline: String
     let body: String
 
-    /// Selects a random prompt based on whether the user has tipped before.
-    /// Randomized so that repeat appearances don't feel scripted.
-    static func select(tipCount: Int, dismissCount: Int) -> TipPromptContent {
-        if tipCount > 0 {
-            return returningTipperPrompts.randomElement()!
+    static func select(from stats: TipPromptStats) -> TipPromptContent {
+        if stats.hasTippedBefore {
+            return returningTipper(stats: stats)
         }
-        return firstTimePrompts.randomElement()!
+        return firstTime(stats: stats)
     }
 
-    // MARK: - First-Time Prompts
+    // MARK: - First-Time Prompt
 
-    /// Messages for users who haven't tipped yet. Each successive dismiss
-    /// shows a different angle to find what resonates.
-    private static let firstTimePrompts: [TipPromptContent] = [
-        // First time: friendly, value-focused
-        TipPromptContent(
-            headline: "YOU'RE ON TOP OF IT",
-            body: "Checkpoint is built by one developer.\nA small tip keeps it free and improving — plus unlocks an exclusive theme."
-        ),
-        // Second time: community angle
-        TipPromptContent(
-            headline: "KEEPING YOUR RIDE SHARP",
-            body: "Tips from drivers like you fund every update.\nEach one also unlocks a rare theme for your dashboard."
-        ),
-        // Third time: short and direct
-        TipPromptContent(
-            headline: "LIKE CHECKPOINT?",
-            body: "A quick tip goes a long way.\nEvery tip unlocks an exclusive theme."
-        ),
-        // Fourth+: minimal, low-pressure
-        TipPromptContent(
-            headline: "STILL HERE FOR YOU",
-            body: "Checkpoint is free — tips help keep it that way.\nPlus, you'll unlock a rare theme."
-        ),
-    ]
+    private static func firstTime(stats: TipPromptStats) -> TipPromptContent {
+        let headline = buildHeadline(stats: stats)
+        let body = buildBody(stats: stats)
+        return TipPromptContent(headline: headline, body: body)
+    }
 
-    // MARK: - Returning Tipper Prompts
+    private static func buildHeadline(stats: TipPromptStats) -> String {
+        // Lead with the most impressive stat the user has
+        if let cost = stats.formattedCost {
+            return "\(cost) TRACKED"
+        }
+        if stats.servicesLogged >= 5 {
+            return "\(stats.servicesLogged) SERVICES LOGGED"
+        }
+        if stats.servicesTracked >= 3 {
+            return "\(stats.servicesTracked) SERVICES TRACKED"
+        }
+        if stats.vehicleCount > 1 {
+            return "\(stats.vehicleCount) VEHICLES MANAGED"
+        }
+        return "YOUR MAINTENANCE, HANDLED"
+    }
 
-    /// Messages for users who have tipped before. Grateful tone,
-    /// acknowledges their support, entices with more themes.
-    private static let returningTipperPrompts: [TipPromptContent] = [
-        TipPromptContent(
-            headline: "THANKS FOR YOUR SUPPORT",
-            body: "Your tips keep Checkpoint going.\nTip again to unlock another rare theme."
-        ),
-        TipPromptContent(
-            headline: "YOU'RE A CHAMPION",
-            body: "Every tip helps build the next feature.\nThere are more rare themes waiting for you."
-        ),
-    ]
+    private static func buildBody(stats: TipPromptStats) -> String {
+        var parts: [String] = []
+
+        if stats.vehicleCount > 1 {
+            parts.append("You're managing \(stats.vehicleCount) vehicles")
+        }
+
+        if stats.servicesLogged > 0 && stats.servicesTracked > 0 {
+            parts.append("\(stats.servicesLogged) logged, \(stats.servicesTracked) on the radar")
+        } else if stats.servicesTracked > 0 {
+            parts.append("\(stats.servicesTracked) services on the radar")
+        } else if stats.servicesLogged > 0 {
+            parts.append("\(stats.servicesLogged) services logged")
+        }
+
+        let statLine: String
+        if parts.isEmpty {
+            statLine = "You're building a solid maintenance history."
+        } else {
+            statLine = parts.joined(separator: " with ") + "."
+        }
+
+        return statLine + "\nCheckpoint is made by one dev — a tip helps keep it free."
+    }
+
+    // MARK: - Returning Tipper Prompt
+
+    private static func returningTipper(stats: TipPromptStats) -> TipPromptContent {
+        let headline: String
+        if let cost = stats.formattedCost {
+            headline = "\(cost) AND COUNTING"
+        } else if stats.servicesLogged >= 5 {
+            headline = "\(stats.servicesLogged) SERVICES AND COUNTING"
+        } else {
+            headline = "STILL GOING STRONG"
+        }
+
+        return TipPromptContent(
+            headline: headline,
+            body: "Your support keeps Checkpoint improving.\nAnother tip unlocks another rare theme."
+        )
+    }
 }
