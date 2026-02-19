@@ -23,7 +23,7 @@ struct TipJarView: View {
                     VStack(alignment: .leading, spacing: Spacing.sm) {
                         Text("SUPPORT CHECKPOINT")
                             .font(.brutalistLabel)
-                            .foregroundStyle(Theme.textTertiary)
+                            .foregroundStyle(Theme.accent)
                             .tracking(2)
 
                         Text("Help keep Checkpoint free and actively developed. Every tip unlocks an exclusive rare theme.")

@@ -18,6 +18,8 @@ struct TipModalView: View {
     @Query private var vehicles: [Vehicle]
     @Query private var services: [Service]
 
+    @State private var isRevealed = false
+
     private var storeManager: StoreManager { StoreManager.shared }
 
     private var stats: TipPromptStats {
@@ -43,10 +45,17 @@ struct TipModalView: View {
                 VStack(spacing: Spacing.lg) {
                     Spacer()
 
-                    // Stats-driven header
-                    VStack(spacing: Spacing.sm) {
+                    // Stats-driven header — mirrors ThemeRevealView pattern:
+                    // small label on top, large stat headline, body below
+                    VStack(spacing: Spacing.md) {
+                        Text("SUPPORT CHECKPOINT")
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.accent)
+                            .textCase(.uppercase)
+                            .tracking(2)
+
                         Text(promptContent.headline)
-                            .font(.brutalistHeading)
+                            .font(.brutalistTitle)
                             .foregroundStyle(Theme.textPrimary)
                             .multilineTextAlignment(.center)
 
@@ -54,56 +63,71 @@ struct TipModalView: View {
                             .font(.brutalistSecondary)
                             .foregroundStyle(Theme.textSecondary)
                             .multilineTextAlignment(.center)
-
-                        Text("Every tip also unlocks a rare theme.")
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.accent)
-                            .padding(.top, Spacing.xs)
+                            .padding(.horizontal, Spacing.lg)
                     }
                     .padding(.horizontal, Spacing.screenHorizontal)
+                    .opacity(isRevealed ? 1 : 0)
 
-                    // Tip buttons in a horizontal row
-                    HStack(spacing: Spacing.sm) {
-                        #if DEBUG
-                        if storeManager.tipProducts().isEmpty {
-                            debugTipSmall
-                            debugTipMedium
-                            debugTipLarge
-                        } else {
+                    Spacer()
+
+                    // Tip buttons + dismiss — pinned to bottom
+                    VStack(spacing: Spacing.md) {
+                        // Tip tier buttons in instrument card containers
+                        HStack(spacing: Spacing.sm) {
+                            #if DEBUG
+                            if storeManager.tipProducts().isEmpty {
+                                debugTipSmall
+                                debugTipMedium
+                                debugTipLarge
+                            } else {
+                                ForEach(storeManager.tipProducts(), id: \.id) { product in
+                                    tipButton(for: product)
+                                }
+                            }
+                            #else
                             ForEach(storeManager.tipProducts(), id: \.id) { product in
                                 tipButton(for: product)
                             }
+                            #endif
                         }
-                        #else
-                        ForEach(storeManager.tipProducts(), id: \.id) { product in
-                            tipButton(for: product)
+
+                        // Theme unlock hint
+                        Text("EVERY TIP UNLOCKS A RARE THEME")
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.textTertiary)
+                            .textCase(.uppercase)
+                            .tracking(1.5)
+
+                        // Dismiss
+                        Button {
+                            handleDismiss()
+                        } label: {
+                            Text("Not now")
+                                .font(.brutalistSecondary)
+                                .foregroundStyle(Theme.textTertiary)
                         }
-                        #endif
                     }
                     .padding(.horizontal, Spacing.screenHorizontal)
-
-                    // Dismiss
-                    Button {
-                        handleDismiss()
-                    } label: {
-                        Text("Not now")
-                            .font(.brutalistSecondary)
-                            .foregroundStyle(Theme.textTertiary)
-                    }
-
-                    Spacer()
+                    .padding(.bottom, Spacing.lg)
+                    .opacity(isRevealed ? 1 : 0)
                 }
             }
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button("Close") {
                         handleDismiss()
                     }
                     .toolbarButtonStyle()
                 }
             }
         }
-        .presentationDetents([.height(380)])
+        .presentationDetents([.medium])
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.4)) {
+                isRevealed = true
+            }
+        }
     }
 
     // MARK: - Actions
@@ -135,18 +159,25 @@ struct TipModalView: View {
                 }
             }
         } label: {
-            VStack(spacing: 4) {
+            VStack(spacing: Spacing.xs) {
                 Text(price)
                     .font(.brutalistBody)
-                    .foregroundStyle(Theme.surfaceInstrument)
+                    .foregroundStyle(Theme.textPrimary)
                 Text(label)
                     .font(.brutalistLabel)
-                    .foregroundStyle(Theme.surfaceInstrument.opacity(0.7))
+                    .foregroundStyle(Theme.textTertiary)
+                    .textCase(.uppercase)
+                    .tracking(1.5)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 60)
+            .padding(.vertical, Spacing.sm)
+            .background(Theme.surfaceInstrument)
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.accent, lineWidth: Theme.borderWidth)
+            )
         }
-        .buttonStyle(.primary)
+        .buttonStyle(.instrument)
     }
 
     private var debugTipSmall: some View {
@@ -177,7 +208,6 @@ struct TipModalView: View {
                         dismiss()
                         if let theme = ThemeManager.shared.unlockRandomRareTheme() {
                             AnalyticsService.shared.capture(.themeUnlocked(themeID: theme.id, tier: "rare"))
-                            // Small delay to let the tip modal dismiss first
                             try? await Task.sleep(for: .seconds(0.5))
                             appState.unlockedTheme = theme
                         }
@@ -187,18 +217,25 @@ struct TipModalView: View {
                 }
             }
         } label: {
-            VStack(spacing: 4) {
+            VStack(spacing: Spacing.xs) {
                 Text(product.displayPrice)
                     .font(.brutalistBody)
-                    .foregroundStyle(Theme.surfaceInstrument)
+                    .foregroundStyle(Theme.textPrimary)
                 Text(product.displayName.replacingOccurrences(of: " Tip", with: ""))
                     .font(.brutalistLabel)
-                    .foregroundStyle(Theme.surfaceInstrument.opacity(0.7))
+                    .foregroundStyle(Theme.textTertiary)
+                    .textCase(.uppercase)
+                    .tracking(1.5)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 60)
+            .padding(.vertical, Spacing.sm)
+            .background(Theme.surfaceInstrument)
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Theme.accent, lineWidth: Theme.borderWidth)
+            )
         }
-        .buttonStyle(.primary)
+        .buttonStyle(.instrument)
     }
 }
 
