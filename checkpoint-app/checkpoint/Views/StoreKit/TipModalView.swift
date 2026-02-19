@@ -26,6 +26,7 @@ struct TipModalView: View {
             servicesTracked: services.count,
             vehicleCount: vehicles.count,
             totalCost: serviceLogs.compactMap(\.cost).reduce(Decimal.zero, +),
+            oldestLogDate: serviceLogs.map(\.performedDate).min(),
             hasTippedBefore: PurchaseSettings.shared.totalTipCount > 0
         )
     }
@@ -209,95 +210,145 @@ struct TipPromptStats {
     let servicesTracked: Int
     let vehicleCount: Int
     let totalCost: Decimal
+    let oldestLogDate: Date?
     let hasTippedBefore: Bool
 
     var formattedCost: String? {
         guard totalCost > 0 else { return nil }
         return Formatters.currency.string(from: totalCost as NSDecimalNumber)
     }
+
+    /// Months of maintenance history, nil if no logs
+    var monthsOfHistory: Int? {
+        guard let oldest = oldestLogDate else { return nil }
+        let months = Calendar.current.dateComponents([.month], from: oldest, to: Date()).month ?? 0
+        return months > 0 ? months : nil
+    }
 }
 
 // MARK: - Tip Prompt Content
 
 /// Builds personalized, stats-driven messages for the tip prompt.
-/// Instead of generic "enjoying the app?" copy, it reflects what the user
-/// has actually accomplished with Checkpoint.
+///
+/// Design: Collect all stat-based messages the user *qualifies* for, then
+/// randomly pick one. This gives variety across appearances while keeping
+/// every message grounded in real data. The "one developer" line stays
+/// constant as the ask — only the stat framing rotates.
 struct TipPromptContent {
     let headline: String
     let body: String
 
     static func select(from stats: TipPromptStats) -> TipPromptContent {
         if stats.hasTippedBefore {
-            return returningTipper(stats: stats)
+            return pickRandom(from: returningTipperCandidates(stats: stats))
         }
-        return firstTime(stats: stats)
+        return pickRandom(from: firstTimeCandidates(stats: stats))
     }
 
-    // MARK: - First-Time Prompt
-
-    private static func firstTime(stats: TipPromptStats) -> TipPromptContent {
-        let headline = buildHeadline(stats: stats)
-        let body = buildBody(stats: stats)
-        return TipPromptContent(headline: headline, body: body)
+    private static func pickRandom(from candidates: [TipPromptContent]) -> TipPromptContent {
+        candidates.randomElement() ?? fallback
     }
 
-    private static func buildHeadline(stats: TipPromptStats) -> String {
-        // Lead with the most impressive stat the user has
+    // MARK: - First-Time Candidates
+
+    /// Builds every message the user's stats qualify for, then one is
+    /// picked at random. More stats = bigger pool = more variety.
+    private static func firstTimeCandidates(stats: TipPromptStats) -> [TipPromptContent] {
+        var pool: [TipPromptContent] = []
+
+        // Cost-based — strong signal, most concrete value
         if let cost = stats.formattedCost {
-            return "\(cost) TRACKED"
+            pool.append(TipPromptContent(
+                headline: "\(cost) IN MAINTENANCE TRACKED",
+                body: "That's real money you're keeping an eye on.\nCheckpoint is made by one dev — a tip helps keep it free."
+            ))
+            pool.append(TipPromptContent(
+                headline: "\(cost) LOGGED SO FAR",
+                body: "You've got a clear picture of what your vehicle costs.\nThis app is a one-person project — tips help it stay free."
+            ))
         }
-        if stats.servicesLogged >= 5 {
-            return "\(stats.servicesLogged) SERVICES LOGGED"
+
+        // Service log count — shows consistent engagement
+        if stats.servicesLogged >= 10 {
+            pool.append(TipPromptContent(
+                headline: "\(stats.servicesLogged) SERVICES IN THE BOOKS",
+                body: "That's a maintenance record any mechanic would respect.\nBuilt and maintained by one developer — tips make that possible."
+            ))
+        } else if stats.servicesLogged >= 3 {
+            pool.append(TipPromptContent(
+                headline: "\(stats.servicesLogged) SERVICES LOGGED",
+                body: "You're building a solid maintenance history.\nCheckpoint is a one-person project — a tip helps keep it going."
+            ))
         }
+
+        // Tracked/scheduled services — forward-looking value
         if stats.servicesTracked >= 3 {
-            return "\(stats.servicesTracked) SERVICES TRACKED"
+            pool.append(TipPromptContent(
+                headline: "\(stats.servicesTracked) SERVICES ON YOUR RADAR",
+                body: "Nothing's sneaking up on you.\nOne developer builds and maintains this — tips keep the updates coming."
+            ))
         }
+
+        // History depth — time-based engagement
+        if let months = stats.monthsOfHistory, months >= 2 {
+            pool.append(TipPromptContent(
+                headline: "\(months) MONTHS OF HISTORY",
+                body: "That's \(months) months of maintenance you'll never lose track of.\nCheckpoint is made by one dev — a tip helps keep it free."
+            ))
+        }
+
+        // Multi-vehicle — power user
         if stats.vehicleCount > 1 {
-            return "\(stats.vehicleCount) VEHICLES MANAGED"
+            pool.append(TipPromptContent(
+                headline: "\(stats.vehicleCount) VEHICLES, ONE PLACE",
+                body: "Every vehicle's maintenance, organized.\nThis is a one-person project — tips help keep it free for everyone."
+            ))
         }
-        return "YOUR MAINTENANCE, HANDLED"
+
+        // Always include a general-purpose entry so the pool is never empty
+        pool.append(fallback)
+
+        return pool
     }
 
-    private static func buildBody(stats: TipPromptStats) -> String {
-        var parts: [String] = []
+    // MARK: - Returning Tipper Candidates
 
-        if stats.vehicleCount > 1 {
-            parts.append("You're managing \(stats.vehicleCount) vehicles")
-        }
+    private static func returningTipperCandidates(stats: TipPromptStats) -> [TipPromptContent] {
+        var pool: [TipPromptContent] = []
 
-        if stats.servicesLogged > 0 && stats.servicesTracked > 0 {
-            parts.append("\(stats.servicesLogged) logged, \(stats.servicesTracked) on the radar")
-        } else if stats.servicesTracked > 0 {
-            parts.append("\(stats.servicesTracked) services on the radar")
-        } else if stats.servicesLogged > 0 {
-            parts.append("\(stats.servicesLogged) services logged")
-        }
-
-        let statLine: String
-        if parts.isEmpty {
-            statLine = "You're building a solid maintenance history."
-        } else {
-            statLine = parts.joined(separator: " with ") + "."
-        }
-
-        return statLine + "\nCheckpoint is made by one dev — a tip helps keep it free."
-    }
-
-    // MARK: - Returning Tipper Prompt
-
-    private static func returningTipper(stats: TipPromptStats) -> TipPromptContent {
-        let headline: String
         if let cost = stats.formattedCost {
-            headline = "\(cost) AND COUNTING"
-        } else if stats.servicesLogged >= 5 {
-            headline = "\(stats.servicesLogged) SERVICES AND COUNTING"
-        } else {
-            headline = "STILL GOING STRONG"
+            pool.append(TipPromptContent(
+                headline: "\(cost) AND COUNTING",
+                body: "Your support helped get Checkpoint here.\nAnother tip means another rare theme for your collection."
+            ))
         }
 
-        return TipPromptContent(
-            headline: headline,
-            body: "Your support keeps Checkpoint improving.\nAnother tip unlocks another rare theme."
-        )
+        if stats.servicesLogged >= 5 {
+            pool.append(TipPromptContent(
+                headline: "\(stats.servicesLogged) SERVICES AND GROWING",
+                body: "Your history keeps getting stronger.\nTips fund the next feature — and unlock another rare theme."
+            ))
+        }
+
+        if let months = stats.monthsOfHistory, months >= 3 {
+            pool.append(TipPromptContent(
+                headline: "\(months) MONTHS TOGETHER",
+                body: "Thanks for sticking around — and for your past support.\nAnother tip unlocks another rare theme."
+            ))
+        }
+
+        pool.append(TipPromptContent(
+            headline: "STILL GOING STRONG",
+            body: "Your past tips helped shape what Checkpoint is today.\nAnother one unlocks another rare theme."
+        ))
+
+        return pool
     }
+
+    // MARK: - Fallback
+
+    private static let fallback = TipPromptContent(
+        headline: "YOUR MAINTENANCE, HANDLED",
+        body: "Checkpoint is built and maintained by one developer.\nA tip helps keep it free — and unlocks a rare theme."
+    )
 }
