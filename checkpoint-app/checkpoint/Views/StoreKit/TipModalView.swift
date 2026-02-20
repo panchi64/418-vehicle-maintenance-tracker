@@ -110,7 +110,17 @@ struct TipModalView: View {
                             .font(.brutalistSecondary)
                             .foregroundStyle(Theme.textSecondary)
                             .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
                             .padding(.horizontal, Spacing.lg)
+
+                        if let closing = promptContent.closing {
+                            Text(closing)
+                                .font(.brutalistLabel)
+                                .foregroundStyle(Theme.textTertiary)
+                                .multilineTextAlignment(.center)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .padding(.horizontal, Spacing.lg)
+                        }
                     }
                     .padding(.horizontal, Spacing.screenHorizontal)
                     .opacity(isRevealed ? 1 : 0)
@@ -145,14 +155,6 @@ struct TipModalView: View {
                             .textCase(.uppercase)
                             .tracking(1.5)
 
-                        // Dismiss
-                        Button {
-                            handleDismiss()
-                        } label: {
-                            Text("Not now")
-                                .font(.brutalistSecondary)
-                                .foregroundStyle(Theme.textTertiary)
-                        }
                     }
                     .padding(.horizontal, Spacing.screenHorizontal)
                     .padding(.bottom, Spacing.lg)
@@ -169,7 +171,7 @@ struct TipModalView: View {
                 }
             }
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.fraction(0.65)])
         .onAppear {
             withAnimation(.easeOut(duration: 0.4)) {
                 isRevealed = true
@@ -329,6 +331,7 @@ struct TipPromptStats {
 struct TipPromptContent {
     let headline: String
     let body: String
+    let closing: String?
 
     static func select(from stats: TipPromptStats) -> TipPromptContent {
         if stats.hasTippedBefore {
@@ -341,69 +344,75 @@ struct TipPromptContent {
         candidates.randomElement() ?? fallback
     }
 
-    // The closing line every first-time message ends with.
-    // Genuine, not salesy — acknowledges the exchange.
-    private static let closingLine = "I built Checkpoint to make car ownership easier. If it's helped you, a tip would mean a lot."
+    // Short closing shown as tertiary caption below the body.
+    private static let closingLine = "If Checkpoint's helped you, a tip would mean a lot."
 
     // MARK: - First-Time Candidates
 
     private static func firstTimeCandidates(stats: TipPromptStats) -> [TipPromptContent] {
         var pool: [TipPromptContent] = []
 
-        // Monthly spend — genuinely useful for budgeting
+        // Monthly spend
         if let monthly = stats.formattedMonthlySpend {
             pool.append(TipPromptContent(
                 headline: "\(monthly)/MONTH",
-                body: "That's your average maintenance spend based on your history. Useful for budgeting — most people have no idea what their car actually costs them.\n\n\(closingLine)"
+                body: "Your average maintenance spend. Most people have no idea what their car actually costs them.",
+                closing: closingLine
             ))
         }
 
-        // Average cost per service — helps spot overcharges
+        // Average cost per service
         if let avg = stats.formattedAverageCost, stats.servicesLogged >= 3 {
             pool.append(TipPromptContent(
                 headline: "\(avg) AVG PER SERVICE",
-                body: "Across your \(stats.servicesLogged) logged services, that's your average. Having this number makes it easier to notice when a bill seems off.\n\n\(closingLine)"
+                body: "Across \(stats.servicesLogged) logged services. Handy for spotting when a bill seems off.",
+                closing: closingLine
             ))
         }
 
-        // Upcoming due services — actionable awareness
+        // Upcoming due services
         if stats.dueSoonOrOverdueCount > 0, let next = stats.nextServiceName {
             let serviceWord = stats.dueSoonOrOverdueCount == 1 ? "service" : "services"
             pool.append(TipPromptContent(
                 headline: "\(stats.dueSoonOrOverdueCount) \(serviceWord.uppercased()) NEED ATTENTION",
-                body: "Your \(next) is next up. Checkpoint tracks deadlines by both date and mileage so nothing slips through — whichever comes first.\n\n\(closingLine)"
+                body: "\(next) is next up. Tracked by both date and mileage — whichever comes first.",
+                closing: closingLine
             ))
         }
 
-        // Service tracking count — explain what it's doing for them
+        // Service tracking count
         if stats.servicesTracked >= 3 {
             pool.append(TipPromptContent(
                 headline: "\(stats.servicesTracked) SERVICES MONITORED",
-                body: "Checkpoint is watching \(stats.servicesTracked) services for you right now — tracking due dates and mileage thresholds so you don't have to remember.\n\n\(closingLine)"
+                body: "Due dates and mileage thresholds tracked for you, so you don't have to remember.",
+                closing: closingLine
             ))
         }
 
-        // Deep history — explain the resale/warranty value
+        // Deep history
         if let months = stats.monthsOfHistory, months >= 3, stats.servicesLogged >= 5 {
             pool.append(TipPromptContent(
                 headline: "\(months) MONTHS OF RECORDS",
-                body: "That's \(stats.servicesLogged) services across \(months) months. A complete maintenance history like this adds real value if you ever sell or need warranty work.\n\n\(closingLine)"
+                body: "\(stats.servicesLogged) services logged. A history like this adds real value at resale or for warranty work.",
+                closing: closingLine
             ))
         }
 
-        // Total cost tracked — frame as visibility into ownership cost
+        // Total cost tracked
         if let total = stats.formattedTotalCost, stats.servicesLogged >= 3 {
             pool.append(TipPromptContent(
                 headline: "\(total) TOTAL LOGGED",
-                body: "That's every dollar you've put into maintenance, in one place. Most people lose track of this — you haven't.\n\n\(closingLine)"
+                body: "Every dollar you've put into maintenance, in one place. Most people lose track — you haven't.",
+                closing: closingLine
             ))
         }
 
-        // Multi-vehicle — explain the organizational value
+        // Multi-vehicle
         if stats.vehicleCount > 1 {
             pool.append(TipPromptContent(
                 headline: "\(stats.vehicleCount) VEHICLES TRACKED",
-                body: "Each vehicle has its own schedules, mileage, and history. Checkpoint keeps them separate so you always know which car needs what, and when.\n\n\(closingLine)"
+                body: "Separate schedules, mileage, and history for each. Always know which car needs what.",
+                closing: closingLine
             ))
         }
 
@@ -419,27 +428,31 @@ struct TipPromptContent {
         if let monthly = stats.formattedMonthlySpend {
             pool.append(TipPromptContent(
                 headline: "\(monthly)/MONTH",
-                body: "Your average maintenance spend — tracked because you took the time to log it. Your past support helped make this possible, and another tip unlocks a rare theme."
+                body: "Your average spend — tracked because you took the time to log it.",
+                closing: "Another tip unlocks a rare theme."
             ))
         }
 
         if stats.dueSoonOrOverdueCount > 0, let next = stats.nextServiceName {
             pool.append(TipPromptContent(
                 headline: "\(next.uppercased()) IS COMING UP",
-                body: "Checkpoint's keeping an eye on it. Your tips help keep these features free for everyone — and each one unlocks a rare theme."
+                body: "Checkpoint's keeping an eye on it for you.",
+                closing: "Another tip unlocks a rare theme."
             ))
         }
 
         if let months = stats.monthsOfHistory, months >= 3 {
             pool.append(TipPromptContent(
                 headline: "\(months) MONTHS OF HISTORY",
-                body: "That's a solid record that's only getting more valuable. Thanks for your past support — another tip unlocks another rare theme."
+                body: "A solid record that's only getting more valuable.",
+                closing: "Another tip unlocks a rare theme."
             ))
         }
 
         pool.append(TipPromptContent(
             headline: "THANKS FOR BEING HERE",
-            body: "Your past tips helped shape what Checkpoint is today. If you'd like to keep supporting it, another tip unlocks a rare theme."
+            body: "Your past tips helped shape what Checkpoint is today.",
+            closing: "Another tip unlocks a rare theme."
         ))
 
         return pool
@@ -449,6 +462,7 @@ struct TipPromptContent {
 
     private static let fallback = TipPromptContent(
         headline: "YOUR MAINTENANCE, ORGANIZED",
-        body: "Checkpoint tracks your services, costs, and deadlines so you don't have to keep it all in your head.\n\n\(closingLine)"
+        body: "Services, costs, and deadlines — so you don't have to keep it all in your head.",
+        closing: closingLine
     )
 }
