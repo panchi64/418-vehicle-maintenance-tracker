@@ -89,9 +89,9 @@ struct TipJarView: View {
 
     private var debugTipOptions: [DebugTipOption] {
         [
-            .init(id: "tip.small", name: "Small Tip", price: "$1.99", description: "A small tip to support development.", productID: .tipSmall),
-            .init(id: "tip.medium", name: "Medium Tip", price: "$4.99", description: "A medium tip to support development.", productID: .tipMedium),
-            .init(id: "tip.large", name: "Large Tip", price: "$9.99", description: "A generous tip to support development.", productID: .tipLarge),
+            .init(id: "tip.small", name: "Snack", price: "$1.99", description: "A small tip to support development.", productID: .tipSmall),
+            .init(id: "tip.medium", name: "Coffee Run", price: "$4.99", description: "A medium tip to support development.", productID: .tipMedium),
+            .init(id: "tip.large", name: "Lunch", price: "$9.99", description: "A generous tip to support development.", productID: .tipLarge),
         ]
     }
 
@@ -191,10 +191,16 @@ private struct TipCard: View {
 
     @State private var isPurchasing = false
 
+    private static let tipLabels: [String: String] = [
+        "tip.small": "Snack",
+        "tip.medium": "Coffee Run",
+        "tip.large": "Lunch",
+    ]
+
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text(product.displayName)
+                Text(Self.tipLabels[product.id] ?? product.displayName)
                     .font(.brutalistBody)
                     .foregroundStyle(Theme.textPrimary)
 

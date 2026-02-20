@@ -290,7 +290,7 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             Text("SUPPORT")
                 .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
+                .foregroundStyle(Theme.accent)
                 .tracking(2)
 
             VStack(spacing: 0) {
@@ -298,10 +298,22 @@ struct SettingsView: View {
                     TipJarView()
                         .environment(appState)
                 } label: {
-                    settingRow(
-                        title: "Support Checkpoint",
-                        value: ""
-                    )
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Support Checkpoint")
+                                .font(.brutalistBody)
+                                .foregroundStyle(Theme.textPrimary)
+                            Text("Every tip unlocks a rare theme")
+                                .font(.brutalistLabel)
+                                .foregroundStyle(Theme.textTertiary)
+                        }
+                        Spacer()
+                        Image(systemName: "heart.fill")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Theme.accent)
+                    }
+                    .padding(Spacing.md)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
 
@@ -329,7 +341,7 @@ struct SettingsView: View {
             .background(Theme.surfaceInstrument)
             .overlay(
                 Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+                    .strokeBorder(Theme.accent, lineWidth: Theme.borderWidth)
             )
         }
     }

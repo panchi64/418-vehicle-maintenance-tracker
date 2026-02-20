@@ -230,17 +230,27 @@ struct TipModalView: View {
     }
 
     private var debugTipSmall: some View {
-        debugTipButton(label: "Small", price: "$1.99", productID: .tipSmall)
+        debugTipButton(label: "Snack", price: "$1.99", productID: .tipSmall)
     }
 
     private var debugTipMedium: some View {
-        debugTipButton(label: "Medium", price: "$4.99", productID: .tipMedium)
+        debugTipButton(label: "Coffee Run", price: "$4.99", productID: .tipMedium)
     }
 
     private var debugTipLarge: some View {
-        debugTipButton(label: "Large", price: "$9.99", productID: .tipLarge)
+        debugTipButton(label: "Lunch", price: "$9.99", productID: .tipLarge)
     }
     #endif
+
+    private static let tipLabels: [String: String] = [
+        "tip.small": "Snack",
+        "tip.medium": "Coffee Run",
+        "tip.large": "Lunch",
+    ]
+
+    private func tipLabel(for product: Product) -> String {
+        Self.tipLabels[product.id] ?? product.displayName.replacingOccurrences(of: " Tip", with: "")
+    }
 
     // MARK: - Tip Button
 
@@ -270,7 +280,7 @@ struct TipModalView: View {
                 Text(product.displayPrice)
                     .font(.brutalistBody)
                     .foregroundStyle(Theme.textPrimary)
-                Text(product.displayName.replacingOccurrences(of: " Tip", with: ""))
+                Text(tipLabel(for: product))
                     .font(.brutalistLabel)
                     .foregroundStyle(Theme.textTertiary)
                     .textCase(.uppercase)
