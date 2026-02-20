@@ -7,6 +7,9 @@
 
 import SwiftUI
 import SwiftData
+#if DEBUG
+import UserNotifications
+#endif
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -340,6 +343,8 @@ struct SettingsView: View {
     // MARK: - Debug Section
 
     #if DEBUG
+    @State private var showTipModal = false
+
     private var debugSection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             Text("DEBUG")
@@ -361,6 +366,66 @@ struct SettingsView: View {
                         Spacer()
 
                         Image(systemName: "arrow.counterclockwise")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+                    .padding(Spacing.md)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: Theme.borderWidth)
+
+                Button {
+                    showTipModal = true
+                } label: {
+                    HStack {
+                        Text("Show Tip Prompt")
+                            .font(.brutalistBody)
+                            .foregroundStyle(Theme.textPrimary)
+
+                        Spacer()
+
+                        Image(systemName: "heart")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+                    .padding(Spacing.md)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .sheet(isPresented: $showTipModal) {
+                    TipModalView()
+                        .environment(appState)
+                }
+
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: Theme.borderWidth)
+
+                Button {
+                    Task {
+                        let center = UNUserNotificationCenter.current()
+                        let content = UNMutableNotificationContent()
+                        content.title = "Oil Change Due Soon"
+                        content.body = "Your vehicle's oil change is coming up. Tap to view details."
+                        content.sound = .default
+                        content.categoryIdentifier = NotificationService.serviceDueCategoryID
+                        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
+                        let request = UNNotificationRequest(identifier: "debug-test-notification", content: content, trigger: trigger)
+                        try? await center.add(request)
+                    }
+                } label: {
+                    HStack {
+                        Text("Fire Test Notification (3s)")
+                            .font(.brutalistBody)
+                            .foregroundStyle(Theme.textPrimary)
+
+                        Spacer()
+
+                        Image(systemName: "bell")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundStyle(Theme.textTertiary)
                     }
