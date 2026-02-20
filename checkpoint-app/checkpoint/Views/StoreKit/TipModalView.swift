@@ -345,7 +345,7 @@ struct TipPromptContent {
     }
 
     // Short closing shown as tertiary caption below the body.
-    private static let closingLine = "If Checkpoint's helped you, a tip would mean a lot."
+    private static let closingLine = "Checkpoint looks after your car — tips are a great way to return the favor."
 
     // MARK: - First-Time Candidates
 
