@@ -10,7 +10,7 @@ import Foundation
 import SwiftData
 
 enum MileageSource: String, Codable {
-    case manual = "manual"
+    case manual
     case serviceCompletion = "service_completion"
 }
 

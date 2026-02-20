@@ -173,45 +173,18 @@ struct MarkServiceDoneSheet: View {
         modelContext.insert(log)
 
         // Save attachments
-        for attachmentData in pendingAttachments {
-            let thumbnailData = ServiceAttachment.generateThumbnailData(
-                from: attachmentData.data,
-                mimeType: attachmentData.mimeType
+        for a in pendingAttachments {
+            ServiceAttachment.insert(
+                serviceLog: log, data: a.data, fileName: a.fileName,
+                mimeType: a.mimeType, extractedText: a.extractedText, into: modelContext
             )
-            let attachment = ServiceAttachment(
-                serviceLog: log,
-                data: attachmentData.data,
-                thumbnailData: thumbnailData,
-                fileName: attachmentData.fileName,
-                mimeType: attachmentData.mimeType,
-                extractedText: attachmentData.extractedText
-            )
-            modelContext.insert(attachment)
         }
 
         // Update service with new due dates
         service.recalculateDueDates(performedDate: performedDate, mileage: mileageInt)
 
-        // Update vehicle mileage if service mileage is higher
-        if mileageInt > vehicle.currentMileage {
-            vehicle.currentMileage = mileageInt
-            vehicle.mileageUpdatedAt = performedDate
-        }
-
-        // Create mileage snapshot for pace calculation (throttled: max 1 per day)
-        let shouldCreateSnapshot = !MileageSnapshot.hasSnapshotToday(
-            snapshots: vehicle.mileageSnapshots ?? []
-        )
-
-        if shouldCreateSnapshot {
-            let snapshot = MileageSnapshot(
-                vehicle: vehicle,
-                mileage: mileageInt,
-                recordedAt: performedDate,
-                source: .serviceCompletion
-            )
-            modelContext.insert(snapshot)
-        }
+        // Update vehicle mileage and create pace snapshot
+        vehicle.recordServiceMileage(mileageInt, at: performedDate, context: modelContext)
 
         updateAppIcon()
         updateWidgetData()

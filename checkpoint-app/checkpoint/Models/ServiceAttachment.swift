@@ -149,6 +149,28 @@ final class ServiceAttachment: Identifiable {
         self.extractedText = extractedText
     }
 
+    /// Create one attachment from raw fields and insert it into the model context.
+    /// Centralises thumbnail generation + init + insert so callers don't duplicate the pattern.
+    static func insert(
+        serviceLog: ServiceLog,
+        data: Data,
+        fileName: String,
+        mimeType: String,
+        extractedText: String?,
+        into context: ModelContext
+    ) {
+        let thumbnailData = generateThumbnailData(from: data, mimeType: mimeType)
+        let attachment = ServiceAttachment(
+            serviceLog: serviceLog,
+            data: data,
+            thumbnailData: thumbnailData,
+            fileName: fileName,
+            mimeType: mimeType,
+            extractedText: extractedText
+        )
+        context.insert(attachment)
+    }
+
     /// Create from UIImage
     static func fromImage(_ image: UIImage, fileName: String = "photo.jpg", serviceLog: ServiceLog? = nil) -> ServiceAttachment? {
         guard let data = compressedImageData(from: image) else { return nil }

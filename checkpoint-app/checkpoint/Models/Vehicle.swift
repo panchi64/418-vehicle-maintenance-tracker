@@ -57,11 +57,6 @@ final class Vehicle: Identifiable {
         MileageSnapshot.calculateDailyPace(from: mileageSnapshots ?? [])
     }
 
-    /// Check if we have enough data for pace calculation (7+ days)
-    var hasSufficientPaceData: Bool {
-        dailyMilesPace != nil
-    }
-
     /// Pace result with confidence metadata
     var paceResult: PaceResult? {
         MileageSnapshot.calculatePaceResult(from: mileageSnapshots ?? [])
@@ -139,6 +134,21 @@ final class Vehicle: Identifiable {
         let forbidden = CharacterSet(charactersIn: "IOQioq")
         return trimmed.unicodeScalars.allSatisfy {
             !forbidden.contains($0) && CharacterSet.alphanumerics.contains($0)
+        }
+    }
+
+    // MARK: - Mileage Recording
+
+    /// Update mileage and create a pace snapshot after a service is logged.
+    /// Raises `currentMileage` / `mileageUpdatedAt` only when the recorded value is higher,
+    /// and throttles snapshots to one per calendar day.
+    func recordServiceMileage(_ mileage: Int, at date: Date, context: ModelContext) {
+        if mileage > currentMileage {
+            currentMileage = mileage
+            mileageUpdatedAt = date
+        }
+        if !MileageSnapshot.hasSnapshotToday(snapshots: mileageSnapshots ?? []) {
+            context.insert(MileageSnapshot(vehicle: self, mileage: mileage, recordedAt: date, source: .serviceCompletion))
         }
     }
 

@@ -14,6 +14,9 @@ private let serviceNotificationLogger = Logger(subsystem: "com.418-studio.checkp
 /// Scheduler for service due notifications
 struct ServiceNotificationScheduler {
 
+    /// Hour at which all service notifications fire (9 AM local time)
+    private static let notificationHour = 9
+
     // MARK: - Build Notification Requests
 
     /// Build a notification request for a service
@@ -53,7 +56,7 @@ struct ServiceNotificationScheduler {
         ]
 
         var dateComponents = Calendar.current.dateComponents([.year, .month, .day], from: notificationDate)
-        dateComponents.hour = 9
+        dateComponents.hour = notificationHour
         dateComponents.minute = 0
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
 
@@ -80,7 +83,7 @@ struct ServiceNotificationScheduler {
         content.userInfo = ["serviceID": service.id.uuidString, "vehicleID": vehicle.id.uuidString]
 
         var dateComponents = Calendar.current.dateComponents([.year, .month, .day], from: snoozeDate)
-        dateComponents.hour = 9
+        dateComponents.hour = notificationHour
         dateComponents.minute = 0
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
 
@@ -92,7 +95,7 @@ struct ServiceNotificationScheduler {
     /// Schedule notifications for a service at default intervals (30, 7, 1 day before + due date)
     @discardableResult
     static func scheduleNotification(for service: Service, vehicle: Vehicle) -> String? {
-        guard let dueDate = service.dueDate, dueDate > Date() else { return nil }
+        guard let dueDate = service.dueDate, dueDate > .now else { return nil }
         return scheduleNotificationsForDueDate(dueDate, service: service, vehicle: vehicle)
     }
 
@@ -111,7 +114,7 @@ struct ServiceNotificationScheduler {
         for service: Service, vehicle: Vehicle, dailyPace: Double? = nil
     ) -> String? {
         let effectiveDate = service.effectiveDueDate(currentMileage: vehicle.currentMileage, dailyPace: dailyPace)
-        guard let dueDate = effectiveDate, dueDate > Date() else { return nil }
+        guard let dueDate = effectiveDate, dueDate > .now else { return nil }
         return scheduleNotificationsForDueDate(dueDate, service: service, vehicle: vehicle)
     }
 
@@ -170,7 +173,7 @@ struct ServiceNotificationScheduler {
 
         for daysBeforeDue in NotificationService.defaultReminderIntervals {
             guard let notificationDate = Calendar.current.date(byAdding: .day, value: -daysBeforeDue, to: dueDate),
-                  notificationDate > Date() else { continue }
+                  notificationDate > .now else { continue }
 
             let notificationID = baseNotificationID + NotificationService.intervalSuffix(for: daysBeforeDue)
             let request = buildNotificationRequest(
@@ -215,7 +218,7 @@ struct ServiceNotificationScheduler {
     /// Reschedule notification for tomorrow at 9 AM
     static func snoozeNotification(for service: Service, vehicle: Vehicle) {
         cancelNotification(for: service)
-        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: .now) ?? .now
         let notificationID = "service-snooze-\(UUID().uuidString)"
         let request = buildSnoozeNotificationRequest(for: service, vehicle: vehicle,
                                                      notificationID: notificationID, snoozeDate: tomorrow)

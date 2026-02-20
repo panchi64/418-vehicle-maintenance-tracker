@@ -520,26 +520,15 @@ struct AddServiceView: View {
         modelContext.insert(log)
 
         // Save attachments
-        for attachmentData in pendingAttachments {
-            let thumbnailData = ServiceAttachment.generateThumbnailData(
-                from: attachmentData.data,
-                mimeType: attachmentData.mimeType
+        for a in pendingAttachments {
+            ServiceAttachment.insert(
+                serviceLog: log, data: a.data, fileName: a.fileName,
+                mimeType: a.mimeType, extractedText: a.extractedText, into: modelContext
             )
-            let attachment = ServiceAttachment(
-                serviceLog: log,
-                data: attachmentData.data,
-                thumbnailData: thumbnailData,
-                fileName: attachmentData.fileName,
-                mimeType: attachmentData.mimeType,
-                extractedText: attachmentData.extractedText
-            )
-            modelContext.insert(attachment)
         }
 
-        // Update vehicle mileage if service mileage is higher
-        if mileage > vehicle.currentMileage {
-            vehicle.currentMileage = mileage
-        }
+        // Update vehicle mileage and create pace snapshot
+        vehicle.recordServiceMileage(mileage, at: performedDate, context: modelContext)
     }
 
     private func saveScheduledService() {

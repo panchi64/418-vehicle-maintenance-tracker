@@ -234,46 +234,19 @@ struct MarkClusterDoneSheet: View {
             modelContext.insert(log)
 
             // Save attachments for each service log
-            for attachmentData in pendingAttachments {
-                let thumbnailData = ServiceAttachment.generateThumbnailData(
-                    from: attachmentData.data,
-                    mimeType: attachmentData.mimeType
+            for a in pendingAttachments {
+                ServiceAttachment.insert(
+                    serviceLog: log, data: a.data, fileName: a.fileName,
+                    mimeType: a.mimeType, extractedText: a.extractedText, into: modelContext
                 )
-                let attachment = ServiceAttachment(
-                    serviceLog: log,
-                    data: attachmentData.data,
-                    thumbnailData: thumbnailData,
-                    fileName: attachmentData.fileName,
-                    mimeType: attachmentData.mimeType,
-                    extractedText: attachmentData.extractedText
-                )
-                modelContext.insert(attachment)
             }
 
             // Update service tracking and recalculate due dates
             service.recalculateDueDates(performedDate: performedDate, mileage: mileageInt)
         }
 
-        // Update vehicle mileage if service mileage is higher
-        if mileageInt > cluster.vehicle.currentMileage {
-            cluster.vehicle.currentMileage = mileageInt
-            cluster.vehicle.mileageUpdatedAt = performedDate
-        }
-
-        // Create mileage snapshot
-        let shouldCreateSnapshot = !MileageSnapshot.hasSnapshotToday(
-            snapshots: cluster.vehicle.mileageSnapshots ?? []
-        )
-
-        if shouldCreateSnapshot {
-            let snapshot = MileageSnapshot(
-                vehicle: cluster.vehicle,
-                mileage: mileageInt,
-                recordedAt: performedDate,
-                source: .serviceCompletion
-            )
-            modelContext.insert(snapshot)
-        }
+        // Update vehicle mileage and create pace snapshot
+        cluster.vehicle.recordServiceMileage(mileageInt, at: performedDate, context: modelContext)
 
         // Update app icon and widget
         AppIconService.shared.updateIcon(for: cluster.vehicle, services: services)
