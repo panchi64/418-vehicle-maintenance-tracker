@@ -170,8 +170,7 @@ struct TipModalView: View {
 
                     // Dismiss
                     Button {
-                        AnalyticsService.shared.capture(.tipModalDismissed)
-                        dismiss()
+                        handleDismiss()
                     } label: {
                         Text("Not now")
                             .font(.brutalistSecondary)
