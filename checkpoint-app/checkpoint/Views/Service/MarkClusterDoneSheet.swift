@@ -14,6 +14,7 @@ struct MarkClusterDoneSheet: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(AppState.self) private var appState
     @Query private var services: [Service]
 
     @State private var performedDate: Date = Date()
@@ -190,6 +191,7 @@ struct MarkClusterDoneSheet: View {
         WidgetDataService.shared.updateWidget(for: cluster.vehicle)
 
         onSaved?()
+        appState.recordCompletedAction()
         dismiss()
     }
 }
@@ -206,6 +208,7 @@ struct MarkClusterDoneSheet: View {
     )
 
     return MarkClusterDoneSheet(cluster: cluster)
+        .environment(AppState())
         .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self], inMemory: true)
         .preferredColorScheme(.dark)
 }

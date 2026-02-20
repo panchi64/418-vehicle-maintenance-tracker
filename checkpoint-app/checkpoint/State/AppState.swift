@@ -189,13 +189,22 @@ final class AppState {
     }
 
     func recordCompletedAction() {
-        guard !StoreManager.shared.isPro,
-              !PurchaseSettings.shared.hasShownTipModalThisSession else { return }
+        guard !StoreManager.shared.isPro else { return }
+
+        PurchaseSettings.shared.recordCompletedAction()
+
+        guard PurchaseSettings.shared.shouldShowTipPrompt else { return }
+
+        let actionCount = PurchaseSettings.shared.completedActionCount
+        let dismissCount = PurchaseSettings.shared.tipPromptDismissCount
         Task { @MainActor in
             try? await Task.sleep(for: .seconds(1.5))
             showTipModal = true
             PurchaseSettings.shared.hasShownTipModalThisSession = true
-            AnalyticsService.shared.capture(.tipModalShown)
+            AnalyticsService.shared.capture(.tipModalShown(
+                actionCount: actionCount,
+                dismissCount: dismissCount
+            ))
         }
     }
 }

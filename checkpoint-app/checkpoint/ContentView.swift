@@ -279,6 +279,7 @@ struct ContentView: View {
                     seasonalPrefill: appState.seasonalPrefill,
                     initialMode: appState.addServiceMode ?? .record
                 )
+                .environment(appState)
             }
         }
         .sheet(item: $appState.selectedService) { service in

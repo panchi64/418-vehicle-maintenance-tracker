@@ -7,6 +7,9 @@
 
 import SwiftUI
 import SwiftData
+#if DEBUG
+import UserNotifications
+#endif
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -287,7 +290,7 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             Text("SUPPORT")
                 .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
+                .foregroundStyle(Theme.accent)
                 .tracking(2)
 
             VStack(spacing: 0) {
@@ -295,10 +298,22 @@ struct SettingsView: View {
                     TipJarView()
                         .environment(appState)
                 } label: {
-                    settingRow(
-                        title: "Support Checkpoint",
-                        value: ""
-                    )
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Support Checkpoint")
+                                .font(.brutalistBody)
+                                .foregroundStyle(Theme.textPrimary)
+                            Text("Every tip unlocks a rare theme")
+                                .font(.brutalistLabel)
+                                .foregroundStyle(Theme.textTertiary)
+                        }
+                        Spacer()
+                        Image(systemName: "heart.fill")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Theme.accent)
+                    }
+                    .padding(Spacing.md)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
 
@@ -326,7 +341,7 @@ struct SettingsView: View {
             .background(Theme.surfaceInstrument)
             .overlay(
                 Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
+                    .strokeBorder(Theme.accent, lineWidth: Theme.borderWidth)
             )
         }
     }
@@ -340,6 +355,8 @@ struct SettingsView: View {
     // MARK: - Debug Section
 
     #if DEBUG
+    @State private var showTipModal = false
+
     private var debugSection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             Text("DEBUG")
@@ -361,6 +378,79 @@ struct SettingsView: View {
                         Spacer()
 
                         Image(systemName: "arrow.counterclockwise")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+                    .padding(Spacing.md)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: Theme.borderWidth)
+
+                Button {
+                    showTipModal = true
+                } label: {
+                    HStack {
+                        Text("Show Tip Prompt")
+                            .font(.brutalistBody)
+                            .foregroundStyle(Theme.textPrimary)
+
+                        Spacer()
+
+                        Image(systemName: "heart")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+                    .padding(Spacing.md)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .sheet(isPresented: $showTipModal) {
+                    TipModalView()
+                        .environment(appState)
+                }
+
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: Theme.borderWidth)
+
+                Button {
+                    Task {
+                        let center = UNUserNotificationCenter.current()
+                        let content = UNMutableNotificationContent()
+                        let messages: [(title: String, body: String)] = [
+                            ("Odometer Sync Requested", "It's been a while. How far have we gone?"),
+                            ("Marbete Status: 30 Days", "Would prefer not to be impounded."),
+                            ("Marbete Status: 7 Days", "Starting to worry about that marbete."),
+                            ("Marbete Status: URGENT", "Expires tomorrow. Legally speaking."),
+                            ("Oil Change Due in 1 Week", "The oil is aging. So are we all."),
+                            ("Tire Rotation Reminder", "The tires asked me to ask you."),
+                            ("Brake Inspection Due", "Stopping is optional. Until it isn't."),
+                            ("Coolant Flush Due Soon", "Running a little warm. Thought you should know."),
+                            ("2025 Expense Report", "You spent a lot last year. You're welcome."),
+                            ("Marbete Status: 60 Days", "Requesting registration renewal. No rush. Yet."),
+                        ]
+                        let pick = messages.randomElement()!
+                        content.title = pick.title
+                        content.body = pick.body
+                        content.sound = .default
+                        content.categoryIdentifier = NotificationService.serviceDueCategoryID
+                        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
+                        let request = UNNotificationRequest(identifier: "debug-test-notification", content: content, trigger: trigger)
+                        try? await center.add(request)
+                    }
+                } label: {
+                    HStack {
+                        Text("Fire Test Notification (3s)")
+                            .font(.brutalistBody)
+                            .foregroundStyle(Theme.textPrimary)
+
+                        Spacer()
+
+                        Image(systemName: "bell")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundStyle(Theme.textTertiary)
                     }
