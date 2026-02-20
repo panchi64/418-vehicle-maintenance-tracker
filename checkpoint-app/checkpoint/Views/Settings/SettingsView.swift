@@ -421,8 +421,21 @@ struct SettingsView: View {
                     Task {
                         let center = UNUserNotificationCenter.current()
                         let content = UNMutableNotificationContent()
-                        content.title = "Oil Change Due Soon"
-                        content.body = "Your vehicle's oil change is coming up. Tap to view details."
+                        let messages: [(title: String, body: String)] = [
+                            ("Odometer Sync Requested", "It's been a while. How far have we gone?"),
+                            ("Marbete Status: 30 Days", "Would prefer not to be impounded."),
+                            ("Marbete Status: 7 Days", "Starting to worry about that marbete."),
+                            ("Marbete Status: URGENT", "Expires tomorrow. Legally speaking."),
+                            ("Oil Change Due in 1 Week", "The oil is aging. So are we all."),
+                            ("Tire Rotation Reminder", "The tires asked me to ask you."),
+                            ("Brake Inspection Due", "Stopping is optional. Until it isn't."),
+                            ("Coolant Flush Due Soon", "Running a little warm. Thought you should know."),
+                            ("2025 Expense Report", "You spent a lot last year. You're welcome."),
+                            ("Marbete Status: 60 Days", "Requesting registration renewal. No rush. Yet."),
+                        ]
+                        let pick = messages.randomElement()!
+                        content.title = pick.title
+                        content.body = pick.body
                         content.sound = .default
                         content.categoryIdentifier = NotificationService.serviceDueCategoryID
                         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
