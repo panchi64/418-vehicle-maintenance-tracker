@@ -31,7 +31,7 @@ struct MarbetePicker: View {
     private var monthPicker: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("EXPIRATION MONTH")
-                .font(.instrumentLabel)
+                .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1.5)
                 .textCase(.uppercase)
@@ -52,11 +52,11 @@ struct MarbetePicker: View {
                 HStack {
                     if let month = month {
                         Text(Calendar.current.monthSymbols[month - 1])
-                            .font(.instrumentBody)
+                            .font(.brutalistBody)
                             .foregroundStyle(Theme.textPrimary)
                     } else {
                         Text("Not Set")
-                            .font(.instrumentBody)
+                            .font(.brutalistBody)
                             .foregroundStyle(Theme.textTertiary)
                     }
                     Spacer()
@@ -82,7 +82,7 @@ struct MarbetePicker: View {
 
         return VStack(alignment: .leading, spacing: 6) {
             Text("EXPIRATION YEAR")
-                .font(.instrumentLabel)
+                .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1.5)
                 .textCase(.uppercase)
@@ -103,11 +103,11 @@ struct MarbetePicker: View {
                 HStack {
                     if let year = year {
                         Text(String(year))
-                            .font(.instrumentBody)
+                            .font(.brutalistBody)
                             .foregroundStyle(Theme.textPrimary)
                     } else {
                         Text("Not Set")
-                            .font(.instrumentBody)
+                            .font(.brutalistBody)
                             .foregroundStyle(Theme.textTertiary)
                     }
                     Spacer()

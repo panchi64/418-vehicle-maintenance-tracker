@@ -144,7 +144,7 @@ struct VehiclePickerSheet: View {
                                     .foregroundStyle(Theme.accent)
 
                                 Text("Add Vehicle")
-                                    .font(.instrumentBody)
+                                    .font(.brutalistBody)
                                     .foregroundStyle(Theme.accent)
 
                                 Spacer()
@@ -285,7 +285,7 @@ struct VehiclePickerSheet: View {
                         .tracking(0.5)
 
                     Text("\(String(vehicle.year)) \(vehicle.make) \(vehicle.model)")
-                        .font(.instrumentLabel)
+                        .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
                 }
 

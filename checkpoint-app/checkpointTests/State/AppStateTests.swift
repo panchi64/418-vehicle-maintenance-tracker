@@ -53,48 +53,6 @@ final class AppStateTests: XCTestCase {
         XCTAssertNil(appState.selectedServiceLog)
     }
 
-    // MARK: - Navigation Method Tests
-
-    @MainActor
-    func testNavigateToServices() async {
-        // Given
-        let appState = AppState()
-        XCTAssertEqual(appState.selectedTab, .home)
-
-        // When
-        appState.navigateToServices()
-
-        // Then
-        XCTAssertEqual(appState.selectedTab, .services)
-    }
-
-    @MainActor
-    func testNavigateToCosts() async {
-        // Given
-        let appState = AppState()
-        XCTAssertEqual(appState.selectedTab, .home)
-
-        // When
-        appState.navigateToCosts()
-
-        // Then
-        XCTAssertEqual(appState.selectedTab, .costs)
-    }
-
-    @MainActor
-    func testNavigateToHome() async {
-        // Given
-        let appState = AppState()
-        appState.selectedTab = .costs
-        XCTAssertEqual(appState.selectedTab, .costs)
-
-        // When
-        appState.navigateToHome()
-
-        // Then
-        XCTAssertEqual(appState.selectedTab, .home)
-    }
-
     // MARK: - Selected Service Log Tests
 
     @MainActor

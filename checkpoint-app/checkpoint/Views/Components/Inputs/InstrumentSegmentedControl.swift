@@ -38,7 +38,7 @@ struct InstrumentSegmentedControl<T: Hashable>: View {
             HapticService.shared.selectionChanged()
         } label: {
             Text(labelFor(option).uppercased())
-                .font(.instrumentLabel)
+                .font(.brutalistLabel)
                 .foregroundStyle(isSelected ? Theme.surfaceInstrument : Theme.textSecondary)
                 .tracking(1)
                 .lineLimit(1)
@@ -71,7 +71,7 @@ struct LabeledInstrumentSegmentedControl<T: Hashable>: View {
         VStack(alignment: .leading, spacing: 6) {
             // Label
             Text(label.uppercased())
-                .font(.instrumentLabel)
+                .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1.5)
 

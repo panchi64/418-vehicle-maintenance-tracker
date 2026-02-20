@@ -258,7 +258,7 @@ struct MileageUpdateSheet: View {
         VStack(alignment: .leading, spacing: 6) {
             // Label
             Text("ENTER MILEAGE")
-                .font(.instrumentLabel)
+                .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1.5)
 
@@ -272,12 +272,12 @@ struct MileageUpdateSheet: View {
                             : "Enter mileage",
                         text: mileageBinding
                     )
-                        .font(.instrumentBody)
+                        .font(.brutalistBody)
                         .foregroundStyle(Theme.textPrimary)
                         .keyboardType(.numberPad)
 
                     Text(DistanceSettings.shared.unit.abbreviation)
-                        .font(.instrumentLabel)
+                        .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
                 }
                 .padding(16)

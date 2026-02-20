@@ -23,20 +23,20 @@ struct InstrumentTextField: View {
             // Label with optional required indicator
             HStack(spacing: 2) {
                 Text(label.uppercased())
-                    .font(.instrumentLabel)
+                    .font(.brutalistLabel)
                     .foregroundStyle(Theme.textTertiary)
                     .tracking(1.5)
 
                 if isRequired {
                     Text("*")
-                        .font(.instrumentLabel)
+                        .font(.brutalistLabel)
                         .foregroundStyle(Theme.statusOverdue)
                 }
             }
 
             // Input field
             TextField(placeholder, text: $text)
-                .font(.instrumentBody)
+                .font(.brutalistBody)
                 .foregroundStyle(Theme.textPrimary)
                 .keyboardType(keyboardType)
                 .textContentType(textContentType)
@@ -81,13 +81,13 @@ struct InstrumentNumberField: View {
             // Label with optional required indicator
             HStack(spacing: 2) {
                 Text(label.uppercased())
-                    .font(.instrumentLabel)
+                    .font(.brutalistLabel)
                     .foregroundStyle(Theme.textTertiary)
                     .tracking(1.5)
 
                 if isRequired {
                     Text("*")
-                        .font(.instrumentLabel)
+                        .font(.brutalistLabel)
                         .foregroundStyle(Theme.statusOverdue)
                 }
             }
@@ -97,7 +97,7 @@ struct InstrumentNumberField: View {
                 // Main input area
                 HStack(spacing: 8) {
                     TextField(placeholder, text: $textValue)
-                        .font(.instrumentBody)
+                        .font(.brutalistBody)
                         .foregroundStyle(Theme.textPrimary)
                         .keyboardType(.numberPad)
                         .focused($isFocused)
@@ -122,7 +122,7 @@ struct InstrumentNumberField: View {
 
                     if !suffix.isEmpty {
                         Text(suffix)
-                            .font(.instrumentLabel)
+                            .font(.brutalistLabel)
                             .foregroundStyle(Theme.textTertiary)
                     }
                 }
@@ -172,7 +172,7 @@ struct InstrumentDatePicker: View {
         VStack(alignment: .leading, spacing: 6) {
             // Label
             Text(label.uppercased())
-                .font(.instrumentLabel)
+                .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1.5)
 
@@ -203,7 +203,7 @@ struct InstrumentToggle: View {
     var body: some View {
         HStack {
             Text(label)
-                .font(.instrumentBody)
+                .font(.brutalistBody)
                 .foregroundStyle(Theme.textPrimary)
 
             Spacer()
@@ -266,7 +266,7 @@ struct InstrumentTextEditor: View {
         VStack(alignment: .leading, spacing: 6) {
             // Label
             Text(label.uppercased())
-                .font(.instrumentLabel)
+                .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1.5)
 
@@ -274,14 +274,14 @@ struct InstrumentTextEditor: View {
             ZStack(alignment: .topLeading) {
                 if text.isEmpty && !isFocused {
                     Text(placeholder)
-                        .font(.instrumentBody)
+                        .font(.brutalistBody)
                         .foregroundStyle(Theme.textTertiary)
                         .padding(.horizontal, Spacing.listItem)
                         .padding(.vertical, Spacing.md)
                 }
 
                 TextEditor(text: $text)
-                    .font(.instrumentBody)
+                    .font(.brutalistBody)
                     .foregroundStyle(Theme.textPrimary)
                     .focused($isFocused)
                     .scrollContentBackground(.hidden)

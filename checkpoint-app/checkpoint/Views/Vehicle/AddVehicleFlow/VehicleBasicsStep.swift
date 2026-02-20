@@ -129,14 +129,14 @@ private struct VINInputSection: View {
             // VIN input with camera button
             VStack(alignment: .leading, spacing: 6) {
                 Text(L10n.vehicleVIN)
-                    .font(.instrumentLabel)
+                    .font(.brutalistLabel)
                     .foregroundStyle(Theme.textTertiary)
                     .tracking(1.5)
                     .textCase(.uppercase)
 
                 HStack(spacing: 0) {
                     TextField(L10n.vehicleVINPlaceholder, text: $formState.vin)
-                        .font(.instrumentBody)
+                        .font(.brutalistBody)
                         .foregroundStyle(Theme.textPrimary)
                         .textInputAutocapitalization(.characters)
                         .autocorrectionDisabled()

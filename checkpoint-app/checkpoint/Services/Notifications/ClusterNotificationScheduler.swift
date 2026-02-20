@@ -50,10 +50,7 @@ struct ClusterNotificationScheduler {
             "serviceIDs": cluster.services.map { $0.id.uuidString }
         ]
 
-        var dateComponents = Calendar.current.dateComponents([.year, .month, .day], from: notificationDate)
-        dateComponents.hour = 9
-        dateComponents.minute = 0
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
+        let trigger = NotificationHelpers.calendarTrigger(for: notificationDate)
 
         return UNNotificationRequest(identifier: notificationID, content: content, trigger: trigger)
     }

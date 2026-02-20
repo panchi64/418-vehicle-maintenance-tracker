@@ -221,8 +221,6 @@ final class SyncStatusService {
         // Don't start monitors during testing
     }
 
-    nonisolated deinit {}
-
     // MARK: - Account Status
 
     /// Check if user has an iCloud account and update state accordingly

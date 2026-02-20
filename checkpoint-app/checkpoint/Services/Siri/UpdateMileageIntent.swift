@@ -54,7 +54,7 @@ struct UpdateMileageIntent: AppIntent {
 /// Singleton to hold pending mileage update from Siri
 /// The app reads this on launch to pre-fill the mileage update sheet
 @MainActor
-final class PendingMileageUpdate: @unchecked Sendable {
+final class PendingMileageUpdate {
     static let shared = PendingMileageUpdate()
 
     var vehicleID: String?

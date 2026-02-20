@@ -52,10 +52,7 @@ struct ServiceNotificationScheduler {
             "daysBeforeDue": daysBeforeDue
         ]
 
-        var dateComponents = Calendar.current.dateComponents([.year, .month, .day], from: notificationDate)
-        dateComponents.hour = 9
-        dateComponents.minute = 0
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
+        let trigger = NotificationHelpers.calendarTrigger(for: notificationDate)
 
         return UNNotificationRequest(identifier: notificationID, content: content, trigger: trigger)
     }
@@ -79,10 +76,7 @@ struct ServiceNotificationScheduler {
         content.categoryIdentifier = NotificationService.serviceDueCategoryID
         content.userInfo = ["serviceID": service.id.uuidString, "vehicleID": vehicle.id.uuidString]
 
-        var dateComponents = Calendar.current.dateComponents([.year, .month, .day], from: snoozeDate)
-        dateComponents.hour = 9
-        dateComponents.minute = 0
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
+        let trigger = NotificationHelpers.calendarTrigger(for: snoozeDate)
 
         return UNNotificationRequest(identifier: notificationID, content: content, trigger: trigger)
     }

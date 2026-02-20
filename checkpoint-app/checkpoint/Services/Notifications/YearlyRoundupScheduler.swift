@@ -67,11 +67,7 @@ struct YearlyRoundupScheduler {
             "type": "yearlyRoundup"
         ]
 
-        var dateComponents = Calendar.current.dateComponents([.year, .month, .day], from: notificationDate)
-        dateComponents.hour = 10  // 10 AM for yearly roundup
-        dateComponents.minute = 0
-
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
+        let trigger = NotificationHelpers.calendarTrigger(for: notificationDate, hour: 10)
 
         return UNNotificationRequest(
             identifier: yearlyRoundupID(for: vehicleID, year: year),

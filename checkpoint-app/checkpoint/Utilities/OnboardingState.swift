@@ -67,8 +67,6 @@ final class OnboardingState {
         currentPhase = Self.hasCompletedOnboarding ? .completed : .intro
     }
 
-    nonisolated deinit {}
-
     // MARK: - Phase Transitions
 
     func startTour() {

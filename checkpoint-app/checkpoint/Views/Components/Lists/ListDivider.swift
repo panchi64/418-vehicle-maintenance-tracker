@@ -39,7 +39,7 @@ struct ListDivider: View {
                         .font(.brutalistBody)
                         .foregroundStyle(Theme.textPrimary)
                     Text("500 MI")
-                        .font(.instrumentLabel)
+                        .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
                 }
 
@@ -66,7 +66,7 @@ struct ListDivider: View {
                         .font(.brutalistBody)
                         .foregroundStyle(Theme.textPrimary)
                     Text("2,500 MI")
-                        .font(.instrumentLabel)
+                        .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
                 }
 
@@ -93,7 +93,7 @@ struct ListDivider: View {
                         .font(.brutalistBody)
                         .foregroundStyle(Theme.textPrimary)
                     Text("DUE SOON")
-                        .font(.instrumentLabel)
+                        .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
                 }
 

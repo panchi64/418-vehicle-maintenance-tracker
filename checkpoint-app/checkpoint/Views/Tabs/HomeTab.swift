@@ -170,7 +170,7 @@ struct HomeTab: View {
                             Spacer()
                             if remainingServices.count > 3 {
                                 Button {
-                                    appState.navigateToServices()
+                                    appState.selectedTab = .services
                                 } label: {
                                     Text("View All")
                                         .font(.brutalistLabel)
@@ -215,7 +215,7 @@ struct HomeTab: View {
                             Spacer()
                             if vehicleServiceLogs.count > 3 {
                                 Button {
-                                    appState.navigateToCosts()
+                                    appState.selectedTab = .costs
                                 } label: {
                                     Text("View All")
                                         .font(.brutalistLabel)

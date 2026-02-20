@@ -175,20 +175,6 @@ final class AppState {
         }
     }
 
-    // MARK: - Navigation Methods
-
-    func navigateToServices() {
-        selectedTab = .services
-    }
-
-    func navigateToCosts() {
-        selectedTab = .costs
-    }
-
-    func navigateToHome() {
-        selectedTab = .home
-    }
-
     // MARK: - Monetization
 
     func requestAddVehicle(vehicleCount: Int) {

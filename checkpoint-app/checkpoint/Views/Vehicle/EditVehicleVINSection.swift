@@ -36,14 +36,14 @@ struct EditVehicleVINSection: View {
                 // VIN input with camera button
                 VStack(alignment: .leading, spacing: 6) {
                     Text("VIN")
-                        .font(.instrumentLabel)
+                        .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
                         .tracking(1.5)
                         .textCase(.uppercase)
 
                     HStack(spacing: 0) {
                         TextField("Optional", text: $vin)
-                            .font(.instrumentBody)
+                            .font(.brutalistBody)
                             .foregroundStyle(Theme.textPrimary)
                             .textInputAutocapitalization(.characters)
                             .autocorrectionDisabled()

@@ -39,11 +39,7 @@ struct MileageReminderScheduler {
             "type": "mileageReminder"
         ]
 
-        var dateComponents = Calendar.current.dateComponents([.year, .month, .day], from: reminderDate)
-        dateComponents.hour = 9
-        dateComponents.minute = 0
-
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
+        let trigger = NotificationHelpers.calendarTrigger(for: reminderDate)
 
         return UNNotificationRequest(
             identifier: mileageReminderID(for: vehicleID),

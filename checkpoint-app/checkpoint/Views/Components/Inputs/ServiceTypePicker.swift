@@ -59,7 +59,7 @@ struct ServiceTypePicker: View {
                 // No selection - show button to pick or custom field
                 VStack(spacing: Spacing.sm) {
                     TextField("Service name", text: $customServiceName)
-                        .font(.instrumentBody)
+                        .font(.brutalistBody)
                         .foregroundStyle(Theme.textPrimary)
                         .focused($isFocused)
                         .padding(Spacing.md)

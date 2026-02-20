@@ -25,7 +25,7 @@ struct MileageInputField: View {
             TextField(placeholder, text: $textValue)
                 .keyboardType(.numberPad)
                 .focused($isFocused)
-                .font(.bodyText)
+                .font(.brutalistBody)
                 .foregroundStyle(Theme.textPrimary)
                 .onChange(of: textValue) { _, newValue in
                     // Strip non-numeric characters and limit to 7 digits
@@ -63,7 +63,7 @@ struct MileageInputField: View {
 
             if !suffix.isEmpty {
                 Text(suffix)
-                    .font(.bodyText)
+                    .font(.brutalistBody)
                     .foregroundStyle(Theme.textSecondary)
             }
         }
@@ -107,7 +107,7 @@ extension MileageInputField {
         // Empty state
         HStack {
             Text("Empty:")
-                .font(.bodySecondary)
+                .font(.brutalistSecondary)
                 .foregroundStyle(Theme.textSecondary)
                 .frame(width: 80, alignment: .leading)
 
@@ -120,7 +120,7 @@ extension MileageInputField {
         // With value
         HStack {
             Text("With value:")
-                .font(.bodySecondary)
+                .font(.brutalistSecondary)
                 .foregroundStyle(Theme.textSecondary)
                 .frame(width: 80, alignment: .leading)
 
@@ -133,7 +133,7 @@ extension MileageInputField {
         // Large number
         HStack {
             Text("Large:")
-                .font(.bodySecondary)
+                .font(.brutalistSecondary)
                 .foregroundStyle(Theme.textSecondary)
                 .frame(width: 80, alignment: .leading)
 
@@ -146,7 +146,7 @@ extension MileageInputField {
         // Custom suffix
         HStack {
             Text("Custom:")
-                .font(.bodySecondary)
+                .font(.brutalistSecondary)
                 .foregroundStyle(Theme.textSecondary)
                 .frame(width: 80, alignment: .leading)
 
@@ -159,7 +159,7 @@ extension MileageInputField {
         // No suffix
         HStack {
             Text("No suffix:")
-                .font(.bodySecondary)
+                .font(.brutalistSecondary)
                 .foregroundStyle(Theme.textSecondary)
                 .frame(width: 80, alignment: .leading)
 
@@ -178,7 +178,7 @@ extension MileageInputField {
 
     VStack(spacing: Spacing.lg) {
         Text("Current value: \(mileage.map(String.init) ?? "nil")")
-            .font(.headline)
+            .font(.brutalistHeading)
             .foregroundStyle(Theme.textPrimary)
 
         MileageInputField(value: $mileage)

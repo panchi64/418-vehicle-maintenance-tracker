@@ -80,12 +80,12 @@ struct ServiceRow: View {
                     // Miles info (primary) or days info (fallback for date-only services)
                     if let miles = milesRemaining {
                         Text(formatMilesText(miles))
-                            .font(.instrumentLabel)
+                            .font(.brutalistLabel)
                             .foregroundStyle(status == .overdue ? status.color : Theme.textTertiary)
                             .tracking(0.5)
                     } else if let days = daysUntilDue {
                         Text(dueText(days: days))
-                            .font(.instrumentLabel)
+                            .font(.brutalistLabel)
                             .foregroundStyle(status == .overdue ? status.color : Theme.textTertiary)
                             .tracking(0.5)
                     }
