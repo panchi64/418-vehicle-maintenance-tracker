@@ -45,7 +45,7 @@ export default function ThemesGallery() {
             class="text-sm"
             style={{ color: "rgba(245, 240, 220, 0.6)" }}
           >
-            One theme is free. The rest are earned.
+            One free. Four with Pro. Three hidden in the tip jar.
           </p>
         </div>
 

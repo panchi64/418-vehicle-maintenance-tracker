@@ -4,7 +4,7 @@ const faqs = [
   {
     question: "Is Checkpoint really free?",
     answer:
-      "Yes. Every core feature — service logging, reminders, cost tracking, widgets, Apple Watch, CarPlay, and Siri — is free with no ads. Checkpoint Pro unlocks extra themes and custom icons for a one-time purchase.",
+      "Yes. Every core feature — service logging, reminders, cost tracking, widgets, Apple Watch, CarPlay, and Siri — is free with no ads. Checkpoint Pro unlocks extra themes and unlimited vehicles for a one-time purchase.",
   },
   {
     question: "Do I need to create an account?",
@@ -14,7 +14,7 @@ const faqs = [
   {
     question: "Can I track more than one vehicle?",
     answer:
-      "Yes. Add as many vehicles as you need — cars, trucks, motorcycles, boats, whatever has a maintenance schedule. Each gets its own dashboard, history, and reminders.",
+      "Yes. The free tier supports up to 3 vehicles — cars, trucks, motorcycles, boats, whatever has a maintenance schedule. Need more? Checkpoint Pro unlocks unlimited vehicles for a one-time purchase. Each vehicle gets its own dashboard, history, and reminders.",
   },
   {
     question: "How do smart reminders work?",
@@ -34,7 +34,7 @@ const faqs = [
   {
     question: "Is my data private?",
     answer:
-      "Completely. All data is stored locally on your device and synced via iCloud. There are no accounts, no servers collecting your information, no ads, and no third-party tracking.",
+      "Completely. All data is stored locally on your device and synced via iCloud. There are no accounts, no ads, and no third-party tracking. Anonymous usage analytics (no personal data) help improve the app and can be disabled with one tap in Settings.",
   },
   {
     question: "What happens if I switch phones?",

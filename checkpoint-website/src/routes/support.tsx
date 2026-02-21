@@ -7,17 +7,17 @@ const supportFaqs = [
   {
     question: "How do I add a new vehicle?",
     answer:
-      "Open Checkpoint and tap on the vehicle name, you will see an option at the bottom of the list to add a new vehicle. Enter your vehicle's year, make, and model. You can also add a nickname, and license plate to make it easy to identify.",
+      "Tap the vehicle name at the top of any tab to open the vehicle picker. At the bottom, tap Add Vehicle. You'll walk through a short setup: nickname, make, model, year, and current mileage. You can also scan your VIN or odometer with the camera. Optional fields include license plate, tire size, oil type, and notes.",
   },
   {
     question: "How do I log a service record?",
     answer:
-      'Select a vehicle from your dashboard, then tap "Add Service." Choose the service type (oil change, tire rotation, etc.), enter the date, mileage, cost, and any notes. Once you press the save button on the top right, the record is saved instantly.',
+      'Tap the "Log" button in the bottom tab bar to record a completed service, or "Schedule" to set up a future reminder. Choose a service type (or create your own), then fill in the date, mileage, cost, and category. You can also attach receipts or photos and add notes. Tap Save in the top right when you\'re done.',
   },
   {
     question: "How do reminders work?",
     answer:
-      "Checkpoint tracks your mileage patterns and service history to send notifications when maintenance is due. You can also set custom reminders based on time intervals or mileage thresholds in each vehicle's settings.",
+      'When you log or schedule a service, toggle "Remind me next time" and set a time interval (e.g., every 6 months) and/or a mileage interval (e.g., every 5,000 miles). Checkpoint calculates the next due date automatically and sends notifications as the deadline approaches — at 30 days, 7 days, and 1 day before.',
   },
   {
     question: "My data isn't syncing between devices. What should I do?",
@@ -27,22 +27,22 @@ const supportFaqs = [
   {
     question: "How do I import data from another app?",
     answer:
-      "Checkpoint supports CSV imports from Fuelly, Drivvo, and Simply Auto. Export your data from the other app as a CSV file, then open Checkpoint, go to Settings > Import Data, and select the file. The import wizard will map your data automatically.",
+      "Checkpoint supports CSV imports from Fuelly, Drivvo, and Simply Auto. Export your data from the other app as a CSV file, then open Checkpoint, go to Settings > Import Service History (under Data & Sync), and select the file. The import wizard will map your data automatically.",
   },
   {
     question: "How do I restore my Checkpoint Pro purchase?",
     answer:
-      'Go to Settings > Checkpoint Pro and tap "Restore Purchase." This uses your Apple ID to verify the purchase. Make sure you\'re signed into the same Apple ID you used for the original purchase.',
+      'Go to Settings and scroll to the Support section. Tap "Restore Purchases." This uses your Apple ID to verify the purchase. Make sure you\'re signed into the same Apple ID you used for the original purchase.',
   },
   {
     question: "Can I export my data?",
     answer:
-      "Yes. Go to Settings > Export Data. Checkpoint will generate a CSV file containing all your vehicles, service records, and costs. You can share the file via AirDrop, email, or save it to the Files app.",
+      'Yes. Go to the Services tab and tap "Export" at the top of your service history. Checkpoint generates a PDF with your complete maintenance record — dates, mileage, costs, and categories. You can share it via AirDrop, email, or save it to the Files app.',
   },
   {
     question: "How do I delete my data?",
     answer:
-      "To delete a single vehicle and its records, long press the vehicle on the dashboard or tap the ellipsis (···) button to the right of the vehicle name to open the menu, then tap Delete. To delete all data, go to Settings > Delete All Data. Deleting the app also removes all locally stored data. To remove iCloud data, manage it through Settings > [Your Name] > iCloud > Manage Storage.",
+      "To delete a vehicle and all its records, tap the vehicle name to open the vehicle picker, then tap the ellipsis (···) menu next to the vehicle and select Delete. You can also long-press a vehicle for the same option. Deleting the app removes all locally stored data. To remove iCloud data, go to iOS Settings > [Your Name] > iCloud > Manage Storage.",
   },
 ];
 

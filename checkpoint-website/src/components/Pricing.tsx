@@ -6,13 +6,13 @@ export default function Pricing() {
     "Full service logging & scheduling",
     "Smart mileage estimation",
     "Cost tracking & reports",
-    "All widgets (Home, Lock Screen, Watch)",
+    "All widgets (Home, Lock Screen, Watch, CarPlay)",
     "Siri Shortcuts",
     "NHTSA recall alerts",
     "iCloud sync",
     "PDF export",
     "CSV import (Fuelly, Drivvo, Simply Auto)",
-    "On-device OCR",
+    "Camera text scanning (odometer & receipts)",
     "Dynamic app icon",
     "Default theme (Checkpoint)",
   ];
@@ -43,7 +43,7 @@ export default function Pricing() {
             class="text-sm"
             style={{ color: "rgba(245, 240, 220, 0.7)" }}
           >
-            No ads. No tracking. No subscription required.
+            No ads. No data selling. No subscription required.
           </p>
         </div>
 
