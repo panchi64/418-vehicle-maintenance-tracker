@@ -1,0 +1,458 @@
+@import 'tailwindcss';
+
+/* ===================================================================
+   Color Tokens (CSS Custom Properties)
+   ================================================================ */
+
+:root {
+  --bg-primary: #0033BE;
+  --bg-elevated: #0F41C8;
+  --bg-dark: #0A0A0A;
+  --text-primary: #F5F0DC;
+  --status-good: #38D9A9;
+  --status-warn: #F7AD55;
+  --status-urgent: #FF6B6B;
+  --frame: #F5F0DC;
+}
+
+/* ===================================================================
+   Base Styles
+   ================================================================ */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'JetBrains Mono', monospace;
+    background-color: var(--frame);
+    color: var(--text-primary);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  ::selection {
+    background: var(--frame);
+    color: var(--bg-primary);
+  }
+
+  /* Offset scroll targets so fixed navbar doesn't cover them */
+  [id] {
+    scroll-margin-top: 80px;
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ===================================================================
+   The Frame — 35px off-white border around viewport
+   ================================================================ */
+
+.frame {
+  position: relative;
+  margin: 35px;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+}
+
+@media (max-width: 768px) {
+  .frame {
+    margin: 16px;
+  }
+}
+
+/* ===================================================================
+   Typography
+   ================================================================ */
+
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.label {
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.label-lg {
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ===================================================================
+   Scroll-Triggered Fade-In
+   ================================================================ */
+
+.fade-in-on-scroll {
+  opacity: 0;
+  transition: opacity 0.6s ease-out;
+}
+
+.fade-in-on-scroll.is-visible {
+  opacity: 1;
+}
+
+/* ===================================================================
+   Utility Classes
+   ================================================================ */
+
+/* Zero border radius enforced globally */
+*, *::before, *::after {
+  border-radius: 0 !important;
+}
+
+/* Section padding */
+.section-padding {
+  padding: 100px 60px;
+}
+
+@media (max-width: 1199px) {
+  .section-padding {
+    padding: 80px 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .section-padding {
+    padding: 60px 24px;
+  }
+}
+
+/* Phone mockup placeholder */
+.mockup-placeholder {
+  background: rgba(245, 240, 220, 0.06);
+  border: 2px solid rgba(245, 240, 220, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(245, 240, 220, 0.4);
+  min-height: 500px;
+  width: 260px;
+  max-width: 100%;
+}
+
+.mockup-placeholder-wide {
+  background: rgba(245, 240, 220, 0.06);
+  border: 2px solid rgba(245, 240, 220, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(245, 240, 220, 0.4);
+  min-height: 400px;
+  width: 100%;
+  max-width: 500px;
+}
+
+/* Notification card style */
+.notification-card {
+  background: rgba(245, 240, 220, 0.08);
+  border: 2px solid rgba(245, 240, 220, 0.12);
+  padding: 16px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: rgba(245, 240, 220, 0.8);
+  line-height: 1.5;
+}
+
+/* Theme preview tile */
+.theme-tile {
+  background: rgba(245, 240, 220, 0.04);
+  border: 2px solid rgba(245, 240, 220, 0.1);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.theme-tile-screen {
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  background: rgba(245, 240, 220, 0.06);
+  border: 1px solid rgba(245, 240, 220, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: rgba(245, 240, 220, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Pricing card */
+.pricing-card {
+  border: 2px solid rgba(245, 240, 220, 0.2);
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  flex: 1;
+}
+
+.pricing-card-highlight {
+  border-color: rgba(245, 240, 220, 0.5);
+  background: rgba(245, 240, 220, 0.04);
+}
+
+/* Badge */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.badge-free {
+  background: var(--status-good);
+  color: #0A0A0A;
+}
+
+.badge-pro {
+  background: var(--text-primary);
+  color: var(--bg-primary);
+}
+
+.badge-rare {
+  background: var(--status-warn);
+  color: #0A0A0A;
+}
+
+/* Buttons */
+.btn-primary {
+  display: inline-block;
+  padding: 14px 32px;
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s ease-out;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-primary:active {
+  opacity: 0.75;
+}
+
+.btn-secondary {
+  display: inline-block;
+  padding: 14px 32px;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-align: center;
+  border: 2px solid var(--text-primary);
+  cursor: pointer;
+  transition: opacity 0.15s ease-out;
+}
+
+.btn-secondary:hover {
+  opacity: 0.9;
+}
+
+.btn-secondary:active {
+  opacity: 0.75;
+}
+
+/* Hero chevron bounce */
+.hero-chevron {
+  animation: chevron-bounce 2s ease-in-out infinite;
+}
+
+@keyframes chevron-bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(6px); }
+}
+
+/* Nav link hover */
+.nav-link {
+  text-decoration: none;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 2px;
+}
+
+.nav-link:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--text-primary);
+}
+
+/* Hamburger icon */
+.hamburger-line {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--text-primary);
+  transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+}
+
+/* Divider */
+.section-divider {
+  border: none;
+  border-top: 2px solid rgba(245, 240, 220, 0.1);
+  margin: 0;
+}
+
+/* Checkmark list */
+.check-list li {
+  position: relative;
+  padding-left: 24px;
+}
+
+.check-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--status-good);
+  font-weight: 700;
+}
+
+/* Star rating */
+.star {
+  color: var(--status-warn);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(245, 240, 220, 0.2);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(245, 240, 220, 0.3);
+}
+
+/* ===================================================================
+   Legal / Content Prose
+   ================================================================ */
+
+.legal-prose {
+  color: rgba(245, 240, 220, 0.8);
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.legal-prose h1 {
+  color: var(--text-primary);
+  font-size: 32px;
+  font-weight: 300;
+  margin-bottom: 8px;
+}
+
+.legal-prose h2 {
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 500;
+  margin-top: 48px;
+  margin-bottom: 16px;
+}
+
+.legal-prose p {
+  margin-bottom: 16px;
+}
+
+.legal-prose ul {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 16px;
+}
+
+.legal-prose ul li {
+  position: relative;
+  padding-left: 20px;
+  margin-bottom: 8px;
+}
+
+.legal-prose ul li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: rgba(245, 240, 220, 0.4);
+}
+
+.legal-prose a {
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+
+.legal-prose a:hover {
+  opacity: 0.8;
+}
+
+.legal-prose .effective-date {
+  font-size: 13px;
+  color: rgba(245, 240, 220, 0.4);
+  margin-bottom: 40px;
+}
+
+@media (max-width: 768px) {
+  .legal-prose h1 {
+    font-size: 26px;
+  }
+
+  .legal-prose h2 {
+    font-size: 18px;
+    margin-top: 36px;
+  }
+
+  .legal-prose {
+    font-size: 14px;
+  }
+}

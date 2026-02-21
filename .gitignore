@@ -110,3 +110,7 @@ Thumbs.db
 
 # Secrets
 Secrets.xcconfig
+
+# Website
+
+node_modules
