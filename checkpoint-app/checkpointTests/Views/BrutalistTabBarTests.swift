@@ -15,7 +15,7 @@ final class BrutalistTabBarTests: XCTestCase {
 
     func testTabSelection_InitialState() {
         // Given
-        var selectedTab = AppState.Tab.home
+        var selectedTab = Tab.home
 
         // Then
         XCTAssertEqual(selectedTab, .home)
@@ -23,7 +23,7 @@ final class BrutalistTabBarTests: XCTestCase {
 
     func testTabSelection_CanChangeToServices() {
         // Given
-        var selectedTab = AppState.Tab.home
+        var selectedTab = Tab.home
 
         // When
         selectedTab = .services
@@ -34,7 +34,7 @@ final class BrutalistTabBarTests: XCTestCase {
 
     func testTabSelection_CanChangeToCosts() {
         // Given
-        var selectedTab = AppState.Tab.home
+        var selectedTab = Tab.home
 
         // When
         selectedTab = .costs
@@ -45,7 +45,7 @@ final class BrutalistTabBarTests: XCTestCase {
 
     func testTabSelection_CanChangeBackToHome() {
         // Given
-        var selectedTab = AppState.Tab.services
+        var selectedTab = Tab.services
 
         // When
         selectedTab = .home
@@ -58,7 +58,7 @@ final class BrutalistTabBarTests: XCTestCase {
 
     func testHomeTab_HasCorrectProperties() {
         // Given
-        let tab = AppState.Tab.home
+        let tab = Tab.home
 
         // Then
         XCTAssertEqual(tab.title, "HOME")
@@ -68,7 +68,7 @@ final class BrutalistTabBarTests: XCTestCase {
 
     func testServicesTab_HasCorrectProperties() {
         // Given
-        let tab = AppState.Tab.services
+        let tab = Tab.services
 
         // Then
         XCTAssertEqual(tab.title, "SERVICES")
@@ -78,7 +78,7 @@ final class BrutalistTabBarTests: XCTestCase {
 
     func testCostsTab_HasCorrectProperties() {
         // Given
-        let tab = AppState.Tab.costs
+        let tab = Tab.costs
 
         // Then
         XCTAssertEqual(tab.title, "COSTS")
@@ -90,7 +90,7 @@ final class BrutalistTabBarTests: XCTestCase {
 
     func testAllTabs_ArePresent() {
         // Given
-        let allTabs = AppState.Tab.allCases
+        let allTabs = Tab.allCases
 
         // Then
         XCTAssertEqual(allTabs.count, 3)
@@ -101,7 +101,7 @@ final class BrutalistTabBarTests: XCTestCase {
 
     func testAllTabs_HaveUniqueRawValues() {
         // Given
-        let allTabs = AppState.Tab.allCases
+        let allTabs = Tab.allCases
         let rawValues = allTabs.map { $0.rawValue }
 
         // Then
@@ -111,7 +111,7 @@ final class BrutalistTabBarTests: XCTestCase {
 
     func testAllTabs_HaveUniqueTitles() {
         // Given
-        let allTabs = AppState.Tab.allCases
+        let allTabs = Tab.allCases
         let titles = allTabs.map { $0.title }
 
         // Then
@@ -121,7 +121,7 @@ final class BrutalistTabBarTests: XCTestCase {
 
     func testAllTabs_HaveUniqueIcons() {
         // Given
-        let allTabs = AppState.Tab.allCases
+        let allTabs = Tab.allCases
         let icons = allTabs.map { $0.icon }
 
         // Then

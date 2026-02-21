@@ -45,13 +45,7 @@ struct InstrumentTextField: View {
                 .padding(Spacing.md)
                 .background(Theme.surfaceInstrument)
                 .clipShape(Rectangle())
-                .overlay(
-                    Rectangle()
-                        .strokeBorder(
-                            isFocused ? Theme.accent : Theme.gridLine,
-                            lineWidth: Theme.borderWidth
-                        )
-                )
+                .brutalistBorder(color: isFocused ? Theme.accent : Theme.gridLine)
                 .focusGlow(isActive: isFocused)
                 .animation(.easeOut(duration: Theme.animationFast), value: isFocused)
         }
@@ -141,20 +135,11 @@ struct InstrumentNumberField: View {
                             .background(Theme.surfaceInstrument)
                     }
                     .accessibilityLabel("Scan with camera")
-                    .overlay(
-                        Rectangle()
-                            .strokeBorder(isFocused ? Theme.accent : Theme.gridLine, lineWidth: Theme.borderWidth)
-                    )
+                    .brutalistBorder(color: isFocused ? Theme.accent : Theme.gridLine)
                 }
             }
             .clipShape(Rectangle())
-            .overlay(
-                Rectangle()
-                    .strokeBorder(
-                        isFocused ? Theme.accent : Theme.gridLine,
-                        lineWidth: Theme.borderWidth
-                    )
-            )
+            .brutalistBorder(color: isFocused ? Theme.accent : Theme.gridLine)
             .focusGlow(isActive: isFocused)
             .animation(.easeOut(duration: Theme.animationFast), value: isFocused)
         }
@@ -186,10 +171,7 @@ struct InstrumentDatePicker: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Theme.surfaceInstrument)
                 .clipShape(Rectangle())
-                .overlay(
-                    Rectangle()
-                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                )
+                .brutalistBorder()
         }
     }
 }
@@ -216,10 +198,7 @@ struct InstrumentToggle: View {
         .padding(Spacing.md)
         .background(Theme.surfaceInstrument)
         .clipShape(Rectangle())
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
     }
 }
 
@@ -290,13 +269,7 @@ struct InstrumentTextEditor: View {
             .frame(minHeight: minHeight)
             .background(Theme.surfaceInstrument)
             .clipShape(Rectangle())
-            .overlay(
-                Rectangle()
-                    .strokeBorder(
-                        isFocused ? Theme.accent : Theme.gridLine,
-                        lineWidth: Theme.borderWidth
-                    )
-            )
+            .brutalistBorder(color: isFocused ? Theme.accent : Theme.gridLine)
             .focusGlow(isActive: isFocused)
             .animation(.easeOut(duration: Theme.animationFast), value: isFocused)
         }

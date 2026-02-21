@@ -66,10 +66,7 @@ struct MarbetePicker: View {
                 }
                 .padding(Spacing.md)
                 .background(Theme.surfaceInstrument)
-                .overlay(
-                    Rectangle()
-                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                )
+                .brutalistBorder()
             }
         }
     }
@@ -117,10 +114,7 @@ struct MarbetePicker: View {
                 }
                 .padding(Spacing.md)
                 .background(Theme.surfaceInstrument)
-                .overlay(
-                    Rectangle()
-                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                )
+                .brutalistBorder()
             }
         }
     }

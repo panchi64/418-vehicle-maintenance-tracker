@@ -41,7 +41,7 @@ final class ServiceHistoryPDFService {
         static let background = UIColor.white
         static let text = UIColor.black
         static let secondary = UIColor.darkGray
-        static let accent = UIColor(red: 0/255, green: 119/255, blue: 182/255, alpha: 1) // Cerulean blue
+        static let accent = UIColor(Theme.accent)
         static let border = UIColor.lightGray
     }
 

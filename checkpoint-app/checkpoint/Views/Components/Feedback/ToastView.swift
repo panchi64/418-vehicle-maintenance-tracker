@@ -55,10 +55,7 @@ struct ToastView: View {
         .padding(.horizontal, Spacing.md)
         .padding(.vertical, Spacing.sm)
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
         .gesture(
             DragGesture(minimumDistance: 20)
                 .onEnded { value in

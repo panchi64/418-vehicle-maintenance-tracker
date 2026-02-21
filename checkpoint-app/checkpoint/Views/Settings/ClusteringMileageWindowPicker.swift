@@ -34,10 +34,7 @@ struct ClusteringMileageWindowPicker: View {
                         }
                     }
                     .background(Theme.surfaceInstrument)
-                    .overlay(
-                        Rectangle()
-                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                    )
+                    .brutalistBorder()
 
                     Text("Services within this mileage range of each other will be suggested for bundling.")
                         .font(.brutalistSecondary)

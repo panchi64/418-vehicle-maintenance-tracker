@@ -34,10 +34,7 @@ struct ClusteringDaysWindowPicker: View {
                         }
                     }
                     .background(Theme.surfaceInstrument)
-                    .overlay(
-                        Rectangle()
-                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                    )
+                    .brutalistBorder()
 
                     Text("Services due within this many days of each other will be suggested for bundling.")
                         .font(.brutalistSecondary)

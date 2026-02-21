@@ -69,6 +69,26 @@ enum Theme {
     static let focusGlowOpacity: Double = 0.5
 }
 
+// MARK: - Brutalist Border
+
+struct BrutalistBorder: ViewModifier {
+    var color: Color = Theme.gridLine
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+                Rectangle()
+                    .strokeBorder(color, lineWidth: Theme.borderWidth)
+            )
+    }
+}
+
+extension View {
+    func brutalistBorder(color: Color = Theme.gridLine) -> some View {
+        modifier(BrutalistBorder(color: color))
+    }
+}
+
 // MARK: - Brutalist Card Style
 
 struct CardStyle: ViewModifier {
@@ -78,10 +98,7 @@ struct CardStyle: ViewModifier {
         content
             .padding(padding)
             .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+            .brutalistBorder()
     }
 }
 
@@ -120,10 +137,7 @@ struct SecondaryButtonStyle: ButtonStyle {
             .frame(maxWidth: .infinity)
             .frame(height: Theme.buttonHeight)
             .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+            .brutalistBorder()
             .opacity(configuration.isPressed ? 0.7 : 1.0)
             .animation(.easeOut(duration: Theme.animationFast), value: configuration.isPressed)
     }
@@ -147,10 +161,7 @@ struct InstrumentCardStyle: ViewModifier {
         content
             .padding(padding)
             .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+            .brutalistBorder()
     }
 }
 
@@ -263,10 +274,7 @@ struct GlassCardStyle: ViewModifier {
                         .fill(Color.white.opacity(intensity.tintOpacity))
                 }
             )
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+            .brutalistBorder()
     }
 }
 
@@ -466,6 +474,7 @@ struct BrutalistDataRow: View {
     let label: String
     let value: String
     var valueColor: Color = Theme.textPrimary
+    var padding: CGFloat = 0
 
     var body: some View {
         HStack {
@@ -481,6 +490,7 @@ struct BrutalistDataRow: View {
                 .font(.brutalistBody)
                 .foregroundStyle(valueColor)
         }
+        .padding(padding)
     }
 }
 

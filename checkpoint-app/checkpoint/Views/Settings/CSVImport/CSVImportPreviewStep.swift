@@ -73,10 +73,7 @@ struct CSVImportPreviewStep: View {
                 }
             }
             .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+            .brutalistBorder()
 
             // Vehicle assignment
             InstrumentSectionHeader(title: "Assign to Vehicle")
@@ -152,10 +149,7 @@ struct CSVImportPreviewStep: View {
                 }
             }
             .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+            .brutalistBorder()
 
             // Warnings
             if !preview.warnings.isEmpty {
@@ -178,10 +172,7 @@ struct CSVImportPreviewStep: View {
                 .padding(Spacing.md)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Theme.surfaceInstrument)
-                .overlay(
-                    Rectangle()
-                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                )
+                .brutalistBorder()
             }
 
             // Buttons
@@ -225,9 +216,6 @@ struct CSVImportPreviewStep: View {
         .frame(maxWidth: .infinity)
         .padding(Spacing.md)
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
     }
 }

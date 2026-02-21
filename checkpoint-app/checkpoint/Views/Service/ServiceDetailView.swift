@@ -146,27 +146,25 @@ struct ServiceDetailView: View {
     // MARK: - Due Info Section
 
     private var dueInfoSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            InstrumentSectionHeader(title: "Schedule")
-
+        InstrumentSection(title: "Schedule") {
             VStack(spacing: 0) {
                 if let dueDate = service.dueDate {
-                    infoRow(title: "Due Date", value: formatDate(dueDate))
+                    BrutalistDataRow(label: "Due Date", value: formatDate(dueDate), padding: Spacing.md)
                     ListDivider(leadingPadding: 0)
                 }
 
                 if let dueMileage = service.dueMileage {
-                    infoRow(title: "Due Mileage", value: formatMileage(dueMileage))
+                    BrutalistDataRow(label: "Due Mileage", value: formatMileage(dueMileage), padding: Spacing.md)
                     ListDivider(leadingPadding: 0)
                 }
 
                 if let intervalMonths = service.intervalMonths {
-                    infoRow(title: "Repeat Every", value: "\(intervalMonths) months")
+                    BrutalistDataRow(label: "Repeat Every", value: "\(intervalMonths) months", padding: Spacing.md)
                     ListDivider(leadingPadding: 0)
                 }
 
                 if let intervalMiles = service.intervalMiles {
-                    infoRow(title: "Or Every", value: formatMileage(intervalMiles))
+                    BrutalistDataRow(label: "Or Every", value: formatMileage(intervalMiles), padding: Spacing.md)
                     if let notes = service.notes, !notes.isEmpty {
                         ListDivider(leadingPadding: 0)
                     }
@@ -187,27 +185,7 @@ struct ServiceDetailView: View {
                     .padding(Spacing.md)
                 }
             }
-            .background(Theme.surfaceInstrument)
-            .clipShape(Rectangle())
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
         }
-    }
-
-    private func infoRow(title: String, value: String) -> some View {
-        HStack {
-            Text(title.uppercased())
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1)
-            Spacer()
-            Text(value)
-                .font(.brutalistBody)
-                .foregroundStyle(Theme.textPrimary)
-        }
-        .padding(Spacing.md)
     }
 
     // MARK: - Action Buttons
@@ -245,9 +223,7 @@ struct ServiceDetailView: View {
     // MARK: - History Section
 
     private var historySection: some View {
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            InstrumentSectionHeader(title: "History")
-
+        InstrumentSection(title: "History") {
             VStack(spacing: 0) {
                 let sortedLogs = (service.logs ?? []).sorted(by: { $0.performedDate > $1.performedDate })
                 ForEach(sortedLogs) { log in
@@ -263,12 +239,6 @@ struct ServiceDetailView: View {
                     }
                 }
             }
-            .background(Theme.surfaceInstrument)
-            .clipShape(Rectangle())
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
         }
     }
 
@@ -317,24 +287,24 @@ struct ServiceDetailView: View {
     private var insightsSection: some View {
         let sortedLogs = (service.logs ?? []).sorted(by: { $0.performedDate > $1.performedDate })
 
-        return VStack(alignment: .leading, spacing: Spacing.md) {
-            InstrumentSectionHeader(title: "Insights")
-
+        return InstrumentSection(title: "Insights") {
             VStack(spacing: 0) {
                 // Time since last
                 if let lastLog = sortedLogs.first {
-                    infoRow(
-                        title: "Time Since Last",
-                        value: TimeSinceFormatter.full(from: lastLog.performedDate)
+                    BrutalistDataRow(
+                        label: "Time Since Last",
+                        value: TimeSinceFormatter.full(from: lastLog.performedDate),
+                        padding: Spacing.md
                     )
                     ListDivider(leadingPadding: 0)
 
                     // Miles since last
                     let milesSince = vehicle.currentMileage - lastLog.mileageAtService
                     if milesSince >= 0 {
-                        infoRow(
-                            title: "Miles Since Last",
-                            value: Formatters.mileage(milesSince)
+                        BrutalistDataRow(
+                            label: "Miles Since Last",
+                            value: Formatters.mileage(milesSince),
+                            padding: Spacing.md
                         )
                         ListDivider(leadingPadding: 0)
                     }
@@ -345,25 +315,21 @@ struct ServiceDetailView: View {
                 if !logsWithCost.isEmpty {
                     let totalCost = logsWithCost.compactMap { $0.cost }.reduce(Decimal.zero, +)
                     let averageCost = totalCost / Decimal(logsWithCost.count)
-                    infoRow(
-                        title: "Average Cost",
-                        value: Formatters.currency.string(from: averageCost as NSDecimalNumber) ?? "$0"
+                    BrutalistDataRow(
+                        label: "Average Cost",
+                        value: Formatters.currency.string(from: averageCost as NSDecimalNumber) ?? "$0",
+                        padding: Spacing.md
                     )
                     ListDivider(leadingPadding: 0)
                 }
 
                 // Times serviced
-                infoRow(
-                    title: "Times Serviced",
-                    value: "\(sortedLogs.count)"
+                BrutalistDataRow(
+                    label: "Times Serviced",
+                    value: "\(sortedLogs.count)",
+                    padding: Spacing.md
                 )
             }
-            .background(Theme.surfaceInstrument)
-            .clipShape(Rectangle())
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
         }
     }
 

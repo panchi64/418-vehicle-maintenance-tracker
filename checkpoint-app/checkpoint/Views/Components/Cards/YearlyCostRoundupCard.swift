@@ -118,10 +118,7 @@ struct YearlyCostRoundupCard: View {
             footerSection
         }
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
         .accessibilityElement(children: .contain)
         .accessibilityLabel("\(year) yearly cost roundup, total spent \(formatCurrency(totalSpent))")
     }

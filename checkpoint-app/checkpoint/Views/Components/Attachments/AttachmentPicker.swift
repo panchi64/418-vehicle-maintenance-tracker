@@ -48,10 +48,7 @@ struct AttachmentPicker: View {
                     .padding(.horizontal, Spacing.md)
                     .padding(.vertical, Spacing.sm)
                     .background(Theme.surfaceInstrument)
-                    .overlay(
-                        Rectangle()
-                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                    )
+                    .brutalistBorder()
                 }
                 .onChange(of: selectedPhotoItem) { _, newItem in
                     Task {
@@ -73,10 +70,7 @@ struct AttachmentPicker: View {
                     .padding(.horizontal, Spacing.md)
                     .padding(.vertical, Spacing.sm)
                     .background(Theme.surfaceInstrument)
-                    .overlay(
-                        Rectangle()
-                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                    )
+                    .brutalistBorder()
                 }
                 .sheet(isPresented: $showDocumentPicker) {
                     DocumentPicker(onDocumentPicked: { url in
@@ -104,10 +98,7 @@ struct AttachmentPicker: View {
                     .padding(.horizontal, Spacing.md)
                     .padding(.vertical, Spacing.sm)
                     .background(Theme.surfaceInstrument)
-                    .overlay(
-                        Rectangle()
-                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                    )
+                    .brutalistBorder()
                 }
                 .disabled(isProcessingOCR)
                 .sheet(isPresented: $showReceiptScanner) {

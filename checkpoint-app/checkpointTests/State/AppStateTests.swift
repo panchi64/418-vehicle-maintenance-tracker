@@ -15,24 +15,24 @@ final class AppStateTests: XCTestCase {
 
     func testTab_AllCases() {
         // Then
-        XCTAssertEqual(AppState.Tab.allCases.count, 3)
-        XCTAssertTrue(AppState.Tab.allCases.contains(.home))
-        XCTAssertTrue(AppState.Tab.allCases.contains(.services))
-        XCTAssertTrue(AppState.Tab.allCases.contains(.costs))
+        XCTAssertEqual(Tab.allCases.count, 3)
+        XCTAssertTrue(Tab.allCases.contains(.home))
+        XCTAssertTrue(Tab.allCases.contains(.services))
+        XCTAssertTrue(Tab.allCases.contains(.costs))
     }
 
     func testTab_Titles() {
         // Then
-        XCTAssertEqual(AppState.Tab.home.title, "HOME")
-        XCTAssertEqual(AppState.Tab.services.title, "SERVICES")
-        XCTAssertEqual(AppState.Tab.costs.title, "COSTS")
+        XCTAssertEqual(Tab.home.title, "HOME")
+        XCTAssertEqual(Tab.services.title, "SERVICES")
+        XCTAssertEqual(Tab.costs.title, "COSTS")
     }
 
     func testTab_Icons() {
         // Then
-        XCTAssertEqual(AppState.Tab.home.icon, "house.fill")
-        XCTAssertEqual(AppState.Tab.services.icon, "wrench.and.screwdriver.fill")
-        XCTAssertEqual(AppState.Tab.costs.icon, "dollarsign.circle.fill")
+        XCTAssertEqual(Tab.home.icon, "house.fill")
+        XCTAssertEqual(Tab.services.icon, "wrench.and.screwdriver.fill")
+        XCTAssertEqual(Tab.costs.icon, "dollarsign.circle.fill")
     }
 
     // MARK: - Initialization Tests

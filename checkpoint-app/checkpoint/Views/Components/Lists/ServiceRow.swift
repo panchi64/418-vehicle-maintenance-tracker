@@ -191,10 +191,7 @@ struct ServiceRowButtonStyle: ButtonStyle {
             }
         }
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
         .screenPadding()
     }
     .preferredColorScheme(.dark)

@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct BrutalistTabBar: View {
-    @Binding var selectedTab: AppState.Tab
+    @Binding var selectedTab: Tab
     var onLogTapped: (() -> Void)?
     var onScheduleTapped: (() -> Void)?
 
@@ -23,7 +23,7 @@ struct BrutalistTabBar: View {
         HStack(alignment: .bottom, spacing: Spacing.sm) {
             // Tab buttons in glass container
             HStack(spacing: 0) {
-                ForEach(AppState.Tab.allCases, id: \.self) { tab in
+                ForEach(Tab.allCases, id: \.self) { tab in
                     tabButton(for: tab)
                 }
             }
@@ -132,7 +132,7 @@ struct BrutalistTabBar: View {
         .padding(.bottom, Spacing.sm)
     }
 
-    private func tabButton(for tab: AppState.Tab) -> some View {
+    private func tabButton(for tab: Tab) -> some View {
         let isSelected = selectedTab == tab
 
         return Button {
@@ -179,7 +179,7 @@ struct BrutalistTabBar: View {
 
 #Preview {
     struct PreviewWrapper: View {
-        @State private var selectedTab: AppState.Tab = .home
+        @State private var selectedTab: Tab = .home
 
         var body: some View {
             ZStack {

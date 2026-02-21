@@ -127,45 +127,9 @@ struct TipModalView: View {
 
                     Spacer()
 
-                    // Tip buttons + dismiss — pinned to bottom
-                    VStack(spacing: Spacing.md) {
-                        // Tip tier buttons in instrument card containers
-                        HStack(spacing: Spacing.sm) {
-                            #if DEBUG
-                            if storeManager.tipProducts().isEmpty {
-                                debugTipSmall
-                                debugTipMedium
-                                debugTipLarge
-                            } else {
-                                ForEach(storeManager.tipProducts(), id: \.id) { product in
-                                    tipButton(for: product)
-                                }
-                            }
-                            #else
-                            ForEach(storeManager.tipProducts(), id: \.id) { product in
-                                tipButton(for: product)
-                            }
-                            #endif
-                        }
-
-                        // Theme unlock hint
-                        Text("EVERY TIP UNLOCKS A RARE THEME")
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.textTertiary)
-                            .textCase(.uppercase)
-                            .tracking(1.5)
-
-                    }
-                    .padding(.horizontal, Spacing.screenHorizontal)
-
-                    // Collection progress
-                    let rareThemes = ThemeManager.shared.allThemes.filter { $0.tier == .rare }
-                    let ownedRare = rareThemes.filter { ThemeManager.shared.isOwned($0) }
-                    if rareThemes.count > 0 && ownedRare.count < rareThemes.count {
-                        Text("\(ownedRare.count)/\(rareThemes.count) RARE THEMES COLLECTED")
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.textTertiary)
-                            .tracking(1)
+                    // Tip buttons + collection progress
+                    TipTierList { productID in
+                        await handleTipPurchase(productID)
                     }
 
                     // Dismiss
@@ -208,18 +172,27 @@ struct TipModalView: View {
         dismiss()
     }
 
-    private func handleSuccessfulTip() {
-        PurchaseSettings.shared.recordTip()
-    }
+    private func handleTipPurchase(_ productID: StoreManager.ProductID) async {
+        #if DEBUG
+        if storeManager.tipProducts().isEmpty {
+            await storeManager.simulatePurchase(productID)
+            PurchaseSettings.shared.recordTip()
+            dismiss()
+            if let theme = ThemeManager.shared.unlockRandomRareTheme() {
+                AnalyticsService.shared.capture(.themeUnlocked(themeID: theme.id, tier: "rare"))
+                try? await Task.sleep(for: .seconds(0.5))
+                appState.unlockedTheme = theme
+            }
+            return
+        }
+        #endif
 
-    // MARK: - Debug Buttons
-
-    #if DEBUG
-    private func debugTipButton(label: String, price: String, productID: StoreManager.ProductID) -> some View {
-        Button {
-            Task {
-                await storeManager.simulatePurchase(productID)
-                handleSuccessfulTip()
+        AnalyticsService.shared.capture(.purchaseAttempted(product: productID.rawValue))
+        do {
+            let transaction = try await storeManager.purchase(productID)
+            if transaction != nil {
+                AnalyticsService.shared.capture(.purchaseSucceeded(product: productID.rawValue))
+                PurchaseSettings.shared.recordTip()
                 dismiss()
                 if let theme = ThemeManager.shared.unlockRandomRareTheme() {
                     AnalyticsService.shared.capture(.themeUnlocked(themeID: theme.id, tier: "rare"))
@@ -227,94 +200,9 @@ struct TipModalView: View {
                     appState.unlockedTheme = theme
                 }
             }
-        } label: {
-            VStack(spacing: Spacing.xs) {
-                Text(price)
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textPrimary)
-                Text(label)
-                    .font(.brutalistLabel)
-                    .foregroundStyle(Theme.textTertiary)
-                    .textCase(.uppercase)
-                    .tracking(1.5)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, Spacing.sm)
-            .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.accent, lineWidth: Theme.borderWidth)
-            )
+        } catch {
+            AnalyticsService.shared.capture(.purchaseFailed(product: productID.rawValue, error: error.localizedDescription))
         }
-        .buttonStyle(.instrument)
-    }
-
-    private var debugTipSmall: some View {
-        debugTipButton(label: "Snack", price: "$1.99", productID: .tipSmall)
-    }
-
-    private var debugTipMedium: some View {
-        debugTipButton(label: "Coffee Run", price: "$4.99", productID: .tipMedium)
-    }
-
-    private var debugTipLarge: some View {
-        debugTipButton(label: "Lunch", price: "$9.99", productID: .tipLarge)
-    }
-    #endif
-
-    private static let tipLabels: [String: String] = [
-        "tip.small": "Snack",
-        "tip.medium": "Coffee Run",
-        "tip.large": "Lunch",
-    ]
-
-    private func tipLabel(for product: Product) -> String {
-        Self.tipLabels[product.id] ?? product.displayName.replacingOccurrences(of: " Tip", with: "")
-    }
-
-    // MARK: - Tip Button
-
-    private func tipButton(for product: Product) -> some View {
-        Button {
-            Task {
-                guard let productID = StoreManager.ProductID(rawValue: product.id) else { return }
-                AnalyticsService.shared.capture(.purchaseAttempted(product: product.id))
-                do {
-                    let transaction = try await storeManager.purchase(productID)
-                    if transaction != nil {
-                        AnalyticsService.shared.capture(.purchaseSucceeded(product: product.id))
-                        handleSuccessfulTip()
-                        dismiss()
-                        if let theme = ThemeManager.shared.unlockRandomRareTheme() {
-                            AnalyticsService.shared.capture(.themeUnlocked(themeID: theme.id, tier: "rare"))
-                            try? await Task.sleep(for: .seconds(0.5))
-                            appState.unlockedTheme = theme
-                        }
-                    }
-                } catch {
-                    AnalyticsService.shared.capture(.purchaseFailed(product: product.id, error: error.localizedDescription))
-                }
-            }
-        } label: {
-            VStack(spacing: Spacing.xs) {
-                Text(product.displayPrice)
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textPrimary)
-                Text(tipLabel(for: product))
-                    .font(.brutalistLabel)
-                    .foregroundStyle(Theme.textTertiary)
-                    .textCase(.uppercase)
-                    .tracking(1.5)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, Spacing.sm)
-            .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.accent, lineWidth: Theme.borderWidth)
-            )
-        }
-        .buttonStyle(.instrument)
     }
 }
 

@@ -61,10 +61,7 @@ struct CSVImportConfigureStep: View {
                 }
             }
             .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+            .brutalistBorder()
 
             // Column mapping
             InstrumentSectionHeader(title: "Column Mapping")
@@ -127,10 +124,7 @@ struct CSVImportConfigureStep: View {
                 )
             }
             .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+            .brutalistBorder()
 
             // Data preview (first 3 rows)
             if !importService.previewRows.isEmpty {
@@ -189,10 +183,7 @@ struct CSVImportConfigureStep: View {
                         }
                     }
                     .background(Theme.surfaceInstrument)
-                    .overlay(
-                        Rectangle()
-                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                    )
+                    .brutalistBorder()
                 }
             }
 

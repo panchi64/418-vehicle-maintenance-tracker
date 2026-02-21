@@ -168,10 +168,7 @@ struct OCRConfirmationView: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, Spacing.xl)
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
     }
 
     // MARK: - Low Confidence Warning
@@ -239,10 +236,7 @@ struct OCRConfirmationView: View {
         }
         .padding(Spacing.md)
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
     }
     #endif
 

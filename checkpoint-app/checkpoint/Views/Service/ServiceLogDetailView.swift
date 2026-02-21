@@ -100,62 +100,32 @@ struct ServiceLogDetailView: View {
     // MARK: - Details Section
 
     private var detailsSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            InstrumentSectionHeader(title: "Details")
-
+        InstrumentSection(title: "Details") {
             VStack(spacing: 0) {
                 if let cost = log.formattedCost {
-                    detailRow(title: "Cost", value: cost)
+                    BrutalistDataRow(label: "Cost", value: cost, padding: Spacing.md)
                     ListDivider(leadingPadding: 0)
                 }
 
                 if let category = log.costCategory {
-                    detailRow(title: "Category", value: category.displayName)
+                    BrutalistDataRow(label: "Category", value: category.displayName, padding: Spacing.md)
                     ListDivider(leadingPadding: 0)
                 }
 
-                detailRow(title: "Mileage", value: Formatters.mileage(log.mileageAtService))
+                BrutalistDataRow(label: "Mileage", value: Formatters.mileage(log.mileageAtService), padding: Spacing.md)
             }
-            .background(Theme.surfaceInstrument)
-            .clipShape(Rectangle())
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
         }
-    }
-
-    private func detailRow(title: String, value: String) -> some View {
-        HStack {
-            Text(title.uppercased())
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1)
-            Spacer()
-            Text(value)
-                .font(.brutalistBody)
-                .foregroundStyle(Theme.textPrimary)
-        }
-        .padding(Spacing.md)
     }
 
     // MARK: - Notes Section
 
     private func notesSection(notes: String) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            InstrumentSectionHeader(title: "Notes")
-
+        InstrumentSection(title: "Notes") {
             Text(notes)
                 .font(.brutalistBody)
                 .foregroundStyle(Theme.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(Spacing.md)
-                .background(Theme.surfaceInstrument)
-                .clipShape(Rectangle())
-                .overlay(
-                    Rectangle()
-                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                )
         }
     }
 }

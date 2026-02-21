@@ -105,10 +105,7 @@ struct CumulativeCostChartCard: View {
             }
             .padding(Spacing.md)
             .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+            .brutalistBorder()
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Spending pace chart showing cumulative costs over time")
@@ -128,10 +125,7 @@ struct CumulativeCostChartCard: View {
         .padding(.horizontal, Spacing.sm)
         .padding(.vertical, Spacing.xs)
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
     }
 
     private static let dateFormatter: DateFormatter = {

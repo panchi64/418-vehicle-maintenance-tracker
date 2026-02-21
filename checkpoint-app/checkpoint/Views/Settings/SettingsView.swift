@@ -115,10 +115,7 @@ struct SettingsView: View {
                 AppIconToggle()
             }
             .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+            .brutalistBorder()
         }
     }
 
@@ -183,10 +180,7 @@ struct SettingsView: View {
                 .opacity(SeasonalSettings.shared.isEnabled ? 1.0 : 0.5)
             }
             .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+            .brutalistBorder()
         }
     }
 
@@ -238,10 +232,7 @@ struct SettingsView: View {
                 .opacity(ClusteringSettings.shared.isEnabled ? 1.0 : 0.5)
             }
             .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+            .brutalistBorder()
         }
     }
 
@@ -278,10 +269,7 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
                 }
                 .background(Theme.surfaceInstrument)
-                .overlay(
-                    Rectangle()
-                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                )
+                .brutalistBorder()
             }
 
             SyncSettingsSection()
@@ -467,10 +455,7 @@ struct SettingsView: View {
                 .buttonStyle(.plain)
             }
             .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+            .brutalistBorder()
         }
     }
     #endif

@@ -55,10 +55,7 @@ struct QuickStatsBar: View {
         }
         .frame(height: 56)
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Year to date: \(formattedYTDSpend) spent, \(ytdServicesCount) services completed")
     }

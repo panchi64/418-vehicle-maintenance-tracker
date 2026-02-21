@@ -200,10 +200,7 @@ struct HomeTab: View {
                             }
                         }
                         .background(Theme.surfaceInstrument)
-                        .overlay(
-                            Rectangle()
-                                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                        )
+                        .brutalistBorder()
                     }
                 }
 
@@ -247,10 +244,7 @@ struct HomeTab: View {
                             }
                         }
                         .background(Theme.surfaceInstrument)
-                        .overlay(
-                            Rectangle()
-                                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                        )
+                        .brutalistBorder()
                     }
                     .revealAnimation(delay: 0.35)
                 }

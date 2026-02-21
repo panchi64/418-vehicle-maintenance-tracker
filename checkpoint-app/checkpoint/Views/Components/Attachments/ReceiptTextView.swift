@@ -29,10 +29,7 @@ struct ReceiptTextView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(maxHeight: 200)
-                                .overlay(
-                                    Rectangle()
-                                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                                )
+                                .brutalistBorder()
                         }
 
                         // Extracted text section
@@ -56,10 +53,7 @@ struct ReceiptTextView: View {
                                     .padding(.horizontal, Spacing.sm)
                                     .padding(.vertical, 6)
                                     .background(Theme.surfaceInstrument)
-                                    .overlay(
-                                        Rectangle()
-                                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                                    )
+                                    .brutalistBorder()
                                 }
                                 .disabled(showCopiedFeedback)
                             }
@@ -72,10 +66,7 @@ struct ReceiptTextView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(Spacing.md)
                                 .background(Theme.surfaceInstrument)
-                                .overlay(
-                                    Rectangle()
-                                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                                )
+                                .brutalistBorder()
                         }
 
                         // Reference note

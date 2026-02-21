@@ -49,10 +49,7 @@ struct ServiceTypePicker: View {
                     .padding(Spacing.md)
                     .background(Theme.surfaceInstrument)
                     .clipShape(Rectangle())
-                    .overlay(
-                        Rectangle()
-                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                    )
+                    .brutalistBorder()
                 }
                 .buttonStyle(.plain)
             } else {

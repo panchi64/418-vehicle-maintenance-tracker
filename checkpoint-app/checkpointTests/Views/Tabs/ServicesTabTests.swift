@@ -36,7 +36,7 @@ final class ServicesTabTests: XCTestCase {
 
     func testViewMode_AllCases() {
         // Given
-        let allModes = AppState.ServicesViewMode.allCases
+        let allModes = ServicesTabState.ViewMode.allCases
 
         // Then
         XCTAssertEqual(allModes.count, 2)
@@ -46,15 +46,15 @@ final class ServicesTabTests: XCTestCase {
 
     func testViewMode_RawValues() {
         // Then
-        XCTAssertEqual(AppState.ServicesViewMode.list.rawValue, "List")
-        XCTAssertEqual(AppState.ServicesViewMode.timeline.rawValue, "Timeline")
+        XCTAssertEqual(ServicesTabState.ViewMode.list.rawValue, "List")
+        XCTAssertEqual(ServicesTabState.ViewMode.timeline.rawValue, "Timeline")
     }
 
     // MARK: - Status Filter Tests
 
     func testStatusFilter_AllCases() {
         // Given
-        let allFilters = AppState.ServicesStatusFilter.allCases
+        let allFilters = ServicesTabState.StatusFilter.allCases
 
         // Then
         XCTAssertEqual(allFilters.count, 4)
@@ -66,10 +66,10 @@ final class ServicesTabTests: XCTestCase {
 
     func testStatusFilter_RawValues() {
         // Then
-        XCTAssertEqual(AppState.ServicesStatusFilter.all.rawValue, "All")
-        XCTAssertEqual(AppState.ServicesStatusFilter.overdue.rawValue, "Overdue")
-        XCTAssertEqual(AppState.ServicesStatusFilter.dueSoon.rawValue, "Due Soon")
-        XCTAssertEqual(AppState.ServicesStatusFilter.good.rawValue, "Good")
+        XCTAssertEqual(ServicesTabState.StatusFilter.all.rawValue, "All")
+        XCTAssertEqual(ServicesTabState.StatusFilter.overdue.rawValue, "Overdue")
+        XCTAssertEqual(ServicesTabState.StatusFilter.dueSoon.rawValue, "Due Soon")
+        XCTAssertEqual(ServicesTabState.StatusFilter.good.rawValue, "Good")
     }
 
     // MARK: - Search Filter Tests

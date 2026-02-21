@@ -107,16 +107,10 @@ struct OnboardingGetStartedView: View {
                                                 .frame(width: 52, height: 52)
                                                 .background(Theme.surfaceInstrument)
                                         }
-                                        .overlay(
-                                            Rectangle()
-                                                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                                        )
+                                        .brutalistBorder()
                                     }
                                 }
-                                .overlay(
-                                    Rectangle()
-                                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                                )
+                                .brutalistBorder()
 
                                 // Character count
                                 Text(L10n.onboardingGetStartedCharacters(vin.count))
@@ -145,10 +139,7 @@ struct OnboardingGetStartedView: View {
                                 }
                                 .padding(Spacing.md)
                                 .background(Theme.surfaceInstrument)
-                                .overlay(
-                                    Rectangle()
-                                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                                )
+                                .brutalistBorder()
                             }
 
                             // Marbete section (collapsible — region-specific)

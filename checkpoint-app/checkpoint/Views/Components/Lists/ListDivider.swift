@@ -103,10 +103,7 @@ struct ListDivider: View {
             .padding(.vertical, Spacing.listItem)
         }
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
         .screenPadding()
     }
     .preferredColorScheme(.dark)

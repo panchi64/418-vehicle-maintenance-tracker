@@ -187,10 +187,7 @@ private struct DebugTipCard: View {
         }
         .padding(Spacing.md)
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
     }
 }
 #endif
@@ -247,9 +244,6 @@ private struct TipCard: View {
         }
         .padding(Spacing.md)
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
     }
 }

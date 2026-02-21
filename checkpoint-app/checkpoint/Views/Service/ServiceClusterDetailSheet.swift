@@ -83,10 +83,7 @@ struct ServiceClusterDetailSheet: View {
                 }
             }
             .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+            .brutalistBorder()
         }
     }
 
@@ -129,10 +126,7 @@ struct ServiceClusterDetailSheet: View {
                 }
             }
             .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+            .brutalistBorder()
         }
     }
 
@@ -222,10 +216,7 @@ struct ServiceClusterDetailSheet: View {
         }
         .padding(Spacing.md)
         .background(Theme.surfaceInstrument.opacity(0.5))
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
     }
 }
 

@@ -33,10 +33,7 @@ struct SyncSettingsSection: View {
                 syncStatusRow
             }
             .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+            .brutalistBorder()
 
             // Info text
             Text("Syncs your vehicles and maintenance data across your Apple devices via iCloud.")

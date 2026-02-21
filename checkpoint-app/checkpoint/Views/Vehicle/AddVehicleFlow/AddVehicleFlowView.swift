@@ -4,10 +4,8 @@
 //
 //  Coordinator view for the 2-step add vehicle wizard flow
 //
-//  TODO: [OB-C2] FeatureHintView is built but not integrated in production views.
-//  VIN hint (.vinLookup) should be placed in VehicleBasicsStep after VIN input;
-//  Odometer hint (.odometerOCR) should be placed in VehicleDetailsStep after odometer input.
-//  See checkpoint/Views/Components/Feedback/INTEGRATION_GUIDE.md for details.
+//  FeatureHintView integration deferred — onboarding flow is already dense;
+//  hints would add noise without measurable benefit to completion rate.
 //
 
 import SwiftUI
@@ -88,20 +86,20 @@ struct AddVehicleFlowView: View {
             }
             .onAppear {
                 // Apply onboarding marbete prefill if set
-                if let month = appState.onboardingMarbeteMonth {
+                if let month = appState.onboarding.marbeteMonth {
                     formState.marbeteExpirationMonth = month
                 }
-                if let year = appState.onboardingMarbeteYear {
+                if let year = appState.onboarding.marbeteYear {
                     formState.marbeteExpirationYear = year
                 }
                 // Apply VIN lookup result from onboarding if available
-                if let vinResult = appState.vinLookupResult {
+                if let vinResult = appState.onboarding.vinLookupResult {
                     formState.vin = vinResult.vin
                     formState.make = vinResult.make
                     formState.model = vinResult.model
                     formState.year = vinResult.year
                     formState.usedVINLookup = true
-                    appState.vinLookupResult = nil
+                    appState.onboarding.vinLookupResult = nil
                 }
             }
             .fullScreenCover(isPresented: $formState.showVINCamera) {

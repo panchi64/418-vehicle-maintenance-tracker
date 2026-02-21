@@ -60,9 +60,6 @@ struct CSVImportSuccessStep: View {
         .frame(maxWidth: .infinity)
         .padding(Spacing.md)
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
     }
 }

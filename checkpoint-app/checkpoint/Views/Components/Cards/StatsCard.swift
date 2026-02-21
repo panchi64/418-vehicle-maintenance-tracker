@@ -34,10 +34,7 @@ struct StatsCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Spacing.md)
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(label): \(value)")
     }

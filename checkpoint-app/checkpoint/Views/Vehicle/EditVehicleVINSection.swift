@@ -65,16 +65,10 @@ struct EditVehicleVINSection: View {
                                     .frame(width: 52, height: 52)
                                     .background(Theme.surfaceInstrument)
                             }
-                            .overlay(
-                                Rectangle()
-                                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                            )
+                            .brutalistBorder()
                         }
                     }
-                    .overlay(
-                        Rectangle()
-                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                    )
+                    .brutalistBorder()
                 }
 
                 HStack {

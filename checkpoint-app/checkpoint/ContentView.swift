@@ -264,9 +264,9 @@ struct ContentView: View {
             )
         }
         .sheet(isPresented: $appState.showAddVehicle, onDismiss: {
-            appState.onboardingMarbeteMonth = nil
-            appState.onboardingMarbeteYear = nil
-            appState.vinLookupResult = nil
+            appState.onboarding.marbeteMonth = nil
+            appState.onboarding.marbeteYear = nil
+            appState.onboarding.vinLookupResult = nil
         }) {
             AddVehicleFlowView()
                 .environment(appState)
@@ -401,7 +401,7 @@ struct ContentView: View {
                 onVINLookupComplete: { result, vin in
                     AnalyticsService.shared.capture(.onboardingVINLookupUsed)
                     // Store VIN lookup result for AddVehicleFlowView to consume
-                    appState.vinLookupResult = AppState.VINLookupPassthrough(
+                    appState.onboarding.vinLookupResult = OnboardingPrefillState.VINLookupPassthrough(
                         make: result.make,
                         model: result.model,
                         year: result.modelYear,
@@ -437,8 +437,8 @@ struct ContentView: View {
                     clearSampleData()
                     onboardingState.complete()
                 },
-                marbeteMonth: $appState.onboardingMarbeteMonth,
-                marbeteYear: $appState.onboardingMarbeteYear
+                marbeteMonth: $appState.onboarding.marbeteMonth,
+                marbeteYear: $appState.onboarding.marbeteYear
             )
         }
         // Handle mileage update notification navigation

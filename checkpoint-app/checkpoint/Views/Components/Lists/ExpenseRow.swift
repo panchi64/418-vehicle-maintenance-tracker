@@ -135,10 +135,7 @@ struct ExpenseRow: View {
             ExpenseRow(log: log3) { print("Tapped") }
         }
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
         .padding(Spacing.screenHorizontal)
     }
     .preferredColorScheme(.dark)

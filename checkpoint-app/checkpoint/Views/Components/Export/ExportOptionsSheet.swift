@@ -39,10 +39,7 @@ struct ExportOptionsSheet: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(Spacing.md)
                 .background(Theme.surfaceInstrument)
-                .overlay(
-                    Rectangle()
-                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                )
+                .brutalistBorder()
 
                 // Options
                 VStack(spacing: 0) {
@@ -61,10 +58,7 @@ struct ExportOptionsSheet: View {
                     .padding(Spacing.md)
                 }
                 .background(Theme.surfaceInstrument)
-                .overlay(
-                    Rectangle()
-                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                )
+                .brutalistBorder()
 
                 // Error message
                 if let error = exportError {

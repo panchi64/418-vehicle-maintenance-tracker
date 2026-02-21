@@ -73,10 +73,7 @@ struct EditServiceView: View {
                                 .padding(Spacing.md)
                                 .accessibilityElement(children: .combine)
                                 .background(Theme.surfaceInstrument)
-                                .overlay(
-                                    Rectangle()
-                                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                                )
+                                .brutalistBorder()
 
                                 if hasDueDate {
                                     InstrumentDatePicker(

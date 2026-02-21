@@ -197,10 +197,7 @@ struct MaintenanceTimeline: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(Spacing.md)
             .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+            .brutalistBorder()
             .contentShape(Rectangle())
             .onTapGesture {
                 // Selection haptic for row tap

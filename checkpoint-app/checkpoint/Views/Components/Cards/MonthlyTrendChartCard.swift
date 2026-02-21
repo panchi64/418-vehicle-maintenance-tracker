@@ -62,10 +62,7 @@ struct MonthlyTrendChartCard: View {
                 }
             }
             .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+            .brutalistBorder()
 
             textRows
         }
@@ -87,10 +84,7 @@ struct MonthlyTrendChartCard: View {
         .padding(.horizontal, Spacing.sm)
         .padding(.vertical, Spacing.xs)
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
     }
 
     // MARK: - Chart
@@ -226,10 +220,7 @@ struct MonthlyTrendChartCard: View {
             }
         }
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
     }
 
     // MARK: - Helpers

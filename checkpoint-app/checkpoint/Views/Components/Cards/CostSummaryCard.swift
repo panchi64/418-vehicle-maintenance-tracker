@@ -32,10 +32,7 @@ struct CostSummaryCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Spacing.lg)
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Total spent \(formattedTotal), \(periodLabel)")
     }

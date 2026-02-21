@@ -22,10 +22,7 @@ struct InstrumentSegmentedControl<T: Hashable>: View {
         }
         .padding(Spacing.xs)
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
     }
 
     private func segmentButton(for option: T) -> some View {

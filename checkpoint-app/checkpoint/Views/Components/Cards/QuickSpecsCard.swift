@@ -237,10 +237,7 @@ struct QuickSpecsCard: View {
                 .transition(.opacity)
             }
         }
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
         .clipped()
         .sheet(isPresented: $showFullNotes) {
             FullNotesView(notes: vehicle.notes ?? "")

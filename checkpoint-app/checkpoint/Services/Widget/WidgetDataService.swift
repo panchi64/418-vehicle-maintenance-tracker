@@ -22,6 +22,10 @@ final class WidgetDataService {
     private let widgetDataKey = "widgetData"
     private let vehicleListKey = "vehicleList"
 
+    private var widgetDefaults: UserDefaults? {
+        UserDefaults(suiteName: AppGroupConstants.iPhoneWidget)
+    }
+
     /// Cancellables for observation
     private var cancellables = Set<AnyCancellable>()
 
@@ -71,7 +75,7 @@ final class WidgetDataService {
         isEstimated: Bool = false,
         services: [(serviceID: String?, name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?)]
     ) {
-        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else {
+        guard let userDefaults = widgetDefaults else {
             widgetLogger.error("Failed to access App Group UserDefaults")
             return
         }
@@ -132,13 +136,6 @@ final class WidgetDataService {
             .filter { $0.hasDueTracking }
             .map { service in
             let status = service.status(currentMileage: effectiveMileage)
-            let statusString: String
-            switch status {
-            case .overdue: statusString = "overdue"
-            case .dueSoon: statusString = "dueSoon"
-            case .good: statusString = "good"
-            case .neutral: statusString = "neutral"
-            }
 
             // Calculate days remaining from effective due date (considering pace)
             let daysRemaining: Int?
@@ -151,7 +148,7 @@ final class WidgetDataService {
             return (
                 serviceID: service.id.uuidString,
                 name: service.name,
-                status: statusString,
+                status: statusString(for: status),
                 dueDescription: service.primaryDescription ?? "Scheduled",
                 dueMileage: service.dueMileage,
                 daysRemaining: daysRemaining,
@@ -162,13 +159,6 @@ final class WidgetDataService {
         // Add marbete if configured
         if vehicle.hasMarbeteExpiration {
             let marbeteStatus = vehicle.marbeteStatus
-            let statusString: String
-            switch marbeteStatus {
-            case .overdue: statusString = "overdue"
-            case .dueSoon: statusString = "dueSoon"
-            case .good: statusString = "good"
-            case .neutral: statusString = "neutral"
-            }
 
             let daysRemaining = vehicle.daysUntilMarbeteExpiration
             let dueDescription: String
@@ -189,7 +179,7 @@ final class WidgetDataService {
             allItems.append((
                 serviceID: nil,
                 name: "Marbete Renewal",
-                status: statusString,
+                status: statusString(for: marbeteStatus),
                 dueDescription: dueDescription,
                 dueMileage: nil,  // Marbete has no mileage component
                 daysRemaining: daysRemaining,
@@ -218,7 +208,7 @@ final class WidgetDataService {
     /// Update the list of vehicles available for widget selection
     /// - Parameter vehicles: All vehicles to make available in widget configuration
     func updateVehicleList(_ vehicles: [Vehicle]) {
-        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else {
+        guard let userDefaults = widgetDefaults else {
             widgetLogger.error("Failed to access App Group UserDefaults")
             return
         }
@@ -238,8 +228,8 @@ final class WidgetDataService {
     /// Remove widget data for a deleted vehicle
     /// - Parameter vehicleID: The UUID string of the deleted vehicle
     func removeWidgetData(for vehicleID: String) {
-        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else {
-            widgetLogger.error("Failed to access App Group UserDefaults (\(AppGroupConstants.iPhoneWidget)) in removeWidgetData()")
+        guard let userDefaults = widgetDefaults else {
+            widgetLogger.error("Failed to access App Group UserDefaults in removeWidgetData()")
             return
         }
         userDefaults.removeObject(forKey: widgetDataKey(for: vehicleID))
@@ -248,8 +238,8 @@ final class WidgetDataService {
 
     /// Clear all widget data
     func clearWidgetData() {
-        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else {
-            widgetLogger.error("Failed to access App Group UserDefaults (\(AppGroupConstants.iPhoneWidget)) in clearWidgetData()")
+        guard let userDefaults = widgetDefaults else {
+            widgetLogger.error("Failed to access App Group UserDefaults in clearWidgetData()")
             return
         }
         userDefaults.removeObject(forKey: widgetDataKey)
@@ -334,6 +324,15 @@ final class WidgetDataService {
             try context.save()
         } catch {
             widgetLogger.error("Failed to save widget completions: \(error.localizedDescription)")
+        }
+    }
+
+    private func statusString(for status: ServiceStatus) -> String {
+        switch status {
+        case .overdue: return "overdue"
+        case .dueSoon: return "dueSoon"
+        case .good: return "good"
+        case .neutral: return "neutral"
         }
     }
 

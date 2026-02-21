@@ -171,10 +171,7 @@ struct MileageUpdateSheet: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Spacing.md)
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
     }
 
     private var lastConfirmedContextCard: some View {
@@ -195,10 +192,7 @@ struct MileageUpdateSheet: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Spacing.md)
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
     }
 
     private var lastConfirmedOnlyCard: some View {
@@ -226,10 +220,7 @@ struct MileageUpdateSheet: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Spacing.md)
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
     }
 
     private var noEstimateHint: some View {
@@ -246,10 +237,7 @@ struct MileageUpdateSheet: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Spacing.md)
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
     }
 
     // MARK: - Mileage Input Section
@@ -296,16 +284,10 @@ struct MileageUpdateSheet: View {
                             .background(Theme.surfaceInstrument)
                     }
                     .accessibilityLabel("Scan odometer with camera")
-                    .overlay(
-                        Rectangle()
-                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                    )
+                    .brutalistBorder()
                 }
             }
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+            .brutalistBorder()
         }
     }
 
@@ -375,10 +357,7 @@ struct MileageUpdateSheet: View {
         .padding(Spacing.md)
         .frame(maxWidth: .infinity)
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
     }
 
     // MARK: - OCR Processing

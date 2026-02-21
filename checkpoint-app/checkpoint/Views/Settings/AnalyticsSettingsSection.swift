@@ -41,10 +41,7 @@ struct AnalyticsSettingsSection: View {
                 .accessibilityElement(children: .combine)
             }
             .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-            )
+            .brutalistBorder()
         }
         .onChange(of: isEnabled) { _, newValue in
             Task { @MainActor in

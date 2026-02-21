@@ -15,17 +15,17 @@ enum ServiceMode: String, CaseIterable {
 }
 
 struct AddServiceView: View {
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext
-    @Environment(AppState.self) private var appState
-    @Query private var services: [Service]
+    @Environment(\.dismiss) var dismiss
+    @Environment(\.modelContext) var modelContext
+    @Environment(AppState.self) var appState
+    @Query var services: [Service]
 
     let vehicle: Vehicle
     var seasonalPrefill: SeasonalPrefill?
     var initialMode: ServiceMode = .record
 
     // Mode selection
-    @State private var mode: ServiceMode
+    @State var mode: ServiceMode
 
     init(vehicle: Vehicle, seasonalPrefill: SeasonalPrefill? = nil, initialMode: ServiceMode = .record) {
         self.vehicle = vehicle
@@ -35,25 +35,25 @@ struct AddServiceView: View {
     }
 
     // Service type selection
-    @State private var selectedPreset: PresetData? = nil
-    @State private var customServiceName: String = ""
+    @State var selectedPreset: PresetData? = nil
+    @State var customServiceName: String = ""
 
     // Log mode fields
-    @State private var performedDate: Date = Date()
-    @State private var mileageAtService: Int? = nil
-    @State private var cost: String = ""
+    @State var performedDate: Date = Date()
+    @State var mileageAtService: Int? = nil
+    @State var cost: String = ""
     @State private var costError: String?
-    @State private var costCategory: CostCategory = .maintenance
-    @State private var notes: String = ""
-    @State private var scheduleRecurring: Bool = false
-    @State private var pendingAttachments: [AttachmentPicker.AttachmentData] = []
+    @State var costCategory: CostCategory = .maintenance
+    @State var notes: String = ""
+    @State var scheduleRecurring: Bool = false
+    @State var pendingAttachments: [AttachmentPicker.AttachmentData] = []
 
     // Schedule mode fields
-    @State private var hasCustomDate: Bool = false
-    @State private var dueDate: Date = Date()
-    @State private var dueMileage: Int? = nil
-    @State private var intervalMonths: Int? = nil
-    @State private var intervalMiles: Int? = nil
+    @State var hasCustomDate: Bool = false
+    @State var dueDate: Date = Date()
+    @State var dueMileage: Int? = nil
+    @State var intervalMonths: Int? = nil
+    @State var intervalMiles: Int? = nil
 
     /// The due date that will be saved — derived from interval, custom pick, or nil.
     /// Used by both the UI (to show the derived date) and save logic.
@@ -272,10 +272,7 @@ struct AddServiceView: View {
                 .padding(Spacing.md)
                 .accessibilityElement(children: .combine)
                 .background(Theme.surfaceInstrument)
-                .overlay(
-                    Rectangle()
-                        .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                )
+                .brutalistBorder()
 
                 if scheduleRecurring {
                     Text(L10n.reminderHelperText)
@@ -358,10 +355,7 @@ struct AddServiceView: View {
                         }
                         .padding(Spacing.md)
                         .background(Theme.surfaceInstrument)
-                        .overlay(
-                            Rectangle()
-                                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                        )
+                        .brutalistBorder()
                     }
                 } else {
                     // No interval — allow a one-off custom date
@@ -381,10 +375,7 @@ struct AddServiceView: View {
                     .padding(Spacing.md)
                     .accessibilityElement(children: .combine)
                     .background(Theme.surfaceInstrument)
-                    .overlay(
-                        Rectangle()
-                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                        )
+                    .brutalistBorder()
 
                     if hasCustomDate {
                         InstrumentDatePicker(
@@ -410,10 +401,7 @@ struct AddServiceView: View {
                     }
                     .padding(Spacing.md)
                     .background(Theme.surfaceInstrument)
-                    .overlay(
-                        Rectangle()
-                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                    )
+                    .brutalistBorder()
                 } else {
                     // No mile interval — allow explicit due mileage
                     InstrumentNumberField(
@@ -438,132 +426,6 @@ struct AddServiceView: View {
         }
     }
 
-    // MARK: - Save Logic
-
-    private func saveService() {
-        // Analytics
-        let isPreset = selectedPreset != nil
-        let category = selectedPreset?.category
-        let hasInterval = scheduleRecurring && ((intervalMonths != nil && intervalMonths != 0) || (intervalMiles != nil && intervalMiles != 0))
-
-        HapticService.shared.success()
-
-        if mode == .record {
-            AnalyticsService.shared.capture(.serviceLogged(
-                isPreset: isPreset,
-                category: category,
-                hasInterval: hasInterval
-            ))
-            saveLoggedService()
-        } else {
-            AnalyticsService.shared.capture(.serviceScheduled(
-                isPreset: isPreset,
-                category: category,
-                hasInterval: hasInterval
-            ))
-            saveScheduledService()
-        }
-        updateAppIcon()
-        updateWidgetData()
-        if mode == .record {
-            ToastService.shared.show(L10n.toastServiceRecorded, icon: "checkmark", style: .success)
-        } else {
-            ToastService.shared.show(L10n.toastReminderSet, icon: "clock", style: .success)
-        }
-        appState.recordCompletedAction()
-        dismiss()
-    }
-
-    // MARK: - App Icon
-
-    private func updateAppIcon() {
-        AppIconService.shared.updateIcon(for: vehicle, services: services)
-    }
-
-    // MARK: - Widget Data
-
-    private func updateWidgetData() {
-        WidgetDataService.shared.updateWidget(for: vehicle)
-    }
-
-    private func saveLoggedService() {
-        let mileage = mileageAtService ?? vehicle.currentMileage
-
-        // Create service
-        let service = Service(
-            name: serviceName,
-            lastPerformed: performedDate,
-            lastMileage: mileage,
-            intervalMonths: scheduleRecurring ? intervalMonths : nil,
-            intervalMiles: scheduleRecurring ? intervalMiles : nil
-        )
-        service.vehicle = vehicle
-
-        // Derive next due date/mileage from intervals (only when recurring)
-        if scheduleRecurring {
-            service.deriveDueFromIntervals(anchorDate: performedDate, anchorMileage: mileage)
-        }
-
-        modelContext.insert(service)
-
-        // Create service log entry
-        let costDecimal = Decimal(string: cost)
-        let log = ServiceLog(
-            service: service,
-            vehicle: vehicle,
-            performedDate: performedDate,
-            mileageAtService: mileage,
-            cost: costDecimal,
-            costCategory: costDecimal != nil ? costCategory : nil,
-            notes: notes.isEmpty ? nil : notes
-        )
-        modelContext.insert(log)
-
-        // Save attachments
-        for attachmentData in pendingAttachments {
-            let thumbnailData = ServiceAttachment.generateThumbnailData(
-                from: attachmentData.data,
-                mimeType: attachmentData.mimeType
-            )
-            let attachment = ServiceAttachment(
-                serviceLog: log,
-                data: attachmentData.data,
-                thumbnailData: thumbnailData,
-                fileName: attachmentData.fileName,
-                mimeType: attachmentData.mimeType,
-                extractedText: attachmentData.extractedText
-            )
-            modelContext.insert(attachment)
-        }
-
-        // Update vehicle mileage if service mileage is higher
-        if mileage > vehicle.currentMileage {
-            vehicle.currentMileage = mileage
-        }
-    }
-
-    private func saveScheduledService() {
-        let service = Service(
-            name: serviceName,
-            intervalMonths: intervalMonths,
-            intervalMiles: intervalMiles,
-            notes: notes.isEmpty ? nil : notes
-        )
-        service.vehicle = vehicle
-
-        // Derive deadlines from intervals (same logic as record mode and mark-complete)
-        service.deriveDueFromIntervals(anchorDate: Date(), anchorMileage: vehicle.currentMileage)
-
-        // Apply user overrides: custom date or explicit due mileage take precedence
-        if hasCustomDate {
-            service.dueDate = dueDate
-        }
-        if let explicit = dueMileage {
-            service.dueMileage = explicit
-        }
-
-        modelContext.insert(service)
-    }
 }
 
 #Preview {

@@ -176,10 +176,7 @@ struct OnboardingIntroView: View {
                         }
                     }
                     .background(Theme.surfaceInstrument)
-                    .overlay(
-                        Rectangle()
-                            .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-                    )
+                    .brutalistBorder()
                 }
             }
             .padding(.horizontal, Spacing.screenHorizontal)

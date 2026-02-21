@@ -25,10 +25,7 @@ struct OCRProcessingIndicator: View {
         .padding(Spacing.md)
         .frame(maxWidth: .infinity)
         .background(Theme.surfaceInstrument)
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.gridLine, lineWidth: Theme.borderWidth)
-        )
+        .brutalistBorder()
     }
 }
 
