@@ -9,6 +9,7 @@
 import UIKit
 import PDFKit
 import os
+import SwiftUI
 
 /// Export options for PDF generation
 struct ExportOptions: Sendable {
