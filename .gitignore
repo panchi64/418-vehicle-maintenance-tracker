@@ -114,3 +114,5 @@ Secrets.xcconfig
 # Website
 
 node_modules
+.vinxi
+dist
