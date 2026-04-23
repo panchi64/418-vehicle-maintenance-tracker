@@ -1,0 +1,85 @@
+import SwiftUI
+import DesignKit
+
+struct ContentView: View {
+    @Environment(BiomboAppState.self) private var appState
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        @Bindable var state = appState
+
+        VStack(spacing: 0) {
+            header
+                .padding(.horizontal, DKSpacing.md)
+                .padding(.top, DKSpacing.md)
+                .padding(.bottom, DKSpacing.sm)
+
+            content
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .background(theme.backgroundPrimary.ignoresSafeArea())
+        .sheet(isPresented: $state.showingSettings) { FuelSettingsView() }
+        .sheet(isPresented: $state.showingSubmitSheet) { SubmitPriceSheet() }
+        .fullScreenCover(isPresented: .constant(!appState.hasCompletedOnboarding)) {
+            OnboardingView()
+        }
+    }
+
+    private var header: some View {
+        HStack(spacing: DKSpacing.sm) {
+            Text("BIOMBO")
+                .font(theme.font(.headline, weight: .bold))
+                .foregroundStyle(theme.textPrimary)
+                .tracking(4)
+
+            Spacer()
+
+            viewModePicker
+
+            Button {
+                appState.showingSettings = true
+            } label: {
+                Image(systemName: "slider.horizontal.3")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundStyle(theme.textPrimary)
+                    .frame(width: 44, height: 44)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private var viewModePicker: some View {
+        HStack(spacing: 0) {
+            ForEach(BiomboViewMode.allCases) { mode in
+                Button {
+                    appState.viewMode = mode
+                } label: {
+                    Text(mode.label)
+                        .font(theme.font(.caption, weight: .semibold))
+                        .textCase(.uppercase)
+                        .tracking(1.5)
+                        .foregroundStyle(
+                            appState.viewMode == mode ? theme.backgroundPrimary : theme.textPrimary
+                        )
+                        .frame(minWidth: 64, minHeight: 36)
+                        .background(appState.viewMode == mode ? theme.accent : .clear)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .brutalistBorder(color: theme.borderSubtle, lineWidth: 2)
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch appState.viewMode {
+        case .map: FuelMapView()
+        case .list: FuelListView()
+        }
+    }
+}
+
+#Preview {
+    ContentView()
+        .environment(BiomboAppState())
+}

@@ -1,0 +1,501 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0DB927D2532962A7172098F2 /* DesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = 5554124D864D3F77BC90FED3 /* DesignKit */; };
+		5543A62DE2568969B63B4314 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7C63C82859E11E89C0D7431 /* Foundation.framework */; };
+		8CA1708282A128E1EEBFFEE9 /* Localization in Frameworks */ = {isa = PBXBuildFile; productRef = 52E80798EBE8F894698D7E14 /* Localization */; };
+		C91A236462960C2FA4A8C55E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7C63C82859E11E89C0D7431 /* Foundation.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		5A449EE35EEBFF988675DF31 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BBB48A8F269E2C0294D6246B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 66B4BAB274D117384D0BC045;
+			remoteInfo = Biombo;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		70482EAF890E33EB1EC036B5 /* BiomboTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BiomboTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A7C63C82859E11E89C0D7431 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		D6308B7A4A6E1726F24DC794 /* Biombo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Biombo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		9AD982B5C535034E22A73342 /* Biombo */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			path = Biombo;
+			sourceTree = "<group>";
+		};
+		A18728B629DD73287C664E33 /* BiomboTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			path = BiomboTests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4889B6049488A0575C0ED783 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C91A236462960C2FA4A8C55E /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5B569AF331772740B1192335 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5543A62DE2568969B63B4314 /* Foundation.framework in Frameworks */,
+				0DB927D2532962A7172098F2 /* DesignKit in Frameworks */,
+				8CA1708282A128E1EEBFFEE9 /* Localization in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		198640F2ED6F5AB0162C3CEE /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				A7C63C82859E11E89C0D7431 /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		7416D4796944821D3CC7A67B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D6308B7A4A6E1726F24DC794 /* Biombo.app */,
+				70482EAF890E33EB1EC036B5 /* BiomboTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EBA96040CC8C37FB2B118D1C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				198640F2ED6F5AB0162C3CEE /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F84BCF123AF6A48BB7D9E3C5 = {
+			isa = PBXGroup;
+			children = (
+				7416D4796944821D3CC7A67B /* Products */,
+				EBA96040CC8C37FB2B118D1C /* Frameworks */,
+				9AD982B5C535034E22A73342 /* Biombo */,
+				A18728B629DD73287C664E33 /* BiomboTests */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		66B4BAB274D117384D0BC045 /* Biombo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 99FF4A239C166B4A0F057419 /* Build configuration list for PBXNativeTarget "Biombo" */;
+			buildPhases = (
+				C6E5078E121068F37ED8175F /* Sources */,
+				5B569AF331772740B1192335 /* Frameworks */,
+				624BF9F4242C290092169B96 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				9AD982B5C535034E22A73342 /* Biombo */,
+			);
+			name = Biombo;
+			packageProductDependencies = (
+				5554124D864D3F77BC90FED3 /* DesignKit */,
+				52E80798EBE8F894698D7E14 /* Localization */,
+			);
+			productName = Biombo;
+			productReference = D6308B7A4A6E1726F24DC794 /* Biombo.app */;
+			productType = "com.apple.product-type.application";
+		};
+		6F92BB3E546E61B1A12473EC /* BiomboTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A62D483F3F9FEF0BD7F750AC /* Build configuration list for PBXNativeTarget "BiomboTests" */;
+			buildPhases = (
+				D8A9893393A358E7C271E8CF /* Sources */,
+				4889B6049488A0575C0ED783 /* Frameworks */,
+				861968DDE58BC61F9F01C589 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9DD83562A2677D4D1CD6DDD5 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				A18728B629DD73287C664E33 /* BiomboTests */,
+			);
+			name = BiomboTests;
+			productName = BiomboTests;
+			productReference = 70482EAF890E33EB1EC036B5 /* BiomboTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BBB48A8F269E2C0294D6246B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+			};
+			buildConfigurationList = 5160B89C1283D7B747380C5C /* Build configuration list for PBXProject "Biombo" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				es,
+			);
+			mainGroup = F84BCF123AF6A48BB7D9E3C5;
+			minimizedProjectReferenceProxies = 0;
+			packageReferences = (
+				AC4731B0617D77548F2DE024 /* XCLocalSwiftPackageReference "DesignKit" */,
+				A4BCAD12FA1B9BE738BD088A /* XCLocalSwiftPackageReference "Localization" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 7416D4796944821D3CC7A67B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				66B4BAB274D117384D0BC045 /* Biombo */,
+				6F92BB3E546E61B1A12473EC /* BiomboTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		624BF9F4242C290092169B96 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		861968DDE58BC61F9F01C589 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C6E5078E121068F37ED8175F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D8A9893393A358E7C271E8CF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		9DD83562A2677D4D1CD6DDD5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Biombo;
+			target = 66B4BAB274D117384D0BC045 /* Biombo */;
+			targetProxy = 5A449EE35EEBFF988675DF31 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		39278609623889921A2FB488 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		4A59E64AADA6B93A219F1AEF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "\"Biombo/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Biombo;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Photograph a gas station price sign so the community can see the current price.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Select a photo of a gas station price sign to submit.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILocationWhenInUseUsageDescription = "Biombo uses your location to show nearby gas station prices.";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.418-studio.biombo";
+				PRODUCT_NAME = Biombo;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		9F6D7CE16B508720B72E1EA0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		B8A76DFE4FDA040EE985F41F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "\"Biombo/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Biombo;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Photograph a gas station price sign so the community can see the current price.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Select a photo of a gas station price sign to submit.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILocationWhenInUseUsageDescription = "Biombo uses your location to show nearby gas station prices.";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.418-studio.biombo";
+				PRODUCT_NAME = Biombo;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D656917AED9CEFCD3B2A1F4B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.418-studio.biombo.tests";
+				PRODUCT_NAME = BiomboTests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Biombo.app/Biombo";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		FDFEFFDBEA2807761B1832C5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.418-studio.biombo.tests";
+				PRODUCT_NAME = BiomboTests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Biombo.app/Biombo";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5160B89C1283D7B747380C5C /* Build configuration list for PBXProject "Biombo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9F6D7CE16B508720B72E1EA0 /* Debug */,
+				39278609623889921A2FB488 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		99FF4A239C166B4A0F057419 /* Build configuration list for PBXNativeTarget "Biombo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B8A76DFE4FDA040EE985F41F /* Release */,
+				4A59E64AADA6B93A219F1AEF /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A62D483F3F9FEF0BD7F750AC /* Build configuration list for PBXNativeTarget "BiomboTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D656917AED9CEFCD3B2A1F4B /* Release */,
+				FDFEFFDBEA2807761B1832C5 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		A4BCAD12FA1B9BE738BD088A /* XCLocalSwiftPackageReference "Localization" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../../packages/Localization;
+		};
+		AC4731B0617D77548F2DE024 /* XCLocalSwiftPackageReference "DesignKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../../packages/DesignKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		52E80798EBE8F894698D7E14 /* Localization */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A4BCAD12FA1B9BE738BD088A /* XCLocalSwiftPackageReference "Localization" */;
+			productName = Localization;
+		};
+		5554124D864D3F77BC90FED3 /* DesignKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AC4731B0617D77548F2DE024 /* XCLocalSwiftPackageReference "DesignKit" */;
+			productName = DesignKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = BBB48A8F269E2C0294D6246B /* Project object */;
+}

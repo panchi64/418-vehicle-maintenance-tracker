@@ -28,3 +28,9 @@ public protocol ThemeProviding: AnyObject, Observable {
     var fontDesign: Font.Design { get }
     var colorScheme: ColorScheme? { get }
 }
+
+public extension ThemeProviding {
+    func font(_ style: Font.TextStyle, weight: Font.Weight = .regular) -> Font {
+        .system(style, design: fontDesign).weight(weight)
+    }
+}

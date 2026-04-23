@@ -1,0 +1,174 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "action.submit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Submit" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Enviar" } }
+      }
+    },
+    "detail.daco_delta" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "DACO Δ" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Δ vs. DACO" } }
+      }
+    },
+    "detail.history" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "30-Day History" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Historial de 30 días" } }
+      }
+    },
+    "detail.prices" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Current Prices" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Precios actuales" } }
+      }
+    },
+    "freshness.aging" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Aging" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Envejeciendo" } }
+      }
+    },
+    "freshness.fresh" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Fresh" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Reciente" } }
+      }
+    },
+    "freshness.stale" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Stale" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Viejo" } }
+      }
+    },
+    "history.date" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Date" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Fecha" } }
+      }
+    },
+    "history.empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Not enough data yet" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Aún no hay suficientes datos" } }
+      }
+    },
+    "history.price" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Price" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Precio" } }
+      }
+    },
+    "onboarding.allow_location" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Allow location" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Permitir ubicación" } }
+      }
+    },
+    "onboarding.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Biombo uses your location to show nearby stations and their prices. We don't track you." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Biombo usa tu ubicación para mostrar estaciones cercanas y sus precios. No te rastreamos." } }
+      }
+    },
+    "onboarding.skip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Skip" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Omitir" } }
+      }
+    },
+    "onboarding.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Nearby prices, on demand" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Precios cercanos, al instante" } }
+      }
+    },
+    "settings.about.version" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Version" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Versión" } }
+      }
+    },
+    "settings.section.about" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "About" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Acerca de" } }
+      }
+    },
+    "settings.section.units" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Units" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Unidades" } }
+      }
+    },
+    "settings.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Settings" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ajustes" } }
+      }
+    },
+    "settings.volume_unit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Volume unit" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Unidad de volumen" } }
+      }
+    },
+    "submit.placeholder_body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Capture + OCR + brand detection ships in Phase 2." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Captura + OCR + detección de marca llegan en la Fase 2." } }
+      }
+    },
+    "submit.placeholder_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Coming soon" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Próximamente" } }
+      }
+    },
+    "submit.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Submit price" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Enviar precio" } }
+      }
+    },
+    "view.list" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "List" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Lista" } }
+      }
+    },
+    "view.map" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Map" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Mapa" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}
