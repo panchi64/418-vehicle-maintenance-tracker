@@ -211,13 +211,19 @@ actor BiomboAPIService {
 
     private static var resolvedBaseURL: URL {
         if let override = ProcessInfo.processInfo.environment["BIOMBO_API_URL"],
+           !override.isEmpty,
            let url = URL(string: override) {
             return url
         }
         if let configured = Bundle.main.object(forInfoDictionaryKey: "BiomboAPIURL") as? String,
+           !configured.isEmpty,
            let url = URL(string: configured) {
             return url
         }
+        #if DEBUG
         return URL(string: "http://localhost:8787")!
+        #else
+        preconditionFailure("BIOMBO_API_URL not configured for Release build")
+        #endif
     }
 }

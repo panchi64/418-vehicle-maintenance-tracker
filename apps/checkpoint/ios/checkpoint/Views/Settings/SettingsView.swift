@@ -316,22 +316,25 @@ struct SettingsView: View {
                     .fill(Theme.gridLine)
                     .frame(height: Theme.borderWidth)
 
-                Button {
+                SettingsActionRow(
+                    title: "Restore Purchases",
+                    systemImage: "arrow.counterclockwise",
+                    iconColor: Theme.textTertiary
+                ) {
                     Task { await StoreManager.shared.restorePurchases() }
-                } label: {
-                    HStack {
-                        Text("Restore Purchases")
-                            .font(.brutalistBody)
-                            .foregroundStyle(Theme.textPrimary)
-                        Spacer()
-                        Image(systemName: "arrow.counterclockwise")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(Theme.textTertiary)
-                    }
-                    .padding(Spacing.md)
-                    .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: Theme.borderWidth)
+
+                SettingsActionRow(
+                    title: "Find Gas Prices",
+                    subtitle: "Opens Biombo — our PR gas-price companion",
+                    systemImage: "fuelpump.fill"
+                ) {
+                    CompanionAppLauncher.openBiombo()
+                }
             }
             .background(Theme.surfaceInstrument)
             .overlay(
