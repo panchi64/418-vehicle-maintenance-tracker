@@ -18,23 +18,7 @@ struct FuelListView: View {
     private let locationService = LocationService.shared
 
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 0) {
-                ForEach(sortedPrices, id: \.recordID) { price in
-                    Button {
-                        selectedStation = price
-                    } label: {
-                        StationRow(price: price, userLocation: locationService.currentLocation)
-                    }
-                    .buttonStyle(.plain)
-
-                    Rectangle()
-                        .fill(theme.borderSubtle)
-                        .frame(height: 2)
-                }
-            }
-            .padding(.vertical, DKSpacing.sm)
-        }
+        listContent
         .overlay(alignment: .bottomTrailing) {
             Button {
                 appState.showingSubmitSheet = true
@@ -51,6 +35,36 @@ struct FuelListView: View {
         }
         .sheet(item: $selectedStation) { price in
             FuelPriceDetailView(price: price)
+        }
+    }
+
+    @ViewBuilder
+    private var listContent: some View {
+        if sortedPrices.isEmpty {
+            EmptyStateView(
+                code: "// STATUS: AWAITING DATA",
+                title: "list.empty.title",
+                message: "list.empty.body"
+            )
+            .accessibilityIdentifier("list.emptyState")
+        } else {
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    ForEach(sortedPrices, id: \.recordID) { price in
+                        Button {
+                            selectedStation = price
+                        } label: {
+                            StationRow(price: price, userLocation: locationService.currentLocation)
+                        }
+                        .buttonStyle(.plain)
+
+                        Rectangle()
+                            .fill(theme.borderSubtle)
+                            .frame(height: 2)
+                    }
+                }
+                .padding(.vertical, DKSpacing.sm)
+            }
         }
     }
 

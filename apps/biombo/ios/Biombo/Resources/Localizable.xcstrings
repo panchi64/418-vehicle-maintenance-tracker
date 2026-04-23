@@ -253,6 +253,34 @@
         "es" : { "stringUnit" : { "state" : "translated", "value" : "Enviar precio" } }
       }
     },
+    "list.empty.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No stations yet" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Aún no hay estaciones" } }
+      }
+    },
+    "list.empty.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Prices populate when the daily scrape lands or another user submits nearby." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Los precios aparecerán cuando se ejecute el scrape diario o alguien envíe uno cerca." } }
+      }
+    },
+    "status.offline" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Showing last cached data" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Mostrando datos en caché" } }
+      }
+    },
+    "status.syncing" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Refreshing…" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Actualizando…" } }
+      }
+    },
     "view.list" : {
       "extractionState" : "manual",
       "localizations" : {

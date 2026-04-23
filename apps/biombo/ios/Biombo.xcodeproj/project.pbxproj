@@ -8,12 +8,20 @@
 
 /* Begin PBXBuildFile section */
 		0DB927D2532962A7172098F2 /* DesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = 5554124D864D3F77BC90FED3 /* DesignKit */; };
+		2EB136F04D88D599DAF62847 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7C63C82859E11E89C0D7431 /* Foundation.framework */; };
 		5543A62DE2568969B63B4314 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7C63C82859E11E89C0D7431 /* Foundation.framework */; };
 		8CA1708282A128E1EEBFFEE9 /* Localization in Frameworks */ = {isa = PBXBuildFile; productRef = 52E80798EBE8F894698D7E14 /* Localization */; };
 		C91A236462960C2FA4A8C55E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7C63C82859E11E89C0D7431 /* Foundation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		13DDF0E640977EF5287E6877 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BBB48A8F269E2C0294D6246B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 66B4BAB274D117384D0BC045;
+			remoteInfo = Biombo;
+		};
 		5A449EE35EEBFF988675DF31 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BBB48A8F269E2C0294D6246B /* Project object */;
@@ -25,11 +33,19 @@
 
 /* Begin PBXFileReference section */
 		70482EAF890E33EB1EC036B5 /* BiomboTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BiomboTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		829DE8A898A69C4A6DDC7395 /* BiomboUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BiomboUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A7C63C82859E11E89C0D7431 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		D6308B7A4A6E1726F24DC794 /* Biombo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Biombo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		5ADA8DEFCA57AFFC999F7FA0 /* BiomboUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			path = BiomboUITests;
+			sourceTree = "<group>";
+		};
 		9AD982B5C535034E22A73342 /* Biombo */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -47,6 +63,14 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		0BEE13689156C6011614D386 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2EB136F04D88D599DAF62847 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4889B6049488A0575C0ED783 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -81,6 +105,7 @@
 			children = (
 				D6308B7A4A6E1726F24DC794 /* Biombo.app */,
 				70482EAF890E33EB1EC036B5 /* BiomboTests.xctest */,
+				829DE8A898A69C4A6DDC7395 /* BiomboUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -100,12 +125,34 @@
 				EBA96040CC8C37FB2B118D1C /* Frameworks */,
 				9AD982B5C535034E22A73342 /* Biombo */,
 				A18728B629DD73287C664E33 /* BiomboTests */,
+				5ADA8DEFCA57AFFC999F7FA0 /* BiomboUITests */,
 			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		1C596297285CAA2DF88E9D45 /* BiomboUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AB374D6E9D41B4CA0696775D /* Build configuration list for PBXNativeTarget "BiomboUITests" */;
+			buildPhases = (
+				D582278976EAB626F9470301 /* Sources */,
+				0BEE13689156C6011614D386 /* Frameworks */,
+				509425AD477FDD9E85A9E641 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				63518F610A664FF5566312A6 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				5ADA8DEFCA57AFFC999F7FA0 /* BiomboUITests */,
+			);
+			name = BiomboUITests;
+			productName = BiomboUITests;
+			productReference = 829DE8A898A69C4A6DDC7395 /* BiomboUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		66B4BAB274D117384D0BC045 /* Biombo */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 99FF4A239C166B4A0F057419 /* Build configuration list for PBXNativeTarget "Biombo" */;
@@ -182,11 +229,19 @@
 			targets = (
 				66B4BAB274D117384D0BC045 /* Biombo */,
 				6F92BB3E546E61B1A12473EC /* BiomboTests */,
+				1C596297285CAA2DF88E9D45 /* BiomboUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		509425AD477FDD9E85A9E641 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		624BF9F4242C290092169B96 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -211,6 +266,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D582278976EAB626F9470301 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D8A9893393A358E7C271E8CF /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -221,6 +283,12 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		63518F610A664FF5566312A6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Biombo;
+			target = 66B4BAB274D117384D0BC045 /* Biombo */;
+			targetProxy = 13DDF0E640977EF5287E6877 /* PBXContainerItemProxy */;
+		};
 		9DD83562A2677D4D1CD6DDD5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = Biombo;
@@ -230,6 +298,23 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		304348BCA5736645FE587814 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.418-studio.biombo.uitests";
+				PRODUCT_NAME = BiomboUITests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = Biombo;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		39278609623889921A2FB488 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -311,6 +396,22 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		516DA7B24FD3025602ABBA17 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.418-studio.biombo.uitests";
+				PRODUCT_NAME = BiomboUITests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = Biombo;
 			};
 			name = Debug;
 		};
@@ -467,6 +568,15 @@
 			buildConfigurations = (
 				D656917AED9CEFCD3B2A1F4B /* Release */,
 				FDFEFFDBEA2807761B1832C5 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AB374D6E9D41B4CA0696775D /* Build configuration list for PBXNativeTarget "BiomboUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				304348BCA5736645FE587814 /* Release */,
+				516DA7B24FD3025602ABBA17 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

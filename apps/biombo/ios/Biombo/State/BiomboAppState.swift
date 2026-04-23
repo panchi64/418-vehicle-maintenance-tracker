@@ -33,7 +33,17 @@ final class BiomboAppState {
     var selectedStationId: String?
     var showingSubmitSheet: Bool = false
     var showingSettings: Bool = false
-    var hasCompletedOnboarding: Bool = UserDefaults.standard.bool(forKey: Keys.completedOnboarding)
+    var hasCompletedOnboarding: Bool
+
+    init() {
+        #if DEBUG
+        if LaunchArg.isPresent(LaunchArg.skipOnboarding) {
+            self.hasCompletedOnboarding = true
+            return
+        }
+        #endif
+        self.hasCompletedOnboarding = UserDefaults.standard.bool(forKey: Keys.completedOnboarding)
+    }
 
     func completeOnboarding() {
         hasCompletedOnboarding = true

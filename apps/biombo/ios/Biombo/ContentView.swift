@@ -9,6 +9,8 @@ struct ContentView: View {
         @Bindable var state = appState
 
         VStack(spacing: 0) {
+            OfflineBannerSlot()
+
             header
                 .padding(.horizontal, DKSpacing.md)
                 .padding(.top, DKSpacing.md)
@@ -31,6 +33,7 @@ struct ContentView: View {
                 .font(theme.font(.headline, weight: .bold))
                 .foregroundStyle(theme.textPrimary)
                 .tracking(4)
+                .accessibilityIdentifier("app.title")
 
             Spacer()
 
@@ -44,6 +47,7 @@ struct ContentView: View {
                     .foregroundStyle(theme.textPrimary)
                     .frame(width: 44, height: 44)
             }
+            .accessibilityIdentifier("action.open-settings")
             .buttonStyle(.plain)
         }
     }
@@ -65,6 +69,7 @@ struct ContentView: View {
                         .background(appState.viewMode == mode ? theme.accent : .clear)
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier("viewMode.\(mode.rawValue)")
             }
         }
         .brutalistBorder(color: theme.borderSubtle, lineWidth: 2)
