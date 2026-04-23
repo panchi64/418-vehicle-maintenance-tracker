@@ -9,12 +9,12 @@ final class ThemeProvidingTests: XCTestCase {
     }
 
     func testSpacingTokensMatchCheckpoint() {
-        XCTAssertEqual(Spacing.xs, 4)
-        XCTAssertEqual(Spacing.sm, 8)
-        XCTAssertEqual(Spacing.md, 16)
-        XCTAssertEqual(Spacing.lg, 24)
-        XCTAssertEqual(Spacing.xl, 32)
-        XCTAssertEqual(Spacing.xxl, 48)
-        XCTAssertEqual(Spacing.tabBarOffset, 56)
+        XCTAssertEqual(DKSpacing.xs, 4)
+        XCTAssertEqual(DKSpacing.sm, 8)
+        XCTAssertEqual(DKSpacing.md, 16)
+        XCTAssertEqual(DKSpacing.lg, 24)
+        XCTAssertEqual(DKSpacing.xl, 32)
+        XCTAssertEqual(DKSpacing.xxl, 48)
+        XCTAssertEqual(DKSpacing.tabBarOffset, 56)
     }
 }

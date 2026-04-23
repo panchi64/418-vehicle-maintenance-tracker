@@ -1,0 +1,1042 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "addvehicle.basics" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Vehicle Basics" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Datos básicos del vehículo" } }
+      }
+    },
+    "addvehicle.scanning_odometer" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Scanning odometer..." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Escaneando odómetro…" } }
+      }
+    },
+    "addvehicle.scanning_vin" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Scanning VIN..." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Escaneando VIN…" } }
+      }
+    },
+    "addvehicle.step" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Step %d of %d" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Paso %d de %d" } }
+      }
+    },
+    "addvehicle.vin_align_guide" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "ALIGN VIN HERE" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "ALINEAR VIN AQUÍ" } }
+      }
+    },
+    "addvehicle.vin_details_filled" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "DETAILS FILLED FROM VIN" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "DETALLES COMPLETADOS DESDE EL VIN" } }
+      }
+    },
+    "addvehicle.vin_lookup" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Look Up VIN" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Consultar VIN" } }
+      }
+    },
+    "addvehicle.vin_lookup_loading" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Looking Up..." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Consultando…" } }
+      }
+    },
+    "addvehicle.vin_valid_lookup" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "VIN VALID — LOOK UP DETAILS" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "VIN VÁLIDO — CONSULTAR DETALLES" } }
+      }
+    },
+    "addvehicle.vin_value_prop" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Enter your VIN to auto-fill make, model, and year — and check for open recalls." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ingresa tu VIN para completar marca, modelo y año — y ver retiros abiertos." } }
+      }
+    },
+    "common.back" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Back" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Atrás" } }
+      }
+    },
+    "common.cancel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancel" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cancelar" } }
+      }
+    },
+    "common.days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "days" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "días" } }
+      }
+    },
+    "common.dismiss" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Dismiss" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Descartar" } }
+      }
+    },
+    "common.done" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Done" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Listo" } }
+      }
+    },
+    "common.next" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Next" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Siguiente" } }
+      }
+    },
+    "common.save" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Save" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Guardar" } }
+      }
+    },
+    "distance.kilometers" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Kilometers" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Kilómetros" } }
+      }
+    },
+    "distance.kilometers_abbr" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "km" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "km" } }
+      }
+    },
+    "distance.miles" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Miles" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Millas" } }
+      }
+    },
+    "distance.miles_default" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "mi (default)" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "mi (predeterminado)" } }
+      }
+    },
+    "distance.unit_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Distance Unit" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Unidad de distancia" } }
+      }
+    },
+    "duesoon.days_desc" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose when a date-based service is marked \"due soon\" based on days remaining." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Elige cuándo un servicio por fecha se marca como «próximo a vencer» según los días restantes." } }
+      }
+    },
+    "duesoon.days_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Days Threshold" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Umbral de días" } }
+      }
+    },
+    "duesoon.default" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Default" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Predeterminado" } }
+      }
+    },
+    "duesoon.mileage_desc" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose when a service is marked \"due soon\" based on mileage remaining." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Elige cuándo un servicio se marca como «próximo a vencer» según el kilometraje restante." } }
+      }
+    },
+    "duesoon.mileage_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mileage Threshold" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Umbral de kilometraje" } }
+      }
+    },
+    "empty.chart_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "3+ entries needed" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Se necesitan 3+ entradas" } }
+      }
+    },
+    "empty.cost_per_mile_hint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Log 2+ services with mileage to calculate" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Registra 2+ servicios con kilometraje para calcular" } }
+      }
+    },
+    "empty.filter_clear" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Clear" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Limpiar" } }
+      }
+    },
+    "empty.filter_showing" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Showing %d of %d" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Mostrando %d de %d" } }
+      }
+    },
+    "empty.pace_hint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Update mileage to enable pace estimates" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Actualiza el kilometraje para habilitar estimaciones de ritmo" } }
+      }
+    },
+    "empty.timeline_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Complete a service to see your maintenance timeline" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Completa un servicio para ver tu cronología de mantenimiento" } }
+      }
+    },
+    "empty.timeline_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No History" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin historial" } }
+      }
+    },
+    "error.could_not_read_odometer" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Could not read odometer from image" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudo leer el odómetro de la imagen" } }
+      }
+    },
+    "error.invalid_vin_format" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Invalid VIN format" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Formato de VIN inválido" } }
+      }
+    },
+    "error.network_connection_failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Network connection failed" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Falló la conexión de red" } }
+      }
+    },
+    "error.required_field" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This field is required" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Este campo es obligatorio" } }
+      }
+    },
+    "ocr.error.image_processing_failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Image couldn't be processed. Try again with a clearer photo." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudo procesar la imagen. Inténtalo con una foto más clara." } }
+      }
+    },
+    "ocr.error.invalid_mileage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The detected value doesn't look right. You can edit it below." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "El valor detectado no parece correcto. Puedes editarlo abajo." } }
+      }
+    },
+    "ocr.error.no_text_found" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Couldn't detect the reading. Ensure it's well-lit and centered." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudo detectar la lectura. Asegúrate de que esté bien iluminada y centrada." } }
+      }
+    },
+    "ocr.error.no_valid_mileage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No valid mileage found. Align the odometer in the frame." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "No se encontró kilometraje válido. Alinea el odómetro en el encuadre." } }
+      }
+    },
+    "ocr.error.no_valid_vin" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No valid VIN found. Align the VIN plate in the frame." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "No se encontró un VIN válido. Alinea la placa del VIN en el encuadre." } }
+      }
+    },
+    "onboarding.distance_unit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Distance Unit" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Unidad de distancia" } }
+      }
+    },
+    "onboarding.distance_unit_explanation" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "All mileage tracking, service intervals, and cost-per-distance calculations use this unit. You can change it later in Settings." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Todo el seguimiento de kilometraje, los intervalos de servicio y los cálculos de costo por distancia usan esta unidad. Puedes cambiarla después en Ajustes." } }
+      }
+    },
+    "onboarding.climate_zone" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Climate Zone" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Zona climática" } }
+      }
+    },
+    "onboarding.climate_zone_explanation" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Seasonal reminders adapt to your climate — winter tires, AC checks, battery heat warnings. You can change this later in Settings." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Los recordatorios de temporada se adaptan a tu clima — gomas de invierno, revisión del A/C, avisos por calor en la batería. Puedes cambiarlo después en Ajustes." } }
+      }
+    },
+    "onboarding.feature1.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mileage and date-based reminders. Your vehicle keeps score." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Recordatorios por kilometraje y fecha. Tu vehículo lleva la cuenta." } }
+      }
+    },
+    "onboarding.feature1.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Maintenance Tracking" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Seguimiento de mantenimiento" } }
+      }
+    },
+    "onboarding.feature2.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Enter your VIN. The rest fills itself. Open recalls surface automatically." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ingresa tu VIN. Lo demás se llena solo. Los retiros abiertos aparecen automáticamente." } }
+      }
+    },
+    "onboarding.feature2.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "VIN Lookup & Recalls" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Consulta de VIN y retiros" } }
+      }
+    },
+    "onboarding.feature3.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Every dollar, charted. Cost-per-mile included. No surprises." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cada dólar, graficado. Costo por milla incluido. Sin sorpresas." } }
+      }
+    },
+    "onboarding.feature3.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cost Tracking" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Seguimiento de costos" } }
+      }
+    },
+    "onboarding.getstarted.add_vehicle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add Vehicle" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añadir vehículo" } }
+      }
+    },
+    "onboarding.getstarted.characters" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%d / 17 Characters" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%d / 17 caracteres" } }
+      }
+    },
+    "onboarding.getstarted.icloud_help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sync vehicles from a previous install" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sincroniza vehículos de una instalación anterior" } }
+      }
+    },
+    "onboarding.getstarted.looking_up" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Looking Up..." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Consultando…" } }
+      }
+    },
+    "onboarding.getstarted.lookup" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Look Up VIN" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Consultar VIN" } }
+      }
+    },
+    "onboarding.getstarted.manual" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Enter Details Manually" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ingresar datos manualmente" } }
+      }
+    },
+    "onboarding.getstarted.or" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "OR" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "O" } }
+      }
+    },
+    "onboarding.getstarted.skip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Skip for Now" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Omitir por ahora" } }
+      }
+    },
+    "onboarding.getstarted.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your Vehicle Is Waiting" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tu vehículo está esperando" } }
+      }
+    },
+    "onboarding.getstarted.use_icloud" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Use Your iCloud Vehicles" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Usar tus vehículos de iCloud" } }
+      }
+    },
+    "onboarding.getstarted.vin_help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "17 characters. We handle the rest. Make, model, year, open recalls." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "17 caracteres. Nosotros nos ocupamos del resto. Marca, modelo, año, retiros abiertos." } }
+      }
+    },
+    "onboarding.getstarted.vin_label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Enter Your VIN" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ingresa tu VIN" } }
+      }
+    },
+    "onboarding.getstarted.vin_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Enter VIN..." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ingresar VIN…" } }
+      }
+    },
+    "onboarding.lets_look" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Let's Take a Look" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Vamos a verlo" } }
+      }
+    },
+    "onboarding.skip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Skip" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Omitir" } }
+      }
+    },
+    "onboarding.skip_tour" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Skip Tour" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Omitir recorrido" } }
+      }
+    },
+    "onboarding.swipe_next" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Swipe to continue" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Desliza para continuar" } }
+      }
+    },
+    "onboarding.tour.costs.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Every dollar your vehicle has cost you, charted. It's not sorry about it." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cada dólar que tu vehículo te ha costado, graficado. Sin disculpas." } }
+      }
+    },
+    "onboarding.tour.costs.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "04 // Costs" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "04 // Costos" } }
+      }
+    },
+    "onboarding.tour.dashboard.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The most urgent item surfaces first. No buried information. No digging." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Lo más urgente aparece primero. Nada enterrado. Nada que excavar." } }
+      }
+    },
+    "onboarding.tour.dashboard.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "01 // Dashboard" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "01 // Panel" } }
+      }
+    },
+    "onboarding.tour.services.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Scheduled maintenance and completed history. Search, filter, export. Everything your vehicle needs, in one list." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Mantenimiento programado e historial completado. Busca, filtra, exporta. Todo lo que tu vehículo necesita, en una lista." } }
+      }
+    },
+    "onboarding.tour.services.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "03 // Services" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "03 // Servicios" } }
+      }
+    },
+    "onboarding.tour.vehicle.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tap the name to switch vehicles. Tap the amber mileage when the odometer changes. Your vehicle tracks the rest." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Toca el nombre para cambiar de vehículo. Toca el kilometraje ámbar cuando cambie el odómetro. Tu vehículo lleva el resto." } }
+      }
+    },
+    "onboarding.tour.vehicle.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "02 // Your Vehicle" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "02 // Tu vehículo" } }
+      }
+    },
+    "onboarding.transition.costs" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Costs" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Costos" } }
+      }
+    },
+    "onboarding.transition.services" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Services" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Servicios" } }
+      }
+    },
+    "onboarding.welcome.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your vehicle has a lot to say.\nThis is where it talks." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tu vehículo tiene mucho que decir.\nAquí es donde habla." } }
+      }
+    },
+    "onboarding.welcome.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "CHECKPOINT" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "CHECKPOINT" } }
+      }
+    },
+    "recall.error_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Couldn't check recalls" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudieron consultar los retiros" } }
+      }
+    },
+    "recall.last_checked" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Last checked: %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Última consulta: %@" } }
+      }
+    },
+    "recall.retry" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tap to retry" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Toca para reintentar" } }
+      }
+    },
+    "reminder.helper_text" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "You'll be notified when this service is due again" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Se te notificará cuando este servicio vuelva a vencer" } }
+      }
+    },
+    "settings.alerts" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "ALERTS" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "ALERTAS" } }
+      }
+    },
+    "settings.automatic_icon" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Automatic Icon" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ícono automático" } }
+      }
+    },
+    "settings.automatic_icon_desc" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Changes icon based on service urgency" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cambia el ícono según la urgencia del servicio" } }
+      }
+    },
+    "settings.bundle_suggestions" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Bundle Suggestions" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sugerencias para agrupar" } }
+      }
+    },
+    "settings.bundle_suggestions_desc" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Suggest bundling services due around the same time" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sugerir agrupar servicios que vencen por la misma fecha" } }
+      }
+    },
+    "settings.days_window" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Days Window" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ventana de días" } }
+      }
+    },
+    "settings.default_vehicle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Default Vehicle" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Vehículo predeterminado" } }
+      }
+    },
+    "settings.display" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "DISPLAY" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "PANTALLA" } }
+      }
+    },
+    "settings.distance_unit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Distance Unit" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Unidad de distancia" } }
+      }
+    },
+    "settings.due_soon_days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Due Soon (Days)" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Próximo a vencer (días)" } }
+      }
+    },
+    "settings.due_soon_mileage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Due Soon (Mileage)" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Próximo a vencer (kilometraje)" } }
+      }
+    },
+    "settings.mileage_display" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mileage Display" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Visualización de kilometraje" } }
+      }
+    },
+    "settings.mileage_estimation" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mileage Estimation" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Estimación de kilometraje" } }
+      }
+    },
+    "settings.mileage_estimation_desc" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Show estimated mileage based on driving pace" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Muestra kilometraje estimado según el ritmo de manejo" } }
+      }
+    },
+    "settings.mileage_window" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mileage Window" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ventana de kilometraje" } }
+      }
+    },
+    "settings.privacy" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "PRIVACY" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "PRIVACIDAD" } }
+      }
+    },
+    "settings.reminders" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "REMINDERS" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "RECORDATORIOS" } }
+      }
+    },
+    "settings.service_bundling" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "SERVICE BUNDLING" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "AGRUPAR SERVICIOS" } }
+      }
+    },
+    "settings.smart_features" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "SMART FEATURES" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "FUNCIONES INTELIGENTES" } }
+      }
+    },
+    "settings.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Settings" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ajustes" } }
+      }
+    },
+    "settings.widgets" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "WIDGETS" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "WIDGETS" } }
+      }
+    },
+    "toast.mileage_updated" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mileage updated" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Kilometraje actualizado" } }
+      }
+    },
+    "toast.pdf_ready" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "PDF ready" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "PDF listo" } }
+      }
+    },
+    "toast.reading_captured" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reading captured" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Lectura capturada" } }
+      }
+    },
+    "toast.reminder_set" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reminder Set" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Recordatorio configurado" } }
+      }
+    },
+    "toast.service_added" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Service added" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Servicio añadido" } }
+      }
+    },
+    "toast.service_log_updated" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Service log updated" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Registro de servicio actualizado" } }
+      }
+    },
+    "toast.service_logged" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Service logged" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Servicio registrado" } }
+      }
+    },
+    "toast.service_recorded" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Service Recorded" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Servicio anotado" } }
+      }
+    },
+    "toast.service_scheduled" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Service scheduled" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Servicio programado" } }
+      }
+    },
+    "toast.sync_error" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sync issue — data saved locally" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Problema de sincronización — datos guardados localmente" } }
+      }
+    },
+    "toast.vehicle_deleted" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Vehicle deleted" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Vehículo eliminado" } }
+      }
+    },
+    "toast.vehicle_saved" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Vehicle saved" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Vehículo guardado" } }
+      }
+    },
+    "toast.vehicle_updated" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Vehicle updated" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Vehículo actualizado" } }
+      }
+    },
+    "vehicle.add" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add Vehicle" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añadir vehículo" } }
+      }
+    },
+    "vehicle.current_mileage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Current Mileage" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Kilometraje actual" } }
+      }
+    },
+    "vehicle.details" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Vehicle Details" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Detalles del vehículo" } }
+      }
+    },
+    "vehicle.first_vehicle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "First Vehicle" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Primer vehículo" } }
+      }
+    },
+    "vehicle.identification" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Identification" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Identificación" } }
+      }
+    },
+    "vehicle.make" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Make" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Marca" } }
+      }
+    },
+    "vehicle.make_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Toyota, Honda, Ford..." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Toyota, Honda, Ford…" } }
+      }
+    },
+    "vehicle.mileage_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "0" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "0" } }
+      }
+    },
+    "vehicle.model" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Model" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Modelo" } }
+      }
+    },
+    "vehicle.model_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Camry, Civic, F-150..." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Camry, Civic, F-150…" } }
+      }
+    },
+    "vehicle.nickname" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Nickname" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Apodo" } }
+      }
+    },
+    "vehicle.nickname_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Optional" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Opcional" } }
+      }
+    },
+    "vehicle.notes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Notes" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Notas" } }
+      }
+    },
+    "vehicle.notes_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Vehicle quirks, history, reminders..." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Particularidades, historial, recordatorios…" } }
+      }
+    },
+    "vehicle.odometer" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Odometer" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Odómetro" } }
+      }
+    },
+    "vehicle.oil_type" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Oil Type" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tipo de aceite" } }
+      }
+    },
+    "vehicle.oil_type_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "0W-20 Synthetic (Optional)" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "0W-20 Sintético (opcional)" } }
+      }
+    },
+    "vehicle.optional" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Optional" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Opcional" } }
+      }
+    },
+    "vehicle.save" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Save Vehicle" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Guardar vehículo" } }
+      }
+    },
+    "vehicle.skip_details" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Skip Details" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Omitir detalles" } }
+      }
+    },
+    "vehicle.specifications" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Specifications" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Especificaciones" } }
+      }
+    },
+    "vehicle.tire_size" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tire Size" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Medida de goma" } }
+      }
+    },
+    "vehicle.tire_size_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "225/45R17 (Optional)" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "225/45R17 (opcional)" } }
+      }
+    },
+    "vehicle.vin" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "VIN" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "VIN" } }
+      }
+    },
+    "vehicle.vin_help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "17-character Vehicle Identification Number" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Número de identificación del vehículo de 17 caracteres" } }
+      }
+    },
+    "vehicle.vin_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Optional" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Opcional" } }
+      }
+    },
+    "vehicle.year" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Year" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Año" } }
+      }
+    },
+    "vehicle.year_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "2024" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "2024" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

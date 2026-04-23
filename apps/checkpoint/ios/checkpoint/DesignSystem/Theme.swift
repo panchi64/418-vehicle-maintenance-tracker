@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+@_exported import DesignKit
 
 enum Theme {
     // MARK: - Backgrounds
@@ -56,10 +57,6 @@ enum Theme {
     static let revealStagger: Double = 0.05
     static let pulseAnimationDuration: Double = 1.5
 
-    // MARK: - Liquid Glass Effects
-    static let glassBlurRadius: CGFloat = 20
-    static let glassTintOpacity: Double = 0.08
-
     // MARK: - Glow Effects (Re-enabled for glass accents)
     static let glowRadius: CGFloat = 8
     static let glowOpacity: Double = 0.3
@@ -69,42 +66,22 @@ enum Theme {
     static let focusGlowOpacity: Double = 0.5
 }
 
-// MARK: - Brutalist Border
-
-struct BrutalistBorder: ViewModifier {
-    var color: Color = Theme.gridLine
-
-    func body(content: Content) -> some View {
-        content
-            .overlay(
-                Rectangle()
-                    .strokeBorder(color, lineWidth: Theme.borderWidth)
-            )
-    }
-}
-
 extension View {
     func brutalistBorder(color: Color = Theme.gridLine) -> some View {
-        modifier(BrutalistBorder(color: color))
+        brutalistBorder(color: color, lineWidth: Theme.borderWidth)
     }
-}
 
-// MARK: - Brutalist Card Style
-
-struct CardStyle: ViewModifier {
-    var padding: CGFloat = Theme.cardPadding
-
-    func body(content: Content) -> some View {
-        content
-            .padding(padding)
-            .background(Theme.surfaceInstrument)
-            .brutalistBorder()
-    }
-}
-
-extension View {
     func cardStyle(padding: CGFloat = Theme.cardPadding) -> some View {
-        modifier(CardStyle(padding: padding))
+        brutalistCard(
+            background: Theme.surfaceInstrument,
+            borderColor: Theme.gridLine,
+            borderWidth: Theme.borderWidth,
+            padding: padding
+        )
+    }
+
+    func instrumentCardStyle(padding: CGFloat = Theme.cardPadding) -> some View {
+        cardStyle(padding: padding)
     }
 }
 
@@ -151,25 +128,6 @@ extension ButtonStyle where Self == SecondaryButtonStyle {
     static var secondary: SecondaryButtonStyle { SecondaryButtonStyle() }
 }
 
-// MARK: - Brutalist Instrument Card
-
-struct InstrumentCardStyle: ViewModifier {
-    var padding: CGFloat = Theme.cardPadding
-    var glowColor: Color? = nil  // Ignored in brutalist style
-
-    func body(content: Content) -> some View {
-        content
-            .padding(padding)
-            .background(Theme.surfaceInstrument)
-            .brutalistBorder()
-    }
-}
-
-extension View {
-    func instrumentCardStyle(padding: CGFloat = Theme.cardPadding, glowColor: Color? = nil) -> some View {
-        modifier(InstrumentCardStyle(padding: padding, glowColor: glowColor))
-    }
-}
 
 // MARK: - Status Glow (Liquid Glass accent on brutalist base)
 
@@ -219,68 +177,18 @@ extension View {
     }
 }
 
-// MARK: - Glass Card Style (blur + translucency + brutalist border)
+// MARK: - Glass Card Style
 
-enum GlassIntensity {
-    case subtle
-    case medium
-    case strong
-    case heavy
-
-    var blurRadius: CGFloat {
-        switch self {
-        case .subtle: return 10
-        case .medium: return Theme.glassBlurRadius
-        case .strong: return 30
-        case .heavy: return 30
-        }
-    }
-
-    var tintOpacity: Double {
-        switch self {
-        case .subtle: return 0.05
-        case .medium: return Theme.glassTintOpacity
-        case .strong: return 0.12
-        case .heavy: return 0.15
-        }
-    }
-
-    var materialOpacity: Double {
-        switch self {
-        case .subtle: return 0.5
-        case .medium: return 0.5
-        case .strong: return 0.5
-        case .heavy: return 0.75
-        }
-    }
-}
-
-struct GlassCardStyle: ViewModifier {
-    var intensity: GlassIntensity = .medium
-    var padding: CGFloat = Theme.cardPadding
-
-    func body(content: Content) -> some View {
-        content
-            .padding(padding)
-            .background(
-                ZStack {
-                    // Frosted glass effect
-                    Rectangle()
-                        .fill(intensity == .heavy ? .thinMaterial : .ultraThinMaterial)
-                        .opacity(intensity.materialOpacity)
-
-                    // Tint overlay
-                    Rectangle()
-                        .fill(Color.white.opacity(intensity.tintOpacity))
-                }
-            )
-            .brutalistBorder()
-    }
-}
+typealias GlassIntensity = DesignKit.GlassIntensity
 
 extension View {
     func glassCardStyle(intensity: GlassIntensity = .medium, padding: CGFloat = Theme.cardPadding) -> some View {
-        modifier(GlassCardStyle(intensity: intensity, padding: padding))
+        glassCard(
+            intensity: intensity,
+            padding: padding,
+            borderColor: Theme.gridLine,
+            borderWidth: Theme.borderWidth
+        )
     }
 }
 
@@ -416,54 +324,36 @@ struct FramedContainer<Content: View>: View {
     }
 
     var body: some View {
-        ZStack {
-            // Off-white frame
-            Theme.accent
-                .ignoresSafeArea()
-
-            // Cerulean content area
+        DesignKit.FramedContainer(
+            frameColor: Theme.accent,
+            frameWidth: Theme.frameWidth,
+            backgroundColor: Theme.backgroundPrimary
+        ) {
             content
-                .background(Theme.backgroundPrimary)
-                .padding(Theme.frameWidth)
         }
     }
 }
 
 // MARK: - Brutalist Section Header
 
-struct InstrumentSectionHeader<TrailingContent: View>: View {
+struct InstrumentSectionHeader<Trailing: View>: View {
     let title: String
-    let trailingContent: TrailingContent?
+    let trailing: Trailing
 
-    init(title: String) where TrailingContent == EmptyView {
+    init(title: String, @ViewBuilder trailing: () -> Trailing = { EmptyView() }) {
         self.title = title
-        self.trailingContent = nil
-    }
-
-    init(title: String, @ViewBuilder trailing: () -> TrailingContent) {
-        self.title = title
-        self.trailingContent = trailing()
+        self.trailing = trailing()
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Text(title)
-                    .font(.brutalistLabel)
-                    .foregroundStyle(Theme.textTertiary)
-                    .textCase(.uppercase)
-                    .tracking(2)
-
-                Spacer()
-
-                if let trailingContent {
-                    trailingContent
-                }
-            }
-
-            Rectangle()
-                .fill(Theme.gridLine)
-                .frame(height: Theme.borderWidth)
+        DesignKit.SectionHeader(
+            title: title,
+            labelColor: Theme.textTertiary,
+            dividerColor: Theme.gridLine,
+            dividerHeight: Theme.borderWidth,
+            labelFont: .brutalistLabel
+        ) {
+            trailing
         }
     }
 }
@@ -477,20 +367,15 @@ struct BrutalistDataRow: View {
     var padding: CGFloat = 0
 
     var body: some View {
-        HStack {
-            Text(label)
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .textCase(.uppercase)
-                .tracking(1)
-
-            Spacer()
-
-            Text(value)
-                .font(.brutalistBody)
-                .foregroundStyle(valueColor)
-        }
-        .padding(padding)
+        DesignKit.DataRow(
+            label: label,
+            value: value,
+            labelColor: Theme.textTertiary,
+            valueColor: valueColor,
+            labelFont: .brutalistLabel,
+            valueFont: .brutalistBody,
+            padding: padding
+        )
     }
 }
 
@@ -498,17 +383,6 @@ struct BrutalistDataRow: View {
 
 struct GridOverlay: View {
     var body: some View {
-        GeometryReader { geo in
-            Path { path in
-                // Vertical lines every 16pt
-                let spacing: CGFloat = 16
-                for x in stride(from: 0, to: geo.size.width, by: spacing) {
-                    path.move(to: CGPoint(x: x, y: 0))
-                    path.addLine(to: CGPoint(x: x, y: geo.size.height))
-                }
-            }
-            .stroke(Theme.gridLine.opacity(0.3), lineWidth: 0.5)
-        }
-        .allowsHitTesting(false)
+        DesignKit.GridOverlay(color: Theme.gridLine.opacity(0.3))
     }
 }

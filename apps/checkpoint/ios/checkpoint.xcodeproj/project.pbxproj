@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		233723FFB1C83A005BF41AA9 /* DesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = BE9845272C4CFCF14D65E3A6 /* DesignKit */; };
+		35EAF4409A656AD01A1033BA /* DesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = EB06FB0A7CC3A382CE061002 /* DesignKit */; };
+		4990276752C961C629471AA9 /* DesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = 72A7D215AA9F0416060B11E5 /* DesignKit */; };
 		5A409E922F36F7DD0010D306 /* PostHog in Frameworks */ = {isa = PBXBuildFile; productRef = 5APH00022F4000000036D71B /* PostHog */; };
 		5A40A09D2F3705D20010D306 /* Secrets.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 5A40A09C2F3705D20010D306 /* Secrets.xcconfig */; };
 		5AB669662F2687FC0036D71B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5AB669652F2687FC0036D71B /* WidgetKit.framework */; };
@@ -29,6 +32,7 @@
 		5ACB20202F37C7BF00714E55 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5ACB20112F37C7BF00714E55 /* Assets.xcassets */; };
 		5ASIRI0012F3000000036D71B /* VehicleEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ASIRI0022F3000000036D71B /* VehicleEntity.swift */; };
 		5ASIRI0032F3000000036D71B /* VehicleEntityQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ASIRI0042F3000000036D71B /* VehicleEntityQuery.swift */; };
+		F424A22B574B2CAB7D7CECB0 /* DesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = 25127F8914D55F849FB69D80 /* DesignKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -185,11 +189,15 @@
 		};
 		5AAAA9392F2084330002A8C6 /* checkpointTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = checkpointTests;
 			sourceTree = "<group>";
 		};
 		5AAAA9432F2084330002A8C6 /* checkpointUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = checkpointUITests;
 			sourceTree = "<group>";
 		};
@@ -211,6 +219,8 @@
 		};
 		5ACB30022F37D00000714E55 /* CheckpointWatchTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = CheckpointWatchTests;
 			sourceTree = "<group>";
 		};
@@ -222,6 +232,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5A409E922F36F7DD0010D306 /* PostHog in Frameworks */,
+				233723FFB1C83A005BF41AA9 /* DesignKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -245,6 +256,7 @@
 			files = (
 				5AB669682F2687FC0036D71B /* SwiftUI.framework in Frameworks */,
 				5AB669662F2687FC0036D71B /* WidgetKit.framework in Frameworks */,
+				4990276752C961C629471AA9 /* DesignKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -252,6 +264,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				35EAF4409A656AD01A1033BA /* DesignKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -275,6 +288,7 @@
 			files = (
 				5ACB1FDD2F37C75800714E55 /* SwiftUI.framework in Frameworks */,
 				5ACB1FDC2F37C75800714E55 /* WidgetKit.framework in Frameworks */,
+				F424A22B574B2CAB7D7CECB0 /* DesignKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -407,6 +421,7 @@
 			name = checkpoint;
 			packageProductDependencies = (
 				5APH00022F4000000036D71B /* PostHog */,
+				BE9845272C4CFCF14D65E3A6 /* DesignKit */,
 			);
 			productName = checkpoint;
 			productReference = 5AAAA9272F2084320002A8C6 /* checkpoint.app */;
@@ -429,8 +444,6 @@
 				5AAAA9392F2084330002A8C6 /* checkpointTests */,
 			);
 			name = checkpointTests;
-			packageProductDependencies = (
-			);
 			productName = checkpointTests;
 			productReference = 5AAAA9362F2084330002A8C6 /* checkpointTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -452,8 +465,6 @@
 				5AAAA9432F2084330002A8C6 /* checkpointUITests */,
 			);
 			name = checkpointUITests;
-			packageProductDependencies = (
-			);
 			productName = checkpointUITests;
 			productReference = 5AAAA9402F2084330002A8C6 /* checkpointUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -475,6 +486,7 @@
 			);
 			name = CheckpointWidgetExtension;
 			packageProductDependencies = (
+				72A7D215AA9F0416060B11E5 /* DesignKit */,
 			);
 			productName = CheckpointWidgetExtension;
 			productReference = 5AB669632F2687FC0036D71B /* CheckpointWidgetExtension.appex */;
@@ -496,6 +508,7 @@
 			);
 			name = "CheckpointWatch Watch App";
 			packageProductDependencies = (
+				EB06FB0A7CC3A382CE061002 /* DesignKit */,
 			);
 			productName = "CheckpointWatch Watch App";
 			productReference = 5ACB1F742F37C5C900714E55 /* CheckpointWatch Watch App.app */;
@@ -518,8 +531,6 @@
 				5ACB30022F37D00000714E55 /* CheckpointWatchTests */,
 			);
 			name = CheckpointWatchTests;
-			packageProductDependencies = (
-			);
 			productName = CheckpointWatchTests;
 			productReference = 5ACB1F802F37C5CA00714E55 /* CheckpointWatchTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -538,8 +549,6 @@
 				5ACB1F8C2F37C5CA00714E55 /* PBXTargetDependency */,
 			);
 			name = CheckpointWatchUITests;
-			packageProductDependencies = (
-			);
 			productName = CheckpointWatchUITests;
 			productReference = 5ACB1F8A2F37C5CA00714E55 /* CheckpointWatchUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -561,6 +570,7 @@
 			);
 			name = CheckpointWatchWidgetExtension;
 			packageProductDependencies = (
+				25127F8914D55F849FB69D80 /* DesignKit */,
 			);
 			productName = CheckpointWatchWidgetExtension;
 			productReference = 5ACB1FDB2F37C75800714E55 /* CheckpointWatchWidgetExtension.appex */;
@@ -612,11 +622,13 @@
 			knownRegions = (
 				en,
 				Base,
+				es,
 			);
 			mainGroup = 5AAAA91E2F2084320002A8C6;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				5APH00012F4000000036D71B /* XCRemoteSwiftPackageReference "posthog-ios" */,
+				E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "DesignKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5AAAA9282F2084320002A8C6 /* Products */;
@@ -1459,6 +1471,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "DesignKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../../packages/DesignKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		5APH00012F4000000036D71B /* XCRemoteSwiftPackageReference "posthog-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -1471,10 +1490,30 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		25127F8914D55F849FB69D80 /* DesignKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "DesignKit" */;
+			productName = DesignKit;
+		};
 		5APH00022F4000000036D71B /* PostHog */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 5APH00012F4000000036D71B /* XCRemoteSwiftPackageReference "posthog-ios" */;
 			productName = PostHog;
+		};
+		72A7D215AA9F0416060B11E5 /* DesignKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "DesignKit" */;
+			productName = DesignKit;
+		};
+		BE9845272C4CFCF14D65E3A6 /* DesignKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "DesignKit" */;
+			productName = DesignKit;
+		};
+		EB06FB0A7CC3A382CE061002 /* DesignKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "DesignKit" */;
+			productName = DesignKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
