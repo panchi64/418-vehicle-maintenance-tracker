@@ -6,6 +6,7 @@ import DesignKit
 struct FuelMapView: View {
     @Environment(\.theme) private var theme
     @Environment(BiomboAppState.self) private var appState
+    private let locationService = LocationService.shared
 
     @Query(
         filter: #Predicate<CachedFuelPrice> { $0.flagCount < 3 },
@@ -32,9 +33,17 @@ struct FuelMapView: View {
             UserAnnotation()
         }
         .mapStyle(.standard(elevation: .flat, emphasis: .muted, pointsOfInterest: .excludingAll))
-        .mapControls {
-            MapUserLocationButton()
-            MapCompass()
+        .saturation(0.15)
+        .brightness(0.05)
+        .overlay {
+            theme.backgroundPrimary.opacity(0.20)
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+        }
+        .contrast(1.1)
+        .mapControls { }
+        .overlay(alignment: .topTrailing) {
+            mapLocationButton.padding(DKSpacing.md)
         }
         .overlay(alignment: .bottomTrailing) {
             submitButton.padding(DKSpacing.md)
@@ -53,6 +62,24 @@ struct FuelMapView: View {
             get: { cachedPrices.first(where: { $0.recordID == presentedStationId }) },
             set: { presentedStationId = $0?.recordID }
         )
+    }
+
+    private var mapLocationButton: some View {
+        Button {
+            if let coordinate = locationService.currentLocation?.coordinate {
+                cameraPosition = .camera(
+                    MapCamera(centerCoordinate: coordinate, distance: 15000)
+                )
+            }
+        } label: {
+            Image(systemName: "location.fill")
+                .font(.system(size: 14, weight: .bold, design: .monospaced))
+                .foregroundStyle(theme.backgroundPrimary)
+                .frame(width: 36, height: 36)
+                .background(theme.accent)
+        }
+        .buttonStyle(.plain)
+        .brutalistBorder(color: theme.backgroundPrimary, lineWidth: 2)
     }
 
     private var submitButton: some View {
