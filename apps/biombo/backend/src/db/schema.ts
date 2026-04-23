@@ -7,6 +7,7 @@ import {
   integer,
   customType,
   index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 const bytea = customType<{ data: Buffer; default: false }>({
@@ -77,6 +78,14 @@ export const submissions = pgTable(
   (t) => ({
     locationIdx: index("idx_submissions_location").on(t.latitude, t.longitude),
     expiresAtIdx: index("idx_submissions_expires_at").on(t.expiresAt),
+    deviceCreatedIdx: index("idx_submissions_device_created").on(
+      t.deviceToken,
+      t.createdAt
+    ),
+    expiresFlagIdx: index("idx_submissions_expires_flag").on(
+      t.expiresAt,
+      t.flagCount
+    ),
   })
 );
 
@@ -92,7 +101,7 @@ export const submissionInteractions = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => ({
-    uniqueDeviceInteraction: index("idx_submission_interactions_unique").on(
+    uniqueDeviceInteraction: uniqueIndex("idx_submission_interactions_unique").on(
       t.submissionId,
       t.deviceToken,
       t.kind

@@ -47,6 +47,10 @@ CREATE TABLE IF NOT EXISTS "submissions" (
 );
 CREATE INDEX IF NOT EXISTS "idx_submissions_location" ON "submissions" ("latitude", "longitude");
 CREATE INDEX IF NOT EXISTS "idx_submissions_expires_at" ON "submissions" ("expires_at");
+CREATE INDEX IF NOT EXISTS "idx_submissions_device_created"
+  ON "submissions" ("device_token", "created_at" DESC);
+CREATE INDEX IF NOT EXISTS "idx_submissions_expires_flag"
+  ON "submissions" ("expires_at", "flag_count");
 
 CREATE TABLE IF NOT EXISTS "submission_interactions" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -55,5 +59,5 @@ CREATE TABLE IF NOT EXISTS "submission_interactions" (
   "kind" text NOT NULL CHECK ("kind" IN ('confirm', 'flag')),
   "created_at" timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS "idx_submission_interactions_unique"
+CREATE UNIQUE INDEX IF NOT EXISTS "idx_submission_interactions_unique"
   ON "submission_interactions" ("submission_id", "device_token", "kind");

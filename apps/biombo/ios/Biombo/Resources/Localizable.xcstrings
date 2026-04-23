@@ -134,18 +134,116 @@
         "es" : { "stringUnit" : { "state" : "translated", "value" : "Unidad de volumen" } }
       }
     },
-    "submit.placeholder_body" : {
+    "submit.action.send" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Capture + OCR + brand detection ships in Phase 2." } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Captura + OCR + detección de marca llegan en la Fase 2." } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Send" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Enviar" } }
       }
     },
-    "submit.placeholder_title" : {
+    "submit.detected_brand" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Coming soon" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Próximamente" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Detected brand" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Marca detectada" } }
+      }
+    },
+    "submit.error.image_load" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Couldn't load the photo." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudo cargar la foto." } }
+      }
+    },
+    "submit.error.no_image" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pick a photo first." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Primero elige una foto." } }
+      }
+    },
+    "submit.error.no_location" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Location unavailable. Check permissions." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ubicación no disponible. Revisa los permisos." } }
+      }
+    },
+    "submit.failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Submission failed" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Falló el envío" } }
+      }
+    },
+    "submit.pick_photo" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pick a photo" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Elegir una foto" } }
+      }
+    },
+    "submit.processing" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reading price sign…" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Leyendo el letrero…" } }
+      }
+    },
+    "submit.retry" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Try again" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Reintentar" } }
+      }
+    },
+    "submit.review.prices" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Prices" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Precios" } }
+      }
+    },
+    "submit.review.station" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Station" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Estación" } }
+      }
+    },
+    "submit.select_photo.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Snap the price sign. We'll read the price and match the brand." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Toma foto al letrero. Leeremos el precio y reconoceremos la marca." } }
+      }
+    },
+    "submit.select_photo.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Capture a price sign" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Captura un letrero" } }
+      }
+    },
+    "submit.station_name_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Station name (optional)" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Nombre de la estación (opcional)" } }
+      }
+    },
+    "submit.success" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Submitted" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Enviado" } }
+      }
+    },
+    "submit.uploading" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Uploading…" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Subiendo…" } }
       }
     },
     "submit.title" : {
