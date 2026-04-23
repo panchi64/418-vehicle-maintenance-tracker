@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -39,27 +39,9 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		5ADA8DEFCA57AFFC999F7FA0 /* BiomboUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			path = BiomboUITests;
-			sourceTree = "<group>";
-		};
-		9AD982B5C535034E22A73342 /* Biombo */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			path = Biombo;
-			sourceTree = "<group>";
-		};
-		A18728B629DD73287C664E33 /* BiomboTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			path = BiomboTests;
-			sourceTree = "<group>";
-		};
+		5ADA8DEFCA57AFFC999F7FA0 /* BiomboUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = BiomboUITests; sourceTree = "<group>"; };
+		9AD982B5C535034E22A73342 /* Biombo */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Biombo; sourceTree = "<group>"; };
+		A18728B629DD73287C664E33 /* BiomboTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = BiomboTests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -204,8 +186,9 @@
 		BBB48A8F269E2C0294D6246B /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 1600;
-				LastUpgradeCheck = 1600;
+				LastUpgradeCheck = 2640;
 			};
 			buildConfigurationList = 5160B89C1283D7B747380C5C /* Build configuration list for PBXProject "Biombo" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -217,12 +200,10 @@
 				es,
 			);
 			mainGroup = F84BCF123AF6A48BB7D9E3C5;
-			minimizedProjectReferenceProxies = 0;
 			packageReferences = (
-				AC4731B0617D77548F2DE024 /* XCLocalSwiftPackageReference "DesignKit" */,
-				A4BCAD12FA1B9BE738BD088A /* XCLocalSwiftPackageReference "Localization" */,
+				AC4731B0617D77548F2DE024 /* XCLocalSwiftPackageReference "../../../packages/DesignKit" */,
+				A4BCAD12FA1B9BE738BD088A /* XCLocalSwiftPackageReference "../../../packages/Localization" */,
 			);
-			preferredProjectObjectVersion = 77;
 			productRefGroup = 7416D4796944821D3CC7A67B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -319,6 +300,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -349,9 +332,11 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -363,6 +348,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
@@ -382,8 +368,12 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "Biombo-Support/Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.418-studio.biombo";
 				PRODUCT_NAME = Biombo;
 				SDKROOT = iphoneos;
@@ -414,6 +404,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -444,9 +436,11 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -465,6 +459,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -484,8 +479,12 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "Biombo-Support/Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.418-studio.biombo";
 				PRODUCT_NAME = Biombo;
 				SDKROOT = iphoneos;
@@ -574,11 +573,11 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		A4BCAD12FA1B9BE738BD088A /* XCLocalSwiftPackageReference "Localization" */ = {
+		A4BCAD12FA1B9BE738BD088A /* XCLocalSwiftPackageReference "../../../packages/Localization" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../../packages/Localization;
 		};
-		AC4731B0617D77548F2DE024 /* XCLocalSwiftPackageReference "DesignKit" */ = {
+		AC4731B0617D77548F2DE024 /* XCLocalSwiftPackageReference "../../../packages/DesignKit" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../../packages/DesignKit;
 		};
@@ -587,12 +586,12 @@
 /* Begin XCSwiftPackageProductDependency section */
 		52E80798EBE8F894698D7E14 /* Localization */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = A4BCAD12FA1B9BE738BD088A /* XCLocalSwiftPackageReference "Localization" */;
+			package = A4BCAD12FA1B9BE738BD088A /* XCLocalSwiftPackageReference "../../../packages/Localization" */;
 			productName = Localization;
 		};
 		5554124D864D3F77BC90FED3 /* DesignKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = AC4731B0617D77548F2DE024 /* XCLocalSwiftPackageReference "DesignKit" */;
+			package = AC4731B0617D77548F2DE024 /* XCLocalSwiftPackageReference "../../../packages/DesignKit" */;
 			productName = DesignKit;
 		};
 /* End XCSwiftPackageProductDependency section */
