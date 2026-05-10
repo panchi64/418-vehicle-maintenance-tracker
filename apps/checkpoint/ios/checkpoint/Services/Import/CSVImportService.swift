@@ -155,16 +155,16 @@ final class CSVImportService {
         "wipers": "Wiper Blades",
     ]
 
-    // MARK: - Date Formats
+    // MARK: - Date Parsers
 
-    private static let dateFormats: [String] = [
-        "yyyy-MM-dd",
-        "MM/dd/yyyy",
-        "dd/MM/yyyy",
-        "MMM d, yyyy",
-        "M/d/yyyy",
-        "d/M/yyyy",
-        "yyyy/MM/dd",
+    private static let dateParsers: [DateFormatter] = [
+        Formatters.dateParserDashYMD,
+        Formatters.dateParserSlashMDY,
+        Formatters.dateParserSlashDMY,
+        Formatters.dateParserMediumDate,
+        Formatters.dateParserSlashMDYShort,
+        Formatters.dateParserSlashDMYShort,
+        Formatters.dateParserSlashYMD,
     ]
 
     // MARK: - Public API
@@ -465,17 +465,12 @@ final class CSVImportService {
         let trimmed = string.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return nil }
 
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-
-        for format in Self.dateFormats {
-            formatter.dateFormat = format
+        for formatter in Self.dateParsers {
             if let date = formatter.date(from: trimmed) {
                 return date
             }
         }
 
-        // Try ISO8601 as fallback
         let iso = ISO8601DateFormatter()
         iso.formatOptions = [.withFullDate]
         return iso.date(from: trimmed)

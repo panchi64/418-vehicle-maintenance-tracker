@@ -30,6 +30,35 @@ enum Formatters {
         return formatter
     }()
 
+    // MARK: - Date Parsers
+    //
+    // For parsing fixed-format date strings from external sources (NHTSA API,
+    // CSV imports). Locale is en_US_POSIX so user locale doesn't affect parsing,
+    // and time zone is UTC so dates round-trip without DST drift.
+
+    /// `MM/dd/yyyy` (e.g. "01/15/2024")
+    nonisolated static let dateParserSlashMDY = makeDateParser("MM/dd/yyyy")
+    /// `dd/MM/yyyy` (e.g. "27/06/2019")
+    nonisolated static let dateParserSlashDMY = makeDateParser("dd/MM/yyyy")
+    /// `M/d/yyyy` (e.g. "1/5/2024")
+    nonisolated static let dateParserSlashMDYShort = makeDateParser("M/d/yyyy")
+    /// `d/M/yyyy` (e.g. "27/6/2019")
+    nonisolated static let dateParserSlashDMYShort = makeDateParser("d/M/yyyy")
+    /// `yyyy-MM-dd` (e.g. "2024-01-15")
+    nonisolated static let dateParserDashYMD = makeDateParser("yyyy-MM-dd")
+    /// `yyyy/MM/dd` (e.g. "2024/01/15")
+    nonisolated static let dateParserSlashYMD = makeDateParser("yyyy/MM/dd")
+    /// `MMM d, yyyy` (e.g. "Jan 5, 2024")
+    nonisolated static let dateParserMediumDate = makeDateParser("MMM d, yyyy")
+
+    private nonisolated static func makeDateParser(_ format: String) -> DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateFormat = format
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        return formatter
+    }
+
     /// Currency format: "$45.99"
     static let currency: NumberFormatter = {
         let formatter = NumberFormatter()

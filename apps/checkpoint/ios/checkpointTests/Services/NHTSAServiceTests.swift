@@ -395,21 +395,15 @@ final class NHTSAModelTests: XCTestCase {
         XCTAssertFalse(recall.parkOutside)
     }
 
-    func testRecallInfo_HasUniqueID() {
-        let recall1 = RecallInfo(
-            campaignNumber: "24V123",
-            component: "AIR BAGS",
-            summary: "", consequence: "", remedy: "",
-            reportDate: "", parkIt: false, parkOutside: false
-        )
-        let recall2 = RecallInfo(
+    func testRecallInfo_IDIsCampaignNumber() {
+        let recall = RecallInfo(
             campaignNumber: "24V123",
             component: "AIR BAGS",
             summary: "", consequence: "", remedy: "",
             reportDate: "", parkIt: false, parkOutside: false
         )
 
-        XCTAssertNotEqual(recall1.id, recall2.id)
+        XCTAssertEqual(recall.id, "24V123")
     }
 }
 

@@ -11,7 +11,7 @@ import SwiftUI
 struct RecallDetailSheet: View {
     let recalls: [RecallInfo]
     @Environment(\.dismiss) private var dismiss
-    @State private var expandedRecallIDs: Set<UUID> = []
+    @State private var expandedRecallIDs: Set<String> = []
 
     var body: some View {
         NavigationStack {

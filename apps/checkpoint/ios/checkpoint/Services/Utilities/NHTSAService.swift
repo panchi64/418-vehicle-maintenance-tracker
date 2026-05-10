@@ -50,7 +50,6 @@ struct VINDecodeResult: Sendable {
 }
 
 struct RecallInfo: Identifiable, Sendable {
-    let id = UUID()
     let campaignNumber: String
     let component: String
     let summary: String
@@ -60,23 +59,14 @@ struct RecallInfo: Identifiable, Sendable {
     let parkIt: Bool
     let parkOutside: Bool
 
-    private nonisolated static let monthDayYearFormatter = makeFormatter("MM/dd/yyyy")
-    private nonisolated static let dayMonthYearFormatter = makeFormatter("dd/MM/yyyy")
-
-    private nonisolated static func makeFormatter(_ format: String) -> DateFormatter {
-        let formatter = DateFormatter()
-        formatter.dateFormat = format
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = TimeZone(identifier: "UTC")
-        return formatter
-    }
+    var id: String { campaignNumber }
 
     /// NHTSA's API mixes `MM/dd/yyyy` and `dd/MM/yyyy` — disambiguate by the first component
     /// (>12 ⇒ day-first); when both halves are ≤12 we default to US `MM/dd/yyyy`.
     var reportDateParsed: Date? {
         let parts = reportDate.split(separator: "/")
         guard parts.count == 3, let first = Int(parts[0]) else { return nil }
-        let formatter = first > 12 ? Self.dayMonthYearFormatter : Self.monthDayYearFormatter
+        let formatter = first > 12 ? Formatters.dateParserSlashDMY : Formatters.dateParserSlashMDY
         return formatter.date(from: reportDate)
     }
 }
