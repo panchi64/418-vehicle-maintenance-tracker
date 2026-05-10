@@ -9,7 +9,7 @@ import Foundation
 import UserNotifications
 import os
 
-private let mileageNotificationLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "Notifications.Mileage")
+private let mileageNotificationLogger = Logger(category: "Notifications.Mileage")
 
 /// Scheduler for mileage reminder notifications
 struct MileageReminderScheduler {

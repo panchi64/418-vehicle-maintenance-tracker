@@ -52,7 +52,7 @@ nonisolated enum SiriServiceStatus: String {
 
 /// Reads vehicle and service data from App Groups for Siri intents
 nonisolated struct SiriDataProvider {
-    private static let logger = Logger(subsystem: "com.418-studio.checkpoint", category: "Siri")
+    private static let logger = Logger(category: "Siri")
     private static let widgetDataKey = "widgetData"
     private static let vehicleListKey = "vehicleList"
 

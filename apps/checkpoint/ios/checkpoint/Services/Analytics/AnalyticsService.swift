@@ -17,7 +17,7 @@ import os
 final class AnalyticsService {
     static let shared = AnalyticsService()
 
-    private let logger = Logger(subsystem: "com.418-studio.checkpoint", category: "Analytics")
+    private let logger = Logger(category: "Analytics")
     private var isInitialized = false
 
     private init() {}

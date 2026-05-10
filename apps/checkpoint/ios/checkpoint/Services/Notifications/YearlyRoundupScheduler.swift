@@ -9,7 +9,7 @@ import Foundation
 import UserNotifications
 import os
 
-private let yearlyNotificationLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "Notifications.Yearly")
+private let yearlyNotificationLogger = Logger(category: "Notifications.Yearly")
 
 /// Scheduler for yearly cost roundup notifications
 struct YearlyRoundupScheduler {

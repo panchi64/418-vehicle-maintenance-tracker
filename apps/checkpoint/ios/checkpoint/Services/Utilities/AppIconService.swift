@@ -9,7 +9,7 @@ import UIKit
 import SwiftData
 import os
 
-private let appIconLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "AppIcon")
+private let appIconLogger = Logger(category: "AppIcon")
 
 @MainActor
 final class AppIconService {

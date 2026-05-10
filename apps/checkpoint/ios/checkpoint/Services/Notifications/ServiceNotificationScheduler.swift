@@ -9,7 +9,7 @@ import Foundation
 import UserNotifications
 import os
 
-private let serviceNotificationLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "Notifications.Service")
+private let serviceNotificationLogger = Logger(category: "Notifications.Service")
 
 /// Scheduler for service due notifications
 struct ServiceNotificationScheduler {

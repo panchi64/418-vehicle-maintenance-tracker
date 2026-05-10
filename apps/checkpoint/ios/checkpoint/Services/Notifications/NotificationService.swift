@@ -10,7 +10,7 @@ import UserNotifications
 import SwiftData
 import os
 
-private let notificationLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "Notifications")
+private let notificationLogger = Logger(category: "Notifications")
 
 /// Core service for managing local notifications for vehicle maintenance reminders
 @Observable

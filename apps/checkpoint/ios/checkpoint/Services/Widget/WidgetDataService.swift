@@ -12,7 +12,7 @@ import Combine
 import CoreData
 import os
 
-private let widgetLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "Widget")
+private let widgetLogger = Logger(category: "Widget")
 
 /// Service for updating widget data in the shared App Group container
 @MainActor

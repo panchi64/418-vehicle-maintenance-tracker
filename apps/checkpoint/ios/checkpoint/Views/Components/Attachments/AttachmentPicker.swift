@@ -10,7 +10,7 @@ import PhotosUI
 import UniformTypeIdentifiers
 import os
 
-private let attachmentLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "Attachments")
+private let attachmentLogger = Logger(category: "Attachments")
 
 struct AttachmentPicker: View {
     @Binding var attachments: [AttachmentData]

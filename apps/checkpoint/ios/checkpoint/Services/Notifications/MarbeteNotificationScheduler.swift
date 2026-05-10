@@ -9,7 +9,7 @@ import Foundation
 import UserNotifications
 import os
 
-private let marbeteNotificationLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "Notifications.Marbete")
+private let marbeteNotificationLogger = Logger(category: "Notifications.Marbete")
 
 /// Scheduler for marbete (PR vehicle registration) expiration notifications
 struct MarbeteNotificationScheduler {

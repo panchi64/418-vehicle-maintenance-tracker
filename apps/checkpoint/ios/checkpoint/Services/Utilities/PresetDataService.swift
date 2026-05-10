@@ -15,7 +15,7 @@ struct PresetData: Codable, Equatable {
     let defaultIntervalMiles: Int?
 }
 
-private let presetLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "PresetData")
+private let presetLogger = Logger(category: "PresetData")
 
 class PresetDataService {
     static let shared = PresetDataService()

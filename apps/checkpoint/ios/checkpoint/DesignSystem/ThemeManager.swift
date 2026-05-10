@@ -6,7 +6,7 @@
 import SwiftUI
 import os
 
-private let themeLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "ThemeManager")
+private let themeLogger = Logger(category: "ThemeManager")
 
 @Observable
 @MainActor

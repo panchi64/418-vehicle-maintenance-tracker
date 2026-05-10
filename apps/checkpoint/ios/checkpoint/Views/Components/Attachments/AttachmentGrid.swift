@@ -9,7 +9,7 @@ import SwiftUI
 import QuickLook
 import os
 
-private let attachmentGridLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "Attachments")
+private let attachmentGridLogger = Logger(category: "Attachments")
 
 struct AttachmentGrid: View {
     let attachments: [ServiceAttachment]

@@ -12,7 +12,7 @@ import SwiftData
 import os
 
 private nonisolated enum WatchLog {
-    static let logger = Logger(subsystem: "com.418-studio.checkpoint", category: "WatchSession")
+    static let logger = Logger(category: "WatchSession")
 }
 
 @Observable

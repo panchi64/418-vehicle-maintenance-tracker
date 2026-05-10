@@ -8,7 +8,7 @@
 import Foundation
 import OSLog
 
-private let cacheLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "PersistentRecallCache")
+private let cacheLogger = Logger(category: "PersistentRecallCache")
 
 actor PersistentRecallCache {
     static let shared = PersistentRecallCache()

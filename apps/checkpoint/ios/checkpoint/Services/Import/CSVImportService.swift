@@ -109,7 +109,7 @@ enum CSVImportError: Error, LocalizedError {
 final class CSVImportService {
     static let shared = CSVImportService()
 
-    private let logger = Logger(subsystem: "com.418-studio.checkpoint", category: "CSVImport")
+    private let logger = Logger(category: "CSVImport")
 
     // MARK: - State
 

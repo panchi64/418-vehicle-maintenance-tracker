@@ -8,7 +8,7 @@
 import StoreKit
 import os
 
-private let storeLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "StoreManager")
+private let storeLogger = Logger(category: "StoreManager")
 
 @Observable
 @MainActor

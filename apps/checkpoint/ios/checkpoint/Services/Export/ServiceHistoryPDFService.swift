@@ -18,7 +18,7 @@ struct ExportOptions: Sendable {
     var includeCostPerMile: Bool = false
 }
 
-private let pdfLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "PDFExport")
+private let pdfLogger = Logger(category: "PDFExport")
 
 @MainActor
 final class ServiceHistoryPDFService {

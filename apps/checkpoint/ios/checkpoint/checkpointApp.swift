@@ -12,7 +12,7 @@ import UserNotifications
 import WatchConnectivity
 import os
 
-private let appLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "App")
+private let appLogger = Logger(category: "App")
 
 @main
 struct checkpointApp: App {
