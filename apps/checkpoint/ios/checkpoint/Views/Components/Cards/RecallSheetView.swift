@@ -76,9 +76,8 @@ struct RecallSheetView: View {
         return L10n.recallLastChecked(timeAgo)
     }
 
-    /// Renders the empty placeholder when nothing else would draw — prevents the
-    /// sheet from collapsing to an empty ScrollView (which leaves a blank screen
-    /// under the toolbar).
+    /// True when no severity sections render and the resolved section is hidden
+    /// or empty — drives the placeholder so the sheet never shows a blank body.
     private var isEmptyState: Bool {
         severityGroups.isEmpty && (!showResolved || resolvedRecalls.isEmpty)
     }
@@ -200,7 +199,6 @@ struct RecallSheetView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, Spacing.xxl)
-        .padding(.horizontal, Spacing.lg)
     }
 
     // MARK: - Row factory
