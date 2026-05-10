@@ -226,4 +226,29 @@ final class AppStateTests: XCTestCase {
         appState.selectedTab = .home
         XCTAssertEqual(appState.selectedTab, .home)
     }
+
+    // MARK: - Recall Ordering Tests
+
+    func testRecallInfo_SortedNewestFirst_OrdersByReportDateWithUndatedLast() {
+        let older = RecallInfo(
+            campaignNumber: "23V456", component: "FUEL", summary: "", consequence: "", remedy: "",
+            reportDate: "06/20/2023", parkIt: false, parkOutside: false
+        )
+        let newest = RecallInfo(
+            campaignNumber: "24V789", component: "STEERING", summary: "", consequence: "", remedy: "",
+            reportDate: "03/10/2024", parkIt: false, parkOutside: false
+        )
+        let middle = RecallInfo(
+            campaignNumber: "24V123", component: "AIR BAGS", summary: "", consequence: "", remedy: "",
+            reportDate: "01/15/2024", parkIt: false, parkOutside: false
+        )
+        let undated = RecallInfo(
+            campaignNumber: "00V000", component: "UNKNOWN", summary: "", consequence: "", remedy: "",
+            reportDate: "", parkIt: false, parkOutside: false
+        )
+
+        let ordered = [older, undated, newest, middle].sortedNewestFirst()
+
+        XCTAssertEqual(ordered.map(\.campaignNumber), ["24V789", "24V123", "23V456", "00V000"])
+    }
 }

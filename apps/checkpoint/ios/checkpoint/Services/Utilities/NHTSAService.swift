@@ -59,6 +59,26 @@ struct RecallInfo: Identifiable, Sendable {
     let reportDate: String
     let parkIt: Bool
     let parkOutside: Bool
+
+    private nonisolated static let reportDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM/dd/yyyy"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        return formatter
+    }()
+
+    var reportDateParsed: Date? {
+        Self.reportDateFormatter.date(from: reportDate)
+    }
+}
+
+extension Array where Element == RecallInfo {
+    func sortedNewestFirst() -> [RecallInfo] {
+        sorted { lhs, rhs in
+            (lhs.reportDateParsed ?? .distantPast) > (rhs.reportDateParsed ?? .distantPast)
+        }
+    }
 }
 
 // MARK: - API Response Decodables

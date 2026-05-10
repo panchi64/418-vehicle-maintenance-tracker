@@ -74,7 +74,7 @@ final class AppState {
                 model: vehicle.model,
                 year: vehicle.year
             )
-            recall.fetchStates[vehicle.id] = .fetched(results)
+            recall.fetchStates[vehicle.id] = .fetched(results.sortedNewestFirst())
             RecallCheckCache.shared.recordSuccess()
             if !results.isEmpty {
                 AnalyticsService.shared.capture(.recallAlertShown(recallCount: results.count))

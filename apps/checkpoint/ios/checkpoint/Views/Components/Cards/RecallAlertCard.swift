@@ -25,23 +25,8 @@ struct RecallAlertCard: View {
         return "\(count) Open Recall\(count == 1 ? "" : "s")"
     }
 
-    private static let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MM/dd/yyyy"
-        return formatter
-    }()
-
-    /// Recalls sorted by report date descending (most recent first).
-    private var sortedRecalls: [RecallInfo] {
-        recalls.sorted { a, b in
-            let dateA = Self.dateFormatter.date(from: a.reportDate) ?? .distantPast
-            let dateB = Self.dateFormatter.date(from: b.reportDate) ?? .distantPast
-            return dateA > dateB
-        }
-    }
-
     private var inlineRecalls: [RecallInfo] {
-        Array(sortedRecalls.prefix(RecallAlertCard.inlineLimit))
+        Array(recalls.prefix(RecallAlertCard.inlineLimit))
     }
 
     private var hasOverflow: Bool {
@@ -173,7 +158,7 @@ struct RecallAlertCard: View {
                 .strokeBorder(Theme.statusOverdue.opacity(0.5), lineWidth: Theme.borderWidth)
         )
         .sheet(isPresented: $showAllRecalls) {
-            RecallDetailSheet(recalls: sortedRecalls)
+            RecallDetailSheet(recalls: recalls)
         }
     }
 
