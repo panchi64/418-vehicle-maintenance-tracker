@@ -251,4 +251,42 @@ final class AppStateTests: XCTestCase {
 
         XCTAssertEqual(ordered.map(\.campaignNumber), ["24V789", "24V123", "23V456", "00V000"])
     }
+
+    /// 2006 Honda Element regression: NHTSA's API mixes MM/dd/yyyy and dd/MM/yyyy
+    /// in the same response. Both must parse so older dd/MM dates don't sink past
+    /// MM/dd-parseable entries.
+    func testRecallInfo_SortedNewestFirst_HandlesMixedNHTSADateFormats() {
+        let raw: [(String, String)] = [
+            ("19V182000", "06/03/2019"),
+            ("19V499000", "27/06/2019"),
+            ("19V501000", "27/06/2019"),
+            ("06V270000", "26/07/2006"),
+            ("18V268000", "26/04/2018"),
+            ("17V029000", "10/01/2017"),
+            ("15V320000", "28/05/2015"),
+            ("16V344000", "23/05/2016"),
+            ("11V395000", "04/08/2011"),
+            ("09E012000", "07/04/2009"),
+            ("09E025000", "11/05/2009"),
+        ]
+        let recalls = raw.map { campaign, date in
+            RecallInfo(
+                campaignNumber: campaign, component: "", summary: "", consequence: "", remedy: "",
+                reportDate: date, parkIt: false, parkOutside: false
+            )
+        }
+
+        let ordered = recalls.sortedNewestFirst()
+
+        XCTAssertEqual(ordered.first?.campaignNumber, "19V499000",
+                       "Newest dd/MM/yyyy entry must sort first")
+        XCTAssertEqual(ordered.last?.campaignNumber, "06V270000",
+                       "Oldest entry (2006) must sort last")
+        for (lhs, rhs) in zip(ordered, ordered.dropFirst()) {
+            let lhsDate = lhs.reportDateParsed ?? .distantPast
+            let rhsDate = rhs.reportDateParsed ?? .distantPast
+            XCTAssertGreaterThanOrEqual(lhsDate, rhsDate,
+                "\(lhs.campaignNumber) (\(lhs.reportDate)) must not precede \(rhs.campaignNumber) (\(rhs.reportDate))")
+        }
+    }
 }
