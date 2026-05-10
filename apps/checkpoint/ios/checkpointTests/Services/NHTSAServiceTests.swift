@@ -405,6 +405,32 @@ final class NHTSAModelTests: XCTestCase {
 
         XCTAssertEqual(recall.id, "24V123")
     }
+
+    func testRecallInfo_CodableRoundtrip() throws {
+        let original = RecallInfo(
+            campaignNumber: "24V123",
+            component: "AIR BAGS",
+            summary: "Defect.",
+            consequence: "Injury risk.",
+            remedy: "Replace module.",
+            reportDate: "01/15/2024",
+            parkIt: true,
+            parkOutside: false
+        )
+
+        let data = try JSONEncoder().encode(original)
+        let decoded = try JSONDecoder().decode(RecallInfo.self, from: data)
+
+        XCTAssertEqual(decoded.campaignNumber, original.campaignNumber)
+        XCTAssertEqual(decoded.component, original.component)
+        XCTAssertEqual(decoded.summary, original.summary)
+        XCTAssertEqual(decoded.consequence, original.consequence)
+        XCTAssertEqual(decoded.remedy, original.remedy)
+        XCTAssertEqual(decoded.reportDate, original.reportDate)
+        XCTAssertEqual(decoded.parkIt, original.parkIt)
+        XCTAssertEqual(decoded.parkOutside, original.parkOutside)
+        XCTAssertEqual(decoded.id, original.id)
+    }
 }
 
 // MARK: - Cache Tests

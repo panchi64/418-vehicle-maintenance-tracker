@@ -49,7 +49,7 @@ struct VINDecodeResult: Sendable {
     let errorCode: String
 }
 
-struct RecallInfo: Identifiable, Sendable {
+struct RecallInfo: Identifiable, Codable, Sendable {
     let campaignNumber: String
     let component: String
     let summary: String
@@ -261,14 +261,36 @@ actor NHTSAService {
     // MARK: - Recall Fetch
 
     func fetchRecalls(make: String, model: String, year: Int) async throws -> [RecallInfo] {
-        // Create cache key from normalized inputs
         let cacheKey = "\(make.lowercased())|\(model.lowercased())|\(year)"
 
-        // Check cache first
         if let cached = recallsCache[cacheKey], cached.isValid(ttl: recallsCacheTTL) {
             return cached.data
         }
 
+        if let persisted = PersistentRecallCache.read(key: cacheKey),
+           Date().timeIntervalSince(persisted.timestamp) < recallsCacheTTL {
+            recallsCache[cacheKey] = CacheEntry(data: persisted.recalls, timestamp: persisted.timestamp)
+            return persisted.recalls
+        }
+
+        do {
+            let recalls = try await fetchRecallsFromNetwork(make: make, model: model, year: year)
+            let now = Date()
+            recallsCache[cacheKey] = CacheEntry(data: recalls, timestamp: now)
+            PersistentRecallCache.write(key: cacheKey, recalls: recalls, timestamp: now)
+            return recalls
+        } catch {
+            // Fall back to any persisted data on network failure so metered-data users
+            // don't lose their recall list when offline.
+            if let stale = PersistentRecallCache.read(key: cacheKey) {
+                recallsCache[cacheKey] = CacheEntry(data: stale.recalls, timestamp: stale.timestamp)
+                return stale.recalls
+            }
+            throw error
+        }
+    }
+
+    private func fetchRecallsFromNetwork(make: String, model: String, year: Int) async throws -> [RecallInfo] {
         let encodedMake = make.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? make
         let encodedModel = model.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? model
 
@@ -305,7 +327,7 @@ actor NHTSAService {
             throw NHTSAError.decodingFailed
         }
 
-        let recalls = recallsResponse.results.map { result in
+        return recallsResponse.results.map { result in
             RecallInfo(
                 campaignNumber: result.NHTSACampaignNumber ?? "",
                 component: result.Component ?? "",
@@ -317,10 +339,5 @@ actor NHTSAService {
                 parkOutside: result.parkOutSide ?? false
             )
         }
-
-        // Cache the result
-        recallsCache[cacheKey] = CacheEntry(data: recalls, timestamp: Date())
-
-        return recalls
     }
 }
