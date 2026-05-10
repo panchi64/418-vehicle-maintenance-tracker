@@ -118,6 +118,12 @@ enum AnalyticsEvent {
     // MARK: - Features
 
     case recallAlertShown(recallCount: Int)
+    case recallSheetOpened(recallCount: Int)
+    case recallStatusChanged(status: String, campaignNumber: String)
+    case recallSnoozed(days: Int, recallCount: Int)
+    case recallDealerSearchOpened(make: String)
+    case recallPlannedServiceStarted(campaignNumber: String)
+    case recallNHTSALinkOpened(campaignNumber: String)
     case serviceClusterTapped
     case serviceClusterMarkAllDone
     case notificationPermissionGranted
@@ -186,6 +192,12 @@ enum AnalyticsEvent {
         case .analyticsOptedOut: return "analytics_opted_out"
         case .analyticsOptedIn: return "analytics_opted_in"
         case .recallAlertShown: return "recall_alert_shown"
+        case .recallSheetOpened: return "recall_sheet_opened"
+        case .recallStatusChanged: return "recall_status_changed"
+        case .recallSnoozed: return "recall_snoozed"
+        case .recallDealerSearchOpened: return "recall_dealer_search_opened"
+        case .recallPlannedServiceStarted: return "recall_planned_service_started"
+        case .recallNHTSALinkOpened: return "recall_nhtsa_link_opened"
         case .serviceClusterTapped: return "service_cluster_tapped"
         case .serviceClusterMarkAllDone: return "service_cluster_mark_all_done"
         case .notificationPermissionGranted: return "notification_permission_granted"
@@ -263,6 +275,18 @@ enum AnalyticsEvent {
             return ["setting": setting, "enabled": enabled]
         case .recallAlertShown(let recallCount):
             return ["recall_count": recallCount]
+        case .recallSheetOpened(let recallCount):
+            return ["recall_count": recallCount]
+        case .recallStatusChanged(let status, let campaignNumber):
+            return ["status": status, "campaign_number": campaignNumber]
+        case .recallSnoozed(let days, let recallCount):
+            return ["days": days, "recall_count": recallCount]
+        case .recallDealerSearchOpened(let make):
+            return ["make": make]
+        case .recallPlannedServiceStarted(let campaignNumber):
+            return ["campaign_number": campaignNumber]
+        case .recallNHTSALinkOpened(let campaignNumber):
+            return ["campaign_number": campaignNumber]
         case .onboardingTourSkipped(let atStep):
             return ["at_step": atStep]
         case .paywallShown(let trigger):

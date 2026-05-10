@@ -2,7 +2,8 @@
 //  RecallAlertCardTests.swift
 //  checkpointTests
 //
-//  Tests for RecallAlertCard view component
+//  Tests for the compact RecallAlertCard label logic and the worst-severity
+//  computation that drives its appearance.
 //
 
 import XCTest
@@ -10,100 +11,69 @@ import XCTest
 
 final class RecallAlertCardTests: XCTestCase {
 
-    // MARK: - Count Text
-
-    func testRecallAlertCard_SingleRecall_ShowsCorrectCount() {
-        let recalls = [
-            RecallInfo(
-                campaignNumber: "24V123",
-                component: "AIR BAGS",
-                summary: "Defect.",
-                consequence: "Injury.",
-                remedy: "Replace.",
-                reportDate: "01/15/2024",
-                parkIt: false,
-                parkOutside: false
-            )
-        ]
-
-        // Verify the count text logic
-        let count = recalls.count
-        let countText = "\(count) Open Recall\(count == 1 ? "" : "s")"
-        XCTAssertEqual(countText, "1 Open Recall")
+    private func makeRecall(
+        campaignNumber: String = "24V123",
+        parkIt: Bool = false,
+        parkOutside: Bool = false
+    ) -> RecallInfo {
+        RecallInfo(
+            campaignNumber: campaignNumber,
+            component: "TEST",
+            summary: "",
+            consequence: "",
+            remedy: "",
+            reportDate: "",
+            parkIt: parkIt,
+            parkOutside: parkOutside
+        )
     }
 
-    func testRecallAlertCard_MultipleRecalls_ShowsCorrectCount() {
-        let recalls = [
-            RecallInfo(
-                campaignNumber: "24V123",
-                component: "AIR BAGS",
-                summary: "", consequence: "", remedy: "",
-                reportDate: "", parkIt: false, parkOutside: false
-            ),
-            RecallInfo(
-                campaignNumber: "23V456",
-                component: "FUEL SYSTEM",
-                summary: "", consequence: "", remedy: "",
-                reportDate: "", parkIt: false, parkOutside: false
-            ),
-            RecallInfo(
-                campaignNumber: "22V789",
-                component: "STEERING",
-                summary: "", consequence: "", remedy: "",
-                reportDate: "", parkIt: false, parkOutside: false
-            )
-        ]
+    // MARK: - Worst Severity
 
-        let count = recalls.count
-        let countText = "\(count) Open Recall\(count == 1 ? "" : "s")"
-        XCTAssertEqual(countText, "3 Open Recalls")
+    func test_worstSeverity_emptySet_returnsOpen() {
+        XCTAssertEqual([RecallInfo]().worstSeverity, .open)
     }
 
-    // MARK: - Park It Detection
-
-    func testRecallAlertCard_ParkItRecall_DetectedCorrectly() {
-        let recalls = [
-            RecallInfo(
-                campaignNumber: "24V123",
-                component: "AIR BAGS",
-                summary: "Critical defect.",
-                consequence: "Fire risk.",
-                remedy: "Do not drive.",
-                reportDate: "01/15/2024",
-                parkIt: true,
-                parkOutside: true
-            ),
-            RecallInfo(
-                campaignNumber: "23V456",
-                component: "FUEL SYSTEM",
-                summary: "Minor issue.",
-                consequence: "Stall.",
-                remedy: "Replace pump.",
-                reportDate: "06/20/2023",
-                parkIt: false,
-                parkOutside: false
-            )
-        ]
-
-        let hasParkIt = recalls.contains { $0.parkIt }
-        XCTAssertTrue(hasParkIt)
+    func test_worstSeverity_openOnly_returnsOpen() {
+        let recalls = [makeRecall()]
+        XCTAssertEqual(recalls.worstSeverity, .open)
     }
 
-    func testRecallAlertCard_NoParkItRecalls_NotDetected() {
-        let recalls = [
-            RecallInfo(
-                campaignNumber: "23V456",
-                component: "FUEL SYSTEM",
-                summary: "Minor issue.",
-                consequence: "Stall.",
-                remedy: "Replace pump.",
-                reportDate: "06/20/2023",
-                parkIt: false,
-                parkOutside: false
-            )
-        ]
+    func test_worstSeverity_parkOutsidePresent_returnsParkOutside() {
+        let recalls = [makeRecall(parkOutside: true), makeRecall(campaignNumber: "X")]
+        XCTAssertEqual(recalls.worstSeverity, .parkOutside)
+    }
 
-        let hasParkIt = recalls.contains { $0.parkIt }
-        XCTAssertFalse(hasParkIt)
+    func test_worstSeverity_parkItPresent_dominatesEverything() {
+        let recalls = [
+            makeRecall(parkOutside: true),
+            makeRecall(campaignNumber: "X", parkIt: true, parkOutside: true)
+        ]
+        XCTAssertEqual(recalls.worstSeverity, .parkIt)
+    }
+
+    // MARK: - Severity → label mapping (mirrors RecallAlertCard.severityLabel)
+
+    func test_severityLabel_doNotDrive_whenParkIt() {
+        let label = labelFor([makeRecall(parkIt: true)])
+        XCTAssertEqual(label, L10n.recallSeverityDoNotDrive.uppercased())
+    }
+
+    func test_severityLabel_parkOutside_whenOnlyParkOutside() {
+        let label = labelFor([makeRecall(parkOutside: true)])
+        XCTAssertEqual(label, L10n.recallSeverityParkOutside.uppercased())
+    }
+
+    func test_severityLabel_open_whenNeitherFlag() {
+        let label = labelFor([makeRecall()])
+        XCTAssertEqual(label, L10n.recallSeverityOpen.uppercased())
+    }
+
+    private func labelFor(_ recalls: [RecallInfo]) -> String {
+        switch recalls.worstSeverity {
+        case .parkIt: return L10n.recallSeverityDoNotDrive.uppercased()
+        case .parkOutside: return L10n.recallSeverityParkOutside.uppercased()
+        case .open: return L10n.recallSeverityOpen.uppercased()
+        }
     }
 }

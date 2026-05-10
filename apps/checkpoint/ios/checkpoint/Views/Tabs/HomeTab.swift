@@ -13,6 +13,7 @@ struct HomeTab: View {
     @Environment(\.modelContext) var modelContext
     @Query var services: [Service]
     @Query private var serviceLogs: [ServiceLog]
+    @Query private var recallAcknowledgments: [RecallAcknowledgment]
 
     // Cluster state
     @State var primaryCluster: ServiceCluster?
@@ -56,15 +57,30 @@ struct HomeTab: View {
         return serviceLogs.filter { $0.vehicle?.id == vehicle.id }
     }
 
+    /// Recalls that should appear on Home: drops resolved + actively snoozed,
+    /// but never hides a parkIt recall (safety override).
+    private var visibleRecalls: [RecallInfo] {
+        guard let vehicle = vehicle else { return [] }
+        return RecallVisibility.visibleRecalls(
+            from: appState.currentRecalls,
+            acknowledgments: recallAcknowledgments.dictionary(forVehicle: vehicle.id)
+        )
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: Spacing.xl) {
                 // Instrument cluster: compact status cards grouped tightly
                 VStack(spacing: Spacing.md) {
                     // Recall Alert Card (safety-critical, shown above everything)
-                    if !appState.currentRecalls.isEmpty {
-                        RecallAlertCard(recalls: appState.currentRecalls)
-                            .revealAnimation(delay: 0.05)
+                    if let vehicle = vehicle, !visibleRecalls.isEmpty {
+                        RecallAlertCard(
+                            vehicle: vehicle,
+                            recalls: visibleRecalls,
+                            allRecalls: appState.currentRecalls,
+                            appState: appState
+                        )
+                        .revealAnimation(delay: 0.05)
                     }
 
                     // Quick Specs Card

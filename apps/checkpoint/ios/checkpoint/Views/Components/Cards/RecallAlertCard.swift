@@ -2,318 +2,194 @@
 //  RecallAlertCard.swift
 //  checkpoint
 //
-//  Safety recall alert card for the Home tab
-//  Shows NHTSA recall information with urgency styling
+//  Compact tap-target on the Home tab. Shows worst severity + count and
+//  opens the full `RecallSheetView` on tap. Long-press exposes a snooze
+//  menu (disabled when any recall is parkIt — safety override).
 //
 
 import SwiftUI
+import SwiftData
 
 struct RecallAlertCard: View {
-    /// Max recalls shown inline before prompting "view all"
-    private static let inlineLimit = 3
+    let vehicle: Vehicle
+    /// Recalls that pass the visibility filter — drives the label and snooze count.
     let recalls: [RecallInfo]
+    /// Full recall set (including resolved). Drives sheet contents so the
+    /// "Show resolved" toggle has data to surface.
+    let allRecalls: [RecallInfo]
+    /// Passed in by parent (matches HomeTab's pattern of forwarding AppState
+    /// instead of relying on environment injection that isn't set up here).
+    let appState: AppState
 
-    @State private var isExpanded = false
-    @State private var showAllRecalls = false
+    @Environment(\.modelContext) private var modelContext
+    @State private var showSheet = false
+    @State private var pendingAddServicePrefill: SeasonalPrefill?
 
-    private var hasParkItRecall: Bool {
-        recalls.contains { $0.parkIt }
-    }
+    private var worstSeverity: RecallSeverity { recalls.worstSeverity }
+    private var hasParkIt: Bool { worstSeverity == .parkIt }
 
     private var countText: String {
         let count = recalls.count
-        return "\(count) Open Recall\(count == 1 ? "" : "s")"
+        return "\(count) \(count == 1 ? "RECALL" : "RECALLS")"
     }
 
-    private var inlineRecalls: [RecallInfo] {
-        Array(recalls.prefix(RecallAlertCard.inlineLimit))
-    }
-
-    private var hasOverflow: Bool {
-        recalls.count > RecallAlertCard.inlineLimit
-    }
+    private var severityLabel: String { worstSeverity.label.uppercased() }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Header
-            Button {
-                HapticService.shared.tabChanged()
-                withAnimation(.easeOut(duration: Theme.animationMedium)) {
-                    isExpanded.toggle()
-                }
-            } label: {
-                HStack(spacing: Spacing.sm) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.system(size: 16, weight: .bold))
+        Button {
+            HapticService.shared.tabChanged()
+            showSheet = true
+        } label: {
+            HStack(spacing: Spacing.sm) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(Theme.statusOverdue)
+
+                if hasParkIt {
+                    Text("PARK IT")
+                        .font(.brutalistLabel)
                         .foregroundStyle(Theme.statusOverdue)
+                        .tracking(2)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Theme.statusOverdue.opacity(0.2))
+                }
 
-                    if hasParkItRecall {
-                        Text("PARK IT")
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.statusOverdue)
-                            .tracking(2)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Theme.statusOverdue.opacity(0.2))
-                    }
-
-                    Text(countText.uppercased())
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(severityLabel)
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.statusOverdue)
                         .tracking(1.5)
-
-                    Spacer()
-
-                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(Theme.statusOverdue)
+                    Text(countText)
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.statusOverdue.opacity(0.8))
+                        .tracking(1)
                 }
-                .padding(Spacing.md)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(isExpanded ? "Collapse recall details" : "Expand recall details, \(countText)")
-
-            // Expanded recall list (capped at inlineLimit)
-            if isExpanded {
-                VStack(spacing: 0) {
-                    Rectangle()
-                        .fill(Theme.statusOverdue.opacity(0.3))
-                        .frame(height: 1)
-
-                    VStack(spacing: 0) {
-                        ForEach(Array(inlineRecalls.enumerated()), id: \.element.id) { index, recall in
-                            recallRow(recall)
-
-                            if index < inlineRecalls.count - 1 {
-                                Rectangle()
-                                    .fill(Theme.statusOverdue.opacity(0.15))
-                                    .frame(height: 1)
-                                    .padding(.leading, Spacing.md)
-                            }
-                        }
-                    }
-
-                    // "View all" button when there are more recalls than shown
-                    if hasOverflow {
-                        Rectangle()
-                            .fill(Theme.statusOverdue.opacity(0.3))
-                            .frame(height: 1)
-
-                        Button {
-                            showAllRecalls = true
-                        } label: {
-                            HStack {
-                                Text("VIEW ALL \(recalls.count) RECALLS")
-                                    .font(.brutalistLabel)
-                                    .foregroundStyle(Theme.statusOverdue)
-                                    .tracking(1.5)
-                                Spacer()
-                                Image(systemName: "arrow.up.right")
-                                    .font(.system(size: 11, weight: .bold))
-                                    .foregroundStyle(Theme.statusOverdue)
-                            }
-                            .frame(minHeight: 44)
-                            .padding(.horizontal, Spacing.md)
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("View all \(recalls.count) recalls")
-                    }
-
-                    // Collapse footer
-                    Rectangle()
-                        .fill(Theme.statusOverdue.opacity(0.3))
-                        .frame(height: 1)
-
-                    Button {
-                        HapticService.shared.tabChanged()
-                        withAnimation(.easeOut(duration: Theme.animationMedium)) {
-                            isExpanded = false
-                        }
-                    } label: {
-                        HStack {
-                            Spacer()
-                            Image(systemName: "chevron.up")
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundStyle(Theme.statusOverdue.opacity(0.6))
-                            Text("COLLAPSE")
-                                .font(.brutalistLabel)
-                                .foregroundStyle(Theme.statusOverdue.opacity(0.6))
-                                .tracking(1.5)
-                            Spacer()
-                        }
-                        .frame(minHeight: 44)
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("Collapse recall details")
-                }
-                .transition(.opacity)
-            }
-        }
-        .background(Theme.statusOverdue.opacity(0.08))
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.statusOverdue.opacity(0.5), lineWidth: Theme.borderWidth)
-        )
-        .sheet(isPresented: $showAllRecalls) {
-            RecallDetailSheet(recalls: recalls)
-        }
-    }
-
-    // MARK: - Recall Row
-
-    private func recallRow(_ recall: RecallInfo) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            // Component
-            HStack(spacing: Spacing.xs) {
-                Text("COMPONENT")
-                    .font(.brutalistLabel)
-                    .foregroundStyle(Theme.textTertiary)
-                    .tracking(1)
-
-                if recall.parkIt {
-                    Image(systemName: "exclamationmark.octagon.fill")
-                        .font(.system(size: 10))
-                        .foregroundStyle(Theme.statusOverdue)
-                }
-            }
-
-            Text(recall.component)
-                .font(.brutalistBody)
-                .foregroundStyle(Theme.textPrimary)
-
-            // Summary
-            Text("SUMMARY")
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1)
-                .padding(.top, Spacing.xs)
-
-            Text(recall.summary)
-                .font(.brutalistSecondary)
-                .foregroundStyle(Theme.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-
-            // Consequence
-            if !recall.consequence.isEmpty {
-                Text("RISK")
-                    .font(.brutalistLabel)
-                    .foregroundStyle(Theme.statusOverdue)
-                    .tracking(1)
-                    .padding(.top, Spacing.xs)
-
-                Text(recall.consequence)
-                    .font(.brutalistSecondary)
-                    .foregroundStyle(Theme.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-
-            // Remedy
-            if !recall.remedy.isEmpty {
-                Text("REMEDY")
-                    .font(.brutalistLabel)
-                    .foregroundStyle(Theme.statusGood)
-                    .tracking(1)
-                    .padding(.top, Spacing.xs)
-
-                Text(recall.remedy)
-                    .font(.brutalistSecondary)
-                    .foregroundStyle(Theme.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-
-            // Campaign number & date
-            HStack {
-                Text("NHTSA #\(recall.campaignNumber)")
-                    .font(.brutalistLabel)
-                    .foregroundStyle(Theme.textTertiary)
-                    .tracking(1)
 
                 Spacer()
 
-                if !recall.reportDate.isEmpty {
-                    Text(recall.reportDate)
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
-                        .tracking(1)
-                }
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(Theme.statusOverdue)
             }
-            .padding(.top, Spacing.xs)
+            .padding(Spacing.md)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .recallCardStyle()
+        .contextMenu { snoozeMenu }
+        .accessibilityLabel("\(severityLabel), \(countText). Tap for details.")
+        .sheet(isPresented: $showSheet, onDismiss: presentPendingAddServiceIfNeeded) {
+            RecallSheetView(
+                vehicle: vehicle,
+                recalls: allRecalls,
+                onRequestAddPlannedService: { pendingAddServicePrefill = $0 }
+            )
+        }
+    }
 
-            // NHTSA link
-            if let nhtsaURL = URL(string: "https://www.nhtsa.gov/recalls") {
-                Link(destination: nhtsaURL) {
-                    HStack(spacing: Spacing.xs) {
-                        Text("VIEW ON NHTSA")
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.accent)
-                            .tracking(1.5)
+    // MARK: - Snooze menu
 
-                        Image(systemName: "arrow.up.right")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundStyle(Theme.accent)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Spacing.sm)
-                    .background(Theme.accent.opacity(0.1))
-                    .contentShape(Rectangle())
-                }
-                .padding(.top, Spacing.sm)
-                .accessibilityLabel("View recall \(recall.campaignNumber) on NHTSA website")
+    @ViewBuilder
+    private var snoozeMenu: some View {
+        Section(L10n.recallSnoozeMenuTitle) {
+            Button {
+                snooze(days: 7)
+            } label: {
+                Label(L10n.recallSnooze7Days, systemImage: "clock")
+            }
+            .disabled(hasParkIt)
+
+            Button {
+                snooze(days: 30)
+            } label: {
+                Label(L10n.recallSnooze30Days, systemImage: "clock.badge")
+            }
+            .disabled(hasParkIt)
+
+            if hasParkIt {
+                Text(L10n.recallSnoozeDisabledParkIt)
             }
         }
-        .padding(Spacing.md)
+    }
+
+    /// Fires after the recall sheet finishes its dismiss animation, so a queued
+    /// AddServiceView can present cleanly without iOS's only-one-sheet-at-a-time race.
+    private func presentPendingAddServiceIfNeeded() {
+        guard let prefill = pendingAddServicePrefill else { return }
+        appState.seasonalPrefill = prefill
+        appState.addServiceMode = .remind
+        appState.showAddService = true
+        pendingAddServicePrefill = nil
+    }
+
+    private func snooze(days: Int) {
+        let store = RecallAckStore(context: modelContext)
+        let count = store.snooze(recalls, days: days, vehicleID: vehicle.id)
+        if count > 0 {
+            AnalyticsService.shared.capture(.recallSnoozed(days: days, recallCount: count))
+        }
     }
 }
 
 // MARK: - Preview
 
 #Preview {
-    ZStack {
+    let container = try! ModelContainer(
+        for: Vehicle.self, RecallAcknowledgment.self,
+        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+    )
+    let vehicle = Vehicle(name: "Civic", make: "Honda", model: "Civic", year: 2022, currentMileage: 30_000)
+    container.mainContext.insert(vehicle)
+    let previewAppState = AppState()
+
+    let parkItRecalls: [RecallInfo] = [
+        RecallInfo(
+            campaignNumber: "24V123",
+            component: "AIR BAGS: FRONTAL",
+            summary: "The front passenger air bag inflator may explode during deployment.",
+            consequence: "An exploding inflator may result in sharp metal fragments striking the driver or passengers.",
+            remedy: "Dealers will replace the front passenger air bag inflator, free of charge.",
+            reportDate: "01/15/2024",
+            parkIt: true,
+            parkOutside: true
+        ),
+        RecallInfo(
+            campaignNumber: "23V456",
+            component: "FUEL SYSTEM, GASOLINE: DELIVERY: FUEL PUMP",
+            summary: "The fuel pump may fail causing the engine to stall.",
+            consequence: "An engine stall while driving increases the risk of a crash.",
+            remedy: "Dealers will replace the fuel pump assembly, free of charge.",
+            reportDate: "06/20/2023",
+            parkIt: false,
+            parkOutside: false
+        )
+    ]
+
+    let openOnlyRecalls: [RecallInfo] = [
+        RecallInfo(
+            campaignNumber: "24V789",
+            component: "STEERING",
+            summary: "The steering column may detach from the steering gear.",
+            consequence: "Loss of steering control increases the risk of a crash.",
+            remedy: "Dealers will inspect and tighten the steering column, free of charge.",
+            reportDate: "03/10/2024",
+            parkIt: false,
+            parkOutside: false
+        )
+    ]
+
+    return ZStack {
         AtmosphericBackground()
 
         ScrollView {
             VStack(spacing: Spacing.lg) {
-                RecallAlertCard(recalls: [
-                    RecallInfo(
-                        campaignNumber: "24V123",
-                        component: "AIR BAGS: FRONTAL",
-                        summary: "The front passenger air bag inflator may explode during deployment.",
-                        consequence: "An exploding inflator may result in sharp metal fragments striking the driver or passengers.",
-                        remedy: "Dealers will replace the front passenger air bag inflator, free of charge.",
-                        reportDate: "01/15/2024",
-                        parkIt: true,
-                        parkOutside: true
-                    ),
-                    RecallInfo(
-                        campaignNumber: "23V456",
-                        component: "FUEL SYSTEM, GASOLINE: DELIVERY: FUEL PUMP",
-                        summary: "The fuel pump may fail causing the engine to stall.",
-                        consequence: "An engine stall while driving increases the risk of a crash.",
-                        remedy: "Dealers will replace the fuel pump assembly, free of charge.",
-                        reportDate: "06/20/2023",
-                        parkIt: false,
-                        parkOutside: false
-                    )
-                ])
-
-                RecallAlertCard(recalls: [
-                    RecallInfo(
-                        campaignNumber: "24V789",
-                        component: "STEERING",
-                        summary: "The steering column may detach from the steering gear.",
-                        consequence: "Loss of steering control increases the risk of a crash.",
-                        remedy: "Dealers will inspect and tighten the steering column, free of charge.",
-                        reportDate: "03/10/2024",
-                        parkIt: false,
-                        parkOutside: false
-                    )
-                ])
+                RecallAlertCard(vehicle: vehicle, recalls: parkItRecalls, allRecalls: parkItRecalls, appState: previewAppState)
+                RecallAlertCard(vehicle: vehicle, recalls: openOnlyRecalls, allRecalls: openOnlyRecalls, appState: previewAppState)
             }
             .padding(Spacing.screenHorizontal)
         }
     }
+    .modelContainer(container)
     .preferredColorScheme(.dark)
 }

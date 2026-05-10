@@ -34,6 +34,7 @@ struct checkpointApp: App {
             ServicePreset.self,
             MileageSnapshot.self,
             ServiceAttachment.self,
+            RecallAcknowledgment.self,
         ])
 
         let storeURL = AppGroupConstants.iPhoneWidgetContainerURL?.appendingPathComponent("checkpoint.store")

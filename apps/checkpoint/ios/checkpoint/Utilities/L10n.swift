@@ -75,6 +75,7 @@ enum L10n {
     static var settingsWidgets: String { localized("settings.widgets") }
     static var settingsServiceBundling: String { localized("settings.service_bundling") }
     static var settingsSmartFeatures: String { localized("settings.smart_features") }
+    static var settingsSafety: String { localized("settings.safety") }
     static var settingsPrivacy: String { localized("settings.privacy") }
     static var settingsDistanceUnit: String { localized("settings.distance_unit") }
     static var settingsMileageEstimation: String { localized("settings.mileage_estimation") }
@@ -137,6 +138,54 @@ enum L10n {
     static var recallRetry: String { localized("recall.retry") }
     static func recallLastChecked(_ timeAgo: String) -> String {
         String(format: localized("recall.last_checked"), timeAgo)
+    }
+
+    // Severity bucket labels (sheet section headers + compact card label).
+    static var recallSeverityDoNotDrive: String { localized("recall.severity.do_not_drive") }
+    static var recallSeverityParkOutside: String { localized("recall.severity.park_outside") }
+    static var recallSeverityOpen: String { localized("recall.severity.open") }
+
+    // Sheet chrome.
+    static var recallSheetTitleSingular: String { localized("recall.sheet.title_singular") }
+    static func recallSheetTitlePlural(_ count: Int) -> String {
+        String(format: localized("recall.sheet.title_plural"), count)
+    }
+    static var recallSectionResolved: String { localized("recall.section.resolved") }
+    static var recallToggleShowResolved: String { localized("recall.toggle.show_resolved") }
+    static var recallEmptyAllClear: String { localized("recall.empty.all_clear") }
+    static var recallEmptyToggleHint: String { localized("recall.empty.toggle_hint") }
+
+    // Per-recall actions.
+    static func recallActionFindDealer(_ make: String) -> String {
+        String(format: localized("recall.action.find_dealer"), make)
+    }
+    static var recallActionAddPlannedService: String { localized("recall.action.add_planned_service") }
+    static var recallActionViewNHTSA: String { localized("recall.action.view_nhtsa") }
+    static var recallActionMarkScheduled: String { localized("recall.action.mark_scheduled") }
+    static var recallActionMarkResolved: String { localized("recall.action.mark_resolved") }
+    static var recallActionReopen: String { localized("recall.action.reopen") }
+
+    // Snooze menu.
+    static var recallSnoozeMenuTitle: String { localized("recall.snooze.menu_title") }
+    static var recallSnooze7Days: String { localized("recall.snooze.7_days") }
+    static var recallSnooze30Days: String { localized("recall.snooze.30_days") }
+    static var recallSnoozeDisabledParkIt: String { localized("recall.snooze.disabled_park_it") }
+
+    // Status badges.
+    static var recallStatusScheduled: String { localized("recall.status.scheduled") }
+    static var recallStatusResolved: String { localized("recall.status.resolved") }
+
+    // Pre-fill copy when sending a recall to AddServiceView.
+    static func recallPlannedServiceName(_ component: String) -> String {
+        String(format: localized("recall.planned_service_name"), component)
+    }
+
+    // Settings entry for re-opening the recall sheet.
+    static var recallSettingsRowTitle: String { localized("recall.settings.row_title") }
+    static var recallSettingsNoneOnFile: String { localized("recall.settings.none_on_file") }
+    static func recallSettingsCount(_ count: Int) -> String {
+        let template = count == 1 ? localized("recall.settings.count_singular") : localized("recall.settings.count_plural")
+        return String(format: template, count)
     }
 
     // MARK: - Empty States

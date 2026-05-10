@@ -30,6 +30,9 @@ struct SettingsView: View {
                         // REMINDERS — notification thresholds and seasonal alerts
                         remindersSection
 
+                        // SAFETY — recalls (per current vehicle)
+                        safetySection
+
                         // SMART FEATURES — service bundling
                         smartFeaturesSection
 
@@ -181,6 +184,43 @@ struct SettingsView: View {
             }
             .background(Theme.surfaceInstrument)
             .brutalistBorder()
+        }
+    }
+
+    // MARK: - Safety Section
+
+    @State private var showRecallSheet = false
+
+    private var safetySection: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            Text(L10n.settingsSafety)
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(2)
+
+            VStack(spacing: 0) {
+                let recalls = appState.currentRecalls
+                let hasRecalls = appState.selectedVehicle != nil && !recalls.isEmpty
+
+                Button {
+                    showRecallSheet = true
+                } label: {
+                    settingRow(
+                        title: L10n.recallSettingsRowTitle,
+                        value: hasRecalls ? L10n.recallSettingsCount(recalls.count) : L10n.recallSettingsNoneOnFile
+                    )
+                }
+                .buttonStyle(.plain)
+                .disabled(!hasRecalls)
+                .opacity(hasRecalls ? 1.0 : 0.5)
+            }
+            .background(Theme.surfaceInstrument)
+            .brutalistBorder()
+        }
+        .sheet(isPresented: $showRecallSheet) {
+            if let vehicle = appState.selectedVehicle {
+                RecallSheetView(vehicle: vehicle, recalls: appState.currentRecalls)
+            }
         }
     }
 
