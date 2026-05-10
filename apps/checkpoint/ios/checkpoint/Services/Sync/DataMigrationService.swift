@@ -32,21 +32,13 @@ final class DataMigrationService {
             return false
         }
 
-        // Check if old store file exists
-        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppGroupConstants.iPhoneWidget) else {
-            return false
-        }
-
-        let oldStoreURL = containerURL.appendingPathComponent("checkpoint.store")
+        guard let oldStoreURL = oldStoreURL() else { return false }
         return FileManager.default.fileExists(atPath: oldStoreURL.path)
     }
 
     /// Get the URL of the old App Group store
     func oldStoreURL() -> URL? {
-        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppGroupConstants.iPhoneWidget) else {
-            return nil
-        }
-        return containerURL.appendingPathComponent("checkpoint.store")
+        AppGroupConstants.iPhoneWidgetContainerURL?.appendingPathComponent("checkpoint.store")
     }
 
     // MARK: - Migration

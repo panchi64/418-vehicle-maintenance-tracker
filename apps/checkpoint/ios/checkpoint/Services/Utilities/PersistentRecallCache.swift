@@ -2,8 +2,7 @@
 //  PersistentRecallCache.swift
 //  checkpoint
 //
-//  Disk-backed cache for NHTSA recall lookups so users on metered data
-//  plans don't re-fetch on every cold launch.
+//  Disk-backed cache for NHTSA recall lookups across launches.
 //
 
 import Foundation
@@ -11,52 +10,61 @@ import OSLog
 
 private let cacheLogger = Logger(subsystem: "com.418-studio.checkpoint", category: "PersistentRecallCache")
 
-struct PersistentRecallCacheEntry: Codable, Sendable {
-    let recalls: [RecallInfo]
-    let timestamp: Date
-}
+actor PersistentRecallCache {
+    static let shared = PersistentRecallCache()
 
-enum PersistentRecallCache {
     private static let fileName = "recalls-cache.json"
 
-    private static var fileURL: URL? {
-        FileManager.default
-            .containerURL(forSecurityApplicationGroupIdentifier: AppGroupConstants.iPhoneWidget)?
-            .appendingPathComponent(fileName)
+    private var store: [String: CacheEntry<[RecallInfo]>]?
+
+    private var fileURL: URL? {
+        AppGroupConstants.iPhoneWidgetContainerURL?.appendingPathComponent(Self.fileName)
     }
 
-    static func read(key: String) -> PersistentRecallCacheEntry? {
-        readAll()[key]
+    func read(key: String) -> CacheEntry<[RecallInfo]>? {
+        loadIfNeeded()[key]
     }
 
-    static func write(key: String, recalls: [RecallInfo], timestamp: Date = .now) {
-        var store = readAll()
-        store[key] = PersistentRecallCacheEntry(recalls: recalls, timestamp: timestamp)
-        writeAll(store)
+    func write(key: String, recalls: [RecallInfo], timestamp: Date = .now) {
+        var current = loadIfNeeded()
+        current[key] = CacheEntry(data: recalls, timestamp: timestamp)
+        store = current
+        flush(current)
     }
 
-    static func clear() {
-        guard let url = fileURL else { return }
-        try? FileManager.default.removeItem(at: url)
+    func clear() {
+        store = [:]
+        if let url = fileURL {
+            try? FileManager.default.removeItem(at: url)
+        }
     }
 
-    private static func readAll() -> [String: PersistentRecallCacheEntry] {
-        guard let url = fileURL,
-              FileManager.default.fileExists(atPath: url.path) else { return [:] }
+    private func loadIfNeeded() -> [String: CacheEntry<[RecallInfo]>] {
+        if let store { return store }
+        guard let url = fileURL else {
+            store = [:]
+            return [:]
+        }
         do {
             let data = try Data(contentsOf: url)
-            return try JSONDecoder().decode([String: PersistentRecallCacheEntry].self, from: data)
+            let decoded = try JSONDecoder().decode([String: CacheEntry<[RecallInfo]>].self, from: data)
+            store = decoded
+            return decoded
+        } catch CocoaError.fileReadNoSuchFile {
+            store = [:]
+            return [:]
         } catch {
-            cacheLogger.warning("Failed to read recalls cache: \(error.localizedDescription); resetting.")
+            cacheLogger.warning("Recalls cache unreadable, resetting: \(error.localizedDescription)")
             try? FileManager.default.removeItem(at: url)
+            store = [:]
             return [:]
         }
     }
 
-    private static func writeAll(_ store: [String: PersistentRecallCacheEntry]) {
+    private func flush(_ snapshot: [String: CacheEntry<[RecallInfo]>]) {
         guard let url = fileURL else { return }
         do {
-            let data = try JSONEncoder().encode(store)
+            let data = try JSONEncoder().encode(snapshot)
             try data.write(to: url, options: .atomic)
         } catch {
             cacheLogger.error("Failed to write recalls cache: \(error.localizedDescription)")

@@ -33,8 +33,9 @@ enum Formatters {
     // MARK: - Date Parsers
     //
     // For parsing fixed-format date strings from external sources (NHTSA API,
-    // CSV imports). Locale is en_US_POSIX so user locale doesn't affect parsing,
-    // and time zone is UTC so dates round-trip without DST drift.
+    // CSV imports). Locale is en_US_POSIX so user locale doesn't affect parsing.
+    // Time zone is left as the system default so parsed dates land at local
+    // midnight — important for CSV-imported service dates the user typed.
 
     /// `MM/dd/yyyy` (e.g. "01/15/2024")
     nonisolated static let dateParserSlashMDY = makeDateParser("MM/dd/yyyy")
@@ -55,7 +56,6 @@ enum Formatters {
         let formatter = DateFormatter()
         formatter.dateFormat = format
         formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = TimeZone(identifier: "UTC")
         return formatter
     }
 

@@ -127,7 +127,7 @@ private nonisolated func decodeNHTSAJSON<T: Decodable>(_ type: T.Type, from data
 
 // MARK: - Cache Entry
 
-private nonisolated struct CacheEntry<T: Sendable>: Sendable {
+struct CacheEntry<T: Sendable>: Sendable {
     let data: T
     let timestamp: Date
 
@@ -135,6 +135,8 @@ private nonisolated struct CacheEntry<T: Sendable>: Sendable {
         Date().timeIntervalSince(timestamp) < ttl
     }
 }
+
+extension CacheEntry: Codable where T: Codable {}
 
 // MARK: - Service
 
@@ -156,9 +158,10 @@ actor NHTSAService {
     }
 
     /// Clears all cached data (useful for testing or manual refresh)
-    func clearCache() {
+    func clearCache() async {
         vinCache.removeAll()
         recallsCache.removeAll()
+        await PersistentRecallCache.shared.clear()
     }
 
     // MARK: - VIN Validation
@@ -267,24 +270,24 @@ actor NHTSAService {
             return cached.data
         }
 
-        if let persisted = PersistentRecallCache.read(key: cacheKey),
-           Date().timeIntervalSince(persisted.timestamp) < recallsCacheTTL {
-            recallsCache[cacheKey] = CacheEntry(data: persisted.recalls, timestamp: persisted.timestamp)
-            return persisted.recalls
+        if let persisted = await PersistentRecallCache.shared.read(key: cacheKey),
+           persisted.isValid(ttl: recallsCacheTTL) {
+            recallsCache[cacheKey] = persisted
+            return persisted.data
         }
 
         do {
             let recalls = try await fetchRecallsFromNetwork(make: make, model: model, year: year)
-            let now = Date()
-            recallsCache[cacheKey] = CacheEntry(data: recalls, timestamp: now)
-            PersistentRecallCache.write(key: cacheKey, recalls: recalls, timestamp: now)
+            let entry = CacheEntry(data: recalls, timestamp: Date())
+            recallsCache[cacheKey] = entry
+            await PersistentRecallCache.shared.write(key: cacheKey, recalls: recalls, timestamp: entry.timestamp)
             return recalls
         } catch {
             // Fall back to any persisted data on network failure so metered-data users
             // don't lose their recall list when offline.
-            if let stale = PersistentRecallCache.read(key: cacheKey) {
-                recallsCache[cacheKey] = CacheEntry(data: stale.recalls, timestamp: stale.timestamp)
-                return stale.recalls
+            if let stale = await PersistentRecallCache.shared.read(key: cacheKey) {
+                recallsCache[cacheKey] = stale
+                return stale.data
             }
             throw error
         }
@@ -327,9 +330,14 @@ actor NHTSAService {
             throw NHTSAError.decodingFailed
         }
 
-        return recallsResponse.results.map { result in
-            RecallInfo(
-                campaignNumber: result.NHTSACampaignNumber ?? "",
+        return recallsResponse.results.compactMap { result in
+            // Drop entries without a campaign number — id and cache key both rely on it,
+            // and SwiftUI ForEach/Set would collapse multiple empty-id rows into one.
+            guard let campaignNumber = result.NHTSACampaignNumber, !campaignNumber.isEmpty else {
+                return nil
+            }
+            return RecallInfo(
+                campaignNumber: campaignNumber,
                 component: result.Component ?? "",
                 summary: result.Summary ?? "",
                 consequence: result.Consequence ?? "",

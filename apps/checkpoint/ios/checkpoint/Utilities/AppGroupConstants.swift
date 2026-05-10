@@ -13,4 +13,10 @@ enum AppGroupConstants {
 
     /// App Group shared between the Watch app and its widget extension
     nonisolated static let watchApp = "group.com.418-studio.checkpoint.watch"
+
+    /// Filesystem container URL for the iPhone↔widget App Group, or nil if entitlements
+    /// don't grant access (e.g. test bundles).
+    nonisolated static var iPhoneWidgetContainerURL: URL? {
+        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: iPhoneWidget)
+    }
 }

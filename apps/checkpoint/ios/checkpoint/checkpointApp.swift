@@ -36,9 +36,7 @@ struct checkpointApp: App {
             ServiceAttachment.self,
         ])
 
-        // Use App Group container for shared access with widget
-        let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppGroupConstants.iPhoneWidget)
-        let storeURL = containerURL?.appendingPathComponent("checkpoint.store")
+        let storeURL = AppGroupConstants.iPhoneWidgetContainerURL?.appendingPathComponent("checkpoint.store")
 
         if syncEnabled {
             // Try CloudKit-enabled configuration first
