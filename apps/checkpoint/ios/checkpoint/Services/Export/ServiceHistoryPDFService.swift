@@ -337,8 +337,10 @@ final class ServiceHistoryPDFService {
         currentY = drawDivider(at: currentY, in: context)
         currentY += Layout.itemSpacing
 
-        // Calculate total
-        let totalCost = serviceLogs.reduce(Decimal.zero) { $0 + ($1.cost ?? 0) }
+        // Calculate total. Uses honestTotalCost() so a Service Visit holding
+        // four services contributes its real total once, not four divided
+        // shares (the original bug).
+        let totalCost = serviceLogs.honestTotalCost()
         let totalFormatted = Formatters.currency.string(from: totalCost as NSDecimalNumber) ?? "$0.00"
 
         // Total spent row - more compact

@@ -297,6 +297,11 @@ struct ContentView: View {
                 ServiceLogDetailView(log: log)
             }
         }
+        .sheet(item: $appState.selectedServiceVisit) { visit in
+            NavigationStack {
+                ServiceVisitDetailView(visit: visit)
+            }
+        }
         .sheet(isPresented: $appState.showEditVehicle) {
             if let vehicle = currentVehicle {
                 EditVehicleView(vehicle: vehicle)

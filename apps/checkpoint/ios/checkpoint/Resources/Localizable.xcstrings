@@ -627,15 +627,15 @@
     "settings.bundle_suggestions" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Bundle Suggestions" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sugerencias para agrupar" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Service Visit Suggestions" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sugerencias de visita al taller" } }
       }
     },
     "settings.bundle_suggestions_desc" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Suggest bundling services due around the same time" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sugerir agrupar servicios que vencen por la misma fecha" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Suggest grouping services due around the same time into a single Service Visit" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sugerir agrupar los servicios que vencen por la misma fecha en una sola visita al taller" } }
       }
     },
     "settings.days_window" : {

@@ -23,14 +23,15 @@ struct TipModalView: View {
     private var storeManager: StoreManager { StoreManager.shared }
 
     private var stats: TipPromptStats {
-        let costs = serviceLogs.compactMap(\.cost)
-        let totalCost = costs.reduce(Decimal.zero, +)
+        // Use visit-aware totals: visits count once, standalone logs count once.
+        let totalCost = serviceLogs.honestTotalCost()
+        let eventCount = serviceLogs.distinctVisitCount()
         let oldestLog = serviceLogs.map(\.performedDate).min()
         let selectedVehicle = appState.selectedVehicle
 
-        // Compute average cost per service
-        let averageCost: Decimal? = costs.count >= 2
-            ? totalCost / Decimal(costs.count)
+        // Average cost per money event (visit or standalone log).
+        let averageCost: Decimal? = eventCount >= 2
+            ? totalCost / Decimal(eventCount)
             : nil
 
         // Monthly spend: total cost / months of history

@@ -27,6 +27,7 @@ final class AppState {
     var unlockedTheme: ThemeDefinition?
     var selectedService: Service?
     var selectedServiceLog: ServiceLog?
+    var selectedServiceVisit: ServiceVisit?
 
     // MARK: - Cluster States
 

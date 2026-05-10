@@ -30,7 +30,7 @@ struct ServiceClusterCard: View {
                     .statusGlow(color: Theme.accent, isActive: isUrgent)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("BUNDLE OPPORTUNITY")
+                    Text("SERVICE VISIT OPPORTUNITY")
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.accent)
                         .tracking(1.5)
@@ -54,7 +54,7 @@ struct ServiceClusterCard: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Dismiss bundle suggestion")
+                .accessibilityLabel("Dismiss service visit suggestion")
             }
             .padding(.bottom, Spacing.md)
 
@@ -127,7 +127,7 @@ struct ServiceClusterCard: View {
         .glassCardStyle(intensity: .subtle)
         .tappableCard(action: onTap)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Bundle opportunity, \(cluster.serviceCount) services due soon")
+        .accessibilityLabel("Service visit opportunity, \(cluster.serviceCount) services due soon")
         .accessibilityHint("Tap to view details, or dismiss")
     }
 }
