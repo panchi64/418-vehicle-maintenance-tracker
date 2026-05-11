@@ -82,11 +82,7 @@ struct MileageUpdateSheet: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        if let mileage = newMileage, mileage > 0 {
-                            HapticService.shared.success()
-                            onSave(mileage)
-                            dismiss()
-                        }
+                        commit(newMileage ?? 0)
                     }
                     .toolbarButtonStyle(isDisabled: (newMileage ?? 0) <= 0 || isProcessingOCR)
                     .disabled((newMileage ?? 0) <= 0 || isProcessingOCR)
@@ -110,9 +106,7 @@ struct MileageUpdateSheet: View {
                 OCRConfirmationView(
                     extractedMileage: result.mileage,
                     confidence: result.confidence,
-                    onConfirm: { mileage in
-                        newMileage = mileage
-                    },
+                    onConfirm: commit,
                     currentMileage: vehicle.currentMileage,
                     detectedUnit: result.detectedUnit,
                     rawText: result.rawText,
@@ -358,6 +352,15 @@ struct MileageUpdateSheet: View {
         .frame(maxWidth: .infinity)
         .background(Theme.surfaceInstrument)
         .brutalistBorder()
+    }
+
+    // MARK: - Commit
+
+    private func commit(_ mileage: Int) {
+        guard mileage > 0 else { return }
+        HapticService.shared.success()
+        onSave(mileage)
+        dismiss()
     }
 
     // MARK: - OCR Processing

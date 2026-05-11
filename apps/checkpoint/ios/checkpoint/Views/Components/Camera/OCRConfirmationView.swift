@@ -34,11 +34,20 @@ struct OCRConfirmationView: View {
     /// Cropped image sent to Vision (for debugging)
     let debugImage: UIImage?
 
-    @State private var editedMileage: Int?
+    @State private var mileageText: String = ""
     @State private var sourceUnit: DistanceUnit = .miles
 
-    private var displayMileage: Int {
-        editedMileage ?? extractedMileage
+    private var parsedMileage: Int? {
+        Int(mileageText)
+    }
+
+    private var finalMileageInMiles: Int {
+        sourceUnit.toMiles(parsedMileage ?? extractedMileage)
+    }
+
+    private var isLowerThanCurrent: Bool {
+        guard currentMileage > 0, parsedMileage != nil else { return false }
+        return finalMileageInMiles < currentMileage
     }
 
     private var confidenceLevel: ConfidenceLevel {
@@ -49,17 +58,6 @@ struct OCRConfirmationView: View {
         } else {
             return .low
         }
-    }
-
-    /// Binding for the mileage text field (limited to 7 digits)
-    private var mileageTextBinding: Binding<String> {
-        Binding(
-            get: { String(editedMileage ?? extractedMileage) },
-            set: { newValue in
-                let filtered = String(newValue.filter { $0.isNumber }.prefix(7))
-                editedMileage = Int(filtered)
-            }
-        )
     }
 
     /// Initialize with optional detected unit (defaults to nil for backward compatibility)
@@ -91,9 +89,12 @@ struct OCRConfirmationView: View {
                     // Extracted mileage display (directly editable)
                     mileageDisplay
 
-                    // Warning for low confidence only (no confidence bar)
                     if confidenceLevel == .low {
-                        lowConfidenceWarning
+                        warningBanner("LOW CONFIDENCE - VERIFY VALUE")
+                    }
+
+                    if isLowerThanCurrent {
+                        warningBanner("BELOW PREVIOUS READING (\(previousMileageText))")
                     }
 
                     // Debug: raw OCR text and cropped image preview
@@ -123,6 +124,9 @@ struct OCRConfirmationView: View {
         .onAppear {
             // Initialize sourceUnit from detected unit or user preference
             sourceUnit = detectedUnit ?? DistanceSettings.shared.unit
+            if mileageText.isEmpty {
+                mileageText = String(extractedMileage)
+            }
         }
     }
 
@@ -136,12 +140,18 @@ struct OCRConfirmationView: View {
                 .tracking(2)
 
             HStack(alignment: .firstTextBaseline, spacing: Spacing.sm) {
-                TextField("", text: mileageTextBinding)
+                TextField("", text: $mileageText)
                     .font(.brutalistHero)
                     .foregroundStyle(Theme.accent)
                     .keyboardType(.numberPad)
                     .multilineTextAlignment(.center)
                     .fixedSize()
+                    .onChange(of: mileageText) { _, newValue in
+                        let filtered = String(newValue.filter(\.isNumber).prefix(7))
+                        if filtered != newValue {
+                            mileageText = filtered
+                        }
+                    }
 
                 // Unit toggle button
                 Button {
@@ -171,18 +181,26 @@ struct OCRConfirmationView: View {
         .brutalistBorder()
     }
 
-    // MARK: - Low Confidence Warning
+    // MARK: - Warning Banner
 
-    private var lowConfidenceWarning: some View {
+    private var previousMileageText: String {
+        "\(Formatters.mileageNumber(currentMileage)) \(DistanceSettings.shared.unit.uppercaseAbbreviation)"
+    }
+
+    private func warningBanner(_ text: String) -> some View {
         HStack(spacing: Spacing.sm) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(Theme.statusOverdue)
 
-            Text("LOW CONFIDENCE - VERIFY VALUE")
+            Text(text)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.statusOverdue)
                 .tracking(1)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+
+            Spacer(minLength: 0)
         }
         .padding(Spacing.md)
         .frame(maxWidth: .infinity)
@@ -244,16 +262,12 @@ struct OCRConfirmationView: View {
 
     private var actionButtons: some View {
         Button {
-            var finalMileage = editedMileage ?? extractedMileage
-            // Convert to miles if source was kilometers (internal storage is always miles)
-            if sourceUnit == .kilometers {
-                finalMileage = sourceUnit.toMiles(finalMileage)
-            }
+            let userValue = parsedMileage ?? extractedMileage
             AnalyticsService.shared.capture(.ocrConfirmed(
                 ocrType: .odometer,
-                valueEdited: editedMileage != nil
+                valueEdited: userValue != extractedMileage
             ))
-            onConfirm(finalMileage)
+            onConfirm(finalMileageInMiles)
             dismiss()
         } label: {
             Text("USE THIS")
