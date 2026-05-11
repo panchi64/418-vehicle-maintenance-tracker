@@ -28,6 +28,12 @@ struct MileageUpdateSheet: View {
     @State private var ocrDebugImage: UIImage?
     @State private var isProcessingOCR = false
     @State private var ocrError: String?
+    @State private var showLowerWarning = false
+
+    /// Delay before the "below previous reading" warning appears while typing.
+    /// Why: the comparison fires per keystroke, so "32500" would flash the
+    /// warning at "3" before the user finishes the number.
+    private static let lowerWarningDebounce: Duration = .milliseconds(600)
 
     /// Check if camera is available (requires physical device)
     private var isCameraAvailable: Bool {
@@ -44,6 +50,16 @@ struct MileageUpdateSheet: View {
         showEstimates && vehicle.isUsingEstimatedMileage && vehicle.estimatedMileage != nil
     }
 
+    /// True when the manually entered mileage is below the vehicle's last confirmed reading.
+    private var isLowerThanCurrent: Bool {
+        guard vehicle.currentMileage > 0, let entered = newMileage, entered > 0 else { return false }
+        return entered < vehicle.currentMileage
+    }
+
+    private var previousMileageText: String {
+        "\(Formatters.mileageNumber(vehicle.currentMileage)) \(DistanceSettings.shared.unit.uppercaseAbbreviation)"
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -56,6 +72,10 @@ struct MileageUpdateSheet: View {
 
                     // Mileage input with camera button
                     mileageInputSection
+
+                    if showLowerWarning {
+                        belowPreviousWarning
+                    }
 
                     // OCR error message
                     if let error = ocrError {
@@ -95,6 +115,19 @@ struct MileageUpdateSheet: View {
                 newMileage = prefilled
             }
             // Otherwise leave newMileage nil so user enters actual reading
+        }
+        .task(id: newMileage) {
+            guard isLowerThanCurrent else {
+                showLowerWarning = false
+                return
+            }
+            showLowerWarning = false
+            do {
+                try await Task.sleep(for: Self.lowerWarningDebounce)
+                showLowerWarning = true
+            } catch {
+                // Task cancelled because the user typed another digit — keep the warning hidden.
+            }
         }
         .fullScreenCover(isPresented: $showCamera) {
             OdometerCameraSheet { image in
@@ -299,6 +332,32 @@ struct MileageUpdateSheet: View {
                 let filtered = newValue.filter { $0.isNumber }
                 newMileage = Int(filtered)
             }
+        )
+    }
+
+    // MARK: - Below Previous Warning
+
+    private var belowPreviousWarning: some View {
+        HStack(spacing: Spacing.sm) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(Theme.statusOverdue)
+
+            Text("BELOW PREVIOUS READING (\(previousMileageText))")
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.statusOverdue)
+                .tracking(1)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+
+            Spacer(minLength: 0)
+        }
+        .padding(Spacing.md)
+        .frame(maxWidth: .infinity)
+        .background(Theme.statusOverdue.opacity(0.1))
+        .overlay(
+            Rectangle()
+                .strokeBorder(Theme.statusOverdue.opacity(0.5), lineWidth: Theme.borderWidth)
         )
     }
 
