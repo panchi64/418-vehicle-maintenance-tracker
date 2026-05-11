@@ -26,11 +26,9 @@ struct ServiceDetailView: View {
     }
 
     private var allAttachments: [ServiceAttachment] {
-        var seen = Set<ServiceAttachment.DedupKey>()
-        return (service.logs ?? [])
+        (service.logs ?? [])
             .flatMap { $0.attachments ?? [] }
             .sorted { $0.createdAt < $1.createdAt }
-            .filter { seen.insert($0.dedupKey).inserted }
     }
 
     var body: some View {

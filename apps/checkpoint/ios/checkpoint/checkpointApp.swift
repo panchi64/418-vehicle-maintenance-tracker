@@ -105,10 +105,6 @@ struct checkpointApp: App {
         let container = Self.createContainer(syncEnabled: syncEnabled)
         _modelContainer = State(initialValue: container)
 
-        // One-time backfill: convert legacy "divide cluster total by N services"
-        // logs into Service Visits. Idempotent and gated by a UserDefaults flag.
-        ServiceVisitBackfill.runIfNeeded(context: container.mainContext)
-
         // Initialize Watch connectivity
         WatchSessionService.shared.modelContainer = container
         WatchSessionService.shared.activate()
