@@ -114,7 +114,7 @@ struct CostsTab: View {
             }
             .revealAnimation(delay: 0.2)
 
-            if costPerMile == nil && !logsWithCosts.isEmpty {
+            if costPerMile == nil && !eventsWithCosts.isEmpty {
                 Text(L10n.emptyCostPerMileHint.uppercased())
                     .font(.brutalistLabel)
                     .foregroundStyle(Theme.textTertiary)
@@ -133,7 +133,7 @@ struct CostsTab: View {
         if cumulativeCostOverTime.count >= 3 {
             CumulativeCostChartCard(data: cumulativeCostOverTime)
                 .revealAnimation(delay: 0.22)
-        } else if !logsWithCosts.isEmpty {
+        } else if !eventsWithCosts.isEmpty {
             ChartPlaceholderCard(message: "3+ expenses to show spending pace")
                 .revealAnimation(delay: 0.22)
         }
@@ -166,7 +166,7 @@ struct CostsTab: View {
                 isStacked: categoryFilter == .all
             )
             .revealAnimation(delay: 0.28)
-        } else if logsWithCosts.count == 1 && periodFilter != .month {
+        } else if eventsWithCosts.count == 1 && periodFilter != .month {
             ChartPlaceholderCard(message: "Expenses in 2+ months to show trends")
                 .revealAnimation(delay: 0.28)
         }
@@ -176,18 +176,27 @@ struct CostsTab: View {
 
     @ViewBuilder
     private var expenseListSection: some View {
-        if !logsWithCosts.isEmpty {
+        if !eventsWithCosts.isEmpty {
             VStack(alignment: .leading, spacing: Spacing.sm) {
                 InstrumentSectionHeader(title: "Expenses")
 
                 VStack(spacing: 0) {
-                    ForEach(Array(logsWithCosts.enumerated()), id: \.element.id) { index, log in
-                        ExpenseRow(log: log) {
-                            appState.selectedServiceLog = log
+                    ForEach(Array(eventsWithCosts.enumerated()), id: \.element.id) { index, event in
+                        Group {
+                            switch event {
+                            case .standalone(let log):
+                                ExpenseRow(log: log) {
+                                    appState.selectedServiceLog = log
+                                }
+                            case .visit(let visit):
+                                VisitExpenseRow(visit: visit) {
+                                    appState.selectedServiceVisit = visit
+                                }
+                            }
                         }
                         .staggeredReveal(index: index, baseDelay: 0.25)
 
-                        if index < logsWithCosts.count - 1 {
+                        if index < eventsWithCosts.count - 1 {
                             ListDivider(leadingPadding: 28)
                         }
                     }
@@ -202,7 +211,7 @@ struct CostsTab: View {
 
     @ViewBuilder
     private var emptyStates: some View {
-        if vehicle != nil && logsWithCosts.isEmpty {
+        if vehicle != nil && eventsWithCosts.isEmpty {
             emptyState
                 .revealAnimation(delay: 0.2)
         }

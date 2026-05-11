@@ -19,6 +19,7 @@ struct ServiceDetailView: View {
     @State private var showMarkDoneSheet = false
     @State private var didCompleteMark = false
     @State private var selectedLog: ServiceLog?
+    @State private var selectedVisit: ServiceVisit?
 
     private var status: ServiceStatus {
         service.status(currentMileage: vehicle.currentMileage)
@@ -94,6 +95,11 @@ struct ServiceDetailView: View {
         .sheet(item: $selectedLog) { log in
             NavigationStack {
                 ServiceLogDetailView(log: log)
+            }
+        }
+        .sheet(item: $selectedVisit) { visit in
+            NavigationStack {
+                ServiceVisitDetailView(visit: visit)
             }
         }
     }
@@ -228,7 +234,11 @@ struct ServiceDetailView: View {
                 let sortedLogs = (service.logs ?? []).sorted(by: { $0.performedDate > $1.performedDate })
                 ForEach(sortedLogs) { log in
                     Button {
-                        selectedLog = log
+                        if let visit = log.visit {
+                            selectedVisit = visit
+                        } else {
+                            selectedLog = log
+                        }
                     } label: {
                         historyRow(log: log)
                     }
@@ -264,7 +274,12 @@ struct ServiceDetailView: View {
 
             Spacer()
 
-            if let cost = log.formattedCost {
+            if log.visit != nil {
+                Text("PART OF VISIT")
+                    .font(.brutalistLabel)
+                    .tracking(1)
+                    .foregroundStyle(Theme.textTertiary)
+            } else if let cost = log.formattedCost {
                 Text(cost)
                     .font(.brutalistBody)
                     .foregroundStyle(Theme.textSecondary)
@@ -278,8 +293,8 @@ struct ServiceDetailView: View {
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Service on \(formatDate(log.performedDate)), \(formatMileage(log.mileageAtService))")
-        .accessibilityValue(log.formattedCost ?? "No cost")
-        .accessibilityHint("Double tap to view details")
+        .accessibilityValue(log.visit != nil ? "Part of a Service Visit" : (log.formattedCost ?? "No cost"))
+        .accessibilityHint(log.visit != nil ? "Double tap to view the Service Visit" : "Double tap to view details")
     }
 
     // MARK: - Insights Section
@@ -310,14 +325,29 @@ struct ServiceDetailView: View {
                     }
                 }
 
-                // Average cost
-                let logsWithCost = sortedLogs.filter { $0.cost != nil }
-                if !logsWithCost.isEmpty {
-                    let totalCost = logsWithCost.compactMap { $0.cost }.reduce(Decimal.zero, +)
-                    let averageCost = totalCost / Decimal(logsWithCost.count)
+                // Average cost — only counts standalone logs (logs not bound to a
+                // Service Visit). For an un-itemized Service Visit, attributing
+                // the visit total to a single child service would be misleading,
+                // so those logs are excluded here. The visit total still counts
+                // in lifetime totals (see CostsTab analytics).
+                let standaloneLogsWithCost = sortedLogs.filter { $0.visit == nil && $0.cost != nil }
+                if !standaloneLogsWithCost.isEmpty {
+                    let totalCost = standaloneLogsWithCost.compactMap { $0.cost }.reduce(Decimal.zero, +)
+                    let averageCost = totalCost / Decimal(standaloneLogsWithCost.count)
                     BrutalistDataRow(
                         label: "Average Cost",
                         value: Formatters.currency.string(from: averageCost as NSDecimalNumber) ?? "$0",
+                        padding: Spacing.md
+                    )
+                    ListDivider(leadingPadding: 0)
+                }
+
+                // Appears in N Service Visits
+                let visitCount = Set(sortedLogs.compactMap { $0.visit?.id }).count
+                if visitCount > 0 {
+                    BrutalistDataRow(
+                        label: "Appears In Visits",
+                        value: "\(visitCount)",
                         padding: Spacing.md
                     )
                     ListDivider(leadingPadding: 0)

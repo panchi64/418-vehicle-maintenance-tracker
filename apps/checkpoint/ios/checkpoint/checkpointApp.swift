@@ -35,6 +35,8 @@ struct checkpointApp: App {
             MileageSnapshot.self,
             ServiceAttachment.self,
             RecallAcknowledgment.self,
+            ServiceVisit.self,
+            VisitLineItem.self,
         ])
 
         let storeURL = AppGroupConstants.iPhoneWidgetContainerURL?.appendingPathComponent("checkpoint.store")
@@ -102,6 +104,10 @@ struct checkpointApp: App {
         let syncEnabled = hasCompleted && userSyncPref
         let container = Self.createContainer(syncEnabled: syncEnabled)
         _modelContainer = State(initialValue: container)
+
+        // One-time backfill: convert legacy "divide cluster total by N services"
+        // logs into Service Visits. Idempotent and gated by a UserDefaults flag.
+        ServiceVisitBackfill.runIfNeeded(context: container.mainContext)
 
         // Initialize Watch connectivity
         WatchSessionService.shared.modelContainer = container

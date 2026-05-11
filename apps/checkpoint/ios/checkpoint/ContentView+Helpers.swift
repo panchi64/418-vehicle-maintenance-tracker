@@ -174,7 +174,7 @@ extension ContentView {
             let previousYearLogs = vehicleLogs.filter {
                 calendar.component(.year, from: $0.performedDate) == previousYear
             }
-            let previousYearCost = previousYearLogs.compactMap { $0.cost }.reduce(0, +)
+            let previousYearCost = previousYearLogs.honestTotalCost()
 
             // Schedule yearly roundup if there's data
             NotificationService.shared.scheduleYearlyRoundup(

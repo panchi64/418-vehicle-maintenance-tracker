@@ -39,7 +39,7 @@ struct ServiceClusterDetailSheet: View {
                     .padding(.vertical, Spacing.lg)
                 }
             }
-            .navigationTitle("Bundle Services")
+            .navigationTitle("Service Visit")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {

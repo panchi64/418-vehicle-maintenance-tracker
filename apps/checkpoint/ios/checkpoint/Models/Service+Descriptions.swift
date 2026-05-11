@@ -56,11 +56,13 @@ extension Service {
         return dueDescription  // Fallback to date-based for services without mileage tracking
     }
 
-    /// Average cost across all service logs with cost data
+    /// Average cost across all standalone service logs with cost data.
+    /// Logs bound to a Service Visit are excluded — attributing a visit's
+    /// shared total to a single child service would be misleading.
     func averageCost(from logs: [ServiceLog]) -> Decimal? {
-        let logsWithCost = logs.filter { $0.cost != nil }
-        guard !logsWithCost.isEmpty else { return nil }
-        let totalCost = logsWithCost.compactMap { $0.cost }.reduce(Decimal.zero, +)
-        return totalCost / Decimal(logsWithCost.count)
+        let standaloneLogsWithCost = logs.filter { $0.visit == nil && $0.cost != nil }
+        guard !standaloneLogsWithCost.isEmpty else { return nil }
+        let totalCost = standaloneLogsWithCost.compactMap { $0.cost }.reduce(Decimal.zero, +)
+        return totalCost / Decimal(standaloneLogsWithCost.count)
     }
 }

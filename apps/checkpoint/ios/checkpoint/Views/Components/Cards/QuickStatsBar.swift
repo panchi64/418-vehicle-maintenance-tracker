@@ -17,11 +17,12 @@ struct QuickStatsBar: View {
     }
 
     private var ytdSpend: Decimal {
-        ytdLogs.compactMap { $0.cost }.reduce(0, +)
+        ytdLogs.honestTotalCost()
     }
 
+    /// Distinct money events: visits counted once + standalone logs.
     private var ytdServicesCount: Int {
-        ytdLogs.count
+        ytdLogs.distinctVisitCount()
     }
 
     private var formattedYTDSpend: String {

@@ -24,19 +24,12 @@ struct YearlyCostRoundupCard: View {
         }
     }
 
-    private var logsWithCosts: [ServiceLog] {
-        yearLogs.filter { ($0.cost ?? 0) > 0 }
-    }
-
     private var totalSpent: Decimal {
-        logsWithCosts.compactMap { $0.cost }.reduce(0, +)
+        yearLogs.honestTotalCost()
     }
 
     private var previousYearTotal: Decimal {
-        previousYearLogs
-            .filter { ($0.cost ?? 0) > 0 }
-            .compactMap { $0.cost }
-            .reduce(0, +)
+        previousYearLogs.honestTotalCost()
     }
 
     private var yearOverYearChange: Double? {
@@ -46,8 +39,9 @@ struct YearlyCostRoundupCard: View {
         return ((current - previous) / previous) * 100
     }
 
+    /// Number of distinct money events: visits counted once + standalone logs.
     private var serviceCount: Int {
-        yearLogs.count
+        yearLogs.distinctVisitCount()
     }
 
     private var estimatedMilesDriven: Int? {
@@ -63,9 +57,23 @@ struct YearlyCostRoundupCard: View {
 
         var breakdown: [(CostCategory, Decimal, Double)] = []
 
+        // For each category, sum:
+        //   - standalone log costs in that category
+        //   - the visit's totalCost (once) when the visit's costCategory matches
         for category in CostCategory.allCases {
-            let categoryLogs = logsWithCosts.filter { $0.costCategory == category }
-            let amount = categoryLogs.compactMap { $0.cost }.reduce(0, +)
+            var amount: Decimal = 0
+            var seenVisitIDs: Set<UUID> = []
+            for log in yearLogs {
+                if let visit = log.visit {
+                    if seenVisitIDs.contains(visit.id) { continue }
+                    seenVisitIDs.insert(visit.id)
+                    if visit.costCategory == category, let total = visit.totalCost {
+                        amount += total
+                    }
+                } else if log.costCategory == category, let cost = log.cost {
+                    amount += cost
+                }
+            }
             if amount > 0 {
                 let percentage = NSDecimalNumber(decimal: amount).doubleValue /
                     NSDecimalNumber(decimal: totalSpent).doubleValue * 100

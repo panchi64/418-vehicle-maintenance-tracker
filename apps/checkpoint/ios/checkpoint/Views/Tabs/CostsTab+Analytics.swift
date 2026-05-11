@@ -2,10 +2,65 @@
 //  CostsTab+Analytics.swift
 //  checkpoint
 //
-//  Analytics computed properties for CostsTab
+//  Analytics computed properties for CostsTab.
+//
+//  All money metrics flow from `ExpenseEvent`s, not raw `ServiceLog`s.
+//  An ExpenseEvent is one of:
+//    - a standalone log with cost > 0
+//    - a Service Visit with totalCost > 0
+//
+//  This means a Service Visit holding 4 services contributes ONCE to totals,
+//  not 4 fabricated quarter-shares (the original bug). Logs that belong to a
+//  visit but are not the visit itself are absorbed into the visit event.
 //
 
 import Foundation
+
+// MARK: - Expense Event
+
+/// Either a standalone service log with a cost or a Service Visit with a total.
+/// Used as the unit of analysis for every cost-side metric.
+enum ExpenseEvent: Identifiable {
+    case standalone(ServiceLog)
+    case visit(ServiceVisit)
+
+    var id: UUID {
+        switch self {
+        case .standalone(let log): return log.id
+        case .visit(let visit): return visit.id
+        }
+    }
+
+    var date: Date {
+        switch self {
+        case .standalone(let log): return log.performedDate
+        case .visit(let visit): return visit.performedDate
+        }
+    }
+
+    var mileage: Int {
+        switch self {
+        case .standalone(let log): return log.mileageAtService
+        case .visit(let visit): return visit.mileageAtVisit
+        }
+    }
+
+    var amount: Decimal {
+        switch self {
+        case .standalone(let log): return log.cost ?? 0
+        case .visit(let visit): return visit.totalCost ?? 0
+        }
+    }
+
+    var category: CostCategory? {
+        switch self {
+        case .standalone(let log): return log.costCategory
+        case .visit(let visit): return visit.costCategory
+        }
+    }
+
+    var hasCost: Bool { amount > 0 }
+}
 
 // MARK: - Analytics Extension
 
@@ -24,44 +79,79 @@ extension CostsTab {
             .sorted { $0.performedDate > $1.performedDate }
     }
 
-    var filteredLogs: [ServiceLog] {
-        var logs = vehicleServiceLogs
+    /// Build the deduped event list for the selected vehicle.
+    /// Visits are inserted once; logs that belong to a visit are absorbed.
+    private var vehicleEvents: [ExpenseEvent] {
+        let logs = vehicleServiceLogs
+        var seenVisitIDs: Set<UUID> = []
+        var events: [ExpenseEvent] = []
 
-        // Filter by period
-        if let startDate = periodFilter.startDate {
-            logs = logs.filter { $0.performedDate >= startDate }
+        for log in logs {
+            if let visit = log.visit {
+                guard !seenVisitIDs.contains(visit.id) else { continue }
+                seenVisitIDs.insert(visit.id)
+                events.append(.visit(visit))
+            } else {
+                events.append(.standalone(log))
+            }
         }
 
-        // Filter by category
-        if let category = categoryFilter.costCategory {
-            logs = logs.filter { $0.costCategory == category }
-        }
-
-        return logs
+        return events.sorted { $0.date > $1.date }
     }
 
+    var filteredEvents: [ExpenseEvent] {
+        var events = vehicleEvents
+
+        if let startDate = periodFilter.startDate {
+            events = events.filter { $0.date >= startDate }
+        }
+
+        if let category = categoryFilter.costCategory {
+            events = events.filter { $0.category == category }
+        }
+
+        return events
+    }
+
+    /// Events with at least some cost. The expense list and most metrics use
+    /// this — events without a cost (e.g. a visit logged without a total) are
+    /// excluded from financial summaries but still appear in service history.
+    var eventsWithCosts: [ExpenseEvent] {
+        filteredEvents.filter { $0.hasCost }
+    }
+
+    /// Backwards-compatible accessor: exposed because CostsTab uses it for
+    /// empty-state checks. Returns standalone logs that have a real cost,
+    /// dropping every visit-bound log (those are surfaced through visits).
     var logsWithCosts: [ServiceLog] {
-        filteredLogs.filter { ($0.cost ?? 0) > 0 }
+        eventsWithCosts.compactMap { event in
+            if case .standalone(let log) = event { return log }
+            return nil
+        }
     }
 
     // MARK: - Cost Metrics
 
     var totalSpent: Decimal {
-        logsWithCosts.compactMap { $0.cost }.reduce(0, +)
+        eventsWithCosts.map(\.amount).reduce(0, +)
     }
 
     var formattedTotalSpent: String {
         Formatters.currencyWhole(totalSpent)
     }
 
-    /// Count only logs with costs, consistent with AVG COST and other metrics
+    /// Number of distinct money events (visits + standalone logs with cost).
+    /// Replaces the previous "service count" which counted each log of an
+    /// un-itemized cluster as a separate service.
     var serviceCount: Int {
-        logsWithCosts.count
+        eventsWithCosts.count
     }
 
+    /// Average cost per money event — per visit when bundled, per standalone
+    /// log otherwise. Reads as "AVG COST" in the UI.
     var averageCostPerService: Decimal? {
-        guard logsWithCosts.count > 0 else { return nil }
-        return totalSpent / Decimal(logsWithCosts.count)
+        guard !eventsWithCosts.isEmpty else { return nil }
+        return totalSpent / Decimal(eventsWithCosts.count)
     }
 
     var formattedAverageCost: String {
@@ -72,18 +162,18 @@ extension CostsTab {
     // MARK: - Cost Per Mile
 
     /// Calculate cost per mile for the filtered period.
-    /// Uses logsWithCosts for both spending and mileage range so the
-    /// numerator and denominator come from the same population.
+    /// Numerator and denominator come from the same event population so the
+    /// math reads consistently across visit-heavy and standalone-heavy data.
     var costPerMile: Double? {
         guard vehicle != nil,
-              logsWithCosts.count >= 2 else { return nil }
+              eventsWithCosts.count >= 2 else { return nil }
 
-        let sortedLogs = logsWithCosts.sorted { $0.performedDate < $1.performedDate }
-        guard let oldest = sortedLogs.first,
-              let newest = sortedLogs.last,
-              newest.mileageAtService > oldest.mileageAtService else { return nil }
+        let sortedEvents = eventsWithCosts.sorted { $0.date < $1.date }
+        guard let oldest = sortedEvents.first,
+              let newest = sortedEvents.last,
+              newest.mileage > oldest.mileage else { return nil }
 
-        let milesDriven = newest.mileageAtService - oldest.mileageAtService
+        let milesDriven = newest.mileage - oldest.mileage
         guard milesDriven > 0 else { return nil }
 
         return NSDecimalNumber(decimal: totalSpent).doubleValue / Double(milesDriven)
@@ -103,10 +193,11 @@ extension CostsTab {
         var breakdown: [(CostCategory, Decimal, Double)] = []
 
         for category in CostCategory.allCases {
-            let categoryLogs = logsWithCosts.filter { $0.costCategory == category }
-            let amount = categoryLogs.compactMap { $0.cost }.reduce(0, +)
+            let categoryEvents = eventsWithCosts.filter { $0.category == category }
+            let amount = categoryEvents.map(\.amount).reduce(0, +)
             if amount > 0 {
-                let percentage = NSDecimalNumber(decimal: amount).doubleValue / NSDecimalNumber(decimal: totalSpent).doubleValue * 100
+                let percentage = NSDecimalNumber(decimal: amount).doubleValue
+                    / NSDecimalNumber(decimal: totalSpent).doubleValue * 100
                 breakdown.append((category, amount, percentage))
             }
         }
@@ -118,36 +209,31 @@ extension CostsTab {
 
     var monthlyBreakdown: [(month: Date, amount: Decimal)] {
         let calendar = Calendar.current
-
-        // Group logs by month
         var monthlyTotals: [Date: Decimal] = [:]
 
-        for log in logsWithCosts {
-            let components = calendar.dateComponents([.year, .month], from: log.performedDate)
+        for event in eventsWithCosts {
+            let components = calendar.dateComponents([.year, .month], from: event.date)
             if let monthStart = calendar.date(from: components) {
-                monthlyTotals[monthStart, default: 0] += log.cost ?? 0
+                monthlyTotals[monthStart, default: 0] += event.amount
             }
         }
 
-        // Sort by date (most recent first)
         return monthlyTotals.map { ($0.key, $0.value) }.sorted { $0.0 > $1.0 }
     }
 
-    /// Monthly breakdown sorted oldest-first for chart display (left-to-right reading)
     var monthlyBreakdownChronological: [(month: Date, amount: Decimal)] {
         monthlyBreakdown.sorted { $0.month < $1.month }
     }
 
-    /// Monthly breakdown grouped by both month AND category for stacked bar charts
     var monthlyBreakdownByCategory: [(month: Date, category: CostCategory, amount: Decimal)] {
         let calendar = Calendar.current
         var grouped: [Date: [CostCategory: Decimal]] = [:]
 
-        for log in logsWithCosts {
-            let components = calendar.dateComponents([.year, .month], from: log.performedDate)
+        for event in eventsWithCosts {
+            let components = calendar.dateComponents([.year, .month], from: event.date)
             if let monthStart = calendar.date(from: components) {
-                let category = log.costCategory ?? .maintenance
-                grouped[monthStart, default: [:]][category, default: 0] += log.cost ?? 0
+                let category = event.category ?? .maintenance
+                grouped[monthStart, default: [:]][category, default: 0] += event.amount
             }
         }
 
@@ -163,27 +249,22 @@ extension CostsTab {
 
     // MARK: - Cumulative Cost Over Time
 
-    /// Running total of costs over time for spending pace chart
     var cumulativeCostOverTime: [(date: Date, cumulativeAmount: Decimal)] {
         let calendar = Calendar.current
+        let sorted = eventsWithCosts.sorted { $0.date < $1.date }
 
-        // Sort logs by date ascending
-        let sorted = logsWithCosts.sorted { $0.performedDate < $1.performedDate }
-
-        // Merge same-date entries
         var dailyTotals: [(date: Date, amount: Decimal)] = []
-        for log in sorted {
-            let dayComponents = calendar.dateComponents([.year, .month, .day], from: log.performedDate)
-            let dayDate = calendar.date(from: dayComponents) ?? log.performedDate
+        for event in sorted {
+            let dayComponents = calendar.dateComponents([.year, .month, .day], from: event.date)
+            let dayDate = calendar.date(from: dayComponents) ?? event.date
 
             if let lastIndex = dailyTotals.indices.last, dailyTotals[lastIndex].date == dayDate {
-                dailyTotals[lastIndex].amount += log.cost ?? 0
+                dailyTotals[lastIndex].amount += event.amount
             } else {
-                dailyTotals.append((date: dayDate, amount: log.cost ?? 0))
+                dailyTotals.append((date: dayDate, amount: event.amount))
             }
         }
 
-        // Build cumulative total
         var cumulative: Decimal = 0
         return dailyTotals.map { entry in
             cumulative += entry.amount
@@ -193,12 +274,9 @@ extension CostsTab {
 
     // MARK: - Yearly Roundup
 
-    /// The year shown in the yearly roundup. When the period filter is "Year"
-    /// (rolling 12 months), use the year of the most recent log so the roundup
-    /// reflects the filtered window. Otherwise use the current calendar year.
     var currentYear: Int {
-        if periodFilter == .year, let newest = logsWithCosts.first {
-            return Calendar.current.component(.year, from: newest.performedDate)
+        if periodFilter == .year, let newest = eventsWithCosts.first {
+            return Calendar.current.component(.year, from: newest.date)
         }
         return Calendar.current.component(.year, from: Date.now)
     }
@@ -214,7 +292,7 @@ extension CostsTab {
     }
 
     var shouldShowYearlyRoundup: Bool {
-        (periodFilter == .year || periodFilter == .all) && !logsWithCosts.isEmpty
+        (periodFilter == .year || periodFilter == .all) && !eventsWithCosts.isEmpty
     }
 
     // MARK: - Period Label

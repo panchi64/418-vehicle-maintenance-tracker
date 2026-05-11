@@ -20,6 +20,11 @@ final class ServiceLog: Identifiable {
     var notes: String?
     var createdAt: Date = Date.now
 
+    /// Parent Service Visit when this log was completed as part of a multi-service
+    /// shop visit. nil for standalone single-service logs created before the
+    /// Service Visit feature, and for any imported standalone log.
+    var visit: ServiceVisit?
+
     @Relationship(deleteRule: .cascade, inverse: \ServiceAttachment.serviceLog)
     var attachments: [ServiceAttachment]? = []
 
