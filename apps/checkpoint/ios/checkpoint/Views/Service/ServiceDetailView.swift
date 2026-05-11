@@ -25,6 +25,14 @@ struct ServiceDetailView: View {
         service.status(currentMileage: vehicle.currentMileage)
     }
 
+    private var allAttachments: [ServiceAttachment] {
+        var seen = Set<ServiceAttachment.DedupKey>()
+        return (service.logs ?? [])
+            .flatMap { $0.attachments ?? [] }
+            .sorted { $0.createdAt < $1.createdAt }
+            .filter { seen.insert($0.dedupKey).inserted }
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: Spacing.xl) {
@@ -51,10 +59,6 @@ struct ServiceDetailView: View {
                     insightsSection
                 }
 
-                // Attachments from all logs
-                let allAttachments = (service.logs ?? [])
-                    .sorted(by: { $0.performedDate > $1.performedDate })
-                    .flatMap { $0.attachments ?? [] }
                 if !allAttachments.isEmpty {
                     AttachmentSection(attachments: allAttachments)
                 }

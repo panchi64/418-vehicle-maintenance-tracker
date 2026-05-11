@@ -157,6 +157,70 @@ final class ServiceVisitBackfillTests: XCTestCase {
         XCTAssertNil(visits[0].totalCost)
     }
 
+    func test_backfill_dedupesIdenticalAttachmentsAcrossClusterLogs() throws {
+        let vehicle = makeVehicle()
+        let s1 = makeService(name: "Oil Change", vehicle: vehicle)
+        let s2 = makeService(name: "Tire Rotation", vehicle: vehicle)
+        let date = Date.now
+        let log1 = makeLog(service: s1, vehicle: vehicle, date: date, mileage: 32000, cost: 50)
+        let log2 = makeLog(service: s2, vehicle: vehicle, date: date, mileage: 32000, cost: 50)
+
+        // Simulate the legacy code path: the same receipt attached to every
+        // child log in the cluster (same fileName + mimeType, distinct UUIDs).
+        let sharedFileName = "receipt_42.jpg"
+        let sharedMime = "image/jpeg"
+        let copy1 = ServiceAttachment(
+            serviceLog: log1,
+            data: Data([0x01]),
+            fileName: sharedFileName,
+            mimeType: sharedMime
+        )
+        let copy2 = ServiceAttachment(
+            serviceLog: log2,
+            data: Data([0x01]),
+            fileName: sharedFileName,
+            mimeType: sharedMime
+        )
+        modelContext.insert(copy1)
+        modelContext.insert(copy2)
+
+        try ServiceVisitBackfill.perform(context: modelContext)
+
+        let attachments = try modelContext.fetch(FetchDescriptor<ServiceAttachment>())
+        XCTAssertEqual(attachments.count, 1, "Identical legacy copies should collapse to one attachment per visit.")
+        XCTAssertEqual(attachments.first?.fileName, sharedFileName)
+    }
+
+    func test_backfill_preservesDistinctAttachmentsWithinVisit() throws {
+        let vehicle = makeVehicle()
+        let s1 = makeService(name: "Oil Change", vehicle: vehicle)
+        let s2 = makeService(name: "Tire Rotation", vehicle: vehicle)
+        let date = Date.now
+        let log1 = makeLog(service: s1, vehicle: vehicle, date: date, mileage: 32000, cost: 50)
+        let log2 = makeLog(service: s2, vehicle: vehicle, date: date, mileage: 32000, cost: 50)
+
+        // Two genuinely distinct receipts — different fileNames.
+        let receiptA = ServiceAttachment(
+            serviceLog: log1,
+            data: Data([0x01]),
+            fileName: "receipt_A.jpg",
+            mimeType: "image/jpeg"
+        )
+        let receiptB = ServiceAttachment(
+            serviceLog: log2,
+            data: Data([0x02]),
+            fileName: "receipt_B.jpg",
+            mimeType: "image/jpeg"
+        )
+        modelContext.insert(receiptA)
+        modelContext.insert(receiptB)
+
+        try ServiceVisitBackfill.perform(context: modelContext)
+
+        let attachments = try modelContext.fetch(FetchDescriptor<ServiceAttachment>())
+        XCTAssertEqual(attachments.count, 2, "Distinct attachments should survive the dedup pass.")
+    }
+
     func test_runIfNeeded_isIdempotent() throws {
         let vehicle = makeVehicle()
         let s1 = makeService(name: "Oil Change", vehicle: vehicle)

@@ -173,4 +173,15 @@ final class ServiceAttachment: Identifiable {
             mimeType: "application/pdf"
         )
     }
+
+    /// Key used to collapse legacy per-log duplicates of the same receipt.
+    /// See `ServiceVisitBackfill.dedupeVisitAttachments`.
+    struct DedupKey: Hashable {
+        let fileName: String
+        let mimeType: String
+    }
+
+    var dedupKey: DedupKey {
+        DedupKey(fileName: fileName, mimeType: mimeType)
+    }
 }

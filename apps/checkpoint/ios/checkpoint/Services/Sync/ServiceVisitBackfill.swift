@@ -33,7 +33,10 @@ private let backfillLogger = Logger(subsystem: "com.418-studio.checkpoint", cate
 
 enum ServiceVisitBackfill {
     /// UserDefaults flag — bumped by suffix when we iterate the algorithm.
-    private static let completionFlagKey = "checkpoint.serviceVisitBackfill.v1.completed"
+    /// v2 added an attachment-dedup pass; users on v1 re-run perform() once,
+    /// which is a no-op for already-migrated visits but cleans up the
+    /// duplicated receipts the legacy `MarkClusterDoneSheet` left behind.
+    private static let completionFlagKey = "checkpoint.serviceVisitBackfill.v2.completed"
 
     /// Runs the backfill once per device. No-ops on subsequent launches.
     /// Safe to call repeatedly; safe to call before any user data exists.
@@ -114,10 +117,43 @@ enum ServiceVisitBackfill {
             createdVisits += 1
         }
 
+        let deletedAttachments = dedupeVisitAttachments(context: context)
+
         if context.hasChanges {
             try context.save()
         }
-        backfillLogger.info("Backfill scanned \(allLogs.count) logs and created \(createdVisits) Service Visits.")
+        backfillLogger.info("Backfill scanned \(allLogs.count) logs, created \(createdVisits) Service Visits, removed \(deletedAttachments) duplicate attachments.")
+    }
+
+    /// Legacy `MarkClusterDoneSheet` saved a copy of each attachment to every
+    /// child ServiceLog in a cluster. After migrating those logs into a
+    /// ServiceVisit we end up with N byte-identical receipts per uploaded
+    /// receipt. This pass keeps the earliest copy and deletes the rest,
+    /// reclaiming local + CloudKit storage. The dedup key is
+    /// (fileName, mimeType): the legacy loop iterated the same
+    /// `AttachmentData` for every log, so duplicates share both.
+    @MainActor
+    private static func dedupeVisitAttachments(context: ModelContext) -> Int {
+        guard let visits = try? context.fetch(FetchDescriptor<ServiceVisit>()) else {
+            return 0
+        }
+
+        var deleted = 0
+        for visit in visits {
+            let logs = visit.logs ?? []
+            guard logs.count >= 2 else { continue }
+
+            var seen = Set<ServiceAttachment.DedupKey>()
+            let attachments = logs
+                .flatMap { $0.attachments ?? [] }
+                .sorted { $0.createdAt < $1.createdAt }
+
+            for attachment in attachments where !seen.insert(attachment.dedupKey).inserted {
+                context.delete(attachment)
+                deleted += 1
+            }
+        }
+        return deleted
     }
 
     /// Reset the completion flag. Test-only helper; not used at runtime.

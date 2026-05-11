@@ -9,6 +9,7 @@ import XCTest
 import SwiftData
 @testable import checkpoint
 
+@MainActor
 final class ServiceVisitTests: XCTestCase {
     var modelContainer: ModelContainer!
     var modelContext: ModelContext!

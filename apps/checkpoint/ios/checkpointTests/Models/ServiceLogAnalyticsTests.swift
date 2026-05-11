@@ -11,6 +11,7 @@ import XCTest
 import SwiftData
 @testable import checkpoint
 
+@MainActor
 final class ServiceLogAnalyticsTests: XCTestCase {
     var modelContainer: ModelContainer!
     var modelContext: ModelContext!
