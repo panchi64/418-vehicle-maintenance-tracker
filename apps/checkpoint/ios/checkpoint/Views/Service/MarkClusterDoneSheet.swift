@@ -9,6 +9,7 @@
 //  `MarkServiceVisitDoneSheet.saveCluster(...)`.
 //
 
+import SwiftData
 import SwiftUI
 
 struct MarkClusterDoneSheet: View {

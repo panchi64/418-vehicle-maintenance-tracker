@@ -43,6 +43,9 @@ final class Vehicle: Identifiable {
     @Relationship(deleteRule: .cascade, inverse: \MileageSnapshot.vehicle)
     var mileageSnapshots: [MileageSnapshot]? = []
 
+    @Relationship(deleteRule: .cascade, inverse: \ServiceVisit.vehicle)
+    var serviceVisits: [ServiceVisit]? = []
+
     var displayName: String {
         if name.isEmpty {
             return "\(year) \(make) \(model)"

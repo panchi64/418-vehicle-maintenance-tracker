@@ -7,6 +7,7 @@
 //  (e.g. `ServiceDetailView`) compile unchanged.
 //
 
+import SwiftData
 import SwiftUI
 
 struct MarkServiceDoneSheet: View {
