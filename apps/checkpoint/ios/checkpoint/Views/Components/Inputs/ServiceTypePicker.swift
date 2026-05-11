@@ -48,35 +48,69 @@ struct ServiceTypePicker: View {
     }
 
     private func selectedPresetRow(_ preset: PresetData) -> some View {
-        Button { showingPicker = true } label: {
-            HStack {
-                Image(systemName: ServiceCategory(rawValue: preset.category)?.icon ?? "wrench.and.screwdriver")
-                    .foregroundStyle(Theme.accent)
-                    .frame(width: 24)
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            HStack(spacing: 0) {
+                Button { showingPicker = true } label: {
+                    HStack {
+                        Image(systemName: ServiceCategory(rawValue: preset.category)?.icon ?? "wrench.and.screwdriver")
+                            .foregroundStyle(Theme.accent)
+                            .frame(width: 24)
 
-                VStack(alignment: .leading, spacing: Spacing.xs) {
-                    Text(preset.name)
-                        .foregroundStyle(Theme.textPrimary)
-                    if let interval = Formatters.serviceInterval(months: preset.defaultIntervalMonths, miles: preset.defaultIntervalMiles) {
-                        Text(interval.uppercased())
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.textSecondary)
-                            .tracking(1)
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            Text(preset.name)
+                                .foregroundStyle(Theme.textPrimary)
+                            if let interval = Formatters.serviceInterval(months: preset.defaultIntervalMonths, miles: preset.defaultIntervalMiles) {
+                                Text(interval.uppercased())
+                                    .font(.brutalistLabel)
+                                    .foregroundStyle(Theme.textSecondary)
+                                    .tracking(1)
+                            }
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12))
+                            .foregroundStyle(Theme.textTertiary)
                     }
+                    .padding(Spacing.md)
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Change service type. Currently \(preset.name)")
 
-                Spacer()
+                Divider()
+                    .frame(width: Theme.borderWidth)
+                    .overlay(Theme.gridLine)
 
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 12))
-                    .foregroundStyle(Theme.textTertiary)
+                Button {
+                    selectedPreset = nil
+                    HapticService.shared.selectionChanged()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(Theme.textSecondary)
+                        .frame(width: 48, height: 48)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Clear service type")
             }
-            .padding(Spacing.md)
             .background(Theme.surfaceInstrument)
             .clipShape(Rectangle())
             .brutalistBorder()
+
+            Button {
+                selectedPreset = nil
+            } label: {
+                Text("USE A CUSTOM SERVICE INSTEAD")
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.textTertiary)
+                    .tracking(1.5)
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint("Clears the selected preset and lets you type any service name")
         }
-        .buttonStyle(.plain)
     }
 
     private var browseRow: some View {
