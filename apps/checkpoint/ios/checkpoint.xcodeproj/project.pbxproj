@@ -11,7 +11,6 @@
 		35EAF4409A656AD01A1033BA /* DesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = EB06FB0A7CC3A382CE061002 /* DesignKit */; };
 		4990276752C961C629471AA9 /* DesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = 72A7D215AA9F0416060B11E5 /* DesignKit */; };
 		5A409E922F36F7DD0010D306 /* PostHog in Frameworks */ = {isa = PBXBuildFile; productRef = 5APH00022F4000000036D71B /* PostHog */; };
-		5A40A09D2F3705D20010D306 /* Secrets.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 5A40A09C2F3705D20010D306 /* Secrets.xcconfig */; };
 		5AB669662F2687FC0036D71B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5AB669652F2687FC0036D71B /* WidgetKit.framework */; };
 		5AB669682F2687FC0036D71B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5AB669672F2687FC0036D71B /* SwiftUI.framework */; };
 		5AB669752F2687FD0036D71B /* CheckpointWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5AB669632F2687FC0036D71B /* CheckpointWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -189,15 +188,11 @@
 		};
 		5AAAA9392F2084330002A8C6 /* checkpointTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = checkpointTests;
 			sourceTree = "<group>";
 		};
 		5AAAA9432F2084330002A8C6 /* checkpointUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = checkpointUITests;
 			sourceTree = "<group>";
 		};
@@ -219,8 +214,6 @@
 		};
 		5ACB30022F37D00000714E55 /* CheckpointWatchTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = CheckpointWatchTests;
 			sourceTree = "<group>";
 		};
@@ -584,7 +577,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2620;
-				LastUpgradeCheck = 2620;
+				LastUpgradeCheck = 2640;
 				TargetAttributes = {
 					5AAAA9262F2084320002A8C6 = {
 						CreatedOnToolsVersion = 26.2;
@@ -628,7 +621,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				5APH00012F4000000036D71B /* XCRemoteSwiftPackageReference "posthog-ios" */,
-				E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "DesignKit" */,
+				E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "../../../packages/DesignKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5AAAA9282F2084320002A8C6 /* Products */;
@@ -673,7 +666,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5A40A09D2F3705D20010D306 /* Secrets.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -823,6 +815,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -876,6 +869,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -886,6 +880,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -932,6 +927,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -1472,7 +1468,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "DesignKit" */ = {
+		E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "../../../packages/DesignKit" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../../packages/DesignKit;
 		};
@@ -1492,7 +1488,7 @@
 /* Begin XCSwiftPackageProductDependency section */
 		25127F8914D55F849FB69D80 /* DesignKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "DesignKit" */;
+			package = E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "../../../packages/DesignKit" */;
 			productName = DesignKit;
 		};
 		5APH00022F4000000036D71B /* PostHog */ = {
@@ -1502,17 +1498,17 @@
 		};
 		72A7D215AA9F0416060B11E5 /* DesignKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "DesignKit" */;
+			package = E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "../../../packages/DesignKit" */;
 			productName = DesignKit;
 		};
 		BE9845272C4CFCF14D65E3A6 /* DesignKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "DesignKit" */;
+			package = E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "../../../packages/DesignKit" */;
 			productName = DesignKit;
 		};
 		EB06FB0A7CC3A382CE061002 /* DesignKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "DesignKit" */;
+			package = E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "../../../packages/DesignKit" */;
 			productName = DesignKit;
 		};
 /* End XCSwiftPackageProductDependency section */

@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkpoint — Screenshot Mockups v2: Brutalist Documentary</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-primary: #0033BE;
+    --bg-elevated: #0F41C8;
+    --text-primary: #F5F0DC;
+    --text-secondary: #F5F0DCB3;
+    --text-tertiary: #F5F0DC66;
+    --status-overdue: #FF6B6B;
+    --status-due-soon: #F7AD55;
+    --status-good: #38D9A9;
+    --surface: rgba(20, 71, 209, 0.85);
+    --border: rgba(245, 240, 220, 0.2);
+  }
+
+  body {
+    font-family: 'JetBrains Mono', monospace;
+    background: #0A0A0A;
+    color: var(--text-primary);
+    padding: 60px 40px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+
+  h2 {
+    font-size: 32px;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--status-due-soon);
+    margin-bottom: 48px;
+    letter-spacing: 0.02em;
+  }
+
+  .description {
+    font-size: 13px;
+    color: var(--text-secondary);
+    max-width: 680px;
+    line-height: 1.7;
+    margin-bottom: 64px;
+  }
+
+  /* Screenshot cards */
+  .screenshots {
+    display: flex;
+    gap: 32px;
+    overflow-x: auto;
+    padding-bottom: 40px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .screenshots::-webkit-scrollbar { height: 2px; }
+  .screenshots::-webkit-scrollbar-track { background: rgba(245,240,220,0.05); }
+  .screenshots::-webkit-scrollbar-thumb { background: rgba(245,240,220,0.2); }
+
+  .shot {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    width: 340px;
+  }
+
+  .shot-number {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 12px;
+  }
+
+  .shot-caption {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .shot-subcaption {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+  }
+
+  /* App Store frame - simulates the final screenshot */
+  .appstore-frame {
+    width: 320px;
+    height: 640px;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid rgba(245,240,220,0.1);
+  }
+
+  /* Environment layer (simulated photography background) */
+  .environment {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  /* Caption overlay */
+  .caption-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 24px 20px 20px;
+    z-index: 10;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, transparent 100%);
+  }
+
+  .caption-bar .caption {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  }
+
+  .caption-bar .sub {
+    font-size: 11px;
+    color: rgba(245,240,220,0.8);
+    margin-top: 4px;
+    letter-spacing: 0.02em;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  }
+
+  /* Phone device in scene */
+  .phone-in-scene {
+    position: absolute;
+    width: 200px;
+    background: #111;
+    border: 2px solid rgba(255,255,255,0.15);
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.4);
+  }
+
+  .phone-in-scene .screen {
+    background: var(--bg-primary);
+    margin: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Mini UI elements inside phone screens */
+  .mini-status-bar {
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+    font-size: 7px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .mini-vehicle {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 8px;
+    border-bottom: 1.5px solid var(--border);
+    font-size: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .mini-dot {
+    width: 5px;
+    height: 5px;
+  }
+
+  .mini-card {
+    margin: 5px 8px;
+    padding: 8px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+  }
+
+  .mini-card-label {
+    font-size: 6px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 3px;
+  }
+
+  .mini-card-title {
+    font-size: 9px;
+    font-weight: 600;
+  }
+
+  .mini-card-detail {
+    font-size: 7px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+
+  .mini-badge {
+    display: inline-block;
+    padding: 1px 5px;
+    font-size: 6px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid;
+    margin-top: 5px;
+  }
+
+  .mini-tab-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 28px;
+    display: flex;
+    border-top: 1.5px solid var(--border);
+    font-size: 6px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .mini-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-tertiary);
+  }
+
+  .mini-tab.active { color: var(--text-primary); }
+
+  /* Environment-specific backgrounds */
+
+  /* Shot 1: Garage workbench */
+  .env-garage {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2520 30%, #1c1c1c 70%, #141414 100%);
+  }
+
+  .env-garage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      /* Simulated overhead fluorescent light */
+      radial-gradient(ellipse at 40% 20%, rgba(255,248,220,0.08) 0%, transparent 50%),
+      /* Workbench surface texture */
+      repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.01) 40px, rgba(255,255,255,0.01) 41px),
+      /* Wood grain suggestion */
+      repeating-linear-gradient(180deg, transparent, transparent 8px, rgba(80,60,40,0.05) 8px, rgba(80,60,40,0.05) 9px);
+  }
+
+  /* Props: wrench silhouette */
+  .prop-wrench {
+    position: absolute;
+    bottom: 80px;
+    right: 30px;
+    width: 100px;
+    height: 20px;
+    background: linear-gradient(90deg, #333 0%, #444 40%, #333 60%, #555 80%, transparent 100%);
+    transform: rotate(-15deg);
+    opacity: 0.4;
+    filter: blur(2px);
+    border-radius: 2px 10px 10px 2px;
+  }
+
+  .prop-receipt {
+    position: absolute;
+    bottom: 40px;
+    left: 20px;
+    width: 70px;
+    height: 90px;
+    background: rgba(245,240,230,0.08);
+    transform: rotate(5deg);
+    filter: blur(1.5px);
+  }
+
+  .prop-receipt::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 8px;
+    right: 8px;
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    box-shadow:
+      0 8px 0 rgba(255,255,255,0.04),
+      0 16px 0 rgba(255,255,255,0.05),
+      0 24px 0 rgba(255,255,255,0.03),
+      0 32px 0 rgba(255,255,255,0.04);
+  }
+
+  /* Shot 2: Service manual on table */
+  .env-manual {
+    background: linear-gradient(160deg, #1e1e1e 0%, #252220 40%, #1a1a1a 100%);
+  }
+
+  .prop-manual {
+    position: absolute;
+    bottom: 20px;
+    left: 10px;
+    right: 10px;
+    height: 280px;
+    background: rgba(245,240,230,0.06);
+    transform: perspective(400px) rotateX(5deg);
+    filter: blur(2px);
+  }
+
+  .prop-manual::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 12px, rgba(255,255,255,0.03) 12px, rgba(255,255,255,0.03) 13px);
+  }
+
+  .prop-manual-spine {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    width: 2px;
+    height: 280px;
+    background: rgba(0,0,0,0.15);
+    transform: perspective(400px) rotateX(5deg);
+    filter: blur(1px);
+  }
+
+  /* Shot 3: Receipt scanning */
+  .env-scan {
+    background: linear-gradient(170deg, #1c1c1c 0%, #222018 50%, #181818 100%);
+  }
+
+  .prop-real-receipt {
+    position: absolute;
+    top: 140px;
+    right: 15px;
+    width: 110px;
+    height: 160px;
+    background: rgba(255,252,240,0.1);
+    transform: rotate(-3deg);
+    filter: blur(1.5px);
+    border: 1px solid rgba(255,255,255,0.03);
+  }
+
+  .prop-real-receipt::after {
+    content: 'JIFFY LUBE';
+    position: absolute;
+    top: 12px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 6px;
+    letter-spacing: 0.15em;
+    color: rgba(0,0,0,0.12);
+    font-weight: 700;
+  }
+
+  /* Shot 4: Clean surface with keys */
+  .env-clean {
+    background: linear-gradient(180deg, #141414 0%, #1a1a1a 50%, #111 100%);
+  }
+
+  .prop-keys {
+    position: absolute;
+    bottom: 60px;
+    right: 40px;
+    opacity: 0.3;
+    filter: blur(2px);
+  }
+
+  .prop-key-fob {
+    width: 40px;
+    height: 28px;
+    background: #333;
+    border-radius: 4px;
+  }
+
+  .prop-key-ring {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #444;
+    border-radius: 50%;
+    margin-top: -4px;
+    margin-left: 10px;
+  }
+
+  /* Shot 5: Car interior */
+  .env-car {
+    background: linear-gradient(145deg, #181818 0%, #1e1c1a 30%, #222 60%, #141414 100%);
+  }
+
+  .env-car::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      /* Windshield light */
+      radial-gradient(ellipse at 50% 0%, rgba(200,210,230,0.06) 0%, transparent 60%),
+      /* Dashboard shape */
+      linear-gradient(to bottom, transparent 60%, rgba(30,28,26,0.8) 60%, rgba(30,28,26,0.9) 100%);
+  }
+
+  .prop-steering {
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 200px;
+    border: 8px solid rgba(60,55,50,0.3);
+    border-radius: 50%;
+    filter: blur(3px);
+  }
+
+  /* Shot 6: Theme gallery (graphic, not photographic) */
+  .env-themes {
+    background: var(--bg-primary);
+  }
+
+  .theme-grid-v2 {
+    position: absolute;
+    top: 90px;
+    left: 12px;
+    right: 12px;
+    bottom: 40px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .theme-mini-phone {
+    border: 1.5px solid rgba(255,255,255,0.15);
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .theme-mini-label {
+    font-size: 6px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.5;
+    margin-bottom: 4px;
+  }
+
+  .theme-mini-card {
+    flex: 1;
+    border: 1px solid currentColor;
+    opacity: 0.3;
+    padding: 4px;
+    margin-top: 2px;
+  }
+
+  .theme-mini-title {
+    font-size: 8px;
+    font-weight: 600;
+    opacity: 0.8;
+  }
+
+  .theme-mini-accent {
+    width: 20px;
+    height: 3px;
+    margin-top: auto;
+    opacity: 0.6;
+  }
+
+  /* Cost chart mini */
+  .mini-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 50px;
+    margin: 6px 8px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .mini-bar {
+    flex: 1;
+    background: var(--text-primary);
+    opacity: 0.5;
+    min-height: 2px;
+  }
+
+  .mini-bar.hi { opacity: 0.9; }
+
+  .mini-big-number {
+    font-size: 24px;
+    font-weight: 300;
+    padding: 4px 8px 0;
+    letter-spacing: -0.02em;
+  }
+
+  .mini-big-label {
+    font-size: 6px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    padding: 0 8px;
+  }
+
+  /* Due axes */
+  .mini-due-axis {
+    margin: 4px 8px;
+    padding: 6px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+  }
+
+  .mini-due-label {
+    font-size: 6px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+
+  .mini-due-value {
+    font-size: 11px;
+    font-weight: 500;
+    margin-top: 2px;
+  }
+
+  .mini-due-remaining {
+    font-size: 7px;
+    margin-top: 1px;
+  }
+
+  /* Ecosystem widgets */
+  .mini-widgets {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 4px 8px;
+    height: calc(100% - 56px);
+  }
+
+  .mini-widget {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    font-size: 7px;
+  }
+
+  .mini-widget.span { grid-column: span 2; }
+
+  .mini-widget-label {
+    font-size: 5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 2px;
+  }
+
+  .mini-widget-value {
+    font-size: 12px;
+    font-weight: 300;
+    margin-top: auto;
+  }
+
+  /* Scan steps mini */
+  .mini-scan-steps {
+    padding: 4px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    height: calc(100% - 50px);
+  }
+
+  .mini-scan-step {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    padding: 6px;
+  }
+
+  .mini-scan-num {
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-tertiary);
+    width: 18px;
+    flex-shrink: 0;
+  }
+
+  .mini-scan-title {
+    font-size: 8px;
+    font-weight: 600;
+  }
+
+  .mini-scan-detail {
+    font-size: 6px;
+    color: var(--text-secondary);
+    margin-top: 1px;
+  }
+
+  /* Section notes */
+  .notes {
+    margin-top: 80px;
+    padding-top: 40px;
+    border-top: 2px solid rgba(245,240,220,0.08);
+    max-width: 680px;
+  }
+
+  .notes h3 {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+  }
+
+  .note {
+    margin-bottom: 24px;
+  }
+
+  .note strong {
+    font-size: 13px;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .note p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  .comparison {
+    display: flex;
+    gap: 32px;
+    margin-top: 80px;
+    padding-top: 40px;
+    border-top: 2px solid rgba(245,240,220,0.08);
+  }
+
+  .comparison-col {
+    flex: 1;
+    max-width: 340px;
+  }
+
+  .comparison-col h4 {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .comparison-col.before h4 { color: var(--status-overdue); }
+  .comparison-col.after h4 { color: var(--status-good); }
+
+  .comparison-col p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+
+  <h1>Checkpoint / App Store</h1>
+  <h2>Screenshot Mockups v2</h2>
+  <div class="subtitle">BRUTALIST DOCUMENTARY</div>
+  <p class="description">
+    Real environments. Real light. Real surfaces. The phone lives in the world — on workbenches, next to receipts, in the driver's seat. The cerulean screen glows against desaturated backgrounds. Shallow depth of field keeps the UI sharp while the world falls soft. Each shot tells one story in under two seconds.
+  </p>
+
+  <div class="screenshots">
+
+    <!-- SHOT 1: Know What's Next -->
+    <div class="shot">
+      <div class="shot-number">01 / 06 — THE HERO</div>
+      <div class="shot-caption">KNOW WHAT'S NEXT</div>
+      <div class="shot-subcaption">Your most urgent service. One glance.</div>
+      <div class="appstore-frame">
+        <div class="environment env-garage">
+          <!-- Simulated props -->
+          <div class="prop-wrench"></div>
+          <div class="prop-receipt"></div>
+        </div>
+        <div class="caption-bar">
+          <div class="caption">KNOW WHAT'S NEXT</div>
+          <div class="sub">Your most urgent service. One glance.</div>
+        </div>
+        <!-- Phone on workbench -->
+        <div class="phone-in-scene" style="top: 100px; left: 50%; transform: translateX(-50%); height: 400px;">
+          <div class="screen" style="height: calc(100% - 6px);">
+            <div class="mini-status-bar"><span>9:41</span><span>CHECKPOINT</span></div>
+            <div class="mini-vehicle">
+              <div class="mini-dot" style="background: var(--status-due-soon);"></div>
+              2021 CIVIC
+              <span style="margin-left:auto; color:var(--text-tertiary); font-weight:400;">38,420 MI</span>
+            </div>
+            <div class="mini-card" style="border-color: var(--status-overdue);">
+              <div class="mini-card-label">NEXT UP</div>
+              <div class="mini-card-title">Oil Change</div>
+              <div class="mini-card-detail">Last: Jan 12 at 35,200 mi<br>Due: Mar 12 — 3,220 mi ago</div>
+              <div class="mini-badge" style="color:var(--status-overdue); border-color:var(--status-overdue);">12 DAYS OVERDUE</div>
+            </div>
+            <div class="mini-card">
+              <div class="mini-card-label">UPCOMING</div>
+              <div style="display:flex; align-items:center; gap:4px; padding:3px 0; border-bottom:1px solid rgba(245,240,220,0.06); font-size:8px;">
+                <div class="mini-dot" style="background:var(--status-due-soon); width:4px; height:4px;"></div>
+                <span style="font-weight:500;">Tire Rotation</span>
+                <span style="margin-left:auto; color:var(--text-tertiary); font-size:7px;">Apr 15</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:4px; padding:3px 0; border-bottom:1px solid rgba(245,240,220,0.06); font-size:8px;">
+                <div class="mini-dot" style="background:var(--status-good); width:4px; height:4px;"></div>
+                <span style="font-weight:500;">Brake Inspection</span>
+                <span style="margin-left:auto; color:var(--text-tertiary); font-size:7px;">~Jun</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:4px; padding:3px 0; font-size:8px;">
+                <div class="mini-dot" style="background:var(--status-good); width:4px; height:4px;"></div>
+                <span style="font-weight:500;">Air Filter</span>
+                <span style="margin-left:auto; color:var(--text-tertiary); font-size:7px;">~Jul</span>
+              </div>
+            </div>
+            <div class="mini-tab-bar">
+              <div class="mini-tab active">HOME</div>
+              <div class="mini-tab">SERVICES</div>
+              <div class="mini-tab">COSTS</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHOT 2: Date and Mileage -->
+    <div class="shot">
+      <div class="shot-number">02 / 06 — THE DIFFERENTIATOR</div>
+      <div class="shot-caption">DATE AND MILEAGE</div>
+      <div class="shot-subcaption">Whichever comes first. Miss nothing.</div>
+      <div class="appstore-frame">
+        <div class="environment env-manual">
+          <div class="prop-manual"></div>
+          <div class="prop-manual-spine"></div>
+        </div>
+        <div class="caption-bar">
+          <div class="caption">DATE AND MILEAGE</div>
+          <div class="sub">Whichever comes first.</div>
+        </div>
+        <div class="phone-in-scene" style="top: 80px; left: 45%; transform: translateX(-50%) rotate(-2deg); height: 420px; width: 210px;">
+          <div class="screen" style="height: calc(100% - 6px);">
+            <div class="mini-status-bar"><span>9:41</span><span style="font-size:6px;">‹ BACK</span></div>
+            <div style="padding:6px 8px; border-bottom:1.5px solid var(--border);">
+              <div style="font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.02em;">Oil Change</div>
+              <div style="font-size:7px; color:var(--text-tertiary); letter-spacing:0.08em; text-transform:uppercase; margin-top:2px;">Maintenance · Recurring</div>
+            </div>
+            <div class="mini-due-axis">
+              <div class="mini-due-label">DUE BY DATE</div>
+              <div class="mini-due-value" style="color:var(--status-overdue);">Mar 12, 2026</div>
+              <div class="mini-due-remaining" style="color:var(--status-overdue);">12 days overdue</div>
+            </div>
+            <div class="mini-due-axis">
+              <div class="mini-due-label">DUE BY MILEAGE</div>
+              <div class="mini-due-value" style="color:var(--status-overdue);">38,200 mi</div>
+              <div class="mini-due-remaining" style="color:var(--status-overdue);">220 mi past due</div>
+            </div>
+            <div class="mini-card" style="margin-top:6px;">
+              <div class="mini-card-label">LAST SERVICE</div>
+              <div style="font-size:7px; color:var(--text-secondary); line-height:1.6;">
+                <div style="display:flex; justify-content:space-between;"><span>Date</span><span style="font-weight:600; color:var(--text-primary);">Jan 12, 2026</span></div>
+                <div style="display:flex; justify-content:space-between;"><span>Mileage</span><span style="font-weight:600; color:var(--text-primary);">35,200 mi</span></div>
+                <div style="display:flex; justify-content:space-between;"><span>Cost</span><span style="font-weight:600; color:var(--text-primary);">$72.50</span></div>
+              </div>
+            </div>
+            <div class="mini-card">
+              <div class="mini-card-label">INTERVAL</div>
+              <div style="font-size:7px; color:var(--text-secondary); line-height:1.6;">
+                <div style="display:flex; justify-content:space-between;"><span>Every</span><span style="font-weight:600; color:var(--text-primary);">3,000 mi</span></div>
+                <div style="display:flex; justify-content:space-between;"><span>Or every</span><span style="font-weight:600; color:var(--text-primary);">60 days</span></div>
+              </div>
+            </div>
+            <div class="mini-tab-bar">
+              <div class="mini-tab active">HOME</div>
+              <div class="mini-tab">SERVICES</div>
+              <div class="mini-tab">COSTS</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHOT 3: Scan. Log. Done. -->
+    <div class="shot">
+      <div class="shot-number">03 / 06 — THE EASE</div>
+      <div class="shot-caption">SCAN. LOG. DONE.</div>
+      <div class="shot-subcaption">Point your camera. The rest fills itself.</div>
+      <div class="appstore-frame">
+        <div class="environment env-scan">
+          <div class="prop-real-receipt"></div>
+        </div>
+        <div class="caption-bar">
+          <div class="caption">SCAN. LOG. DONE.</div>
+          <div class="sub">Point your camera. The rest fills itself.</div>
+        </div>
+        <div class="phone-in-scene" style="top: 95px; left: 25px; height: 410px; width: 195px; transform: rotate(1deg);">
+          <div class="screen" style="height: calc(100% - 6px);">
+            <div class="mini-status-bar"><span>9:41</span><span style="font-size:6px;">ADD SERVICE</span></div>
+            <div class="mini-scan-steps">
+              <div class="mini-scan-step">
+                <div class="mini-scan-num">1</div>
+                <div>
+                  <div class="mini-scan-title">Scan Receipt</div>
+                  <div class="mini-scan-detail">Camera OCR extracts text</div>
+                </div>
+              </div>
+              <div class="mini-scan-step" style="border-color:var(--status-good);">
+                <div class="mini-scan-num" style="color:var(--status-good);">2</div>
+                <div>
+                  <div class="mini-scan-title">Auto-Fill</div>
+                  <div style="font-size:6px; color:var(--text-secondary); margin-top:3px; line-height:1.5;">
+                    <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:var(--text-tertiary);">Service</span><span>Oil Change</span></div>
+                    <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:var(--text-tertiary);">Cost</span><span>$72.50</span></div>
+                    <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:var(--text-tertiary);">Date</span><span>Jan 12</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="mini-scan-step">
+                <div class="mini-scan-num">3</div>
+                <div>
+                  <div class="mini-scan-title">Smart Mileage</div>
+                  <div class="mini-scan-detail">Est: 38,420 mi (~112 mi/wk)</div>
+                </div>
+              </div>
+              <div style="padding:4px 0;">
+                <div style="background:var(--text-primary); color:var(--bg-primary); padding:8px; text-align:center; font-size:8px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase;">SAVE SERVICE</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHOT 4: See What You Spend -->
+    <div class="shot">
+      <div class="shot-number">04 / 06 — THE PAYOFF</div>
+      <div class="shot-caption">SEE WHAT YOU SPEND</div>
+      <div class="shot-subcaption">By category, by month, by mile.</div>
+      <div class="appstore-frame">
+        <div class="environment env-clean"></div>
+        <div class="caption-bar">
+          <div class="caption">SEE WHAT YOU SPEND</div>
+          <div class="sub">By category, by month, by mile.</div>
+        </div>
+        <!-- Keys prop -->
+        <div class="prop-keys" style="position:absolute; bottom:80px; right:30px; z-index:1;">
+          <div class="prop-key-fob"></div>
+          <div class="prop-key-ring"></div>
+        </div>
+        <div class="phone-in-scene" style="top: 90px; left: 50%; transform: translateX(-50%); height: 420px; width: 210px;">
+          <div class="screen" style="height: calc(100% - 6px);">
+            <div class="mini-status-bar"><span>9:41</span><span>CHECKPOINT</span></div>
+            <div class="mini-vehicle">
+              <div class="mini-dot" style="background:var(--status-due-soon);"></div>
+              2021 CIVIC
+              <span style="margin-left:auto; color:var(--text-tertiary); font-weight:400;">2026</span>
+            </div>
+            <div class="mini-big-number">$847</div>
+            <div class="mini-big-label">THIS YEAR · $0.022/MI</div>
+            <div class="mini-chart">
+              <div class="mini-bar" style="height:30%;"></div>
+              <div class="mini-bar" style="height:65%;"></div>
+              <div class="mini-bar hi" style="height:45%;"></div>
+              <div class="mini-bar" style="height:0; border:1px dashed var(--text-tertiary);"></div>
+              <div class="mini-bar" style="height:0; border:1px dashed var(--text-tertiary);"></div>
+              <div class="mini-bar" style="height:0; border:1px dashed var(--text-tertiary);"></div>
+            </div>
+            <div style="display:flex; gap:3px; padding:0 8px; font-size:5px; color:var(--text-tertiary); letter-spacing:0.08em;">
+              <span style="flex:1; text-align:center;">JAN</span>
+              <span style="flex:1; text-align:center;">FEB</span>
+              <span style="flex:1; text-align:center;">MAR</span>
+              <span style="flex:1; text-align:center;">APR</span>
+              <span style="flex:1; text-align:center;">MAY</span>
+              <span style="flex:1; text-align:center;">JUN</span>
+            </div>
+            <div style="padding:8px 8px 0;">
+              <div class="mini-card-label">BY CATEGORY</div>
+              <div style="font-size:7px; border-bottom:1px solid rgba(245,240,220,0.06); padding:4px 0; display:flex; justify-content:space-between;">
+                <span style="color:var(--text-secondary);">● Maintenance</span><span style="font-weight:600;">$522</span>
+              </div>
+              <div style="font-size:7px; border-bottom:1px solid rgba(245,240,220,0.06); padding:4px 0; display:flex; justify-content:space-between;">
+                <span style="color:var(--status-due-soon);">● Repair</span><span style="font-weight:600;">$248</span>
+              </div>
+              <div style="font-size:7px; padding:4px 0; display:flex; justify-content:space-between;">
+                <span style="color:var(--status-good);">● Inspection</span><span style="font-weight:600;">$77</span>
+              </div>
+            </div>
+            <div class="mini-tab-bar">
+              <div class="mini-tab">HOME</div>
+              <div class="mini-tab">SERVICES</div>
+              <div class="mini-tab active">COSTS</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHOT 5: Everywhere You Look -->
+    <div class="shot">
+      <div class="shot-number">05 / 06 — THE ECOSYSTEM</div>
+      <div class="shot-caption">EVERYWHERE YOU LOOK</div>
+      <div class="shot-subcaption">Home Screen. Lock Screen. Watch. CarPlay.</div>
+      <div class="appstore-frame">
+        <div class="environment env-car">
+          <div class="prop-steering"></div>
+        </div>
+        <div class="caption-bar">
+          <div class="caption">EVERYWHERE YOU LOOK</div>
+          <div class="sub">Home Screen. Lock Screen. Watch. CarPlay.</div>
+        </div>
+        <div class="phone-in-scene" style="top: 90px; left: 50%; transform: translateX(-50%); height: 400px; width: 200px;">
+          <div class="screen" style="height: calc(100% - 6px);">
+            <div class="mini-status-bar"><span>9:41</span><span></span></div>
+            <div class="mini-widgets">
+              <div class="mini-widget span">
+                <div class="mini-widget-label">HOME SCREEN WIDGET</div>
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:4px;">
+                  <div>
+                    <div style="font-size:8px; font-weight:600;">Oil Change</div>
+                    <div style="font-size:7px; color:var(--status-overdue); margin-top:1px;">12 DAYS OVERDUE</div>
+                  </div>
+                  <div style="text-align:right; font-size:6px; color:var(--text-tertiary);">
+                    NEXT<br><span style="color:var(--text-secondary);">Tire Rot · Apr 15</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mini-widget">
+                <div class="mini-widget-label">LOCK SCREEN</div>
+                <div class="mini-widget-value" style="color:var(--status-overdue); font-size:16px;">!</div>
+                <div style="font-size:6px; color:var(--text-secondary);">Oil Change</div>
+              </div>
+              <div class="mini-widget" style="border-radius:12px; background:#1A1A2E; border-color:rgba(255,255,255,0.15);">
+                <div class="mini-widget-label" style="color:rgba(255,255,255,0.4);">WATCH</div>
+                <div style="font-size:7px; font-weight:600; color:white; margin-top:4px;">Oil Change</div>
+                <div style="font-size:6px; color:var(--status-overdue);">OVERDUE</div>
+              </div>
+              <div class="mini-widget span">
+                <div class="mini-widget-label">CARPLAY DASHBOARD</div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+                  <div>
+                    <div style="font-size:8px; font-weight:600;">Next: Oil Change</div>
+                    <div style="font-size:6px; color:var(--status-overdue);">12 days overdue</div>
+                  </div>
+                  <div style="font-size:7px; color:var(--text-tertiary);">38,420 MI</div>
+                </div>
+              </div>
+              <div class="mini-widget span">
+                <div class="mini-widget-label">SIRI SHORTCUT</div>
+                <div style="font-size:7px; color:var(--text-secondary); margin-top:3px;">"What's due on my Civic?"</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHOT 6: Built With Intention -->
+    <div class="shot">
+      <div class="shot-number">06 / 06 — THE CLOSER</div>
+      <div class="shot-caption">BUILT WITH INTENTION</div>
+      <div class="shot-subcaption">8 themes. Zero fluff.</div>
+      <div class="appstore-frame">
+        <div class="environment env-themes"></div>
+        <div class="caption-bar" style="background:none;">
+          <div class="caption">BUILT WITH INTENTION</div>
+          <div class="sub">8 themes. Zero fluff.</div>
+        </div>
+        <div class="theme-grid-v2">
+          <!-- Checkpoint (default) -->
+          <div class="theme-mini-phone" style="background:#0033BE; color:#F5F0DC;">
+            <div class="theme-mini-label">CHECKPOINT</div>
+            <div class="theme-mini-card"><div class="theme-mini-title">Oil Change</div></div>
+            <div class="theme-mini-accent" style="background:#F5F0DC;"></div>
+          </div>
+          <!-- Clean Slate -->
+          <div class="theme-mini-phone" style="background:#F5F6F8; color:#1A1A2E; border-color:rgba(0,0,0,0.1);">
+            <div class="theme-mini-label">CLEAN SLATE</div>
+            <div class="theme-mini-card"><div class="theme-mini-title">Oil Change</div></div>
+            <div class="theme-mini-accent" style="background:#1A1A2E;"></div>
+          </div>
+          <!-- Red Line -->
+          <div class="theme-mini-phone" style="background:#1A0505; color:#DC2626;">
+            <div class="theme-mini-label">RED LINE</div>
+            <div class="theme-mini-card"><div class="theme-mini-title">Oil Change</div></div>
+            <div class="theme-mini-accent" style="background:#DC2626;"></div>
+          </div>
+          <!-- Blueprint -->
+          <div class="theme-mini-phone" style="background:#0F172A; color:#93C5FD;">
+            <div class="theme-mini-label">BLUEPRINT</div>
+            <div class="theme-mini-card"><div class="theme-mini-title">Oil Change</div></div>
+            <div class="theme-mini-accent" style="background:#93C5FD;"></div>
+          </div>
+          <!-- Midnight Oil -->
+          <div class="theme-mini-phone" style="background:#0D0D1A; color:#818CF8;">
+            <div class="theme-mini-label">MIDNIGHT OIL</div>
+            <div class="theme-mini-card"><div class="theme-mini-title">Oil Change</div></div>
+            <div class="theme-mini-accent" style="background:#818CF8;"></div>
+          </div>
+          <!-- Stealth -->
+          <div class="theme-mini-phone" style="background:#000; color:#6B7280;">
+            <div class="theme-mini-label">STEALTH</div>
+            <div class="theme-mini-card"><div class="theme-mini-title">Oil Change</div></div>
+            <div class="theme-mini-accent" style="background:#6B7280;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Notes -->
+  <div class="notes">
+    <h3>How to Read These Mockups</h3>
+    <div class="note">
+      <strong>The dark textured backgrounds simulate real photography.</strong>
+      <p>In production, these will be actual photos from your mirrorless camera — garage workbench, owner's manual, car interior, etc. The CSS textures here are placeholders that approximate the tonal quality and mood of each scene.</p>
+    </div>
+    <div class="note">
+      <strong>The phone screens will be composited in post.</strong>
+      <p>Photograph your phone with the screen off or showing a solid dark color. In Photoshop/Affinity, mask the screen area and perspective-warp a real app screenshot to fit. Add a subtle glass reflection for realism.</p>
+    </div>
+    <div class="note">
+      <strong>The blurred props tell the story.</strong>
+      <p>The wrench, receipt, keys, and steering wheel are all out of focus — they provide context without competing. Your mirrorless at f/1.8–2.8 will naturally create this separation.</p>
+    </div>
+  </div>
+
+  <div class="comparison">
+    <div class="comparison-col before">
+      <h4>What competitors do</h4>
+      <p>Flat device mockup floating on a gradient. Maybe a drop shadow. Caption in a system font. Looks like every other app in the category. Zero personality, zero context.</p>
+    </div>
+    <div class="comparison-col after">
+      <h4>What Checkpoint does</h4>
+      <p>A phone on a real workbench, screen glowing cerulean, wrench going soft in the background. Monospace caption above. It says: this app was made by someone who understands both cars and design. You feel it before you read a word.</p>
+    </div>
+  </div>
+
+</body>
+</html>

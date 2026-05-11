@@ -434,15 +434,6 @@
     "Browse service presets" : {
 
     },
-    "BUNDLE OPPORTUNITY" : {
-
-    },
-    "Bundle opportunity, %lld services due soon" : {
-
-    },
-    "Bundle Services" : {
-
-    },
     "BY CATEGORY" : {
 
     },
@@ -670,13 +661,13 @@
     "DETECTED VALUE" : {
 
     },
-    "Dismiss bundle suggestion" : {
-
-    },
     "Dismiss error" : {
 
     },
     "Dismiss hint" : {
+
+    },
+    "Dismiss service visit suggestion" : {
 
     },
     "distance.kilometers" : {
@@ -798,6 +789,12 @@
 
     },
     "Double tap to view details" : {
+
+    },
+    "Double tap to view the Service Visit" : {
+
+    },
+    "Double tap to view the visit" : {
 
     },
     "DUE AT" : {
@@ -1256,9 +1253,6 @@
     "Marbete status: %@" : {
 
     },
-    "Mark All Done" : {
-
-    },
     "MARK ALL DONE" : {
 
     },
@@ -1296,6 +1290,9 @@
 
     },
     "NHTSA #%@" : {
+
+    },
+    "No cost recorded" : {
 
     },
     "NO ESTIMATE AVAILABLE" : {
@@ -2126,6 +2123,9 @@
     "PARK IT" : {
 
     },
+    "PART OF VISIT" : {
+
+    },
     "PDF" : {
 
     },
@@ -2243,6 +2243,40 @@
         }
       }
     },
+    "recall.empty.all_clear" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All clear"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo en orden"
+          }
+        }
+      }
+    },
+    "recall.empty.toggle_hint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No open recalls. Toggle Show resolved to view past recalls."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay retiros abiertos. Activa Mostrar resueltos para ver retiros pasados."
+          }
+        }
+      }
+    },
     "recall.error_title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2311,6 +2345,23 @@
         }
       }
     },
+    "recall.section.resolved" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resolved"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resueltos"
+          }
+        }
+      }
+    },
     "recall.settings.count_plural" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2375,57 +2426,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Retiros del vehículo"
-          }
-        }
-      }
-    },
-    "recall.empty.all_clear" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "All clear"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Todo en orden"
-          }
-        }
-      }
-    },
-    "recall.empty.toggle_hint" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No open recalls. Toggle Show resolved to view past recalls."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No hay retiros abiertos. Activa Mostrar resueltos para ver retiros pasados."
-          }
-        }
-      }
-    },
-    "recall.section.resolved" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Resolved"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Resueltos"
           }
         }
       }
@@ -2762,6 +2762,31 @@
           }
         }
       }
+    },
+    "Service Visit" : {
+
+    },
+    "SERVICE VISIT" : {
+
+    },
+    "Service Visit · %lld services" : {
+
+    },
+    "Service Visit on %@, %lld services" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Service Visit on %1$@, %2$lld services"
+          }
+        }
+      }
+    },
+    "SERVICE VISIT OPPORTUNITY" : {
+
+    },
+    "Service visit opportunity, %lld services due soon" : {
+
     },
     "SERVICES" : {
 
