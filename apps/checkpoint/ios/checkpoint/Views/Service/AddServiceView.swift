@@ -1,11 +1,3 @@
-//
-//  AddServiceView.swift
-//  checkpoint
-//
-//  Dual-mode form for logging past services or scheduling future services
-//  with instrument cluster aesthetic
-//
-
 import SwiftUI
 import SwiftData
 
@@ -19,12 +11,12 @@ struct AddServiceView: View {
     @Environment(\.modelContext) var modelContext
     @Environment(AppState.self) var appState
     @Query var services: [Service]
+    @Query var serviceLogs: [ServiceLog]
 
     let vehicle: Vehicle
     var seasonalPrefill: SeasonalPrefill?
     var initialMode: ServiceMode = .record
 
-    // Mode selection
     @State var mode: ServiceMode
 
     init(vehicle: Vehicle, seasonalPrefill: SeasonalPrefill? = nil, initialMode: ServiceMode = .record) {
@@ -34,11 +26,9 @@ struct AddServiceView: View {
         _mode = State(initialValue: initialMode)
     }
 
-    // Service type selection
     @State var selectedPreset: PresetData? = nil
     @State var customServiceName: String = ""
 
-    // Log mode fields
     @State var performedDate: Date = Date()
     @State var mileageAtService: Int? = nil
     @State var cost: String = ""
@@ -48,15 +38,14 @@ struct AddServiceView: View {
     @State var scheduleRecurring: Bool = false
     @State var pendingAttachments: [AttachmentPicker.AttachmentData] = []
 
-    // Schedule mode fields
     @State var hasCustomDate: Bool = false
     @State var dueDate: Date = Date()
     @State var dueMileage: Int? = nil
     @State var intervalMonths: Int? = nil
     @State var intervalMiles: Int? = nil
 
-    /// The due date that will be saved — derived from interval, custom pick, or nil.
-    /// Used by both the UI (to show the derived date) and save logic.
+    @State private var presets: [PresetData] = []
+
     private var effectiveDueDate: Date? {
         if hasCustomDate {
             return dueDate
@@ -72,23 +61,55 @@ struct AddServiceView: View {
     }
 
     var isFormValid: Bool {
-        !serviceName.isEmpty && (mode == .record ? mileageAtService != nil : true)
+        !serviceName.isEmpty
     }
 
-    /// Preview text showing when the next service would be due
+    var lastLogForVehicle: ServiceLog? {
+        serviceLogs.forVehicleNewestFirst(vehicle).first
+    }
+
+    var quickChips: [PresetData] {
+        serviceLogs.topPresetChips(for: vehicle, from: presets, limit: 4)
+    }
+
+    private var anchors: ServiceFormAnchors {
+        ServiceFormAnchors(
+            vehicle: vehicle,
+            logs: serviceLogs,
+            serviceName: serviceName,
+            performedDate: performedDate,
+            enteredMileage: mileageAtService,
+            enteredCostString: cost
+        )
+    }
+
+    func useLastEntry() {
+        guard let log = lastLogForVehicle else { return }
+        let template = LoggedServiceTemplate(from: log)
+        selectedPreset = nil
+        customServiceName = template.serviceName
+        cost = template.costString
+        if let category = template.costCategory {
+            costCategory = category
+        }
+        notes = template.notes ?? ""
+        intervalMonths = template.intervalMonths
+        intervalMiles = template.intervalMiles
+        scheduleRecurring = template.hasRecurringIntervals
+        HapticService.shared.selectionChanged()
+    }
+
     private var nextDuePreview: String? {
         guard scheduleRecurring else { return nil }
         var parts: [String] = []
 
-        if let months = intervalMonths, months > 0 {
-            if let nextDate = Calendar.current.date(byAdding: .month, value: months, to: performedDate) {
-                parts.append(Formatters.shortDate.string(from: nextDate))
-            }
+        if let months = intervalMonths, months > 0,
+           let nextDate = Calendar.current.date(byAdding: .month, value: months, to: performedDate) {
+            parts.append(Formatters.shortDate.string(from: nextDate))
         }
 
         if let miles = intervalMiles, miles > 0, let currentMileage = mileageAtService {
-            let nextMileage = currentMileage + miles
-            parts.append("at \(Formatters.mileage(nextMileage))")
+            parts.append("at \(Formatters.mileage(currentMileage + miles))")
         }
 
         guard !parts.isEmpty else { return nil }
@@ -102,7 +123,6 @@ struct AddServiceView: View {
 
                 ScrollView {
                     VStack(spacing: Spacing.lg) {
-                        // Mode picker
                         InstrumentSegmentedControl(
                             options: ServiceMode.allCases,
                             selection: $mode
@@ -110,9 +130,23 @@ struct AddServiceView: View {
                             option.rawValue
                         }
 
-                        // Service type section
+                        if mode == .record, let last = lastLogForVehicle {
+                            UseLastEntryButton(
+                                serviceName: last.service?.name ?? "previous service",
+                                performedDate: last.performedDate,
+                                action: useLastEntry
+                            )
+                        }
+
                         VStack(alignment: .leading, spacing: Spacing.sm) {
                             InstrumentSectionHeader(title: "Service Type")
+
+                            if selectedPreset == nil, !quickChips.isEmpty {
+                                QuickServiceChipsRow(chips: quickChips) { preset in
+                                    selectedPreset = preset
+                                    HapticService.shared.selectionChanged()
+                                }
+                            }
 
                             ServiceTypePicker(
                                 selectedPreset: $selectedPreset,
@@ -120,7 +154,6 @@ struct AddServiceView: View {
                             )
                         }
 
-                        // Mode-specific fields
                         if mode == .record {
                             logModeFields
                         } else {
@@ -148,31 +181,22 @@ struct AddServiceView: View {
                 }
             }
             .onChange(of: selectedPreset) { _, newPreset in
-                if let preset = newPreset {
-                    if let months = preset.defaultIntervalMonths {
-                        intervalMonths = months
-                    }
-                    if let miles = preset.defaultIntervalMiles {
-                        intervalMiles = miles
-                    }
-                    // Auto-enable recurring when preset has intervals (Record mode)
-                    if mode == .record {
-                        let hasIntervals = (preset.defaultIntervalMonths ?? 0) > 0 || (preset.defaultIntervalMiles ?? 0) > 0
-                        if hasIntervals {
-                            scheduleRecurring = true
-                        }
-                    }
+                guard let preset = newPreset else { return }
+                if let months = preset.defaultIntervalMonths { intervalMonths = months }
+                if let miles = preset.defaultIntervalMiles { intervalMiles = miles }
+                if mode == .record {
+                    let hasIntervals = (preset.defaultIntervalMonths ?? 0) > 0 || (preset.defaultIntervalMiles ?? 0) > 0
+                    if hasIntervals { scheduleRecurring = true }
                 }
             }
             .trackScreen(.addService)
             .onAppear {
-                // Pre-fill mileage with current vehicle mileage
+                if presets.isEmpty {
+                    presets = PresetDataService.shared.loadPresets()
+                }
                 if mileageAtService == nil {
                     mileageAtService = vehicle.currentMileage
                 }
-                // Apply seasonal reminder pre-fill
-                // Seasonal dates are seasonally meaningful (e.g., Oct 1 for antifreeze),
-                // so we use the prefill date as a custom override rather than deriving from interval.
                 if let prefill = seasonalPrefill {
                     mode = .remind
                     customServiceName = prefill.serviceName
@@ -184,17 +208,13 @@ struct AddServiceView: View {
         }
     }
 
-    // MARK: - Log Mode Fields
-
     @ViewBuilder
     private var logModeFields: some View {
+        let anchors = self.anchors
+
         VStack(alignment: .leading, spacing: Spacing.sm) {
             InstrumentSectionHeader(title: "Date Performed")
-
-            InstrumentDatePicker(
-                label: "Date Performed",
-                date: $performedDate
-            )
+            InstrumentDatePicker(label: "Date Performed", date: $performedDate)
         }
 
         VStack(alignment: .leading, spacing: Spacing.sm) {
@@ -212,6 +232,19 @@ struct AddServiceView: View {
                     costError = CostValidation.validate(cost)
                 }
 
+                if let hint = anchors.priorCostHint {
+                    Text(hint)
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.textTertiary)
+                        .tracking(1)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityLabel(hint)
+                }
+
+                if let warning = anchors.costWarning {
+                    SanityWarningRow(message: warning)
+                }
+
                 if let costError {
                     ErrorMessageRow(message: costError) {
                         self.costError = nil
@@ -227,9 +260,7 @@ struct AddServiceView: View {
                     InstrumentSegmentedControl(
                         options: CostCategory.allCases,
                         selection: $costCategory
-                    ) { category in
-                        category.displayName
-                    }
+                    ) { $0.displayName }
                 }
             }
         }
@@ -238,17 +269,21 @@ struct AddServiceView: View {
             InstrumentSectionHeader(title: "Mileage")
 
             InstrumentNumberField(
-                label: "Mileage *",
+                label: "Mileage",
                 value: $mileageAtService,
-                placeholder: "Required",
+                placeholder: "Optional",
                 suffix: DistanceSettings.shared.unit.abbreviation
             )
 
             if mileageAtService == nil {
-                Text("MILEAGE IS REQUIRED TO SAVE")
-                    .font(.brutalistLabel)
-                    .foregroundStyle(Theme.statusOverdue.opacity(0.7))
-                    .tracking(1)
+                Text("If left blank, current vehicle mileage will be used.")
+                    .font(.brutalistSecondary)
+                    .foregroundStyle(Theme.textTertiary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
+            if let warning = anchors.mileageWarning {
+                SanityWarningRow(message: warning)
             }
         }
 
@@ -292,54 +327,57 @@ struct AddServiceView: View {
 
         VStack(alignment: .leading, spacing: Spacing.sm) {
             InstrumentSectionHeader(title: "Notes")
-
-            InstrumentTextEditor(
-                label: "Notes",
-                text: $notes,
-                placeholder: "Add notes...",
-                minHeight: 80
-            )
+            RichNotesEditor(label: "Notes", text: $notes, placeholder: "Add notes...", minHeight: 100)
         }
 
         VStack(alignment: .leading, spacing: Spacing.sm) {
             InstrumentSectionHeader(title: "Attachments")
-
             AttachmentPicker(attachments: $pendingAttachments)
         }
-    }
 
-    // MARK: - Schedule Mode Fields
+        Button {
+            saveService(keepOpen: true)
+        } label: {
+            HStack(spacing: Spacing.sm) {
+                Image(systemName: "plus.square.on.square")
+                    .font(.system(size: 14, weight: .medium))
+                Text("SAVE & ADD ANOTHER")
+                    .font(.brutalistLabel)
+                    .tracking(1)
+            }
+            .foregroundStyle(isFormValid ? Theme.accent : Theme.textTertiary)
+            .frame(maxWidth: .infinity)
+            .frame(height: Theme.buttonHeight)
+            .background(Theme.surfaceInstrument)
+            .overlay(
+                Rectangle()
+                    .strokeBorder(
+                        (isFormValid ? Theme.accent : Theme.gridLine).opacity(0.5),
+                        lineWidth: Theme.borderWidth
+                    )
+            )
+        }
+        .disabled(!isFormValid)
+        .padding(.top, Spacing.sm)
+        .accessibilityLabel("Save and add another")
+    }
 
     @ViewBuilder
     private var scheduleModeFields: some View {
-        // Interval first — this drives the derived due date
         VStack(alignment: .leading, spacing: Spacing.sm) {
             InstrumentSectionHeader(title: "Repeat Interval")
 
             VStack(spacing: Spacing.md) {
-                InstrumentNumberField(
-                    label: "Every",
-                    value: $intervalMonths,
-                    placeholder: "6",
-                    suffix: "months"
-                )
-
-                InstrumentNumberField(
-                    label: "Or Every",
-                    value: $intervalMiles,
-                    placeholder: "5000",
-                    suffix: "miles"
-                )
+                InstrumentNumberField(label: "Every", value: $intervalMonths, placeholder: "6", suffix: "months")
+                InstrumentNumberField(label: "Or Every", value: $intervalMiles, placeholder: "5000", suffix: "miles")
             }
         }
 
-        // Due section — adapts based on whether an interval is set
         VStack(alignment: .leading, spacing: Spacing.sm) {
             InstrumentSectionHeader(title: "When Is It Due?")
 
             VStack(spacing: Spacing.md) {
                 if let months = intervalMonths, months > 0 {
-                    // Interval is set — show derived date as informational text
                     if let date = effectiveDueDate {
                         HStack {
                             Text("DUE DATE")
@@ -358,7 +396,6 @@ struct AddServiceView: View {
                         .brutalistBorder()
                     }
                 } else {
-                    // No interval — allow a one-off custom date
                     HStack {
                         Text("SET DUE DATE")
                             .font(.brutalistLabel)
@@ -378,15 +415,11 @@ struct AddServiceView: View {
                     .brutalistBorder()
 
                     if hasCustomDate {
-                        InstrumentDatePicker(
-                            label: "Due Date",
-                            date: $dueDate
-                        )
+                        InstrumentDatePicker(label: "Due Date", date: $dueDate)
                     }
                 }
 
                 if let miles = intervalMiles, miles > 0 {
-                    // Interval is set — show derived mileage as informational text
                     HStack {
                         Text("DUE MILEAGE")
                             .font(.brutalistLabel)
@@ -403,29 +436,16 @@ struct AddServiceView: View {
                     .background(Theme.surfaceInstrument)
                     .brutalistBorder()
                 } else {
-                    // No mile interval — allow explicit due mileage
-                    InstrumentNumberField(
-                        label: "Due Mileage",
-                        value: $dueMileage,
-                        placeholder: "Optional",
-                        suffix: "mi"
-                    )
+                    InstrumentNumberField(label: "Due Mileage", value: $dueMileage, placeholder: "Optional", suffix: "mi")
                 }
             }
         }
 
         VStack(alignment: .leading, spacing: Spacing.sm) {
             InstrumentSectionHeader(title: "Notes")
-
-            InstrumentTextEditor(
-                label: "Notes",
-                text: $notes,
-                placeholder: "Add notes...",
-                minHeight: 80
-            )
+            RichNotesEditor(label: "Notes", text: $notes, placeholder: "Add notes...", minHeight: 100)
         }
     }
-
 }
 
 #Preview {

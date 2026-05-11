@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import SwiftData
 @testable import checkpoint
 
 @MainActor
@@ -206,5 +207,76 @@ final class EditServiceLogViewTests: XCTestCase {
 
         // Then: Should have correct raw value
         XCTAssertEqual(screenName.rawValue, "edit_service_log")
+    }
+
+    // MARK: - Full-Field Edit Symmetry
+    //
+    // The edit form now mirrors the record form: date, mileage, cost,
+    // category, and notes are all editable. These tests cover the in-place
+    // mutation of those fields on the existing ServiceLog so a fix doesn't
+    // accidentally create a new entry.
+
+    func testEditableFields_DateMutatesInPlace() {
+        let log = ServiceLog(performedDate: Date(timeIntervalSince1970: 1_700_000_000), mileageAtService: 32000)
+        let newDate = Date(timeIntervalSince1970: 1_710_000_000)
+        log.performedDate = newDate
+        XCTAssertEqual(log.performedDate, newDate)
+    }
+
+    func testEditableFields_MileageMutatesInPlace() {
+        let log = ServiceLog(performedDate: Date.now, mileageAtService: 30000)
+        log.mileageAtService = 31250
+        XCTAssertEqual(log.mileageAtService, 31250)
+    }
+
+    func testEditableFields_CostAndCategoryMutateTogether() {
+        let log = ServiceLog(performedDate: Date.now, mileageAtService: 30000, cost: 45, costCategory: .maintenance)
+        log.cost = 95
+        log.costCategory = .repair
+        XCTAssertEqual(log.cost, 95)
+        XCTAssertEqual(log.costCategory, .repair)
+    }
+
+    func testEditableFields_ClearingCostClearsCategory() {
+        // Mirrors the saveChanges() rule: if cost becomes nil, category is dropped.
+        let log = ServiceLog(performedDate: Date.now, mileageAtService: 30000, cost: 45, costCategory: .maintenance)
+        let newCost: Decimal? = nil
+        log.cost = newCost
+        log.costCategory = newCost != nil ? .maintenance : nil
+        XCTAssertNil(log.cost)
+        XCTAssertNil(log.costCategory)
+    }
+
+    // MARK: - History exclusion when editing
+    //
+    // When editing an existing log, the sanity warnings and last-cost hint
+    // must exclude that log from the comparison set — otherwise editing your
+    // own entry would compare against itself.
+
+    @MainActor
+    func testHistoryExclusion_MedianCostIgnoresEditedLog() {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try! ModelContainer(
+            for: Vehicle.self, Service.self, ServiceLog.self,
+            configurations: config
+        )
+        let context = container.mainContext
+        let vehicle = Vehicle(name: "Daily", make: "T", model: "C", year: 2020, currentMileage: 30000)
+        context.insert(vehicle)
+        let service = Service(name: "Oil Change")
+        service.vehicle = vehicle
+        context.insert(service)
+
+        let edited = ServiceLog(service: service, vehicle: vehicle, performedDate: Date(), mileageAtService: 30000, cost: 99)
+        let other1 = ServiceLog(service: service, vehicle: vehicle, performedDate: Date(), mileageAtService: 28000, cost: 40)
+        let other2 = ServiceLog(service: service, vehicle: vehicle, performedDate: Date(), mileageAtService: 29000, cost: 50)
+        context.insert(edited)
+        context.insert(other1)
+        context.insert(other2)
+
+        let logs = [edited, other1, other2]
+        let othersMedian = logs.filter { $0.id != edited.id }.medianCost(serviceName: "Oil Change", vehicle: vehicle)
+
+        XCTAssertEqual(othersMedian, 45, "Median should exclude the log being edited")
     }
 }

@@ -1,24 +1,18 @@
-//
-//  AddServiceView+Save.swift
-//  checkpoint
-//
-//  Save logic extracted from AddServiceView
-//
-
 import SwiftUI
 import SwiftData
 
 extension AddServiceView {
 
-    // MARK: - Save Logic
-
-    func saveService() {
-        // Analytics
+    /// Persist the form. When `keepOpen` is true, the screen stays open and
+    /// the form resets so the user can immediately log another entry.
+    func saveService(keepOpen: Bool = false) {
         let isPreset = selectedPreset != nil
         let category = selectedPreset?.category
         let hasInterval = scheduleRecurring && ((intervalMonths != nil && intervalMonths != 0) || (intervalMiles != nil && intervalMiles != 0))
 
         HapticService.shared.success()
+
+        var undo: RecordedServiceUndo?
 
         if mode == .record {
             AnalyticsService.shared.capture(.serviceLogged(
@@ -26,7 +20,7 @@ extension AddServiceView {
                 category: category,
                 hasInterval: hasInterval
             ))
-            saveLoggedService()
+            undo = saveLoggedService()
         } else {
             AnalyticsService.shared.capture(.serviceScheduled(
                 isPreset: isPreset,
@@ -37,33 +31,60 @@ extension AddServiceView {
         }
         updateAppIcon()
         updateWidgetData()
+
         if mode == .record {
-            ToastService.shared.show(L10n.toastServiceRecorded, icon: "checkmark", style: .success)
+            let context = modelContext
+            let undoAction: ToastService.ToastAction? = undo.map { snapshot in
+                ToastService.ToastAction(label: "UNDO") {
+                    snapshot.perform(in: context)
+                    HapticService.shared.selectionChanged()
+                    AnalyticsService.shared.capture(.serviceLogUndone)
+                }
+            }
+            ToastService.shared.show(
+                L10n.toastServiceRecorded,
+                icon: "checkmark",
+                style: .success,
+                action: undoAction
+            )
         } else {
             ToastService.shared.show(L10n.toastReminderSet, icon: "clock", style: .success)
         }
         appState.recordCompletedAction()
-        dismiss()
+
+        if keepOpen {
+            resetLogModeFields()
+        } else {
+            dismiss()
+        }
     }
 
-    // MARK: - App Icon
+    func resetLogModeFields() {
+        selectedPreset = nil
+        customServiceName = ""
+        performedDate = Date()
+        mileageAtService = vehicle.currentMileage
+        cost = ""
+        costCategory = .maintenance
+        notes = ""
+        scheduleRecurring = false
+        pendingAttachments = []
+        intervalMonths = nil
+        intervalMiles = nil
+    }
 
     private func updateAppIcon() {
         AppIconService.shared.updateIcon(for: vehicle, services: services)
     }
 
-    // MARK: - Widget Data
-
     private func updateWidgetData() {
         WidgetDataService.shared.updateWidget(for: vehicle)
     }
 
-    // MARK: - Save Logged Service
-
-    private func saveLoggedService() {
+    private func saveLoggedService() -> RecordedServiceUndo {
         let mileage = mileageAtService ?? vehicle.currentMileage
+        let priorMileage = vehicle.currentMileage
 
-        // Create service
         let service = Service(
             name: serviceName,
             lastPerformed: performedDate,
@@ -73,14 +94,12 @@ extension AddServiceView {
         )
         service.vehicle = vehicle
 
-        // Derive next due date/mileage from intervals (only when recurring)
         if scheduleRecurring {
             service.deriveDueFromIntervals(anchorDate: performedDate, anchorMileage: mileage)
         }
 
         modelContext.insert(service)
 
-        // Create service log entry
         let costDecimal = Decimal(string: cost)
         let log = ServiceLog(
             service: service,
@@ -93,7 +112,7 @@ extension AddServiceView {
         )
         modelContext.insert(log)
 
-        // Save attachments
+        var insertedAttachments: [ServiceAttachment] = []
         for attachmentData in pendingAttachments {
             let thumbnailData = ServiceAttachment.generateThumbnailData(
                 from: attachmentData.data,
@@ -108,15 +127,21 @@ extension AddServiceView {
                 extractedText: attachmentData.extractedText
             )
             modelContext.insert(attachment)
+            insertedAttachments.append(attachment)
         }
 
-        // Update vehicle mileage if service mileage is higher
         if mileage > vehicle.currentMileage {
             vehicle.currentMileage = mileage
         }
-    }
 
-    // MARK: - Save Scheduled Service
+        return RecordedServiceUndo(
+            service: service,
+            log: log,
+            attachments: insertedAttachments,
+            vehicle: vehicle,
+            priorVehicleMileage: priorMileage
+        )
+    }
 
     private func saveScheduledService() {
         let service = Service(
@@ -127,10 +152,8 @@ extension AddServiceView {
         )
         service.vehicle = vehicle
 
-        // Derive deadlines from intervals (same logic as record mode and mark-complete)
         service.deriveDueFromIntervals(anchorDate: Date(), anchorMileage: vehicle.currentMileage)
 
-        // Apply user overrides: custom date or explicit due mileage take precedence
         if hasCustomDate {
             service.dueDate = dueDate
         }

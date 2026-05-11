@@ -195,7 +195,7 @@ struct ServiceVisitDetailView: View {
 
     private func notesSection(notes: String) -> some View {
         InstrumentSection(title: "Notes") {
-            Text(notes)
+            Text(notes.brutalistMarkdownAttributed)
                 .font(.brutalistBody)
                 .foregroundStyle(Theme.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)

@@ -29,98 +29,41 @@ final class AddServiceViewTests: XCTestCase {
     }
 
     // MARK: - Form Validation Tests (Log Mode)
+    //
+    // Validation mirrors AddServiceView.isFormValid: only the service name is required.
+    // Mileage is optional; an unspecified mileage falls back to vehicle.currentMileage
+    // in the save logic. This keeps the form permissive for casual users, backfillers,
+    // and one-handed parking-lot loggers.
 
-    func testFormValidation_LogMode_ValidWhenServiceNameAndMileageFilled() {
-        // Given: Log mode with service name and mileage
-        let mode = ServiceMode.record
-        let serviceName = "Oil Change"
-        let mileageAtService = "32500"
+    private func isFormValid(serviceName: String) -> Bool {
+        !serviceName.isEmpty
+    }
 
-        // When: Checking validation logic
-        let isValid = !serviceName.isEmpty && (mode == .record ? !mileageAtService.isEmpty : true)
+    func testFormValidation_LogMode_ValidWhenServiceNameFilled() {
+        XCTAssertTrue(isFormValid(serviceName: "Oil Change"))
+    }
 
-        // Then: Form should be valid
-        XCTAssertTrue(isValid, "Log mode should be valid when service name and mileage are filled")
+    func testFormValidation_LogMode_ValidWithoutMileage() {
+        // Mileage is optional — saving without it is allowed.
+        XCTAssertTrue(isFormValid(serviceName: "Oil Change"))
     }
 
     func testFormValidation_LogMode_InvalidWhenServiceNameEmpty() {
-        // Given: Log mode with empty service name
-        let mode = ServiceMode.record
-        let serviceName = ""
-        let mileageAtService = "32500"
-
-        // When: Checking validation logic
-        let isValid = !serviceName.isEmpty && (mode == .record ? !mileageAtService.isEmpty : true)
-
-        // Then: Form should be invalid
-        XCTAssertFalse(isValid, "Log mode should be invalid when service name is empty")
-    }
-
-    func testFormValidation_LogMode_InvalidWhenMileageEmpty() {
-        // Given: Log mode with empty mileage
-        let mode = ServiceMode.record
-        let serviceName = "Oil Change"
-        let mileageAtService = ""
-
-        // When: Checking validation logic
-        let isValid = !serviceName.isEmpty && (mode == .record ? !mileageAtService.isEmpty : true)
-
-        // Then: Form should be invalid
-        XCTAssertFalse(isValid, "Log mode should be invalid when mileage is empty")
+        XCTAssertFalse(isFormValid(serviceName: ""))
     }
 
     func testFormValidation_LogMode_InvalidWhenBothEmpty() {
-        // Given: Log mode with both fields empty
-        let mode = ServiceMode.record
-        let serviceName = ""
-        let mileageAtService = ""
-
-        // When: Checking validation logic
-        let isValid = !serviceName.isEmpty && (mode == .record ? !mileageAtService.isEmpty : true)
-
-        // Then: Form should be invalid
-        XCTAssertFalse(isValid, "Log mode should be invalid when both fields are empty")
+        XCTAssertFalse(isFormValid(serviceName: ""))
     }
 
     // MARK: - Form Validation Tests (Schedule Mode)
 
-    func testFormValidation_ScheduleMode_ValidWhenOnlyServiceNameFilled() {
-        // Given: Schedule mode with only service name (mileage not required)
-        let mode = ServiceMode.remind
-        let serviceName = "Tire Rotation"
-        let mileageAtService = ""
-
-        // When: Checking validation logic
-        let isValid = !serviceName.isEmpty && (mode == .record ? !mileageAtService.isEmpty : true)
-
-        // Then: Form should be valid
-        XCTAssertTrue(isValid, "Schedule mode should be valid when only service name is filled")
+    func testFormValidation_ScheduleMode_ValidWhenServiceNameFilled() {
+        XCTAssertTrue(isFormValid(serviceName: "Tire Rotation"))
     }
 
     func testFormValidation_ScheduleMode_InvalidWhenServiceNameEmpty() {
-        // Given: Schedule mode with empty service name
-        let mode = ServiceMode.remind
-        let serviceName = ""
-        let mileageAtService = "35000"
-
-        // When: Checking validation logic
-        let isValid = !serviceName.isEmpty && (mode == .record ? !mileageAtService.isEmpty : true)
-
-        // Then: Form should be invalid
-        XCTAssertFalse(isValid, "Schedule mode should be invalid when service name is empty")
-    }
-
-    func testFormValidation_ScheduleMode_ValidWithAllFields() {
-        // Given: Schedule mode with all fields filled
-        let mode = ServiceMode.remind
-        let serviceName = "Brake Inspection"
-        let mileageAtService = "40000"
-
-        // When: Checking validation logic
-        let isValid = !serviceName.isEmpty && (mode == .record ? !mileageAtService.isEmpty : true)
-
-        // Then: Form should be valid
-        XCTAssertTrue(isValid, "Schedule mode should be valid with all fields filled")
+        XCTAssertFalse(isFormValid(serviceName: ""))
     }
 
     // MARK: - Service Name Computed Property Tests

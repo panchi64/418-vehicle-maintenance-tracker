@@ -116,11 +116,11 @@ struct EditServiceView: View {
                         VStack(alignment: .leading, spacing: Spacing.sm) {
                             InstrumentSectionHeader(title: "Notes")
 
-                            InstrumentTextEditor(
+                            RichNotesEditor(
                                 label: "Notes",
                                 text: $notes,
                                 placeholder: "Add notes...",
-                                minHeight: 80
+                                minHeight: 100
                             )
                         }
 

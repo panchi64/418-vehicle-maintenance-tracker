@@ -184,7 +184,7 @@ struct ServiceDetailView: View {
                             .font(.brutalistLabel)
                             .foregroundStyle(Theme.textTertiary)
                             .tracking(1)
-                        Text(notes)
+                        Text(notes.brutalistMarkdownAttributed)
                             .font(.brutalistBody)
                             .foregroundStyle(Theme.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)

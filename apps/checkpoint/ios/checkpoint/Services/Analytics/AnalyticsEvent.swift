@@ -83,6 +83,7 @@ enum AnalyticsEvent {
     case serviceMarkedDone(hasCost: Bool, hasNotes: Bool, hasAttachments: Bool, attachmentCount: Int)
     case serviceEdited
     case serviceLogEdited(notesChanged: Bool, attachmentsAdded: Int)
+    case serviceLogUndone
     case serviceDeleted
 
     // MARK: - Mileage
@@ -175,6 +176,7 @@ enum AnalyticsEvent {
         case .serviceMarkedDone: return "service_marked_done"
         case .serviceEdited: return "service_edited"
         case .serviceLogEdited: return "service_log_edited"
+        case .serviceLogUndone: return "service_log_undone"
         case .serviceDeleted: return "service_deleted"
         case .mileageUpdated: return "mileage_updated"
         case .mileagePromptShown: return "mileage_prompt_shown"
