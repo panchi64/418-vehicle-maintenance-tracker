@@ -49,16 +49,15 @@ struct RichNotesEditor: View {
 
     private var toolbar: some View {
         HStack(spacing: Spacing.sm) {
-            FormatButton(label: "B", accessibility: "Bold") {
+            FormatButton(label: "BOLD", accessibility: "Bold") {
                 apply(MarkdownNotesEditing.applyBold)
             }
-            .fontWeight(.bold)
 
-            FormatButton(label: "•", accessibility: "Bulleted list") {
+            FormatButton(label: "BULLETS", accessibility: "Bulleted list") {
                 apply(MarkdownNotesEditing.applyBulletList)
             }
 
-            FormatButton(label: "1.", accessibility: "Numbered list") {
+            FormatButton(label: "NUMBERED", accessibility: "Numbered list") {
                 apply(MarkdownNotesEditing.applyNumberedList)
             }
 
@@ -87,9 +86,10 @@ private struct FormatButton: View {
         Button(action: action) {
             Text(label)
                 .font(.brutalistLabel)
-                .tracking(1)
+                .tracking(1.5)
                 .foregroundStyle(Theme.accent)
-                .frame(minWidth: 32, minHeight: 32)
+                .padding(.horizontal, Spacing.sm)
+                .frame(minHeight: 32)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
