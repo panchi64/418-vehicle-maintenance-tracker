@@ -273,12 +273,14 @@ struct ContentView: View {
         }
         .sheet(isPresented: $appState.showAddService, onDismiss: {
             appState.seasonalPrefill = nil
+            appState.postRecordPrefill = nil
             appState.addServiceMode = nil
         }) {
             if let vehicle = currentVehicle {
                 AddServiceView(
                     vehicle: vehicle,
                     seasonalPrefill: appState.seasonalPrefill,
+                    postRecordPrefill: appState.postRecordPrefill,
                     initialMode: appState.addServiceMode ?? .record
                 )
                 .environment(appState)

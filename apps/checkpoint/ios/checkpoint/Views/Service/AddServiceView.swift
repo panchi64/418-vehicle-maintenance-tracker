@@ -15,13 +15,20 @@ struct AddServiceView: View {
 
     let vehicle: Vehicle
     var seasonalPrefill: SeasonalPrefill?
+    var postRecordPrefill: PostRecordPrefill?
     var initialMode: ServiceMode = .record
 
     @State var mode: ServiceMode
 
-    init(vehicle: Vehicle, seasonalPrefill: SeasonalPrefill? = nil, initialMode: ServiceMode = .record) {
+    init(
+        vehicle: Vehicle,
+        seasonalPrefill: SeasonalPrefill? = nil,
+        postRecordPrefill: PostRecordPrefill? = nil,
+        initialMode: ServiceMode = .record
+    ) {
         self.vehicle = vehicle
         self.seasonalPrefill = seasonalPrefill
+        self.postRecordPrefill = postRecordPrefill
         self.initialMode = initialMode
         _mode = State(initialValue: initialMode)
     }
@@ -111,6 +118,34 @@ struct AddServiceView: View {
         intervalMiles = template.intervalMiles
         isRecurring = template.hasRecurringIntervals
         HapticService.shared.selectionChanged()
+    }
+
+    private func applySeasonalPrefill(_ prefill: SeasonalPrefill) {
+        mode = .remind
+        customServiceName = prefill.serviceName
+        hasCustomDate = true
+        dueDate = prefill.dueDate
+        intervalMonths = prefill.intervalMonths
+        isRecurring = true
+    }
+
+    private func applyPostRecordPrefill(_ prefill: PostRecordPrefill) {
+        mode = .remind
+        customServiceName = prefill.serviceName
+        intervalMonths = prefill.intervalMonths
+        intervalMiles = prefill.intervalMiles
+        isRecurring = Service.hasIntervalPolicy(
+            intervalMonths: prefill.intervalMonths,
+            intervalMiles: prefill.intervalMiles
+        )
+        if let months = prefill.intervalMonths, months > 0,
+           let projected = Calendar.current.date(byAdding: .month, value: months, to: prefill.performedDate) {
+            hasCustomDate = true
+            dueDate = projected
+        }
+        if let miles = prefill.intervalMiles, miles > 0 {
+            nextDueMileage = prefill.performedMileage + miles
+        }
     }
 
     /// Remind-mode counterpart to `useLastEntry()`. Diverges by projecting a
@@ -256,14 +291,8 @@ struct AddServiceView: View {
                 if mileageAtService == nil {
                     mileageAtService = vehicle.currentMileage
                 }
-                if let prefill = seasonalPrefill {
-                    mode = .remind
-                    customServiceName = prefill.serviceName
-                    hasCustomDate = true
-                    dueDate = prefill.dueDate
-                    intervalMonths = prefill.intervalMonths
-                    isRecurring = true
-                }
+                if let prefill = seasonalPrefill { applySeasonalPrefill(prefill) }
+                if let prefill = postRecordPrefill { applyPostRecordPrefill(prefill) }
             }
         }
     }

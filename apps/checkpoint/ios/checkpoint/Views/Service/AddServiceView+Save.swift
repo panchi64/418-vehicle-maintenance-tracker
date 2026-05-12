@@ -37,18 +37,38 @@ extension AddServiceView {
 
         if mode == .record {
             let context = modelContext
-            let undoAction: ToastService.ToastAction? = undo.map { snapshot in
-                ToastService.ToastAction(label: "UNDO") {
-                    snapshot.perform(in: context)
+            let toastAction: ToastService.ToastAction?
+            if !isRecurring {
+                // No future Service was spawned — offer the user a one-tap
+                // way to schedule one from the completion's anchors.
+                let prefill = PostRecordPrefill(
+                    serviceName: serviceName,
+                    performedDate: performedDate,
+                    performedMileage: mileageAtService ?? vehicle.currentMileage,
+                    intervalMonths: intervalMonths,
+                    intervalMiles: intervalMiles
+                )
+                let state = appState
+                toastAction = ToastService.ToastAction(label: "SCHEDULE NEXT") {
+                    state.postRecordPrefill = prefill
+                    state.addServiceMode = .remind
+                    state.showAddService = true
                     HapticService.shared.selectionChanged()
-                    AnalyticsService.shared.capture(.serviceLogUndone)
+                }
+            } else {
+                toastAction = undo.map { snapshot in
+                    ToastService.ToastAction(label: "UNDO") {
+                        snapshot.perform(in: context)
+                        HapticService.shared.selectionChanged()
+                        AnalyticsService.shared.capture(.serviceLogUndone)
+                    }
                 }
             }
             ToastService.shared.show(
                 L10n.toastServiceRecorded,
                 icon: "checkmark",
                 style: .success,
-                action: undoAction
+                action: toastAction
             )
         } else {
             ToastService.shared.show(L10n.toastReminderSet, icon: "clock", style: .success)

@@ -38,6 +38,11 @@ final class AppState {
 
     var seasonalPrefill: SeasonalPrefill?
 
+    /// Set by the "SCHEDULE NEXT" toast action after a record-mode save.
+    /// Consumed by the next AddServiceView presentation to anchor the
+    /// remind form on the just-recorded service's data.
+    var postRecordPrefill: PostRecordPrefill?
+
     // MARK: - Add Service Mode
 
     var addServiceMode: ServiceMode?
