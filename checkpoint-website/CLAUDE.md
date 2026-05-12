@@ -69,3 +69,16 @@ All design tokens live in `app.css` as CSS custom properties. Styles use a mix o
 - `useScrollFade()` must be called in each page that uses `.fade-in-on-scroll` elements
 - The homepage composes all section components in order inside a `.frame` wrapper
 - Legal pages (privacy, terms) use the `.legal-prose` class for consistent typography
+
+## Security Posture
+
+The site is intentionally static — no server functions, no API routes, no form actions, no `fetch()`, no Cloudflare Worker. Preserve these invariants:
+
+- **Never render untrusted HTML.** Do not introduce `innerHTML` props, `bypassSecurityTrust*`, or anything equivalent. If you need to render rich content, use SolidJS components, not raw HTML strings.
+- **If a server function is added** (`+server`, `use server`, API route, form action), validate and sanitize all inputs at the boundary and treat it as a new attack surface to be reviewed.
+- **Add a `_headers` file before launch** for Cloudflare Pages hardening. Recommended baseline:
+  - `Content-Security-Policy` — strict, scoped to first-party + required CDNs
+  - `X-Content-Type-Options: nosniff`
+  - `Referrer-Policy: strict-origin-when-cross-origin`
+  - `Permissions-Policy` — deny unused features (camera, microphone, geolocation, etc.)
+  - `Strict-Transport-Security: max-age=31536000; includeSubDomains`
