@@ -431,6 +431,12 @@ struct AddServiceView: View {
             InstrumentSectionHeader(title: "Next Due")
 
             VStack(spacing: Spacing.md) {
+                ChipRow(items: fuzzyDateChips, label: \.label) { chip in
+                    hasCustomDate = true
+                    dueDate = chip.date
+                    HapticService.shared.selectionChanged()
+                }
+
                 LabeledInstrumentToggle(
                     label: "SET DUE DATE",
                     accessibilityLabel: "Set due date",
@@ -448,6 +454,11 @@ struct AddServiceView: View {
                     suffix: DistanceSettings.shared.unit.abbreviation
                 )
 
+                ChipRow(items: Self.mileageOffsetChips, label: \.label) { chip in
+                    nextDueMileage = vehicle.currentMileage + chip.miles
+                    HapticService.shared.selectionChanged()
+                }
+
                 if nextDueMileage == nil, let suggested = projectedDueMileage {
                     SuggestedValueRow(label: "Suggest \(Formatters.mileage(suggested))") {
                         nextDueMileage = suggested
@@ -458,6 +469,13 @@ struct AddServiceView: View {
                     Text("This date is in the past — will be marked overdue.")
                         .font(.brutalistSecondary)
                         .foregroundStyle(Theme.textTertiary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+
+                if let countdown = countdownText(date: nextDueDate, mileage: nextDueMileage) {
+                    Text(countdown.text)
+                        .font(.brutalistSecondary)
+                        .foregroundStyle(countdown.isOverdue ? Theme.statusOverdue : Theme.textSecondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
@@ -478,6 +496,11 @@ struct AddServiceView: View {
                 )
 
                 if isRecurring {
+                    ChipRow(items: Self.monthIntervalChips, label: \.label) { chip in
+                        intervalMonths = chip.months
+                        HapticService.shared.selectionChanged()
+                    }
+
                     InstrumentNumberField(label: "Every", value: $intervalMonths, placeholder: "6", suffix: "months")
                     if intervalMonths == nil, let suggested = policyMonths {
                         SuggestedValueRow(label: "Suggest \(suggested) months") {
@@ -485,11 +508,23 @@ struct AddServiceView: View {
                         }
                     }
 
+                    ChipRow(items: Self.mileageIntervalChips, label: \.label) { chip in
+                        intervalMiles = chip.miles
+                        HapticService.shared.selectionChanged()
+                    }
+
                     InstrumentNumberField(label: "Or Every", value: $intervalMiles, placeholder: "5000", suffix: "miles")
                     if intervalMiles == nil, let suggested = policyMiles {
                         SuggestedValueRow(label: "Suggest \(Formatters.mileage(suggested))") {
                             intervalMiles = suggested
                         }
+                    }
+
+                    if let preview = recurrencePolicyPreview {
+                        Text(preview)
+                            .font(.system(size: 12, weight: .regular, design: .monospaced))
+                            .foregroundStyle(Theme.textSecondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
             }
@@ -550,6 +585,99 @@ struct AddServiceView: View {
         let daysUntilDate = Calendar.current.dateComponents([.day], from: Date.now, to: date).day ?? Int.max
         return daysUntilDate <= daysUntilMileage
     }
+
+    /// Time-dependent — recomputed each render so dates anchor to "now."
+    private var fuzzyDateChips: [FuzzyDateChip] {
+        let cal = Calendar.current
+        let now = Date.now
+        return [
+            FuzzyDateChip(label: "Next Week", date: cal.date(byAdding: .day, value: 7, to: now) ?? now),
+            FuzzyDateChip(label: "~1 mo", date: cal.date(byAdding: .month, value: 1, to: now) ?? now),
+            FuzzyDateChip(label: "~3 mo", date: cal.date(byAdding: .month, value: 3, to: now) ?? now),
+            FuzzyDateChip(label: "~6 mo", date: cal.date(byAdding: .month, value: 6, to: now) ?? now)
+        ]
+    }
+
+    private static let monthIntervalChips: [MonthIntervalChip] = [
+        MonthIntervalChip(months: 3, label: "3 mo"),
+        MonthIntervalChip(months: 6, label: "6 mo"),
+        MonthIntervalChip(months: 12, label: "1 yr"),
+        MonthIntervalChip(months: 24, label: "2 yr")
+    ]
+
+    private static let mileageIntervalChips: [MileageChip] = [
+        MileageChip(miles: 3000, label: "+3k"),
+        MileageChip(miles: 5000, label: "+5k"),
+        MileageChip(miles: 7500, label: "+7.5k"),
+        MileageChip(miles: 10000, label: "+10k")
+    ]
+
+    private static let mileageOffsetChips: [MileageChip] = [
+        MileageChip(miles: 1000, label: "+1k"),
+        MileageChip(miles: 3000, label: "+3k"),
+        MileageChip(miles: 5000, label: "+5k"),
+        MileageChip(miles: 10000, label: "+10k")
+    ]
+
+    private var recurrencePolicyPreview: String? {
+        var parts: [String] = []
+        if let months = intervalMonths, months > 0 {
+            parts.append(months == 1 ? "every month" : "every \(months) months")
+        }
+        if let miles = intervalMiles, miles > 0 {
+            parts.append("every \(Formatters.mileage(miles))")
+        }
+        guard !parts.isEmpty else { return nil }
+        return parts.joined(separator: " or ")
+    }
+
+    /// Returns nil when neither trigger is set so the strip doesn't render.
+    private func countdownText(date: Date?, mileage: Int?) -> (text: String, isOverdue: Bool)? {
+        var parts: [String] = []
+        var isOverdue = false
+
+        if let date {
+            let days = Calendar.current.dateComponents([.day], from: Date.now, to: date).day ?? 0
+            if days < 0 {
+                parts.append("\(-days) days overdue")
+                isOverdue = true
+            } else {
+                parts.append("~\(days) days")
+            }
+        }
+
+        if let mileage {
+            let delta = mileage - vehicle.currentMileage
+            if delta < 0 {
+                parts.append("\(Formatters.mileage(-delta)) past")
+                isOverdue = true
+            } else {
+                parts.append("~\(Formatters.mileage(delta)) ahead")
+            }
+        }
+
+        guard !parts.isEmpty else { return nil }
+        return (parts.joined(separator: " · "), isOverdue)
+    }
+}
+
+// MARK: - Chip Data
+
+private struct FuzzyDateChip: Hashable {
+    let label: String
+    let date: Date
+}
+
+private struct MonthIntervalChip: Hashable {
+    let months: Int
+    let label: String
+}
+
+/// Used for both recurrence-cadence chips and one-shot offset-from-current
+/// chips — the shape is identical; the meaning is set by the call site.
+private struct MileageChip: Hashable {
+    let miles: Int
+    let label: String
 }
 
 #Preview {

@@ -8,7 +8,7 @@
 import Foundation
 import os
 
-struct PresetData: Codable, Equatable {
+struct PresetData: Codable, Hashable {
     let name: String
     let category: String
     let defaultIntervalMonths: Int?
