@@ -283,6 +283,11 @@ struct AddServiceView: View {
                     isRecurring = true
                 }
             }
+            .onChange(of: mode) { _, _ in
+                // Per-completion notes and per-schedule notes are different things;
+                // carrying typed text across the segmented control is surprising.
+                notes = ""
+            }
             .trackScreen(.addService)
             .onAppear {
                 if presets.isEmpty {

@@ -39,8 +39,10 @@ struct ServiceDetailView: View {
                     statusCard
                 }
 
-                // Due info section (hide for log-only services with no schedule data)
-                if service.dueDate != nil || service.dueMileage != nil || service.intervalMonths != nil || service.intervalMiles != nil {
+                // Due info section (hide for closed/log-only services with no
+                // forward-looking schedule data). Chain-spawn clears intervals
+                // on the closed row, so `hasDueTracking` is the right gate.
+                if service.hasDueTracking {
                     dueInfoSection
                 }
 
