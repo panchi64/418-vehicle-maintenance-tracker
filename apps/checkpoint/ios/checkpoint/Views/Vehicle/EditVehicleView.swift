@@ -283,18 +283,14 @@ struct EditVehicleView: View {
             do {
                 let result = try await VINOCRService.shared.recognizeVIN(from: image)
 
-                await MainActor.run {
-                    isProcessingVINOCR = false
-                    vin = result.vin
-                    vinOCROriginal = result.vin
-                    AnalyticsService.shared.capture(.ocrSucceeded(ocrType: .vin))
-                }
+                isProcessingVINOCR = false
+                vin = result.vin
+                vinOCROriginal = result.vin
+                AnalyticsService.shared.capture(.ocrSucceeded(ocrType: .vin))
             } catch {
-                await MainActor.run {
-                    isProcessingVINOCR = false
-                    vinOCRError = error.localizedDescription
-                    AnalyticsService.shared.capture(.ocrFailed(ocrType: .vin))
-                }
+                isProcessingVINOCR = false
+                vinOCRError = error.localizedDescription
+                AnalyticsService.shared.capture(.ocrFailed(ocrType: .vin))
             }
         }
     }
@@ -314,18 +310,14 @@ struct EditVehicleView: View {
                     currentMileage: currentMileage
                 )
 
-                await MainActor.run {
-                    isProcessingOdometerOCR = false
-                    ocrResult = result
-                    showOCRConfirmation = true
-                    AnalyticsService.shared.capture(.ocrSucceeded(ocrType: .odometer))
-                }
+                isProcessingOdometerOCR = false
+                ocrResult = result
+                showOCRConfirmation = true
+                AnalyticsService.shared.capture(.ocrSucceeded(ocrType: .odometer))
             } catch {
-                await MainActor.run {
-                    isProcessingOdometerOCR = false
-                    odometerOCRError = error.localizedDescription
-                    AnalyticsService.shared.capture(.ocrFailed(ocrType: .odometer))
-                }
+                isProcessingOdometerOCR = false
+                odometerOCRError = error.localizedDescription
+                AnalyticsService.shared.capture(.ocrFailed(ocrType: .odometer))
             }
         }
     }

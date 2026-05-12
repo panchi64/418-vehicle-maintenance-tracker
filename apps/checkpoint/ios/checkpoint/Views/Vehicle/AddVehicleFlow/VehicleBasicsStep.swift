@@ -312,41 +312,35 @@ private struct VINLookupButton: View {
             do {
                 let result = try await NHTSAService.shared.decodeVIN(formState.vin)
 
-                await MainActor.run {
-                    formState.isDecodingVIN = false
-                    formState.usedVINLookup = true
+                formState.isDecodingVIN = false
+                formState.usedVINLookup = true
 
-                    var filled: Set<String> = []
-                    // Auto-fill only empty fields
-                    if formState.make.isEmpty {
-                        formState.make = result.make
-                        filled.insert("make")
-                    }
-                    if formState.model.isEmpty {
-                        formState.model = result.model
-                        filled.insert("model")
-                    }
-                    if formState.year == nil {
-                        formState.year = result.modelYear
-                        filled.insert("year")
-                    }
+                var filled: Set<String> = []
+                if formState.make.isEmpty {
+                    formState.make = result.make
+                    filled.insert("make")
+                }
+                if formState.model.isEmpty {
+                    formState.model = result.model
+                    filled.insert("model")
+                }
+                if formState.year == nil {
+                    formState.year = result.modelYear
+                    filled.insert("year")
+                }
 
-                    if !filled.isEmpty {
-                        formState.autoFilledFields = filled
-                        formState.vinLookupSucceeded = true
+                if !filled.isEmpty {
+                    formState.autoFilledFields = filled
+                    formState.vinLookupSucceeded = true
 
-                        // Auto-clear feedback after 3 seconds
-                        Task {
-                            try? await Task.sleep(for: .seconds(3))
-                            formState.clearAutoFillFeedback()
-                        }
+                    Task {
+                        try? await Task.sleep(for: .seconds(3))
+                        formState.clearAutoFillFeedback()
                     }
                 }
             } catch {
-                await MainActor.run {
-                    formState.isDecodingVIN = false
-                    formState.vinLookupError = error.localizedDescription
-                }
+                formState.isDecodingVIN = false
+                formState.vinLookupError = error.localizedDescription
             }
         }
     }

@@ -8,7 +8,7 @@
 import Foundation
 import OSLog
 
-private let cacheLogger = Logger(category: "PersistentRecallCache")
+private nonisolated let cacheLogger = Logger(category: "PersistentRecallCache")
 
 actor PersistentRecallCache {
     static let shared = PersistentRecallCache()

@@ -3,7 +3,7 @@ import Foundation
 /// Pure text-manipulation helpers behind the rich notes editor toolbar.
 /// Storage stays plain markdown — the toolbar inserts the same syntax
 /// users would type by hand.
-enum MarkdownNotesEditing {
+nonisolated enum MarkdownNotesEditing {
 
     struct EditResult: Equatable {
         let text: String

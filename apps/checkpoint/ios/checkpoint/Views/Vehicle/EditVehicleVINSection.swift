@@ -144,32 +144,25 @@ struct EditVehicleVINSection: View {
             do {
                 let result = try await NHTSAService.shared.decodeVIN(vin)
 
-                await MainActor.run {
-                    isDecodingVIN = false
-                    // Track which fields were already populated
-                    let makeSkipped = !make.isEmpty
-                    let modelSkipped = !model.isEmpty
-                    let yearSkipped = year != nil
+                isDecodingVIN = false
+                let makeSkipped = !make.isEmpty
+                let modelSkipped = !model.isEmpty
+                let yearSkipped = year != nil
 
-                    // Auto-fill only empty fields
-                    if !makeSkipped { make = result.make }
-                    if !modelSkipped { model = result.model }
-                    if !yearSkipped { year = result.modelYear }
+                if !makeSkipped { make = result.make }
+                if !modelSkipped { model = result.model }
+                if !yearSkipped { year = result.modelYear }
 
-                    // Notify user if all fields were already populated
-                    if makeSkipped && modelSkipped && yearSkipped {
-                        ToastService.shared.show("FIELDS ALREADY POPULATED", icon: "info.circle", style: .info)
-                    } else if makeSkipped || modelSkipped || yearSkipped {
-                        ToastService.shared.show("SOME FIELDS ALREADY POPULATED", icon: "info.circle", style: .info)
-                    } else {
-                        HapticService.shared.success()
-                    }
+                if makeSkipped && modelSkipped && yearSkipped {
+                    ToastService.shared.show("FIELDS ALREADY POPULATED", icon: "info.circle", style: .info)
+                } else if makeSkipped || modelSkipped || yearSkipped {
+                    ToastService.shared.show("SOME FIELDS ALREADY POPULATED", icon: "info.circle", style: .info)
+                } else {
+                    HapticService.shared.success()
                 }
             } catch {
-                await MainActor.run {
-                    isDecodingVIN = false
-                    vinLookupError = error.localizedDescription
-                }
+                isDecodingVIN = false
+                vinLookupError = error.localizedDescription
             }
         }
     }

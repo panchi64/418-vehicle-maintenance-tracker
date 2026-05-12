@@ -157,18 +157,14 @@ struct AddVehicleFlowView: View {
             do {
                 let result = try await VINOCRService.shared.recognizeVIN(from: image)
 
-                await MainActor.run {
-                    formState.isProcessingVINOCR = false
-                    formState.vin = result.vin
-                    formState.vinOCROriginal = result.vin
-                    AnalyticsService.shared.capture(.ocrSucceeded(ocrType: .vin))
-                }
+                formState.isProcessingVINOCR = false
+                formState.vin = result.vin
+                formState.vinOCROriginal = result.vin
+                AnalyticsService.shared.capture(.ocrSucceeded(ocrType: .vin))
             } catch {
-                await MainActor.run {
-                    formState.isProcessingVINOCR = false
-                    formState.vinOCRError = error.localizedDescription
-                    AnalyticsService.shared.capture(.ocrFailed(ocrType: .vin))
-                }
+                formState.isProcessingVINOCR = false
+                formState.vinOCRError = error.localizedDescription
+                AnalyticsService.shared.capture(.ocrFailed(ocrType: .vin))
             }
         }
     }
@@ -188,19 +184,15 @@ struct AddVehicleFlowView: View {
                     currentMileage: formState.currentMileage
                 )
 
-                await MainActor.run {
-                    formState.isProcessingOdometerOCR = false
-                    formState.ocrResult = result
-                    formState.showOCRConfirmation = true
-                    formState.usedOdometerOCR = true
-                    AnalyticsService.shared.capture(.ocrSucceeded(ocrType: .odometer))
-                }
+                formState.isProcessingOdometerOCR = false
+                formState.ocrResult = result
+                formState.showOCRConfirmation = true
+                formState.usedOdometerOCR = true
+                AnalyticsService.shared.capture(.ocrSucceeded(ocrType: .odometer))
             } catch {
-                await MainActor.run {
-                    formState.isProcessingOdometerOCR = false
-                    formState.odometerOCRError = error.localizedDescription
-                    AnalyticsService.shared.capture(.ocrFailed(ocrType: .odometer))
-                }
+                formState.isProcessingOdometerOCR = false
+                formState.odometerOCRError = error.localizedDescription
+                AnalyticsService.shared.capture(.ocrFailed(ocrType: .odometer))
             }
         }
     }

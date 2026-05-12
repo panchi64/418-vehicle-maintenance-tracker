@@ -322,15 +322,11 @@ struct OnboardingGetStartedView: View {
         Task {
             do {
                 let result = try await NHTSAService.shared.decodeVIN(vin)
-                await MainActor.run {
-                    isDecodingVIN = false
-                    vinResult = result
-                }
+                isDecodingVIN = false
+                vinResult = result
             } catch {
-                await MainActor.run {
-                    isDecodingVIN = false
-                    vinLookupError = error.localizedDescription
-                }
+                isDecodingVIN = false
+                vinLookupError = error.localizedDescription
             }
         }
     }
@@ -341,13 +337,9 @@ struct OnboardingGetStartedView: View {
         Task {
             do {
                 let result = try await VINOCRService.shared.recognizeVIN(from: image)
-                await MainActor.run {
-                    vin = result.vin
-                }
+                vin = result.vin
             } catch {
-                await MainActor.run {
-                    vinLookupError = error.localizedDescription
-                }
+                vinLookupError = error.localizedDescription
             }
         }
     }

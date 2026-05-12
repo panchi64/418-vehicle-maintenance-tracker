@@ -156,9 +156,7 @@ final class WatchSessionService: NSObject {
             WatchLog.logger.info("Updated mileage from Watch: \(update.newMileage) for \(vehicle.displayName)")
 
             // Re-sync widget + Watch with updated data
-            await MainActor.run {
-                WidgetDataService.shared.updateWidget(for: vehicle)
-            }
+            WidgetDataService.shared.updateWidget(for: vehicle)
         } catch {
             WatchLog.logger.error("Failed to handle mileage update from Watch: \(error.localizedDescription)")
         }
@@ -214,22 +212,18 @@ final class WatchSessionService: NSObject {
             context.insert(log)
 
             // Close this occurrence and (if recurring) spawn the next.
-            await MainActor.run {
-                ServiceCompletionService.completeService(
-                    service,
-                    performedDate: completion.performedDate,
-                    mileage: completion.mileageAtService,
-                    in: context
-                )
-            }
+            ServiceCompletionService.completeService(
+                service,
+                performedDate: completion.performedDate,
+                mileage: completion.mileageAtService,
+                in: context
+            )
 
             try context.save()
             WatchLog.logger.info("Marked service done from Watch: \(completion.serviceName)")
 
             // Re-sync widget + Watch
-            await MainActor.run {
-                WidgetDataService.shared.updateWidget(for: vehicle)
-            }
+            WidgetDataService.shared.updateWidget(for: vehicle)
         } catch {
             WatchLog.logger.error("Failed to handle service completion from Watch: \(error.localizedDescription)")
         }

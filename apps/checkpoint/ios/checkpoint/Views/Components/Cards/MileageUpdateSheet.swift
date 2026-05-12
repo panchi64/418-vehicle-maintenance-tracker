@@ -436,16 +436,12 @@ struct MileageUpdateSheet: View {
                     currentMileage: vehicle.currentMileage
                 )
 
-                await MainActor.run {
-                    isProcessingOCR = false
-                    ocrResult = result
-                    showOCRConfirmation = true
-                }
+                isProcessingOCR = false
+                ocrResult = result
+                showOCRConfirmation = true
             } catch {
-                await MainActor.run {
-                    isProcessingOCR = false
-                    ocrError = error.localizedDescription
-                }
+                isProcessingOCR = false
+                ocrError = error.localizedDescription
             }
         }
     }

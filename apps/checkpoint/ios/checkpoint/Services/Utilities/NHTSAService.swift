@@ -127,7 +127,7 @@ private nonisolated func decodeNHTSAJSON<T: Decodable>(_ type: T.Type, from data
 
 // MARK: - Cache Entry
 
-struct CacheEntry<T: Sendable>: Sendable {
+nonisolated struct CacheEntry<T: Sendable>: Sendable {
     let data: T
     let timestamp: Date
 
