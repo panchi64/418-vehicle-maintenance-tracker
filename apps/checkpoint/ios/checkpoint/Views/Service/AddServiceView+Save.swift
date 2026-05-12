@@ -8,7 +8,7 @@ extension AddServiceView {
     func saveService(keepOpen: Bool = false) {
         let isPreset = selectedPreset != nil
         let category = selectedPreset?.category
-        let hasInterval = scheduleRecurring && Service.hasIntervalPolicy(
+        let hasInterval = isRecurring && Service.hasIntervalPolicy(
             intervalMonths: intervalMonths,
             intervalMiles: intervalMiles
         )
@@ -70,7 +70,7 @@ extension AddServiceView {
         cost = ""
         costCategory = .maintenance
         notes = ""
-        scheduleRecurring = false
+        isRecurring = false
         pendingAttachments = []
         intervalMonths = nil
         intervalMiles = nil
@@ -95,13 +95,13 @@ extension AddServiceView {
             name: serviceName,
             lastPerformed: performedDate,
             lastMileage: mileage,
-            intervalMonths: scheduleRecurring ? intervalMonths : nil,
-            intervalMiles: scheduleRecurring ? intervalMiles : nil,
-            isRecurring: scheduleRecurring
+            intervalMonths: isRecurring ? intervalMonths : nil,
+            intervalMiles: isRecurring ? intervalMiles : nil,
+            isRecurring: isRecurring
         )
         service.vehicle = vehicle
 
-        if scheduleRecurring {
+        if isRecurring {
             service.deriveDueFromIntervals(anchorDate: performedDate, anchorMileage: mileage)
         }
 
@@ -151,12 +151,14 @@ extension AddServiceView {
     }
 
     private func saveScheduledService() {
+        // When the user has not enabled "Repeats", drop any interval values
+        // they may have typed — the policy should match the toggle's intent.
         let service = Service(
             name: serviceName,
             dueDate: nextDueDate,
             dueMileage: nextDueMileage,
-            intervalMonths: intervalMonths,
-            intervalMiles: intervalMiles,
+            intervalMonths: isRecurring ? intervalMonths : nil,
+            intervalMiles: isRecurring ? intervalMiles : nil,
             notes: notes.isEmpty ? nil : notes,
             isRecurring: isRecurringSchedule
         )

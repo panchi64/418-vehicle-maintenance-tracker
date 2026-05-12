@@ -35,7 +35,10 @@ struct AddServiceView: View {
     @State private var costError: String?
     @State var costCategory: CostCategory = .maintenance
     @State var notes: String = ""
-    @State var scheduleRecurring: Bool = false
+    /// Shared "this should repeat after completion" toggle. In record mode it
+    /// also schedules the next occurrence inline; in remind mode it gates
+    /// whether `isRecurring` is persisted on the Service.
+    @State var isRecurring: Bool = false
     @State var pendingAttachments: [AttachmentPicker.AttachmentData] = []
 
     @State var hasCustomDate: Bool = false
@@ -52,8 +55,11 @@ struct AddServiceView: View {
         hasCustomDate ? dueDate : nil
     }
 
+    /// Whether the scheduled occurrence should chain forward on completion.
+    /// Only meaningful when intervals are also set — explicit user intent
+    /// (the toggle) plus a non-zero policy.
     var isRecurringSchedule: Bool {
-        Service.hasIntervalPolicy(intervalMonths: intervalMonths, intervalMiles: intervalMiles)
+        isRecurring && Service.hasIntervalPolicy(intervalMonths: intervalMonths, intervalMiles: intervalMiles)
     }
 
     var serviceName: String {
@@ -95,12 +101,12 @@ struct AddServiceView: View {
         notes = template.notes ?? ""
         intervalMonths = template.intervalMonths
         intervalMiles = template.intervalMiles
-        scheduleRecurring = template.hasRecurringIntervals
+        isRecurring = template.hasRecurringIntervals
         HapticService.shared.selectionChanged()
     }
 
     private var nextDuePreview: String? {
-        guard scheduleRecurring else { return nil }
+        guard isRecurring else { return nil }
         var parts: [String] = []
 
         if let months = intervalMonths, months > 0,
@@ -165,7 +171,6 @@ struct AddServiceView: View {
                 }
             }
             .numberPadDoneButton()
-            .navigationTitle(mode == .record ? "Record Service" : "Set Reminder")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
@@ -173,6 +178,20 @@ struct AddServiceView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                         .toolbarButtonStyle()
+                }
+                ToolbarItem(placement: .principal) {
+                    VStack(spacing: 2) {
+                        Text(vehicle.displayName)
+                            .font(.brutalistBody)
+                            .foregroundStyle(Theme.textPrimary)
+                            .lineLimit(1)
+                        Text(mode == .record ? "RECORD SERVICE" : "SET REMINDER")
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.textTertiary)
+                            .tracking(1)
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("\(vehicle.displayName), \(mode == .record ? "Record Service" : "Set Reminder")")
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") { saveService() }
@@ -184,9 +203,11 @@ struct AddServiceView: View {
                 guard let preset = newPreset else { return }
                 if let months = preset.defaultIntervalMonths { intervalMonths = months }
                 if let miles = preset.defaultIntervalMiles { intervalMiles = miles }
-                if mode == .record {
-                    let hasIntervals = (preset.defaultIntervalMonths ?? 0) > 0 || (preset.defaultIntervalMiles ?? 0) > 0
-                    if hasIntervals { scheduleRecurring = true }
+                if Service.hasIntervalPolicy(
+                    intervalMonths: preset.defaultIntervalMonths,
+                    intervalMiles: preset.defaultIntervalMiles
+                ) {
+                    isRecurring = true
                 }
             }
             .trackScreen(.addService)
@@ -203,6 +224,7 @@ struct AddServiceView: View {
                     hasCustomDate = true
                     dueDate = prefill.dueDate
                     intervalMonths = prefill.intervalMonths
+                    isRecurring = true
                 }
             }
         }
@@ -291,25 +313,13 @@ struct AddServiceView: View {
             InstrumentSectionHeader(title: "Reminder")
 
             VStack(spacing: Spacing.sm) {
-                HStack {
-                    Text("REMIND ME NEXT TIME")
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
-                        .tracking(1)
+                LabeledInstrumentToggle(
+                    label: "REMIND ME NEXT TIME",
+                    accessibilityLabel: "Remind me next time",
+                    isOn: $isRecurring
+                )
 
-                    Spacer()
-
-                    Toggle("", isOn: $scheduleRecurring)
-                        .labelsHidden()
-                        .tint(Theme.accent)
-                        .accessibilityLabel("Remind me next time")
-                }
-                .padding(Spacing.md)
-                .accessibilityElement(children: .combine)
-                .background(Theme.surfaceInstrument)
-                .brutalistBorder()
-
-                if scheduleRecurring {
+                if isRecurring {
                     Text(L10n.reminderHelperText)
                         .font(.brutalistSecondary)
                         .foregroundStyle(Theme.textTertiary)
@@ -368,23 +378,11 @@ struct AddServiceView: View {
             InstrumentSectionHeader(title: "Next Due")
 
             VStack(spacing: Spacing.md) {
-                HStack {
-                    Text("SET DUE DATE")
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
-                        .tracking(1)
-
-                    Spacer()
-
-                    Toggle("", isOn: $hasCustomDate)
-                        .labelsHidden()
-                        .tint(Theme.accent)
-                        .accessibilityLabel("Set due date")
-                }
-                .padding(Spacing.md)
-                .accessibilityElement(children: .combine)
-                .background(Theme.surfaceInstrument)
-                .brutalistBorder()
+                LabeledInstrumentToggle(
+                    label: "SET DUE DATE",
+                    accessibilityLabel: "Set due date",
+                    isOn: $hasCustomDate
+                )
 
                 if hasCustomDate {
                     InstrumentDatePicker(label: "Due Date", date: $dueDate)
@@ -396,15 +394,27 @@ struct AddServiceView: View {
                     placeholder: "Optional",
                     suffix: DistanceSettings.shared.unit.abbreviation
                 )
+
+                if let nextDueDate, let nextDueMileage {
+                    whicheverFirstSummary(date: nextDueDate, mileage: nextDueMileage, pace: vehicle.dailyMilesPace)
+                }
             }
         }
 
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "Repeat Interval")
+            InstrumentSectionHeader(title: "Repeats")
 
             VStack(spacing: Spacing.md) {
-                InstrumentNumberField(label: "Every", value: $intervalMonths, placeholder: "6", suffix: "months")
-                InstrumentNumberField(label: "Or Every", value: $intervalMiles, placeholder: "5000", suffix: "miles")
+                LabeledInstrumentToggle(
+                    label: "REPEAT AFTER COMPLETION",
+                    accessibilityLabel: "Repeat after completion",
+                    isOn: $isRecurring
+                )
+
+                if isRecurring {
+                    InstrumentNumberField(label: "Every", value: $intervalMonths, placeholder: "6", suffix: "months")
+                    InstrumentNumberField(label: "Or Every", value: $intervalMiles, placeholder: "5000", suffix: "miles")
+                }
             }
         }
 
@@ -412,6 +422,56 @@ struct AddServiceView: View {
             InstrumentSectionHeader(title: "Notes")
             RichNotesEditor(label: "Notes", text: $notes, placeholder: "Add notes...", minHeight: 100)
         }
+    }
+
+    private func whicheverFirstSummary(date: Date, mileage: Int, pace: Double?) -> some View {
+        let dateLeads = dateTriggerLeads(date: date, mileage: mileage, pace: pace)
+        let dateText = Formatters.mediumDate.string(from: date)
+        let mileageText = Formatters.mileage(mileage)
+
+        return VStack(alignment: .leading, spacing: Spacing.xs) {
+            Text("WHICHEVER COMES FIRST")
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(1)
+
+            HStack(spacing: Spacing.sm) {
+                triggerCell(text: dateText, isLeading: dateLeads)
+                Text("OR")
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.textTertiary)
+                triggerCell(text: mileageText, isLeading: !dateLeads)
+            }
+        }
+        .padding(Spacing.md)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.surfaceInstrument)
+        .brutalistBorder()
+    }
+
+    private func triggerCell(text: String, isLeading: Bool) -> some View {
+        HStack(spacing: Spacing.xs) {
+            if isLeading {
+                Text("◆")
+                    .font(.brutalistBody)
+                    .foregroundStyle(Theme.accent)
+            }
+            Text(text)
+                .font(.brutalistBody)
+                .foregroundStyle(isLeading ? Theme.accent : Theme.textSecondary)
+        }
+    }
+
+    /// Returns true if the date trigger fires before the mileage trigger.
+    /// When pace is unavailable, the date is treated as leading — the user
+    /// still sees both values side-by-side, so the visual emphasis simply
+    /// defaults to the explicit calendar trigger.
+    private func dateTriggerLeads(date: Date, mileage: Int, pace: Double?) -> Bool {
+        guard let pace, pace > 0 else { return true }
+        let milesRemaining = max(mileage - vehicle.currentMileage, 0)
+        let daysUntilMileage = Int((Double(milesRemaining) / pace).rounded())
+        let daysUntilDate = Calendar.current.dateComponents([.day], from: Date.now, to: date).day ?? Int.max
+        return daysUntilDate <= daysUntilMileage
     }
 }
 
