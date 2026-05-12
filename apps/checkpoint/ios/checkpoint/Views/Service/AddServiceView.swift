@@ -488,7 +488,7 @@ struct AddServiceView: View {
                     suffix: DistanceSettings.shared.unit.abbreviation
                 )
 
-                ChipRow(items: mileageOffsetChips, label: \.label) { chip in
+                ChipRow(items: Self.mileageOffsetChips, label: \.label) { chip in
                     nextDueMileage = vehicle.currentMileage + chip.miles
                     HapticService.shared.selectionChanged()
                 }
@@ -542,7 +542,7 @@ struct AddServiceView: View {
                         }
                     }
 
-                    ChipRow(items: mileageIntervalChips, label: \.label) { chip in
+                    ChipRow(items: Self.mileageIntervalChips, label: \.label) { chip in
                         intervalMiles = chip.miles
                         HapticService.shared.selectionChanged()
                     }
@@ -639,47 +639,19 @@ struct AddServiceView: View {
         MonthIntervalChip(months: 24, label: "2 yr")
     ]
 
-    /// Recurrence-cadence chips. Scale matches typical maintenance intervals
-    /// for the user's unit (e.g. oil change ~5k mi vs ~8–10k km).
-    private var mileageIntervalChips: [MileageChip] {
-        switch DistanceSettings.shared.unit {
-        case .miles:
-            return [
-                MileageChip(miles: 3000, label: "+3k"),
-                MileageChip(miles: 5000, label: "+5k"),
-                MileageChip(miles: 7500, label: "+7.5k"),
-                MileageChip(miles: 10000, label: "+10k")
-            ]
-        case .kilometers:
-            return [
-                MileageChip(miles: 5000, label: "+5k"),
-                MileageChip(miles: 8000, label: "+8k"),
-                MileageChip(miles: 12000, label: "+12k"),
-                MileageChip(miles: 16000, label: "+16k")
-            ]
-        }
-    }
+    private static let mileageIntervalChips: [MileageChip] = [
+        MileageChip(miles: 3000, label: "+3k"),
+        MileageChip(miles: 5000, label: "+5k"),
+        MileageChip(miles: 7500, label: "+7.5k"),
+        MileageChip(miles: 10000, label: "+10k")
+    ]
 
-    /// One-shot offsets from current mileage. Smaller values than intervals
-    /// because users often schedule "the next inspection" not a recurring policy.
-    private var mileageOffsetChips: [MileageChip] {
-        switch DistanceSettings.shared.unit {
-        case .miles:
-            return [
-                MileageChip(miles: 1000, label: "+1k"),
-                MileageChip(miles: 3000, label: "+3k"),
-                MileageChip(miles: 5000, label: "+5k"),
-                MileageChip(miles: 10000, label: "+10k")
-            ]
-        case .kilometers:
-            return [
-                MileageChip(miles: 1500, label: "+1.5k"),
-                MileageChip(miles: 5000, label: "+5k"),
-                MileageChip(miles: 8000, label: "+8k"),
-                MileageChip(miles: 16000, label: "+16k")
-            ]
-        }
-    }
+    private static let mileageOffsetChips: [MileageChip] = [
+        MileageChip(miles: 1000, label: "+1k"),
+        MileageChip(miles: 3000, label: "+3k"),
+        MileageChip(miles: 5000, label: "+5k"),
+        MileageChip(miles: 10000, label: "+10k")
+    ]
 
     private var recurrencePolicyPreview: String? {
         var parts: [String] = []
