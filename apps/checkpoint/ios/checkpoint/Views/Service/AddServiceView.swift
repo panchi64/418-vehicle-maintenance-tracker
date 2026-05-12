@@ -40,20 +40,20 @@ struct AddServiceView: View {
 
     @State var hasCustomDate: Bool = false
     @State var dueDate: Date = Date()
-    @State var dueMileage: Int? = nil
+    @State var nextDueMileage: Int? = nil
     @State var intervalMonths: Int? = nil
     @State var intervalMiles: Int? = nil
 
     @State private var presets: [PresetData] = []
 
-    private var effectiveDueDate: Date? {
-        if hasCustomDate {
-            return dueDate
-        } else if let months = intervalMonths, months > 0 {
-            return Calendar.current.date(byAdding: .month, value: months, to: Date())
-        } else {
-            return nil
-        }
+    /// Drives `Service.dueDate` directly at save time — no derivation from
+    /// intervals. Intervals are recurrence policy only.
+    var nextDueDate: Date? {
+        hasCustomDate ? dueDate : nil
+    }
+
+    var isRecurringSchedule: Bool {
+        Service.hasIntervalPolicy(intervalMonths: intervalMonths, intervalMiles: intervalMiles)
     }
 
     var serviceName: String {
@@ -365,79 +365,46 @@ struct AddServiceView: View {
     @ViewBuilder
     private var scheduleModeFields: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
+            InstrumentSectionHeader(title: "Next Due")
+
+            VStack(spacing: Spacing.md) {
+                HStack {
+                    Text("SET DUE DATE")
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.textTertiary)
+                        .tracking(1)
+
+                    Spacer()
+
+                    Toggle("", isOn: $hasCustomDate)
+                        .labelsHidden()
+                        .tint(Theme.accent)
+                        .accessibilityLabel("Set due date")
+                }
+                .padding(Spacing.md)
+                .accessibilityElement(children: .combine)
+                .background(Theme.surfaceInstrument)
+                .brutalistBorder()
+
+                if hasCustomDate {
+                    InstrumentDatePicker(label: "Due Date", date: $dueDate)
+                }
+
+                InstrumentNumberField(
+                    label: "Due Mileage",
+                    value: $nextDueMileage,
+                    placeholder: "Optional",
+                    suffix: DistanceSettings.shared.unit.abbreviation
+                )
+            }
+        }
+
+        VStack(alignment: .leading, spacing: Spacing.sm) {
             InstrumentSectionHeader(title: "Repeat Interval")
 
             VStack(spacing: Spacing.md) {
                 InstrumentNumberField(label: "Every", value: $intervalMonths, placeholder: "6", suffix: "months")
                 InstrumentNumberField(label: "Or Every", value: $intervalMiles, placeholder: "5000", suffix: "miles")
-            }
-        }
-
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "When Is It Due?")
-
-            VStack(spacing: Spacing.md) {
-                if let months = intervalMonths, months > 0 {
-                    if let date = effectiveDueDate {
-                        HStack {
-                            Text("DUE DATE")
-                                .font(.brutalistLabel)
-                                .foregroundStyle(Theme.textTertiary)
-                                .tracking(1)
-
-                            Spacer()
-
-                            Text(Formatters.mediumDate.string(from: date))
-                                .font(.brutalistBody)
-                                .foregroundStyle(Theme.accent)
-                        }
-                        .padding(Spacing.md)
-                        .background(Theme.surfaceInstrument)
-                        .brutalistBorder()
-                    }
-                } else {
-                    HStack {
-                        Text("SET DUE DATE")
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.textTertiary)
-                            .tracking(1)
-
-                        Spacer()
-
-                        Toggle("", isOn: $hasCustomDate)
-                            .labelsHidden()
-                            .tint(Theme.accent)
-                            .accessibilityLabel("Set due date")
-                    }
-                    .padding(Spacing.md)
-                    .accessibilityElement(children: .combine)
-                    .background(Theme.surfaceInstrument)
-                    .brutalistBorder()
-
-                    if hasCustomDate {
-                        InstrumentDatePicker(label: "Due Date", date: $dueDate)
-                    }
-                }
-
-                if let miles = intervalMiles, miles > 0 {
-                    HStack {
-                        Text("DUE MILEAGE")
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.textTertiary)
-                            .tracking(1)
-
-                        Spacer()
-
-                        Text(Formatters.mileage(vehicle.currentMileage + miles))
-                            .font(.brutalistBody)
-                            .foregroundStyle(Theme.accent)
-                    }
-                    .padding(Spacing.md)
-                    .background(Theme.surfaceInstrument)
-                    .brutalistBorder()
-                } else {
-                    InstrumentNumberField(label: "Due Mileage", value: $dueMileage, placeholder: "Optional", suffix: "mi")
-                }
             }
         }
 

@@ -294,8 +294,13 @@ final class WidgetDataService {
                 log.vehicle = vehicle
                 context.insert(log)
 
-                // Update service tracking and recalculate due dates
-                service.recalculateDueDates(performedDate: completion.performedDate, mileage: completion.mileageAtService)
+                // Close this occurrence and (if recurring) spawn the next.
+                ServiceCompletionService.completeService(
+                    service,
+                    performedDate: completion.performedDate,
+                    mileage: completion.mileageAtService,
+                    in: context
+                )
 
                 // Update vehicle mileage if widget mileage is higher
                 if completion.mileageAtService > vehicle.currentMileage {

@@ -322,4 +322,50 @@ final class ServiceTests: XCTestCase {
         XCTAssertEqual(service.lastPerformed, performedDate)
         XCTAssertEqual(service.lastMileage, mileage)
     }
+
+    // MARK: - isRecurring Tests
+
+    func testIsRecurring_defaultsToFalse() {
+        let service = Service(name: "Oil Change")
+        XCTAssertFalse(service.isRecurring, "isRecurring should default to false for new Services")
+    }
+
+    func testIsRecurring_explicitTrue_persistsThroughInit() {
+        let service = Service(
+            name: "Oil Change",
+            intervalMonths: 6,
+            isRecurring: true
+        )
+        XCTAssertTrue(service.isRecurring)
+        XCTAssertEqual(service.intervalMonths, 6)
+    }
+
+    // MARK: - ServiceMigrationService Tests
+
+    @MainActor
+    func testRecurringBackfill_flipsServicesWithIntervals() throws {
+        // Reset flag so the backfill runs fresh in this test.
+        UserDefaults.standard.removeObject(forKey: "recurringBackfillV1Completed")
+        defer { UserDefaults.standard.removeObject(forKey: "recurringBackfillV1Completed") }
+
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try ModelContainer(
+            for: Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self, ServiceAttachment.self,
+            configurations: config
+        )
+        let context = container.mainContext
+
+        let withIntervals = Service(name: "Oil Change", intervalMonths: 6)
+        let withMilesOnly = Service(name: "Tire Rotation", intervalMiles: 7500)
+        let oneShot = Service(name: "Brake Inspection", dueDate: .now)
+        context.insert(withIntervals)
+        context.insert(withMilesOnly)
+        context.insert(oneShot)
+
+        ServiceMigrationService.runPostLaunchBackfills(in: context)
+
+        XCTAssertTrue(withIntervals.isRecurring, "Service with intervalMonths should be flipped to recurring")
+        XCTAssertTrue(withMilesOnly.isRecurring, "Service with intervalMiles should be flipped to recurring")
+        XCTAssertFalse(oneShot.isRecurring, "Service without intervals should remain one-shot")
+    }
 }

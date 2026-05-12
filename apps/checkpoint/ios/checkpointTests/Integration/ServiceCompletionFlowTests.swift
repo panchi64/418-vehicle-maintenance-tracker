@@ -2,8 +2,11 @@
 //  ServiceCompletionFlowTests.swift
 //  checkpointTests
 //
-//  Integration tests: create vehicle → add service → log completion → verify due date recalculation
-//  Tests use Service.recalculateDueDates() — the same method used by all completion flows.
+//  Integration tests for completing a scheduled service.
+//  - Service.recalculateDueDates() tests cover the in-place primitive (still
+//    used as a low-level helper by other tests).
+//  - ServiceCompletionService.completeService() tests cover the chain-spawn
+//    flow that production completion paths now go through.
 //
 
 import XCTest
@@ -153,5 +156,96 @@ final class ServiceCompletionFlowTests: XCTestCase {
         let secondsDifference = abs(service.lastPerformed!.timeIntervalSince(performedDate))
         XCTAssertLessThan(secondsDifference, 1.0, "lastPerformed should match the performed date")
         XCTAssertEqual(service.lastMileage, 50000)
+    }
+
+    // MARK: - ServiceCompletionService (chain-spawn) Tests
+
+    @MainActor
+    func testCompleteService_recurring_spawnsNextOccurrence() {
+        let vehicle = Vehicle(name: "Test", make: "Toyota", model: "Camry", year: 2022, currentMileage: 50000)
+        modelContext.insert(vehicle)
+
+        let original = Service(
+            name: "Oil Change",
+            dueDate: Calendar.current.date(byAdding: .month, value: -1, to: .now),
+            dueMileage: 49000,
+            intervalMonths: 6,
+            intervalMiles: 5000,
+            isRecurring: true
+        )
+        original.vehicle = vehicle
+        modelContext.insert(original)
+
+        let performedDate = Date.now
+        let next = ServiceCompletionService.completeService(
+            original,
+            performedDate: performedDate,
+            mileage: 50000,
+            in: modelContext
+        )
+
+        XCTAssertNotNil(next, "Recurring service should spawn a successor")
+        XCTAssertEqual(next?.name, "Oil Change")
+        XCTAssertEqual(next?.intervalMonths, 6)
+        XCTAssertEqual(next?.intervalMiles, 5000)
+        XCTAssertTrue(next?.isRecurring == true)
+        XCTAssertEqual(next?.vehicle?.id, vehicle.id)
+        XCTAssertEqual(next?.dueMileage, 55000, "Next due mileage = completion mileage + interval")
+        let expectedDate = Calendar.current.date(byAdding: .month, value: 6, to: performedDate)!
+        let dayDelta = Calendar.current.dateComponents([.day], from: next!.dueDate!, to: expectedDate).day ?? 99
+        XCTAssertEqual(dayDelta, 0, "Next due date should be 6 months from completion")
+
+        // Closed (original) service is reduced to a historical record.
+        XCTAssertNil(original.dueDate, "Closed service should have no future due date")
+        XCTAssertNil(original.dueMileage)
+        XCTAssertNil(original.intervalMonths, "Intervals carry forward to spawn, not the corpse")
+        XCTAssertNil(original.intervalMiles)
+        XCTAssertEqual(original.lastMileage, 50000)
+        XCTAssertNotNil(original.lastPerformed)
+    }
+
+    @MainActor
+    func testCompleteService_nonRecurring_doesNotSpawn() {
+        let vehicle = Vehicle(name: "Test", make: "Toyota", model: "Camry", year: 2022, currentMileage: 50000)
+        modelContext.insert(vehicle)
+
+        let oneShot = Service(
+            name: "Brake Inspection",
+            dueDate: Calendar.current.date(byAdding: .day, value: 30, to: .now),
+            isRecurring: false
+        )
+        oneShot.vehicle = vehicle
+        modelContext.insert(oneShot)
+
+        let next = ServiceCompletionService.completeService(
+            oneShot,
+            performedDate: Date.now,
+            mileage: 50000,
+            in: modelContext
+        )
+
+        XCTAssertNil(next, "Non-recurring service should not spawn a successor")
+        XCTAssertNil(oneShot.dueDate)
+        XCTAssertNotNil(oneShot.lastPerformed)
+    }
+
+    @MainActor
+    func testCompleteService_recurringWithoutPolicy_doesNotSpawn() {
+        let vehicle = Vehicle(name: "Test", make: "Toyota", model: "Camry", year: 2022, currentMileage: 50000)
+        modelContext.insert(vehicle)
+
+        // isRecurring=true but no intervals — defensive guard
+        let stranded = Service(name: "Mystery Service", isRecurring: true)
+        stranded.vehicle = vehicle
+        modelContext.insert(stranded)
+
+        let next = ServiceCompletionService.completeService(
+            stranded,
+            performedDate: Date.now,
+            mileage: 50000,
+            in: modelContext
+        )
+
+        XCTAssertNil(next, "Recurring service with no interval policy should not spawn an empty successor")
     }
 }

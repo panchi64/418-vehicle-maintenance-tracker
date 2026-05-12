@@ -8,7 +8,10 @@ extension AddServiceView {
     func saveService(keepOpen: Bool = false) {
         let isPreset = selectedPreset != nil
         let category = selectedPreset?.category
-        let hasInterval = scheduleRecurring && ((intervalMonths != nil && intervalMonths != 0) || (intervalMiles != nil && intervalMiles != 0))
+        let hasInterval = scheduleRecurring && Service.hasIntervalPolicy(
+            intervalMonths: intervalMonths,
+            intervalMiles: intervalMiles
+        )
 
         HapticService.shared.success()
 
@@ -71,6 +74,9 @@ extension AddServiceView {
         pendingAttachments = []
         intervalMonths = nil
         intervalMiles = nil
+        hasCustomDate = false
+        dueDate = Date()
+        nextDueMileage = nil
     }
 
     private func updateAppIcon() {
@@ -90,7 +96,8 @@ extension AddServiceView {
             lastPerformed: performedDate,
             lastMileage: mileage,
             intervalMonths: scheduleRecurring ? intervalMonths : nil,
-            intervalMiles: scheduleRecurring ? intervalMiles : nil
+            intervalMiles: scheduleRecurring ? intervalMiles : nil,
+            isRecurring: scheduleRecurring
         )
         service.vehicle = vehicle
 
@@ -146,21 +153,14 @@ extension AddServiceView {
     private func saveScheduledService() {
         let service = Service(
             name: serviceName,
+            dueDate: nextDueDate,
+            dueMileage: nextDueMileage,
             intervalMonths: intervalMonths,
             intervalMiles: intervalMiles,
-            notes: notes.isEmpty ? nil : notes
+            notes: notes.isEmpty ? nil : notes,
+            isRecurring: isRecurringSchedule
         )
         service.vehicle = vehicle
-
-        service.deriveDueFromIntervals(anchorDate: Date(), anchorMileage: vehicle.currentMileage)
-
-        if hasCustomDate {
-            service.dueDate = dueDate
-        }
-        if let explicit = dueMileage {
-            service.dueMileage = explicit
-        }
-
         modelContext.insert(service)
     }
 }

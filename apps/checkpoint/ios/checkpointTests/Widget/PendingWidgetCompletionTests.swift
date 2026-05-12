@@ -93,7 +93,8 @@ final class PendingWidgetCompletionTests: XCTestCase {
             dueDate: Calendar.current.date(byAdding: .day, value: -5, to: .now),
             dueMileage: 49500,
             intervalMonths: 6,
-            intervalMiles: 5000
+            intervalMiles: 5000,
+            isRecurring: true
         )
         service.vehicle = vehicle
         modelContext.insert(service)
@@ -126,10 +127,18 @@ final class PendingWidgetCompletionTests: XCTestCase {
         XCTAssertEqual(log.service?.id, service.id)
         XCTAssertEqual(log.vehicle?.id, vehicle.id)
 
-        // Verify service due dates were recalculated
+        // Completed (original) service is closed.
         XCTAssertNotNil(service.lastPerformed)
         XCTAssertEqual(service.lastMileage, 50000)
-        XCTAssertEqual(service.dueMileage, 55000, "Should add intervalMiles to mileageAtService")
+        XCTAssertNil(service.dueMileage, "Closed occurrence has no forward-looking mileage")
+        XCTAssertNil(service.dueDate, "Closed occurrence has no forward-looking date")
+
+        // Chain-spawn produced the next occurrence with derived dates.
+        let allServices = try modelContext.fetch(FetchDescriptor<Service>())
+        let successor = allServices.first(where: { $0.id != service.id && $0.name == "Oil Change" })
+        XCTAssertNotNil(successor, "Recurring widget completion should spawn a successor Service")
+        XCTAssertEqual(successor?.dueMileage, 55000, "Next-occurrence dueMileage = completion mileage + interval")
+        XCTAssertTrue(successor?.isRecurring == true)
 
         // Verify pending completions were cleared
         let remaining = PendingWidgetCompletion.loadAll()

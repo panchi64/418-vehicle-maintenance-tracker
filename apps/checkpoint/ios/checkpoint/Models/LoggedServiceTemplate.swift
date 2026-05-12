@@ -11,7 +11,7 @@ struct LoggedServiceTemplate: Equatable {
     let intervalMiles: Int?
 
     var hasRecurringIntervals: Bool {
-        (intervalMonths ?? 0) > 0 || (intervalMiles ?? 0) > 0
+        Service.hasIntervalPolicy(intervalMonths: intervalMonths, intervalMiles: intervalMiles)
     }
 
     init(from log: ServiceLog) {

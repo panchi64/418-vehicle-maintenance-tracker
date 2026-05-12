@@ -368,7 +368,12 @@ struct MarkServiceVisitDoneSheet: View {
         modelContext.insert(log)
 
         attachAttachments(to: log)
-        service.recalculateDueDates(performedDate: performedDate, mileage: mileageInt)
+        ServiceCompletionService.completeService(
+            service,
+            performedDate: performedDate,
+            mileage: mileageInt,
+            in: modelContext
+        )
     }
 
     private func saveCluster(
@@ -411,7 +416,12 @@ struct MarkServiceVisitDoneSheet: View {
             modelContext.insert(log)
             if firstLog == nil { firstLog = log }
 
-            service.recalculateDueDates(performedDate: performedDate, mileage: mileageInt)
+            ServiceCompletionService.completeService(
+                service,
+                performedDate: performedDate,
+                mileage: mileageInt,
+                in: modelContext
+            )
         }
 
         if let firstLog {

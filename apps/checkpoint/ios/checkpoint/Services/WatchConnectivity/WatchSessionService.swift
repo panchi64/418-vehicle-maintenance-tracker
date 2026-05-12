@@ -213,8 +213,15 @@ final class WatchSessionService: NSObject {
             log.vehicle = vehicle
             context.insert(log)
 
-            // Update service tracking and recalculate due dates
-            service.recalculateDueDates(performedDate: completion.performedDate, mileage: completion.mileageAtService)
+            // Close this occurrence and (if recurring) spawn the next.
+            await MainActor.run {
+                ServiceCompletionService.completeService(
+                    service,
+                    performedDate: completion.performedDate,
+                    mileage: completion.mileageAtService,
+                    in: context
+                )
+            }
 
             try context.save()
             WatchLog.logger.info("Marked service done from Watch: \(completion.serviceName)")

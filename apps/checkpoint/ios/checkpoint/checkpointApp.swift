@@ -105,6 +105,9 @@ struct checkpointApp: App {
         let container = Self.createContainer(syncEnabled: syncEnabled)
         _modelContainer = State(initialValue: container)
 
+        // Each backfill is gated by its own UserDefaults flag so this is safe on every launch.
+        ServiceMigrationService.runPostLaunchBackfills(in: container.mainContext)
+
         // Initialize Watch connectivity
         WatchSessionService.shared.modelContainer = container
         WatchSessionService.shared.activate()

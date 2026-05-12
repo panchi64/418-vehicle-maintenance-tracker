@@ -20,6 +20,10 @@ final class Service: Identifiable {
     var intervalMiles: Int?
     var notificationID: String?
     var notes: String?
+    /// Whether this scheduled occurrence should spawn a successor on completion.
+    /// Intervals (`intervalMonths` / `intervalMiles`) define the policy; this
+    /// flag controls whether the policy is active.
+    var isRecurring: Bool = false
 
     var vehicle: Vehicle?
 
@@ -35,7 +39,8 @@ final class Service: Identifiable {
         intervalMonths: Int? = nil,
         intervalMiles: Int? = nil,
         notificationID: String? = nil,
-        notes: String? = nil
+        notes: String? = nil,
+        isRecurring: Bool = false
     ) {
         self.name = name
         self.dueDate = dueDate
@@ -46,6 +51,7 @@ final class Service: Identifiable {
         self.intervalMiles = intervalMiles
         self.notificationID = notificationID
         self.notes = notes
+        self.isRecurring = isRecurring
     }
 }
 
@@ -56,6 +62,18 @@ final class Service: Identifiable {
 extension Service {
     var hasDueTracking: Bool {
         dueDate != nil || dueMileage != nil
+    }
+
+    /// Whether this service carries a non-zero recurrence interval.
+    /// A nil or zero interval is treated as "no policy."
+    var hasIntervalPolicy: Bool {
+        Service.hasIntervalPolicy(intervalMonths: intervalMonths, intervalMiles: intervalMiles)
+    }
+
+    /// Predicate variant for use against raw interval fields (form state,
+    /// log-derived templates) where no `Service` instance exists yet.
+    static func hasIntervalPolicy(intervalMonths: Int?, intervalMiles: Int?) -> Bool {
+        (intervalMonths ?? 0) > 0 || (intervalMiles ?? 0) > 0
     }
 }
 
