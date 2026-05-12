@@ -74,6 +74,14 @@ struct AddServiceView: View {
         serviceLogs.forVehicleNewestFirst(vehicle).first
     }
 
+    /// Best history match for the current service-type selection. Falls back
+    /// to the most recent log on the vehicle so the form still has something
+    /// to anchor suggestions on before a type is chosen.
+    var lastLogForServiceType: ServiceLog? {
+        guard !serviceName.isEmpty else { return lastLogForVehicle }
+        return serviceLogs.mostRecent(serviceName: serviceName, vehicle: vehicle) ?? lastLogForVehicle
+    }
+
     var quickChips: [PresetData] {
         serviceLogs.topPresetChips(for: vehicle, from: presets, limit: 4)
     }
@@ -102,6 +110,30 @@ struct AddServiceView: View {
         intervalMonths = template.intervalMonths
         intervalMiles = template.intervalMiles
         isRecurring = template.hasRecurringIntervals
+        HapticService.shared.selectionChanged()
+    }
+
+    /// Remind-mode counterpart to `useLastEntry()`. Diverges by projecting a
+    /// next-due date/mileage from the historic anchor + interval policy, and
+    /// by skipping cost/notes (which only matter when recording a completion).
+    /// The service name is preserved if the user already has one in flight.
+    func useLastEntryForRemind() {
+        guard let log = lastLogForServiceType else { return }
+        let template = LoggedServiceTemplate(from: log)
+        if selectedPreset == nil && customServiceName.isEmpty {
+            customServiceName = template.serviceName
+        }
+        intervalMonths = template.intervalMonths
+        intervalMiles = template.intervalMiles
+        isRecurring = template.hasRecurringIntervals
+        if let interval = template.intervalMiles, interval > 0 {
+            nextDueMileage = log.mileageAtService + interval
+        }
+        if let months = template.intervalMonths, months > 0,
+           let suggested = Calendar.current.date(byAdding: .month, value: months, to: log.performedDate) {
+            hasCustomDate = true
+            dueDate = suggested
+        }
         HapticService.shared.selectionChanged()
     }
 
@@ -141,6 +173,12 @@ struct AddServiceView: View {
                                 serviceName: last.service?.name ?? "previous service",
                                 performedDate: last.performedDate,
                                 action: useLastEntry
+                            )
+                        } else if mode == .remind, let last = lastLogForServiceType {
+                            UseLastEntryButton(
+                                serviceName: last.service?.name ?? "previous service",
+                                performedDate: last.performedDate,
+                                action: useLastEntryForRemind
                             )
                         }
 
@@ -374,6 +412,21 @@ struct AddServiceView: View {
 
     @ViewBuilder
     private var scheduleModeFields: some View {
+        // Resolve history once per render; downstream suggestions read from
+        // the captured log instead of re-running the lookup.
+        let last = lastLogForServiceType
+        let policyMonths = (last?.service?.intervalMonths).flatMap { $0 > 0 ? $0 : nil }
+        let policyMiles = (last?.service?.intervalMiles).flatMap { $0 > 0 ? $0 : nil }
+        let projectedDueMileage = last.flatMap { log in policyMiles.map { log.mileageAtService + $0 } }
+
+        if let last {
+            Text("Last done: \(Formatters.shortDate.string(from: last.performedDate)) · \(Formatters.mileage(last.mileageAtService))")
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(1)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+
         VStack(alignment: .leading, spacing: Spacing.sm) {
             InstrumentSectionHeader(title: "Next Due")
 
@@ -395,6 +448,19 @@ struct AddServiceView: View {
                     suffix: DistanceSettings.shared.unit.abbreviation
                 )
 
+                if nextDueMileage == nil, let suggested = projectedDueMileage {
+                    SuggestedValueRow(label: "Suggest \(Formatters.mileage(suggested))") {
+                        nextDueMileage = suggested
+                    }
+                }
+
+                if let nextDueDate, nextDueDate < Date.now {
+                    Text("This date is in the past — will be marked overdue.")
+                        .font(.brutalistSecondary)
+                        .foregroundStyle(Theme.textTertiary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+
                 if let nextDueDate, let nextDueMileage {
                     whicheverFirstSummary(date: nextDueDate, mileage: nextDueMileage, pace: vehicle.dailyMilesPace)
                 }
@@ -413,7 +479,18 @@ struct AddServiceView: View {
 
                 if isRecurring {
                     InstrumentNumberField(label: "Every", value: $intervalMonths, placeholder: "6", suffix: "months")
+                    if intervalMonths == nil, let suggested = policyMonths {
+                        SuggestedValueRow(label: "Suggest \(suggested) months") {
+                            intervalMonths = suggested
+                        }
+                    }
+
                     InstrumentNumberField(label: "Or Every", value: $intervalMiles, placeholder: "5000", suffix: "miles")
+                    if intervalMiles == nil, let suggested = policyMiles {
+                        SuggestedValueRow(label: "Suggest \(Formatters.mileage(suggested))") {
+                            intervalMiles = suggested
+                        }
+                    }
                 }
             }
         }
