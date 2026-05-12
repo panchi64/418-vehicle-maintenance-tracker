@@ -24,6 +24,7 @@ struct EditServiceView: View {
     @State private var dueMileage: Int? = nil
     @State private var intervalMonths: Int? = nil
     @State private var intervalMiles: Int? = nil
+    @State private var isRecurring: Bool = false
     @State private var notes: String = ""
 
     @State private var showDeleteConfirmation = false
@@ -51,29 +52,16 @@ struct EditServiceView: View {
                             )
                         }
 
-                        // Due Date Section
+                        // Next Due Section
                         VStack(alignment: .leading, spacing: Spacing.sm) {
-                            InstrumentSectionHeader(title: "When Is It Due?")
+                            InstrumentSectionHeader(title: "Next Due")
 
                             VStack(spacing: Spacing.md) {
-                                // Due date toggle
-                                HStack {
-                                    Text("SET DUE DATE")
-                                        .font(.brutalistLabel)
-                                        .foregroundStyle(Theme.textTertiary)
-                                        .tracking(1)
-
-                                    Spacer()
-
-                                    Toggle("", isOn: $hasDueDate)
-                                        .labelsHidden()
-                                        .tint(Theme.accent)
-                                        .accessibilityLabel("Set due date")
-                                }
-                                .padding(Spacing.md)
-                                .accessibilityElement(children: .combine)
-                                .background(Theme.surfaceInstrument)
-                                .brutalistBorder()
+                                LabeledInstrumentToggle(
+                                    label: "SET DUE DATE",
+                                    accessibilityLabel: "Set due date",
+                                    isOn: $hasDueDate
+                                )
 
                                 if hasDueDate {
                                     InstrumentDatePicker(
@@ -91,24 +79,32 @@ struct EditServiceView: View {
                             }
                         }
 
-                        // Repeat Section
+                        // Repeats Section
                         VStack(alignment: .leading, spacing: Spacing.sm) {
-                            InstrumentSectionHeader(title: "Repeat")
+                            InstrumentSectionHeader(title: "Repeats")
 
                             VStack(spacing: Spacing.md) {
-                                InstrumentNumberField(
-                                    label: "Every",
-                                    value: $intervalMonths,
-                                    placeholder: "6",
-                                    suffix: "months"
+                                LabeledInstrumentToggle(
+                                    label: "REPEAT AFTER COMPLETION",
+                                    accessibilityLabel: "Repeat after completion",
+                                    isOn: $isRecurring
                                 )
 
-                                InstrumentNumberField(
-                                    label: "Or Every",
-                                    value: $intervalMiles,
-                                    placeholder: "5000",
-                                    suffix: DistanceSettings.shared.unit.abbreviation
-                                )
+                                if isRecurring {
+                                    InstrumentNumberField(
+                                        label: "Every",
+                                        value: $intervalMonths,
+                                        placeholder: "6",
+                                        suffix: "months"
+                                    )
+
+                                    InstrumentNumberField(
+                                        label: "Or Every",
+                                        value: $intervalMiles,
+                                        placeholder: "5000",
+                                        suffix: DistanceSettings.shared.unit.abbreviation
+                                    )
+                                }
                             }
                         }
 
@@ -190,6 +186,7 @@ struct EditServiceView: View {
         dueMileage = service.dueMileage
         intervalMonths = service.intervalMonths
         intervalMiles = service.intervalMiles
+        isRecurring = service.isRecurring
         notes = service.notes ?? ""
     }
 
@@ -199,29 +196,16 @@ struct EditServiceView: View {
         HapticService.shared.success()
         AnalyticsService.shared.capture(.serviceEdited)
 
-        let intervalsChanged = service.intervalMonths != intervalMonths || service.intervalMiles != intervalMiles
-
         service.name = serviceName
-        service.intervalMonths = intervalMonths
-        service.intervalMiles = intervalMiles
+        service.dueDate = hasDueDate ? dueDate : nil
+        service.dueMileage = dueMileage
+        service.intervalMonths = isRecurring ? intervalMonths : nil
+        service.intervalMiles = isRecurring ? intervalMiles : nil
+        service.isRecurring = isRecurring && Service.hasIntervalPolicy(
+            intervalMonths: intervalMonths,
+            intervalMiles: intervalMiles
+        )
         service.notes = notes.isEmpty ? nil : notes
-
-        // Re-derive due dates from intervals when intervals changed
-        if intervalsChanged {
-            let anchorDate = service.lastPerformed ?? Date()
-            let anchorMileage = service.lastMileage ?? vehicle.currentMileage
-            service.deriveDueFromIntervals(anchorDate: anchorDate, anchorMileage: anchorMileage)
-        }
-
-        // Apply explicit user overrides on top of derived values
-        if hasDueDate {
-            service.dueDate = dueDate
-        } else if !intervalsChanged {
-            service.dueDate = nil
-        }
-        if let explicit = dueMileage, !intervalsChanged {
-            service.dueMileage = explicit
-        }
 
         updateAppIcon()
         updateWidgetData()
