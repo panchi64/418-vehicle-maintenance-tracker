@@ -11,6 +11,7 @@ import Charts
 
 struct CumulativeCostChartCard: View {
     let data: [(date: Date, cumulativeAmount: Decimal)]
+    var onSelectionChange: ((Date?) -> Void)? = nil
 
     @State private var selectedDate: Date?
 
@@ -109,6 +110,9 @@ struct CumulativeCostChartCard: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Spending pace chart showing cumulative costs over time")
+        .onChange(of: selectedEntry?.date) { _, newDate in
+            onSelectionChange?(newDate)
+        }
     }
 
     private func selectionOverlay(date: Date, amount: Decimal) -> some View {

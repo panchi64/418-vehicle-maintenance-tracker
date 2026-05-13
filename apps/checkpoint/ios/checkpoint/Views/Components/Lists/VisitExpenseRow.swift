@@ -13,10 +13,19 @@ import SwiftUI
 struct VisitExpenseRow: View {
     let visit: ServiceVisit
     let onTap: (() -> Void)?
+    let isAnomalous: Bool
+    let isHighlighted: Bool
 
-    init(visit: ServiceVisit, onTap: (() -> Void)? = nil) {
+    init(
+        visit: ServiceVisit,
+        isAnomalous: Bool = false,
+        isHighlighted: Bool = false,
+        onTap: (() -> Void)? = nil
+    ) {
         self.visit = visit
         self.onTap = onTap
+        self.isAnomalous = isAnomalous
+        self.isHighlighted = isHighlighted
     }
 
     var body: some View {
@@ -42,20 +51,7 @@ struct VisitExpenseRow: View {
                     .foregroundStyle(Theme.textPrimary)
                     .lineLimit(1)
 
-                HStack(spacing: 4) {
-                    Text(formatDate(visit.performedDate))
-                        .font(.brutalistSecondary)
-                        .foregroundStyle(Theme.textTertiary)
-
-                    Text("//")
-                        .font(.brutalistSecondary)
-                        .foregroundStyle(Theme.textTertiary)
-
-                    Text("SERVICE VISIT")
-                        .font(.brutalistLabel)
-                        .foregroundStyle(visit.costCategory?.color ?? Theme.accent)
-                        .tracking(0.5)
-                }
+                metadataRow
             }
 
             Spacer()
@@ -75,11 +71,40 @@ struct VisitExpenseRow: View {
             }
         }
         .padding(Spacing.md)
+        .background(isHighlighted ? Theme.accent.opacity(0.12) : Color.clear)
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Service Visit on \(formatDate(visit.performedDate)), \(visit.serviceCount) services")
         .accessibilityValue(visit.formattedTotalCost ?? "No total recorded")
         .accessibilityHint(onTap != nil ? "Double tap to view the visit" : "")
+    }
+
+    private var metadataRow: some View {
+        HStack(spacing: 4) {
+            Text(formatDate(visit.performedDate))
+                .font(.brutalistSecondary)
+                .foregroundStyle(Theme.textTertiary)
+
+            Text("//")
+                .font(.brutalistSecondary)
+                .foregroundStyle(Theme.textTertiary)
+
+            Text("SERVICE VISIT")
+                .font(.brutalistLabel)
+                .foregroundStyle(visit.costCategory?.color ?? Theme.accent)
+                .tracking(0.5)
+
+            if isAnomalous {
+                Text("//")
+                    .font(.brutalistSecondary)
+                    .foregroundStyle(Theme.textTertiary)
+
+                Text(L10n.costsRowOutlier)
+                    .font(.brutalistLabelBold)
+                    .foregroundStyle(Theme.statusOverdue)
+                    .tracking(1.5)
+            }
+        }
     }
 
     private var serviceListLabel: String {

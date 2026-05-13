@@ -13,6 +13,7 @@ struct MonthlyTrendChartCard: View {
     let breakdown: [(month: Date, amount: Decimal)]
     let breakdownByCategory: [(month: Date, category: CostCategory, amount: Decimal)]?
     let isStacked: Bool
+    var onSelectionChange: ((Date?) -> Void)? = nil
 
     @State private var selectedMonth: Date?
 
@@ -68,6 +69,9 @@ struct MonthlyTrendChartCard: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Monthly spending trend chart")
+        .onChange(of: selectedBreakdownEntry?.month) { _, newMonth in
+            onSelectionChange?(newMonth)
+        }
     }
 
     private func selectionOverlay(month: Date, amount: Decimal) -> some View {

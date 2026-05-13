@@ -10,10 +10,19 @@ import SwiftUI
 struct ExpenseRow: View {
     let log: ServiceLog
     let onTap: (() -> Void)?
+    let isAnomalous: Bool
+    let isHighlighted: Bool
 
-    init(log: ServiceLog, onTap: (() -> Void)? = nil) {
+    init(
+        log: ServiceLog,
+        isAnomalous: Bool = false,
+        isHighlighted: Bool = false,
+        onTap: (() -> Void)? = nil
+    ) {
         self.log = log
         self.onTap = onTap
+        self.isAnomalous = isAnomalous
+        self.isHighlighted = isHighlighted
     }
 
     var body: some View {
@@ -47,22 +56,7 @@ struct ExpenseRow: View {
                     .foregroundStyle(Theme.textPrimary)
                     .lineLimit(1)
 
-                HStack(spacing: 4) {
-                    Text(formatDate(log.performedDate))
-                        .font(.brutalistSecondary)
-                        .foregroundStyle(Theme.textTertiary)
-
-                    if let category = log.costCategory {
-                        Text("//")
-                            .font(.brutalistSecondary)
-                            .foregroundStyle(Theme.textTertiary)
-
-                        Text(category.displayName.uppercased())
-                            .font(.brutalistLabel)
-                            .foregroundStyle(category.color)
-                            .tracking(0.5)
-                    }
-                }
+                metadataRow
             }
 
             Spacer()
@@ -84,11 +78,42 @@ struct ExpenseRow: View {
             }
         }
         .padding(Spacing.md)
+        .background(isHighlighted ? Theme.accent.opacity(0.12) : Color.clear)
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(log.service?.name ?? "Service"), \(formatDate(log.performedDate))")
+        .accessibilityLabel("\(log.service?.name ?? "Service"), \(formatDate(log.performedDate))\(isAnomalous ? ", outlier" : "")")
         .accessibilityValue(log.formattedCost ?? "No cost recorded")
         .accessibilityHint(onTap != nil ? "Double tap to view details" : "")
+    }
+
+    private var metadataRow: some View {
+        HStack(spacing: 4) {
+            Text(formatDate(log.performedDate))
+                .font(.brutalistSecondary)
+                .foregroundStyle(Theme.textTertiary)
+
+            if let category = log.costCategory {
+                Text("//")
+                    .font(.brutalistSecondary)
+                    .foregroundStyle(Theme.textTertiary)
+
+                Text(category.displayName.uppercased())
+                    .font(.brutalistLabel)
+                    .foregroundStyle(category.color)
+                    .tracking(0.5)
+            }
+
+            if isAnomalous {
+                Text("//")
+                    .font(.brutalistSecondary)
+                    .foregroundStyle(Theme.textTertiary)
+
+                Text(L10n.costsRowOutlier)
+                    .font(.brutalistLabelBold)
+                    .foregroundStyle(Theme.statusOverdue)
+                    .tracking(1.5)
+            }
+        }
     }
 
     private func formatDate(_ date: Date) -> String {

@@ -81,7 +81,7 @@ extension CostsTab {
 
     /// Build the deduped event list for the selected vehicle.
     /// Visits are inserted once; logs that belong to a visit are absorbed.
-    private var vehicleEvents: [ExpenseEvent] {
+    var vehicleEvents: [ExpenseEvent] {
         let logs = vehicleServiceLogs
         var seenVisitIDs: Set<UUID> = []
         var events: [ExpenseEvent] = []

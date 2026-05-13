@@ -40,6 +40,16 @@
     "%@" : {
 
     },
+    "%@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
+    },
     "%@ //" : {
 
     },
@@ -217,6 +227,9 @@
 
     },
     "~%lld DAYS AT YOUR PACE" : {
+
+    },
+    "◆" : {
 
     },
     "$14.99" : {
@@ -428,10 +441,13 @@
     "Back" : {
 
     },
-    "Browse Presets" : {
+    "BELOW PREVIOUS READING (%@)" : {
 
     },
-    "Browse service presets" : {
+    "BROWSE ALL PRESETS" : {
+
+    },
+    "Browse all service presets" : {
 
     },
     "BY CATEGORY" : {
@@ -447,6 +463,9 @@
 
     },
     "CATEGORY" : {
+
+    },
+    "Change service type. Currently %@" : {
 
     },
     "Check Next Due" : {
@@ -468,6 +487,12 @@
 
     },
     "Clear search" : {
+
+    },
+    "Clear service type" : {
+
+    },
+    "Clears the selected preset and lets you type any service name" : {
 
     },
     "Climate Zone" : {
@@ -800,12 +825,6 @@
     "DUE AT" : {
 
     },
-    "DUE DATE" : {
-
-    },
-    "DUE MILEAGE" : {
-
-    },
     "duesoon.days_desc" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -906,13 +925,13 @@
     "Edit service log" : {
 
     },
-    "Edit Service Log" : {
-
-    },
     "Edit Vehicle" : {
 
     },
     "Edit vehicle specs" : {
+
+    },
+    "EDITING" : {
 
     },
     "Empty" : {
@@ -1035,6 +1054,181 @@
             "value" : "Sin historial"
           }
         }
+      }
+    },
+    "costs.headline.total" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Total Spent" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Total gastado" } }
+      }
+    },
+    "costs.headline.delta_up" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "↑ %1$@ %2$@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "↑ %1$@ %2$@" } }
+      }
+    },
+    "costs.headline.delta_down" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "↓ %1$@ %2$@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "↓ %1$@ %2$@" } }
+      }
+    },
+    "costs.headline.delta_flat" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "— %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "— %@" } }
+      }
+    },
+    "costs.headline.prior_month" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "vs prior 30 d" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "vs 30 d anteriores" } }
+      }
+    },
+    "costs.headline.prior_ytd" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "vs YTD %lld" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "vs YTD %lld" } }
+      }
+    },
+    "costs.headline.prior_year" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "vs prior 12 mo" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "vs 12 meses anteriores" } }
+      }
+    },
+    "costs.headline.split" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$lld%% REACTIVE · %2$lld%% PREVENTIVE · %3$lld%% DISCRETIONARY" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$lld%% REACTIVO · %2$lld%% PREVENTIVO · %3$lld%% DISCRECIONAL" } }
+      }
+    },
+    "costs.headline.projection" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "ON PACE FOR %@ BY DEC 31" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "EN RITMO PARA %@ AL 31 DIC" } }
+      }
+    },
+    "costs.headline.share" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "SHARE" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "COMPARTIR" } }
+      }
+    },
+    "costs.cluster.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "REPAIR CLUSTER" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "GRUPO DE REPARACIONES" } }
+      }
+    },
+    "costs.cluster.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$lld repairs in the last 90 days totaling %2$@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$lld reparaciones en los últimos 90 días por un total de %2$@" } }
+      }
+    },
+    "costs.top.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Biggest Expenses" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Gastos mayores" } }
+      }
+    },
+    "costs.row.outlier" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "OUTLIER" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "ATÍPICO" } }
+      }
+    },
+    "costs.cpm.delta_up" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "↑ %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "↑ %@" } }
+      }
+    },
+    "costs.cpm.delta_down" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "↓ %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "↓ %@" } }
+      }
+    },
+    "costs.cpm.delta_flat" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "—" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "—" } }
+      }
+    },
+    "costs.empty.none.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No Expenses" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin gastos" } }
+      }
+    },
+    "costs.empty.none.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Record service costs when\ncompleting maintenance" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Registra los costos de servicio al\ncompletar mantenimiento" } }
+      }
+    },
+    "costs.empty.start.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Off to a Good Start" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Buen comienzo" } }
+      }
+    },
+    "costs.empty.start.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "As you log more services, you'll see\nspending trends and where the money goes." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Conforme registres más servicios, verás\ntendencias y a dónde va tu dinero." } }
+      }
+    },
+    "costs.upcoming.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Coming Up" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Próximamente" } }
+      }
+    },
+    "costs.upcoming.body_singular" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%@ — plan ahead" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%@ — planifica" } }
+      }
+    },
+    "costs.upcoming.body_plural" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ and %2$lld more upcoming" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ y %2$lld más próximos" } }
+      }
+    },
+    "costs.share.subject" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Vehicle costs" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Costos del vehículo" } }
       }
     },
     "ENTER MILEAGE" : {
@@ -1174,6 +1368,9 @@
     "ICLOUD SYNC" : {
 
     },
+    "If left blank, current vehicle mileage will be used." : {
+
+    },
     "Import" : {
 
     },
@@ -1208,6 +1405,16 @@
     "LAST CONFIRMED" : {
 
     },
+    "Last done: %@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Last done: %1$@ · %2$@"
+          }
+        }
+      }
+    },
     "Last synced %@" : {
 
     },
@@ -1241,9 +1448,6 @@
     "Looking Up..." : {
 
     },
-    "LOW CONFIDENCE - VERIFY VALUE" : {
-
-    },
     "MARBETE" : {
 
     },
@@ -1269,9 +1473,6 @@
 
     },
     "Mileage input" : {
-
-    },
-    "MILEAGE IS REQUIRED TO SAVE" : {
 
     },
     "Mileage Window" : {
@@ -2117,6 +2318,12 @@
     "Optional" : {
 
     },
+    "OR" : {
+
+    },
+    "OR TYPE A CUSTOM SERVICE" : {
+
+    },
     "OVERDUE" : {
 
     },
@@ -2646,7 +2853,7 @@
     "RECORD COMPLETED SERVICE" : {
 
     },
-    "Record Service" : {
+    "RECORD SERVICE" : {
 
     },
     "REGISTRATION TAG" : {
@@ -2656,12 +2863,6 @@
 
     },
     "REMEDY" : {
-
-    },
-    "Remind me next time" : {
-
-    },
-    "REMIND ME NEXT TIME" : {
 
     },
     "reminder.helper_text" : {
@@ -2694,6 +2895,12 @@
 
     },
     "Save" : {
+
+    },
+    "SAVE & ADD ANOTHER" : {
+
+    },
+    "Save and add another" : {
 
     },
     "Scan odometer with camera" : {
@@ -2803,13 +3010,7 @@
     "Set a reminder for future service" : {
 
     },
-    "Set due date" : {
-
-    },
-    "SET DUE DATE" : {
-
-    },
-    "Set Reminder" : {
+    "SET REMINDER" : {
 
     },
     "Set up reminder" : {
@@ -3270,6 +3471,9 @@
     "THEME UNLOCKED" : {
 
     },
+    "This date is in the past — will be marked overdue." : {
+
+    },
     "This is your only vehicle. Deleting it will remove all associated services and maintenance history. You'll need to add a new vehicle to continue using Checkpoint." : {
 
     },
@@ -3574,6 +3778,24 @@
 
     },
     "Usage Analytics" : {
+
+    },
+    "USE" : {
+
+    },
+    "Use %@" : {
+
+    },
+    "USE A CUSTOM SERVICE INSTEAD" : {
+
+    },
+    "USE LAST ENTRY" : {
+
+    },
+    "Use last entry: %@" : {
+
+    },
+    "Use suggested value: %@" : {
 
     },
     "USE THIS" : {
@@ -4089,6 +4311,9 @@
 
     },
     "Which vehicle would you like to update?" : {
+
+    },
+    "WHICHEVER COMES FIRST" : {
 
     },
     "WINDOW" : {

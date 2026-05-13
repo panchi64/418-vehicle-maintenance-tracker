@@ -2,7 +2,10 @@
 //  CostsTab.swift
 //  checkpoint
 //
-//  Costs tab showing expense tracking and analytics
+//  Costs tab — analytics-style answers to "how is this car doing financially?"
+//  The view itself is a thin orchestrator. Sections live in
+//  `CostsTab+Sections.swift`; analytics in `CostsTab+Analytics.swift`;
+//  derived insights in `CostsTab+Insights.swift`.
 //
 
 import SwiftUI
@@ -13,8 +16,9 @@ struct CostsTab: View {
     @Bindable var appState: AppState
     @Query var serviceLogs: [ServiceLog]
 
-    @State var periodFilter: PeriodFilter = .ytd
+    @State var periodFilter: PeriodFilter = .year
     @State var categoryFilter: CategoryFilter = .all
+    @State var highlightedEventID: UUID?
 
     enum PeriodFilter: String, CaseIterable {
         case month = "Month"
@@ -54,17 +58,25 @@ struct CostsTab: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: Spacing.lg) {
-                filtersSection
-                summaryCardsSection
-                breakdownSections
-                expenseListSection
-                emptyStates
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(spacing: Spacing.lg) {
+                    filtersSection
+                    summaryCardsSection
+                    breakdownSections
+                    expenseListSection(scrollProxy: proxy)
+                    emptyStates
+                }
+                .padding(.horizontal, Spacing.screenHorizontal)
+                .padding(.top, Spacing.md)
+                .padding(.bottom, Spacing.xxl + Spacing.tabBarOffset)
             }
-            .padding(.horizontal, Spacing.screenHorizontal)
-            .padding(.top, Spacing.md)
-            .padding(.bottom, Spacing.xxl + Spacing.tabBarOffset)
+            .onChange(of: highlightedEventID) { _, newID in
+                guard let newID else { return }
+                withAnimation(.easeInOut(duration: Theme.animationMedium)) {
+                    proxy.scrollTo(newID, anchor: .center)
+                }
+            }
         }
         .trackScreen(.costs)
         .onChange(of: periodFilter) { _, newValue in
@@ -73,169 +85,6 @@ struct CostsTab: View {
         .onChange(of: categoryFilter) { _, newValue in
             AnalyticsService.shared.capture(.costsCategoryChanged(category: newValue.rawValue))
         }
-    }
-
-    // MARK: - Filters Section
-
-    private var filtersSection: some View {
-        VStack(spacing: Spacing.lg) {
-            InstrumentSegmentedControl(
-                options: PeriodFilter.allCases,
-                selection: $periodFilter
-            ) { filter in
-                filter.rawValue
-            }
-            .revealAnimation(delay: 0.1)
-
-            InstrumentSegmentedControl(
-                options: CategoryFilter.allCases,
-                selection: $categoryFilter
-            ) { filter in
-                filter.rawValue
-            }
-            .revealAnimation(delay: 0.12)
-        }
-    }
-
-    // MARK: - Summary Cards Section
-
-    private var summaryCardsSection: some View {
-        VStack(spacing: Spacing.md) {
-            CostSummaryCard(
-                formattedTotal: formattedTotalSpent,
-                periodLabel: periodLabel
-            )
-            .revealAnimation(delay: 0.15)
-
-            HStack(spacing: Spacing.md) {
-                StatsCard(label: "SERVICES", value: "\(serviceCount)")
-                StatsCard(label: "AVG COST", value: formattedAverageCost)
-                StatsCard(label: "PER MILE", value: formattedCostPerMile, valueColor: Theme.accent)
-            }
-            .revealAnimation(delay: 0.2)
-
-            if costPerMile == nil && !eventsWithCosts.isEmpty {
-                Text(L10n.emptyCostPerMileHint.uppercased())
-                    .font(.brutalistLabel)
-                    .foregroundStyle(Theme.textTertiary)
-                    .tracking(1.5)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity)
-            }
-        }
-    }
-
-    // MARK: - Breakdown Sections
-
-    @ViewBuilder
-    private var breakdownSections: some View {
-        // Spending pace chart
-        if cumulativeCostOverTime.count >= 3 {
-            CumulativeCostChartCard(data: cumulativeCostOverTime)
-                .revealAnimation(delay: 0.22)
-        } else if !eventsWithCosts.isEmpty {
-            ChartPlaceholderCard(message: "3+ expenses to show spending pace")
-                .revealAnimation(delay: 0.22)
-        }
-
-        // Category breakdown (only show when "All" category is selected)
-        if categoryFilter == .all && !categoryBreakdown.isEmpty {
-            CategoryBreakdownCard(breakdown: categoryBreakdown)
-                .revealAnimation(delay: 0.24)
-        }
-
-        // Yearly roundup card (show for Year and All periods)
-        if shouldShowYearlyRoundup {
-            VStack(alignment: .leading, spacing: Spacing.sm) {
-                InstrumentSectionHeader(title: "Yearly Summary")
-
-                YearlyCostRoundupCard(
-                    year: currentYear,
-                    serviceLogs: vehicleServiceLogs,
-                    previousYearLogs: previousYearLogs
-                )
-            }
-            .revealAnimation(delay: 0.26)
-        }
-
-        // Monthly trend chart (replaces MonthlyBreakdownCard)
-        if monthlyBreakdown.count > 1 && periodFilter != .month {
-            MonthlyTrendChartCard(
-                breakdown: monthlyBreakdownChronological,
-                breakdownByCategory: categoryFilter == .all ? monthlyBreakdownByCategory : nil,
-                isStacked: categoryFilter == .all
-            )
-            .revealAnimation(delay: 0.28)
-        } else if eventsWithCosts.count == 1 && periodFilter != .month {
-            ChartPlaceholderCard(message: "Expenses in 2+ months to show trends")
-                .revealAnimation(delay: 0.28)
-        }
-    }
-
-    // MARK: - Expense List Section
-
-    @ViewBuilder
-    private var expenseListSection: some View {
-        if !eventsWithCosts.isEmpty {
-            VStack(alignment: .leading, spacing: Spacing.sm) {
-                InstrumentSectionHeader(title: "Expenses")
-
-                VStack(spacing: 0) {
-                    ForEach(Array(eventsWithCosts.enumerated()), id: \.element.id) { index, event in
-                        Group {
-                            switch event {
-                            case .standalone(let log):
-                                ExpenseRow(log: log) {
-                                    appState.selectedServiceLog = log
-                                }
-                            case .visit(let visit):
-                                VisitExpenseRow(visit: visit) {
-                                    appState.selectedServiceVisit = visit
-                                }
-                            }
-                        }
-                        .staggeredReveal(index: index, baseDelay: 0.25)
-
-                        if index < eventsWithCosts.count - 1 {
-                            ListDivider(leadingPadding: 28)
-                        }
-                    }
-                }
-                .background(Theme.surfaceInstrument)
-                .brutalistBorder()
-            }
-        }
-    }
-
-    // MARK: - Empty States
-
-    @ViewBuilder
-    private var emptyStates: some View {
-        if vehicle != nil && eventsWithCosts.isEmpty {
-            emptyState
-                .revealAnimation(delay: 0.2)
-        }
-
-        if vehicle == nil {
-            noVehicleState
-                .revealAnimation(delay: 0.2)
-        }
-    }
-
-    private var emptyState: some View {
-        EmptyStateView(
-            icon: "dollarsign.circle",
-            title: "No Expenses",
-            message: "Record service costs when\ncompleting maintenance"
-        )
-    }
-
-    private var noVehicleState: some View {
-        EmptyStateView(
-            icon: "car.side.fill",
-            title: "No Vehicle",
-            message: "Select or add a vehicle\nto view costs"
-        )
     }
 }
 

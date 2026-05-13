@@ -11,11 +11,21 @@ struct StatsCard: View {
     let label: String
     let value: String
     let valueColor: Color
+    let subvalue: String?
+    let subvalueColor: Color
 
-    init(label: String, value: String, valueColor: Color = Theme.textPrimary) {
+    init(
+        label: String,
+        value: String,
+        valueColor: Color = Theme.textPrimary,
+        subvalue: String? = nil,
+        subvalueColor: Color = Theme.textTertiary
+    ) {
         self.label = label
         self.value = value
         self.valueColor = valueColor
+        self.subvalue = subvalue
+        self.subvalueColor = subvalueColor
     }
 
     var body: some View {
@@ -30,13 +40,21 @@ struct StatsCard: View {
                 .foregroundStyle(valueColor)
                 .minimumScaleFactor(0.7)
                 .lineLimit(1)
+
+            if let subvalue {
+                Text(subvalue)
+                    .font(.brutalistLabel)
+                    .foregroundStyle(subvalueColor)
+                    .tracking(0.5)
+                    .lineLimit(1)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Spacing.md)
         .background(Theme.surfaceInstrument)
         .brutalistBorder()
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(label): \(value)")
+        .accessibilityLabel("\(label): \(value)\(subvalue.map { ", \($0)" } ?? "")")
     }
 }
 
