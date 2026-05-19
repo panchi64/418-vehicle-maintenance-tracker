@@ -158,12 +158,6 @@ struct HomeTab: View {
                     .revealAnimation(delay: 0.25)
                 }
 
-                // Quick Stats Bar (after cluster, before lists)
-                if vehicle != nil, !vehicleServiceLogs.isEmpty {
-                    QuickStatsBar(serviceLogs: vehicleServiceLogs)
-                        .revealAnimation(delay: 0.3)
-                }
-
                 // Seasonal Advisory Cards (max 2)
                 ForEach(Array(activeSeasonalReminders.prefix(2)), id: \.id) { reminder in
                     SeasonalReminderCard(

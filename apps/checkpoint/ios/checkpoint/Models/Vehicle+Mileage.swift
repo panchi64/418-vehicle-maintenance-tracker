@@ -87,4 +87,88 @@ extension Vehicle {
             return "Updated \(days) days ago"
         }
     }
+
+    // MARK: - Period-based driving
+
+    /// Miles driven year-to-date (since Jan 1 of the current calendar year).
+    /// Falls back to "miles since first reading this year" when no pre-Jan-1 anchor exists,
+    /// marking the result `isPartial = true` so callers can suppress YoY comparisons.
+    /// Returns nil when there is no usable mileage history.
+    var milesDrivenYearToDate: MileagePeriodResult? {
+        let cal = Calendar.current
+        let now = Date.now
+        guard let startOfYear = cal.date(from: cal.dateComponents([.year], from: now)) else {
+            return nil
+        }
+        let snapshots = (mileageSnapshots ?? []).sorted { $0.recordedAt < $1.recordedAt }
+        guard !snapshots.isEmpty else { return nil }
+
+        let baseline: MileageSnapshot
+        let effectiveStart: Date
+        let isPartial: Bool
+        if let preYearAnchor = snapshots.last(where: { $0.recordedAt < startOfYear }) {
+            baseline = preYearAnchor
+            effectiveStart = startOfYear
+            isPartial = false
+        } else if let firstInYear = snapshots.first(where: { $0.recordedAt >= startOfYear }) {
+            baseline = firstInYear
+            effectiveStart = firstInYear.recordedAt
+            isPartial = true
+        } else {
+            return nil
+        }
+
+        let driven = currentMileage - baseline.mileage
+        guard driven >= 0 else { return nil }
+
+        // Need at least a day's gap so the number means something.
+        let daysElapsed = cal.dateComponents([.day], from: effectiveStart, to: now).day ?? 0
+        guard daysElapsed >= 1 else { return nil }
+
+        return MileagePeriodResult(miles: driven, effectiveStart: effectiveStart, isPartial: isPartial)
+    }
+
+    /// Miles driven in the same calendar window of the previous year
+    /// (Jan 1 of last year → today's month/day of last year). Used for YoY comparison.
+    /// Returns nil unless we have anchor snapshots bracketing both dates.
+    var milesDrivenSamePeriodLastYear: Int? {
+        let cal = Calendar.current
+        let now = Date.now
+
+        var startComponents = cal.dateComponents([.year], from: now)
+        guard let currentYear = startComponents.year else { return nil }
+        startComponents.year = currentYear - 1
+        guard let startOfLastYear = cal.date(from: startComponents) else { return nil }
+
+        var endComponents = cal.dateComponents([.year, .month, .day], from: now)
+        endComponents.year = currentYear - 1
+        guard let endOfPeriodLastYear = cal.date(from: endComponents) else { return nil }
+
+        let sorted = (mileageSnapshots ?? []).sorted { $0.recordedAt < $1.recordedAt }
+        return Self.milesBetween(sortedSnapshots: sorted, from: startOfLastYear, to: endOfPeriodLastYear)
+    }
+
+    /// Miles driven between two dates using snapshot anchors. Both anchors must exist
+    /// (most-recent snapshot at-or-before each date) and end must be later than start.
+    private static func milesBetween(sortedSnapshots: [MileageSnapshot], from startDate: Date, to endDate: Date) -> Int? {
+        guard !sortedSnapshots.isEmpty,
+              let startAnchor = sortedSnapshots.last(where: { $0.recordedAt <= startDate }),
+              let endAnchor = sortedSnapshots.last(where: { $0.recordedAt <= endDate }),
+              endAnchor.recordedAt > startAnchor.recordedAt else {
+            return nil
+        }
+        let driven = endAnchor.mileage - startAnchor.mileage
+        return driven >= 0 ? driven : nil
+    }
+}
+
+/// Result of a period-based mileage calculation.
+struct MileagePeriodResult: Equatable {
+    /// Miles driven during the period (in internal storage units — miles).
+    let miles: Int
+    /// Start date actually used. May be after the requested start when no pre-period anchor exists.
+    let effectiveStart: Date
+    /// True when the calculation was shortened because no pre-period anchor existed.
+    /// Callers should treat the number as "since [effectiveStart]" rather than full-period.
+    let isPartial: Bool
 }
