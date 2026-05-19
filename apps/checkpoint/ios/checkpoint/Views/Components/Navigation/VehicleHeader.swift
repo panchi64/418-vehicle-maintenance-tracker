@@ -2,8 +2,8 @@
 //  VehicleHeader.swift
 //  checkpoint
 //
-//  Persistent vehicle header showing vehicle name, mileage (with YTD line),
-//  make/model + year, and select action
+//  Persistent vehicle header — left column shows nickname + make/model,
+//  right column stacks settings/sync icons over the mileage + YTD readout.
 //
 
 import SwiftUI
@@ -19,22 +19,12 @@ struct VehicleHeader: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            selectTag
+        HStack(alignment: .top, spacing: Spacing.md) {
+            leftColumn
 
-            nameRow
+            Spacer()
 
-            if let vehicle = vehicle {
-                Text("\(vehicle.make)_\(vehicle.model) \u{00B7} \(String(vehicle.year))".uppercased())
-                    .font(.brutalistSecondary)
-                    .foregroundStyle(Theme.textTertiary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                    .padding(.top, Spacing.xs)
-
-                mileageRow(for: vehicle, metrics: drivingMetrics(for: vehicle))
-                    .padding(.top, Spacing.xs)
-            }
+            rightColumn
         }
         .padding(.horizontal, Theme.screenHorizontalPadding)
         .padding(.vertical, Spacing.listItem)
@@ -45,43 +35,85 @@ struct VehicleHeader: View {
         }
     }
 
-    // MARK: - [SELECT] tag (above nickname)
+    // MARK: - Left column: [SELECT] + nickname + make/model
 
-    private var selectTag: some View {
-        Button {
-            onTap()
-        } label: {
-            Text("[SELECT]")
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.accent)
-                .tracking(1)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityHidden(true)
-    }
+    private var leftColumn: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Button {
+                onTap()
+            } label: {
+                Text("[SELECT]")
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.accent)
+                    .tracking(1)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityHidden(true)
 
-    // MARK: - Name row (nickname + sync error + settings)
-
-    private var nameRow: some View {
-        HStack(spacing: Spacing.sm) {
             Button {
                 onTap()
             } label: {
                 Text(vehicle?.displayName.uppercased() ?? "SELECT_VEHICLE")
-                    .font(.brutalistTitle)
+                    .font(.brutalistHero)
                     .foregroundStyle(Theme.textPrimary)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.6)
+                    .minimumScaleFactor(0.5)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel(vehicle?.displayName ?? "Select vehicle")
             .accessibilityHint("Double tap to choose a vehicle")
 
-            Spacer()
+            if let vehicle = vehicle {
+                Text("\(vehicle.make)_\(vehicle.model) \u{00B7} \(String(vehicle.year))".uppercased())
+                    .font(.brutalistSecondary)
+                    .foregroundStyle(Theme.textTertiary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .padding(.top, Spacing.xs)
+            }
+        }
+    }
 
+    // MARK: - Right column: settings/sync icons + mileage + YTD
+
+    private var rightColumn: some View {
+        VStack(alignment: .trailing, spacing: 0) {
+            iconRow
+
+            if let vehicle = vehicle {
+                let metrics = drivingMetrics(for: vehicle)
+                let mileageText = Formatters.mileage(vehicle.currentMileage)
+
+                Button {
+                    onMileageTap?()
+                } label: {
+                    Text(mileageText)
+                        .font(.brutalistBody)
+                        .foregroundStyle(Theme.accent)
+                        .underline(onMileageTap != nil, color: Theme.accent.opacity(0.5))
+                        .frame(minHeight: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .padding(.top, Spacing.xs)
+                .accessibilityLabel("Mileage: \(mileageText)")
+                .accessibilityHint(onMileageTap != nil ? "Double tap to update mileage" : "")
+
+                if let line = metrics.subline {
+                    Text(line)
+                        .font(.brutalistSecondary)
+                        .foregroundStyle(Theme.textTertiary)
+                        .padding(.top, Spacing.xs)
+                        .accessibilityLabel(metrics.accessibilityLabel)
+                }
+            }
+        }
+    }
+
+    private var iconRow: some View {
+        HStack(spacing: 0) {
             if let error = syncService.currentError {
                 Button {
                     onSettingsTap?()
@@ -113,32 +145,6 @@ struct VehicleHeader: View {
         }
     }
 
-    // MARK: - Mileage row (current mileage + YTD + YoY)
-
-    private func mileageRow(for vehicle: Vehicle, metrics: DrivingMetrics) -> some View {
-        HStack(spacing: Spacing.xs) {
-            Button {
-                onMileageTap?()
-            } label: {
-                Text(Formatters.mileage(vehicle.currentMileage))
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.accent)
-                    .underline(onMileageTap != nil, color: Theme.accent.opacity(0.5))
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Mileage: \(Formatters.mileage(vehicle.currentMileage))")
-            .accessibilityHint(onMileageTap != nil ? "Double tap to update mileage" : "")
-
-            if let line = metrics.subline {
-                Text(line)
-                    .font(.brutalistSecondary)
-                    .foregroundStyle(Theme.textTertiary)
-                    .accessibilityLabel(metrics.accessibilityLabel)
-            }
-        }
-    }
-
     // MARK: - Driving metrics
 
     /// Computed once per render and shared by the visible subline + accessibility label.
@@ -164,9 +170,9 @@ struct VehicleHeader: View {
                 let arrow = rounded > 0 ? "\u{2191}" : "\u{2193}"
                 yoyFragment = "\(arrow) \(abs(rounded))%"
             }
-            subline = "\u{00B7} YTD \(Formatters.mileage(ytd.miles)) \u{00B7} \(yoyFragment)"
+            subline = "YTD \(Formatters.mileage(ytd.miles)) \u{00B7} \(yoyFragment)"
         } else {
-            subline = "\u{00B7} YTD \(Formatters.mileage(ytd.miles))"
+            subline = "YTD \(Formatters.mileage(ytd.miles))"
         }
 
         var a11yParts = ["Year to date: \(Formatters.mileage(ytd.miles)) driven"]
