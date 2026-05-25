@@ -96,12 +96,11 @@ The main page for the v1.0 submission.
 2. **Services tab** — Timeline view with upcoming/past services
 3. **Costs tab** — Charts and spending analytics
 4. **Service logging** — Quick-add flow / receipt OCR
-5. **Widgets** — Home Screen + Lock Screen + Watch widgets
+5. **Widgets** — Home Screen + Lock Screen widgets
 6. **Recall alerts** — Safety feature, builds trust
-7. **Apple Watch** — Complication + watch app
-8. **Settings/Themes** — Show the brutalist design language
+7. **Settings/Themes** — Show the brutalist design language
 
-**Apple Watch screenshots (optional):** 410 x 502 px (Series 10/11)
+> v1.0 is iPhone-only — no iPad/Apple Watch screenshots. See [`DEFERRED_PLATFORMS.md`](./DEFERRED_PLATFORMS.md).
 
 **Format:** PNG or JPEG, no transparency/alpha. Consider minimal text overlays ("Track what matters", "Know what's next") — most top apps use these.
 
@@ -131,7 +130,6 @@ TRACK EVERYTHING THAT MATTERS
 
 APPLE ECOSYSTEM, FULLY INTEGRATED
 • Home Screen & Lock Screen widgets
-• Apple Watch app with complications
 • Siri shortcuts — "Hey Siri, what's due on my car?"
 • CarPlay dashboard widget
 • Interactive widgets to mark services done
@@ -143,7 +141,7 @@ SMART SCHEDULING
 • Dual-axis tracking: date AND mileage, whichever comes first
 
 YOUR DATA, YOUR CONTROL
-• Free iCloud sync across all your devices
+• Free iCloud sync across all your iPhones
 • Export full service history as PDF
 • Import from Fuelly, Drivvo, or Simply Auto
 • Works fully offline — cloud is a bonus, not a requirement
@@ -156,7 +154,7 @@ Free for up to 3 vehicles with every feature unlocked. No ads, ever. Upgrade to 
 Appears above the description. Can be updated **without a new app version** — use for announcements:
 
 ```
-Track services, costs, and mileage for your vehicles. Smart reminders, widgets, Apple Watch, and Siri — all free. No ads, no account required.
+Track services, costs, and mileage for your vehicles. Smart reminders, widgets, Siri, and CarPlay — all free. No ads, no account required.
 ```
 
 ### 5e. Keywords (100 char max, comma-separated)
@@ -289,11 +287,11 @@ Order of operations:
 - [x] Build uploaded via Xcode → TestFlight
 - [x] Screenshots authored (en-US + es-MX)
 - [x] Description, keywords, promotional text drafted (locked in `marketing/APP_STORE_ASSETS.md`)
-- [ ] **Recreate the 4 IAPs in App Store Connect** — `pro.unlock`, `tip.small`, `tip.medium`, `tip.large`. Product IDs must match `Products.storekit` exactly. Each needs display name, description, review screenshot of the purchase sheet, and review notes. Must be "Ready to Submit" **and attached to v1.0.**
-- [ ] **Attach a processed build to v1.0** — ASC → App Store → v1.0 → Build section. Wait for "ready," not "processing."
-- [ ] **Fill in App Privacy disclosures** — use the table in §4. Mark all as "Used for App Functionality," nothing as "Tracking."
-- [ ] **Complete the Age Rating questionnaire** — expected result: 4+.
-- [ ] **Paste App Review notes + contact info** — review script in §6, test VIN `1HGBH41JXMN109186`.
+- [x] **Recreate the 4 IAPs in App Store Connect** — `pro.unlock`, `tip.small`, `tip.medium`, `tip.large`. Product IDs must match `Products.storekit` exactly. Each needs display name, description, review screenshot of the purchase sheet, and review notes. Must be "Ready to Submit" **and attached to v1.0.**
+- [x] **Attach a processed build to v1.0** — ASC → App Store → v1.0 → Build section. Wait for "ready," not "processing."
+- [x] **Fill in App Privacy disclosures** — use the table in §4. Mark all as "Used for App Functionality," nothing as "Tracking."
+- [x] **Complete the Age Rating questionnaire** — expected result: 4+.
+- [x] **Paste App Review notes + contact info** — review script in §6, test VIN `1HGBH41JXMN109186`.
 - [ ] **Add the es-MX localization** — paste locked copy from `marketing/APP_STORE_ASSETS.md` §2; upload es-MX screenshots (frames 1/2/3/8/10 differ from en-US).
 - [ ] **Submit for Review.**
 

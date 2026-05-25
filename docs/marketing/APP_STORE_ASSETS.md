@@ -33,7 +33,7 @@ The subtitle is the second-highest-weight ASO field after the name. *"No ads"* i
 ### Promotional Text (170 char, editable without resubmission — use for announcements)
 
 ```
-Track your car's services, costs, and mileage. Smart reminders, widgets, Apple Watch, Siri. No ads, no account, no subscription. Free for up to 3 vehicles.
+Track your car's services, costs, and mileage. Smart reminders, widgets, Siri, CarPlay. No ads, no account, no subscription. Free for up to 3 vehicles.
 ```
 
 ### Keywords (100 char, comma-separated, no spaces)
@@ -63,7 +63,6 @@ The dashboard shows the single most urgent service every time you open the app. 
 
 EVERY APPLE SURFACE
 • Home Screen and Lock Screen widgets
-• Apple Watch app with complications
 • Siri: "What's due on my car?"
 • CarPlay dashboard widget
 • Interactive widgets to mark a service complete in one tap
@@ -84,7 +83,7 @@ SMART SCHEDULING
 
 YOUR DATA. YOUR DEVICE.
 • No account required
-• Free iCloud sync across your iPhone, iPad, and Apple Watch
+• Free iCloud sync across all your iPhones
 • Full offline operation — the cloud is a bonus, not a requirement
 • Export a complete PDF service history any time
 • Import from Fuelly, Drivvo, Simply Auto
@@ -122,7 +121,7 @@ Rejected alternatives: `Servicios y millas, sin anuncios.` (33 — over), `Servi
 ### Promotional Text (170 char)
 
 ```
-Lleva el control del mantenimiento, los costos y las millas de tu carro. Recordatorios, widgets, Apple Watch y Siri. Sin anuncios, sin cuenta, sin subscripción.
+Lleva el control del mantenimiento, los costos y las millas de tu carro. Recordatorios, widgets, Siri y CarPlay. Sin anuncios, sin cuenta, sin subscripción.
 ```
 
 ### Keywords (100 char)
@@ -145,7 +144,6 @@ La pantalla principal te muestra el servicio más urgente cada vez que abres la 
 
 TODO EL ECOSISTEMA APPLE
 • Widgets en la pantalla de inicio y de bloqueo
-• App de Apple Watch con complicaciones
 • Siri: "¿Qué le toca a mi carro?"
 • Widget de CarPlay
 • Widgets interactivos: marca un servicio como hecho con un toque
@@ -166,7 +164,7 @@ PROGRAMACIÓN INTELIGENTE
 
 TUS DATOS. TU DISPOSITIVO.
 • Sin cuenta
-• Sincronización gratis vía iCloud entre tu iPhone, iPad y Apple Watch
+• Sincronización gratis vía iCloud entre todos tus iPhones
 • Funciona sin internet — la nube es un extra, no un requisito
 • Exporta tu historial completo en PDF cuando quieras
 • Importa desde Fuelly, Drivvo, Simply Auto
@@ -316,7 +314,9 @@ This frame must look *busy* but *organized* — the brutalist grid keeps it disc
 
 ---
 
-### Frame 7 — Apple Watch
+### Frame 7 — Apple Watch *(deferred for v1.0 — see `docs/DEFERRED_PLATFORMS.md`)*
+
+> v1.0 ships iPhone-only. Restore this frame and the supporting Apple Watch screenshots when the Watch app is re-embedded.
 
 **Story role:** Apple ecosystem proof, second wave.
 
@@ -438,20 +438,19 @@ Use `SKStoreReviewController.requestReview` — Apple caps to 3 prompts/365 days
 - [x] Keywords field locked (both locales)
 - [x] Description drafted (both locales) — Spanish still needs native-PR-speaker review aloud
 - [x] Promotional Text drafted
-- [x] Screenshots authored: 10 × 6.9" (`en-US`), 10 × 6.9" (`es-MX`)
+- [x] Screenshots authored: 10 × 6.9" (`en-US`), 10 × 6.9" (`es-MX`) — **upload 9 for v1.0**, skip Frame 7 (Apple Watch) while deferred
 - [x] Privacy Policy URL live — `https://checkpoint.franciscocasiano.com/privacy-policy`
 - [x] Support URL live — `https://checkpoint.franciscocasiano.com/support`
 - [x] PrivacyInfo.xcprivacy in the Xcode project
 - [x] Apple Developer Program active; build uploaded via Xcode → TestFlight
-- [ ] Apple Watch screenshots: 410 × 502 (`en-US` only is fine for v1.0)
 - [ ] App Preview A (24s) for `en-US` — optional but recommended (per §5)
 - [ ] App Preview B (22s) for `en-US` — optional but recommended (per §5)
 - [ ] App Preview A localized voiceless captions for `es-MX` (Preview B can wait)
-- [ ] **IAPs recreated in App Store Connect** and attached to v1.0 (local `Products.storekit` is simulator-only — product IDs must match exactly: `pro.unlock`, `tip.small`, `tip.medium`, `tip.large`)
-- [ ] **Build attached to v1.0** in ASC (uploading ≠ attaching)
-- [ ] **App Privacy disclosures filled** — mark all "App Functionality," nothing "Tracking"
-- [ ] **Age Rating questionnaire** completed (expected: 4+)
-- [ ] **App Review notes pasted** with test VIN `1HGBH41JXMN109186`
+- [x] **IAPs recreated in App Store Connect** and attached to v1.0 (local `Products.storekit` is simulator-only — product IDs must match exactly: `pro.unlock`, `tip.small`, `tip.medium`, `tip.large`)
+- [x] **Build attached to v1.0** in ASC (uploading ≠ attaching)
+- [x] **App Privacy disclosures filled** — mark all "App Functionality," nothing "Tracking"
+- [x] **Age Rating questionnaire** completed (expected: 4+)
+- [x] **App Review notes pasted** with test VIN `1HGBH41JXMN109186`
 - [ ] **es-MX locale paste** — description, keywords, screenshots (frames 1/2/3/8/10 differ from en-US)
 - [ ] Spanish description reviewed aloud by 2 native PR speakers (see §2)
 - [ ] Featuring nomination submitted via App Store Connect ≥ 2 weeks before target ship date (optional)

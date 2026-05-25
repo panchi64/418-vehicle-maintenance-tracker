@@ -466,7 +466,7 @@ Surface meaningful context alongside existing data to help users understand tren
 | Widget Vehicle Selection     | High     | ✅     | Long-press widget to choose which vehicle to display |
 | Widget Settings Sync         | High     | ✅     | Configure default widget settings in app Settings; all widgets inherit |
 | One-tap notification actions | High     | ✅     | "Did you do your oil change?" → Yes/No buttons |
-| Apple Watch App + Complications | High  | ✅     | Watch app with services list, mileage update, mark done; circular/rectangular/inline/corner complications |
+| Apple Watch App + Complications | High  | 🟡     | Built but **deferred from v1.0 ship** — code intact, not embedded in shipping binary. See `DEFERRED_PLATFORMS.md`. |
 | Siri integration             | Medium   | ✅     | "Hey Siri, what's due on my car?"              |
 | CarPlay Dashboard Widget     | Medium   | ✅     | iOS 16+ compact widget on CarPlay home screen  |
 | Dynamic App Icon             | Medium   | ✅     | Icon changes based on service urgency (configurable in Settings) |
@@ -933,7 +933,7 @@ See [DATA_RELIABILITY.md](./DATA_RELIABILITY.md) for the full data reliability c
 ## Open Questions
 
 - [ ] How accurate can on-device OCR/ML be for mechanic invoices?
-- [ ] Should we support iPad / Mac via Catalyst?
+- [ ] iPad / Mac via Catalyst — iPad deferred from v1.0 (see `DEFERRED_PLATFORMS.md`); Catalyst still open
 - [ ] How many vehicles should we seed the schedule database with before launch?
 - [ ] What's the review/verification process for crowdsourced schedules?
 - [ ] Regional pricing considerations for Pro and Subscription?
