@@ -59,11 +59,8 @@ final class ThemeManager {
     }
 
     func isOwned(_ theme: ThemeDefinition) -> Bool {
-        #if DEBUG
-        return true
-        #else
+        if DevEntitlements.unlockAll { return true }
         return ownedThemeIDs.contains(theme.id)
-        #endif
     }
 
     static func registerDefaults() {

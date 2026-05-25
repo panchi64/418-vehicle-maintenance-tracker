@@ -63,3 +63,16 @@ do {
     // Show guidance to user
 }
 ```
+
+## Dev entitlements
+
+Pro and theme gating in DEBUG builds is controlled by a single flag in
+`Utilities/DevEntitlements.swift`. When `unlockAll` is `true` (the dev
+default), `StoreManager.isPro` is forced to `true` and `ThemeManager.isOwned`
+returns `true` for every theme — so dev builds run without hitting the paywall.
+
+Flip `unlockAll` to `false` to exercise the real free-tier paths (paywall
+screenshots, gating tests). Release builds always run with the flag at `false`.
+
+Do not add new DEBUG-only entitlement branches to other files — add a check
+on `DevEntitlements.unlockAll` instead, so the dev-unlock intent stays in one place.

@@ -32,11 +32,7 @@ final class StoreManager {
     // MARK: - Properties
 
     private(set) var products: [Product] = []
-    #if DEBUG
-    var isPro: Bool = true
-    #else
-    var isPro: Bool = false
-    #endif
+    var isPro: Bool = DevEntitlements.unlockAll
     var purchaseInProgress: Bool = false
     var purchaseError: String?
 
@@ -135,10 +131,12 @@ final class StoreManager {
     // MARK: - Entitlements
 
     func checkEntitlements() async {
-        #if DEBUG
-        isPro = true
-        PurchaseSettings.shared.isPro = true
-        #else
+        if DevEntitlements.unlockAll {
+            isPro = true
+            PurchaseSettings.shared.isPro = true
+            return
+        }
+
         var hasPro = false
 
         for await result in Transaction.currentEntitlements {
@@ -151,7 +149,6 @@ final class StoreManager {
 
         isPro = hasPro
         PurchaseSettings.shared.isPro = hasPro
-        #endif
     }
 
     // MARK: - Restore
