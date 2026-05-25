@@ -167,33 +167,35 @@ struct DocumentsView: View {
             .accessibilityLabel(isSelectionMode ? "Done" : "Close")
         }
 
-        ToolbarItem(placement: .primaryAction) {
-            HStack(spacing: Spacing.sm) {
-                if !isSelectionMode && !allDocuments.isEmpty {
-                    Button(L10n.documentsSelectAction) {
-                        enterSelectionMode()
-                    }
-                    .toolbarButtonStyle()
+        if !isSelectionMode && !allDocuments.isEmpty {
+            ToolbarItem(placement: .primaryAction) {
+                Button(L10n.documentsSelectAction) {
+                    enterSelectionMode()
                 }
+                .toolbarButtonStyle()
+            }
+        }
 
-                if !isSelectionMode {
-                    Button {
-                        showAddSheet = true
-                    } label: {
-                        Image(systemName: "plus")
-                    }
-                    .toolbarButtonStyle()
-                    .accessibilityLabel(L10n.documentsAdd)
+        if !isSelectionMode {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showAddSheet = true
+                } label: {
+                    Image(systemName: "plus")
                 }
+                .toolbarButtonStyle()
+                .accessibilityLabel(L10n.documentsAdd)
+            }
+        }
 
-                if isSelectionMode {
-                    Text("\(selectedIDs.count)")
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.accent)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Theme.accent.opacity(0.2))
-                }
+        if isSelectionMode {
+            ToolbarItem(placement: .primaryAction) {
+                Text("\(selectedIDs.count)")
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.accent)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Theme.accent.opacity(0.2))
             }
         }
     }

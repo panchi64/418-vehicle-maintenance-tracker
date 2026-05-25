@@ -31,6 +31,7 @@ struct DocumentDetailView: View {
     @State private var pendingVehicleSelection: Set<UUID> = []
     @State private var showRemoveLastVehicleConfirmation = false
     @State private var pendingRemovalSelection: Set<UUID>?
+    @State private var isExtractedTextExpanded = false
 
     var body: some View {
         NavigationStack {
@@ -49,6 +50,11 @@ struct DocumentDetailView: View {
                         typeSection
 
                         notesSection
+
+                        if let text = document.extractedText,
+                           !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            extractedTextSection(text: text)
+                        }
 
                         linkedVehiclesSection
 
@@ -148,35 +154,35 @@ struct DocumentDetailView: View {
     // MARK: - Sections
 
     private var previewArea: some View {
-        ZStack {
-            Rectangle()
-                .fill(Theme.surfaceInstrument)
+        Button {
+            openPreview()
+        } label: {
+            ZStack {
+                Rectangle()
+                    .fill(Theme.surfaceInstrument)
 
-            if let image = document.thumbnailImage {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFit()
-                    .padding(Spacing.sm)
-            } else {
-                VStack(spacing: Spacing.sm) {
-                    Image(systemName: document.documentType.icon)
-                        .font(.system(size: 40, weight: .light))
-                        .foregroundStyle(document.documentType.accentColor)
+                if let image = document.thumbnailImage {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFit()
+                        .padding(Spacing.sm)
+                } else {
+                    VStack(spacing: Spacing.sm) {
+                        Image(systemName: document.documentType.icon)
+                            .font(.system(size: 40, weight: .light))
+                            .foregroundStyle(document.documentType.accentColor)
 
-                    Text(document.documentType.displayName.uppercased())
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
-                        .tracking(1.5)
+                        Text(document.documentType.displayName.uppercased())
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.textTertiary)
+                            .tracking(1.5)
+                    }
                 }
             }
-        }
-        .frame(height: 320)
-        .frame(maxWidth: .infinity)
-        .brutalistBorder()
-        .overlay(alignment: .bottomTrailing) {
-            Button {
-                openPreview()
-            } label: {
+            .frame(height: 320)
+            .frame(maxWidth: .infinity)
+            .brutalistBorder()
+            .overlay(alignment: .bottomTrailing) {
                 HStack(spacing: 6) {
                     Image(systemName: "arrow.up.left.and.arrow.down.right")
                         .font(.system(size: 12, weight: .semibold))
@@ -188,11 +194,13 @@ struct DocumentDetailView: View {
                 .padding(.horizontal, Spacing.sm)
                 .padding(.vertical, 6)
                 .background(Theme.accent)
+                .padding(Spacing.sm)
             }
-            .buttonStyle(.plain)
-            .padding(Spacing.sm)
-            .accessibilityLabel("Open full document")
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Open full document")
+        .accessibilityHint("Opens the document in the system viewer")
     }
 
     private var typeSection: some View {
@@ -241,6 +249,55 @@ struct DocumentDetailView: View {
             placeholder: L10n.documentsNotesPlaceholder,
             minHeight: 100
         )
+    }
+
+    private func extractedTextSection(text: String) -> some View {
+        VStack(spacing: 0) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    isExtractedTextExpanded.toggle()
+                }
+            } label: {
+                HStack(spacing: Spacing.sm) {
+                    Image(systemName: "text.viewfinder")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(Theme.textSecondary)
+
+                    Text(L10n.documentsExtractedTextLabel.uppercased())
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.textTertiary)
+                        .tracking(1.5)
+
+                    Spacer()
+
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(Theme.textTertiary)
+                        .rotationEffect(.degrees(isExtractedTextExpanded ? 180 : 0))
+                }
+                .padding(Spacing.md)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(L10n.documentsExtractedTextLabel)
+            .accessibilityHint(isExtractedTextExpanded ? "Double tap to collapse" : "Double tap to expand")
+
+            if isExtractedTextExpanded {
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: 1)
+
+                Text(text)
+                    .font(.brutalistSecondary)
+                    .foregroundStyle(Theme.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .textSelection(.enabled)
+                    .padding(Spacing.md)
+                    .transition(.opacity)
+            }
+        }
+        .background(Theme.surfaceInstrument)
+        .brutalistBorder()
     }
 
     private var linkedVehiclesSection: some View {

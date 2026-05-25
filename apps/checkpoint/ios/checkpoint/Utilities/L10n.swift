@@ -354,6 +354,7 @@ enum L10n {
     static var documentsSourceCamera: String { localized("documents.source.camera") }
     static var documentsSourcePhotos: String { localized("documents.source.photos") }
     static var documentsSourceFiles: String { localized("documents.source.files") }
+    static var documentsExtractedTextLabel: String { localized("documents.extracted_text.label") }
 
     // MARK: - Document Types
 
