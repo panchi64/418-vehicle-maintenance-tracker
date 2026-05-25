@@ -250,5 +250,6 @@ struct EditServiceLogView: View {
 
     EditServiceLogView(log: log)
         .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self, ServiceAttachment.self], inMemory: true)
+        .environment(AppState())
         .preferredColorScheme(.dark)
 }

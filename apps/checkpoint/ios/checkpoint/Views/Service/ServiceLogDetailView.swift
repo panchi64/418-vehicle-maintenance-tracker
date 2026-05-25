@@ -10,6 +10,7 @@ import SwiftData
 
 struct ServiceLogDetailView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppState.self) private var appState
 
     @Bindable var log: ServiceLog
 
@@ -64,6 +65,7 @@ struct ServiceLogDetailView: View {
         }
         .sheet(isPresented: $showEditSheet) {
             EditServiceLogView(log: log)
+                .environment(appState)
         }
     }
 
@@ -151,5 +153,6 @@ struct ServiceLogDetailView: View {
         ServiceLogDetailView(log: log)
     }
     .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self, ServiceAttachment.self], inMemory: true)
+    .environment(AppState())
     .preferredColorScheme(.dark)
 }

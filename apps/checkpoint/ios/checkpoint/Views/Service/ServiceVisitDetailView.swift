@@ -236,5 +236,6 @@ struct ServiceVisitDetailView: View {
         ServiceVisitDetailView(visit: visit)
     }
     .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self, ServiceVisit.self, VisitLineItem.self, ServiceAttachment.self], inMemory: true)
+    .environment(AppState())
     .preferredColorScheme(.dark)
 }

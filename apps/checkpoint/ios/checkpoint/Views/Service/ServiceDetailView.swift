@@ -10,6 +10,7 @@ import SwiftData
 
 struct ServiceDetailView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppState.self) private var appState
     @Query private var services: [Service]
 
     @Bindable var service: Service
@@ -100,11 +101,13 @@ struct ServiceDetailView: View {
             NavigationStack {
                 ServiceLogDetailView(log: log)
             }
+            .environment(appState)
         }
         .sheet(item: $selectedVisit) { visit in
             NavigationStack {
                 ServiceVisitDetailView(visit: visit)
             }
+            .environment(appState)
         }
     }
 
@@ -411,5 +414,6 @@ struct ServiceDetailView: View {
         ServiceDetailView(service: service, vehicle: vehicle)
     }
     .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self], inMemory: true)
+    .environment(AppState())
     .preferredColorScheme(.dark)
 }

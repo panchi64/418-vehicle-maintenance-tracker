@@ -6,16 +6,10 @@
 //
 
 import SwiftUI
-import QuickLook
-import os
-
-private let attachmentGridLogger = Logger(category: "Attachments")
 
 struct AttachmentGrid: View {
     let attachments: [ServiceAttachment]
-    @State private var selectedAttachment: ServiceAttachment?
-    @State private var previewURL: URL?
-    @State private var selectedForOCRView: ServiceAttachment?
+    @Environment(AppState.self) private var appState
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
@@ -24,46 +18,17 @@ struct AttachmentGrid: View {
                     HStack(spacing: Spacing.sm) {
                         ForEach(attachments) { attachment in
                             Button {
-                                openAttachment(attachment)
+                                appState.selectedDocument = attachment
                             } label: {
                                 AttachmentThumbnail(attachment: attachment)
                             }
                             .buttonStyle(.plain)
+                            .accessibilityLabel("Open document")
+                            .accessibilityHint("Opens the document detail view")
                         }
                     }
                 }
             }
-        }
-        .quickLookPreview($previewURL)
-        .sheet(item: $selectedForOCRView) { attachment in
-            if let text = attachment.extractedText {
-                ReceiptTextView(
-                    text: text,
-                    image: attachment.data.flatMap { UIImage(data: $0) }
-                )
-            }
-        }
-    }
-
-    private func openAttachment(_ attachment: ServiceAttachment) {
-        // If attachment has extracted text, show the OCR view
-        if attachment.extractedText != nil {
-            selectedForOCRView = attachment
-            return
-        }
-
-        guard let data = attachment.data else { return }
-
-        // Create temporary file for QuickLook
-        let tempDir = FileManager.default.temporaryDirectory
-        let fileExtension = attachment.isPDF ? "pdf" : "jpg"
-        let tempURL = tempDir.appendingPathComponent("\(attachment.id).\(fileExtension)")
-
-        do {
-            try data.write(to: tempURL)
-            previewURL = tempURL
-        } catch {
-            attachmentGridLogger.error("Error writing temp file for preview: \(error.localizedDescription)")
         }
     }
 }
@@ -134,5 +99,6 @@ struct AttachmentSection: View {
             .padding(Spacing.screenHorizontal)
         }
     }
+    .environment(AppState())
     .preferredColorScheme(.dark)
 }
