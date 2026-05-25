@@ -8,7 +8,7 @@
 
 | Version | Theme | Target | Status |
 |---------|-------|--------|--------|
-| **v1.0** | Core Experience | Q1 2026 | 🚧 In Development |
+| **v1.0** | Core Experience | Q2 2026 | 🟡 In Review (submitted 2026-05-25, manual release) |
 | **v1.5** | EV, Engagement & Platform | Q2-Q3 2026 | 📋 Planned |
 | **v2.0** | Intelligence & Insights | Q4 2026 | 📋 Planned |
 | **v2.5** | Education & DIY | 2027 | 🔮 Future |

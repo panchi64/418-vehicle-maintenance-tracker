@@ -2,6 +2,15 @@
 
 > Comprehensive guide for filling out App Store Connect fields. Covers everything needed for TestFlight and eventual App Store launch.
 
+## Current state
+
+| | |
+|---|---|
+| **Version** | v1.0 |
+| **Build** | 4 (iPhone-only — see [`DEFERRED_PLATFORMS.md`](./DEFERRED_PLATFORMS.md)) |
+| **Status** | 🟡 In Review (submitted 2026-05-25) |
+| **Release** | Manual — press **Release This Version** in ASC once approved |
+
 ---
 
 ## 1. New App Creation
@@ -293,7 +302,7 @@ Order of operations:
 - [x] **Complete the Age Rating questionnaire** — expected result: 4+.
 - [x] **Paste App Review notes + contact info** — review script in §6, test VIN `1HGBH41JXMN109186`.
 - [ ] **Add the es-MX localization** — paste locked copy from `marketing/APP_STORE_ASSETS.md` §2; upload es-MX screenshots (frames 1/2/3/8/10 differ from en-US).
-- [ ] **Submit for Review.**
+- [x] **Submit for Review.** — submitted with manual release (you press "Release this version" once approved).
 
 Optional (post-launch is fine):
 - [ ] App Preview videos (per `marketing/APP_STORE_ASSETS.md` §5) — 20–30% install lift, but skippable for first cut.
