@@ -9,7 +9,10 @@ import SwiftUI
 import StoreKit
 
 struct TipJarView: View {
-    @Environment(AppState.self) private var appState
+    // Local sheet state so ThemeRevealView stacks on top of the parent
+    // Settings sheet that contains us. Routing through the root
+    // .sheet(item:) in ContentView is rejected while Settings is up.
+    @State private var unlockedTheme: ThemeDefinition?
 
     private var storeManager: StoreManager { StoreManager.shared }
 
@@ -88,6 +91,9 @@ struct TipJarView: View {
         }
         .navigationTitle("Tip Jar")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(item: $unlockedTheme) { theme in
+            ThemeRevealView(theme: theme)
+        }
     }
 
     #if DEBUG
@@ -112,7 +118,7 @@ struct TipJarView: View {
         PurchaseSettings.shared.recordTip()
         if let theme = ThemeManager.shared.unlockRandomRareTheme() {
             AnalyticsService.shared.capture(.themeUnlocked(themeID: theme.id, tier: "rare"))
-            appState.unlockedTheme = theme
+            unlockedTheme = theme
         }
     }
     #endif
@@ -131,7 +137,7 @@ struct TipJarView: View {
                 // Gacha: unlock random rare theme
                 if let theme = ThemeManager.shared.unlockRandomRareTheme() {
                     AnalyticsService.shared.capture(.themeUnlocked(themeID: theme.id, tier: "rare"))
-                    appState.unlockedTheme = theme
+                    unlockedTheme = theme
                 }
             }
         } catch {
