@@ -234,6 +234,70 @@ final class VehicleHeaderTests: XCTestCase {
         XCTAssertFalse(MileageSnapshot.hasSnapshotToday(snapshots: snapshots))
     }
 
+    // MARK: - Freshness Dot Tests (drives stale indicator in header)
+
+    /// Anchor day-arithmetic at startOfDay so the elapsed-day count is unambiguous
+    /// across DST transitions (otherwise -14d may compute as 13 or 14 days near boundaries).
+    private func daysAgo(_ days: Int) -> Date {
+        let anchor = Calendar.current.startOfDay(for: .now)
+        return Calendar.current.date(byAdding: .day, value: -days, to: anchor)!
+    }
+
+    @MainActor
+    func testShouldPromptMileageUpdate_TrueWhenNeverUpdated() {
+        XCTAssertNil(vehicle.mileageUpdatedAt)
+        XCTAssertTrue(vehicle.shouldPromptMileageUpdate)
+    }
+
+    @MainActor
+    func testShouldPromptMileageUpdate_TrueWhenMileageIsZero() {
+        vehicle.currentMileage = 0
+        vehicle.mileageUpdatedAt = .now
+        XCTAssertTrue(vehicle.shouldPromptMileageUpdate)
+    }
+
+    @MainActor
+    func testShouldPromptMileageUpdate_FalseWhenRecentlyUpdated() {
+        vehicle.mileageUpdatedAt = daysAgo(3)
+        XCTAssertFalse(vehicle.shouldPromptMileageUpdate)
+    }
+
+    @MainActor
+    func testShouldPromptMileageUpdate_TrueWhenStaleByFourteenDays() {
+        vehicle.mileageUpdatedAt = daysAgo(14)
+        XCTAssertTrue(vehicle.shouldPromptMileageUpdate)
+    }
+
+    @MainActor
+    func testShouldPromptMileageUpdate_FalseAtThirteenDays() {
+        vehicle.mileageUpdatedAt = daysAgo(13)
+        XCTAssertFalse(vehicle.shouldPromptMileageUpdate)
+    }
+
+    // MARK: - Display Prompt Gating (couples staleness with interactivity)
+
+    @MainActor
+    func testShouldDisplayMileageUpdatePrompt_FalseWhenNotInteractive_EvenIfStale() {
+        vehicle.currentMileage = 0 // triggers shouldPromptMileageUpdate
+        XCTAssertTrue(vehicle.shouldPromptMileageUpdate)
+        XCTAssertFalse(
+            vehicle.shouldDisplayMileageUpdatePrompt(isInteractive: false),
+            "Read-only contexts should not advertise an update prompt the user cannot act on"
+        )
+    }
+
+    @MainActor
+    func testShouldDisplayMileageUpdatePrompt_TrueWhenInteractiveAndStale() {
+        vehicle.mileageUpdatedAt = daysAgo(20)
+        XCTAssertTrue(vehicle.shouldDisplayMileageUpdatePrompt(isInteractive: true))
+    }
+
+    @MainActor
+    func testShouldDisplayMileageUpdatePrompt_FalseWhenInteractiveButFresh() {
+        vehicle.mileageUpdatedAt = daysAgo(2)
+        XCTAssertFalse(vehicle.shouldDisplayMileageUpdatePrompt(isInteractive: true))
+    }
+
     func testHasSnapshotToday_ReturnsTrueWhenMixedSnapshots() {
         // Given
         let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: .now)!

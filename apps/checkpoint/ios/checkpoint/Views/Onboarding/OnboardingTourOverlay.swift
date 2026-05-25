@@ -172,8 +172,9 @@ struct OnboardingTourOverlay: View {
 
     private func spotlightRect(for step: Int, in geometry: GeometryProxy) -> CGRect {
         let screenW = geometry.size.width
-        // VehicleHeader: Spacing.sm (8pt) top padding + ~72pt content
-        let headerBottom: CGFloat = Spacing.sm + 72
+        // VehicleHeader: Spacing.sm (8pt) top padding + ~86pt content
+        // (iconRow + [UPDATE] label row + mileage + YTD subline + outer vertical padding)
+        let headerBottom: CGFloat = Spacing.sm + 86
         let tabBarHeight: CGFloat = 72
         let contentHeight = geometry.size.height - headerBottom - tabBarHeight
         let horizontalInset = Spacing.screenHorizontal

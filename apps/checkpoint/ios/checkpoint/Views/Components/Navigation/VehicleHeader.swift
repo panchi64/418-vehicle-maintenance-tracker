@@ -85,20 +85,41 @@ struct VehicleHeader: View {
             if let vehicle = vehicle {
                 let metrics = drivingMetrics(for: vehicle)
                 let mileageText = Formatters.mileage(vehicle.currentMileage)
+                let isInteractive = onMileageTap != nil
+                let showsUpdatePrompt = vehicle.shouldDisplayMileageUpdatePrompt(isInteractive: isInteractive)
 
                 Button {
                     onMileageTap?()
                 } label: {
-                    Text(mileageText)
-                        .font(.brutalistBody)
-                        .foregroundStyle(Theme.accent)
-                        .underline(onMileageTap != nil, color: Theme.accent.opacity(0.5))
-                        .padding(.vertical, 6)
-                        .contentShape(Rectangle())
+                    VStack(alignment: .trailing, spacing: 0) {
+                        if isInteractive {
+                            HStack(spacing: Spacing.xs) {
+                                if showsUpdatePrompt {
+                                    Rectangle()
+                                        .fill(Theme.statusDueSoon)
+                                        .frame(width: 6, height: 6)
+                                        .accessibilityHidden(true)
+                                }
+
+                                Text("[UPDATE]")
+                                    .font(.brutalistLabel)
+                                    .foregroundStyle(Theme.accent)
+                                    .tracking(1)
+                            }
+                        }
+
+                        Text(mileageText)
+                            .font(.brutalistBody)
+                            .foregroundStyle(Theme.accent)
+                    }
+                    .padding(.vertical, 6)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .allowsHitTesting(isInteractive)
                 .accessibilityLabel("Mileage: \(mileageText)")
-                .accessibilityHint(onMileageTap != nil ? "Double tap to update mileage" : "")
+                .accessibilityValue(showsUpdatePrompt ? "Update needed" : "")
+                .accessibilityHint(isInteractive ? "Double tap to update odometer reading" : "")
 
                 if let line = metrics.subline {
                     Text(line)

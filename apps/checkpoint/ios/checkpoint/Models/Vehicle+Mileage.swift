@@ -74,6 +74,13 @@ extension Vehicle {
         return days >= 14
     }
 
+    /// Whether the vehicle header should surface the update prompt (dot + a11y announcement).
+    /// Couples the data signal (`shouldPromptMileageUpdate`) with the caller's interactivity:
+    /// read-only consumers should not advertise a prompt the user can't act on.
+    func shouldDisplayMileageUpdatePrompt(isInteractive: Bool) -> Bool {
+        isInteractive && shouldPromptMileageUpdate
+    }
+
     /// Formatted string for last mileage update
     var mileageUpdateDescription: String {
         guard let days = daysSinceMileageUpdate else {
