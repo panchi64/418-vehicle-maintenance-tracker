@@ -122,15 +122,15 @@ extension ServiceLog {
         }
     }
 
-    /// 6 service logs for a secondary vehicle (MX-5), Mar 2025 → Jan 2026
+    /// 6 service logs for a secondary vehicle (NSX Type R), Mar 2025 → Jan 2026
     static func sampleLogsCompact(for vehicle: Vehicle, service: Service? = nil) -> [ServiceLog] {
         let entries: [(String, Date, Int, Decimal, CostCategory, String?)] = [
-            ("Oil change", date(2025, 3, 8), 16800, 52, .maintenance, "Synthetic 0W-20"),
-            ("Summer tires", date(2025, 5, 20), 17200, 680, .upgrade, "Michelin Pilot Sport 4S set"),
-            ("Oil change", date(2025, 7, 12), 17500, 52, .maintenance, "Synthetic 0W-20"),
-            ("Brake fluid flush", date(2025, 9, 6), 17800, 85, .maintenance, "DOT 4 full flush"),
-            ("Oil change", date(2025, 11, 15), 18000, 52, .maintenance, "Synthetic 0W-20"),
-            ("Professional detailing", date(2026, 1, 18), 18100, 200, .upgrade, "Full interior + exterior detail"),
+            ("Oil change", date(2025, 3, 8), 16800, 68, .maintenance, "10W-30 full synthetic"),
+            ("Summer tires", date(2025, 5, 20), 17200, 920, .upgrade, "Michelin Pilot Sport 4S, staggered 15/16"),
+            ("Oil change", date(2025, 7, 12), 17500, 68, .maintenance, "10W-30 full synthetic"),
+            ("Brake fluid flush", date(2025, 9, 6), 17800, 95, .maintenance, "DOT 4 full flush"),
+            ("Oil change", date(2025, 11, 15), 18000, 68, .maintenance, "10W-30 full synthetic"),
+            ("Professional detailing", date(2026, 1, 18), 18100, 240, .upgrade, "Full interior + exterior detail"),
         ]
 
         return entries.map { name, performedDate, mileage, cost, category, notes in

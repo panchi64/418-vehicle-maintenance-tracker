@@ -232,30 +232,30 @@ extension ContentView {
             modelContext.insert(snapshot)
         }
 
-        // --- Vehicle 2: Weekend Car (MX-5) ---
-        let mx5 = Vehicle(
+        // --- Vehicle 2: Weekend Car (NSX Type R) ---
+        let nsx = Vehicle(
             name: "Weekend Car",
-            make: "Mazda",
-            model: "MX-5",
-            year: 2020,
+            make: "Honda",
+            model: "NSX Type R",
+            year: 1992,
             currentMileage: 18200,
-            vin: "JM1NDAD75L0123789",
-            tireSize: "205/45R17",
-            oilType: "0W-20 Synthetic",
-            notes: "Garage kept. Summer tires only.",
+            vin: "NA1-1200034",
+            tireSize: "205/50R15 F, 225/50R16 R",
+            oilType: "10W-30",
+            notes: "JDM-spec NSX-R. Hand-balanced C30A V6. Garage kept.",
             mileageUpdatedAt: Calendar.current.date(byAdding: .day, value: -14, to: .now)
         )
-        modelContext.insert(mx5)
+        modelContext.insert(nsx)
 
-        for service in Service.sampleServicesCompact(for: mx5) {
+        for service in Service.sampleServicesCompact(for: nsx) {
             modelContext.insert(service)
         }
-        for log in ServiceLog.sampleLogsCompact(for: mx5) {
+        for log in ServiceLog.sampleLogsCompact(for: nsx) {
             modelContext.insert(log)
         }
 
         // Track sample vehicle IDs for cleanup
-        onboardingState.sampleVehicleIDs = [camry.id, mx5.id]
+        onboardingState.sampleVehicleIDs = [camry.id, nsx.id]
     }
 
     /// Clear all sample data created during onboarding tour

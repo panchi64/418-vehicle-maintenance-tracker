@@ -104,7 +104,7 @@ extension Service {
                 cabinAirFilter, transmissionFluid, batteryCheck, wiperBlades]
     }
 
-    /// Compact set of 3 services for a secondary vehicle (MX-5)
+    /// Compact set of 3 services for a secondary vehicle (NSX Type R)
     static func sampleServicesCompact(for vehicle: Vehicle) -> [Service] {
         let calendar = Calendar.current
 

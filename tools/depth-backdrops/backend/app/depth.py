@@ -92,17 +92,31 @@ class DepthModel:
 
         out = self._model.predict(inputs)
         depth_arr = np.asarray(out[self._output_name], dtype=np.float32).squeeze()
-
-        dmin, dmax = float(depth_arr.min()), float(depth_arr.max())
-        if dmax > dmin:
-            depth_arr = (depth_arr - dmin) / (dmax - dmin)
-        else:
-            depth_arr = np.zeros_like(depth_arr)
+        depth_arr = _equalize(depth_arr)
 
         resized = Image.fromarray(
             (depth_arr * 255.0).astype(np.uint8), mode="L"
         ).resize((src_w, src_h), Image.Resampling.BILINEAR)
         return np.asarray(resized, dtype=np.uint8)
+
+
+def _equalize(depth_arr: np.ndarray) -> np.ndarray:
+    """Histogram-equalize depth into [0, 1].
+
+    DepthPro outputs inverse depth; a sky-and-foreground scene spans
+    several orders of magnitude, so linear min/max (or percentile) clipping
+    either crushes the sky or saturates the foreground. Rank-based
+    equalization gives every brightness equal pixel count, so the sky,
+    mid-ground, and foreground each get their own readable band of values.
+    """
+    depth_arr = np.nan_to_num(depth_arr, nan=0.0, posinf=0.0, neginf=0.0)
+    flat = depth_arr.ravel()
+    sorted_vals = np.sort(flat)
+    # `searchsorted(..., side='right')` gives 1..N (the count of values <=
+    # each element) — exactly the rank we want, before scaling to [0, 1].
+    ranks = np.searchsorted(sorted_vals, flat, side="right").astype(np.float32)
+    ranks /= float(len(flat))
+    return ranks.reshape(depth_arr.shape)
 
 
 _singleton: DepthModel | None = None

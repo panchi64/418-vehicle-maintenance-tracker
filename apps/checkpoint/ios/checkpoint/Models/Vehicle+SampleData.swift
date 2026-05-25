@@ -45,14 +45,14 @@ extension Vehicle {
             ),
             Vehicle(
                 name: "Weekend Car",
-                make: "Mazda",
-                model: "MX-5",
-                year: 2020,
+                make: "Honda",
+                model: "NSX Type R",
+                year: 1992,
                 currentMileage: 18200,
-                vin: "JM1NDAD75L0123789",
-                tireSize: "205/45R17",
-                oilType: "0W-20 Synthetic",
-                notes: "Garage kept. Summer tires only.",
+                vin: "NA1-1200034",
+                tireSize: "205/50R15 F, 225/50R16 R",
+                oilType: "10W-30",
+                notes: "JDM-spec NSX-R. Hand-balanced C30A V6. Garage kept.",
                 mileageUpdatedAt: Calendar.current.date(byAdding: .day, value: -14, to: .now)
             )
         ]
