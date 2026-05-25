@@ -17,7 +17,8 @@ struct SettingsView: View {
     var onboardingState: OnboardingState?
 
     var body: some View {
-        NavigationStack {
+        @Bindable var appState = appState
+        return NavigationStack {
             ZStack {
                 Theme.backgroundPrimary
                     .ignoresSafeArea()
@@ -63,6 +64,9 @@ struct SettingsView: View {
                     Button(L10n.commonDone) { dismiss() }
                         .toolbarButtonStyle()
                 }
+            }
+            .sheet(isPresented: $appState.showProPaywall) {
+                ProPaywallSheet()
             }
         }
     }
