@@ -175,6 +175,16 @@ v1.0 features are tracked throughout this document. Future versions are outlined
 | Odometer tracking     | High     | ✅     | Manual entry + smart estimation                            |
 | Distance unit support | Medium   | ✅     | Miles or kilometers preference (global setting)            |
 | Vehicle notes         | Medium   | ✅     | Freeform notes area for quirks, history, or reminders      |
+| Vehicle documents library | High | ✅ | Per-vehicle place for registration, insurance, title, manual, warranty, inspection, receipts. Notes searchable. Optional cross-vehicle linking (single file, multiple vehicle references). Reached from Home (QuickSpecsCard row) and from a Documents sub-tab on the Services screen. Native QuickLook viewing + iOS share sheet. Receipts captured inside service logs surface here automatically. |
+
+#### Vehicle Documents — future enhancements
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| "Documents you should have" onboarding checklist | 📋 Planned (new-owner variant) | Guided checklist + plain-English explainers for first-time car owners. |
+| Lock-screen widget for insurance/registration | 📋 Future | Revisit if users surface roadside-retrieval friction. |
+| Full version history of replaced documents | 📋 Future | v1 overwrites in place. |
+| OCR-based document type detection | 📋 Future | `extractedText` field is already on the model — additive when wanted. |
 
 #### VIN Registration Improvements
 

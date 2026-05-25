@@ -270,11 +270,11 @@ IAPs must be in "Ready to Submit" state and attached to the app version before s
 
 | Item | Status | Notes |
 |------|--------|-------|
-| **Privacy Policy** | ❌ Needed before submission | Simple webpage — what you collect, how you use it, how to opt out |
-| **App Icon** | ✅ Exists (`418-checkpoint-app-icon-v1.png`) | Must be 1024x1024, no alpha/transparency, no rounded corners (Apple adds those) |
-| **PrivacyInfo.xcprivacy** | ❌ Missing from project | Apple requires this manifest — declare API usage reasons (UserDefaults, file timestamp, etc.) |
-| **Screenshots** | ❌ Need to create | Use Xcode Simulator screen capture or Fastlane Snapshot |
-| **Support website/page** | ❌ Needed | Even a simple GitHub Pages site works |
+| **Privacy Policy** | ✅ Live at `https://checkpoint.franciscocasiano.com/privacy-policy` | Source in `apps/checkpoint/web/src/routes/privacy-policy.tsx` |
+| **Support page** | ✅ Live at `https://checkpoint.franciscocasiano.com/support` | Source in `apps/checkpoint/web/src/routes/support.tsx` |
+| **App Icon** | ✅ `418-checkpoint-app-icon-v1.png` | 1024×1024, no alpha. Verified. |
+| **PrivacyInfo.xcprivacy** | ✅ In project at `apps/checkpoint/ios/checkpoint/PrivacyInfo.xcprivacy` | — |
+| **Screenshots** | ✅ Authored | 10 × 6.9" frames per `marketing/APP_STORE_ASSETS.md` §4. Both locales. |
 
 ---
 
@@ -282,17 +282,26 @@ IAPs must be in "Ready to Submit" state and attached to the app version before s
 
 Order of operations:
 
-- [ ] **Create the Privacy Policy** — blocker for everything
-- [ ] **Add `PrivacyInfo.xcprivacy`** to the Xcode project — required for submission
-- [ ] **Set up the app in App Store Connect** — name, bundle ID, categories
-- [ ] **Configure IAPs** in App Store Connect
-- [ ] **Fill in App Privacy** disclosures
-- [ ] **Upload a build** via Xcode → TestFlight
-- [ ] **Take screenshots** once happy with the build
-- [ ] **Fill in description, keywords, promotional text**
-- [ ] **Add review notes** and contact info
-- [ ] **Submit to TestFlight external testing** (if you want outside testers)
+- [x] Privacy Policy live and reachable
+- [x] `PrivacyInfo.xcprivacy` in the Xcode project
+- [x] App shell created in App Store Connect (builds upload from Xcode)
+- [x] Apple Developer Program active (team `WU2PJ8AT65`)
+- [x] Build uploaded via Xcode → TestFlight
+- [x] Screenshots authored (en-US + es-MX)
+- [x] Description, keywords, promotional text drafted (locked in `marketing/APP_STORE_ASSETS.md`)
+- [ ] **Recreate the 4 IAPs in App Store Connect** — `pro.unlock`, `tip.small`, `tip.medium`, `tip.large`. Product IDs must match `Products.storekit` exactly. Each needs display name, description, review screenshot of the purchase sheet, and review notes. Must be "Ready to Submit" **and attached to v1.0.**
+- [ ] **Attach a processed build to v1.0** — ASC → App Store → v1.0 → Build section. Wait for "ready," not "processing."
+- [ ] **Fill in App Privacy disclosures** — use the table in §4. Mark all as "Used for App Functionality," nothing as "Tracking."
+- [ ] **Complete the Age Rating questionnaire** — expected result: 4+.
+- [ ] **Paste App Review notes + contact info** — review script in §6, test VIN `1HGBH41JXMN109186`.
+- [ ] **Add the es-MX localization** — paste locked copy from `marketing/APP_STORE_ASSETS.md` §2; upload es-MX screenshots (frames 1/2/3/8/10 differ from en-US).
+- [ ] **Submit for Review.**
+
+Optional (post-launch is fine):
+- [ ] App Preview videos (per `marketing/APP_STORE_ASSETS.md` §5) — 20–30% install lift, but skippable for first cut.
+- [ ] External TestFlight group (adds ~24h for Beta App Review).
+- [ ] Featuring nomination — submit ≥2 weeks before target ship date.
 
 ---
 
-_Last updated: February 2026_
+_Last updated: 2026-05-25_

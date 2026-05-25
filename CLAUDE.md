@@ -1,124 +1,54 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+418 Studio monorepo. Multiple apps share infrastructure via local SwiftPM packages.
 
-## Project Overview
+## Directory map
 
-Checkpoint is a vehicle maintenance tracker iOS app built with SwiftUI and SwiftData. Users manage vehicles, log/schedule maintenance services, track costs, and receive notifications when services are due.
+**Apps:**
+- `apps/checkpoint/ios/` — Checkpoint iOS app (SwiftUI, SwiftData). See `apps/checkpoint/ios/CLAUDE.md`.
+- `apps/checkpoint/web/` — Checkpoint marketing site (SolidJS, Cloudflare). See `apps/checkpoint/web/CLAUDE.md`.
+- `apps/biombo/ios/` — Biombo iOS app (PR gas prices). See `apps/biombo/ios/CLAUDE.md` once scaffolded.
+- `apps/biombo/backend/` — Biombo Node/TS + Postgres backend. See `apps/biombo/backend/CLAUDE.md`.
 
-**Tech Stack:** SwiftUI, SwiftData, WidgetKit, UserNotifications, Vision (OCR)
-**Minimum iOS:** 17.0
-**Design:** Dark mode first, amber accent (#E89B3C), brutalist aesthetic (zero corner radius)
+**Shared packages:**
+- `packages/DesignKit/` — Swift design system (`ThemeProviding` protocol, tokens, modifiers). See `packages/DesignKit/CLAUDE.md`.
+- `packages/Localization/` — Shared EN/ES strings via `.xcstrings`. See `packages/Localization/CLAUDE.md`.
 
-## Repository Structure
+**Internal tooling:**
+- `tools/depth-backdrops/` — Local web app (Python/FastAPI + React/WebGL) that generates the cerulean depth-map backdrops behind device mockups in App Store screenshots. Run `tools/depth-backdrops/dev.sh`. See `tools/depth-backdrops/CLAUDE.md`.
 
-This is a monorepo with two main directories:
+**Docs:**
+- `docs/BIOMBO_IMPLEMENTATION_PLAN.md` — active implementation plan
+- `docs/AESTHETIC.md` — visual design philosophy (shared across 418 products)
+- `docs/FUEL_PRICE_TRACKER.md` — original Biombo feature spec
+- `docs/ARCHITECTURE.md`, `docs/FEATURES.md` — Checkpoint reference
 
-- **`checkpoint-app/`** — iOS app (SwiftUI, SwiftData, WidgetKit, Apple Watch)
-- **`checkpoint-website/`** — Marketing website (SolidJS, Solid Start, Tailwind CSS, Cloudflare Pages)
+## Progressive disclosure
 
-## Restricted Files
+This file is intentionally small. **Go to the scoped CLAUDE.md for the directory you're editing.** Do not load the whole repo into context when a single scoped file will do.
 
-- **`Secrets.xcconfig`** — Contains API keys. NEVER read, cat, display, or access this file in any way.
+## Restricted files
 
-## Build & Test Commands
+- **`apps/checkpoint/ios/Secrets.xcconfig`** — API keys. **Never** read, cat, display, or `grep` this file.
 
-All commands run from `checkpoint-app/` directory:
+## Build quick reference
 
-```bash
-# Build
-xcodebuild build -scheme checkpoint -destination 'platform=iOS Simulator,name=iPhone 17'
+- Checkpoint iOS: `xcodebuild build -project apps/checkpoint/ios/checkpoint.xcodeproj -scheme checkpoint -destination 'platform=iOS Simulator,name=iPhone 17'`
+- Checkpoint web: `npm run dev` from `apps/checkpoint/web/`
+- Biombo iOS: `xcodebuild build -project apps/biombo/ios/Biombo.xcodeproj -scheme Biombo -destination 'platform=iOS Simulator,name=iPhone 17'`
+- Biombo backend: `npm run dev` from `apps/biombo/backend/`
+- DesignKit: `swift build` from `packages/DesignKit/`
+- Localization: `swift build` from `packages/Localization/`
+- Depth backdrops tool: `./dev.sh` from `tools/depth-backdrops/`
 
-# Run all tests
-xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPhone 17'
+**Xcode note:** if `xcodebuild` errors with "requires Xcode", run commands with `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer` prefix or `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`.
 
-# Unit tests only
-xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPhone 17' \
-  -only-testing:checkpointTests
+**Never run multiple `xcodebuild` commands in parallel** (spawns multiple simulators, crashes).
 
-# UI tests only (must shutdown simulators first)
-xcrun simctl shutdown all && \
-xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPhone 17' \
-  -only-testing:checkpointUITests
+## Concurrency rule (Swift)
 
-# Specific test class
-xcodebuild test -scheme checkpoint -destination 'platform=iOS Simulator,name=iPhone 17' \
-  -only-testing:checkpointTests/VehicleTests
-```
+Never use `nonisolated(unsafe)` or `@unchecked Sendable`. For static constants with `Sendable` types, use `nonisolated static let`.
 
-**Critical:** Never run multiple xcodebuild commands in parallel - this spawns multiple simulators and causes crashes. Always run tests sequentially.
+## Feature tracking
 
-## Architecture
-
-### State Management
-- `AppState` class (in `State/`) uses `@Observable` macro for reactive state
-- Manages tab navigation, sheet presentations, vehicle selection
-- SwiftData `@Query` for declarative data fetching
-- `ModelContext` injected via environment for data mutations
-
-### Navigation
-- Tab-based: Home, Services, Costs
-- Sheets for create/edit modals
-- Push navigation for detail views
-- Vehicle selector persists at top of all tabs
-
-### Service Model: Dual-Axis Tracking
-- Services track due status on **two parallel axes**: date (`dueDate`) and mileage (`dueMileage`). Any logic that applies to one axis must apply to the other — if you add/change date-based behavior, check the mileage equivalent and vice versa.
-- `Service.deriveDueFromIntervals(anchorDate:anchorMileage:)` is the single source of truth for converting intervals into deadlines. All code paths that create or recalculate service deadlines must use this method rather than reimplementing the derivation inline.
-- `hasDueTracking` (`dueDate != nil || dueMileage != nil`) gates all upcoming/scheduled views. A service without at least one deadline is invisible to the user.
-
-### Business Logic Placement
-- Derivation and computation logic belongs in `@Model` classes, not in views. Views should call model methods, then apply UI-specific overrides if needed (e.g., user-entered custom dates).
-- When multiple code paths need the same computation, extract it to one method on the model rather than duplicating across views. If you find yourself writing the same `if let` derivation in two places, that's a signal to consolidate.
-
-## Design System
-
-Use tokens from `DesignSystem/`:
-- **Colors:** `Theme.backgroundPrimary`, `Theme.accent`, `Theme.statusOverdue`, etc.
-- **Typography:** `Typography.headline`, `Typography.bodyText`, `Typography.caption`, etc.
-- **Spacing:** `Spacing.sm` (8pt), `Spacing.md` (16pt), `Spacing.lg` (24pt), etc.
-- **Modifiers:** `.cardStyle()`, `.screenPadding()`, `.buttonStyle(.primary)`
-
-## Testing
-
-Test setup uses in-memory ModelContainer:
-```swift
-let config = ModelConfiguration(isStoredInMemoryOnly: true)
-modelContainer = try! ModelContainer(for: Vehicle.self, configurations: config)
-```
-
-Tests should verify actual functionality - avoid hacky workarounds that circumvent proper testing.
-
-## Common Tasks
-
-### Adding a new Service Type Preset
-1. Add to `Resources/ServicePresets.json`
-2. Include `name`, `category`, `defaultIntervalMonths`, `defaultIntervalMiles`
-
-### Adding a new Status Color
-1. Add color to `Assets.xcassets/Colors/`
-2. Add static property in `Theme.swift`
-3. Update `ServiceStatus.color` in `Service.swift`
-
-## Concurrency
-
-- Never use `nonisolated(unsafe)` or `@unchecked Sendable`. For static constants with `Sendable` types (e.g., `String`), use `nonisolated static let` to opt out of actor isolation safely.
-
-## Important Notes
-
-- All data persisted via SwiftData with automatic iCloud sync (when configured)
-- Widget requires App Group capability on both main app and widget targets
-- Notifications require authorization - check `isAuthorized` before scheduling
-- Service due status considers both date AND mileage thresholds
-- App is portrait-only via `UISupportedInterfaceOrientations` + `UIRequiresFullScreen` in Info.plist
-
-## Feature Tracking
-
-Feature implementation status is tracked in `docs/FEATURES.md`. When implementing new features:
-1. Mark the feature as ✅ (implemented) in the Status column
-2. Add corresponding tests for the new functionality
-3. Commit both the implementation and the status update together
-
-## Additional Documentation
-
-See `docs/` for product strategy, design specs, analytics, and troubleshooting guides. See `docs/ARCHITECTURE.md` for detailed architecture reference (project structure tree, component inventories, service descriptions, data models, widget internals).
+`docs/FEATURES.md` tracks Checkpoint feature status. When shipping a new feature: mark `✅`, add tests, commit both together.

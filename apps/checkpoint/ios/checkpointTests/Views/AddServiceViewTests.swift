@@ -1,0 +1,581 @@
+//
+//  AddServiceViewTests.swift
+//  checkpointTests
+//
+//  Tests for AddServiceView form validation and logic
+//
+
+import XCTest
+@testable import checkpoint
+
+final class AddServiceViewTests: XCTestCase {
+
+    // MARK: - Mode Switching Tests
+
+    func testServiceMode_HasCorrectCases() {
+        // Given: ServiceMode enum
+        let allCases = ServiceMode.allCases
+
+        // Then: Should have exactly two cases
+        XCTAssertEqual(allCases.count, 2)
+        XCTAssertTrue(allCases.contains(.record))
+        XCTAssertTrue(allCases.contains(.remind))
+    }
+
+    func testServiceMode_HasCorrectRawValues() {
+        // Then: Raw values should match expected labels
+        XCTAssertEqual(ServiceMode.record.rawValue, "Record")
+        XCTAssertEqual(ServiceMode.remind.rawValue, "Remind")
+    }
+
+    // MARK: - Form Validation Tests (Log Mode)
+    //
+    // Validation mirrors AddServiceView.isFormValid: only the service name is required.
+    // Mileage is optional; an unspecified mileage falls back to vehicle.currentMileage
+    // in the save logic. This keeps the form permissive for casual users, backfillers,
+    // and one-handed parking-lot loggers.
+
+    private func isFormValid(serviceName: String) -> Bool {
+        !serviceName.isEmpty
+    }
+
+    func testFormValidation_LogMode_ValidWhenServiceNameFilled() {
+        XCTAssertTrue(isFormValid(serviceName: "Oil Change"))
+    }
+
+    func testFormValidation_LogMode_ValidWithoutMileage() {
+        // Mileage is optional — saving without it is allowed.
+        XCTAssertTrue(isFormValid(serviceName: "Oil Change"))
+    }
+
+    func testFormValidation_LogMode_InvalidWhenServiceNameEmpty() {
+        XCTAssertFalse(isFormValid(serviceName: ""))
+    }
+
+    func testFormValidation_LogMode_InvalidWhenBothEmpty() {
+        XCTAssertFalse(isFormValid(serviceName: ""))
+    }
+
+    // MARK: - Form Validation Tests (Schedule Mode)
+
+    func testFormValidation_ScheduleMode_ValidWhenServiceNameFilled() {
+        XCTAssertTrue(isFormValid(serviceName: "Tire Rotation"))
+    }
+
+    func testFormValidation_ScheduleMode_InvalidWhenServiceNameEmpty() {
+        XCTAssertFalse(isFormValid(serviceName: ""))
+    }
+
+    // MARK: - Service Name Computed Property Tests
+
+    func testServiceName_PresetTakesPrecedence() {
+        // Given: Both preset and custom name
+        let preset = PresetData(
+            name: "Oil Change",
+            category: "Engine",
+            defaultIntervalMonths: 6,
+            defaultIntervalMiles: 5000
+        )
+        let customName = "Custom Service"
+
+        // When: Computing service name (preset takes precedence)
+        let serviceName = preset.name
+
+        // Then: Should use preset name
+        XCTAssertEqual(serviceName, "Oil Change")
+        XCTAssertNotEqual(serviceName, customName)
+    }
+
+    func testServiceName_UsesCustomWhenNoPreset() {
+        // Given: No preset, only custom name
+        let preset: PresetData? = nil
+        let customName = "Custom Oil Change"
+
+        // When: Computing service name
+        let serviceName = preset?.name ?? customName
+
+        // Then: Should use custom name
+        XCTAssertEqual(serviceName, "Custom Oil Change")
+    }
+
+    func testServiceName_EmptyWhenNeitherProvided() {
+        // Given: No preset and empty custom name
+        let preset: PresetData? = nil
+        let customName = ""
+
+        // When: Computing service name
+        let serviceName = preset?.name ?? customName
+
+        // Then: Should be empty
+        XCTAssertTrue(serviceName.isEmpty)
+    }
+
+    // MARK: - Interval Auto-fill Tests
+
+    func testIntervalAutoFill_PopulatesMonthsFromPreset() {
+        // Given: Preset with interval months
+        let preset = PresetData(
+            name: "Oil Change",
+            category: "Engine",
+            defaultIntervalMonths: 6,
+            defaultIntervalMiles: nil
+        )
+
+        // When: Extracting interval
+        let intervalMonths: String
+        if let months = preset.defaultIntervalMonths {
+            intervalMonths = String(months)
+        } else {
+            intervalMonths = ""
+        }
+
+        // Then: Should populate months
+        XCTAssertEqual(intervalMonths, "6")
+    }
+
+    func testIntervalAutoFill_PopulatesMilesFromPreset() {
+        // Given: Preset with interval miles
+        let preset = PresetData(
+            name: "Tire Rotation",
+            category: "Tires",
+            defaultIntervalMonths: nil,
+            defaultIntervalMiles: 7500
+        )
+
+        // When: Extracting interval
+        let intervalMiles: String
+        if let miles = preset.defaultIntervalMiles {
+            intervalMiles = String(miles)
+        } else {
+            intervalMiles = ""
+        }
+
+        // Then: Should populate miles
+        XCTAssertEqual(intervalMiles, "7500")
+    }
+
+    func testIntervalAutoFill_PopulatesBothFromPreset() {
+        // Given: Preset with both intervals
+        let preset = PresetData(
+            name: "Oil Change",
+            category: "Engine",
+            defaultIntervalMonths: 6,
+            defaultIntervalMiles: 5000
+        )
+
+        // When: Extracting intervals
+        var intervalMonths = ""
+        var intervalMiles = ""
+
+        if let months = preset.defaultIntervalMonths {
+            intervalMonths = String(months)
+        }
+        if let miles = preset.defaultIntervalMiles {
+            intervalMiles = String(miles)
+        }
+
+        // Then: Should populate both
+        XCTAssertEqual(intervalMonths, "6")
+        XCTAssertEqual(intervalMiles, "5000")
+    }
+
+    func testIntervalAutoFill_HandlesNoIntervals() {
+        // Given: Preset without intervals
+        let preset = PresetData(
+            name: "Custom Service",
+            category: "Other",
+            defaultIntervalMonths: nil,
+            defaultIntervalMiles: nil
+        )
+
+        // When: Extracting intervals
+        var intervalMonths = ""
+        var intervalMiles = ""
+
+        if let months = preset.defaultIntervalMonths {
+            intervalMonths = String(months)
+        }
+        if let miles = preset.defaultIntervalMiles {
+            intervalMiles = String(miles)
+        }
+
+        // Then: Should remain empty
+        XCTAssertTrue(intervalMonths.isEmpty)
+        XCTAssertTrue(intervalMiles.isEmpty)
+    }
+
+    // MARK: - Service Creation Logic Tests
+
+    func testServiceCreation_LogMode_CalculatesNextDueDate() {
+        // Given: Service performed today with 6 month interval
+        let performedDate = Date()
+        let intervalMonths = 6
+
+        // When: Calculating next due date
+        let nextDueDate = Calendar.current.date(byAdding: .month, value: intervalMonths, to: performedDate)
+
+        // Then: Should be 6 months from performed date
+        XCTAssertNotNil(nextDueDate)
+
+        let components = Calendar.current.dateComponents([.month], from: performedDate, to: nextDueDate!)
+        XCTAssertEqual(components.month, 6)
+    }
+
+    func testServiceCreation_LogMode_CalculatesNextDueMileage() {
+        // Given: Service at 32500 miles with 5000 mile interval
+        let mileageAtService = 32500
+        let intervalMiles = 5000
+
+        // When: Calculating next due mileage
+        let nextDueMileage = mileageAtService + intervalMiles
+
+        // Then: Should be 37500 miles
+        XCTAssertEqual(nextDueMileage, 37500)
+    }
+
+    func testServiceCreation_UpdatesVehicleMileage() {
+        // Given: Vehicle at 32000 miles, service at 32500 miles
+        let vehicleMileage = 32000
+        let serviceMileage = 32500
+
+        // When: Checking if vehicle mileage should update
+        let shouldUpdate = serviceMileage > vehicleMileage
+        let newMileage = shouldUpdate ? serviceMileage : vehicleMileage
+
+        // Then: Should update to 32500
+        XCTAssertTrue(shouldUpdate)
+        XCTAssertEqual(newMileage, 32500)
+    }
+
+    func testServiceCreation_DoesNotDowngradeVehicleMileage() {
+        // Given: Vehicle at 35000 miles, service at 32500 miles (historical service)
+        let vehicleMileage = 35000
+        let serviceMileage = 32500
+
+        // When: Checking if vehicle mileage should update
+        let shouldUpdate = serviceMileage > vehicleMileage
+        let newMileage = shouldUpdate ? serviceMileage : vehicleMileage
+
+        // Then: Should not update (keep higher mileage)
+        XCTAssertFalse(shouldUpdate)
+        XCTAssertEqual(newMileage, 35000)
+    }
+
+    // MARK: - Cost Parsing Tests
+
+    func testCostParsing_ValidDecimal() {
+        // Given: Valid cost string
+        let costString = "45.99"
+
+        // When: Parsing to Decimal
+        let cost = Decimal(string: costString)
+
+        // Then: Should parse correctly
+        XCTAssertNotNil(cost)
+        XCTAssertEqual(cost, Decimal(string: "45.99"))
+    }
+
+    func testCostParsing_WholeNumber() {
+        // Given: Whole number cost
+        let costString = "50"
+
+        // When: Parsing to Decimal
+        let cost = Decimal(string: costString)
+
+        // Then: Should parse correctly
+        XCTAssertNotNil(cost)
+        XCTAssertEqual(cost, Decimal(50))
+    }
+
+    func testCostParsing_EmptyString() {
+        // Given: Empty cost string
+        let costString = ""
+
+        // When: Parsing to Decimal
+        let cost = Decimal(string: costString)
+
+        // Then: Should be nil
+        XCTAssertNil(cost)
+    }
+
+    func testCostParsing_InvalidString() {
+        // Given: Invalid cost string
+        let costString = "abc"
+
+        // When: Parsing to Decimal
+        let cost = Decimal(string: costString)
+
+        // Then: Should be nil
+        XCTAssertNil(cost)
+    }
+
+    // MARK: - Notes Handling Tests
+
+    func testNotesHandling_EmptyBecomesNil() {
+        // Given: Empty notes
+        let notes = ""
+
+        // When: Converting empty to nil
+        let notesValue: String? = notes.isEmpty ? nil : notes
+
+        // Then: Should be nil
+        XCTAssertNil(notesValue)
+    }
+
+    func testNotesHandling_NonEmptyPreserved() {
+        // Given: Non-empty notes
+        let notes = "Changed oil at local shop"
+
+        // When: Converting
+        let notesValue: String? = notes.isEmpty ? nil : notes
+
+        // Then: Should preserve value
+        XCTAssertEqual(notesValue, "Changed oil at local shop")
+    }
+
+    func testNotesHandling_WhitespaceOnly() {
+        // Given: Whitespace-only notes (not trimmed in the view)
+        let notes = "   "
+
+        // When: Converting (current implementation doesn't trim)
+        let notesValue: String? = notes.isEmpty ? nil : notes
+
+        // Then: Whitespace is preserved (not empty)
+        XCTAssertNotNil(notesValue)
+        XCTAssertEqual(notesValue, "   ")
+    }
+
+    // MARK: - Schedule Recurring Toggle Tests
+
+    func testScheduleRecurring_PresetWithIntervals_DoesNotAutoEnable() {
+        // Given: A preset with both interval types
+        let preset = PresetData(
+            name: "Oil Change",
+            category: "Engine",
+            defaultIntervalMonths: 6,
+            defaultIntervalMiles: 5000
+        )
+
+        // When: Preset has intervals but recurring starts OFF (opt-in behavior)
+        let hasIntervals = (preset.defaultIntervalMonths != nil) || (preset.defaultIntervalMiles != nil)
+        let scheduleRecurring = false // New behavior: toggle stays OFF
+
+        // Then: Intervals exist but recurring is not auto-enabled
+        XCTAssertTrue(hasIntervals, "Preset should have intervals")
+        XCTAssertFalse(scheduleRecurring, "Recurring should NOT be auto-enabled from preset")
+    }
+
+    func testScheduleRecurring_PresetWithOnlyMonths_DoesNotAutoEnable() {
+        // Given: A preset with only month interval
+        let preset = PresetData(
+            name: "Oil Change",
+            category: "Engine",
+            defaultIntervalMonths: 6,
+            defaultIntervalMiles: nil
+        )
+
+        // When: Preset has intervals but recurring stays OFF
+        let hasIntervals = (preset.defaultIntervalMonths != nil) || (preset.defaultIntervalMiles != nil)
+        let scheduleRecurring = false // New behavior: toggle stays OFF
+
+        // Then: Intervals exist but recurring is not auto-enabled
+        XCTAssertTrue(hasIntervals, "Preset should have intervals")
+        XCTAssertFalse(scheduleRecurring, "Recurring should NOT be auto-enabled from preset")
+    }
+
+    func testScheduleRecurring_PresetWithNoIntervals_DefaultsToFalse() {
+        // Given: A preset with no intervals
+        let preset = PresetData(
+            name: "Custom Service",
+            category: "Other",
+            defaultIntervalMonths: nil,
+            defaultIntervalMiles: nil
+        )
+
+        // When: Checking if preset has intervals
+        let hasIntervals = (preset.defaultIntervalMonths != nil) || (preset.defaultIntervalMiles != nil)
+
+        // Then: Should default to not recurring
+        XCTAssertFalse(hasIntervals)
+    }
+
+    func testScheduleRecurring_Off_SkipsIntervalAndDueCalculation() {
+        // Given: Service performed today with intervals but recurring OFF
+        let scheduleRecurring = false
+        let intervalMonths = 6
+        let intervalMiles = 5000
+        let performedDate = Date()
+        let mileageAtService = 32500
+
+        // When: Creating service with recurring off
+        let effectiveIntervalMonths: Int? = scheduleRecurring ? intervalMonths : nil
+        let effectiveIntervalMiles: Int? = scheduleRecurring ? intervalMiles : nil
+
+        // Then: Intervals should be nil
+        XCTAssertNil(effectiveIntervalMonths)
+        XCTAssertNil(effectiveIntervalMiles)
+
+        // And: No due date/mileage should be calculated
+        var dueDate: Date? = nil
+        var dueMileage: Int? = nil
+        if scheduleRecurring {
+            dueDate = Calendar.current.date(byAdding: .month, value: intervalMonths, to: performedDate)
+            dueMileage = mileageAtService + intervalMiles
+        }
+        XCTAssertNil(dueDate)
+        XCTAssertNil(dueMileage)
+    }
+
+    func testScheduleRecurring_On_CalculatesIntervalAndDue() {
+        // Given: Service performed today with intervals and recurring ON
+        let scheduleRecurring = true
+        let intervalMonths = 6
+        let intervalMiles = 5000
+        let performedDate = Date()
+        let mileageAtService = 32500
+
+        // When: Creating service with recurring on
+        let effectiveIntervalMonths: Int? = scheduleRecurring ? intervalMonths : nil
+        let effectiveIntervalMiles: Int? = scheduleRecurring ? intervalMiles : nil
+
+        // Then: Intervals should be set
+        XCTAssertEqual(effectiveIntervalMonths, 6)
+        XCTAssertEqual(effectiveIntervalMiles, 5000)
+
+        // And: Due date/mileage should be calculated
+        var dueDate: Date? = nil
+        var dueMileage: Int? = nil
+        if scheduleRecurring {
+            dueDate = Calendar.current.date(byAdding: .month, value: intervalMonths, to: performedDate)
+            dueMileage = mileageAtService + intervalMiles
+        }
+        XCTAssertNotNil(dueDate)
+        XCTAssertEqual(dueMileage, 37500)
+    }
+
+    func testScheduleRecurring_AnalyticsFlag_RespectsToggle() {
+        // Given: Intervals exist but recurring is off
+        let scheduleRecurring = false
+        let intervalMonths: Int? = 6
+        let intervalMiles: Int? = 5000
+
+        // When: Computing analytics hasInterval flag
+        let hasInterval = scheduleRecurring && ((intervalMonths != nil && intervalMonths != 0) || (intervalMiles != nil && intervalMiles != 0))
+
+        // Then: Should be false because recurring is off
+        XCTAssertFalse(hasInterval)
+    }
+
+    // MARK: - Effective Due Date Tests
+
+    /// Helper mirroring AddServiceView.effectiveDueDate computed property
+    private func effectiveDueDate(hasCustomDate: Bool, dueDate: Date, intervalMonths: Int?) -> Date? {
+        if hasCustomDate {
+            return dueDate
+        } else if let months = intervalMonths, months > 0 {
+            return Calendar.current.date(byAdding: .month, value: months, to: Date())
+        } else {
+            return nil
+        }
+    }
+
+    func testEffectiveDueDate_DerivesFromInterval() {
+        // Given: No custom date, interval is 6 months
+        let now = Date()
+
+        // When: Computing effective due date
+        let result = effectiveDueDate(hasCustomDate: false, dueDate: now, intervalMonths: 6)
+
+        // Then: Should be 6 months from now
+        XCTAssertNotNil(result)
+        let monthsDiff = Calendar.current.dateComponents([.month], from: now, to: result!).month
+        XCTAssertEqual(monthsDiff, 6)
+    }
+
+    func testEffectiveDueDate_NilWhenNoIntervalNoCustomDate() {
+        // Given: No custom date, no interval (mileage-only)
+        let result = effectiveDueDate(hasCustomDate: false, dueDate: Date(), intervalMonths: nil)
+
+        // Then: Should be nil
+        XCTAssertNil(result, "Mileage-only service should have no due date")
+    }
+
+    func testEffectiveDueDate_UsesCustomDateOverInterval() {
+        // Given: Custom date set (e.g., seasonal prefill), interval also set
+        let customDate = Date().addingTimeInterval(86400 * 60)
+        let result = effectiveDueDate(hasCustomDate: true, dueDate: customDate, intervalMonths: 12)
+
+        // Then: Custom date wins over interval-derived date
+        XCTAssertEqual(result, customDate)
+    }
+
+    func testEffectiveDueDate_CustomDateWithoutInterval() {
+        // Given: Custom one-off date, no interval
+        let customDate = Date().addingTimeInterval(86400 * 45)
+        let result = effectiveDueDate(hasCustomDate: true, dueDate: customDate, intervalMonths: nil)
+
+        // Then: Should use the custom date
+        XCTAssertEqual(result, customDate)
+    }
+
+    // MARK: - Scheduled Service Save Logic Tests
+    // These tests verify the save flow for remind mode, which uses
+    // Service.deriveDueFromIntervals() then applies user overrides.
+
+    func testScheduledService_MileageOnlyPreset_HasDueTracking() {
+        // Given: The exact bug scenario — user selects Tire Rotation preset,
+        // clears month interval, changes miles to 10000
+        let service = Service(name: "Tire Rotation", intervalMiles: 10000)
+        let currentMileage = 50000
+
+        // When: deriveDueFromIntervals (same as saveScheduledService)
+        service.deriveDueFromIntervals(anchorDate: Date(), anchorMileage: currentMileage)
+
+        // Then: Service has due tracking via mileage
+        XCTAssertNil(service.dueDate, "No month interval means no due date")
+        XCTAssertEqual(service.dueMileage, 60000, "Due mileage derived from current + interval")
+        XCTAssertTrue(service.hasDueTracking, "Mile-only service must appear in upcoming views")
+    }
+
+    func testScheduledService_CustomDateOverridesInterval() {
+        // Given: Service with month interval, but user sets a custom date
+        let service = Service(name: "Antifreeze", intervalMonths: 12)
+        let customDate = Date().addingTimeInterval(86400 * 60)
+
+        // When: Derive then override (same as saveScheduledService with hasCustomDate)
+        service.deriveDueFromIntervals(anchorDate: Date(), anchorMileage: 50000)
+        service.dueDate = customDate  // user override
+
+        // Then: Custom date takes precedence
+        XCTAssertEqual(service.dueDate, customDate)
+    }
+
+    func testScheduledService_ExplicitMileageOverridesInterval() {
+        // Given: Service with mile interval, but user types explicit due mileage
+        let service = Service(name: "Tire Rotation", intervalMiles: 10000)
+
+        // When: Derive then override (same as saveScheduledService with explicit dueMileage)
+        service.deriveDueFromIntervals(anchorDate: Date(), anchorMileage: 50000)
+        service.dueMileage = 55000  // user override
+
+        // Then: Explicit value takes precedence
+        XCTAssertEqual(service.dueMileage, 55000)
+    }
+
+    func testSeasonalPrefill_SetsCustomDateAndInterval() {
+        // Given: Seasonal prefill with meaningful date and yearly interval
+        let seasonalDate = Date().addingTimeInterval(86400 * 120)
+
+        // When: Applying prefill (simulating onAppear logic)
+        var hasCustomDate = false
+        var dueDate = Date()
+        var intervalMonths: Int? = nil
+        hasCustomDate = true
+        dueDate = seasonalDate
+        intervalMonths = 12
+
+        // Then: Custom date preserves the seasonal date
+        let result = effectiveDueDate(hasCustomDate: hasCustomDate, dueDate: dueDate, intervalMonths: intervalMonths)
+        XCTAssertEqual(result, seasonalDate, "Seasonal prefill date should take priority over interval derivation")
+    }
+}

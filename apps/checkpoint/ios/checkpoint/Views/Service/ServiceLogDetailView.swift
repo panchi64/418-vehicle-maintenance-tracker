@@ -1,0 +1,166 @@
+//
+//  ServiceLogDetailView.swift
+//  checkpoint
+//
+//  Detail view for a single service log showing all recorded information
+//
+
+import SwiftUI
+import SwiftData
+
+struct ServiceLogDetailView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(AppState.self) private var appState
+
+    @Bindable var log: ServiceLog
+
+    @State private var showEditSheet = false
+    @State private var attachmentForDetail: Document?
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: Spacing.xl) {
+                // Service name header
+                serviceHeader
+
+                // Details section
+                detailsSection
+
+                // Notes section
+                if let notes = log.notes, !notes.isEmpty {
+                    notesSection(notes: notes)
+                }
+
+                // Attachments
+                if !(log.attachments ?? []).isEmpty {
+                    AttachmentSection(
+                        attachments: log.attachments ?? [],
+                        onSelect: { attachmentForDetail = $0 }
+                    )
+                }
+            }
+            .padding(.horizontal, Spacing.screenHorizontal)
+            .padding(.vertical, Spacing.lg)
+        }
+        .trackScreen(.serviceLogDetail)
+        .background(Theme.backgroundPrimary)
+        .navigationTitle("Service Log")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Theme.textSecondary)
+                }
+                .accessibilityLabel("Close")
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showEditSheet = true
+                } label: {
+                    Image(systemName: "pencil")
+                }
+                .toolbarButtonStyle()
+                .accessibilityLabel("Edit service log")
+            }
+        }
+        .sheet(isPresented: $showEditSheet) {
+            EditServiceLogView(log: log)
+                .environment(appState)
+        }
+        .sheet(item: $attachmentForDetail) { document in
+            DocumentDetailView(document: document)
+                .environment(appState)
+        }
+    }
+
+    // MARK: - Service Header
+
+    private var serviceHeader: some View {
+        VStack(spacing: Spacing.sm) {
+            // Category icon
+            if let category = log.costCategory {
+                Image(systemName: category.icon)
+                    .font(.system(size: 28, weight: .medium))
+                    .foregroundStyle(category.color)
+            } else {
+                Image(systemName: "wrench.and.screwdriver")
+                    .font(.system(size: 28, weight: .medium))
+                    .foregroundStyle(Theme.accent)
+            }
+
+            Text(log.service?.name ?? "Service")
+                .font(.brutalistTitle)
+                .foregroundStyle(Theme.textPrimary)
+
+            Text(Formatters.mediumDate.string(from: log.performedDate))
+                .font(.brutalistSecondary)
+                .foregroundStyle(Theme.textSecondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(Spacing.xl)
+        .glassCardStyle(intensity: .subtle, padding: 0)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(log.service?.name ?? "Service"), \(Formatters.mediumDate.string(from: log.performedDate))")
+    }
+
+    // MARK: - Details Section
+
+    private var detailsSection: some View {
+        InstrumentSection(title: "Details") {
+            VStack(spacing: 0) {
+                if let cost = log.formattedCost {
+                    BrutalistDataRow(label: "Cost", value: cost, padding: Spacing.md)
+                    ListDivider(leadingPadding: 0)
+                }
+
+                if let category = log.costCategory {
+                    BrutalistDataRow(label: "Category", value: category.displayName, padding: Spacing.md)
+                    ListDivider(leadingPadding: 0)
+                }
+
+                BrutalistDataRow(label: "Mileage", value: Formatters.mileage(log.mileageAtService), padding: Spacing.md)
+            }
+        }
+    }
+
+    // MARK: - Notes Section
+
+    private func notesSection(notes: String) -> some View {
+        InstrumentSection(title: "Notes") {
+            Text(notes.brutalistMarkdownAttributed)
+                .font(.brutalistBody)
+                .foregroundStyle(Theme.textSecondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(Spacing.md)
+        }
+    }
+}
+
+#Preview {
+    @Previewable @State var log = ServiceLog(
+        service: Service(name: "Oil Change", dueDate: nil),
+        vehicle: Vehicle(
+            name: "Test Car",
+            make: "Toyota",
+            model: "Camry",
+            year: 2022,
+            currentMileage: 32500
+        ),
+        performedDate: Date.now,
+        mileageAtService: 32000,
+        cost: 45.99,
+        costCategory: .maintenance,
+        notes: "Synthetic 0W-20 oil change at local shop. Filter replaced."
+    )
+
+    NavigationStack {
+        ServiceLogDetailView(log: log)
+    }
+    .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self, ServiceAttachment.self], inMemory: true)
+    .environment(AppState())
+    .preferredColorScheme(.dark)
+}

@@ -1,0 +1,40 @@
+{
+  "name": "@418-studio/biombo-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Biombo backend — DACO scraper + submissions API backed by PostgreSQL.",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node --enable-source-maps dist/index.js",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src tests --ext .ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "scrape:once": "tsx src/jobs/dailyScrape.ts"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.36.0",
+    "fastify": "^5.0.0",
+    "@fastify/multipart": "^9.0.0",
+    "pg": "^8.13.0",
+    "playwright": "^1.49.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "@types/pg": "^8.11.10",
+    "drizzle-kit": "^0.28.0",
+    "eslint": "^9.15.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

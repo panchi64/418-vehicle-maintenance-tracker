@@ -1,0 +1,12 @@
+sources/
+out/
+backend/.cache/
+backend/models/
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/uv.lock
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+.DS_Store
