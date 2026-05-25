@@ -7,45 +7,60 @@
 //
 
 import SwiftUI
+import DesignKit
 
 extension Font {
-    // MARK: - Brutalist Monospace Type Scale
+    // MARK: - Brutalist Type Scale
+    //
+    // Monospaced themes use bundled JetBrains Mono (shared via DesignKit).
+    // Rounded/serif/system themes fall back to SF + the matching design.
+
+    @MainActor private static func brutalist(
+        size: CGFloat,
+        weight: Font.Weight,
+        jetBrains: DesignKitFonts.Weight
+    ) -> Font {
+        let design = ThemeManager.shared.current.fontDesign.toSwiftUI()
+        if design == .monospaced {
+            return DesignKitFonts.jetBrainsMono(jetBrains, size: size)
+        }
+        return .system(size: size, weight: weight, design: design)
+    }
 
     /// 56pt Light - Hero data displays
     @MainActor static var brutalistHero: Font {
-        .system(size: 56, weight: .light, design: ThemeManager.shared.current.fontDesign.toSwiftUI())
+        brutalist(size: 56, weight: .light, jetBrains: .light)
     }
 
     /// 32pt Medium - Primary headings
     @MainActor static var brutalistTitle: Font {
-        .system(size: 32, weight: .medium, design: ThemeManager.shared.current.fontDesign.toSwiftUI())
+        brutalist(size: 32, weight: .medium, jetBrains: .medium)
     }
 
     /// 20pt Medium - Section titles, service names
     @MainActor static var brutalistHeading: Font {
-        .system(size: 20, weight: .medium, design: ThemeManager.shared.current.fontDesign.toSwiftUI())
+        brutalist(size: 20, weight: .medium, jetBrains: .medium)
     }
 
     /// 15pt Regular - Body text
     @MainActor static var brutalistBody: Font {
-        .system(size: 15, weight: .regular, design: ThemeManager.shared.current.fontDesign.toSwiftUI())
+        brutalist(size: 15, weight: .regular, jetBrains: .regular)
     }
 
     /// 13pt Regular - Secondary content
     @MainActor static var brutalistSecondary: Font {
-        .system(size: 13, weight: .regular, design: ThemeManager.shared.current.fontDesign.toSwiftUI())
+        brutalist(size: 13, weight: .regular, jetBrains: .regular)
     }
 
     /// 11pt Medium - Labels, all caps
     @MainActor static var brutalistLabel: Font {
-        .system(size: 11, weight: .medium, design: ThemeManager.shared.current.fontDesign.toSwiftUI())
+        brutalist(size: 11, weight: .medium, jetBrains: .medium)
     }
 
     /// 11pt Bold - Emphasized labels
     @MainActor static var brutalistLabelBold: Font {
-        .system(size: 11, weight: .bold, design: ThemeManager.shared.current.fontDesign.toSwiftUI())
+        brutalist(size: 11, weight: .bold, jetBrains: .bold)
     }
-
 }
 
 // MARK: - Brutalist Text Style Modifiers

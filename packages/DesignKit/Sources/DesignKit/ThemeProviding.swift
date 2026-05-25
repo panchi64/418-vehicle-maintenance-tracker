@@ -31,6 +31,9 @@ public protocol ThemeProviding: AnyObject, Observable {
 
 public extension ThemeProviding {
     func font(_ style: Font.TextStyle, weight: Font.Weight = .regular) -> Font {
-        .system(style, design: fontDesign).weight(weight)
+        if fontDesign == .monospaced {
+            return DesignKitFonts.jetBrainsMono(.init(weight), textStyle: style)
+        }
+        return .system(style, design: fontDesign).weight(weight)
     }
 }
