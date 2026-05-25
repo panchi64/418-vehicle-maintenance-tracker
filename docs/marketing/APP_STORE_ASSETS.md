@@ -431,25 +431,33 @@ Use `SKStoreReviewController.requestReview` — Apple caps to 3 prompts/365 days
 
 ---
 
-## 8. Pre-submission checklist (copy-paste into Linear / Asana)
+## 8. Pre-submission checklist
 
-- [ ] Bundle ID created, app shell exists in App Store Connect
-- [ ] App Name + Subtitle locked (both locales)
-- [ ] Keywords field locked (both locales)
-- [ ] Description copied in (both locales) — Spanish reviewed by 2 native PR speakers
-- [ ] Promotional Text drafted
-- [ ] Screenshots: 10 × 6.9" (`en-US`), 10 × 6.9" (`es-MX`)
+- [x] Bundle ID created, app shell exists in App Store Connect
+- [x] App Name + Subtitle locked (both locales) — see §1, §2
+- [x] Keywords field locked (both locales)
+- [x] Description drafted (both locales) — Spanish still needs native-PR-speaker review aloud
+- [x] Promotional Text drafted
+- [x] Screenshots authored: 10 × 6.9" (`en-US`), 10 × 6.9" (`es-MX`)
+- [x] Privacy Policy URL live — `https://checkpoint.franciscocasiano.com/privacy-policy`
+- [x] Support URL live — `https://checkpoint.franciscocasiano.com/support`
+- [x] PrivacyInfo.xcprivacy in the Xcode project
+- [x] Apple Developer Program active; build uploaded via Xcode → TestFlight
 - [ ] Apple Watch screenshots: 410 × 502 (`en-US` only is fine for v1.0)
-- [ ] App Preview A (24s) uploaded for `en-US`
-- [ ] App Preview B (22s) uploaded for `en-US`
+- [ ] App Preview A (24s) for `en-US` — optional but recommended (per §5)
+- [ ] App Preview B (22s) for `en-US` — optional but recommended (per §5)
 - [ ] App Preview A localized voiceless captions for `es-MX` (Preview B can wait)
-- [ ] Privacy Policy URL live and reachable
-- [ ] Support URL live and reachable
-- [ ] PrivacyInfo.xcprivacy in the Xcode project (per [APP_STORE_CONNECT.md](../APP_STORE_CONNECT.md))
-- [ ] IAPs in "Ready to Submit" state
-- [ ] Review notes script copied in (with VIN `1HGBH41JXMN109186` for the reviewer)
-- [ ] Featuring nomination submitted via App Store Connect ≥ 2 weeks before target ship date
+- [ ] **IAPs recreated in App Store Connect** and attached to v1.0 (local `Products.storekit` is simulator-only — product IDs must match exactly: `pro.unlock`, `tip.small`, `tip.medium`, `tip.large`)
+- [ ] **Build attached to v1.0** in ASC (uploading ≠ attaching)
+- [ ] **App Privacy disclosures filled** — mark all "App Functionality," nothing "Tracking"
+- [ ] **Age Rating questionnaire** completed (expected: 4+)
+- [ ] **App Review notes pasted** with test VIN `1HGBH41JXMN109186`
+- [ ] **es-MX locale paste** — description, keywords, screenshots (frames 1/2/3/8/10 differ from en-US)
+- [ ] Spanish description reviewed aloud by 2 native PR speakers (see §2)
+- [ ] Featuring nomination submitted via App Store Connect ≥ 2 weeks before target ship date (optional)
+
+For the App Store Connect–side step-by-step, see [`docs/APP_STORE_CONNECT.md`](../APP_STORE_CONNECT.md) §10.
 
 ---
 
-_Last updated: 2026-05-12_
+_Last updated: 2026-05-25_
