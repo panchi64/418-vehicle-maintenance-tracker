@@ -19,7 +19,7 @@ struct VehicleHeader: View {
     }
 
     var body: some View {
-        HStack(alignment: .top, spacing: Spacing.md) {
+        HStack(alignment: .bottom, spacing: Spacing.md) {
             leftColumn
 
             Spacer()
@@ -93,11 +93,10 @@ struct VehicleHeader: View {
                         .font(.brutalistBody)
                         .foregroundStyle(Theme.accent)
                         .underline(onMileageTap != nil, color: Theme.accent.opacity(0.5))
-                        .frame(minHeight: 44)
+                        .padding(.vertical, 6)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .padding(.top, Spacing.xs)
                 .accessibilityLabel("Mileage: \(mileageText)")
                 .accessibilityHint(onMileageTap != nil ? "Double tap to update mileage" : "")
 
