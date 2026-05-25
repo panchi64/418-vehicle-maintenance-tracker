@@ -240,6 +240,50 @@ select:focus {
   max-width: 360px;
 }
 
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(10, 10, 10, 0.78);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+  padding: 24px;
+  text-align: center;
+}
+.loading-title {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+.loading-meta {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.loading-hint {
+  font-size: 10px;
+  color: var(--muted);
+  max-width: 320px;
+}
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--line);
+  border-top-color: var(--off-white);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .controls {
   flex: 1;
   overflow-y: auto;

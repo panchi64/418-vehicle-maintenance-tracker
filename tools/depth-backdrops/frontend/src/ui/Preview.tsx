@@ -2,20 +2,29 @@ import { useEffect, useRef, type RefObject } from "react";
 import { BackdropRenderer } from "../shader/renderer";
 import type { Params, ViewMode } from "../types";
 
+export type DepthLoadState =
+  | { kind: "idle" }
+  | { kind: "loading"; sourceName: string; warm: boolean; elapsedMs: number }
+  | { kind: "error"; message: string };
+
 export function Preview({
   params,
   view,
   setView,
   rendererRef,
+  outputSize,
   hasSource,
-  status,
+  depthState,
+  batchStatus,
 }: {
   params: Params;
   view: ViewMode;
   setView: (v: ViewMode) => void;
   rendererRef: RefObject<BackdropRenderer | null>;
+  outputSize: { width: number; height: number } | null;
   hasSource: boolean;
-  status: string | null;
+  depthState: DepthLoadState;
+  batchStatus: string | null;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -27,10 +36,14 @@ export function Preview({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || !rendererRef.current) return;
-    if (canvas.width !== params.output.width) canvas.width = params.output.width;
-    if (canvas.height !== params.output.height) canvas.height = params.output.height;
+    const targetW = outputSize?.width ?? 1;
+    const targetH = outputSize?.height ?? 1;
+    if (canvas.width !== targetW) canvas.width = targetW;
+    if (canvas.height !== targetH) canvas.height = targetH;
     rendererRef.current.render(params, view);
-  }, [params, view, rendererRef]);
+  }, [params, view, outputSize, rendererRef]);
+
+  const loading = depthState.kind === "loading";
 
   return (
     <div className="preview">
@@ -46,18 +59,32 @@ export function Preview({
           </button>
         ))}
       </div>
-      {!hasSource && (
+      {!hasSource && depthState.kind !== "loading" && (
         <div className="empty-state">
-          Upload an image in the left panel to start.
+          Drop or pick an image in the left panel to start.
           <br />
           Keys 1 / 2 / 3 toggle source · depth · styled.
         </div>
       )}
       <canvas ref={canvasRef} />
+      {loading && depthState.kind === "loading" && (
+        <div className="loading-overlay">
+          <div className="spinner" />
+          <div className="loading-title">Computing depth map…</div>
+          <div className="loading-meta">
+            {depthState.sourceName} · {(depthState.elapsedMs / 1000).toFixed(1)} s
+          </div>
+          <div className="loading-hint">
+            {depthState.warm
+              ? "~70 ms per image once the model is loaded."
+              : "First run loads the Core ML model — ~5 s, then milliseconds per image."}
+          </div>
+        </div>
+      )}
       <div className="meta">
-        {params.output.width} × {params.output.height} · margin{" "}
-        {params.frame.marginPct.toFixed(2)}% · grid {params.grid.size}px
-        {status ? ` · ${status}` : ""}
+        {outputSize ? `${outputSize.width} × ${outputSize.height}` : "no source"}
+        {" · "}grid {params.grid.size}px / gap {params.grid.gap}px
+        {batchStatus ? ` · ${batchStatus}` : ""}
       </div>
     </div>
   );

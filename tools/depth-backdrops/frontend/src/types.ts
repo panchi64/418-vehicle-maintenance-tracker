@@ -5,6 +5,7 @@ export type Source = {
   width: number;
   height: number;
   bytes: number;
+  hasDepth: boolean;
 };
 
 export const PRESET_NAME_RE = /^[a-z0-9][a-z0-9\-_]{0,63}$/;
@@ -27,14 +28,6 @@ export type Params = {
     near: string;
     far: string;
     valueRange: [number, number];
-  };
-  frame: {
-    marginPct: number; // percent of canvas width
-    color: string;
-  };
-  output: {
-    width: number;
-    height: number;
   };
 };
 

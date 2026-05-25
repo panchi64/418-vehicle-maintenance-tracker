@@ -3,7 +3,7 @@ import { api } from "./api";
 import { DEFAULT_PARAMS, ParamsSchema, defaultPreset } from "./presets/schema";
 import { BackdropRenderer } from "./shader/renderer";
 import { Controls } from "./ui/Controls";
-import { Preview } from "./ui/Preview";
+import { Preview, type DepthLoadState } from "./ui/Preview";
 import { PresetBar } from "./ui/PresetBar";
 import { SourceList } from "./ui/SourceList";
 import type { Params, Preset, Source, ViewMode } from "./types";
@@ -33,21 +33,27 @@ export default function App() {
   );
   const [params, setParams] = useState<Params>(loadStoredParams);
   const [view, setView] = useState<ViewMode>("styled");
-  const [status, setStatus] = useState<string | null>(null);
+  const [batchStatus, setBatchStatus] = useState<string | null>(null);
+  const [depthState, setDepthState] = useState<DepthLoadState>({ kind: "idle" });
   const [error, setError] = useState<string | null>(null);
   const [dropping, setDropping] = useState(false);
 
   const rendererRef = useRef<BackdropRenderer | null>(null);
-  // Live closures so the source-load effect always sees the freshest params/view
-  // without re-running on every slider tick.
+  // Refs so the source-load effect can read latest params/view/sources without
+  // re-triggering depth inference on every slider tick.
   const paramsRef = useRef(params);
   const viewRef = useRef(view);
+  const sourcesRef = useRef(sources);
+  const modelWarmRef = useRef(false);
   useEffect(() => {
     paramsRef.current = params;
   }, [params]);
   useEffect(() => {
     viewRef.current = view;
   }, [view]);
+  useEffect(() => {
+    sourcesRef.current = sources;
+  }, [sources]);
 
   // initial data
   useEffect(() => {
@@ -66,7 +72,6 @@ export default function App() {
     localStorage.setItem(LS_PARAMS, JSON.stringify(params));
   }, [params]);
 
-  // persist (or clear) active source selection
   useEffect(() => {
     if (activeSha) localStorage.setItem(LS_ACTIVE_SOURCE, activeSha);
     else localStorage.removeItem(LS_ACTIVE_SOURCE);
@@ -84,19 +89,49 @@ export default function App() {
       r.clearSource();
       r.clearDepth();
       r.render(paramsRef.current, viewRef.current);
+      setDepthState({ kind: "idle" });
       return;
     }
-    setStatus("loading…");
+    let cancelled = false;
+    let tickId: number | null = null;
+    const source = sourcesRef.current.find((s) => s.sha === activeSha);
+    const sourceName = source?.originalFilename ?? activeSha.slice(0, 8);
+    const cached = source?.hasDepth ?? false;
+    const warm = cached || modelWarmRef.current;
+    const start = performance.now();
+    setDepthState({ kind: "loading", sourceName, warm, elapsedMs: 0 });
+    tickId = window.setInterval(() => {
+      setDepthState((s) =>
+        s.kind === "loading" ? { ...s, elapsedMs: performance.now() - start } : s,
+      );
+    }, 100);
+
     Promise.all([r.loadSource(api.imageUrl(activeSha)), r.loadDepth(api.depthUrl(activeSha))])
       .then(() => {
-        setStatus(null);
+        if (cancelled) return;
+        modelWarmRef.current = true;
+        setDepthState({ kind: "idle" });
         setError(null);
+        // mark this source as cached for future selections
+        setSources((prev) =>
+          prev.map((s) => (s.sha === activeSha ? { ...s, hasDepth: true } : s)),
+        );
         r.render(paramsRef.current, viewRef.current);
       })
       .catch((e) => {
-        setError(`load ${activeSha.slice(0, 8)}: ${e}`);
-        setStatus(null);
+        if (cancelled) return;
+        const msg = String(e);
+        setDepthState({ kind: "error", message: msg });
+        setError(`load ${activeSha.slice(0, 8)}: ${msg}`);
+      })
+      .finally(() => {
+        if (tickId !== null) clearInterval(tickId);
       });
+
+    return () => {
+      cancelled = true;
+      if (tickId !== null) clearInterval(tickId);
+    };
   }, [activeSha]);
 
   // keyboard view toggle
@@ -182,6 +217,11 @@ export default function App() {
     [sources, activeSha],
   );
 
+  const outputSize = useMemo(
+    () => (activeSource ? { width: activeSource.width, height: activeSource.height } : null),
+    [activeSource],
+  );
+
   const activePreset = useMemo(
     () => presets.find((p) => p.name === activePresetName) ?? null,
     [presets, activePresetName],
@@ -240,9 +280,8 @@ export default function App() {
       if (p.source?.sha256) {
         if (sources.some((s) => s.sha === p.source!.sha256)) {
           setActiveSha(p.source.sha256);
-          setStatus(null);
         } else {
-          setStatus(`preset's source (${p.source.filename}) is missing — keeping current image`);
+          setError(`preset's source (${p.source.filename}) is missing — keeping current image`);
         }
       }
     },
@@ -291,12 +330,13 @@ export default function App() {
       return;
     }
     const r = rendererRef.current;
-    setStatus("batch export…");
+    setBatchStatus("batch export…");
     setError(null);
     let done = 0;
     const failures: string[] = [];
     for (const s of sources) {
       try {
+        r.setSize(s.width, s.height);
         await Promise.all([
           r.loadSource(api.imageUrl(s.sha)),
           r.loadDepth(api.depthUrl(s.sha)),
@@ -305,21 +345,21 @@ export default function App() {
         const blob = await r.snapshotPng();
         await api.exportPng(activePreset.name, s.sha, blob);
         done += 1;
-        setStatus(`batch export… ${done}/${sources.length}`);
+        setBatchStatus(`batch export… ${done}/${sources.length}`);
       } catch (e) {
         failures.push(`${s.originalFilename}: ${e}`);
       }
     }
-    setStatus(
+    setBatchStatus(
       failures.length === 0
         ? `exported ${done} → out/${activePreset.name}/`
         : `exported ${done}/${sources.length} → out/${activePreset.name}/ (${failures.length} failed)`,
     );
     if (failures.length > 0) setError(failures.join(" · "));
 
-    // Always restore: either reload the active source, or clear if none was selected.
     try {
-      if (activeSha) {
+      if (activeSha && activeSource) {
+        r.setSize(activeSource.width, activeSource.height);
         await Promise.all([
           r.loadSource(api.imageUrl(activeSha)),
           r.loadDepth(api.depthUrl(activeSha)),
@@ -332,7 +372,7 @@ export default function App() {
     } catch (e) {
       setError((prev) => (prev ? `${prev} · restore: ${e}` : `restore: ${e}`));
     }
-  }, [sources, activePreset, params, view, activeSha]);
+  }, [sources, activePreset, params, view, activeSha, activeSource]);
 
   return (
     <div className={`app${dropping ? " dropping" : ""}`}>
@@ -372,8 +412,10 @@ export default function App() {
         view={view}
         setView={setView}
         rendererRef={rendererRef}
+        outputSize={outputSize}
         hasSource={!!activeSha}
-        status={status}
+        depthState={depthState}
+        batchStatus={batchStatus}
       />
 
       <div className="col right">
@@ -389,10 +431,31 @@ export default function App() {
         />
         <Controls params={params} onChange={setParams} />
         <div className="export-bar">
-          <button className="primary" onClick={handleExport} disabled={!activeSha}>
+          <button
+            className="primary"
+            onClick={handleExport}
+            disabled={!activeSha || depthState.kind === "loading"}
+            title={
+              !activeSha
+                ? "Select a source first"
+                : depthState.kind === "loading"
+                  ? "Waiting for depth map to finish"
+                  : "Download the styled PNG"
+            }
+          >
             Export PNG
           </button>
-          <button onClick={handleBatchExport} disabled={!activePreset || sources.length === 0}>
+          <button
+            onClick={handleBatchExport}
+            disabled={!activePreset || sources.length === 0 || depthState.kind === "loading"}
+            title={
+              !activePreset
+                ? "Save a named preset first"
+                : sources.length === 0
+                  ? "No sources to export"
+                  : "Render every source through this preset"
+            }
+          >
             Batch export to out/
           </button>
         </div>

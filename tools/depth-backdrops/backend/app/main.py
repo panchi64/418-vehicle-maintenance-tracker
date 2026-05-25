@@ -72,22 +72,12 @@ class ColorParams(BaseModel):
     valueRange: tuple[float, float]
 
 
-class FrameParams(BaseModel):
-    marginPct: float = Field(ge=0, le=20)
-    color: str = Field(pattern=HEX_COLOR)
-
-
-class OutputParams(BaseModel):
-    width: int = Field(ge=64, le=8192)
-    height: int = Field(ge=64, le=8192)
-
-
 class Params(BaseModel):
     depth: DepthParams
     grid: GridParams
     color: ColorParams
-    frame: FrameParams
-    output: OutputParams
+
+    model_config = {"extra": "ignore"}  # tolerate older presets that still ship frame/output
 
 
 class PresetSourceRef(BaseModel):

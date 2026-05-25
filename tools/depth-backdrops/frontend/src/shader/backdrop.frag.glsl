@@ -23,23 +23,8 @@ uniform vec3 u_nearColor;
 uniform vec3 u_farColor;
 uniform vec2 u_valueRange;
 
-uniform float u_marginPx;
-uniform vec3 u_marginColor;
-
 void main() {
   vec2 px = v_uv * u_canvasSize;
-
-  if (u_viewMode == 2) {
-    bool inFrame =
-      px.x < u_marginPx ||
-      px.y < u_marginPx ||
-      px.x > u_canvasSize.x - u_marginPx ||
-      px.y > u_canvasSize.y - u_marginPx;
-    if (inFrame) {
-      o_color = vec4(u_marginColor, 1.0);
-      return;
-    }
-  }
 
   if (u_viewMode == 0) {
     o_color = u_hasSource ? texture(u_source, v_uv) : vec4(0.04, 0.04, 0.04, 1.0);

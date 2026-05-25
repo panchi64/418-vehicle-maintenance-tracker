@@ -1,11 +1,11 @@
 # tools/depth-backdrops
 
-Internal tool that generates the cerulean-tinted, pixel-quantized, depth-mapped backdrops behind the device mockups in the locked App Store frames (`docs/marketing/APP_STORE_ASSETS.md`).
+Internal tool that generates cerulean-tinted, pixel-quantized, depth-mapped backdrops for App Store screenshots (see `docs/marketing/APP_STORE_ASSETS.md`). The tool's job ends at "depth + pixel grid + color mix" at the source's native resolution — framing, device mockup compositing, and caption typography happen downstream in Figma.
 
 Two processes:
 
 - **`backend/`** — Python (uv) + FastAPI. Runs Depth Anything V2 Small via Core ML on the Apple Neural Engine. SHA256-keyed depth-map cache.
-- **`frontend/`** — Vite + React + TypeScript. WebGL2 fragment shader does all the live styling (pixel grid, value remap, cerulean mix, off-white frame margin). The shader output is the export — preview is pixel-identical to the saved PNG.
+- **`frontend/`** — Vite + React + TypeScript. WebGL2 fragment shader does all the live styling (pixel grid + gap, value remap, near/far color mix). The shader output is the export, at the **source image's native dimensions** — no margin, no resizing. Add framing in post (Figma).
 
 ## Run
 
@@ -33,18 +33,16 @@ All Python commands go through `uv` — never call `python` or `pip` directly.
 
 ## Workflow
 
-1. Drop an image into the left panel (drag-and-drop or "Choose file"). The backend hashes it, writes it to `sources/<sha>.<ext>`, runs depth inference once, and caches the depth map.
+1. Drop an image into the left panel (drag-and-drop or "Choose file"). The backend hashes it, writes it to `sources/<sha>.<ext>`, runs depth inference once, and caches the depth map. A loading overlay covers the preview while inference runs (first image ≈5 s for the model load, every subsequent ≈70 ms).
 2. Tweak parameters in the right panel — everything updates the WebGL preview at 60 fps. Press `1`/`2`/`3` to toggle between source · depth · styled.
 3. Type a name and click **Save as** to persist the current parameters to `presets/<name>.json`. Subsequent edits show a `*` marker; **Save** writes them back. Commit the JSON to lock the recipe.
-4. **Export PNG** downloads the current frame at the output resolution (default 1320×2868). **Batch export to out/** runs every source through the active preset and writes to `out/<preset>/<sha>.png`.
+4. **Export PNG** downloads the rendered frame at the **source image's native dimensions** (no resizing, no margin — add those in post). **Batch export to out/** runs every source through the active preset and writes to `out/<preset>/<sha>.png`, each at its own source dimensions.
 
 ## Parameter groups (right panel)
 
 - **Depth** — `Range` clips the input depth before remap, `Gamma` curves it, `Contrast` pivots around 0.5, `Invert` flips near/far.
-- **Pixel grid** — `Cell px` is the side length of each quantization cell in output pixels. Default 24 px gives a coarse, deliberate texture; raise for chunkier blocks.
+- **Pixel grid** — `Cell px` is the side length of each quantization cell. `Gap px` insets each cell so the spacing between dots shows the `Far` color (zero gap = solid grid).
 - **Color** — `Near`/`Far` are the two endpoints the depth value is mixed between. `Mix range` compresses the mix to a narrow band so the backdrop stays subtle (default 0.05–0.18 keeps the whole image near the cerulean end with just enough variation to read as depth).
-- **Frame** — `Margin %` is the off-white border as a percentage of canvas width; default 2.65% matches the website's 35 px frame proportionally. `Color` overrides the swatch.
-- **Output** — `Width`/`Height` of the rendered PNG. Default 1320×2868 is the App Store 6.9″ canvas.
 
 ## Performance
 

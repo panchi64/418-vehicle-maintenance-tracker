@@ -58,6 +58,15 @@ export class BackdropRenderer {
     return this.loadInto("depth", url, gen);
   }
 
+  /** Resize the backing canvas/framebuffer. The caller should `render()` afterwards. */
+  setSize(width: number, height: number): void {
+    const canvas = this.gl.canvas as HTMLCanvasElement;
+    const w = Math.max(1, Math.floor(width));
+    const h = Math.max(1, Math.floor(height));
+    if (canvas.width !== w) canvas.width = w;
+    if (canvas.height !== h) canvas.height = h;
+  }
+
   clearSource(): void {
     this.sourceGen += 1; // invalidate in-flight loads
     if (this.sourceTex !== this.placeholderTex) {
@@ -115,8 +124,6 @@ export class BackdropRenderer {
     const width = canvas.width || 1;
     const height = canvas.height || 1;
 
-    const marginPx = (params.frame.marginPct / 100) * width;
-
     const uniforms = {
       u_source: this.sourceTex,
       u_depth: this.depthTex,
@@ -134,8 +141,6 @@ export class BackdropRenderer {
       u_nearColor: hexToRgb(params.color.near),
       u_farColor: hexToRgb(params.color.far),
       u_valueRange: params.color.valueRange,
-      u_marginPx: marginPx,
-      u_marginColor: hexToRgb(params.frame.color),
     };
 
     gl.viewport(0, 0, width, height);

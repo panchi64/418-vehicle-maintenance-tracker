@@ -89,40 +89,6 @@ export function Controls({
         />
       </Section>
 
-      <Section title="Frame">
-        <NumberSlider
-          label="Margin %"
-          value={params.frame.marginPct}
-          min={0}
-          max={20}
-          step={0.05}
-          onChange={(n) => patch("frame", { marginPct: n })}
-        />
-        <ColorField
-          label="Color"
-          value={params.frame.color}
-          onChange={(c) => patch("frame", { color: c })}
-        />
-      </Section>
-
-      <Section title="Output" defaultOpen={false}>
-        <NumberSlider
-          label="Width"
-          value={params.output.width}
-          min={64}
-          max={8192}
-          step={1}
-          onChange={(n) => patch("output", { width: Math.round(n) })}
-        />
-        <NumberSlider
-          label="Height"
-          value={params.output.height}
-          min={64}
-          max={8192}
-          step={1}
-          onChange={(n) => patch("output", { height: Math.round(n) })}
-        />
-      </Section>
     </div>
   );
 }

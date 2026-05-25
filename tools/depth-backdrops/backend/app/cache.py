@@ -26,6 +26,13 @@ def cache_path(sha: str) -> Path:
     return CACHE_DIR / f"{sha}.png"
 
 
+def has(sha: str) -> bool:
+    try:
+        return cache_path(sha).exists()
+    except ValueError:
+        return False
+
+
 def get(sha: str) -> bytes | None:
     try:
         p = cache_path(sha)

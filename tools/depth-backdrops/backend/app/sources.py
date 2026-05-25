@@ -7,6 +7,7 @@ from pathlib import Path
 
 from PIL import Image
 
+from . import cache
 from .cache import is_valid_sha
 
 SOURCES_DIR = Path(__file__).resolve().parent.parent.parent / "sources"
@@ -23,6 +24,7 @@ class Source:
     width: int
     height: int
     bytes: int
+    has_depth: bool
 
     def to_dict(self) -> dict:
         return {
@@ -32,6 +34,7 @@ class Source:
             "width": self.width,
             "height": self.height,
             "bytes": self.bytes,
+            "hasDepth": self.has_depth,
         }
 
 
@@ -71,6 +74,7 @@ def list_sources() -> list[Source]:
                 width=w,
                 height=h,
                 bytes=p.stat().st_size,
+                has_depth=cache.has(sha),
             )
         )
     return out
@@ -108,6 +112,7 @@ def save(data: bytes, original_name: str, sha: str) -> Source:
         width=w,
         height=h,
         bytes=path.stat().st_size,
+        has_depth=cache.has(sha),
     )
 
 

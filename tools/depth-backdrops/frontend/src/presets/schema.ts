@@ -4,32 +4,29 @@ import type { Params, Preset } from "../types";
 
 const hex = z.string().regex(/^#[0-9A-Fa-f]{6}$/);
 
-export const ParamsSchema = z.object({
-  depth: z.object({
-    inMin: z.number().min(0).max(1),
-    inMax: z.number().min(0).max(1),
-    gamma: z.number().min(0.1).max(5),
-    contrast: z.number().min(0).max(4),
-    invert: z.boolean(),
-  }),
-  grid: z.object({
-    size: z.number().int().min(1).max(256),
-    gap: z.number().int().min(0).max(256).default(0),
-  }),
-  color: z.object({
-    near: hex,
-    far: hex,
-    valueRange: z.tuple([z.number().min(0).max(1), z.number().min(0).max(1)]),
-  }),
-  frame: z.object({
-    marginPct: z.number().min(0).max(20),
-    color: hex,
-  }),
-  output: z.object({
-    width: z.number().int().min(64).max(8192),
-    height: z.number().int().min(64).max(8192),
-  }),
-});
+export const ParamsSchema = z
+  .object({
+    depth: z.object({
+      inMin: z.number().min(0).max(1),
+      inMax: z.number().min(0).max(1),
+      gamma: z.number().min(0.1).max(5),
+      contrast: z.number().min(0).max(4),
+      invert: z.boolean(),
+    }),
+    grid: z.object({
+      size: z.number().int().min(1).max(256),
+      gap: z.number().int().min(0).max(256).default(0),
+    }),
+    color: z.object({
+      near: hex,
+      far: hex,
+      valueRange: z.tuple([z.number().min(0).max(1), z.number().min(0).max(1)]),
+    }),
+  })
+  // Tolerate older presets that still ship `frame` and `output` — those keys are
+  // stripped on parse so the runtime object matches the simplified Params type.
+  .passthrough()
+  .transform(({ depth, grid, color }) => ({ depth, grid, color }));
 
 export const PresetSchema = z.object({
   version: z.literal(1),
@@ -49,8 +46,6 @@ export const DEFAULT_PARAMS: Params = {
     far: CERULEAN,
     valueRange: [0.05, 0.18],
   },
-  frame: { marginPct: 2.65, color: OFF_WHITE },
-  output: { width: 1320, height: 2868 },
 };
 
 export const defaultPreset = (name = "untitled"): Preset => ({
