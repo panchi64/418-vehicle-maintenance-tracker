@@ -9,6 +9,7 @@ from PIL import Image
 
 from . import cache
 from .cache import is_valid_sha
+from .depth import current_model_slug
 
 SOURCES_DIR = Path(__file__).resolve().parent.parent.parent / "sources"
 THUMB_DIR = Path(__file__).resolve().parent.parent / ".cache" / "thumbs"
@@ -74,7 +75,7 @@ def list_sources() -> list[Source]:
                 width=w,
                 height=h,
                 bytes=p.stat().st_size,
-                has_depth=cache.has(sha),
+                has_depth=cache.has(sha, current_model_slug()),
             )
         )
     return out
@@ -112,7 +113,7 @@ def save(data: bytes, original_name: str, sha: str) -> Source:
         width=w,
         height=h,
         bytes=path.stat().st_size,
-        has_depth=cache.has(sha),
+        has_depth=cache.has(sha, current_model_slug()),
     )
 
 

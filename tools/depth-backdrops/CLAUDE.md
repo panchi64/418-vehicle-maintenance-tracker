@@ -4,7 +4,7 @@ Internal tool that generates cerulean-tinted, pixel-quantized, depth-mapped back
 
 Two processes:
 
-- **`backend/`** — Python (uv) + FastAPI. Runs Depth Anything V2 Small via Core ML on the Apple Neural Engine. SHA256-keyed depth-map cache.
+- **`backend/`** — Python (uv) + FastAPI. Runs Apple's **Depth Pro** via Core ML on the Apple Neural Engine (highest-quality monocular depth available for Apple Silicon, ~1.8 GB). Depth-map cache is keyed by SHA256 + model slug, so swapping models doesn't return stale maps.
 - **`frontend/`** — Vite + React + TypeScript. WebGL2 fragment shader does all the live styling (pixel grid + gap, value remap, near/far color mix). The shader output is the export, at the **source image's native dimensions** — no margin, no resizing. Add framing in post (Figma).
 
 ## Run
@@ -33,7 +33,7 @@ All Python commands go through `uv` — never call `python` or `pip` directly.
 
 ## Workflow
 
-1. Drop an image into the left panel (drag-and-drop or "Choose file"). The backend hashes it, writes it to `sources/<sha>.<ext>`, runs depth inference once, and caches the depth map. A loading overlay covers the preview while inference runs (first image ≈5 s for the model load, every subsequent ≈70 ms).
+1. Drop an image into the left panel (drag-and-drop or "Choose file"). The backend hashes it, writes it to `sources/<sha>.<ext>`, runs depth inference once, and caches the depth map. A loading overlay covers the preview while inference runs (DepthPro: ~50–60 s the first time as the 1.8 GB model loads from disk; ~6 s per subsequent image at 1536×1536 native).
 2. Tweak parameters in the right panel — everything updates the WebGL preview at 60 fps. Press `1`/`2`/`3` to toggle between source · depth · styled.
 3. Type a name and click **Save as** to persist the current parameters to `presets/<name>.json`. Subsequent edits show a `*` marker; **Save** writes them back. Commit the JSON to lock the recipe.
 4. **Export PNG** downloads the rendered frame at the **source image's native dimensions** (no resizing, no margin — add those in post). **Batch export to out/** runs every source through the active preset and writes to `out/<preset>/<sha>.png`, each at its own source dimensions.
@@ -44,12 +44,16 @@ All Python commands go through `uv` — never call `python` or `pip` directly.
 - **Pixel grid** — `Cell px` is the side length of each quantization cell. `Gap px` insets each cell so the spacing between dots shows the `Far` color (zero gap = solid grid).
 - **Color** — `Near`/`Far` are the two endpoints the depth value is mixed between. `Mix range` compresses the mix to a narrow band so the backdrop stays subtle (default 0.05–0.18 keeps the whole image near the cerulean end with just enough variation to read as depth).
 
-## Performance
+## Performance (DepthPro default)
 
-- Cold model load + first inference: ~5 s (one-time per backend start).
-- Warm inference on a new image: ~70 ms on M-series ANE.
+- Cold model load + first inference: ~50–60 s (one-time per backend start; 1.8 GB Core ML package).
+- Warm inference on a new image: ~6 s on M-series ANE at 1536×1536.
 - Cached inference: ~5 ms (served from `backend/.cache/`).
-- Shader preview: 60 fps with all sliders moving — the depth map is loaded into a WebGL2 texture once per source change; slider edits only update uniforms.
+- Shader preview: 60 fps with all sliders moving — depth runs once per source change; slider edits only update WebGL uniforms.
+
+## Swapping models
+
+`DEPTH_MODEL=DepthAnythingV2SmallF16.mlpackage ./dev.sh` runs the older Depth Anything V2 Small instead (25 MB, ~70 ms warm — much faster, less detail). Download it first with `uv run python -m scripts.download_model --model da-v2` from `backend/`. The cache key is namespaced by model slug, so both models can coexist on the same source set.
 
 ## Reproducibility
 

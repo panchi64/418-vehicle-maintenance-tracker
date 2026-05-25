@@ -1,7 +1,8 @@
-"""Core ML inference for Depth Anything V2 on Apple Silicon."""
+"""Core ML inference for monocular depth on Apple Silicon."""
 from __future__ import annotations
 
 import os
+import re
 import threading
 from pathlib import Path
 
@@ -11,30 +12,57 @@ from PIL import Image
 
 
 MODEL_DIR = Path(__file__).resolve().parent.parent / "models"
-DEFAULT_MODEL_FILENAME = "DepthAnythingV2SmallF16.mlpackage"
+DEFAULT_MODEL_FILENAME = "DepthPro.mlpackage"
+
+
+def _slugify(s: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-") or "model"
 
 
 class DepthModel:
-    """Wraps a Core ML depth model. Loads once, runs many."""
+    """Wraps a Core ML depth model. Loads once, runs many.
+
+    Supports both single-input models (Depth Anything V2: just an image) and
+    two-input models (Depth Pro: image + originalWidth scalar). Inputs are
+    introspected from the model spec at load time.
+    """
 
     def __init__(self, model_path: Path) -> None:
         if not model_path.exists():
             raise FileNotFoundError(
                 f"Core ML model not found at {model_path}. "
-                "Run scripts/download_model.sh first."
+                "Run scripts/download_model.py first."
             )
 
         self._model = ct.models.MLModel(
             str(model_path),
             compute_units=ct.ComputeUnit.CPU_AND_NE,
         )
+        self.slug = _slugify(model_path.stem)
 
         spec = self._model.get_spec()
-        self._input_name = spec.description.input[0].name
-        self._output_name = spec.description.output[0].name
+        image_inputs = [i for i in spec.description.input if i.type.HasField("imageType")]
+        if not image_inputs:
+            raise ValueError(f"{model_path.name}: no image input found in spec.")
+        img = image_inputs[0]
+        self._image_input_name = img.name
+        self._input_size = (int(img.type.imageType.width), int(img.type.imageType.height))
 
-        image_input = spec.description.input[0].type.imageType
-        self._input_size = (int(image_input.width), int(image_input.height))
+        # Non-image inputs (e.g. Depth Pro's `originalWidth` scalar). Capture each
+        # one's required shape so we can pass a correctly-ranked ndarray —
+        # Depth Pro insists on rank 4.
+        self._scalar_inputs: list[tuple[str, tuple[int, ...]]] = []
+        for i in spec.description.input:
+            if i.type.HasField("imageType"):
+                continue
+            shape: tuple[int, ...]
+            if i.type.HasField("multiArrayType"):
+                raw_shape = tuple(int(d) for d in i.type.multiArrayType.shape)
+                shape = raw_shape or (1,)
+            else:
+                shape = (1,)
+            self._scalar_inputs.append((i.name, shape))
+        self._output_name = spec.description.output[0].name
 
     @property
     def input_size(self) -> tuple[int, int]:
@@ -43,17 +71,27 @@ class DepthModel:
     def predict(self, image: Image.Image) -> np.ndarray:
         """Return an 8-bit depth map at the source image's resolution.
 
-        The model is run at its native fixed input size; the result is resized back
-        to the source image's dimensions with bilinear interpolation so downstream
-        pixel grids land on coherent terrain features. 8-bit is sufficient because
-        the frontend's pixel-grid quantization discards finer precision anyway.
+        Model is run at its native fixed input size, then resized back to the
+        source's dimensions. 8-bit is sufficient because the frontend pixel-grid
+        quantization discards any finer precision.
         """
         src_w, src_h = image.size
         rgb = image.convert("RGB").resize(self._input_size, Image.Resampling.LANCZOS)
 
-        out = self._model.predict({self._input_name: rgb})
-        depth = out[self._output_name]
-        depth_arr = np.asarray(depth, dtype=np.float32).squeeze()
+        inputs: dict[str, object] = {self._image_input_name: rgb}
+        for name, shape in self._scalar_inputs:
+            # Depth Pro asks for `originalWidth` so it can estimate focal length.
+            # Unknown scalars fall back to 0.
+            if "width" in name.lower():
+                value = float(src_w)
+            elif "height" in name.lower():
+                value = float(src_h)
+            else:
+                value = 0.0
+            inputs[name] = np.full(shape, value, dtype=np.float32)
+
+        out = self._model.predict(inputs)
+        depth_arr = np.asarray(out[self._output_name], dtype=np.float32).squeeze()
 
         dmin, dmax = float(depth_arr.min()), float(depth_arr.max())
         if dmax > dmin:
@@ -71,13 +109,21 @@ _singleton: DepthModel | None = None
 _singleton_lock = threading.Lock()
 
 
+def _resolve_model_path() -> Path:
+    return MODEL_DIR / os.environ.get("DEPTH_MODEL", DEFAULT_MODEL_FILENAME)
+
+
+def current_model_slug() -> str:
+    """The slug used to namespace cache entries by model."""
+    return _slugify(_resolve_model_path().stem)
+
+
 def get_model() -> DepthModel:
     global _singleton
     if _singleton is None:
         with _singleton_lock:
             if _singleton is None:
-                filename = os.environ.get("DEPTH_MODEL", DEFAULT_MODEL_FILENAME)
-                _singleton = DepthModel(MODEL_DIR / filename)
+                _singleton = DepthModel(_resolve_model_path())
     return _singleton
 
 

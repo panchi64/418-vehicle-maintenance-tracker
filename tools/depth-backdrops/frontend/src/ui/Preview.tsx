@@ -76,8 +76,8 @@ export function Preview({
           </div>
           <div className="loading-hint">
             {depthState.warm
-              ? "~70 ms per image once the model is loaded."
-              : "First run loads the Core ML model — ~5 s, then milliseconds per image."}
+              ? "Subsequent images run in seconds."
+              : "First run loads the depth model from disk — this is the slow one."}
           </div>
         </div>
       )}

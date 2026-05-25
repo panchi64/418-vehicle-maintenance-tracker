@@ -11,7 +11,7 @@ from PIL import Image
 from pydantic import BaseModel, Field
 
 from . import cache, presets, sources
-from .depth import encode_depth_png, get_model
+from .depth import current_model_slug, encode_depth_png, get_model
 
 OUT_DIR = Path(__file__).resolve().parent.parent.parent / "out"
 
@@ -151,7 +151,7 @@ def delete_source(sha: str) -> Response:
     _require_sha(sha)
     if not sources.delete(sha):
         raise HTTPException(404, "Source not found.")
-    cache.evict(sha)
+    cache.evict_all(sha)
     return Response(status_code=204)
 
 
@@ -181,7 +181,8 @@ def source_image(sha: str) -> Response:
 @app.get("/depth")
 def depth_map(sha: str) -> Response:
     _require_sha(sha)
-    hit = cache.get(sha)
+    slug = current_model_slug()
+    hit = cache.get(sha, slug)
     if hit is not None:
         return Response(content=hit, media_type="image/png")
 
@@ -195,7 +196,7 @@ def depth_map(sha: str) -> Response:
     except FileNotFoundError:
         raise HTTPException(404, "Source not found.")
     png = encode_depth_png(depth)
-    cache.put(sha, png)
+    cache.put(sha, png, slug)
     return Response(content=png, media_type="image/png")
 
 
