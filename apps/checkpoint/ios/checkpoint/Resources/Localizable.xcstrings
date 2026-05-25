@@ -681,12 +681,6 @@
     "CONFIRM IMPORT" : {
 
     },
-    "COPIED" : {
-
-    },
-    "COPY" : {
-
-    },
     "Copy %@" : {
 
     },
@@ -3305,6 +3299,9 @@
     "OPEN" : {
 
     },
+    "Open document" : {
+
+    },
     "Open documents library" : {
 
     },
@@ -3334,6 +3331,9 @@
 
     },
     "Opens service completion form" : {
+
+    },
+    "Opens the document detail view" : {
 
     },
     "Opens the document in the system viewer" : {
@@ -3866,9 +3866,6 @@
       }
     },
     "RECEIPT" : {
-
-    },
-    "Receipt Text" : {
 
     },
     "Record a completed service" : {
@@ -4478,9 +4475,6 @@
 
     },
     "TARGET" : {
-
-    },
-    "TEXT IS FOR REFERENCE ONLY" : {
 
     },
     "The current mileage reading" : {

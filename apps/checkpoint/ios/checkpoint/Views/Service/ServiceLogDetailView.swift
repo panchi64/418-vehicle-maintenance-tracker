@@ -15,6 +15,7 @@ struct ServiceLogDetailView: View {
     @Bindable var log: ServiceLog
 
     @State private var showEditSheet = false
+    @State private var attachmentForDetail: Document?
 
     var body: some View {
         ScrollView {
@@ -32,7 +33,10 @@ struct ServiceLogDetailView: View {
 
                 // Attachments
                 if !(log.attachments ?? []).isEmpty {
-                    AttachmentSection(attachments: log.attachments ?? [])
+                    AttachmentSection(
+                        attachments: log.attachments ?? [],
+                        onSelect: { attachmentForDetail = $0 }
+                    )
                 }
             }
             .padding(.horizontal, Spacing.screenHorizontal)
@@ -65,6 +69,10 @@ struct ServiceLogDetailView: View {
         }
         .sheet(isPresented: $showEditSheet) {
             EditServiceLogView(log: log)
+                .environment(appState)
+        }
+        .sheet(item: $attachmentForDetail) { document in
+            DocumentDetailView(document: document)
                 .environment(appState)
         }
     }

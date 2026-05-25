@@ -9,7 +9,7 @@ import SwiftUI
 
 struct AttachmentGrid: View {
     let attachments: [ServiceAttachment]
-    @Environment(AppState.self) private var appState
+    let onSelect: (ServiceAttachment) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
@@ -18,7 +18,7 @@ struct AttachmentGrid: View {
                     HStack(spacing: Spacing.sm) {
                         ForEach(attachments) { attachment in
                             Button {
-                                appState.selectedDocument = attachment
+                                onSelect(attachment)
                             } label: {
                                 AttachmentThumbnail(attachment: attachment)
                             }
@@ -37,6 +37,7 @@ struct AttachmentGrid: View {
 
 struct AttachmentSection: View {
     let attachments: [ServiceAttachment]
+    let onSelect: (ServiceAttachment) -> Void
 
     var body: some View {
         if !attachments.isEmpty {
@@ -54,7 +55,7 @@ struct AttachmentSection: View {
                             .foregroundStyle(Theme.textTertiary)
                     }
 
-                    AttachmentGrid(attachments: attachments)
+                    AttachmentGrid(attachments: attachments, onSelect: onSelect)
                 }
                 .padding(Spacing.md)
                 .background(Theme.surfaceInstrument)
@@ -94,11 +95,10 @@ struct AttachmentSection: View {
 
         ScrollView {
             VStack(spacing: Spacing.lg) {
-                AttachmentSection(attachments: [attachment1, attachment2])
+                AttachmentSection(attachments: [attachment1, attachment2], onSelect: { _ in })
             }
             .padding(Spacing.screenHorizontal)
         }
     }
-    .environment(AppState())
     .preferredColorScheme(.dark)
 }

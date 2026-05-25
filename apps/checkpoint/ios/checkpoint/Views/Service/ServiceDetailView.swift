@@ -21,6 +21,7 @@ struct ServiceDetailView: View {
     @State private var didCompleteMark = false
     @State private var selectedLog: ServiceLog?
     @State private var selectedVisit: ServiceVisit?
+    @State private var attachmentForDetail: Document?
 
     private var status: ServiceStatus {
         service.status(currentMileage: vehicle.currentMileage)
@@ -61,7 +62,10 @@ struct ServiceDetailView: View {
                 }
 
                 if !allAttachments.isEmpty {
-                    AttachmentSection(attachments: allAttachments)
+                    AttachmentSection(
+                        attachments: allAttachments,
+                        onSelect: { attachmentForDetail = $0 }
+                    )
                 }
             }
             .padding(.horizontal, Spacing.screenHorizontal)
@@ -108,6 +112,10 @@ struct ServiceDetailView: View {
                 ServiceVisitDetailView(visit: visit)
             }
             .environment(appState)
+        }
+        .sheet(item: $attachmentForDetail) { document in
+            DocumentDetailView(document: document)
+                .environment(appState)
         }
     }
 

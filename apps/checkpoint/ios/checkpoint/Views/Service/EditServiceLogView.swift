@@ -7,6 +7,7 @@ import SwiftData
 struct EditServiceLogView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(AppState.self) private var appState
     @Query private var allServiceLogs: [ServiceLog]
 
     @Bindable var log: ServiceLog
@@ -18,6 +19,7 @@ struct EditServiceLogView: View {
     @State private var costCategory: CostCategory = .maintenance
     @State private var notes: String = ""
     @State private var pendingAttachments: [AttachmentPicker.AttachmentData] = []
+    @State private var attachmentForDetail: Document?
 
     private var serviceName: String { log.service?.name ?? "" }
 
@@ -58,7 +60,10 @@ struct EditServiceLogView: View {
                         }
 
                         if !(log.attachments ?? []).isEmpty {
-                            AttachmentSection(attachments: log.attachments ?? [])
+                            AttachmentSection(
+                                attachments: log.attachments ?? [],
+                                onSelect: { attachmentForDetail = $0 }
+                            )
                         }
 
                         VStack(alignment: .leading, spacing: Spacing.sm) {
@@ -87,6 +92,10 @@ struct EditServiceLogView: View {
             }
             .trackScreen(.editServiceLog)
             .onAppear(perform: loadFromLog)
+            .sheet(item: $attachmentForDetail) { document in
+                DocumentDetailView(document: document)
+                    .environment(appState)
+            }
         }
     }
 

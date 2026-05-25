@@ -20,8 +20,11 @@ import SwiftData
 
 struct ServiceVisitDetailView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppState.self) private var appState
 
     @Bindable var visit: ServiceVisit
+
+    @State private var attachmentForDetail: Document?
 
     private var sortedLogs: [ServiceLog] {
         (visit.logs ?? []).sorted { ($0.service?.name ?? "") < ($1.service?.name ?? "") }
@@ -45,7 +48,10 @@ struct ServiceVisitDetailView: View {
                 }
 
                 if !allAttachments.isEmpty {
-                    AttachmentSection(attachments: allAttachments)
+                    AttachmentSection(
+                        attachments: allAttachments,
+                        onSelect: { attachmentForDetail = $0 }
+                    )
                 }
             }
             .padding(.horizontal, Spacing.screenHorizontal)
@@ -65,6 +71,10 @@ struct ServiceVisitDetailView: View {
                 }
                 .accessibilityLabel("Close")
             }
+        }
+        .sheet(item: $attachmentForDetail) { document in
+            DocumentDetailView(document: document)
+                .environment(appState)
         }
     }
 
