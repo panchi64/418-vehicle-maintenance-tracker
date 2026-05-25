@@ -29,14 +29,10 @@ final class AppIconService {
     ///   - vehicle: The currently selected vehicle
     ///   - services: All services to evaluate
     func updateIcon(for vehicle: Vehicle?, services: [Service]) {
-        guard UIApplication.shared.supportsAlternateIcons else {
-            appIconLogger.info("Alternate icons not supported")
-            return
-        }
+        guard UIApplication.shared.supportsAlternateIcons else { return }
 
         // When auto-change is disabled, always revert to the default icon
         guard AppIconSettings.shared.autoChangeEnabled else {
-            appIconLogger.debug("Auto-change disabled")
             resetToDefaultIcon()
             return
         }
@@ -44,29 +40,21 @@ final class AppIconService {
         let targetIconName = determineIconName(for: vehicle, services: services)
         let currentIconName = UIApplication.shared.alternateIconName
 
-        appIconLogger.debug("Current: \(currentIconName ?? "default", privacy: .public), Target: \(targetIconName ?? "default", privacy: .public)")
-
         // Only update if the icon needs to change
-        guard targetIconName != currentIconName else {
-            appIconLogger.debug("No change needed")
-            return
-        }
+        guard targetIconName != currentIconName else { return }
 
         UIApplication.shared.setAlternateIconName(targetIconName) { error in
             if let error = error {
-                appIconLogger.error("Failed to update: \(error.localizedDescription)")
+                appIconLogger.error("Failed to update icon: \(error.localizedDescription)")
             } else {
-                appIconLogger.info("Successfully changed to: \(targetIconName ?? "default", privacy: .public)")
+                appIconLogger.info("App icon changed to: \(targetIconName ?? "default", privacy: .public)")
             }
         }
     }
 
     /// Determines which icon to display based on service status
     private func determineIconName(for vehicle: Vehicle?, services: [Service]) -> String? {
-        guard let vehicle = vehicle else {
-            appIconLogger.debug("No vehicle selected")
-            return nil
-        }
+        guard let vehicle = vehicle else { return nil }
 
         // Filter services for this vehicle and find the most urgent
         let vehicleServices = services.filter { $0.vehicle?.id == vehicle.id }
@@ -75,15 +63,10 @@ final class AppIconService {
             .sorted(by: { $0.urgencyScore(currentMileage: vehicle.currentMileage) < $1.urgencyScore(currentMileage: vehicle.currentMileage) })
             .first
         else {
-            appIconLogger.debug("No services for vehicle")
             return nil
         }
 
-        // Determine icon based on status
-        let status = mostUrgentService.status(currentMileage: vehicle.currentMileage)
-        appIconLogger.debug("Most urgent service: \(mostUrgentService.name, privacy: .public), status: \(String(describing: status), privacy: .public)")
-
-        switch status {
+        switch mostUrgentService.status(currentMileage: vehicle.currentMileage) {
         case .overdue:
             return AppIconName.critical.rawValue
         case .dueSoon:

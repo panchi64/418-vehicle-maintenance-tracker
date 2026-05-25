@@ -23,7 +23,7 @@ final class WidgetDataService {
     private let vehicleListKey = "vehicleList"
 
     private var widgetDefaults: UserDefaults? {
-        UserDefaults(suiteName: AppGroupConstants.iPhoneWidget)
+        AppGroupConstants.iPhoneWidgetDefaults()
     }
 
     /// Cancellables for observation
@@ -394,10 +394,7 @@ struct PendingWidgetCompletion: Codable {
     static let userDefaultsKey = "pendingWidgetCompletions"
 
     static func save(_ completion: PendingWidgetCompletion) {
-        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else {
-            widgetLogger.error("Failed to access App Group UserDefaults (\(AppGroupConstants.iPhoneWidget)) in PendingWidgetCompletion.save()")
-            return
-        }
+        guard let userDefaults = AppGroupConstants.iPhoneWidgetDefaults() else { return }
         var pending = loadAll()
         pending.append(completion)
         if let data = try? JSONEncoder().encode(pending) {
@@ -406,21 +403,15 @@ struct PendingWidgetCompletion: Codable {
     }
 
     static func loadAll() -> [PendingWidgetCompletion] {
-        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else {
-            widgetLogger.error("Failed to access App Group UserDefaults (\(AppGroupConstants.iPhoneWidget)) in PendingWidgetCompletion.loadAll()")
-            return []
-        }
-        guard let data = userDefaults.data(forKey: userDefaultsKey) else {
+        guard let userDefaults = AppGroupConstants.iPhoneWidgetDefaults(),
+              let data = userDefaults.data(forKey: userDefaultsKey) else {
             return []
         }
         return (try? JSONDecoder().decode([PendingWidgetCompletion].self, from: data)) ?? []
     }
 
     static func clearAll() {
-        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else {
-            widgetLogger.error("Failed to access App Group UserDefaults (\(AppGroupConstants.iPhoneWidget)) in PendingWidgetCompletion.clearAll()")
-            return
-        }
+        guard let userDefaults = AppGroupConstants.iPhoneWidgetDefaults() else { return }
         userDefaults.removeObject(forKey: userDefaultsKey)
     }
 }

@@ -62,7 +62,7 @@ nonisolated struct SiriDataProvider {
     /// - Parameter vehicleID: Optional vehicle ID. If nil, loads the default (currently selected) vehicle
     /// - Returns: Service data for Siri responses, or nil if no data available
     static func loadServiceData(for vehicleID: String? = nil) -> SiriServiceData? {
-        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) else {
+        guard let userDefaults = AppGroupConstants.iPhoneWidgetDefaults() else {
             return nil
         }
 
@@ -85,7 +85,7 @@ nonisolated struct SiriDataProvider {
     /// Load list of all vehicles
     /// - Returns: Array of vehicle entities available for selection
     static func loadVehicleList() -> [SiriVehicleInfo] {
-        guard let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget),
+        guard let userDefaults = AppGroupConstants.iPhoneWidgetDefaults(),
               let data = userDefaults.data(forKey: vehicleListKey) else {
             return []
         }

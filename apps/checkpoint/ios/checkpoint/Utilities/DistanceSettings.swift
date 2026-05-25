@@ -23,7 +23,7 @@ final class DistanceSettings {
 
     private static var standardDefaults: UserDefaults { .standard }
     private static var sharedDefaults: UserDefaults? {
-        UserDefaults(suiteName: AppGroupConstants.iPhoneWidget)
+        AppGroupConstants.iPhoneWidgetDefaults()
     }
 
     // MARK: - Properties

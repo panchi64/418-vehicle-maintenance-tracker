@@ -18,7 +18,6 @@ struct PendingWidgetCompletion: Codable {
     let mileageAtService: Int
 
     static let userDefaultsKey = "pendingWidgetCompletions"
-    static let appGroupID = "group.com.418-studio.checkpoint.shared"
 
     /// TTL for pending completions (7 days)
     private static let ttlSeconds: TimeInterval = 7 * 24 * 60 * 60
@@ -26,10 +25,7 @@ struct PendingWidgetCompletion: Codable {
     /// Save a pending completion to App Group UserDefaults
     /// Deduplicates by serviceID and prunes expired entries
     static func save(_ completion: PendingWidgetCompletion) {
-        guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
-            widgetLogger.error("Failed to access App Group UserDefaults (\(appGroupID)) in save()")
-            return
-        }
+        guard let userDefaults = WidgetAppGroup.defaults() else { return }
 
         var pending = loadAll()
 
@@ -48,11 +44,8 @@ struct PendingWidgetCompletion: Codable {
 
     /// Load all pending completions from App Group UserDefaults, pruning expired entries
     static func loadAll() -> [PendingWidgetCompletion] {
-        guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
-            widgetLogger.error("Failed to access App Group UserDefaults (\(appGroupID)) in loadAll()")
-            return []
-        }
-        guard let data = userDefaults.data(forKey: userDefaultsKey) else {
+        guard let userDefaults = WidgetAppGroup.defaults(),
+              let data = userDefaults.data(forKey: userDefaultsKey) else {
             return []
         }
 
@@ -74,10 +67,7 @@ struct PendingWidgetCompletion: Codable {
 
     /// Clear all pending completions from App Group UserDefaults
     static func clearAll() {
-        guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
-            widgetLogger.error("Failed to access App Group UserDefaults (\(appGroupID)) in clearAll()")
-            return
-        }
+        guard let userDefaults = WidgetAppGroup.defaults() else { return }
         userDefaults.removeObject(forKey: userDefaultsKey)
     }
 }

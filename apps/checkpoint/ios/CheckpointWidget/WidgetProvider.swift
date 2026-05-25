@@ -116,8 +116,6 @@ struct WidgetProvider: AppIntentTimelineProvider {
     typealias Entry = ServiceEntry
     typealias Intent = CheckpointWidgetConfigurationIntent
 
-    // App Group container identifier
-    private let appGroupID = "group.com.418-studio.checkpoint.shared"
     private let widgetDataKey = "widgetData"
 
     func placeholder(in context: Context) -> ServiceEntry {
@@ -141,7 +139,7 @@ struct WidgetProvider: AppIntentTimelineProvider {
     }
 
     private func loadEntry(configuration: CheckpointWidgetConfigurationIntent) -> ServiceEntry {
-        guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
+        guard let userDefaults = WidgetAppGroup.defaults() else {
             return makeEmptyEntry(configuration: configuration)
         }
 

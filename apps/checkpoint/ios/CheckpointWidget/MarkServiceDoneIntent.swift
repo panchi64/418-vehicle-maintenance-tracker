@@ -56,8 +56,7 @@ struct MarkServiceDoneIntent: AppIntent {
 
     /// Read current mileage from shared UserDefaults at intent execution time
     private static func readFreshMileage(vehicleID: String) -> Int? {
-        let appGroupID = "group.com.418-studio.checkpoint.shared"
-        guard let defaults = UserDefaults(suiteName: appGroupID) else { return nil }
+        guard let defaults = WidgetAppGroup.defaults() else { return nil }
 
         // Try vehicle-specific key first, then generic key
         let keys = ["widgetData_\(vehicleID)", "widgetData"]

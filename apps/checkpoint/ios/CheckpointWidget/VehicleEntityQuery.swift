@@ -23,7 +23,6 @@ struct VehicleListItem: Codable, Sendable {
 
 /// Query to fetch vehicles for widget configuration picker and Siri intents
 struct VehicleEntityQuery: EntityQuery {
-    private let appGroupID = "group.com.418-studio.checkpoint.shared"
     private let vehicleListKey = "vehicleList"
 
     /// Pseudo-entity representing "use the app's current vehicle selection"
@@ -48,7 +47,12 @@ struct VehicleEntityQuery: EntityQuery {
     }
 
     private func loadVehicles() -> [VehicleEntity] {
-        guard let userDefaults = UserDefaults(suiteName: appGroupID),
+        #if MAIN_APP_TARGET
+        let appGroupDefaults = AppGroupConstants.iPhoneWidgetDefaults()
+        #else
+        let appGroupDefaults = WidgetAppGroup.defaults()
+        #endif
+        guard let userDefaults = appGroupDefaults,
               let data = userDefaults.data(forKey: vehicleListKey) else {
             return []
         }

@@ -49,12 +49,11 @@ enum WidgetDistanceUnit: String, CaseIterable {
 
     // MARK: - App Group Access
 
-    private static let appGroupID = "group.com.418-studio.checkpoint.shared"
     private static let unitKey = "distanceUnit"
 
     /// Read distance unit from shared App Group UserDefaults
     static func current() -> WidgetDistanceUnit {
-        let rawValue = UserDefaults(suiteName: appGroupID)?.string(forKey: unitKey)
+        let rawValue = WidgetAppGroup.defaults()?.string(forKey: unitKey)
         return rawValue.flatMap(WidgetDistanceUnit.init(rawValue:)) ?? .miles
     }
 }

@@ -45,7 +45,7 @@ extension ContentView {
         }
 
         // Save to shared App Group UserDefaults (for widget access)
-        if let sharedDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget) {
+        if let sharedDefaults = AppGroupConstants.iPhoneWidgetDefaults() {
             if let idString = vehicleIDString {
                 sharedDefaults.set(idString, forKey: Self.selectedVehicleIDKey)
             } else {

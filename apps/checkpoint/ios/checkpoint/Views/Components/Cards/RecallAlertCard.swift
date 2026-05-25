@@ -24,6 +24,9 @@ struct RecallAlertCard: View {
     @Environment(\.modelContext) private var modelContext
     @State private var showSheet = false
     @State private var pendingAddServicePrefill: SeasonalPrefill?
+    /// Tracks the (vehicle, recall-count) pair we last captured an impression
+    /// for, so re-renders don't re-fire the analytics event.
+    @State private var lastImpressionKey: String?
 
     private var worstSeverity: RecallSeverity { recalls.worstSeverity }
     private var hasParkIt: Bool { worstSeverity == .parkIt }
@@ -86,6 +89,19 @@ struct RecallAlertCard: View {
                 onRequestAddPlannedService: { pendingAddServicePrefill = $0 }
             )
         }
+        .onAppear { captureImpressionIfNeeded() }
+        .onChange(of: allRecalls.count) { _, _ in captureImpressionIfNeeded() }
+        .onChange(of: vehicle.id) { _, _ in captureImpressionIfNeeded() }
+    }
+
+    private func captureImpressionIfNeeded() {
+        // Report the full fetched recall count (not the visible/post-filter
+        // count) so the historical `recall_count` metric in PostHog stays
+        // comparable to pre-impression-relocation values.
+        let key = "\(vehicle.id)-\(allRecalls.count)"
+        guard key != lastImpressionKey else { return }
+        lastImpressionKey = key
+        AnalyticsService.shared.capture(.recallAlertShown(recallCount: allRecalls.count))
     }
 
     // MARK: - Snooze menu

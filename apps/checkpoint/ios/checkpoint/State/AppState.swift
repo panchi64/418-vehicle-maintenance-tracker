@@ -84,9 +84,6 @@ final class AppState {
             )
             recall.fetchStates[vehicle.id] = .fetched(results.sortedNewestFirst())
             RecallCheckCache.shared.recordSuccess()
-            if !results.isEmpty {
-                AnalyticsService.shared.capture(.recallAlertShown(recallCount: results.count))
-            }
         } catch {
             recall.fetchStates[vehicle.id] = .failed
         }
