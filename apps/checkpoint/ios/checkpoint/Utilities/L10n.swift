@@ -123,6 +123,9 @@ enum L10n {
     static var toastSyncError: String { localized("toast.sync_error") }
     static var toastReadingCaptured: String { localized("toast.reading_captured") }
     static var toastServiceLogUpdated: String { localized("toast.service_log_updated") }
+    static func toastCopied(_ fieldLabel: String) -> String {
+        String(format: localized("toast.copied"), fieldLabel)
+    }
 
     // MARK: - OCR Errors
 
@@ -311,6 +314,57 @@ enum L10n {
     static var onboardingGetStartedUseICloud: String { localized("onboarding.getstarted.use_icloud") }
     static var onboardingGetStartedICloudHelp: String { localized("onboarding.getstarted.icloud_help") }
     static var onboardingGetStartedSkip: String { localized("onboarding.getstarted.skip") }
+
+    // MARK: - Documents
+
+    static var documentsTitle: String { localized("documents.title") }
+    static var documentsAdd: String { localized("documents.add") }
+    static var documentsEmptyTitle: String { localized("documents.empty.title") }
+    static var documentsEmptyMessage: String { localized("documents.empty.message") }
+    static var documentsEmptyAction: String { localized("documents.empty.action") }
+    static var documentsSearchPlaceholder: String { localized("documents.search.placeholder") }
+    static var documentsSegmentTimeline: String { localized("documents.segment.timeline") }
+    static var documentsSegmentDocuments: String { localized("documents.segment.documents") }
+    static var documentsRowQuickSpecs: String { localized("documents.row.quick_specs") }
+    static var documentsNotesLabel: String { localized("documents.notes.label") }
+    static var documentsNotesPlaceholder: String { localized("documents.notes.placeholder") }
+    static var documentsTypeLabel: String { localized("documents.type.label") }
+    static var documentsLinkedVehiclesLabel: String { localized("documents.linked_vehicles.label") }
+    static var documentsLinkedVehiclesEdit: String { localized("documents.linked_vehicles.edit") }
+    static var documentsFromServiceLog: String { localized("documents.from_service_log") }
+    static var documentsLinkToOtherVehicles: String { localized("documents.link_to_other_vehicles") }
+    static func documentsLinkedCount(_ count: Int) -> String {
+        String(format: localized("documents.linked_count"), count)
+    }
+    static var documentsDeleteConfirmTitle: String { localized("documents.delete.confirm_title") }
+    static var documentsDeleteConfirmMessage: String { localized("documents.delete.confirm_message") }
+    static func documentsDeleteBulkConfirmTitle(_ count: Int) -> String {
+        String(format: localized("documents.delete.bulk_confirm_title"), count)
+    }
+    static var documentsDeleteBulkConfirmMessage: String { localized("documents.delete.bulk_confirm_message") }
+    static var documentsDeleteAction: String { localized("documents.delete.action") }
+    static var documentsShareAction: String { localized("documents.share.action") }
+    static func documentsShareCount(_ count: Int) -> String {
+        String(format: localized("documents.share.count"), count)
+    }
+    static var documentsSelectAction: String { localized("documents.select.action") }
+    static var documentsSelectionDoneAction: String { localized("documents.selection.done_action") }
+    static var documentsRemoveLastVehicleConfirmTitle: String { localized("documents.remove_last_vehicle.confirm_title") }
+    static var documentsRemoveLastVehicleConfirmMessage: String { localized("documents.remove_last_vehicle.confirm_message") }
+    static var documentsSourceCamera: String { localized("documents.source.camera") }
+    static var documentsSourcePhotos: String { localized("documents.source.photos") }
+    static var documentsSourceFiles: String { localized("documents.source.files") }
+
+    // MARK: - Document Types
+
+    static var documentTypeRegistration: String { localized("document.type.registration") }
+    static var documentTypeInsurance: String { localized("document.type.insurance") }
+    static var documentTypeTitle: String { localized("document.type.title") }
+    static var documentTypeInspection: String { localized("document.type.inspection") }
+    static var documentTypeWarranty: String { localized("document.type.warranty") }
+    static var documentTypeManual: String { localized("document.type.manual") }
+    static var documentTypeReceipt: String { localized("document.type.receipt") }
+    static var documentTypeOther: String { localized("document.type.other") }
 
     // MARK: - Helper
 

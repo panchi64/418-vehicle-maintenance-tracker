@@ -22,5 +22,6 @@ struct ServicesTabState {
     enum ViewMode: String, CaseIterable {
         case list = "List"
         case timeline = "Timeline"
+        case documents = "Documents"
     }
 }

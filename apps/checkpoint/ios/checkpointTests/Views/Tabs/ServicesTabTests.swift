@@ -39,15 +39,17 @@ final class ServicesTabTests: XCTestCase {
         let allModes = ServicesTabState.ViewMode.allCases
 
         // Then
-        XCTAssertEqual(allModes.count, 2)
+        XCTAssertEqual(allModes.count, 3)
         XCTAssertTrue(allModes.contains(.list))
         XCTAssertTrue(allModes.contains(.timeline))
+        XCTAssertTrue(allModes.contains(.documents))
     }
 
     func testViewMode_RawValues() {
         // Then
         XCTAssertEqual(ServicesTabState.ViewMode.list.rawValue, "List")
         XCTAssertEqual(ServicesTabState.ViewMode.timeline.rawValue, "Timeline")
+        XCTAssertEqual(ServicesTabState.ViewMode.documents.rawValue, "Documents")
     }
 
     // MARK: - Status Filter Tests

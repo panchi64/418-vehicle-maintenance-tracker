@@ -85,9 +85,11 @@ struct HomeTab: View {
 
                     // Quick Specs Card
                     if let vehicle = vehicle {
-                        QuickSpecsCard(vehicle: vehicle) {
-                            appState.showEditVehicle = true
-                        }
+                        QuickSpecsCard(
+                            vehicle: vehicle,
+                            onEdit: { appState.showEditVehicle = true },
+                            onDocumentsTap: { appState.showDocuments = true }
+                        )
                         .revealAnimation(delay: 0.1)
                     }
                 }

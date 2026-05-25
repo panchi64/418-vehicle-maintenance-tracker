@@ -18,10 +18,11 @@ struct ServiceMigrationService {
     private static let recurringBackfillKey = "recurringBackfillV1Completed"
 
     /// Run any pending post-launch backfills. Safe to call on every launch —
-    /// each backfill checks its own completion flag.
+    /// each backfill is idempotent.
     @MainActor
     static func runPostLaunchBackfills(in context: ModelContext) {
         backfillIsRecurring(in: context)
+        backfillDocumentVehicles(in: context)
     }
 
     /// Flip `isRecurring = true` for any Service that has a non-zero interval.
@@ -52,6 +53,38 @@ struct ServiceMigrationService {
             UserDefaults.standard.set(true, forKey: recurringBackfillKey)
         } catch {
             migrationLogger.error("Recurring backfill failed: \(error.localizedDescription)")
+        }
+    }
+
+    /// Populate `ServiceAttachment.vehicles` for existing rows. Before the
+    /// Documents library, attachments only knew about their service log; the
+    /// vehicle link was derived through that log. The new library views by
+    /// vehicle, so each attachment needs a direct vehicle reference.
+    ///
+    /// Runs on every launch (no UserDefaults gate) because CloudKit-synced
+    /// rows can arrive at any time after first launch on a new device. A
+    /// per-device flag would set itself before iCloud delivered anything and
+    /// permanently lock those rows out of the Documents library. The
+    /// per-launch cost is bounded by the number of attachments with empty
+    /// vehicles (typically zero after the first run).
+    @MainActor
+    private static func backfillDocumentVehicles(in context: ModelContext) {
+        do {
+            let descriptor = FetchDescriptor<ServiceAttachment>()
+            let attachments = try context.fetch(descriptor)
+            var updated = 0
+            for attachment in attachments where (attachment.vehicles?.isEmpty ?? true) {
+                if let vehicle = attachment.serviceLog?.vehicle {
+                    attachment.vehicles = [vehicle]
+                    updated += 1
+                }
+            }
+            if updated > 0 {
+                try context.save()
+                migrationLogger.info("Document-vehicle backfill linked \(updated) attachments")
+            }
+        } catch {
+            migrationLogger.error("Document-vehicle backfill failed: \(error.localizedDescription)")
         }
     }
 }

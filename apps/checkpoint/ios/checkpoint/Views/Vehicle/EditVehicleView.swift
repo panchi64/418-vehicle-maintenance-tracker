@@ -368,6 +368,10 @@ struct EditVehicleView: View {
         HapticService.shared.warning()
         AnalyticsService.shared.capture(.vehicleDeleted)
         modelContext.delete(vehicle)
+        // Sweep documents that were linked only to this vehicle and have no
+        // service log — Vehicle.documents uses .nullify, not .cascade, so
+        // they'd otherwise persist forever with no owner.
+        Document.purgeOrphans(in: modelContext)
         updateAppIcon()
         WidgetDataService.shared.clearWidgetData()
         dismiss()

@@ -11,6 +11,7 @@ import SwiftUI
 struct QuickSpecsCard: View {
     let vehicle: Vehicle
     let onEdit: () -> Void
+    let onDocumentsTap: () -> Void
 
     @State private var isExpanded = false
     @State private var showFullNotes = false
@@ -199,6 +200,10 @@ struct QuickSpecsCard: View {
                             }
                         }
 
+                        // Documents row — always shown so users can add docs
+                        // even on a brand-new vehicle with no other specs.
+                        documentsRow
+
                         // Empty state
                         if !hasAnySpecs {
                             Text("No specifications added")
@@ -244,56 +249,133 @@ struct QuickSpecsCard: View {
         }
     }
 
-    /// Spec block with large value and small label below
-    private func specBlock(value: String, label: String, isMonospace: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            // Value - prominent
-            Text(value)
-                .font(isMonospace ? .brutalistBody : .brutalistHeading)
-                .foregroundStyle(Theme.textPrimary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
+    /// Documents library entry point. Always visible in the expanded card so
+    /// even users with no other specs can start saving registration, insurance,
+    /// and other vehicle files.
+    private var documentsRow: some View {
+        let count = vehicle.documents?.count ?? 0
+        return Button {
+            onDocumentsTap()
+        } label: {
+            HStack(alignment: .center, spacing: Spacing.sm) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(count == 0 ? "—" : "\(count)")
+                        .font(.brutalistHeading)
+                        .foregroundStyle(Theme.textPrimary)
+                    Text(L10n.documentsRowQuickSpecs.uppercased())
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.textTertiary)
+                        .tracking(2)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-            // Label - secondary
-            Text(label)
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Theme.accent)
+            }
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Documents")
+        .accessibilityValue(count == 0 ? "None" : "\(count) saved")
+        .accessibilityHint("Double tap to open documents library")
     }
 
-    /// Marbete block with status-colored expiration display
-    private func marbeteBlock(expiration: String, status: ServiceStatus) -> some View {
-        HStack(spacing: Spacing.sm) {
-            // Status indicator
-            Rectangle()
-                .fill(status.color)
-                .frame(width: 8, height: 8)
+    /// Copy a spec value to the pasteboard, with haptic + toast feedback naming the field.
+    private func copySpec(value: String, fieldLabel: String) {
+        UIPasteboard.general.string = value
+        HapticService.shared.success()
+        ToastService.shared.show(
+            L10n.toastCopied(fieldLabel),
+            icon: "doc.on.doc.fill",
+            style: .success
+        )
+    }
 
-            VStack(alignment: .leading, spacing: 2) {
-                // Expiration date in status color
-                Text(expiration)
-                    .font(.brutalistHeading)
-                    .foregroundStyle(status.color)
+    /// Spec block with large value and small label below. Tap to copy the raw value.
+    private func specBlock(value: String, label: String, isMonospace: Bool) -> some View {
+        Button {
+            copySpec(value: value, fieldLabel: label)
+        } label: {
+            HStack(alignment: .top, spacing: Spacing.xs) {
+                VStack(alignment: .leading, spacing: 2) {
+                    // Value - prominent
+                    Text(value)
+                        .font(isMonospace ? .brutalistBody : .brutalistHeading)
+                        .foregroundStyle(Theme.textPrimary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
 
-                // Label
-                Text("MARBETE")
-                    .font(.brutalistLabel)
+                    // Label - secondary
+                    Text(label)
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.textTertiary)
+                        .tracking(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                // Copy affordance
+                Image(systemName: "doc.on.doc")
+                    .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(Theme.textTertiary)
-                    .tracking(1)
+                    .padding(.top, 3)
+                    .accessibilityHidden(true)
             }
-
-            Spacer()
-
-            // Status label
-            if status != .neutral {
-                Text(status.label)
-                    .font(.brutalistLabel)
-                    .foregroundStyle(status.color)
-                    .tracking(1)
-            }
+            .contentShape(Rectangle())
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .buttonStyle(.plain)
+        .accessibilityLabel("Copy \(label)")
+        .accessibilityValue(value)
+        .accessibilityHint("Double tap to copy to clipboard")
+    }
+
+    /// Marbete block with status-colored expiration display. Tap to copy the expiration string.
+    private func marbeteBlock(expiration: String, status: ServiceStatus) -> some View {
+        Button {
+            copySpec(value: expiration, fieldLabel: "Marbete")
+        } label: {
+            HStack(spacing: Spacing.sm) {
+                // Status indicator
+                Rectangle()
+                    .fill(status.color)
+                    .frame(width: 8, height: 8)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    // Expiration date in status color
+                    Text(expiration)
+                        .font(.brutalistHeading)
+                        .foregroundStyle(status.color)
+
+                    // Label
+                    Text("MARBETE")
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.textTertiary)
+                        .tracking(1)
+                }
+
+                // Copy affordance
+                Image(systemName: "doc.on.doc")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(Theme.textTertiary)
+                    .accessibilityHidden(true)
+
+                Spacer()
+
+                // Status label
+                if status != .neutral {
+                    Text(status.label)
+                        .font(.brutalistLabel)
+                        .foregroundStyle(status.color)
+                        .tracking(1)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Copy marbete expiration")
+        .accessibilityValue(expiration)
+        .accessibilityHint("Double tap to copy to clipboard")
     }
 }
 
@@ -355,10 +437,10 @@ struct FullNotesView: View {
                         tireSize: "225/45R17",
                         oilType: "0W-20 Synthetic",
                         notes: "This car has a slight vibration at highway speeds above 70mph. The dealer mentioned it could be related to the alignment or tire balance. Need to get it checked at the next service appointment. Also, the rear passenger window makes a clicking noise when going down."
-                    )
-                ) {
-                    print("Edit tapped")
-                }
+                    ),
+                    onEdit: { print("Edit tapped") },
+                    onDocumentsTap: { print("Documents tapped") }
+                )
 
                 // With partial specs
                 QuickSpecsCard(
@@ -369,10 +451,10 @@ struct FullNotesView: View {
                         year: 2020,
                         currentMileage: 18200,
                         vin: "JM1NDAL79L0123456"
-                    )
-                ) {
-                    print("Edit tapped")
-                }
+                    ),
+                    onEdit: { print("Edit tapped") },
+                    onDocumentsTap: { print("Documents tapped") }
+                )
 
                 // With no specs
                 QuickSpecsCard(
@@ -382,10 +464,10 @@ struct FullNotesView: View {
                         model: "Civic",
                         year: 2024,
                         currentMileage: 1500
-                    )
-                ) {
-                    print("Edit tapped")
-                }
+                    ),
+                    onEdit: { print("Edit tapped") },
+                    onDocumentsTap: { print("Documents tapped") }
+                )
             }
             .padding(Spacing.screenHorizontal)
         }

@@ -309,6 +309,30 @@ struct ContentView: View {
                 EditVehicleView(vehicle: vehicle)
             }
         }
+        .sheet(isPresented: $appState.showDocuments) {
+            if let vehicle = currentVehicle {
+                DocumentsView(vehicle: vehicle)
+                    .environment(appState)
+            } else {
+                // currentVehicle can resolve to nil if the selected vehicle is
+                // deleted (locally or by an arriving iCloud delete) while the
+                // sheet is in flight. Render a dismissible fallback rather
+                // than an empty sheet the user can only swipe away.
+                NavigationStack {
+                    EmptyStateView(
+                        icon: "car.side.fill",
+                        title: "No Vehicle",
+                        message: "Select a vehicle to view its documents.",
+                        action: { appState.showDocuments = false },
+                        actionLabel: "Close"
+                    )
+                }
+            }
+        }
+        .sheet(item: $appState.selectedDocument) { document in
+            DocumentDetailView(document: document)
+                .environment(appState)
+        }
         .sheet(isPresented: $showMileageUpdate, onDismiss: {
             // Clear Siri prefilled mileage after sheet is dismissed
             siriPrefilledMileage = nil

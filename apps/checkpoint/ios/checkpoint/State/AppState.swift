@@ -22,12 +22,14 @@ final class AppState {
     var showAddVehicle = false
     var showAddService = false
     var showEditVehicle = false
+    var showDocuments = false
     var showProPaywall = false
     var showTipModal = false
     var unlockedTheme: ThemeDefinition?
     var selectedService: Service?
     var selectedServiceLog: ServiceLog?
     var selectedServiceVisit: ServiceVisit?
+    var selectedDocument: Document?
 
     // MARK: - Cluster States
 

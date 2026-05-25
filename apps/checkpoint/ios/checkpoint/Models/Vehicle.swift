@@ -46,6 +46,13 @@ final class Vehicle: Identifiable {
     @Relationship(deleteRule: .cascade, inverse: \ServiceVisit.vehicle)
     var serviceVisits: [ServiceVisit]? = []
 
+    /// Documents linked to this vehicle. Many-to-many — a single file may be
+    /// linked to multiple vehicles. `.nullify` keeps the file alive when one
+    /// linked vehicle is deleted; the orphan sweep in `Document.purgeOrphans`
+    /// removes documents that no longer belong anywhere.
+    @Relationship(deleteRule: .nullify, inverse: \ServiceAttachment.vehicles)
+    var documents: [ServiceAttachment]? = []
+
     var displayName: String {
         if name.isEmpty {
             return "\(year) \(make) \(model)"

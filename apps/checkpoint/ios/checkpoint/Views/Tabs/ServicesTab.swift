@@ -139,6 +139,14 @@ struct ServicesTab: View {
                     }
                 }
 
+                // Documents view mode — embedded read-only preview. Tapping a
+                // row opens the detail sheet; full multi-select / share lives
+                // in the dedicated library opened by "Open library".
+                if appState.servicesTab.viewMode == .documents, let vehicle = vehicle {
+                    documentsSection(vehicle: vehicle)
+                        .revealAnimation(delay: 0.2)
+                }
+
                 // Content based on view mode
                 if appState.servicesTab.viewMode == .timeline, let vehicle = vehicle {
                     if vehicleServiceLogs.isEmpty {
@@ -378,6 +386,145 @@ struct ServicesTab: View {
             title: "No Vehicle",
             message: "Select or add a vehicle\nto view services"
         )
+    }
+
+    // MARK: - Documents Section (in-tab embedded view)
+
+    /// Read-only document list grouped by DocumentType, with the search bar
+    /// above filtering results. Tap a row to open the detail sheet; tap
+    /// "Open library" for multi-select / share / bulk operations.
+    @ViewBuilder
+    private func documentsSection(vehicle: Vehicle) -> some View {
+        let query = appState.servicesTab.searchText.trimmingCharacters(in: .whitespaces)
+        let allDocs = vehicle.documents ?? []
+        let filtered: [Document] = query.isEmpty ? allDocs : allDocs.filter { doc in
+            if doc.fileName.localizedCaseInsensitiveContains(query) { return true }
+            if let notes = doc.notes, notes.localizedCaseInsensitiveContains(query) { return true }
+            if let text = doc.extractedText, text.localizedCaseInsensitiveContains(query) { return true }
+            if doc.documentType.displayName.localizedCaseInsensitiveContains(query) { return true }
+            return false
+        }
+        let grouped: [(type: DocumentType, docs: [Document])] = DocumentType.listOrder.compactMap { type in
+            let matches = filtered.filter { $0.documentType == type }.sorted { $0.createdAt > $1.createdAt }
+            return matches.isEmpty ? nil : (type, matches)
+        }
+
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            HStack {
+                Text("VEHICLE DOCUMENTS")
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.textTertiary)
+                    .tracking(2)
+
+                Spacer()
+
+                Button {
+                    appState.showDocuments = true
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrow.up.right.square")
+                            .font(.system(size: 11, weight: .medium))
+                        Text("OPEN LIBRARY")
+                            .font(.brutalistLabel)
+                            .tracking(1)
+                    }
+                    .foregroundStyle(Theme.accent)
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+                }
+                .accessibilityLabel("Open documents library")
+            }
+
+            if allDocs.isEmpty {
+                EmptyStateView(
+                    icon: "doc.text",
+                    title: L10n.documentsEmptyTitle,
+                    message: L10n.documentsEmptyMessage,
+                    action: { appState.showDocuments = true },
+                    actionLabel: L10n.documentsEmptyAction
+                )
+            } else if filtered.isEmpty {
+                Text(L10n.emptyFilterShowing(0, allDocs.count).uppercased())
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.textTertiary)
+                    .tracking(1.5)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, Spacing.md)
+            } else {
+                VStack(spacing: Spacing.md) {
+                    ForEach(grouped, id: \.type) { group in
+                        documentsGroup(type: group.type, docs: group.docs)
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func documentsGroup(type: DocumentType, docs: [Document]) -> some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            HStack(spacing: Spacing.xs) {
+                Image(systemName: type.icon)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(type.accentColor)
+                Text("\(type.displayName.uppercased()) · \(docs.count)")
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.textSecondary)
+                    .tracking(1.5)
+            }
+
+            VStack(spacing: 0) {
+                ForEach(Array(docs.enumerated()), id: \.element.id) { index, doc in
+                    Button {
+                        appState.selectedDocument = doc
+                    } label: {
+                        documentsInlineRow(doc: doc)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+
+                    if index < docs.count - 1 {
+                        ListDivider(leadingPadding: 76)
+                    }
+                }
+            }
+            .background(Theme.surfaceInstrument)
+            .brutalistBorder()
+        }
+    }
+
+    private func documentsInlineRow(doc: Document) -> some View {
+        HStack(spacing: Spacing.md) {
+            AttachmentThumbnail(attachment: doc)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(doc.fileName)
+                    .font(.brutalistBody)
+                    .foregroundStyle(Theme.textPrimary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+
+                if let notes = doc.notes, !notes.isEmpty {
+                    Text(notes)
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.textTertiary)
+                        .lineLimit(1)
+                }
+
+                if let count = doc.vehicles?.count, count > 1 {
+                    Text(L10n.documentsLinkedCount(count).uppercased())
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.accent)
+                        .tracking(1)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(Theme.textTertiary)
+        }
+        .padding(Spacing.md)
     }
 
 }

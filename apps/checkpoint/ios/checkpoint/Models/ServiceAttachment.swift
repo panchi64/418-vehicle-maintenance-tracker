@@ -28,6 +28,21 @@ final class ServiceAttachment: Identifiable {
     /// OCR-extracted text from receipt/invoice (nil if not scanned)
     var extractedText: String?
 
+    /// What kind of document this is. Defaults to `.receipt` because every
+    /// pre-existing row was a service-log receipt before the vehicle
+    /// Documents library landed.
+    var documentType: DocumentType = DocumentType.receipt
+
+    /// Free-form user notes, shared across every linked vehicle.
+    var notes: String?
+
+    /// Vehicles this document is linked to. Many-to-many — a single file
+    /// (e.g. a business insurance policy) can attach to several vehicles
+    /// without duplicating the file payload. The inverse lives on
+    /// `Vehicle.documents`.
+    @Relationship(deleteRule: .nullify)
+    var vehicles: [Vehicle]?
+
     /// Computed property to check if this is an image
     var isImage: Bool {
         mimeType.hasPrefix("image/")
@@ -138,7 +153,10 @@ final class ServiceAttachment: Identifiable {
         fileName: String,
         mimeType: String,
         createdAt: Date = Date.now,
-        extractedText: String? = nil
+        extractedText: String? = nil,
+        documentType: DocumentType = .receipt,
+        notes: String? = nil,
+        vehicles: [Vehicle]? = nil
     ) {
         self.serviceLog = serviceLog
         self.data = data
@@ -147,6 +165,16 @@ final class ServiceAttachment: Identifiable {
         self.mimeType = mimeType
         self.createdAt = createdAt
         self.extractedText = extractedText
+        self.documentType = documentType
+        self.notes = notes
+        // Auto-link to the service log's vehicle when no explicit vehicles
+        // were passed. Keeps the new Documents library populated without
+        // requiring every existing save site to be touched.
+        if let vehicles = vehicles {
+            self.vehicles = vehicles
+        } else if let vehicle = serviceLog?.vehicle {
+            self.vehicles = [vehicle]
+        }
     }
 
     /// Create from UIImage

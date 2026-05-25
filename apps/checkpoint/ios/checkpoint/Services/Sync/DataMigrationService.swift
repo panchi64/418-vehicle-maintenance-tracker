@@ -128,7 +128,9 @@ final class DataMigrationService {
 
                     destContext.insert(newLog)
 
-                    // Migrate attachments
+                    // Migrate attachments — carry forward every user-mutable
+                    // field (documentType, notes, OCR text) so reclassified or
+                    // annotated documents don't lose data on iCloud migration.
                     for attachment in log.attachments ?? [] {
                         let newAttachment = ServiceAttachment(
                             serviceLog: newLog,
@@ -136,7 +138,10 @@ final class DataMigrationService {
                             thumbnailData: attachment.thumbnailData,
                             fileName: attachment.fileName,
                             mimeType: attachment.mimeType,
-                            createdAt: attachment.createdAt
+                            createdAt: attachment.createdAt,
+                            extractedText: attachment.extractedText,
+                            documentType: attachment.documentType,
+                            notes: attachment.notes
                         )
                         destContext.insert(newAttachment)
                     }

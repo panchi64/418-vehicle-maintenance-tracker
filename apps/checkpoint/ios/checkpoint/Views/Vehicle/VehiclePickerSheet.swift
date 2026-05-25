@@ -234,6 +234,9 @@ struct VehiclePickerSheet: View {
 
         // Delete the vehicle from SwiftData (cascade deletes services, logs, snapshots)
         modelContext.delete(vehicle)
+        // Sweep documents linked only to this vehicle with no service log —
+        // Vehicle.documents uses .nullify so they'd otherwise be orphaned.
+        Document.purgeOrphans(in: modelContext)
 
         // Clear selection if the deleted vehicle was selected
         // ContentView's onChange(of: vehicles) will handle setting a new selection

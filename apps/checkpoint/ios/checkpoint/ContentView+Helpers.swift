@@ -266,6 +266,8 @@ extension ContentView {
         for vehicle in vehicles where idsToRemove.contains(vehicle.id) {
             modelContext.delete(vehicle)
         }
+        // Sweep any sample documents that lose their last vehicle link.
+        Document.purgeOrphans(in: modelContext)
         onboardingState.sampleVehicleIDs = []
         appState.selectedVehicle = nil
     }
