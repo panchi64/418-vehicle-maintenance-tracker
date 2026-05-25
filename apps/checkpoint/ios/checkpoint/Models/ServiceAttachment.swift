@@ -28,19 +28,31 @@ final class ServiceAttachment: Identifiable {
     /// OCR-extracted text from receipt/invoice (nil if not scanned)
     var extractedText: String?
 
-    /// What kind of document this is. Defaults to `.receipt` because every
-    /// pre-existing row was a service-log receipt before the vehicle
-    /// Documents library landed.
-    var documentType: DocumentType = DocumentType.receipt
+    /// What kind of document this is. Stored as a String rather than the
+    /// `DocumentType` enum directly because SwiftData's lightweight migration
+    /// fails to apply the enum default for pre-existing rows (the cast from
+    /// nil-`Optional<Any>` to a non-optional enum traps at fault time). A
+    /// String column with a literal default survives the migration cleanly;
+    /// the typed `documentType` accessor below handles encoding/decoding.
+    var documentTypeRaw: String = DocumentType.receipt.rawValue
+
+    /// Typed accessor for the document classification. Falls back to
+    /// `.receipt` if the stored raw value is unrecognized (corruption /
+    /// downgrade safety).
+    var documentType: DocumentType {
+        get { DocumentType(rawValue: documentTypeRaw) ?? .receipt }
+        set { documentTypeRaw = newValue.rawValue }
+    }
 
     /// Free-form user notes, shared across every linked vehicle.
     var notes: String?
 
     /// Vehicles this document is linked to. Many-to-many — a single file
     /// (e.g. a business insurance policy) can attach to several vehicles
-    /// without duplicating the file payload. The inverse lives on
-    /// `Vehicle.documents`.
-    @Relationship(deleteRule: .nullify)
+    /// without duplicating the file payload. The relationship metadata
+    /// (delete rule, inverse) lives on `Vehicle.documents`; this side is
+    /// just the inverse-resolved property per SwiftData's convention of
+    /// only annotating one side.
     var vehicles: [Vehicle]?
 
     /// Computed property to check if this is an image
