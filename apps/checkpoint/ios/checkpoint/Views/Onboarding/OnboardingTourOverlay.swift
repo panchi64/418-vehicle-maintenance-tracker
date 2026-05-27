@@ -99,13 +99,11 @@ struct OnboardingTourOverlay: View {
             .accessibilityHidden(true)
 
         // Shimmer — subtle diagonal off-white sweep masked to the rect.
-        // `.id(currentStep)` re-creates the overlay each step so its
-        // `.onAppear`-driven animation restarts (otherwise the sweep only
-        // plays for the first spotlighted element).
+        // `restartKey: currentStep` lets DesignKit's modifier replay the
+        // sweep on each step without us re-keying the view tree.
         Color.clear
             .frame(width: rect.width, height: rect.height)
-            .shimmer(color: Theme.accent)
-            .id(currentStep)
+            .shimmer(color: Theme.accent, restartKey: currentStep)
             .position(x: rect.midX, y: rect.midY)
             .allowsHitTesting(false)
             .accessibilityHidden(true)
@@ -129,16 +127,19 @@ struct OnboardingTourOverlay: View {
             if let rect = spotlight {
                 // Anchor the card to the side of the spotlight that has more
                 // available room, then center it within that region with
-                // flanking spacers. This keeps the card visually balanced in
-                // the largest free area while guaranteeing it never overlaps
-                // the spotlight (the fixed-height anchor sits right at
-                // rect.maxY + lg or rect.minY - lg).
+                // flanking Spacers. A closing safe-area anchor at the far
+                // edge keeps the card clear of the home indicator (below)
+                // or Dynamic Island / status bar (above). The fixed-height
+                // spotlight-anchor never crosses the spotlight, so the card
+                // can't overlap the highlighted element.
                 if placeCardBelow(for: rect) {
                     Color.clear.frame(height: rect.maxY + Spacing.lg)
                     Spacer(minLength: 0)
                     cardContent
                     Spacer(minLength: 0)
+                    Color.clear.frame(height: geometry.safeAreaInsets.bottom)
                 } else {
+                    Color.clear.frame(height: geometry.safeAreaInsets.top)
                     Spacer(minLength: 0)
                     cardContent
                     Spacer(minLength: 0)
@@ -192,23 +193,10 @@ struct OnboardingTourOverlay: View {
                 }
             }
         }
-        .padding(Theme.cardPadding)
-        .background(tourCardBackground)
-        .brutalistBorder()
-    }
-
-    /// Dedicated frosted-glass plate for the tour card. The standard
-    /// `glassCardStyle` lets too much of the underlying app UI through to
-    /// stay legible while a colored component is spotlighted — so we stack
-    /// `.ultraThickMaterial` over an opaque background-primary plate. The
-    /// material handles the frosted look; the plate guarantees the text
-    /// always sits on a near-solid surface.
-    private var tourCardBackground: some View {
-        ZStack {
-            Rectangle().fill(Theme.backgroundPrimary)
-            Rectangle().fill(.ultraThickMaterial)
-            Rectangle().fill(Theme.backgroundPrimary.opacity(0.5))
-        }
+        // The tour card floats over live colored app UI, so use the
+        // near-solid `.opaque` intensity to keep the text fully legible
+        // regardless of what's spotlighted behind it.
+        .glassCardStyle(intensity: .opaque)
     }
 }
 
