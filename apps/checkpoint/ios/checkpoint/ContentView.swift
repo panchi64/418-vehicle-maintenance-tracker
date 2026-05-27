@@ -53,6 +53,7 @@ struct ContentView: View {
                         showSettings = true
                     }
                 )
+                .tourTarget(.vehicleHeader, active: onboardingState.currentPhase.isTour)
                 .padding(.top, Spacing.sm)
                 .revealAnimation(delay: 0.1)
 
@@ -60,11 +61,11 @@ struct ContentView: View {
                 Group {
                     switch appState.selectedTab {
                     case .home:
-                        HomeTab(appState: appState)
+                        HomeTab(appState: appState, onboardingState: onboardingState)
                     case .services:
-                        ServicesTab(appState: appState)
+                        ServicesTab(appState: appState, onboardingState: onboardingState)
                     case .costs:
-                        CostsTab(appState: appState)
+                        CostsTab(appState: appState, onboardingState: onboardingState)
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -166,14 +167,19 @@ struct ContentView: View {
             }
         }
         .onChange(of: onboardingState.currentPhase) { _, newPhase in
+            // Pre-switch the tab when entering a transition so the destination
+            // is mounted by the time `resolveTransition()` flips to .tour(step:).
             if case .tourTransition(let toStep) = newPhase {
-                // Switch tab behind the transition card
-                switch toStep {
-                case 2: appState.selectedTab = .services
-                case 3: appState.selectedTab = .costs
-                default: break
-                }
-            } else if newPhase == .completed {
+                appState.selectedTab = onboardingState.tab(forStep: toStep)
+            }
+            // Also normalize the tab when a tour step is entered directly
+            // (covers initial .tour(step: 0) on tour start and any future
+            // path that skips the transition card). Idempotent same-tab
+            // assigns are safe.
+            else if case .tour(let step) = newPhase {
+                appState.selectedTab = onboardingState.tab(forStep: step)
+            }
+            else if newPhase == .completed {
                 AnalyticsService.shared.capture(.onboardingCompleted)
                 // Enable CloudKit sync now that onboarding is done
                 NotificationCenter.default.post(name: .enableCloudSyncAfterOnboarding, object: nil)
@@ -388,41 +394,45 @@ struct ContentView: View {
                 }
             )
         }
-        .overlay {
-            if onboardingState.currentPhase.isTour {
-                if case .tourTransition(let toStep) = onboardingState.currentPhase {
-                    OnboardingTourTransitionCard(
-                        targetStep: toStep,
-                        onSkipTour: {
-                            let step = onboardingState.currentPhase.tourStep ?? 0
-                            AnalyticsService.shared.capture(.onboardingTourSkipped(atStep: step))
-                            clearSampleData()
-                            onboardingState.complete()
-                            appState.selectedTab = .home
-                        },
-                        onContinue: {
-                            onboardingState.resolveTransition()
-                        }
-                    )
-                    .transition(.opacity)
-                } else {
-                    OnboardingTourOverlay(
-                        appState: appState,
-                        onboardingState: onboardingState,
-                        onSkipTour: {
-                            let step = onboardingState.currentPhase.tourStep ?? 0
-                            AnalyticsService.shared.capture(.onboardingTourSkipped(atStep: step))
-                            clearSampleData()
-                            onboardingState.complete()
-                            appState.selectedTab = .home
-                        },
-                        onTourComplete: {
-                            AnalyticsService.shared.capture(.onboardingTourCompleted)
-                            appState.selectedTab = .home
-                            onboardingState.finishTour()
-                        }
-                    )
-                    .transition(.opacity)
+        .overlayPreferenceValue(SpotlightAnchorPreferenceKey.self) { anchors in
+            GeometryReader { geo in
+                if onboardingState.currentPhase.isTour {
+                    if case .tourTransition(let toStep) = onboardingState.currentPhase {
+                        OnboardingTourTransitionCard(
+                            targetStep: toStep,
+                            onSkipTour: {
+                                let step = onboardingState.currentPhase.tourStep ?? 0
+                                AnalyticsService.shared.capture(.onboardingTourSkipped(atStep: step))
+                                clearSampleData()
+                                onboardingState.complete()
+                                appState.selectedTab = .home
+                            },
+                            onContinue: {
+                                onboardingState.resolveTransition()
+                            }
+                        )
+                        .transition(.opacity)
+                    } else {
+                        OnboardingTourOverlay(
+                            appState: appState,
+                            onboardingState: onboardingState,
+                            anchors: anchors,
+                            geometry: geo,
+                            onSkipTour: {
+                                let step = onboardingState.currentPhase.tourStep ?? 0
+                                AnalyticsService.shared.capture(.onboardingTourSkipped(atStep: step))
+                                clearSampleData()
+                                onboardingState.complete()
+                                appState.selectedTab = .home
+                            },
+                            onTourComplete: {
+                                AnalyticsService.shared.capture(.onboardingTourCompleted)
+                                appState.selectedTab = .home
+                                onboardingState.finishTour()
+                            }
+                        )
+                        .transition(.opacity)
+                    }
                 }
             }
         }

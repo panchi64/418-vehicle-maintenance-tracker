@@ -14,6 +14,7 @@ import Charts
 
 struct CostsTab: View {
     @Bindable var appState: AppState
+    let onboardingState: OnboardingState
     @Query var serviceLogs: [ServiceLog]
 
     @State var periodFilter: PeriodFilter = .year
@@ -94,7 +95,7 @@ struct CostsTab: View {
 
     return ZStack {
         AtmosphericBackground()
-        CostsTab(appState: appState)
+        CostsTab(appState: appState, onboardingState: OnboardingState())
     }
     .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self], inMemory: true)
     .preferredColorScheme(.dark)

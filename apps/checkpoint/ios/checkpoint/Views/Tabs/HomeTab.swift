@@ -10,6 +10,7 @@ import SwiftData
 
 struct HomeTab: View {
     @Bindable var appState: AppState
+    let onboardingState: OnboardingState
     @Environment(\.modelContext) var modelContext
     @Query var services: [Service]
     @Query private var serviceLogs: [ServiceLog]
@@ -90,6 +91,7 @@ struct HomeTab: View {
                             onEdit: { appState.showEditVehicle = true },
                             onDocumentsTap: { appState.showDocuments = true }
                         )
+                        .tourTarget(.dashboardSpecs, active: onboardingState.currentPhase.isTour)
                         .revealAnimation(delay: 0.1)
                     }
                 }
@@ -320,7 +322,7 @@ struct HomeTab: View {
 
     return ZStack {
         AtmosphericBackground()
-        HomeTab(appState: appState)
+        HomeTab(appState: appState, onboardingState: OnboardingState())
     }
     .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self], inMemory: true)
     .preferredColorScheme(.dark)

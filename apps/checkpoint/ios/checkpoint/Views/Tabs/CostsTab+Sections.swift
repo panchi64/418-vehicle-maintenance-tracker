@@ -42,6 +42,7 @@ extension CostsTab {
                 projection: yearEndProjection,
                 shareSummary: costShareSummary
             )
+            .tourTarget(.costsHeadline, active: onboardingState.currentPhase.isTour)
             .revealAnimation(delay: 0.15)
 
             let cpm = cpmDelta

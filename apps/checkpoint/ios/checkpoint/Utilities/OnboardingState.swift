@@ -70,44 +70,50 @@ final class OnboardingState {
     // MARK: - Phase Transitions
 
     func startTour() {
-        currentPhase = .tour(step: 0)
+        animate { currentPhase = .tour(step: 0) }
     }
 
     func advanceTour() {
         guard case .tour(let step) = currentPhase else { return }
         let nextStep = step + 1
-        if nextStep > 3 {
-            currentPhase = .getStarted
-        } else if tabForStep(nextStep) != tabForStep(step) {
-            currentPhase = .tourTransition(toStep: nextStep)
+        let newPhase: OnboardingPhase
+
+        if let next = TourStep.at(nextStep), let current = TourStep.at(step) {
+            newPhase = next.tab != current.tab
+                ? .tourTransition(toStep: nextStep)
+                : .tour(step: nextStep)
         } else {
-            currentPhase = .tour(step: nextStep)
+            newPhase = .getStarted
         }
+
+        animate { currentPhase = newPhase }
     }
 
     func resolveTransition() {
         guard case .tourTransition(let toStep) = currentPhase else { return }
-        currentPhase = .tour(step: toStep)
+        animate { currentPhase = .tour(step: toStep) }
     }
 
     func finishTour() {
-        currentPhase = .getStarted
+        animate { currentPhase = .getStarted }
     }
 
     func complete() {
         Self.hasCompletedOnboarding = true
-        currentPhase = .completed
+        animate { currentPhase = .completed }
     }
 
     // MARK: - Helpers
 
-    /// Maps tour steps to tab indices: 0,1 → Home (0); 2 → Services (1); 3 → Costs (2)
-    private func tabForStep(_ step: Int) -> Int {
-        switch step {
-        case 0, 1: return 0
-        case 2: return 1
-        case 3: return 2
-        default: return 0
-        }
+    /// Tab that hosts the given tour step. Falls back to `.home` for out-of-range
+    /// indices (defensive — callers should pass valid indices).
+    func tab(forStep step: Int) -> Tab {
+        TourStep.at(step)?.tab ?? .home
+    }
+
+    /// Wraps a phase mutation in an animation so attached `.transition(...)`
+    /// modifiers on the overlay/transition card actually fire.
+    private func animate(_ change: () -> Void) {
+        withAnimation(.easeOut(duration: Theme.animationMedium), change)
     }
 }

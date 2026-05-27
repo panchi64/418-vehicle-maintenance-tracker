@@ -20,11 +20,7 @@ struct OnboardingTourTransitionCard: View {
     }
 
     private var sectionName: String {
-        switch targetStep {
-        case 2: return L10n.onboardingTransitionServices
-        case 3: return L10n.onboardingTransitionCosts
-        default: return ""
-        }
+        TourStep.at(targetStep)?.transitionLabel?() ?? ""
     }
 
     var body: some View {

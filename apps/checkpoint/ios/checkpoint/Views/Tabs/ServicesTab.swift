@@ -10,6 +10,7 @@ import SwiftData
 
 struct ServicesTab: View {
     @Bindable var appState: AppState
+    let onboardingState: OnboardingState
     @Query private var services: [Service]
     @Query private var serviceLogs: [ServiceLog]
 
@@ -93,8 +94,14 @@ struct ServicesTab: View {
         ScrollView {
             VStack(spacing: Spacing.lg) {
                 // Search field
-                searchField
-                    .revealAnimation(delay: 0.1)
+                ServiceSearchField(
+                    text: $appState.servicesTab.searchText,
+                    onSearchStarted: {
+                        AnalyticsService.shared.capture(.servicesSearchUsed)
+                    }
+                )
+                .tourTarget(.servicesSearch, active: onboardingState.currentPhase.isTour)
+                .revealAnimation(delay: 0.1)
 
                 // View mode toggle
                 InstrumentSegmentedControl(
@@ -281,43 +288,6 @@ struct ServicesTab: View {
         .sheet(item: $exportPDFURL) { url in
             ShareSheet(items: [url])
         }
-    }
-
-    // MARK: - Search Field
-
-    private var searchField: some View {
-        HStack(spacing: Spacing.sm) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 16, weight: .medium))
-                .foregroundStyle(Theme.textTertiary)
-
-            TextField("Search services, notes, receipts...", text: $appState.servicesTab.searchText)
-                .font(.brutalistBody)
-                .foregroundStyle(Theme.textPrimary)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .onChange(of: appState.servicesTab.searchText) { oldValue, _ in
-                    if oldValue.isEmpty {
-                        AnalyticsService.shared.capture(.servicesSearchUsed)
-                    }
-                }
-
-            if !appState.servicesTab.searchText.isEmpty {
-                Button {
-                    appState.servicesTab.searchText = ""
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 16))
-                        .foregroundStyle(Theme.textTertiary)
-                        .frame(minWidth: 44, minHeight: 44)
-                        .contentShape(Rectangle())
-                }
-                .accessibilityLabel("Clear search")
-            }
-        }
-        .padding(Spacing.md)
-        .background(Theme.surfaceInstrument)
-        .brutalistBorder()
     }
 
     // MARK: - History Row
@@ -535,7 +505,7 @@ struct ServicesTab: View {
 
     return ZStack {
         AtmosphericBackground()
-        ServicesTab(appState: appState)
+        ServicesTab(appState: appState, onboardingState: OnboardingState())
     }
     .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self], inMemory: true)
     .preferredColorScheme(.dark)
