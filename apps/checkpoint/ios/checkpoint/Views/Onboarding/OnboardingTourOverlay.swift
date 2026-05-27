@@ -123,30 +123,26 @@ struct OnboardingTourOverlay: View {
 
     // MARK: - Tour card
 
-    /// Cap on how much vertical space the placement spacers can claim. Leaves
-    /// at least 45% of the screen for the card itself so Next/Skip never get
-    /// pushed off-screen on small devices regardless of where the spotlight
-    /// lands.
-    private let placementSpacerMaxFraction: CGFloat = 0.55
-
     @ViewBuilder
     private func tourCard(spotlight: CGRect?) -> some View {
         VStack(spacing: 0) {
             if let rect = spotlight {
+                // Anchor the card to the side of the spotlight that has more
+                // available room, then center it within that region with
+                // flanking spacers. This keeps the card visually balanced in
+                // the largest free area while guaranteeing it never overlaps
+                // the spotlight (the fixed-height anchor sits right at
+                // rect.maxY + lg or rect.minY - lg).
                 if placeCardBelow(for: rect) {
-                    Color.clear.frame(
-                        height: min(rect.maxY + Spacing.lg,
-                                    geometry.size.height * placementSpacerMaxFraction)
-                    )
+                    Color.clear.frame(height: rect.maxY + Spacing.lg)
+                    Spacer(minLength: 0)
                     cardContent
                     Spacer(minLength: 0)
                 } else {
                     Spacer(minLength: 0)
                     cardContent
-                    Color.clear.frame(
-                        height: min(geometry.size.height - rect.minY + Spacing.lg,
-                                    geometry.size.height * placementSpacerMaxFraction)
-                    )
+                    Spacer(minLength: 0)
+                    Color.clear.frame(height: geometry.size.height - rect.minY + Spacing.lg)
                 }
             } else {
                 Spacer()
