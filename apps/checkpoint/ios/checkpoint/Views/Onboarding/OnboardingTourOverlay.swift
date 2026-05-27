@@ -86,21 +86,26 @@ struct OnboardingTourOverlay: View {
     private func spotlightVisuals(for anchorRect: CGRect) -> some View {
         let rect = anchorRect.insetBy(dx: -spotlightOutset, dy: -spotlightOutset)
 
-        // Underglow — a stronger variant of `StatusGlowModifier` (blur 20,
-        // off-white, opacity 0.4). Drawn behind the target.
+        // Underglow — a stroked rectangle so the glow emanates outward from
+        // the edges rather than filling the area behind the highlighted
+        // element. Wide stroke + blur creates a soft halo around the frame.
         Rectangle()
-            .fill(Theme.accent)
+            .stroke(Theme.accent, lineWidth: 10)
             .frame(width: rect.width, height: rect.height)
-            .blur(radius: 20)
-            .opacity(0.4)
+            .blur(radius: 18)
+            .opacity(0.55)
             .position(x: rect.midX, y: rect.midY)
             .allowsHitTesting(false)
             .accessibilityHidden(true)
 
         // Shimmer — subtle diagonal off-white sweep masked to the rect.
+        // `.id(currentStep)` re-creates the overlay each step so its
+        // `.onAppear`-driven animation restarts (otherwise the sweep only
+        // plays for the first spotlighted element).
         Color.clear
             .frame(width: rect.width, height: rect.height)
             .shimmer(color: Theme.accent)
+            .id(currentStep)
             .position(x: rect.midX, y: rect.midY)
             .allowsHitTesting(false)
             .accessibilityHidden(true)
@@ -191,7 +196,23 @@ struct OnboardingTourOverlay: View {
                 }
             }
         }
-        .glassCardStyle(intensity: .heavy)
+        .padding(Theme.cardPadding)
+        .background(tourCardBackground)
+        .brutalistBorder()
+    }
+
+    /// Dedicated frosted-glass plate for the tour card. The standard
+    /// `glassCardStyle` lets too much of the underlying app UI through to
+    /// stay legible while a colored component is spotlighted — so we stack
+    /// `.ultraThickMaterial` over an opaque background-primary plate. The
+    /// material handles the frosted look; the plate guarantees the text
+    /// always sits on a near-solid surface.
+    private var tourCardBackground: some View {
+        ZStack {
+            Rectangle().fill(Theme.backgroundPrimary)
+            Rectangle().fill(.ultraThickMaterial)
+            Rectangle().fill(Theme.backgroundPrimary.opacity(0.5))
+        }
     }
 }
 
