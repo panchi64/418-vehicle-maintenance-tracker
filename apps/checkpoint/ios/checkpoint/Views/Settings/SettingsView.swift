@@ -15,6 +15,10 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(AppState.self) private var appState
     var onboardingState: OnboardingState?
+    /// Replays the tour without re-running the intro/preferences flow.
+    /// Owned by ContentView because seeding sample data requires the
+    /// SwiftData query context that lives there.
+    var onReplayTour: (() -> Void)?
 
     var body: some View {
         @Bindable var appState = appState
@@ -361,6 +365,20 @@ struct SettingsView: View {
                     .frame(height: Theme.borderWidth)
 
                 SettingsActionRow(
+                    title: "Replay Tour",
+                    subtitle: "See the guided walkthrough again",
+                    systemImage: "play.circle",
+                    iconColor: Theme.textTertiary
+                ) {
+                    onReplayTour?()
+                    dismiss()
+                }
+
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: Theme.borderWidth)
+
+                SettingsActionRow(
                     title: "Restore Purchases",
                     systemImage: "arrow.counterclockwise",
                     iconColor: Theme.textTertiary
@@ -408,8 +426,7 @@ struct SettingsView: View {
 
             VStack(spacing: 0) {
                 Button {
-                    OnboardingState.hasCompletedOnboarding = false
-                    onboardingState?.currentPhase = .intro
+                    onboardingState?.replayOnboarding()
                     dismiss()
                 } label: {
                     HStack {

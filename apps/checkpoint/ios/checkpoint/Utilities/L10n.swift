@@ -298,6 +298,22 @@ enum L10n {
 
     static var onboardingTransitionServices: String { localized("onboarding.transition.services") }
     static var onboardingTransitionCosts: String { localized("onboarding.transition.costs") }
+    static var onboardingTransitionTapToContinue: String { localized("onboarding.transition.tap_to_continue") }
+
+    static func onboardingTourNextTo(_ destination: String) -> String {
+        String(format: localized("onboarding.tour.next_to"), destination)
+    }
+    static func onboardingTourProgress(tab: String, step: Int, total: Int) -> String {
+        String(format: localized("onboarding.tour.progress"), tab, step, total)
+    }
+
+    static var onboardingTourRecapTitle: String { localized("onboarding.tour.recap.title") }
+    static var onboardingTourRecapBody: String { localized("onboarding.tour.recap.body") }
+    static var onboardingTourRecapDone: String { localized("onboarding.tour.recap.done") }
+
+    static var onboardingTourSkipConfirmTitle: String { localized("onboarding.tour.skip_confirm_title") }
+    static var onboardingTourSkipConfirmMessage: String { localized("onboarding.tour.skip_confirm_message") }
+    static var onboardingTourSkipConfirmCancel: String { localized("onboarding.tour.skip_confirm_cancel") }
 
     static var onboardingGetStartedTitle: String { localized("onboarding.getstarted.title") }
     static var onboardingGetStartedVINLabel: String { localized("onboarding.getstarted.vin_label") }

@@ -3262,6 +3262,159 @@
         }
       }
     },
+    "onboarding.transition.tap_to_continue" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to continue"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca para continuar"
+          }
+        }
+      }
+    },
+    "onboarding.tour.next_to" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siguiente: %@"
+          }
+        }
+      }
+    },
+    "onboarding.tour.progress" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$02d / %3$02d"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$02d / %3$02d"
+          }
+        }
+      }
+    },
+    "onboarding.tour.recap.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home for what's due. Services for the full history. Costs for the damage. Everything else is one tap away."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicio para lo pendiente. Servicios para el historial. Costos para lo que ha costado. Todo lo demás, a un toque."
+          }
+        }
+      }
+    },
+    "onboarding.tour.recap.done" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Let's go"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vamos"
+          }
+        }
+      }
+    },
+    "onboarding.tour.recap.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You're set."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listo."
+          }
+        }
+      }
+    },
+    "onboarding.tour.skip_confirm_cancel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue Tour"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar recorrido"
+          }
+        }
+      }
+    },
+    "onboarding.tour.skip_confirm_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can replay it anytime from Settings."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puedes verlo de nuevo en Ajustes cuando quieras."
+          }
+        }
+      }
+    },
+    "onboarding.tour.skip_confirm_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip the tour?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Omitir el recorrido?"
+          }
+        }
+      }
+    },
     "onboarding.welcome.subtitle" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3903,11 +4056,45 @@
         }
       }
     },
+    "Replay Tour" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replay Tour"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver recorrido"
+          }
+        }
+      }
+    },
     "Restart Required" : {
 
     },
     "Restore Purchases" : {
 
+    },
+    "See the guided walkthrough again" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See the guided walkthrough again"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver el recorrido guiado de nuevo"
+          }
+        }
+      }
     },
     "Restoring your vehicles and maintenance\nhistory from iCloud" : {
 

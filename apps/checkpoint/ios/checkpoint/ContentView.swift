@@ -72,6 +72,13 @@ struct ContentView: View {
                 .simultaneousGesture(
                     DragGesture(minimumDistance: 50)
                         .onEnded { value in
+                            // Tab swipes are disabled while any onboarding
+                            // surface is up — the tour overlay's tap blocker
+                            // only catches taps, so without this guard a
+                            // horizontal drag would desync the spotlighted
+                            // anchor from the visible tab.
+                            guard !onboardingState.currentPhase.isActiveOnboarding else { return }
+
                             let horizontalSwipe = value.translation.width
                             let verticalSwipe = abs(value.translation.height)
 
@@ -178,6 +185,13 @@ struct ContentView: View {
             // assigns are safe.
             else if case .tour(let step) = newPhase {
                 appState.selectedTab = onboardingState.tab(forStep: step)
+            }
+            // Fire the tour-completed event the moment the user reaches the
+            // recap — not when they tap "Let's go" on it. A user who force-
+            // quits at the recap card still saw every spotlight, so they
+            // count as completing the tour.
+            else if newPhase == .tourRecap {
+                AnalyticsService.shared.capture(.onboardingTourCompleted)
             }
             else if newPhase == .completed {
                 AnalyticsService.shared.capture(.onboardingCompleted)
@@ -360,7 +374,17 @@ struct ContentView: View {
             }
         }
         .sheet(isPresented: $showSettings) {
-            SettingsView(onboardingState: onboardingState)
+            SettingsView(
+                onboardingState: onboardingState,
+                onReplayTour: {
+                    // Skip the intro re-prompt — the user already set their
+                    // preferences. Seed sample data (same hook the intro's
+                    // onStartTour uses) and jump straight to step 0.
+                    AnalyticsService.shared.capture(.onboardingTourStarted)
+                    seedSampleDataForTour()
+                    onboardingState.replayTour()
+                }
+            )
                 .environment(appState)
                 .onAppear {
                     AnalyticsService.shared.capture(.settingsOpened)
@@ -400,9 +424,9 @@ struct ContentView: View {
                     if case .tourTransition(let toStep) = onboardingState.currentPhase {
                         OnboardingTourTransitionCard(
                             targetStep: toStep,
+                            // Analytics for the skip-intent fire from the
+                            // button itself; this closure handles state only.
                             onSkipTour: {
-                                let step = onboardingState.currentPhase.tourStep ?? 0
-                                AnalyticsService.shared.capture(.onboardingTourSkipped(atStep: step))
                                 clearSampleData()
                                 onboardingState.complete()
                                 appState.selectedTab = .home
@@ -418,21 +442,28 @@ struct ContentView: View {
                             onboardingState: onboardingState,
                             anchors: anchors,
                             geometry: geo,
+                            // Analytics fire from the Skip button itself.
                             onSkipTour: {
-                                let step = onboardingState.currentPhase.tourStep ?? 0
-                                AnalyticsService.shared.capture(.onboardingTourSkipped(atStep: step))
                                 clearSampleData()
                                 onboardingState.complete()
                                 appState.selectedTab = .home
-                            },
-                            onTourComplete: {
-                                AnalyticsService.shared.capture(.onboardingTourCompleted)
-                                appState.selectedTab = .home
-                                onboardingState.finishTour()
                             }
                         )
                         .transition(.opacity)
                     }
+                } else if onboardingState.currentPhase.isTourRecap {
+                    OnboardingTourRecapCard(
+                        onBack: {
+                            onboardingState.goBackTour()
+                        },
+                        // onboardingTourCompleted analytics already fired
+                        // on entering .tourRecap via the onChange handler.
+                        onDone: {
+                            appState.selectedTab = .home
+                            onboardingState.finishTour()
+                        }
+                    )
+                    .transition(.opacity)
                 }
             }
         }

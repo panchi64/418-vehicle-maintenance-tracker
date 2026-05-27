@@ -11,9 +11,16 @@ enum OnboardingPhase: Equatable {
     case intro
     case tour(step: Int)
     case tourTransition(toStep: Int)
+    /// Final tour beat — a centered recap card with no spotlight, shown
+    /// after the last anchored step. Closes the tour by tying the three
+    /// tabs into a single mental model before handing off to .getStarted.
+    case tourRecap
     case getStarted
     case completed
 
+    /// True for the anchored, spotlight-driven steps. The recap is a
+    /// separate non-anchored beat, so it is NOT a tour phase by this
+    /// definition — render it through its own branch.
     var isTour: Bool {
         switch self {
         case .tour, .tourTransition: return true
@@ -21,16 +28,16 @@ enum OnboardingPhase: Equatable {
         }
     }
 
-    var isTourTransition: Bool {
-        if case .tourTransition = self { return true }
+    var isTourRecap: Bool {
+        if case .tourRecap = self { return true }
         return false
     }
 
-    var isTourOrGetStarted: Bool {
-        switch self {
-        case .tour, .tourTransition, .getStarted: return true
-        default: return false
-        }
+    /// True for every phase EXCEPT `.completed`. Used to gate UI gestures
+    /// (e.g. tab swipes) that should not fire while any onboarding surface
+    /// is on screen.
+    var isActiveOnboarding: Bool {
+        self != .completed
     }
 
     var tourStep: Int? {
@@ -61,6 +68,12 @@ final class OnboardingState {
     /// IDs of sample vehicles created during tour so we can clean them up
     var sampleVehicleIDs: [UUID] = []
 
+    /// Tour steps whose Skip cooldown has already elapsed once. Used to
+    /// keep Skip immediately available when the user navigates Back to a
+    /// step they have already glanced at — the cooldown's purpose
+    /// (force-glance before bailing) is already satisfied for those.
+    var seenTourSteps: Set<Int> = []
+
     // MARK: - Init
 
     init() {
@@ -83,10 +96,28 @@ final class OnboardingState {
                 ? .tourTransition(toStep: nextStep)
                 : .tour(step: nextStep)
         } else {
-            newPhase = .getStarted
+            // Past the last spotlight step — show the recap before handing
+            // off to .getStarted.
+            newPhase = .tourRecap
         }
 
         animate { currentPhase = newPhase }
+    }
+
+    /// Rewinds a single step in the tour. Back across a tab boundary is a
+    /// direct rewind — the transition card only narrates forward motion;
+    /// rewinding through it would feel like a stutter. The tab itself
+    /// follows automatically via ContentView's `.onChange(of: currentPhase)`
+    /// handler.
+    func goBackTour() {
+        switch currentPhase {
+        case .tour(let step) where step > 0:
+            animate { currentPhase = .tour(step: step - 1) }
+        case .tourRecap:
+            animate { currentPhase = .tour(step: TourStep.lastIndex) }
+        default:
+            return
+        }
     }
 
     func resolveTransition() {
@@ -101,6 +132,24 @@ final class OnboardingState {
     func complete() {
         Self.hasCompletedOnboarding = true
         animate { currentPhase = .completed }
+    }
+
+    /// Replays the tour from step 0, bypassing the intro (the user already
+    /// went through preferences). Caller is responsible for seeding sample
+    /// data first so the spotlight anchors resolve against something.
+    func replayTour() {
+        Self.hasCompletedOnboarding = false
+        seenTourSteps = []
+        animate { currentPhase = .tour(step: 0) }
+    }
+
+    /// Replays the entire onboarding flow (intro + tour). Used by the
+    /// DEBUG section; the user-facing Settings row goes through
+    /// `replayTour()` to skip the preferences re-prompt.
+    func replayOnboarding() {
+        Self.hasCompletedOnboarding = false
+        seenTourSteps = []
+        animate { currentPhase = .intro }
     }
 
     // MARK: - Helpers
