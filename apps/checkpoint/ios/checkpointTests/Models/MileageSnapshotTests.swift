@@ -238,7 +238,7 @@ final class MileageSnapshotTests: XCTestCase {
         )
         let snapshot2 = MileageSnapshot(
             vehicle: vehicle,
-            mileage: 10000,  // Same mileage
+            mileage: 10000,  // Same mileage — user genuinely didn't drive
             recordedAt: .now
         )
 
@@ -246,8 +246,9 @@ final class MileageSnapshotTests: XCTestCase {
         let pace = MileageSnapshot.calculateDailyPace(from: [snapshot1, snapshot2])
 
         // Then
-        // Should return nil because no valid pace pairs (0 miles driven)
-        XCTAssertNil(pace, "Should return nil when no miles were driven")
+        // Zero-mile intervals count as real data — pace is genuinely 0, not "unknown".
+        // Dropping them used to bias the EWMA upward.
+        XCTAssertEqual(pace ?? -1, 0.0, accuracy: 0.001, "Zero miles driven over 14 days = 0 mi/day pace")
     }
 
     func testCalculateDailyPaceHandlesUnorderedSnapshots() {

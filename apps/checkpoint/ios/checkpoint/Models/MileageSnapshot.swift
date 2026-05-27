@@ -69,8 +69,11 @@ struct PaceResult {
 
 extension MileageSnapshot {
     /// Half-life for recency weighting (in days)
-    /// Snapshots older than this have weight reduced by half
-    private static let recencyHalfLifeDays: Double = 30.0
+    /// Snapshots older than this have weight reduced by half.
+    /// Shorter half-life makes pace track recent driving more closely — important when
+    /// driving patterns change (seasonal, life events) so the estimator doesn't drag
+    /// stale high-pace months into today's projection.
+    private static let recencyHalfLifeDays: Double = 14.0
 
     /// Calculate daily miles pace from an array of snapshots using recency-weighted averaging
     /// Recent snapshots are weighted more heavily using exponential decay (EWMA)
@@ -112,7 +115,10 @@ extension MileageSnapshot {
             guard daysBetweenPair > 0 else { continue }
 
             let milesDriven = later.mileage - earlier.mileage
-            guard milesDriven > 0 else { continue }
+            // Allow zero-mile intervals — dropping them biases pace upward by silently
+            // excluding legitimate "didn't drive" stretches. Negative intervals (data
+            // entry mistakes) are still rejected.
+            guard milesDriven >= 0 else { continue }
 
             let pace = Double(milesDriven) / Double(daysBetweenPair)
 
