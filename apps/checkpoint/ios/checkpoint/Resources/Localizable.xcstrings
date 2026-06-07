@@ -2005,6 +2005,38 @@
     "Double tap to view the visit" : {
 
     },
+    "DUE" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DUE"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VENCE"
+          }
+        }
+      }
+    },
+    "Due %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Due %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence %@"
+          }
+        }
+      }
+    },
     "DUE AT" : {
       "localizations" : {
         "en" : {
@@ -2017,6 +2049,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "VENCE A"
+          }
+        }
+      }
+    },
+    "DUE SOON" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DUE SOON"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PRÓXIMO"
           }
         }
       }
@@ -2102,6 +2150,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Umbral de kilometraje"
+          }
+        }
+      }
+    },
+    "Early %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Early %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Principios de %@"
           }
         }
       }
@@ -2323,230 +2387,6 @@
         }
       }
     },
-    "DUE" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "DUE"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "VENCE"
-          }
-        }
-      }
-    },
-    "DUE SOON" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "DUE SOON"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PRÓXIMO"
-          }
-        }
-      }
-    },
-    "GOOD" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GOOD"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "AL DÍA"
-          }
-        }
-      }
-    },
-    "Marbete renewal" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Marbete renewal"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Renovación de marbete"
-          }
-        }
-      }
-    },
-    "SCHEDULED" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SCHEDULED"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PROGRAMADO"
-          }
-        }
-      }
-    },
-    "Due %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Due %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vence %@"
-          }
-        }
-      }
-    },
-    "Early %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Early %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Principios de %@"
-          }
-        }
-      }
-    },
-    "EXPIRED" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "EXPIRED"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "VENCIDO"
-          }
-        }
-      }
-    },
-    "Expired" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Expired"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vencido"
-          }
-        }
-      }
-    },
-    "Expires %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Expires %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vence %@"
-          }
-        }
-      }
-    },
-    "Late %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Late %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Finales de %@"
-          }
-        }
-      }
-    },
-    "Mid %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mid %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mediados de %@"
-          }
-        }
-      }
-    },
-    "Overdue" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Overdue"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vencido"
-          }
-        }
-      }
-    },
-    "This week" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This week"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esta semana"
-          }
-        }
-      }
-    },
     "EST. DUE %@" : {
       "localizations" : {
         "en" : {
@@ -2581,6 +2421,38 @@
     "EXPIRATION YEAR" : {
 
     },
+    "Expired" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expired"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vencido"
+          }
+        }
+      }
+    },
+    "EXPIRED" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "EXPIRED"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VENCIDO"
+          }
+        }
+      }
+    },
     "EXPIRES" : {
       "localizations" : {
         "en" : {
@@ -2593,6 +2465,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "VENCE"
+          }
+        }
+      }
+    },
+    "Expires %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expires %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence %@"
           }
         }
       }
@@ -2617,6 +2505,22 @@
     },
     "Generate PDF" : {
 
+    },
+    "GOOD" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GOOD"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AL DÍA"
+          }
+        }
+      }
     },
     "GOT IT" : {
 
@@ -2708,6 +2612,22 @@
     "LAST: %@" : {
 
     },
+    "Late %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Late %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finales de %@"
+          }
+        }
+      }
+    },
     "Later" : {
 
     },
@@ -2738,8 +2658,21 @@
     "MARBETE" : {
 
     },
-    "Marbete renewal, %@" : {
-
+    "Marbete renewal" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marbete renewal"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renovación de marbete"
+          }
+        }
+      }
     },
     "Marbete status: %@" : {
 
@@ -2752,6 +2685,22 @@
     },
     "Mark as Done" : {
 
+    },
+    "Mid %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mid %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mediados de %@"
+          }
+        }
+      }
     },
     "Mileage" : {
 
@@ -3794,6 +3743,22 @@
     "OR TYPE A CUSTOM SERVICE" : {
 
     },
+    "Overdue" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overdue"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vencido"
+          }
+        }
+      }
+    },
     "OVERDUE" : {
       "localizations" : {
         "en" : {
@@ -4437,6 +4402,23 @@
     "SCHEDULE TOGETHER" : {
 
     },
+    "SCHEDULED" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SCHEDULED"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PROGRAMADO"
+          }
+        }
+      }
+    },
     "SEASONAL ADVISORY" : {
 
     },
@@ -5000,6 +4982,22 @@
     },
     "This is your only vehicle. Deleting it will remove all associated services and maintenance history. You'll need to add a new vehicle to continue using Checkpoint." : {
 
+    },
+    "This week" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This week"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta semana"
+          }
+        }
+      }
     },
     "This will also delete all service history for this service. This action cannot be undone." : {
 
