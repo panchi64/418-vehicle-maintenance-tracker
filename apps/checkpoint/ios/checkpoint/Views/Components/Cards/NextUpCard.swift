@@ -27,7 +27,7 @@ struct NextUpCard: View {
             return nil
         }
         let period = DuePeriodFormatter.describe(due)
-        return period == "Overdue" ? nil : period
+        return period.isOverdue ? nil : period.label
     }
 
     private var milesUntilDue: Int? {
@@ -110,7 +110,7 @@ struct NextUpCard: View {
             } else if let dueDate = service.dueDate {
                 // Date-only services (e.g., battery check, wiper blades):
                 // abstracted month period instead of a raw day count.
-                DuePeriodHero(date: dueDate, status: status, overdueWord: "OVERDUE", dueLabel: "DUE")
+                DuePeriodHero(date: dueDate, status: status, overdueWord: String(localized: "OVERDUE"), dueLabel: String(localized: "DUE"))
             }
 
             // Divider
@@ -231,7 +231,7 @@ struct DuePeriodHero: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text(status == .overdue ? overdueWord : DuePeriodFormatter.describe(date).uppercased())
+            Text(status == .overdue ? overdueWord : DuePeriodFormatter.describe(date).label.uppercased())
                 .font(.brutalistTitle)
                 .foregroundStyle(status.color)
                 .lineLimit(1)
@@ -307,7 +307,7 @@ struct MarbeteNextUpCard: View {
 
             // Hero data display — abstracted month period instead of raw days
             if let expiration = marbeteItem.vehicle.marbeteExpirationDate {
-                DuePeriodHero(date: expiration, status: status, overdueWord: "EXPIRED", dueLabel: "EXPIRES")
+                DuePeriodHero(date: expiration, status: status, overdueWord: String(localized: "EXPIRED"), dueLabel: String(localized: "EXPIRES"))
             }
 
             // Divider

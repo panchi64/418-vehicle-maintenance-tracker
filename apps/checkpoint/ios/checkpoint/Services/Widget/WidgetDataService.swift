@@ -166,7 +166,9 @@ final class WidgetDataService {
             let dueDescription: String
             if let expiration {
                 dueDescription = Self.periodPhrase(
-                    DuePeriodFormatter.describe(expiration), verb: "Expires", overdueWord: "Expired"
+                    DuePeriodFormatter.describe(expiration),
+                    phraseFormat: String(localized: "Expires %@"),
+                    overdueWord: String(localized: "Expired")
                 )
             } else {
                 dueDescription = vehicle.marbeteExpirationFormatted ?? "Set"
@@ -335,13 +337,15 @@ final class WidgetDataService {
     /// early and flip the month bucket near a boundary).
     nonisolated static func duePeriod(for dueDate: Date?) -> String? {
         guard let dueDate else { return nil }
-        return DuePeriodFormatter.describe(dueDate)
+        return DuePeriodFormatter.describe(dueDate).label
     }
 
     /// "verb + period" phrasing for date-based due text, e.g. "Due mid May" /
-    /// "Overdue", or "Expires mid May" / "Expired" for marbete.
-    nonisolated static func periodPhrase(_ period: String, verb: String, overdueWord: String) -> String {
-        period == "Overdue" ? overdueWord : "\(verb) \(period.lowercased())"
+    /// "Overdue", or "Expires mid May" / "Expired" for marbete. `phraseFormat`
+    /// is a localized format string with a single `%@` for the period, so word
+    /// order follows the locale (Spanish: "Vence a mediados de may").
+    nonisolated static func periodPhrase(_ period: DuePeriodFormatter.Period, phraseFormat: String, overdueWord: String) -> String {
+        period.isOverdue ? overdueWord : String(format: phraseFormat, period.label.lowercased())
     }
 
     /// Due text for the shared payload: mileage phrasing for mileage-tracked
@@ -354,7 +358,11 @@ final class WidgetDataService {
         guard let due = effectiveDue else {
             return service.primaryDescription ?? "Scheduled"
         }
-        return Self.periodPhrase(DuePeriodFormatter.describe(due), verb: "Due", overdueWord: "Overdue")
+        return Self.periodPhrase(
+            DuePeriodFormatter.describe(due),
+            phraseFormat: String(localized: "Due %@"),
+            overdueWord: String(localized: "Overdue")
+        )
     }
 
     private func statusString(for status: ServiceStatus) -> String {

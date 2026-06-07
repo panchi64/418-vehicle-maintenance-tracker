@@ -6,6 +6,12 @@
 //  ("Mid May", "Early Aug 2027") instead of a raw day count, which isn't very
 //  actionable. Near-term and past dates collapse to "This week" / "Overdue".
 //
+//  Localized: the month name and word order follow the device locale, and every
+//  word ("Overdue", "Early/Mid/Late", "This week") is resolved through the app
+//  catalog. Callers branch on `Period.isOverdue` rather than matching the label
+//  string, so overdue detection survives translation (the Spanish label is
+//  "Vencido", not "Overdue").
+//
 
 import Foundation
 
@@ -14,38 +20,38 @@ nonisolated enum DuePeriodFormatter {
     /// month bucket — "mid May" on May 13th isn't useful.
     private static let thisWeekThreshold = 7
 
-    /// Stable English month abbreviations (indexed by calendar month, 1–12) so
-    /// the brutalist labels read uniformly regardless of device locale (the rest
-    /// of the card is fixed English). A plain array sidesteps the non-Sendable
-    /// `DateFormatter`, keeping this whole formatter `nonisolated`.
-    private static let monthAbbreviations = [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-    ]
+    /// A due date abstracted into a top-of-mind period.
+    struct Period: Equatable {
+        let isOverdue: Bool
+        /// Localized, natural-case label: "Overdue" / "This week" / "Mid May".
+        /// Callers uppercase (brutalist hero) or lowercase (phrase) for display.
+        let label: String
+    }
 
-    /// Abstracted due descriptor in natural case (callers uppercase for display).
-    /// Examples: "Overdue", "This week", "Early May", "Mid Aug 2027".
-    static func describe(_ date: Date, relativeTo now: Date = .now, calendar: Calendar = .current) -> String {
+    /// Abstracted, localized due descriptor.
+    static func describe(_ date: Date, relativeTo now: Date = .now, calendar: Calendar = .current) -> Period {
         let startNow = calendar.startOfDay(for: now)
         let startDue = calendar.startOfDay(for: date)
         let days = calendar.dateComponents([.day], from: startNow, to: startDue).day ?? 0
 
-        if days < 0 { return "Overdue" }
-        if days <= thisWeekThreshold { return "This week" }
+        if days < 0 { return Period(isOverdue: true, label: String(localized: "Overdue")) }
+        if days <= thisWeekThreshold { return Period(isOverdue: false, label: String(localized: "This week")) }
 
-        let dayOfMonth = calendar.component(.day, from: startDue)
-        let bucket: String
-        switch dayOfMonth {
-        case ...10: bucket = "Early"
-        case 11...20: bucket = "Mid"
-        default: bucket = "Late"
-        }
-
-        let month = monthAbbreviations[calendar.component(.month, from: date) - 1]
+        // Locale-aware abbreviated month ("May" / "may"), carrying the year only
+        // when it differs from now so near-term dates stay terse.
         let dueYear = calendar.component(.year, from: date)
         let nowYear = calendar.component(.year, from: now)
-        let yearSuffix = dueYear == nowYear ? "" : " \(dueYear)"
+        let month = dueYear == nowYear
+            ? date.formatted(.dateTime.month(.abbreviated))
+            : date.formatted(.dateTime.month(.abbreviated).year())
 
-        return "\(bucket) \(month)\(yearSuffix)"
+        let dayOfMonth = calendar.component(.day, from: startDue)
+        let label: String
+        switch dayOfMonth {
+        case ...10: label = String(localized: "Early \(month)")
+        case 11...20: label = String(localized: "Mid \(month)")
+        default: label = String(localized: "Late \(month)")
+        }
+        return Period(isOverdue: false, label: label)
     }
 }

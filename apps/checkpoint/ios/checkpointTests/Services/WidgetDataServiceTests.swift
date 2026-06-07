@@ -304,10 +304,12 @@ final class WidgetDataServiceTests: XCTestCase {
     }
 
     func test_periodPhrase() {
-        XCTAssertEqual(WidgetDataService.periodPhrase("Mid May", verb: "Due", overdueWord: "Overdue"), "Due mid may")
-        XCTAssertEqual(WidgetDataService.periodPhrase("Overdue", verb: "Due", overdueWord: "Overdue"), "Overdue")
-        XCTAssertEqual(WidgetDataService.periodPhrase("Mid May", verb: "Expires", overdueWord: "Expired"), "Expires mid may")
-        XCTAssertEqual(WidgetDataService.periodPhrase("Overdue", verb: "Expires", overdueWord: "Expired"), "Expired")
+        let midMay = DuePeriodFormatter.Period(isOverdue: false, label: "Mid May")
+        let overdue = DuePeriodFormatter.Period(isOverdue: true, label: "Overdue")
+        XCTAssertEqual(WidgetDataService.periodPhrase(midMay, phraseFormat: "Due %@", overdueWord: "Overdue"), "Due mid may")
+        XCTAssertEqual(WidgetDataService.periodPhrase(overdue, phraseFormat: "Due %@", overdueWord: "Overdue"), "Overdue")
+        XCTAssertEqual(WidgetDataService.periodPhrase(midMay, phraseFormat: "Expires %@", overdueWord: "Expired"), "Expires mid may")
+        XCTAssertEqual(WidgetDataService.periodPhrase(overdue, phraseFormat: "Expires %@", overdueWord: "Expired"), "Expired")
     }
 
     func testWidgetSharedData_ServiceStatusRawValues() {

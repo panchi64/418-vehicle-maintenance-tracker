@@ -269,9 +269,6 @@
     "+%lld MORE" : {
 
     },
-    "~%lld DAYS AT YOUR PACE" : {
-
-    },
     "◆" : {
 
     },
@@ -1125,9 +1122,6 @@
 
     },
     "Date" : {
-
-    },
-    "DAYS" : {
 
     },
     "Days Window" : {
@@ -2290,6 +2284,182 @@
         }
       }
     },
+    "DUE" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DUE"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VENCE"
+          }
+        }
+      }
+    },
+    "Due %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Due %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence %@"
+          }
+        }
+      }
+    },
+    "Early %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Early %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Principios de %@"
+          }
+        }
+      }
+    },
+    "EXPIRED" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "EXPIRED"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VENCIDO"
+          }
+        }
+      }
+    },
+    "Expired" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expired"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vencido"
+          }
+        }
+      }
+    },
+    "Expires %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expires %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence %@"
+          }
+        }
+      }
+    },
+    "Late %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Late %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finales de %@"
+          }
+        }
+      }
+    },
+    "Mid %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mid %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mediados de %@"
+          }
+        }
+      }
+    },
+    "Overdue" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overdue"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vencido"
+          }
+        }
+      }
+    },
+    "This week" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This week"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta semana"
+          }
+        }
+      }
+    },
+    "EST. DUE %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "EST. DUE %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VENC. EST. %@"
+          }
+        }
+      }
+    },
     "Every tip unlocks a rare theme" : {
 
     },
@@ -2308,11 +2478,21 @@
     "EXPIRATION YEAR" : {
 
     },
-    "EXPIRED" : {
-
-    },
     "EXPIRES" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "EXPIRES"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VENCE"
+          }
+        }
+      }
     },
     "EXPORT" : {
 
@@ -3499,7 +3679,20 @@
 
     },
     "OVERDUE" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OVERDUE"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VENCIDO"
+          }
+        }
+      }
     },
     "PARK IT" : {
 
