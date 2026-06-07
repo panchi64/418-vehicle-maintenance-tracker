@@ -19,21 +19,15 @@ struct NextUpCard: View {
         service.status(currentMileage: currentMileage)
     }
 
-    /// Calculate days until due based on mileage pace
-    private var pacePredictedDays: Int? {
-        guard let pace = dailyMilesPace,
-              pace > 0,
-              let dueMileage = service.dueMileage else { return nil }
-
-        let milesRemaining = dueMileage - currentMileage
-        guard milesRemaining > 0 else { return nil }
-
-        return Int(ceil(Double(milesRemaining) / pace))
-    }
-
-    private var daysUntilDue: Int? {
-        guard let dueDate = service.dueDate else { return nil }
-        return Calendar.current.dateComponents([.day], from: .now, to: dueDate).day
+    /// Abstracted month period for the projected due date (earlier of the
+    /// calendar due date or the pace-predicted mileage date). Nil when there's
+    /// no projection, or when it resolves to "Overdue" (the hero already says so).
+    private var estimatedDuePeriod: String? {
+        guard let due = service.effectiveDueDate(currentMileage: currentMileage, dailyPace: dailyMilesPace) else {
+            return nil
+        }
+        let period = DuePeriodFormatter.describe(due)
+        return period == "Overdue" ? nil : period
     }
 
     private var milesUntilDue: Int? {
@@ -97,11 +91,12 @@ struct NextUpCard: View {
                         .foregroundStyle(Theme.textTertiary)
                         .tracking(1.5)
 
-                    // Pace prediction (only shown when sufficient data)
-                    if let paceDays = pacePredictedDays {
-                        Text("~\(paceDays) DAYS AT YOUR PACE")
+                    // Estimated due as an abstracted month period (not raw days)
+                    if status != .overdue, let period = estimatedDuePeriod {
+                        Text("EST. DUE \(period.uppercased())")
                             .font(.brutalistSecondary)
                             .foregroundStyle(Theme.textSecondary)
+                            .tracking(1)
                             .padding(.top, 4)
                     } else if dailyMilesPace == nil || dailyMilesPace == 0 {
                         Text(L10n.emptyPaceHint.uppercased())
@@ -112,26 +107,10 @@ struct NextUpCard: View {
                     }
                 }
                 .padding(.vertical, Spacing.lg)
-            } else if let days = daysUntilDue {
-                // Fallback to days for date-only services (e.g., battery check, wiper blades)
-                VStack(alignment: .leading, spacing: Spacing.xs) {
-                    HStack(alignment: .lastTextBaseline, spacing: 4) {
-                        Text("\(abs(days))")
-                            .font(.brutalistHero)
-                            .foregroundStyle(status.color)
-                            .contentTransition(.numericText())
-
-                        Text("DAYS")
-                            .font(.brutalistHeading)
-                            .foregroundStyle(status.color)
-                    }
-
-                    Text(days < 0 ? "OVERDUE" : "REMAINING")
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
-                        .tracking(1.5)
-                }
-                .padding(.vertical, Spacing.lg)
+            } else if let dueDate = service.dueDate {
+                // Date-only services (e.g., battery check, wiper blades):
+                // abstracted month period instead of a raw day count.
+                DuePeriodHero(date: dueDate, status: status, overdueWord: "OVERDUE", dueLabel: "DUE")
             }
 
             // Divider
@@ -237,6 +216,38 @@ struct NextUpCard: View {
 
 }
 
+// MARK: - Due Period Hero
+
+/// Hero display for date-based Next Up items: an abstracted month period
+/// (e.g. "MID MAY") with a label beneath, or the domain "overdue" word when
+/// past due. Shared by date-only services and marbete renewal.
+struct DuePeriodHero: View {
+    let date: Date
+    let status: ServiceStatus
+    /// Word shown when overdue, e.g. "OVERDUE" (services) or "EXPIRED" (marbete).
+    let overdueWord: String
+    /// Label shown beneath the period when not overdue, e.g. "DUE" / "EXPIRES".
+    let dueLabel: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            Text(status == .overdue ? overdueWord : DuePeriodFormatter.describe(date).uppercased())
+                .font(.brutalistTitle)
+                .foregroundStyle(status.color)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+
+            if status != .overdue {
+                Text(dueLabel)
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.textTertiary)
+                    .tracking(1.5)
+            }
+        }
+        .padding(.vertical, Spacing.lg)
+    }
+}
+
 // MARK: - Card Button Style
 
 struct CardButtonStyle: ButtonStyle {
@@ -256,7 +267,6 @@ struct MarbeteNextUpCard: View {
     let onTap: () -> Void
 
     private var status: ServiceStatus { marbeteItem.itemStatus }
-    private var daysUntilDue: Int? { marbeteItem.daysRemaining }
 
     private var isUrgent: Bool {
         status == .overdue || status == .dueSoon
@@ -295,26 +305,9 @@ struct MarbeteNextUpCard: View {
                 .fill(Theme.gridLine)
                 .frame(height: 1)
 
-            // Hero data display - days only for marbete
-            if let days = daysUntilDue {
-                VStack(alignment: .leading, spacing: Spacing.xs) {
-                    HStack(alignment: .lastTextBaseline, spacing: Spacing.xs) {
-                        Text("\(abs(days))")
-                            .font(.brutalistHero)
-                            .foregroundStyle(status.color)
-                            .contentTransition(.numericText())
-
-                        Text("DAYS")
-                            .font(.brutalistHeading)
-                            .foregroundStyle(status.color)
-                    }
-
-                    Text(days < 0 ? "EXPIRED" : "REMAINING")
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
-                        .tracking(1.5)
-                }
-                .padding(.vertical, Spacing.lg)
+            // Hero data display — abstracted month period instead of raw days
+            if let expiration = marbeteItem.vehicle.marbeteExpirationDate {
+                DuePeriodHero(date: expiration, status: status, overdueWord: "EXPIRED", dueLabel: "EXPIRES")
             }
 
             // Divider
