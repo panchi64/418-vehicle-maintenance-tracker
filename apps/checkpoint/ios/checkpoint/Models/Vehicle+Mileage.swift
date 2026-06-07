@@ -6,6 +6,42 @@
 //
 
 import Foundation
+import SwiftData
+
+extension Vehicle {
+    /// Commit a new odometer reading: update `currentMileage` / `mileageUpdatedAt`
+    /// and insert a `MileageSnapshot` (throttled to one per day) into `context`.
+    ///
+    /// This is the single source of the mileage-commit logic shared by manual
+    /// entry, Siri, and companion-app (Biombo) updates. It performs only the
+    /// model mutation; callers own side effects (widgets, notifications, save).
+    ///
+    /// - Returns: `true` if a snapshot was created (i.e. none existed for today).
+    @discardableResult
+    func recordMileage(
+        _ mileage: Int,
+        recordedAt: Date = .now,
+        source: MileageSource,
+        in context: ModelContext
+    ) -> Bool {
+        currentMileage = mileage
+        mileageUpdatedAt = recordedAt
+
+        let shouldCreateSnapshot = !MileageSnapshot.hasSnapshotToday(
+            snapshots: mileageSnapshots ?? []
+        )
+        if shouldCreateSnapshot {
+            let snapshot = MileageSnapshot(
+                vehicle: self,
+                mileage: mileage,
+                recordedAt: recordedAt,
+                source: source
+            )
+            context.insert(snapshot)
+        }
+        return shouldCreateSnapshot
+    }
+}
 
 extension Vehicle {
     /// Whether the user has entered an initial mileage (0 = not yet set)

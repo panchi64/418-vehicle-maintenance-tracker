@@ -215,6 +215,8 @@ struct ContentView: View {
         }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
+                // Apply odometer readings queued by the Biombo companion app
+                applyPendingOdometerUpdates()
                 // Update app icon when entering foreground
                 updateAppIcon()
                 // Update widget data

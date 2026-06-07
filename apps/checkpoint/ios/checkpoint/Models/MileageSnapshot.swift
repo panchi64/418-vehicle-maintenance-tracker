@@ -12,6 +12,8 @@ import SwiftData
 enum MileageSource: String, Codable {
     case manual = "manual"
     case serviceCompletion = "service_completion"
+    /// Reading queued from the Biombo companion app and committed on foreground.
+    case biombo = "biombo"
 }
 
 @Model

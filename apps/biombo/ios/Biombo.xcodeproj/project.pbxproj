@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0DB927D2532962A7172098F2 /* DesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = 5554124D864D3F77BC90FED3 /* DesignKit */; };
+		5B11AA0000000000000000B3 /* VehicleSharing in Frameworks */ = {isa = PBXBuildFile; productRef = 5B11AA0000000000000000B2 /* VehicleSharing */; };
 		2EB136F04D88D599DAF62847 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7C63C82859E11E89C0D7431 /* Foundation.framework */; };
 		5543A62DE2568969B63B4314 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7C63C82859E11E89C0D7431 /* Foundation.framework */; };
 		8CA1708282A128E1EEBFFEE9 /* Localization in Frameworks */ = {isa = PBXBuildFile; productRef = 52E80798EBE8F894698D7E14 /* Localization */; };
@@ -68,6 +69,7 @@
 				5543A62DE2568969B63B4314 /* Foundation.framework in Frameworks */,
 				0DB927D2532962A7172098F2 /* DesignKit in Frameworks */,
 				8CA1708282A128E1EEBFFEE9 /* Localization in Frameworks */,
+				5B11AA0000000000000000B3 /* VehicleSharing in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -154,6 +156,7 @@
 			packageProductDependencies = (
 				5554124D864D3F77BC90FED3 /* DesignKit */,
 				52E80798EBE8F894698D7E14 /* Localization */,
+				5B11AA0000000000000000B2 /* VehicleSharing */,
 			);
 			productName = Biombo;
 			productReference = D6308B7A4A6E1726F24DC794 /* Biombo.app */;
@@ -203,6 +206,7 @@
 			packageReferences = (
 				AC4731B0617D77548F2DE024 /* XCLocalSwiftPackageReference "../../../packages/DesignKit" */,
 				A4BCAD12FA1B9BE738BD088A /* XCLocalSwiftPackageReference "../../../packages/Localization" */,
+				5B11AA0000000000000000B1 /* XCLocalSwiftPackageReference "../../../packages/VehicleSharing" */,
 			);
 			productRefGroup = 7416D4796944821D3CC7A67B /* Products */;
 			projectDirPath = "";
@@ -362,6 +366,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				BIOMBO_API_URL = "http://localhost:8787";
 				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = "Biombo/Biombo.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"Biombo/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
@@ -473,6 +478,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				BIOMBO_API_URL = "";
 				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = "Biombo/Biombo.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"Biombo/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
@@ -581,6 +587,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../../packages/DesignKit;
 		};
+		5B11AA0000000000000000B1 /* XCLocalSwiftPackageReference "../../../packages/VehicleSharing" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../../packages/VehicleSharing;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -593,6 +603,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = AC4731B0617D77548F2DE024 /* XCLocalSwiftPackageReference "../../../packages/DesignKit" */;
 			productName = DesignKit;
+		};
+		5B11AA0000000000000000B2 /* VehicleSharing */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5B11AA0000000000000000B1 /* XCLocalSwiftPackageReference "../../../packages/VehicleSharing" */;
+			productName = VehicleSharing;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

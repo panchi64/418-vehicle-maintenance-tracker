@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		233723FFB1C83A005BF41AA9 /* DesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = BE9845272C4CFCF14D65E3A6 /* DesignKit */; };
+		5A11AA0000000000000000A3 /* VehicleSharing in Frameworks */ = {isa = PBXBuildFile; productRef = 5A11AA0000000000000000A2 /* VehicleSharing */; };
 		35EAF4409A656AD01A1033BA /* DesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = EB06FB0A7CC3A382CE061002 /* DesignKit */; };
 		4990276752C961C629471AA9 /* DesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = 72A7D215AA9F0416060B11E5 /* DesignKit */; };
 		5A409E922F36F7DD0010D306 /* PostHog in Frameworks */ = {isa = PBXBuildFile; productRef = 5APH00022F4000000036D71B /* PostHog */; };
@@ -207,6 +208,7 @@
 			files = (
 				5A409E922F36F7DD0010D306 /* PostHog in Frameworks */,
 				233723FFB1C83A005BF41AA9 /* DesignKit in Frameworks */,
+				5A11AA0000000000000000A3 /* VehicleSharing in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -394,6 +396,7 @@
 			packageProductDependencies = (
 				5APH00022F4000000036D71B /* PostHog */,
 				BE9845272C4CFCF14D65E3A6 /* DesignKit */,
+				5A11AA0000000000000000A2 /* VehicleSharing */,
 			);
 			productName = checkpoint;
 			productReference = 5AAAA9272F2084320002A8C6 /* checkpoint.app */;
@@ -601,6 +604,7 @@
 			packageReferences = (
 				5APH00012F4000000036D71B /* XCRemoteSwiftPackageReference "posthog-ios" */,
 				E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "../../../packages/DesignKit" */,
+				5A11AA0000000000000000A1 /* XCLocalSwiftPackageReference "../../../packages/VehicleSharing" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5AAAA9282F2084320002A8C6 /* Products */;
@@ -1454,6 +1458,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../../packages/DesignKit;
 		};
+		5A11AA0000000000000000A1 /* XCLocalSwiftPackageReference "../../../packages/VehicleSharing" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../../packages/VehicleSharing;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -1492,6 +1500,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "../../../packages/DesignKit" */;
 			productName = DesignKit;
+		};
+		5A11AA0000000000000000A2 /* VehicleSharing */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5A11AA0000000000000000A1 /* XCLocalSwiftPackageReference "../../../packages/VehicleSharing" */;
+			productName = VehicleSharing;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -13,6 +13,7 @@
 **Shared packages:**
 - `packages/DesignKit/` — Swift design system (`ThemeProviding` protocol, tokens, modifiers). See `packages/DesignKit/CLAUDE.md`.
 - `packages/Localization/` — Shared EN/ES strings via `.xcstrings`. See `packages/Localization/CLAUDE.md`.
+- `packages/VehicleSharing/` — Cross-app odometer bridge over App Group `group.com.418-studio.shared`. Checkpoint publishes odometers + drains queued updates; Biombo reads + queues. See `packages/VehicleSharing/CLAUDE.md`.
 
 **Internal tooling:**
 - `tools/depth-backdrops/` — Local web app (Python/FastAPI + React/WebGL) that generates the cerulean depth-map backdrops behind device mockups in App Store screenshots. Run `tools/depth-backdrops/dev.sh`. See `tools/depth-backdrops/CLAUDE.md`.
@@ -39,6 +40,7 @@ This file is intentionally small. **Go to the scoped CLAUDE.md for the directory
 - Biombo backend: `npm run dev` from `apps/biombo/backend/`
 - DesignKit: `swift build` from `packages/DesignKit/`
 - Localization: `swift build` from `packages/Localization/`
+- VehicleSharing: `swift test` from `packages/VehicleSharing/`
 - Depth backdrops tool: `./dev.sh` from `tools/depth-backdrops/`
 
 **Xcode note:** if `xcodebuild` errors with "requires Xcode", run commands with `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer` prefix or `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`.

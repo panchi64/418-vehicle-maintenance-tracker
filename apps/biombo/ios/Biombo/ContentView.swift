@@ -3,6 +3,7 @@ import DesignKit
 
 struct ContentView: View {
     @Environment(BiomboAppState.self) private var appState
+    @Environment(OdometerStore.self) private var odometerStore
     @Environment(\.theme) private var theme
 
     var body: some View {
@@ -15,6 +16,12 @@ struct ContentView: View {
                 .padding(.horizontal, DKSpacing.md)
                 .padding(.top, DKSpacing.md)
                 .padding(.bottom, DKSpacing.sm)
+
+            if odometerStore.hasVehicles {
+                OdometerCard()
+                    .padding(.horizontal, DKSpacing.md)
+                    .padding(.bottom, DKSpacing.sm)
+            }
 
             content
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -87,4 +94,5 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environment(BiomboAppState())
+        .environment(OdometerStore())
 }

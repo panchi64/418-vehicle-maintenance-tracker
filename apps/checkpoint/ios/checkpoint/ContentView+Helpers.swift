@@ -83,6 +83,20 @@ extension ContentView {
         } else {
             WidgetDataService.shared.clearWidgetData()
         }
+
+        // Publish odometers to the cross-product App Group for Biombo.
+        VehicleSharingService.publish(vehicles)
+    }
+
+    // MARK: - Companion App (Biombo) Odometer Sync
+
+    /// Apply odometer readings queued by the Biombo companion app, then refresh
+    /// derived data so widgets and the shared bridge reflect the new mileage.
+    func applyPendingOdometerUpdates() {
+        if VehicleSharingService.applyPendingUpdates(in: modelContext) {
+            updateAppIcon()
+            updateWidgetData()
+        }
     }
 
     // MARK: - Siri Integration
@@ -126,22 +140,7 @@ extension ContentView {
     // MARK: - Mileage Update
 
     func updateMileage(_ newMileage: Int, for vehicle: Vehicle) {
-        vehicle.currentMileage = newMileage
-        vehicle.mileageUpdatedAt = .now
-
-        let shouldCreateSnapshot = !MileageSnapshot.hasSnapshotToday(
-            snapshots: vehicle.mileageSnapshots ?? []
-        )
-
-        if shouldCreateSnapshot {
-            let snapshot = MileageSnapshot(
-                vehicle: vehicle,
-                mileage: newMileage,
-                recordedAt: .now,
-                source: .manual
-            )
-            modelContext.insert(snapshot)
-        }
+        vehicle.recordMileage(newMileage, source: .manual, in: modelContext)
 
         // Update app icon based on new mileage affecting service status
         updateAppIcon()
