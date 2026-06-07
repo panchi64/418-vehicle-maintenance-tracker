@@ -17,10 +17,6 @@ struct OnboardingTourTransitionCard: View {
     @State private var isVisible = false
     @State private var showSkipConfirm = false
 
-    private var sectionNumber: String {
-        String(format: "%02d / %02d", targetStep + 1, TourStep.all.count)
-    }
-
     private var sectionName: String {
         TourStep.at(targetStep)?.transitionLabel?() ?? ""
     }
@@ -33,19 +29,14 @@ struct OnboardingTourTransitionCard: View {
             VStack(spacing: Spacing.md) {
                 Spacer()
 
-                // Section number + name
-                VStack(spacing: Spacing.sm) {
-                    Text("\(sectionNumber) //")
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.accent)
-                        .tracking(2)
-
-                    Text(sectionName.uppercased())
-                        .font(.brutalistHeading)
-                        .foregroundStyle(Theme.textPrimary)
-                        .tracking(3)
-                }
-                .opacity(isVisible ? 1 : 0)
+                // Section name — the fullscreen card is a section divider,
+                // not a progress meter, so no step counter here. The spotlight
+                // cards still carry the step pill for in-section wayfinding.
+                Text(sectionName.uppercased())
+                    .font(.brutalistHeading)
+                    .foregroundStyle(Theme.textPrimary)
+                    .tracking(3)
+                    .opacity(isVisible ? 1 : 0)
 
                 Spacer()
 

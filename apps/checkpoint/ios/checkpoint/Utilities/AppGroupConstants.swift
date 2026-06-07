@@ -35,7 +35,7 @@ enum AppGroupConstants {
 }
 
 private enum AppGroupDefaultsWarning {
-    private static let warned = Mutex<Set<String>>([])
+    nonisolated private static let warned = Mutex<Set<String>>([])
 
     nonisolated static func emitOnce(for suite: String) {
         let firstTime = warned.withLock { $0.insert(suite).inserted }

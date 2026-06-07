@@ -73,9 +73,6 @@
         }
       }
     },
-    "%@ //" : {
-
-    },
     "%@ %@" : {
       "localizations" : {
         "en" : {
@@ -3160,125 +3157,6 @@
         }
       }
     },
-    "onboarding.tour.services.body" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scheduled maintenance and completed history. Search, filter, export. Everything your vehicle needs, in one list."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mantenimiento programado e historial completado. Busca, filtra, exporta. Todo lo que tu vehículo necesita, en una lista."
-          }
-        }
-      }
-    },
-    "onboarding.tour.services.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "03 // Services"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "03 // Servicios"
-          }
-        }
-      }
-    },
-    "onboarding.tour.vehicle.body" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap the name to switch vehicles. Tap the amber mileage when the odometer changes. Your vehicle tracks the rest."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toca el nombre para cambiar de vehículo. Toca el kilometraje ámbar cuando cambie el odómetro. Tu vehículo lleva el resto."
-          }
-        }
-      }
-    },
-    "onboarding.tour.vehicle.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "02 // Your Vehicle"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "02 // Tu vehículo"
-          }
-        }
-      }
-    },
-    "onboarding.transition.costs" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Costs"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Costos"
-          }
-        }
-      }
-    },
-    "onboarding.transition.services" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Services"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Servicios"
-          }
-        }
-      }
-    },
-    "onboarding.transition.tap_to_continue" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap to continue"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toca para continuar"
-          }
-        }
-      }
-    },
     "onboarding.tour.next_to" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3364,6 +3242,40 @@
         }
       }
     },
+    "onboarding.tour.services.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scheduled maintenance and completed history. Search, filter, export. Everything your vehicle needs, in one list."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantenimiento programado e historial completado. Busca, filtra, exporta. Todo lo que tu vehículo necesita, en una lista."
+          }
+        }
+      }
+    },
+    "onboarding.tour.services.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "03 // Services"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "03 // Servicios"
+          }
+        }
+      }
+    },
     "onboarding.tour.skip_confirm_cancel" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3411,6 +3323,91 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "¿Omitir el recorrido?"
+          }
+        }
+      }
+    },
+    "onboarding.tour.vehicle.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the name to switch vehicles. Tap the amber mileage when the odometer changes. Your vehicle tracks the rest."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca el nombre para cambiar de vehículo. Toca el kilometraje ámbar cuando cambie el odómetro. Tu vehículo lleva el resto."
+          }
+        }
+      }
+    },
+    "onboarding.tour.vehicle.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "02 // Your Vehicle"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "02 // Tu vehículo"
+          }
+        }
+      }
+    },
+    "onboarding.transition.costs" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Costs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Costos"
+          }
+        }
+      }
+    },
+    "onboarding.transition.services" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Services"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servicios"
+          }
+        }
+      }
+    },
+    "onboarding.transition.tap_to_continue" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to continue"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca para continuar"
           }
         }
       }
@@ -4079,23 +4076,6 @@
     "Restore Purchases" : {
 
     },
-    "See the guided walkthrough again" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "See the guided walkthrough again"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ver el recorrido guiado de nuevo"
-          }
-        }
-      }
-    },
     "Restoring your vehicles and maintenance\nhistory from iCloud" : {
 
     },
@@ -4143,6 +4123,23 @@
     },
     "Seasonal Alerts" : {
 
+    },
+    "See the guided walkthrough again" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See the guided walkthrough again"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver el recorrido guiado de nuevo"
+          }
+        }
+      }
     },
     "Select CSV File" : {
 
