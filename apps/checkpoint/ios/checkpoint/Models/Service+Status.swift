@@ -24,9 +24,9 @@ enum ServiceStatus {
 
     var label: String {
         switch self {
-        case .overdue: return "OVERDUE"
-        case .dueSoon: return "DUE SOON"
-        case .good: return "GOOD"
+        case .overdue: return String(localized: "OVERDUE")
+        case .dueSoon: return String(localized: "DUE SOON")
+        case .good: return String(localized: "GOOD")
         case .neutral: return ""
         }
     }

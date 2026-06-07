@@ -337,7 +337,7 @@ struct MarbeteNextUpCard: View {
         .glassCardStyle(intensity: .subtle)
         .tappableCard(action: onTap)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Marbete renewal, \(status.label)")
+        .accessibilityLabel("\(String(localized: "Marbete renewal")), \(status.label)")
         .accessibilityHint(marbeteItem.expirationFormatted ?? "")
     }
 }

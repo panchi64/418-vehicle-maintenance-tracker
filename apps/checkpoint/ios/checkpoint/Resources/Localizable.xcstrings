@@ -14,7 +14,20 @@
 
     },
     "(EST)" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(EST)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(EST)"
+          }
+        }
+      }
     },
     "[+]" : {
 
@@ -1110,7 +1123,20 @@
 
     },
     "CURRENT" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CURRENT"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ACTUAL"
+          }
+        }
+      }
     },
     "CURRENT ESTIMATE" : {
 
@@ -1980,7 +2006,20 @@
 
     },
     "DUE AT" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DUE AT"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VENCE A"
+          }
+        }
+      }
     },
     "duesoon.days_desc" : {
       "extractionState" : "manual",
@@ -2300,6 +2339,70 @@
         }
       }
     },
+    "DUE SOON" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DUE SOON"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PRÓXIMO"
+          }
+        }
+      }
+    },
+    "GOOD" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GOOD"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AL DÍA"
+          }
+        }
+      }
+    },
+    "Marbete renewal" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marbete renewal"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renovación de marbete"
+          }
+        }
+      }
+    },
+    "SCHEDULED" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SCHEDULED"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PROGRAMADO"
+          }
+        }
+      }
+    },
     "Due %@" : {
       "localizations" : {
         "en" : {
@@ -2587,7 +2690,20 @@
 
     },
     "LAST_SERVICE" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LAST SERVICE"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ÚLT. SERVICIO"
+          }
+        }
+      }
     },
     "LAST: %@" : {
 
@@ -4224,7 +4340,20 @@
 
     },
     "REMAINING" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "REMAINING"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RESTANTES"
+          }
+        }
+      }
     },
     "REMEDY" : {
 
