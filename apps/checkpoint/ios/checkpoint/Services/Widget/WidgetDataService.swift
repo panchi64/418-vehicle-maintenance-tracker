@@ -73,7 +73,7 @@ final class WidgetDataService {
         currentMileage: Int,
         estimatedMileage: Int? = nil,
         isEstimated: Bool = false,
-        services: [(serviceID: String?, name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?)]
+        services: [(serviceID: String?, name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?, duePeriod: String?)]
     ) {
         guard let userDefaults = widgetDefaults else {
             widgetLogger.error("Failed to access App Group UserDefaults")
@@ -87,7 +87,8 @@ final class WidgetDataService {
                 status: mapStatus(service.status),
                 dueDescription: service.dueDescription,
                 dueMileage: service.dueMileage,
-                daysRemaining: service.daysRemaining
+                daysRemaining: service.daysRemaining,
+                duePeriod: service.duePeriod
             )
         }
 
@@ -132,26 +133,27 @@ final class WidgetDataService {
         let pace = vehicle.dailyMilesPace
 
         // Create service items (only services with due tracking)
-        var allItems: [(serviceID: String?, name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?, urgencyScore: Int)] = (vehicle.services ?? [])
+        var allItems: [(serviceID: String?, name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?, duePeriod: String?, urgencyScore: Int)] = (vehicle.services ?? [])
             .filter { $0.hasDueTracking }
             .map { service in
             let status = service.status(currentMileage: effectiveMileage)
 
-            // Calculate days remaining from effective due date (considering pace)
-            let daysRemaining: Int?
-            if let effectiveDue = service.effectiveDueDate(currentMileage: effectiveMileage, dailyPace: pace) {
-                daysRemaining = Calendar.current.dateComponents([.day], from: .now, to: effectiveDue).day ?? 0
-            } else {
-                daysRemaining = nil
+            // Project the due date (considering pace) once, then derive both the
+            // day count and the abstracted period from that same date so every
+            // surface stays consistent with the Next Up card.
+            let effectiveDue = service.effectiveDueDate(currentMileage: effectiveMileage, dailyPace: pace)
+            let daysRemaining = effectiveDue.map {
+                Calendar.current.dateComponents([.day], from: .now, to: $0).day ?? 0
             }
 
             return (
                 serviceID: service.id.uuidString,
                 name: service.name,
                 status: statusString(for: status),
-                dueDescription: service.primaryDescription ?? "Scheduled",
+                dueDescription: serviceDueDescription(for: service, effectiveDue: effectiveDue),
                 dueMileage: service.dueMileage,
                 daysRemaining: daysRemaining,
+                duePeriod: Self.duePeriod(for: effectiveDue),
                 urgencyScore: service.urgencyScore(currentMileage: effectiveMileage, dailyPace: pace)
             )
         }
@@ -159,19 +161,13 @@ final class WidgetDataService {
         // Add marbete if configured
         if vehicle.hasMarbeteExpiration {
             let marbeteStatus = vehicle.marbeteStatus
+            let expiration = vehicle.marbeteExpirationDate
 
-            let daysRemaining = vehicle.daysUntilMarbeteExpiration
             let dueDescription: String
-            if let days = daysRemaining {
-                if days < 0 {
-                    dueDescription = "\(abs(days)) days expired"
-                } else if days == 0 {
-                    dueDescription = "Expires today"
-                } else if days == 1 {
-                    dueDescription = "Expires tomorrow"
-                } else {
-                    dueDescription = "\(days) days remaining"
-                }
+            if let expiration {
+                dueDescription = Self.periodPhrase(
+                    DuePeriodFormatter.describe(expiration), verb: "Expires", overdueWord: "Expired"
+                )
             } else {
                 dueDescription = vehicle.marbeteExpirationFormatted ?? "Set"
             }
@@ -182,7 +178,8 @@ final class WidgetDataService {
                 status: statusString(for: marbeteStatus),
                 dueDescription: dueDescription,
                 dueMileage: nil,  // Marbete has no mileage component
-                daysRemaining: daysRemaining,
+                daysRemaining: vehicle.daysUntilMarbeteExpiration,
+                duePeriod: Self.duePeriod(for: expiration),
                 urgencyScore: vehicle.marbeteUrgencyScore
             ))
         }
@@ -192,7 +189,7 @@ final class WidgetDataService {
 
         // Convert to service data format (dropping urgencyScore)
         let serviceData = sortedItems.map { item in
-            (serviceID: item.serviceID, name: item.name, status: item.status, dueDescription: item.dueDescription, dueMileage: item.dueMileage, daysRemaining: item.daysRemaining)
+            (serviceID: item.serviceID, name: item.name, status: item.status, dueDescription: item.dueDescription, dueMileage: item.dueMileage, daysRemaining: item.daysRemaining, duePeriod: item.duePeriod)
         }
 
         updateWidgetData(
@@ -332,6 +329,34 @@ final class WidgetDataService {
         }
     }
 
+    /// Abstracted month period for the widget hero ("Mid May" / "This week" /
+    /// "Overdue"), computed from the actual due date so it matches the Next Up
+    /// card exactly (reconstructing from a truncated day count could land a day
+    /// early and flip the month bucket near a boundary).
+    nonisolated static func duePeriod(for dueDate: Date?) -> String? {
+        guard let dueDate else { return nil }
+        return DuePeriodFormatter.describe(dueDate)
+    }
+
+    /// "verb + period" phrasing for date-based due text, e.g. "Due mid May" /
+    /// "Overdue", or "Expires mid May" / "Expired" for marbete.
+    nonisolated static func periodPhrase(_ period: String, verb: String, overdueWord: String) -> String {
+        period == "Overdue" ? overdueWord : "\(verb) \(period.lowercased())"
+    }
+
+    /// Due text for the shared payload: mileage phrasing for mileage-tracked
+    /// services, otherwise an abstracted month period ("Due mid May" / "Overdue")
+    /// so widget, watch, and Siri read consistently with the Next Up card.
+    private func serviceDueDescription(for service: Service, effectiveDue: Date?) -> String {
+        if service.dueMileage != nil {
+            return service.primaryDescription ?? "Scheduled"
+        }
+        guard let due = effectiveDue else {
+            return service.primaryDescription ?? "Scheduled"
+        }
+        return Self.periodPhrase(DuePeriodFormatter.describe(due), verb: "Due", overdueWord: "Overdue")
+    }
+
     private func statusString(for status: ServiceStatus) -> String {
         switch status {
         case .overdue: return "overdue"
@@ -370,6 +395,7 @@ struct WidgetSharedData: Codable {
         let dueDescription: String
         let dueMileage: Int?        // The mileage when service is due (e.g., 35000)
         let daysRemaining: Int?     // Days until due (negative = overdue)
+        let duePeriod: String?      // Abstracted month period for date-based hero (e.g. "Mid May")
     }
 
     enum ServiceStatus: String, Codable {

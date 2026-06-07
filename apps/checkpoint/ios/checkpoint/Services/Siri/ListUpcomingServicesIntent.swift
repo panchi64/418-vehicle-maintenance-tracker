@@ -69,29 +69,11 @@ struct ListUpcomingServicesIntent: AppIntent {
     }
 
     private func formatServiceItem(_ service: SiriService) -> String {
-        switch service.status {
-        case .overdue:
+        // dueDescription already reads as an abstracted period ("Due mid May")
+        // for date-based items, or miles remaining for mileage-tracked services.
+        if service.status == .overdue {
             return "\(service.name) is overdue"
-        case .dueSoon:
-            if let days = service.daysRemaining {
-                if days == 0 {
-                    return "\(service.name) is due today"
-                } else if days == 1 {
-                    return "\(service.name) is due tomorrow"
-                } else if days > 0 {
-                    return "\(service.name) is due in \(days) days"
-                } else {
-                    return "\(service.name) is \(abs(days)) days overdue"
-                }
-            }
-            return "\(service.name) is due soon"
-        case .good:
-            if let days = service.daysRemaining, days > 0 {
-                return "\(service.name) in \(days) days"
-            }
-            return "\(service.name): \(service.dueDescription.lowercased())"
-        case .neutral:
-            return "\(service.name): \(service.dueDescription.lowercased())"
         }
+        return "\(service.name): \(service.dueDescription.lowercased())"
     }
 }

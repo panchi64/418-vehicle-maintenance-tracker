@@ -27,9 +27,9 @@ struct ServiceEntry: TimelineEntry {
             vehicleName: "My Vehicle",
             currentMileage: 34500,
             services: [
-                WidgetService(serviceID: nil, name: "Oil Change", status: .dueSoon, dueDescription: "Due in 5 days", dueMileage: 35000, daysRemaining: 5),
-                WidgetService(serviceID: nil, name: "Tire Rotation", status: .good, dueDescription: "Due in 30 days", dueMileage: 38000, daysRemaining: 30),
-                WidgetService(serviceID: nil, name: "Brake Inspection", status: .overdue, dueDescription: "5 days overdue", dueMileage: 32000, daysRemaining: -5)
+                WidgetService(serviceID: nil, name: "Oil Change", status: .dueSoon, dueDescription: "or 1,200 miles", dueMileage: 35000, daysRemaining: 5, duePeriod: "This week"),
+                WidgetService(serviceID: nil, name: "Tire Rotation", status: .good, dueDescription: "or 3,800 miles", dueMileage: 38000, daysRemaining: 30, duePeriod: "Early Jul"),
+                WidgetService(serviceID: nil, name: "Brake Inspection", status: .overdue, dueDescription: "500 miles overdue", dueMileage: 32000, daysRemaining: -5, duePeriod: "Overdue")
             ],
             configuration: CheckpointWidgetConfigurationIntent(),
             distanceUnit: WidgetDistanceUnit.current()
@@ -51,6 +51,7 @@ struct WidgetService: Identifiable {
     let dueDescription: String
     let dueMileage: Int?        // The mileage when service is due
     let daysRemaining: Int?     // Days until due (negative = overdue)
+    let duePeriod: String?      // Abstracted month period for date-based hero (e.g. "Mid May")
 }
 
 enum WidgetServiceStatus: String, Codable {
@@ -93,6 +94,7 @@ struct WidgetData: Codable {
         let dueDescription: String
         let dueMileage: Int?        // The mileage when service is due
         let daysRemaining: Int?     // Days until due (negative = overdue)
+        let duePeriod: String?      // Abstracted month period for date-based hero (e.g. "Mid May")
     }
 
     /// Provide fallback for older data without currentMileage or vehicleID
@@ -188,7 +190,8 @@ struct WidgetProvider: AppIntentTimelineProvider {
                     status: service.status,
                     dueDescription: service.dueDescription,
                     dueMileage: service.dueMileage,
-                    daysRemaining: service.daysRemaining
+                    daysRemaining: service.daysRemaining,
+                    duePeriod: service.duePeriod
                 )
             }
 

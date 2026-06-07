@@ -40,7 +40,9 @@ enum WidgetDisplayHelpers {
                 return "REMAINING"
             }
         }
-        return "DUE IN"
+        // Date-based items show an abstracted period ("MID MAY"); the period
+        // word itself is the value, so the label is just "DUE".
+        return service.duePeriod != nil ? "DUE" : "DUE IN"
     }
 
     /// Get the display value (mileage or days) based on display mode
@@ -53,6 +55,8 @@ enum WidgetDisplayHelpers {
                 let remaining = dueMileage - currentMileage
                 return formatMileage(abs(remaining), unit: distanceUnit)
             }
+        } else if let period = service.duePeriod {
+            return period.uppercased()
         } else if let days = service.daysRemaining {
             return "\(abs(days))"
         }
@@ -63,6 +67,9 @@ enum WidgetDisplayHelpers {
     static func displayUnit(for service: WidgetService, distanceUnit: WidgetDistanceUnit) -> String {
         if service.dueMileage != nil {
             return distanceUnit.uppercaseAbbreviation
+        } else if service.duePeriod != nil {
+            // The period word ("MID MAY") is the value; no separate unit.
+            return ""
         } else if service.daysRemaining != nil {
             return "DAYS"
         }

@@ -40,9 +40,10 @@ struct WatchInlineView: View {
                 return "\(number) \(unitAbbrev)"
             }
         }
+        // Date-based items read as an abstracted period ("DUE MID MAY"); drop the
+        // leading verb so the compact inline slot shows just "MID MAY".
         return upper
-            .replacingOccurrences(of: "DUE IN ", with: "")
-            .replacingOccurrences(of: " DAYS", with: "D")
-            .replacingOccurrences(of: " DAY", with: "D")
+            .replacingOccurrences(of: "DUE ", with: "")
+            .replacingOccurrences(of: "EXPIRES ", with: "")
     }
 }

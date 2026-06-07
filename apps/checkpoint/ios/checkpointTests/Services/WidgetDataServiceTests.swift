@@ -275,9 +275,10 @@ final class WidgetDataServiceTests: XCTestCase {
                     serviceID: "test-service-id",
                     name: "Oil Change",
                     status: .dueSoon,
-                    dueDescription: "Due in 500 miles",
+                    dueDescription: "or 500 miles",
                     dueMileage: 50500,
-                    daysRemaining: 10
+                    daysRemaining: 10,
+                    duePeriod: "This week"
                 )
             ],
             updatedAt: Date()
@@ -293,6 +294,20 @@ final class WidgetDataServiceTests: XCTestCase {
         XCTAssertEqual(decoded.services.count, 1)
         XCTAssertEqual(decoded.services[0].name, "Oil Change")
         XCTAssertEqual(decoded.services[0].status, .dueSoon)
+    }
+
+    func test_duePeriod_forDate() {
+        XCTAssertNil(WidgetDataService.duePeriod(for: nil))
+        let cal = Calendar.current
+        XCTAssertEqual(WidgetDataService.duePeriod(for: cal.date(byAdding: .day, value: -5, to: .now)), "Overdue")
+        XCTAssertEqual(WidgetDataService.duePeriod(for: cal.date(byAdding: .day, value: 3, to: .now)), "This week")
+    }
+
+    func test_periodPhrase() {
+        XCTAssertEqual(WidgetDataService.periodPhrase("Mid May", verb: "Due", overdueWord: "Overdue"), "Due mid may")
+        XCTAssertEqual(WidgetDataService.periodPhrase("Overdue", verb: "Due", overdueWord: "Overdue"), "Overdue")
+        XCTAssertEqual(WidgetDataService.periodPhrase("Mid May", verb: "Expires", overdueWord: "Expired"), "Expires mid may")
+        XCTAssertEqual(WidgetDataService.periodPhrase("Overdue", verb: "Expires", overdueWord: "Expired"), "Expired")
     }
 
     func testWidgetSharedData_ServiceStatusRawValues() {
