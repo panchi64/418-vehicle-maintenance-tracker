@@ -32,4 +32,16 @@ final class StoreManagerTests: XCTestCase {
         let instance2 = StoreManager.shared
         XCTAssertTrue(instance1 === instance2)
     }
+
+    func testPurchase_withoutLoadedProducts_setsPurchaseError() async {
+        // No StoreKit configuration is wired for unit tests, so products never load.
+        // Purchasing should surface an error instead of silently doing nothing.
+        let manager = StoreManager.shared
+        manager.purchaseError = nil
+
+        let transaction = try? await manager.purchase(.proUnlock)
+
+        XCTAssertNil(transaction, "Purchase should return nil when the product can't be loaded")
+        XCTAssertNotNil(manager.purchaseError, "purchaseError should be set so the UI can present it")
+    }
 }

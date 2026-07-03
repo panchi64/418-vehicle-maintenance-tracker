@@ -733,6 +733,57 @@ final class NHTSAServiceCacheTests: XCTestCase {
     }
 }
 
+// MARK: - Persistent Recall Cache Tests
+
+final class PersistentRecallCacheTests: XCTestCase {
+
+    private let sampleRecall = RecallInfo(
+        campaignNumber: "24V001",
+        component: "TEST",
+        summary: "",
+        consequence: "",
+        remedy: "",
+        reportDate: "",
+        parkIt: false,
+        parkOutside: false
+    )
+
+    override func tearDown() async throws {
+        await PersistentRecallCache.shared.clear()
+        try await super.tearDown()
+    }
+
+    func testWrite_prunesEntriesOlderThanRetentionWindow() async {
+        let cache = PersistentRecallCache.shared
+        await cache.clear()
+
+        // Insert an entry far older than the 30-day retention window…
+        await cache.write(key: "stale", recalls: [sampleRecall], timestamp: Date(timeIntervalSince1970: 0))
+        // …then a fresh write, which triggers pruning.
+        await cache.write(key: "fresh", recalls: [sampleRecall], timestamp: .now)
+
+        let stale = await cache.read(key: "stale")
+        let fresh = await cache.read(key: "fresh")
+
+        XCTAssertNil(stale, "Entry older than the retention window should be pruned on write")
+        XCTAssertNotNil(fresh, "A recent entry should be retained")
+    }
+
+    func testWrite_recentEntriesSurvive() async {
+        let cache = PersistentRecallCache.shared
+        await cache.clear()
+
+        await cache.write(key: "a", recalls: [sampleRecall], timestamp: .now)
+        await cache.write(key: "b", recalls: [sampleRecall], timestamp: .now)
+
+        let a = await cache.read(key: "a")
+        let b = await cache.read(key: "b")
+
+        XCTAssertNotNil(a, "Recent entries within the window should survive pruning")
+        XCTAssertNotNil(b, "Recent entries within the window should survive pruning")
+    }
+}
+
 // MARK: - NHTSAError Equatable
 
 extension NHTSAError: Equatable {}

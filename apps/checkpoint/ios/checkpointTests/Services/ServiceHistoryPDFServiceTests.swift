@@ -88,14 +88,14 @@ final class ServiceHistoryPDFServiceTests: XCTestCase {
 
     // MARK: - Tests
 
-    func test_generatePDF_withVehicleAndLogs_returnsURL() {
+    func test_generatePDF_withVehicleAndLogs_returnsURL() async {
         // Given
         let vehicle = createTestVehicle()
         let service = createTestService(vehicle: vehicle)
         let log = createTestServiceLog(service: service, vehicle: vehicle)
 
         // When
-        let url = sut.generatePDF(for: vehicle, serviceLogs: [log])
+        let url = await sut.generatePDF(for: vehicle, serviceLogs: [log])
 
         // Then
         XCTAssertNotNil(url, "PDF URL should not be nil")
@@ -105,12 +105,12 @@ final class ServiceHistoryPDFServiceTests: XCTestCase {
         try? FileManager.default.removeItem(at: url!)
     }
 
-    func test_generatePDF_withNoLogs_generatesEmptyHistory() {
+    func test_generatePDF_withNoLogs_generatesEmptyHistory() async {
         // Given
         let vehicle = createTestVehicle()
 
         // When
-        let url = sut.generatePDF(for: vehicle, serviceLogs: [])
+        let url = await sut.generatePDF(for: vehicle, serviceLogs: [])
 
         // Then
         XCTAssertNotNil(url, "PDF URL should not be nil even with no logs")
@@ -126,7 +126,7 @@ final class ServiceHistoryPDFServiceTests: XCTestCase {
         }
     }
 
-    func test_generatePDF_includesVehicleInfo() {
+    func test_generatePDF_includesVehicleInfo() async {
         // Given
         let vehicle = createTestVehicle(
             name: "My Honda",
@@ -138,7 +138,7 @@ final class ServiceHistoryPDFServiceTests: XCTestCase {
         )
 
         // When
-        let url = sut.generatePDF(for: vehicle, serviceLogs: [])
+        let url = await sut.generatePDF(for: vehicle, serviceLogs: [])
 
         // Then
         XCTAssertNotNil(url, "PDF should be generated")
@@ -159,7 +159,7 @@ final class ServiceHistoryPDFServiceTests: XCTestCase {
         }
     }
 
-    func test_generatePDF_includesAllServiceLogs() {
+    func test_generatePDF_includesAllServiceLogs() async {
         // Given
         let vehicle = createTestVehicle()
         let service1 = createTestService(name: "Oil Change", vehicle: vehicle)
@@ -188,7 +188,7 @@ final class ServiceHistoryPDFServiceTests: XCTestCase {
         )
 
         // When
-        let url = sut.generatePDF(for: vehicle, serviceLogs: [log1, log2, log3])
+        let url = await sut.generatePDF(for: vehicle, serviceLogs: [log1, log2, log3])
 
         // Then
         XCTAssertNotNil(url, "PDF should be generated with multiple logs")
@@ -199,7 +199,7 @@ final class ServiceHistoryPDFServiceTests: XCTestCase {
         }
     }
 
-    func test_generatePDF_withIncludeTotal_calculatesCorrectSum() {
+    func test_generatePDF_withIncludeTotal_calculatesCorrectSum() async {
         // Given
         let vehicle = createTestVehicle()
         let service = createTestService(vehicle: vehicle)
@@ -212,7 +212,7 @@ final class ServiceHistoryPDFServiceTests: XCTestCase {
         let options = ExportOptions(includeTotal: true)
 
         // When
-        let url = sut.generatePDF(for: vehicle, serviceLogs: [log1, log2, log3], options: options)
+        let url = await sut.generatePDF(for: vehicle, serviceLogs: [log1, log2, log3], options: options)
 
         // Then
         XCTAssertNotNil(url, "PDF should be generated with totals")
@@ -223,7 +223,7 @@ final class ServiceHistoryPDFServiceTests: XCTestCase {
         }
     }
 
-    func test_generatePDF_withoutIncludeTotal_omitsTotal() {
+    func test_generatePDF_withoutIncludeTotal_omitsTotal() async {
         // Given
         let vehicle = createTestVehicle()
         let service = createTestService(vehicle: vehicle)
@@ -232,7 +232,7 @@ final class ServiceHistoryPDFServiceTests: XCTestCase {
         let options = ExportOptions(includeTotal: false)
 
         // When
-        let url = sut.generatePDF(for: vehicle, serviceLogs: [log], options: options)
+        let url = await sut.generatePDF(for: vehicle, serviceLogs: [log], options: options)
 
         // Then
         XCTAssertNotNil(url, "PDF should be generated without totals")
@@ -243,7 +243,7 @@ final class ServiceHistoryPDFServiceTests: XCTestCase {
         }
     }
 
-    func test_generatePDF_withSpecialCharacters_escapesCorrectly() {
+    func test_generatePDF_withSpecialCharacters_escapesCorrectly() async {
         // Given
         let vehicle = createTestVehicle(name: "Car with \"quotes\" & <brackets>")
         let service = createTestService(name: "Service with émojis 🔧", vehicle: vehicle)
@@ -254,7 +254,7 @@ final class ServiceHistoryPDFServiceTests: XCTestCase {
         )
 
         // When
-        let url = sut.generatePDF(for: vehicle, serviceLogs: [log])
+        let url = await sut.generatePDF(for: vehicle, serviceLogs: [log])
 
         // Then
         XCTAssertNotNil(url, "PDF should handle special characters")
@@ -269,7 +269,7 @@ final class ServiceHistoryPDFServiceTests: XCTestCase {
         }
     }
 
-    func test_generatePDF_withLongNotes_truncatesCorrectly() {
+    func test_generatePDF_withLongNotes_truncatesCorrectly() async {
         // Given
         let vehicle = createTestVehicle()
         let service = createTestService(vehicle: vehicle)
@@ -281,7 +281,7 @@ final class ServiceHistoryPDFServiceTests: XCTestCase {
         )
 
         // When
-        let url = sut.generatePDF(for: vehicle, serviceLogs: [log])
+        let url = await sut.generatePDF(for: vehicle, serviceLogs: [log])
 
         // Then
         XCTAssertNotNil(url, "PDF should handle long notes")
@@ -292,12 +292,12 @@ final class ServiceHistoryPDFServiceTests: XCTestCase {
         }
     }
 
-    func test_generatePDF_filenameContainsVehicleName() {
+    func test_generatePDF_filenameContainsVehicleName() async {
         // Given
         let vehicle = createTestVehicle(name: "My Honda Civic")
 
         // When
-        let url = sut.generatePDF(for: vehicle, serviceLogs: [])
+        let url = await sut.generatePDF(for: vehicle, serviceLogs: [])
 
         // Then
         XCTAssertNotNil(url, "PDF should be generated")
@@ -309,7 +309,39 @@ final class ServiceHistoryPDFServiceTests: XCTestCase {
         }
     }
 
-    func test_generatePDF_logsAreSortedChronologically() {
+    func test_sanitizeFileName_replacesPathHostileCharacters() {
+        XCTAssertEqual(ServiceHistoryPDFService.sanitizeFileName("My Honda Civic"), "My_Honda_Civic")
+        XCTAssertEqual(ServiceHistoryPDFService.sanitizeFileName("Front/Rear"), "Front-Rear")
+        XCTAssertEqual(ServiceHistoryPDFService.sanitizeFileName("A:B?C*D"), "A-B-C-D")
+        // A name that sanitizes to nothing falls back to a safe default.
+        XCTAssertEqual(ServiceHistoryPDFService.sanitizeFileName("///"), "Vehicle")
+    }
+
+    func test_generatePDF_withSlashInName_writesToTempDirNotSubpath() async {
+        // Given — a "/" in the name previously created a bogus subpath, silently
+        // failing the write and returning nil.
+        let vehicle = createTestVehicle(name: "Front/Rear Truck")
+
+        // When
+        let url = await sut.generatePDF(for: vehicle, serviceLogs: [])
+
+        // Then
+        XCTAssertNotNil(url, "PDF should still be generated when the name contains a slash")
+        if let url = url {
+            XCTAssertTrue(FileManager.default.fileExists(atPath: url.path), "PDF file should exist")
+            XCTAssertEqual(
+                url.deletingLastPathComponent().standardizedFileURL,
+                FileManager.default.temporaryDirectory.standardizedFileURL,
+                "File should land directly in the temp dir, not a subdirectory"
+            )
+            XCTAssertFalse(url.lastPathComponent.contains("/"))
+
+            // Cleanup
+            try? FileManager.default.removeItem(at: url)
+        }
+    }
+
+    func test_generatePDF_logsAreSortedChronologically() async {
         // Given
         let vehicle = createTestVehicle()
         let service = createTestService(vehicle: vehicle)
@@ -324,7 +356,7 @@ final class ServiceHistoryPDFServiceTests: XCTestCase {
         let log1 = createTestServiceLog(service: service, vehicle: vehicle, performedDate: oldestDate, mileageAtService: 47000)
 
         // When - pass logs in random order
-        let url = sut.generatePDF(for: vehicle, serviceLogs: [log2, log3, log1])
+        let url = await sut.generatePDF(for: vehicle, serviceLogs: [log2, log3, log1])
 
         // Then
         XCTAssertNotNil(url, "PDF should be generated with sorted logs")
@@ -335,14 +367,14 @@ final class ServiceHistoryPDFServiceTests: XCTestCase {
         }
     }
 
-    func test_generatePDF_withNilCost_handlesGracefully() {
+    func test_generatePDF_withNilCost_handlesGracefully() async {
         // Given
         let vehicle = createTestVehicle()
         let service = createTestService(vehicle: vehicle)
         let log = createTestServiceLog(service: service, vehicle: vehicle, cost: nil)
 
         // When
-        let url = sut.generatePDF(for: vehicle, serviceLogs: [log])
+        let url = await sut.generatePDF(for: vehicle, serviceLogs: [log])
 
         // Then
         XCTAssertNotNil(url, "PDF should handle nil costs")
@@ -353,14 +385,14 @@ final class ServiceHistoryPDFServiceTests: XCTestCase {
         }
     }
 
-    func test_generatePDF_withZeroCost_handlesGracefully() {
+    func test_generatePDF_withZeroCost_handlesGracefully() async {
         // Given
         let vehicle = createTestVehicle()
         let service = createTestService(vehicle: vehicle)
         let log = createTestServiceLog(service: service, vehicle: vehicle, cost: 0)
 
         // When
-        let url = sut.generatePDF(for: vehicle, serviceLogs: [log])
+        let url = await sut.generatePDF(for: vehicle, serviceLogs: [log])
 
         // Then
         XCTAssertNotNil(url, "PDF should handle zero costs")

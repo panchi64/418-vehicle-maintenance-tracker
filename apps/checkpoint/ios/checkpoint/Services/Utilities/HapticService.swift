@@ -11,51 +11,69 @@ import UIKit
 final class HapticService {
     static let shared = HapticService()
 
+    // Cached generators. Reusing a single instance per feedback kind and calling
+    // prepare() before firing keeps the Taptic Engine warm, which lowers latency
+    // and avoids the allocation churn of creating a generator per call.
+    private let impactSoft = UIImpactFeedbackGenerator(style: .soft)
+    private let impactLight = UIImpactFeedbackGenerator(style: .light)
+    private let impactMedium = UIImpactFeedbackGenerator(style: .medium)
+    private let impactHeavy = UIImpactFeedbackGenerator(style: .heavy)
+    private let notification = UINotificationFeedbackGenerator()
+    private let selection = UISelectionFeedbackGenerator()
+
     private init() {}
 
     // MARK: - Tab Navigation
 
     /// Soft haptic for tab changes and swipe navigation
     func tabChanged() {
-        UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+        impactSoft.prepare()
+        impactSoft.impactOccurred()
     }
 
     // MARK: - Feedback Types
 
     /// Success haptic for completed actions (form saves, task completion)
     func success() {
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        notification.prepare()
+        notification.notificationOccurred(.success)
     }
 
     /// Warning haptic for destructive or important actions (delete confirmations)
     func warning() {
-        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+        notification.prepare()
+        notification.notificationOccurred(.warning)
     }
 
     /// Error haptic for failed actions
     func error() {
-        UINotificationFeedbackGenerator().notificationOccurred(.error)
+        notification.prepare()
+        notification.notificationOccurred(.error)
     }
 
     /// Selection changed haptic for picker changes
     func selectionChanged() {
-        UISelectionFeedbackGenerator().selectionChanged()
+        selection.prepare()
+        selection.selectionChanged()
     }
 
     // MARK: - Impact Variations
 
     /// Light impact for subtle interactions
     func lightImpact() {
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        impactLight.prepare()
+        impactLight.impactOccurred()
     }
 
     /// Medium impact for standard interactions
     func mediumImpact() {
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        impactMedium.prepare()
+        impactMedium.impactOccurred()
     }
 
     /// Heavy impact for significant interactions
     func heavyImpact() {
-        UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+        impactHeavy.prepare()
+        impactHeavy.impactOccurred()
     }
 }

@@ -153,8 +153,25 @@ actor NHTSAService {
     private let vinCacheTTL: TimeInterval = 24 * 60 * 60  // 24 hours (VIN data is static)
     private let recallsCacheTTL: TimeInterval = 60 * 60   // 1 hour (recalls can be updated)
 
+    // Upper bound on in-memory entries per cache. Prevents unbounded growth for a
+    // long-lived session that decodes many VINs / vehicles.
+    private nonisolated static let maxCacheEntries = 200
+
     init(session: URLSession = .shared) {
         self.session = session
+    }
+
+    /// Returns the cache with expired entries dropped and, if still over the size
+    /// bound, only the most recently written entries retained.
+    private func pruned<T: Sendable>(_ cache: [String: CacheEntry<T>], ttl: TimeInterval) -> [String: CacheEntry<T>] {
+        var result = cache.filter { $0.value.isValid(ttl: ttl) }
+        if result.count > Self.maxCacheEntries {
+            let survivors = result
+                .sorted { $0.value.timestamp > $1.value.timestamp }
+                .prefix(Self.maxCacheEntries)
+            result = Dictionary(uniqueKeysWithValues: survivors.map { ($0.key, $0.value) })
+        }
+        return result
     }
 
     /// Clears all cached data (useful for testing or manual refresh)
@@ -255,8 +272,9 @@ actor NHTSAService {
             errorCode: result.ErrorCode ?? ""
         )
 
-        // Cache the result
+        // Cache the result, evicting expired/overflow entries as we go.
         vinCache[trimmed] = CacheEntry(data: vinDecodeResult, timestamp: Date())
+        vinCache = pruned(vinCache, ttl: vinCacheTTL)
 
         return vinDecodeResult
     }
@@ -280,6 +298,7 @@ actor NHTSAService {
             let recalls = try await fetchRecallsFromNetwork(make: make, model: model, year: year)
             let entry = CacheEntry(data: recalls, timestamp: Date())
             recallsCache[cacheKey] = entry
+            recallsCache = pruned(recallsCache, ttl: recallsCacheTTL)
             await PersistentRecallCache.shared.write(key: cacheKey, recalls: recalls, timestamp: entry.timestamp)
             return recalls
         } catch {

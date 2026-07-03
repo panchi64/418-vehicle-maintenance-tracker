@@ -103,12 +103,13 @@ actor OdometerOCRService {
             throw OCRError.imageProcessingFailed
         }
 
-        // Convert UIImage orientation to CGImagePropertyOrientation for Vision
-        // Access UIImage properties on MainActor to satisfy Swift 6 concurrency requirements
-        let cgOrientation = await MainActor.run {
-            CGImagePropertyOrientation(image.imageOrientation)
+        // Convert UIImage orientation to CGImagePropertyOrientation for Vision.
+        // Access UIImage properties on the MainActor in a single hop, returning the
+        // Sendable values the rest of this method needs.
+        let (cgOrientation, orientationRawValue) = await MainActor.run { () -> (CGImagePropertyOrientation, Int) in
+            let orientation = image.imageOrientation
+            return (CGImagePropertyOrientation(orientation), orientation.rawValue)
         }
-        let orientationRawValue = await MainActor.run { image.imageOrientation.rawValue }
         logger.debug("Starting OCR, image orientation: \(orientationRawValue) -> cgOrientation: \(cgOrientation.rawValue)")
 
         // Preprocess image to get multiple enhanced versions

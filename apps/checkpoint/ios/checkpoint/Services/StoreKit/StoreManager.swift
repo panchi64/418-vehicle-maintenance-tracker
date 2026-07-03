@@ -88,8 +88,19 @@ final class StoreManager {
     #endif
 
     func purchase(_ productID: ProductID) async throws -> StoreKit.Transaction? {
-        guard let product = products.first(where: { $0.id == productID.rawValue }) else {
+        var product = products.first(where: { $0.id == productID.rawValue })
+
+        // Products may not have loaded yet (e.g. an earlier loadProducts() failed).
+        // Retry the fetch once before giving up so a transient failure doesn't leave
+        // the Buy button silently doing nothing.
+        if product == nil {
+            await loadProducts()
+            product = products.first(where: { $0.id == productID.rawValue })
+        }
+
+        guard let product else {
             storeLogger.error("Product not found: \(productID.rawValue)")
+            purchaseError = String(localized: "store.error.product_unavailable")
             return nil
         }
 

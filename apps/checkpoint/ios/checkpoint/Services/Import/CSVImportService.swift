@@ -12,7 +12,7 @@ import os
 
 // MARK: - Import Source
 
-enum CSVImportSource: String, CaseIterable, Identifiable {
+nonisolated enum CSVImportSource: String, CaseIterable, Identifiable, Sendable {
     case fuelly = "Fuelly"
     case drivvo = "Drivvo"
     case simplyAuto = "Simply Auto"
@@ -32,7 +32,7 @@ enum CSVImportSource: String, CaseIterable, Identifiable {
 
 // MARK: - Column Mapping
 
-struct CSVColumnMapping {
+nonisolated struct CSVColumnMapping: Sendable {
     var dateColumn: Int?
     var odometerColumn: Int?
     var descriptionColumn: Int?
@@ -42,7 +42,7 @@ struct CSVColumnMapping {
 
 // MARK: - Import Warning
 
-struct CSVImportWarning: Identifiable {
+nonisolated struct CSVImportWarning: Identifiable, Sendable {
     let id = UUID()
     let row: Int
     let message: String
@@ -50,7 +50,7 @@ struct CSVImportWarning: Identifiable {
 
 // MARK: - Parsed Row
 
-struct CSVParsedRow {
+nonisolated struct CSVParsedRow: Sendable {
     let date: Date?
     let odometer: Int?
     let serviceName: String
@@ -80,7 +80,7 @@ struct CSVImportResult {
 
 // MARK: - Import Error
 
-enum CSVImportError: Error, LocalizedError {
+nonisolated enum CSVImportError: Error, LocalizedError {
     case fileReadFailed
     case emptyFile
     case noHeaderRow
@@ -125,7 +125,7 @@ final class CSVImportService {
 
     // MARK: - Known Service Names (for preset matching)
 
-    private static let presetNameMap: [String: String] = [
+    private nonisolated static let presetNameMap: [String: String] = [
         "oil change": "Oil Change",
         "oil & filter": "Oil Change",
         "oil filter": "Oil Change",
@@ -155,24 +155,93 @@ final class CSVImportService {
         "wipers": "Wiper Blades",
     ]
 
-    // MARK: - Date Parsers
+    // MARK: - Date Parsing
+    //
+    // Slash-delimited dates are ambiguous: "03/04/2024" is Mar 4 (US, month-first)
+    // or Apr 3 (EU, day-first). We resolve the order once per import by scanning the
+    // whole date column — a row whose first field is > 12 proves day-first, one whose
+    // second field is > 12 proves month-first. When every row is ambiguous we fall
+    // back to the user's locale ordering. See `inferSlashDateOrder`.
 
-    private static let dateParsers: [DateFormatter] = [
-        Formatters.dateParserDashYMD,
-        Formatters.dateParserSlashMDY,
-        Formatters.dateParserSlashDMY,
-        Formatters.dateParserMediumDate,
-        Formatters.dateParserSlashMDYShort,
-        Formatters.dateParserSlashDMYShort,
-        Formatters.dateParserSlashYMD,
-    ]
+    nonisolated enum SlashDateOrder: Sendable, Equatable {
+        case monthFirst
+        case dayFirst
+    }
 
     // MARK: - Public API
 
-    /// Load and parse a CSV file from a URL
-    func loadCSV(from url: URL) throws {
+    /// Load and parse a CSV file from a URL.
+    ///
+    /// File reading and line parsing run off the main actor (via a detached task)
+    /// so a large import doesn't block the UI; the parsed result is then published
+    /// to this observable's `@MainActor` state.
+    func loadCSV(from url: URL) async throws {
         reset()
 
+        let loaded: LoadedCSV
+        do {
+            loaded = try await Task.detached { [self] in
+                try readAndParse(from: url)
+            }.value
+        } catch {
+            logger.error("Failed to read CSV file: \(error.localizedDescription)")
+            throw error
+        }
+
+        headers = loaded.headers
+        allRows = loaded.allRows
+        previewRows = loaded.previewRows
+        detectedSource = loaded.detectedSource
+        columnMapping = loaded.columnMapping
+
+        logger.info("CSV loaded: \(loaded.headers.count) columns, \(loaded.allRows.count) data rows, detected: \(loaded.detectedSource.rawValue)")
+    }
+
+    /// Generate an import preview based on current column mapping.
+    ///
+    /// Row parsing (the expensive pass over every data row) runs off the main actor.
+    func generatePreview(distanceUnit: DistanceUnit) async -> CSVImportPreview {
+        let rowsSnapshot = allRows
+        let mapping = columnMapping
+        let milesScale = Self.milesScale(for: distanceUnit)
+
+        let parsed = await Task.detached { [self] in
+            parseRows(rowsSnapshot, columnMapping: mapping, milesScale: milesScale)
+        }.value
+
+        // Group by service name
+        let grouped = Dictionary(grouping: parsed.rows, by: { $0.serviceName })
+        let serviceNames = grouped.keys.sorted()
+
+        let totalCost = parsed.rows.compactMap { $0.cost }.reduce(Decimal.zero, +)
+
+        let preview = CSVImportPreview(
+            serviceCount: serviceNames.count,
+            logCount: parsed.rows.count,
+            totalCost: totalCost,
+            serviceNames: serviceNames,
+            warnings: parsed.warnings,
+            parsedRows: parsed.rows
+        )
+
+        importPreview = preview
+        return preview
+    }
+
+    // MARK: - Off-Main File Reading
+
+    /// Sendable payload carrying a fully-parsed CSV back to the main actor.
+    private nonisolated struct LoadedCSV: Sendable {
+        let headers: [String]
+        let allRows: [[String]]
+        let previewRows: [[String]]
+        let detectedSource: CSVImportSource
+        let columnMapping: CSVColumnMapping
+    }
+
+    /// Reads the file, decodes it (with an encoding fallback chain), and parses the
+    /// header + rows. Runs off the main actor — touches no `@MainActor` state.
+    private nonisolated func readAndParse(from url: URL) throws -> LoadedCSV {
         let didAccessSecurityScope = url.startAccessingSecurityScopedResource()
         defer {
             if didAccessSecurityScope {
@@ -180,11 +249,14 @@ final class CSVImportService {
             }
         }
 
-        let content: String
+        let data: Data
         do {
-            content = try String(contentsOf: url, encoding: .utf8)
+            data = try Data(contentsOf: url)
         } catch {
-            logger.error("Failed to read CSV file: \(error.localizedDescription)")
+            throw CSVImportError.fileReadFailed
+        }
+
+        guard let content = Self.decodeCSVData(data) else {
             throw CSVImportError.fileReadFailed
         }
 
@@ -196,46 +268,48 @@ final class CSVImportService {
         let parsedLines = lines.map { parseCSVLine($0) }
 
         guard let headerRow = parsedLines.first else { throw CSVImportError.noHeaderRow }
-        headers = headerRow.map { $0.trimmingCharacters(in: .whitespaces) }
+        let headers = headerRow.map { $0.trimmingCharacters(in: .whitespaces) }
 
         let dataRows = Array(parsedLines.dropFirst())
         guard !dataRows.isEmpty else { throw CSVImportError.noDataRows }
 
-        allRows = dataRows
-        previewRows = Array(dataRows.prefix(3))
+        let detectedSource = detectSource(headers: headers)
+        let columnMapping = autoMapColumns(headers: headers, source: detectedSource)
 
-        // Auto-detect source
-        detectedSource = detectSource(headers: headers)
-
-        // Auto-map columns
-        columnMapping = autoMapColumns(headers: headers, source: detectedSource)
-
-        logger.info("CSV loaded: \(self.headers.count) columns, \(dataRows.count) data rows, detected: \(self.detectedSource.rawValue)")
+        return LoadedCSV(
+            headers: headers,
+            allRows: dataRows,
+            previewRows: Array(dataRows.prefix(3)),
+            detectedSource: detectedSource,
+            columnMapping: columnMapping
+        )
     }
 
-    /// Generate an import preview based on current column mapping
-    func generatePreview(distanceUnit: DistanceUnit) -> CSVImportPreview {
-        let parsed = parseAllRows(distanceUnit: distanceUnit)
-        let warnings = parsed.warnings
-        let rows = parsed.rows
+    /// Decodes raw CSV bytes, honoring a byte-order mark and falling back across
+    /// common encodings (UTF-8 → UTF-16 → Latin-1) before giving up.
+    nonisolated static func decodeCSVData(_ data: Data) -> String? {
+        let decoded: String?
+        if data.starts(with: [0xFF, 0xFE]) || data.starts(with: [0xFE, 0xFF]) {
+            // UTF-16 with BOM — its interior null bytes would let .utf8 "succeed"
+            // with garbled text, so honor the BOM first.
+            decoded = String(data: data, encoding: .utf16)
+        } else if data.starts(with: [0xEF, 0xBB, 0xBF]) {
+            decoded = String(data: data.dropFirst(3), encoding: .utf8)
+        } else if let utf8 = String(data: data, encoding: .utf8) {
+            decoded = utf8
+        } else if data.contains(0), let utf16 = String(data: data, encoding: .utf16) {
+            // BOM-less UTF-16 text contains NUL bytes (the high byte of ASCII
+            // code units); Latin-1/UTF-8 text never does. Without this gate,
+            // .utf16 happily decodes Latin-1 bytes into CJK garbage.
+            decoded = utf16
+        } else {
+            // Latin-1 maps every byte, so this last resort never fails.
+            decoded = String(data: data, encoding: .isoLatin1)
+        }
 
-        // Group by service name
-        let grouped = Dictionary(grouping: rows, by: { $0.serviceName })
-        let serviceNames = grouped.keys.sorted()
-
-        let totalCost = rows.compactMap { $0.cost }.reduce(Decimal.zero, +)
-
-        let preview = CSVImportPreview(
-            serviceCount: serviceNames.count,
-            logCount: rows.count,
-            totalCost: totalCost,
-            serviceNames: serviceNames,
-            warnings: warnings,
-            parsedRows: rows
-        )
-
-        importPreview = preview
-        return preview
+        // Strip any residual BOM so it can't corrupt the first header cell.
+        guard let result = decoded else { return nil }
+        return result.hasPrefix("\u{FEFF}") ? String(result.dropFirst()) : result
     }
 
     /// Commit the import to SwiftData
@@ -310,7 +384,7 @@ final class CSVImportService {
 
     // MARK: - Source Detection
 
-    func detectSource(headers: [String]) -> CSVImportSource {
+    nonisolated func detectSource(headers: [String]) -> CSVImportSource {
         let headerSet = Set(headers)
 
         for source in CSVImportSource.allCases where source != .custom {
@@ -324,7 +398,7 @@ final class CSVImportService {
 
     // MARK: - Column Auto-Mapping
 
-    func autoMapColumns(headers: [String], source: CSVImportSource) -> CSVColumnMapping {
+    nonisolated func autoMapColumns(headers: [String], source: CSVImportSource) -> CSVColumnMapping {
         var mapping = CSVColumnMapping()
         let lowered = headers.map { $0.lowercased() }
 
@@ -381,9 +455,37 @@ final class CSVImportService {
 
     // MARK: - Row Parsing
 
+    /// Parses `allRows` using the current column mapping. Kept as a thin main-actor
+    /// wrapper so existing callers and tests can invoke it synchronously; the work
+    /// itself is nonisolated and moved off-main by `generatePreview`.
     func parseAllRows(distanceUnit: DistanceUnit) -> (rows: [CSVParsedRow], warnings: [CSVImportWarning]) {
+        parseRows(allRows, columnMapping: columnMapping, milesScale: Self.milesScale(for: distanceUnit))
+    }
+
+    /// The factor that converts a value in `unit` to miles. Resolved on the main
+    /// actor (where `DistanceUnit` is isolated) so the nonisolated parser only needs
+    /// a plain `Double`.
+    static func milesScale(for unit: DistanceUnit) -> Double {
+        unit == .miles ? 1.0 : DistanceUnit.milesPerKm
+    }
+
+    /// Pure, off-main row parser. Locks the ambiguous slash-date order once for the
+    /// whole import before parsing individual rows. `milesScale` converts the
+    /// odometer column into miles (see `milesScale(for:)`).
+    nonisolated func parseRows(
+        _ allRows: [[String]],
+        columnMapping: CSVColumnMapping,
+        milesScale: Double
+    ) -> (rows: [CSVParsedRow], warnings: [CSVImportWarning]) {
         var rows: [CSVParsedRow] = []
         var warnings: [CSVImportWarning] = []
+
+        // Decide month-first vs day-first once, from the full date column.
+        let slashOrder: SlashDateOrder = {
+            guard let col = columnMapping.dateColumn else { return .monthFirst }
+            let dateStrings = allRows.compactMap { row in col < row.count ? row[col] : nil }
+            return inferSlashDateOrder(from: dateStrings)
+        }()
 
         for (index, row) in allRows.enumerated() {
             let rowNumber = index + 2 // 1-based, +1 for header
@@ -406,22 +508,23 @@ final class CSVImportService {
             var date: Date?
             if let col = columnMapping.dateColumn, col < row.count {
                 let raw = row[col].trimmingCharacters(in: .whitespaces)
-                date = parseDate(raw)
+                date = parseDate(raw, slashOrder: slashOrder)
                 if date == nil && !raw.isEmpty {
                     warnings.append(CSVImportWarning(row: rowNumber, message: "Row \(rowNumber): Could not parse date '\(raw)'"))
                 }
             }
 
-            // Parse odometer (convert from user's unit to miles for storage)
+            // Parse odometer (convert from user's unit to miles for storage).
+            // Matches DistanceUnit.toMiles: multiply by the scale, then round.
             var odometer: Int?
             if let col = columnMapping.odometerColumn, col < row.count {
                 let raw = row[col].trimmingCharacters(in: .whitespaces)
                     .replacingOccurrences(of: ",", with: "")
                     .replacingOccurrences(of: " ", with: "")
                 if let value = Int(raw) {
-                    odometer = distanceUnit.toMiles(value)
+                    odometer = Int((Double(value) * milesScale).rounded())
                 } else if let value = Double(raw) {
-                    odometer = distanceUnit.toMiles(Int(value))
+                    odometer = Int((Double(Int(value)) * milesScale).rounded())
                 }
             }
 
@@ -461,11 +564,34 @@ final class CSVImportService {
 
     // MARK: - Date Parsing
 
-    func parseDate(_ string: String) -> Date? {
+    /// Single-string date parse. Resolves ambiguous slash dates from the string
+    /// itself when it's unambiguous, otherwise from the current locale.
+    nonisolated func parseDate(_ string: String) -> Date? {
+        parseDate(string, slashOrder: inferSlashDateOrder(from: [string]))
+    }
+
+    /// Parses a date string, using `slashOrder` to disambiguate `n/n/yyyy` values.
+    nonisolated func parseDate(_ string: String, slashOrder: SlashDateOrder) -> Date? {
         let trimmed = string.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return nil }
 
-        for formatter in Self.dateParsers {
+        // Unambiguous formats first (year-first and month-name never collide).
+        let unambiguous = [
+            Formatters.dateParserDashYMD,
+            Formatters.dateParserSlashYMD,
+            Formatters.dateParserMediumDate,
+        ]
+        for formatter in unambiguous {
+            if let date = formatter.date(from: trimmed) {
+                return date
+            }
+        }
+
+        // Ambiguous slash dates use the order locked in for this import.
+        let slashParsers = slashOrder == .dayFirst
+            ? [Formatters.dateParserSlashDMY, Formatters.dateParserSlashDMYShort]
+            : [Formatters.dateParserSlashMDY, Formatters.dateParserSlashMDYShort]
+        for formatter in slashParsers {
             if let date = formatter.date(from: trimmed) {
                 return date
             }
@@ -476,9 +602,45 @@ final class CSVImportService {
         return iso.date(from: trimmed)
     }
 
+    /// Determines whether a set of slash-delimited dates is month-first or day-first.
+    /// A single unambiguous row (a field > 12) locks the order for the whole import;
+    /// if every candidate is ambiguous, falls back to the user's locale ordering.
+    nonisolated func inferSlashDateOrder(from dateStrings: [String], locale: Locale = .current) -> SlashDateOrder {
+        var sawDayFirst = false    // first field > 12  ⇒ dd/MM
+        var sawMonthFirst = false  // second field > 12 ⇒ MM/dd
+
+        for raw in dateStrings {
+            let parts = raw.trimmingCharacters(in: .whitespaces).split(separator: "/")
+            // Only consider d/M/yyyy-shaped values; skip yyyy/MM/dd and other formats.
+            guard parts.count == 3,
+                  parts[0].count <= 2, parts[1].count <= 2, parts[2].count == 4,
+                  let first = Int(parts[0]), let second = Int(parts[1]) else { continue }
+
+            if first > 12 && second <= 12 {
+                sawDayFirst = true
+            } else if second > 12 && first <= 12 {
+                sawMonthFirst = true
+            }
+        }
+
+        if sawDayFirst && !sawMonthFirst { return .dayFirst }
+        if sawMonthFirst && !sawDayFirst { return .monthFirst }
+        return Self.localePrefersDayFirst(locale) ? .dayFirst : .monthFirst
+    }
+
+    /// Whether the locale writes day before month in a numeric date (e.g. en_GB).
+    nonisolated static func localePrefersDayFirst(_ locale: Locale) -> Bool {
+        guard let template = DateFormatter.dateFormat(fromTemplate: "yMd", options: 0, locale: locale),
+              let dayIndex = template.firstIndex(of: "d"),
+              let monthIndex = template.firstIndex(of: "M") else {
+            return false
+        }
+        return dayIndex < monthIndex
+    }
+
     // MARK: - Service Name Normalization
 
-    func normalizeServiceName(_ raw: String) -> String {
+    nonisolated func normalizeServiceName(_ raw: String) -> String {
         let lowered = raw.lowercased().trimmingCharacters(in: .whitespaces)
 
         // Try exact match against preset names
@@ -499,7 +661,7 @@ final class CSVImportService {
 
     // MARK: - CSV Line Parsing
 
-    func parseCSVLine(_ line: String) -> [String] {
+    nonisolated func parseCSVLine(_ line: String) -> [String] {
         var fields: [String] = []
         var current = ""
         var inQuotes = false

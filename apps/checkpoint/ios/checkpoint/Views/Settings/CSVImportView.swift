@@ -192,13 +192,15 @@ struct CSVImportView: View {
         switch result {
         case .success(let urls):
             guard let url = urls.first else { return }
-            do {
-                try importService.loadCSV(from: url)
-                selectedSource = importService.detectedSource
-                errorMessage = nil
-                currentStep = .configure
-            } catch {
-                errorMessage = error.localizedDescription
+            Task {
+                do {
+                    try await importService.loadCSV(from: url)
+                    selectedSource = importService.detectedSource
+                    errorMessage = nil
+                    currentStep = .configure
+                } catch {
+                    errorMessage = error.localizedDescription
+                }
             }
         case .failure(let error):
             errorMessage = error.localizedDescription

@@ -15,6 +15,13 @@ actor PersistentRecallCache {
 
     private static let fileName = "recalls-cache.json"
 
+    // Retention is deliberately far longer than the 1-hour recalls TTL: NHTSAService
+    // reads this cache as an *offline fallback*, returning stale data when the network
+    // is unavailable. Pruning here only bounds unbounded file growth, so entries live
+    // for a generous window and the cache is capped to the newest N vehicles.
+    private nonisolated static let maxEntryAge: TimeInterval = 30 * 24 * 60 * 60  // 30 days
+    private nonisolated static let maxEntries = 100
+
     private var store: [String: CacheEntry<[RecallInfo]>]?
 
     private var fileURL: URL? {
@@ -28,8 +35,9 @@ actor PersistentRecallCache {
     func write(key: String, recalls: [RecallInfo], timestamp: Date = .now) {
         var current = loadIfNeeded()
         current[key] = CacheEntry(data: recalls, timestamp: timestamp)
-        store = current
-        flush(current)
+        let bounded = Self.prune(current)
+        store = bounded
+        flush(bounded)
     }
 
     func clear() {
@@ -48,8 +56,14 @@ actor PersistentRecallCache {
         do {
             let data = try Data(contentsOf: url)
             let decoded = try JSONDecoder().decode([String: CacheEntry<[RecallInfo]>].self, from: data)
-            store = decoded
-            return decoded
+            let bounded = Self.prune(decoded)
+            store = bounded
+            // Rewrite only when pruning actually dropped something, so a stale file
+            // shrinks on next launch instead of growing without bound.
+            if bounded.count != decoded.count {
+                flush(bounded)
+            }
+            return bounded
         } catch CocoaError.fileReadNoSuchFile {
             store = [:]
             return [:]
@@ -59,6 +73,22 @@ actor PersistentRecallCache {
             store = [:]
             return [:]
         }
+    }
+
+    /// Drops entries older than `maxEntryAge` and, if still over `maxEntries`,
+    /// keeps only the most recently written ones.
+    private nonisolated static func prune(
+        _ store: [String: CacheEntry<[RecallInfo]>],
+        now: Date = .now
+    ) -> [String: CacheEntry<[RecallInfo]>] {
+        var result = store.filter { now.timeIntervalSince($0.value.timestamp) < maxEntryAge }
+        if result.count > maxEntries {
+            let survivors = result
+                .sorted { $0.value.timestamp > $1.value.timestamp }
+                .prefix(maxEntries)
+            result = Dictionary(uniqueKeysWithValues: survivors.map { ($0.key, $0.value) })
+        }
+        return result
     }
 
     private func flush(_ snapshot: [String: CacheEntry<[RecallInfo]>]) {

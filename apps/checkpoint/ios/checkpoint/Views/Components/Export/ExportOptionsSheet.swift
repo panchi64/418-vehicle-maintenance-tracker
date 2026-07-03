@@ -104,24 +104,26 @@ struct ExportOptionsSheet: View {
         isExporting = true
         exportError = nil
 
-        // Generate PDF on main thread (service is @MainActor)
         let options = ExportOptions(
             includeAttachments: false,
             includeTotal: includeTotal,
             includeCostPerMile: false
         )
 
-        if let url = ServiceHistoryPDFService.shared.generatePDF(
-            for: vehicle,
-            serviceLogs: serviceLogs,
-            options: options
-        ) {
+        // Rendering runs off the main actor inside the service; await the result.
+        Task {
+            let url = await ServiceHistoryPDFService.shared.generatePDF(
+                for: vehicle,
+                serviceLogs: serviceLogs,
+                options: options
+            )
             isExporting = false
-            dismiss()
-            onExport(url)
-        } else {
-            isExporting = false
-            exportError = "Failed to generate PDF. Please try again."
+            if let url {
+                dismiss()
+                onExport(url)
+            } else {
+                exportError = "Failed to generate PDF. Please try again."
+            }
         }
     }
 }

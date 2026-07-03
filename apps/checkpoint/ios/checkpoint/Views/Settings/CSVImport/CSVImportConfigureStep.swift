@@ -188,15 +188,17 @@ struct CSVImportConfigureStep: View {
             }
 
             Button {
-                let preview = importService.generatePreview(
-                    distanceUnit: DistanceSettings.shared.unit
-                )
+                Task {
+                    let preview = await importService.generatePreview(
+                        distanceUnit: DistanceSettings.shared.unit
+                    )
 
-                if preview.logCount == 0 {
-                    errorMessage = "No valid rows could be parsed. Check your column mapping."
-                } else {
-                    errorMessage = nil
-                    currentStep = .preview
+                    if preview.logCount == 0 {
+                        errorMessage = "No valid rows could be parsed. Check your column mapping."
+                    } else {
+                        errorMessage = nil
+                        currentStep = .preview
+                    }
                 }
             } label: {
                 Text("Preview Import")

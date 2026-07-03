@@ -203,18 +203,18 @@ final class CSVImportServiceTests: XCTestCase {
 
     // MARK: - Full CSV Loading & Parsing
 
-    func testLoadCSV_milesUnit() {
+    func testLoadCSV_milesUnit() async {
         let csv = "Date,Service,Odometer,Cost\n2024-06-15,Oil Change,50000,45.99"
-        loadCSVString(csv)
+        await loadCSVString(csv)
 
         let result = service.parseAllRows(distanceUnit: .miles)
         XCTAssertEqual(result.rows.count, 1)
         XCTAssertEqual(result.rows.first?.odometer, 50000, "Miles should pass through unchanged")
     }
 
-    func testLoadCSV_kilometersUnit() {
+    func testLoadCSV_kilometersUnit() async {
         let csv = "Date,Service,Odometer,Cost\n2024-06-15,Oil Change,80000,45.99"
-        loadCSVString(csv)
+        await loadCSVString(csv)
 
         let result = service.parseAllRows(distanceUnit: .kilometers)
         XCTAssertEqual(result.rows.count, 1)
@@ -224,7 +224,7 @@ final class CSVImportServiceTests: XCTestCase {
 
     // MARK: - Service Grouping
 
-    func testLoadCSV_groupsByServiceName() {
+    func testLoadCSV_groupsByServiceName() async {
         let csv = """
 Date,Service,Odometer,Cost
 2024-01-15,Oil Change,50000,45
@@ -232,7 +232,7 @@ Date,Service,Odometer,Cost
 2024-07-15,Oil Change,55000,48
 2024-10-15,Oil Change,58000,46
 """
-        loadCSVString(csv)
+        await loadCSVString(csv)
 
         let result = service.parseAllRows(distanceUnit: .miles)
         XCTAssertEqual(result.rows.count, 4)
@@ -244,17 +244,17 @@ Date,Service,Odometer,Cost
 
     // MARK: - Cost Parsing
 
-    func testLoadCSV_costWithDollarSign() {
+    func testLoadCSV_costWithDollarSign() async {
         let csv = "Date,Service,Cost\n2024-01-15,Oil Change,$45.99"
-        loadCSVString(csv)
+        await loadCSVString(csv)
 
         let result = service.parseAllRows(distanceUnit: .miles)
         XCTAssertEqual(result.rows.first?.cost, Decimal(string: "45.99"), "Should parse cost with dollar sign")
     }
 
-    func testLoadCSV_costWithComma() {
+    func testLoadCSV_costWithComma() async {
         let csv = "Date,Service,Cost\n2024-01-15,Brake Pads,\"1,285.50\""
-        loadCSVString(csv)
+        await loadCSVString(csv)
 
         let result = service.parseAllRows(distanceUnit: .miles)
         XCTAssertEqual(result.rows.first?.cost, Decimal(string: "1285.50"), "Should parse cost with comma separator")
@@ -262,18 +262,18 @@ Date,Service,Odometer,Cost
 
     // MARK: - Warnings
 
-    func testLoadCSV_warningForMissingServiceName() {
+    func testLoadCSV_warningForMissingServiceName() async {
         let csv = "Date,Service,Cost\n2024-01-15,,45\n2024-02-15,Oil Change,48"
-        loadCSVString(csv)
+        await loadCSVString(csv)
 
         let result = service.parseAllRows(distanceUnit: .miles)
         XCTAssertEqual(result.rows.count, 1, "Should skip row with empty service name")
         XCTAssertEqual(result.warnings.count, 1, "Should have 1 warning for missing name")
     }
 
-    func testLoadCSV_warningForUnparsableDate() {
+    func testLoadCSV_warningForUnparsableDate() async {
         let csv = "Date,Service,Cost\nnot-a-date,Oil Change,45"
-        loadCSVString(csv)
+        await loadCSVString(csv)
 
         let result = service.parseAllRows(distanceUnit: .miles)
         XCTAssertEqual(result.rows.count, 1, "Should still create row even with bad date")
@@ -388,16 +388,16 @@ Date,Service,Odometer,Cost
 
     // MARK: - Generate Preview
 
-    func testGeneratePreview_producesCorrectCounts() {
+    func testGeneratePreview_producesCorrectCounts() async {
         let csv = """
 Date,Service,Odometer,Cost
 2024-01-15,Oil Change,50000,45
 2024-04-15,Tire Rotation,52000,35
 2024-07-15,Oil Change,55000,48
 """
-        loadCSVString(csv)
+        await loadCSVString(csv)
 
-        let preview = service.generatePreview(distanceUnit: .miles)
+        let preview = await service.generatePreview(distanceUnit: .miles)
         XCTAssertEqual(preview.serviceCount, 2, "Should have 2 unique services")
         XCTAssertEqual(preview.logCount, 3, "Should have 3 total logs")
         XCTAssertEqual(preview.totalCost, 128, "Should sum total cost")
@@ -405,14 +405,14 @@ Date,Service,Odometer,Cost
 
     // MARK: - Load CSV File
 
-    func testLoadCSV_setsHeaders() {
+    func testLoadCSV_setsHeaders() async {
         let csv = "Date,Service,Odometer,Cost\n2024-01-15,Oil Change,50000,45"
-        loadCSVString(csv)
+        await loadCSVString(csv)
 
         XCTAssertEqual(service.headers, ["Date", "Service", "Odometer", "Cost"])
     }
 
-    func testLoadCSV_setsPreviewRows() {
+    func testLoadCSV_setsPreviewRows() async {
         let csv = """
 Date,Service,Cost
 2024-01-15,Oil Change,45
@@ -420,26 +420,157 @@ Date,Service,Cost
 2024-03-15,Brake Pads,200
 2024-04-15,Air Filter,25
 """
-        loadCSVString(csv)
+        await loadCSVString(csv)
 
         XCTAssertEqual(service.previewRows.count, 3, "Should have max 3 preview rows")
     }
 
-    func testLoadCSV_autoDetectsSource() {
+    func testLoadCSV_autoDetectsSource() async {
         let csv = "Date,Gallons,MPG,Odometer,Cost\n2024-01-15,12.5,28.4,50000,45"
-        loadCSVString(csv)
+        await loadCSVString(csv)
 
         XCTAssertEqual(service.detectedSource, .fuelly, "Should auto-detect Fuelly format")
     }
 
+    // MARK: - Encoding Fallback
+
+    func testDecodeCSVData_utf8_decodes() {
+        let data = "Date,Service\n2024-01-15,Oil Change".data(using: .utf8)!
+        XCTAssertEqual(CSVImportService.decodeCSVData(data), "Date,Service\n2024-01-15,Oil Change")
+    }
+
+    func testDecodeCSVData_utf8BOM_isStripped() {
+        var data = Data([0xEF, 0xBB, 0xBF])
+        data.append("Date,Service".data(using: .utf8)!)
+        let decoded = CSVImportService.decodeCSVData(data)
+        XCTAssertEqual(decoded, "Date,Service", "UTF-8 BOM should be stripped")
+        XCTAssertFalse(decoded?.hasPrefix("\u{FEFF}") ?? true, "No residual BOM should remain")
+    }
+
+    func testDecodeCSVData_utf16WithBOM_decodes() {
+        let original = "Date,Service\n2024-01-15,Café"
+        // .utf16 encoding prepends a BOM; decode must honor it, not fall through to UTF-8.
+        let data = original.data(using: .utf16)!
+        XCTAssertEqual(CSVImportService.decodeCSVData(data), original)
+    }
+
+    func testDecodeCSVData_latin1Fallback_decodes() {
+        // "Señor" in Latin-1: 0xF1 is ñ, but is invalid as standalone UTF-8.
+        let data = Data([0x53, 0x65, 0xF1, 0x6F, 0x72])
+        XCTAssertEqual(CSVImportService.decodeCSVData(data), "Señor")
+    }
+
+    func testLoadCSV_utf16File_parses() async throws {
+        let csv = "Date,Service,Odometer,Cost\n2024-06-15,Oil Change,50000,45.99"
+        try await loadCSVData(csv.data(using: .utf16)!)
+
+        XCTAssertEqual(service.headers, ["Date", "Service", "Odometer", "Cost"])
+        let result = service.parseAllRows(distanceUnit: .miles)
+        XCTAssertEqual(result.rows.count, 1)
+        XCTAssertEqual(result.rows.first?.serviceName, "Oil Change")
+    }
+
+    // MARK: - Ambiguous Date Format Inference
+
+    func testInferSlashDateOrder_unambiguousDayFirst_ignoresLocale() {
+        // A first field > 12 proves day-first, even in a month-first (US) locale.
+        let order = service.inferSlashDateOrder(
+            from: ["25/12/2024", "03/04/2024"],
+            locale: Locale(identifier: "en_US")
+        )
+        XCTAssertEqual(order, .dayFirst)
+    }
+
+    func testInferSlashDateOrder_unambiguousMonthFirst_ignoresLocale() {
+        // A second field > 12 proves month-first, even in a day-first (GB) locale.
+        let order = service.inferSlashDateOrder(
+            from: ["03/15/2024", "04/03/2024"],
+            locale: Locale(identifier: "en_GB")
+        )
+        XCTAssertEqual(order, .monthFirst)
+    }
+
+    func testInferSlashDateOrder_allAmbiguous_usesLocale() {
+        let ambiguous = ["03/04/2024", "05/06/2024"]
+        XCTAssertEqual(
+            service.inferSlashDateOrder(from: ambiguous, locale: Locale(identifier: "en_US")),
+            .monthFirst,
+            "US locale should default to month-first"
+        )
+        XCTAssertEqual(
+            service.inferSlashDateOrder(from: ambiguous, locale: Locale(identifier: "en_GB")),
+            .dayFirst,
+            "GB locale should default to day-first"
+        )
+    }
+
+    func testInferSlashDateOrder_ignoresYearFirstDates() {
+        // yyyy/MM/dd values must not be mistaken for day/month ambiguity.
+        let order = service.inferSlashDateOrder(
+            from: ["2024/03/04"],
+            locale: Locale(identifier: "en_US")
+        )
+        XCTAssertEqual(order, .monthFirst, "Year-first dates provide no D/M signal")
+    }
+
+    func testParseAllRows_unambiguousRowLocksDayFirstForWholeImport() async {
+        // The first row (day 25) forces day-first, so the ambiguous second row
+        // (03/04) must parse as Apr 3, not Mar 4.
+        let csv = """
+Date,Service
+25/12/2024,Oil Change
+03/04/2024,Tire Rotation
+"""
+        await loadCSVString(csv)
+
+        let rows = service.parseAllRows(distanceUnit: .miles).rows
+            .sorted { $0.rawRow < $1.rawRow }
+        let calendar = Calendar.current
+
+        XCTAssertEqual(calendar.component(.day, from: rows[0].date!), 25)
+        XCTAssertEqual(calendar.component(.month, from: rows[0].date!), 12)
+        XCTAssertEqual(calendar.component(.day, from: rows[1].date!), 3, "Locked day-first")
+        XCTAssertEqual(calendar.component(.month, from: rows[1].date!), 4)
+    }
+
+    func testParseAllRows_unambiguousRowLocksMonthFirstForWholeImport() async {
+        // The first row (month 12 in position 1 → 12/25 unambiguous month-first)
+        // forces the ambiguous second row (04/03) to parse as Apr 3.
+        let csv = """
+Date,Service
+12/25/2024,Oil Change
+04/03/2024,Tire Rotation
+"""
+        await loadCSVString(csv)
+
+        let rows = service.parseAllRows(distanceUnit: .miles).rows
+            .sorted { $0.rawRow < $1.rawRow }
+        let calendar = Calendar.current
+
+        XCTAssertEqual(calendar.component(.month, from: rows[0].date!), 12)
+        XCTAssertEqual(calendar.component(.day, from: rows[0].date!), 25)
+        XCTAssertEqual(calendar.component(.month, from: rows[1].date!), 4, "Locked month-first")
+        XCTAssertEqual(calendar.component(.day, from: rows[1].date!), 3)
+    }
+
     // MARK: - Helpers
 
-    private func loadCSVString(_ csv: String) {
+    private func loadCSVString(_ csv: String) async {
         let tempURL = FileManager.default.temporaryDirectory
             .appendingPathComponent("test_import_\(UUID().uuidString).csv")
         try! csv.write(to: tempURL, atomically: true, encoding: .utf8)
-        try! service.loadCSV(from: tempURL)
+        try! await service.loadCSV(from: tempURL)
         try? FileManager.default.removeItem(at: tempURL)
+    }
+
+    /// Writes `data` verbatim (no re-encoding) and loads it — used to exercise the
+    /// encoding fallback chain with non-UTF-8 bytes.
+    private func loadCSVData(_ data: Data) async throws {
+        let tempURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("test_import_\(UUID().uuidString).csv")
+        try data.write(to: tempURL)
+        defer { try? FileManager.default.removeItem(at: tempURL) }
+        try await service.loadCSV(from: tempURL)
     }
 
     private func makeDate(_ year: Int, _ month: Int, _ day: Int) -> Date {
