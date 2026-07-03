@@ -72,7 +72,9 @@ final class NotificationService: NSObject {
     /// Request notification authorization from the user
     func requestAuthorization() async -> Bool {
         do {
-            let options: UNAuthorizationOptions = [.alert, .sound, .badge]
+            // No .badge: the app never sets content.badge or clears the icon
+            // badge, so requesting it would over-ask for an unused capability.
+            let options: UNAuthorizationOptions = [.alert, .sound]
             let granted = try await notificationCenter.requestAuthorization(options: options)
             self.isAuthorized = granted
             return granted

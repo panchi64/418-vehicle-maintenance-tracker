@@ -1100,7 +1100,7 @@ final class NotificationServiceTests: XCTestCase {
         service.cancelNotifications(for: vehicle)
     }
 
-    func testScheduleNotificationWithPace_CancelsExisting() {
+    func testScheduleNotificationWithPace_ReplacesInPlace() {
         // Given
         let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022, currentMileage: 50000)
         let serviceItem = Service(name: "Oil Change", dueMileage: 51000)
@@ -1121,8 +1121,9 @@ final class NotificationServiceTests: XCTestCase {
             dailyPace: 40.0
         )
 
-        // Then
-        XCTAssertNotEqual(firstID, secondID, "Should create new notification ID")
+        // Then — identifiers are deterministic per service, so a reschedule
+        // replaces the pending request in place rather than minting a new ID.
+        XCTAssertEqual(firstID, secondID, "Reschedule should reuse the deterministic notification ID")
         XCTAssertNotNil(secondID)
 
         // Cleanup

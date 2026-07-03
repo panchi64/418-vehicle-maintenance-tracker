@@ -17,7 +17,12 @@ extension NotificationService: UNUserNotificationCenterDelegate {
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification
     ) async -> UNNotificationPresentationOptions {
-        return [.banner, .sound, .badge]
+        // Mark a foreground-presented yearly roundup as shown so the dedup
+        // guard in scheduleYearlyRoundup actually holds (it is otherwise only
+        // ever marked on tap).
+        markYearlyRoundupShownIfNeeded(notification.request.content.userInfo)
+        // No .badge: nothing sets or clears the app icon badge.
+        return [.banner, .sound]
     }
 
     /// Handle notification action
@@ -43,12 +48,6 @@ extension NotificationService: UNUserNotificationCenterDelegate {
         // Handle marbete reminder notifications
         if notificationType == "marbeteReminder" {
             await handleMarbeteReminderResponse(response, userInfo: userInfo)
-            return
-        }
-
-        // Handle cluster notifications
-        if notificationType == "cluster" {
-            await handleClusterNotificationResponse(response, userInfo: userInfo)
             return
         }
 
@@ -91,6 +90,9 @@ extension NotificationService: UNUserNotificationCenterDelegate {
         guard let vehicleIDString = userInfo["vehicleID"] as? String,
               let year = userInfo["year"] as? Int else { return }
 
+        // The roundup reached the user; record it so it isn't scheduled again.
+        markYearlyRoundupShownIfNeeded(userInfo)
+
         switch response.actionIdentifier {
         case Self.viewCostsActionID, UNNotificationDefaultActionIdentifier:
             NotificationCenter.default.post(
@@ -102,6 +104,18 @@ extension NotificationService: UNUserNotificationCenterDelegate {
         default:
             break
         }
+    }
+
+    /// Persist that a vehicle's yearly roundup for a given year has reached the
+    /// user (presented in-foreground or tapped) so `scheduleYearlyRoundup`'s
+    /// `hasShownYearlyRoundup` guard can actually suppress a repeat. No-op for
+    /// any other notification type.
+    private func markYearlyRoundupShownIfNeeded(_ userInfo: [AnyHashable: Any]) {
+        guard userInfo["type"] as? String == "yearlyRoundup",
+              let vehicleIDString = userInfo["vehicleID"] as? String,
+              let vehicleID = UUID(uuidString: vehicleIDString),
+              let year = userInfo["year"] as? Int else { return }
+        markYearlyRoundupShown(for: year, vehicleID: vehicleID)
     }
 
     private func handleMarbeteReminderResponse(
@@ -157,30 +171,6 @@ extension NotificationService: UNUserNotificationCenterDelegate {
                 name: .navigateToServiceFromNotification,
                 object: nil,
                 userInfo: ["serviceID": serviceIDString]
-            )
-
-        default:
-            break
-        }
-    }
-
-    private func handleClusterNotificationResponse(
-        _ response: UNNotificationResponse,
-        userInfo: [AnyHashable: Any]
-    ) async {
-        guard let vehicleIDString = userInfo["vehicleID"] as? String,
-              let serviceIDStrings = userInfo["serviceIDs"] as? [String] else { return }
-
-        switch response.actionIdentifier {
-        case UNNotificationDefaultActionIdentifier:
-            // Navigate to home tab where cluster card is shown
-            NotificationCenter.default.post(
-                name: .navigateToClusterFromNotification,
-                object: nil,
-                userInfo: [
-                    "vehicleID": vehicleIDString,
-                    "serviceIDs": serviceIDStrings
-                ]
             )
 
         default:

@@ -192,6 +192,8 @@ extension NotificationService {
     }
 
     func snoozeMarbeteReminder(for vehicle: Vehicle) {
-        MarbeteNotificationScheduler.snoozeMarbeteReminder(for: vehicle)
+        Task {
+            await MarbeteNotificationScheduler.snoozeMarbeteReminder(for: vehicle)
+        }
     }
 }

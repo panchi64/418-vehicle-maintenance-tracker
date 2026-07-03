@@ -4,6 +4,55 @@
     "" : {
 
     },
+    "store.error.product_unavailable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Purchase is unavailable right now. Please try again in a moment."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La compra no está disponible en este momento. Vuelve a intentarlo en un momento."
+          }
+        }
+      }
+    },
+    "%@ is out of time. Renew the marbete today." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is out of time. Renew the marbete today."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A %@ se le acabó el tiempo. Renueva el marbete hoy."
+          }
+        }
+      }
+    },
+    "Marbete Status: FINAL NOTICE" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marbete Status: FINAL NOTICE"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estado del Marbete: AVISO FINAL"
+          }
+        }
+      }
+    },
     "-" : {
 
     },
@@ -1508,6 +1557,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "¿Eliminar documento?"
+          }
+        }
+      }
+    },
+    "documents.delete.error" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't delete. Please try again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo eliminar. Inténtalo de nuevo."
           }
         }
       }
@@ -4500,6 +4566,23 @@
     },
     "Service visit opportunity, %lld services due soon" : {
 
+    },
+    "service.delete.confirm_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This deletes the service and its logged history. Any receipts or documents attached to it stay in your Documents library. This action cannot be undone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esto elimina el servicio y su historial registrado. Los recibos o documentos adjuntos permanecen en tu biblioteca de Documentos. Esta acción no se puede deshacer."
+          }
+        }
+      }
     },
     "SERVICES" : {
 

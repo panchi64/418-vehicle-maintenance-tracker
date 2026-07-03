@@ -359,6 +359,7 @@ enum L10n {
     }
     static var documentsDeleteBulkConfirmMessage: String { localized("documents.delete.bulk_confirm_message") }
     static var documentsDeleteAction: String { localized("documents.delete.action") }
+    static var documentsDeleteError: String { localized("documents.delete.error") }
     static var documentsShareAction: String { localized("documents.share.action") }
     static func documentsShareCount(_ count: Int) -> String {
         String(format: localized("documents.share.count"), count)
@@ -371,6 +372,10 @@ enum L10n {
     static var documentsSourcePhotos: String { localized("documents.source.photos") }
     static var documentsSourceFiles: String { localized("documents.source.files") }
     static var documentsExtractedTextLabel: String { localized("documents.extracted_text.label") }
+
+    // MARK: - Service
+
+    static var serviceDeleteConfirmMessage: String { localized("service.delete.confirm_message") }
 
     // MARK: - Document Types
 

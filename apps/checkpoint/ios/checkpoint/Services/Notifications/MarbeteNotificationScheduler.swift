@@ -16,6 +16,12 @@ struct MarbeteNotificationScheduler {
 
     // MARK: - Notification IDs
 
+    /// `daysBeforeDue` value used for the snoozed / imminent ("due now")
+    /// reminder. Kept distinct from `marbeteReminderIntervals` but included in
+    /// every cancel path so a snoozed request can't survive a re-edit or
+    /// vehicle deletion.
+    static let snoozeDaysBeforeDue = 0
+
     /// Notification ID for marbete reminders (per vehicle)
     static func marbeteReminderID(for vehicleID: UUID, daysBeforeDue: Int) -> String {
         "marbete-\(vehicleID.uuidString)-\(daysBeforeDue)d"
@@ -28,12 +34,15 @@ struct MarbeteNotificationScheduler {
 
     // MARK: - Build Notification Requests
 
-    /// Build a marbete notification request
+    /// Build a marbete notification request. Pass `trigger` to override the
+    /// default 9 AM calendar trigger (e.g. a fire-soon trigger for a same-day
+    /// reminder); leave it nil for the standard behavior.
     static func buildMarbeteNotificationRequest(
         vehicleName: String,
         vehicleID: UUID,
         notificationDate: Date,
-        daysBeforeDue: Int
+        daysBeforeDue: Int,
+        trigger: UNNotificationTrigger? = nil
     ) -> UNNotificationRequest {
         let content = UNMutableNotificationContent()
 
@@ -51,6 +60,9 @@ struct MarbeteNotificationScheduler {
         case 1:
             content.title = "Marbete Status: URGENT"
             content.body = "\(vehicleName) expires tomorrow. Legally speaking."
+        case snoozeDaysBeforeDue:
+            content.title = String(localized: "Marbete Status: FINAL NOTICE")
+            content.body = String(localized: "\(vehicleName) is out of time. Renew the marbete today.")
         default:
             content.title = "Marbete Status: \(daysBeforeDue) Days"
             content.body = "\(vehicleName) - Marbete expires in \(daysBeforeDue) days."
@@ -64,12 +76,12 @@ struct MarbeteNotificationScheduler {
             "daysBeforeDue": daysBeforeDue
         ]
 
-        let trigger = NotificationHelpers.calendarTrigger(for: notificationDate)
+        let resolvedTrigger = trigger ?? NotificationHelpers.calendarTrigger(for: notificationDate)
 
         return UNNotificationRequest(
             identifier: marbeteReminderID(for: vehicleID, daysBeforeDue: daysBeforeDue),
             content: content,
-            trigger: trigger
+            trigger: resolvedTrigger
         )
     }
 
@@ -99,14 +111,17 @@ struct MarbeteNotificationScheduler {
                 to: expirationDate
             ) else { continue }
 
-            // Only schedule if the notification date is in the future
-            guard notificationDate > Date() else { continue }
+            // Gate on the actual 9 AM-snapped fire date, not the raw date, so a
+            // reminder that snaps into the past today is skipped (or fired soon)
+            // rather than dropped silently by the OS.
+            guard let trigger = NotificationHelpers.reminderTrigger(for: notificationDate) else { continue }
 
             let request = buildMarbeteNotificationRequest(
                 vehicleName: vehicle.displayName,
                 vehicleID: vehicle.id,
                 notificationDate: notificationDate,
-                daysBeforeDue: daysBeforeDue
+                daysBeforeDue: daysBeforeDue,
+                trigger: trigger
             )
 
             notificationCenter.add(request) { error in
@@ -124,18 +139,26 @@ struct MarbeteNotificationScheduler {
 
     /// Cancel all marbete notifications for a vehicle
     static func cancelMarbeteNotifications(for vehicle: Vehicle) {
-        // Generate all possible notification IDs for this vehicle
-        let allIDs = NotificationService.marbeteReminderIntervals.map {
-            marbeteReminderID(for: vehicle.id, daysBeforeDue: $0)
-        }
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: allIDs)
+        UNUserNotificationCenter.current().removePendingNotificationRequests(
+            withIdentifiers: marbeteCancellationIDs(for: vehicle.id)
+        )
         vehicle.marbeteNotificationID = nil
+    }
+
+    /// Every marbete notification ID this vehicle could have pending: the
+    /// default intervals plus the snooze/imminent (0-day) request, which a
+    /// plain interval sweep would otherwise strand across re-edits and deletion.
+    static func marbeteCancellationIDs(for vehicleID: UUID) -> [String] {
+        NotificationService.marbeteReminderIntervals.map {
+            marbeteReminderID(for: vehicleID, daysBeforeDue: $0)
+        } + [marbeteReminderID(for: vehicleID, daysBeforeDue: snoozeDaysBeforeDue)]
     }
 
     // MARK: - Snooze
 
-    /// Snooze marbete reminder for 1 day
-    static func snoozeMarbeteReminder(for vehicle: Vehicle) {
+    /// Snooze marbete reminder for 1 day. Async so callers (and tests) can
+    /// observe the request once it's actually registered with the center.
+    static func snoozeMarbeteReminder(for vehicle: Vehicle) async {
         cancelMarbeteNotifications(for: vehicle)
 
         let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
@@ -144,13 +167,13 @@ struct MarbeteNotificationScheduler {
             vehicleName: vehicle.displayName,
             vehicleID: vehicle.id,
             notificationDate: tomorrow,
-            daysBeforeDue: 0  // Snoozed notification
+            daysBeforeDue: snoozeDaysBeforeDue
         )
 
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                marbeteNotificationLogger.error("Failed to snooze marbete reminder: \(error.localizedDescription)")
-            }
+        do {
+            try await UNUserNotificationCenter.current().add(request)
+        } catch {
+            marbeteNotificationLogger.error("Failed to snooze marbete reminder: \(error.localizedDescription)")
         }
     }
 }

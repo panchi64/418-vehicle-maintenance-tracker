@@ -41,13 +41,16 @@ struct ServiceNotificationScheduler {
 
     // MARK: - Build Notification Requests
 
-    /// Build a notification request for a service
+    /// Build a notification request for a service. Pass `trigger` to override
+    /// the default 9 AM calendar trigger (e.g. a fire-soon trigger for a
+    /// same-day reminder); leave it nil for the standard behavior.
     static func buildNotificationRequest(
         for service: Service,
         vehicle: Vehicle,
         notificationID: String,
         notificationDate: Date,
-        daysBeforeDue: Int = 0
+        daysBeforeDue: Int = 0,
+        trigger: UNNotificationTrigger? = nil
     ) -> UNNotificationRequest {
         let content = UNMutableNotificationContent()
 
@@ -77,9 +80,9 @@ struct ServiceNotificationScheduler {
             "daysBeforeDue": daysBeforeDue
         ]
 
-        let trigger = NotificationHelpers.calendarTrigger(for: notificationDate)
+        let resolvedTrigger = trigger ?? NotificationHelpers.calendarTrigger(for: notificationDate)
 
-        return UNNotificationRequest(identifier: notificationID, content: content, trigger: trigger)
+        return UNNotificationRequest(identifier: notificationID, content: content, trigger: resolvedTrigger)
     }
 
     /// Build a notification request for a service (legacy method)
@@ -144,35 +147,6 @@ struct ServiceNotificationScheduler {
         }
     }
 
-    /// Reschedule all notifications for a vehicle with cluster awareness
-    /// - Clustered services get a single bundled notification
-    /// - Non-clustered services get individual notifications
-    @MainActor
-    static func rescheduleNotificationsWithClustering(for vehicle: Vehicle) {
-        let services = vehicle.services ?? []
-
-        // Cancel all existing notifications first
-        cancelNotifications(for: vehicle)
-        ClusterNotificationScheduler.cancelClusterNotifications(for: vehicle)
-
-        // Detect clusters
-        let clusters = ServiceClusteringService.detectClusters(for: vehicle, services: services)
-        let clusteredServiceIDs = Set(clusters.flatMap { $0.services.map { $0.id } })
-
-        // Schedule cluster notifications
-        for cluster in clusters {
-            ClusterNotificationScheduler.scheduleClusterNotification(for: cluster, vehicle: vehicle)
-        }
-
-        // Schedule individual notifications only for non-clustered services
-        let standaloneServices = services.filter { !clusteredServiceIDs.contains($0.id) }
-        let pace = vehicle.dailyMilesPace
-
-        for service in standaloneServices {
-            scheduleNotificationWithPace(for: service, vehicle: vehicle, dailyPace: pace)
-        }
-    }
-
     /// Internal helper to schedule notifications for a due date
     private static func scheduleNotificationsForDueDate(
         _ dueDate: Date, service: Service, vehicle: Vehicle
@@ -190,13 +164,16 @@ struct ServiceNotificationScheduler {
         let notificationCenter = UNUserNotificationCenter.current()
 
         for daysBeforeDue in NotificationService.defaultReminderIntervals {
-            guard let notificationDate = Calendar.current.date(byAdding: .day, value: -daysBeforeDue, to: dueDate),
-                  notificationDate > Date() else { continue }
+            guard let notificationDate = Calendar.current.date(byAdding: .day, value: -daysBeforeDue, to: dueDate) else { continue }
+            // Gate on the actual 9 AM-snapped fire date, not the raw date: a
+            // "due today" reminder set after 9 AM would otherwise pass a raw
+            // `> Date()` check yet produce a past trigger the OS never delivers.
+            guard let trigger = NotificationHelpers.reminderTrigger(for: notificationDate) else { continue }
 
             let notificationID = baseNotificationID + NotificationService.intervalSuffix(for: daysBeforeDue)
             let request = buildNotificationRequest(
                 for: service, vehicle: vehicle, notificationID: notificationID,
-                notificationDate: notificationDate, daysBeforeDue: daysBeforeDue
+                notificationDate: notificationDate, daysBeforeDue: daysBeforeDue, trigger: trigger
             )
             notificationCenter.add(request) { error in
                 if let error = error { serviceNotificationLogger.error("Failed to schedule notification (\(daysBeforeDue)d before): \(error.localizedDescription)") }

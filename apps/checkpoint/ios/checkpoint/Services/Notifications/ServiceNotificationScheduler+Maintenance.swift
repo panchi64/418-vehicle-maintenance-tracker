@@ -28,6 +28,9 @@ extension ServiceNotificationScheduler {
         for vehicle in vehicles {
             rescheduleNotifications(for: vehicle)
         }
+        // Rescheduling every vehicle × service × interval plus marbete/mileage/
+        // roundup can exceed the OS's 64-request cap; keep only the soonest.
+        await NotificationHelpers.enforcePendingBudget()
     }
 
     /// Remove pending service requests whose service no longer exists or

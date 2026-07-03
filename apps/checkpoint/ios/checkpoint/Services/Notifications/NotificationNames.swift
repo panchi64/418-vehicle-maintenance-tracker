@@ -26,9 +26,6 @@ extension Notification.Name {
     static let marbeteReminderSnoozedFromNotification = Notification.Name("marbeteReminderSnoozedFromNotification")
     static let navigateToEditVehicleFromNotification = Notification.Name("navigateToEditVehicleFromNotification")
 
-    // Cluster notifications
-    static let navigateToClusterFromNotification = Notification.Name("navigateToClusterFromNotification")
-
     // Onboarding sync
     static let enableCloudSyncAfterOnboarding = Notification.Name("enableCloudSyncAfterOnboarding")
 }
