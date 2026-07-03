@@ -9,18 +9,31 @@ import SwiftUI
 import SwiftData
 
 struct ServicesTab: View {
-    @Bindable var appState: AppState
+    @Environment(AppState.self) var appState
     let onboardingState: OnboardingState
     @Query private var services: [Service]
     @Query private var serviceLogs: [ServiceLog]
 
     @State private var showExportOptions = false
-    @State private var exportPDFURL: URL?
+    @State private var exportPDFURL: URL? = nil
     @State private var isExporting = false
 
     // Type aliases for cleaner code
     private typealias ViewMode = ServicesTabState.ViewMode
     private typealias StatusFilter = ServicesTabState.StatusFilter
+
+    /// Scopes the service + log fetches to `vehicle` at the database level.
+    /// `appState` arrives through the environment.
+    init(vehicle: Vehicle?, onboardingState: OnboardingState) {
+        self.onboardingState = onboardingState
+        if let vehicleID = vehicle?.id {
+            _services = Query(filter: #Predicate<Service> { $0.vehicle?.id == vehicleID })
+            _serviceLogs = Query(filter: #Predicate<ServiceLog> { $0.vehicle?.id == vehicleID })
+        } else {
+            _services = Query(filter: #Predicate<Service> { _ in false })
+            _serviceLogs = Query(filter: #Predicate<ServiceLog> { _ in false })
+        }
+    }
 
     private var vehicle: Vehicle? {
         appState.selectedVehicle
@@ -91,6 +104,7 @@ struct ServicesTab: View {
     }
 
     var body: some View {
+        @Bindable var appState = appState
         ScrollView {
             VStack(spacing: Spacing.lg) {
                 // Search field
@@ -505,8 +519,9 @@ struct ServicesTab: View {
 
     return ZStack {
         AtmosphericBackground()
-        ServicesTab(appState: appState, onboardingState: OnboardingState())
+        ServicesTab(vehicle: appState.selectedVehicle, onboardingState: OnboardingState())
     }
+    .environment(appState)
     .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self], inMemory: true)
     .preferredColorScheme(.dark)
 }

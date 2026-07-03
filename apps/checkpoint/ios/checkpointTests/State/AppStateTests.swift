@@ -209,6 +209,133 @@ final class AppStateTests: XCTestCase {
         XCTAssertNil(appState.selectedVehicle)
     }
 
+    // MARK: - Container Swap Tests
+
+    @MainActor
+    func testPrepareForContainerSwap_ClearsRetainedModelReferences() async throws {
+        // Given
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let modelContainer = try ModelContainer(
+            for: Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self, ServiceAttachment.self, ServicePreset.self, ServiceVisit.self,
+            configurations: config
+        )
+        let modelContext = modelContainer.mainContext
+
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
+        let service = Service(name: "Oil Change")
+        let log = ServiceLog(performedDate: .now, mileageAtService: 30_000)
+        let visit = ServiceVisit(vehicle: vehicle, performedDate: .now, mileageAtVisit: 30_000)
+        let doc = Document(data: Data(), fileName: "x.jpg", mimeType: "image/jpeg")
+        modelContext.insert(vehicle)
+        modelContext.insert(service)
+        modelContext.insert(log)
+        modelContext.insert(visit)
+        modelContext.insert(doc)
+
+        let appState = AppState()
+        appState.selectedVehicle = vehicle
+        appState.selectedService = service
+        appState.selectedServiceLog = log
+        appState.selectedServiceVisit = visit
+        appState.selectedDocument = doc
+        let cluster = ServiceCluster(
+            services: [service],
+            anchorService: service,
+            vehicle: vehicle,
+            mileageWindow: 500,
+            daysWindow: 30
+        )
+        appState.selectedCluster = cluster
+        appState.clusterToMarkDone = cluster
+
+        // When
+        appState.prepareForContainerSwap()
+
+        // Then — every SwiftData-backed reference is released
+        XCTAssertNil(appState.selectedVehicle)
+        XCTAssertNil(appState.selectedService)
+        XCTAssertNil(appState.selectedServiceLog)
+        XCTAssertNil(appState.selectedServiceVisit)
+        XCTAssertNil(appState.selectedDocument)
+        XCTAssertNil(appState.selectedCluster)
+        XCTAssertNil(appState.clusterToMarkDone)
+    }
+
+    // MARK: - Consolidated Sheet State Tests
+
+    @MainActor
+    func testMileageAndSettingsSheetFlags_DefaultAndToggle() async {
+        // Given — flags moved off ContentView's local @State onto AppState
+        let appState = AppState()
+
+        // Then — sane defaults
+        XCTAssertFalse(appState.showMileageUpdate)
+        XCTAssertFalse(appState.showSettings)
+        XCTAssertNil(appState.siriPrefilledMileage)
+
+        // When
+        appState.showMileageUpdate = true
+        appState.showSettings = true
+        appState.siriPrefilledMileage = 42_000
+
+        // Then
+        XCTAssertTrue(appState.showMileageUpdate)
+        XCTAssertTrue(appState.showSettings)
+        XCTAssertEqual(appState.siriPrefilledMileage, 42_000)
+    }
+
+    // MARK: - Recall State Storage Tests
+
+    @MainActor
+    func testSetRecalls_StoresResultsSortedNewestFirst() async {
+        // Given
+        let appState = AppState()
+        let vehicleID = UUID()
+        let older = RecallInfo(
+            campaignNumber: "23V456", component: "FUEL", summary: "", consequence: "", remedy: "",
+            reportDate: "06/20/2023", parkIt: false, parkOutside: false
+        )
+        let newest = RecallInfo(
+            campaignNumber: "24V789", component: "STEERING", summary: "", consequence: "", remedy: "",
+            reportDate: "03/10/2024", parkIt: false, parkOutside: false
+        )
+
+        // When
+        appState.setRecalls([older, newest], for: vehicleID)
+
+        // Then — stored newest-first, not a failed state
+        XCTAssertEqual(appState.recall.recalls(for: vehicleID).map(\.campaignNumber), ["24V789", "23V456"])
+        XCTAssertFalse(appState.recall.fetchFailed(for: vehicleID))
+    }
+
+    @MainActor
+    func testSetRecalls_EmptyRecordsCheckedNoneFound() async {
+        // Given
+        let appState = AppState()
+        let vehicleID = UUID()
+
+        // When — mirrors a vehicle missing make/model/year
+        appState.setRecalls([], for: vehicleID)
+
+        // Then — a "fetched, empty" state, not a failure
+        XCTAssertTrue(appState.recall.recalls(for: vehicleID).isEmpty)
+        XCTAssertFalse(appState.recall.fetchFailed(for: vehicleID))
+    }
+
+    @MainActor
+    func testSetRecallFetchFailed_MarksVehicleFailed() async {
+        // Given
+        let appState = AppState()
+        let vehicleID = UUID()
+
+        // When
+        appState.setRecallFetchFailed(for: vehicleID)
+
+        // Then
+        XCTAssertTrue(appState.recall.fetchFailed(for: vehicleID))
+        XCTAssertTrue(appState.recall.recalls(for: vehicleID).isEmpty)
+    }
+
     // MARK: - Tab Selection Tests
 
     @MainActor

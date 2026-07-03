@@ -30,6 +30,13 @@ final class AppState {
     var selectedServiceLog: ServiceLog?
     var selectedServiceVisit: ServiceVisit?
     var selectedDocument: Document?
+    var showMileageUpdate = false
+    var showSettings = false
+
+    /// Mileage value prefilled by a Siri intent, consumed by the mileage
+    /// update sheet. A scalar (not a model reference), so it does not need
+    /// clearing in `prepareForContainerSwap()`.
+    var siriPrefilledMileage: Int?
 
     // MARK: - Cluster States
 
@@ -54,7 +61,24 @@ final class AppState {
     var recall = RecallState()
     var servicesTab = ServicesTabState()
     var onboarding = OnboardingPrefillState()
-    var siri = SiriState()
+
+    // MARK: - Container Lifecycle
+
+    /// Release every SwiftData model reference this state retains before the
+    /// app swaps its `ModelContainer` (onboarding completion enables CloudKit
+    /// and rebuilds the container). Those objects belong to the outgoing
+    /// container's context; holding them past the swap would render stale rows
+    /// against a dead context. Must be called on the same event that triggers
+    /// the swap (`.enableCloudSyncAfterOnboarding`).
+    func prepareForContainerSwap() {
+        selectedVehicle = nil
+        selectedService = nil
+        selectedServiceLog = nil
+        selectedServiceVisit = nil
+        selectedDocument = nil
+        selectedCluster = nil
+        clusterToMarkDone = nil
+    }
 
     // MARK: - Recall Convenience
 
@@ -68,25 +92,17 @@ final class AppState {
         recall.fetchFailed(for: selectedVehicle?.id)
     }
 
-    func fetchRecalls(for vehicle: Vehicle) async {
-        guard !vehicle.make.isEmpty,
-              !vehicle.model.isEmpty,
-              vehicle.year > 0 else {
-            recall.fetchStates[vehicle.id] = .fetched([])
-            return
-        }
+    /// Store the outcome of a successful recall fetch. Pure state mutation — the
+    /// network call itself lives in the consuming layer (`ContentView.fetchRecalls`)
+    /// so this store owns no side effects. An empty array records a
+    /// "checked, nothing found" state for vehicles missing make/model/year.
+    func setRecalls(_ recalls: [RecallInfo], for vehicleID: UUID) {
+        recall.fetchStates[vehicleID] = .fetched(recalls.sortedNewestFirst())
+    }
 
-        do {
-            let results = try await NHTSAService.shared.fetchRecalls(
-                make: vehicle.make,
-                model: vehicle.model,
-                year: vehicle.year
-            )
-            recall.fetchStates[vehicle.id] = .fetched(results.sortedNewestFirst())
-            RecallCheckCache.shared.recordSuccess()
-        } catch {
-            recall.fetchStates[vehicle.id] = .failed
-        }
+    /// Record that the recall fetch failed for a vehicle.
+    func setRecallFetchFailed(for vehicleID: UUID) {
+        recall.fetchStates[vehicleID] = .failed
     }
 
     // MARK: - Monetization
@@ -100,6 +116,11 @@ final class AppState {
         }
     }
 
+    /// Set when a completed action qualifies for the tip prompt. The delayed
+    /// presentation effect lives in the view layer (ContentView observes this
+    /// and shows the modal after a beat) so AppState stays a pure state store.
+    var tipPromptQueued = false
+
     func recordCompletedAction() {
         guard !StoreManager.shared.isPro else { return }
 
@@ -107,16 +128,6 @@ final class AppState {
 
         guard PurchaseSettings.shared.shouldShowTipPrompt else { return }
 
-        let actionCount = PurchaseSettings.shared.completedActionCount
-        let dismissCount = PurchaseSettings.shared.tipPromptDismissCount
-        Task { @MainActor in
-            try? await Task.sleep(for: .seconds(1.5))
-            showTipModal = true
-            PurchaseSettings.shared.hasShownTipModalThisSession = true
-            AnalyticsService.shared.capture(.tipModalShown(
-                actionCount: actionCount,
-                dismissCount: dismissCount
-            ))
-        }
+        tipPromptQueued = true
     }
 }

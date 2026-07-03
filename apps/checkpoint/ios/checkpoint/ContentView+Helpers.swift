@@ -10,6 +10,162 @@ import SwiftData
 import WidgetKit
 
 extension ContentView {
+    // MARK: - Lifecycle Handlers
+
+    /// One-time setup on first appearance (once per process launch).
+    func performLaunchSetup() {
+        // Restore persisted vehicle selection
+        restoreSelectedVehicle()
+        // Only seed sample data for returning users (onboarding completed).
+        // New users get sample data seeded when the tour starts.
+        if OnboardingState.hasCompletedOnboarding {
+            seedSampleDataIfNeeded()
+        }
+        // Fetch recalls for all existing vehicles
+        fetchRecallsForAllVehicles()
+        // Analytics: session start
+        let serviceCount = (try? modelContext.fetchCount(FetchDescriptor<Service>())) ?? 0
+        AnalyticsService.shared.capture(.appSessionStart(
+            vehicleCount: vehicles.count,
+            serviceCount: serviceCount
+        ))
+        // Track onboarding start for new users
+        if !OnboardingState.hasCompletedOnboarding {
+            AnalyticsService.shared.capture(.onboardingStarted)
+        }
+        // Run the per-activation foreground work for cold launch. The launch
+        // `scenePhase == .active` change also fires; whichever runs first wins
+        // and the `isForegroundActive` guard makes the other a no-op.
+        if scenePhase == .active {
+            enterForeground()
+        }
+    }
+
+    /// Per-activation foreground work. Runs once each time the app becomes
+    /// active (cold launch or return from background), never twice for one
+    /// activation. Includes `schedulePeriodicNotifications()` so notification
+    /// content refreshes on every foreground, not only at cold launch.
+    func enterForeground() {
+        guard !isForegroundActive else { return }
+        isForegroundActive = true
+
+        // Apply odometer readings queued by the Biombo companion app
+        applyPendingOdometerUpdates()
+        // Update app icon based on service status
+        updateAppIcon()
+        // Update widget data
+        updateWidgetData()
+        // Refresh mileage reminders and yearly roundups with the latest data
+        schedulePeriodicNotifications()
+        // Check for pending Siri mileage update
+        handlePendingSiriMileageUpdate()
+        // Process pending widget service completions
+        processPendingWidgetCompletions()
+        // Analytics
+        AnalyticsService.shared.capture(.appOpened)
+    }
+
+    func handleScenePhaseChange(_ newPhase: ScenePhase) {
+        switch newPhase {
+        case .active:
+            enterForeground()
+        case .background:
+            // Reset so the next foreground re-runs the per-activation work
+            isForegroundActive = false
+            updateAppIcon()
+            updateWidgetData()
+            AnalyticsService.shared.capture(.appBackgrounded)
+            AnalyticsService.shared.flush()
+        default:
+            break
+        }
+    }
+
+    func handleOnboardingPhaseChange(_ newPhase: OnboardingPhase) {
+        // Pre-switch the tab when entering a transition so the destination
+        // is mounted by the time `resolveTransition()` flips to .tour(step:).
+        if case .tourTransition(let toStep) = newPhase {
+            appState.selectedTab = onboardingState.tab(forStep: toStep)
+        }
+        // Also normalize the tab when a tour step is entered directly
+        // (covers initial .tour(step: 0) on tour start and any future
+        // path that skips the transition card). Idempotent same-tab
+        // assigns are safe.
+        else if case .tour(let step) = newPhase {
+            appState.selectedTab = onboardingState.tab(forStep: step)
+        }
+        // Fire the tour-completed event the moment the user reaches the
+        // recap — not when they tap "Let's go" on it. A user who force-
+        // quits at the recap card still saw every spotlight, so they
+        // count as completing the tour.
+        else if newPhase == .tourRecap {
+            AnalyticsService.shared.capture(.onboardingTourCompleted)
+        }
+        else if newPhase == .completed {
+            AnalyticsService.shared.capture(.onboardingCompleted)
+            // Enable CloudKit sync now that onboarding is done
+            NotificationCenter.default.post(name: .enableCloudSyncAfterOnboarding, object: nil)
+            // Request notification permission after onboarding completes
+            Task {
+                let granted = await NotificationService.shared.requestAuthorization()
+                if granted {
+                    AnalyticsService.shared.capture(.notificationPermissionGranted)
+                } else {
+                    AnalyticsService.shared.capture(.notificationPermissionDenied)
+                }
+            }
+        }
+    }
+
+    func handleTabChange(_ newTab: Tab) {
+        if let tab = AnalyticsEvent.TabName(rawValue: newTab.rawValue) {
+            AnalyticsService.shared.capture(.tabSwitched(tab: tab))
+        }
+    }
+
+    func handleSelectedVehicleChange(_ newVehicle: Vehicle?) {
+        updateAppIcon()
+        // Persist selected vehicle ID first so widget reads correct ID
+        persistSelectedVehicle(newVehicle)
+        updateWidgetData()
+        // Analytics
+        AnalyticsService.shared.capture(.vehicleSwitched)
+    }
+
+    func handleVehiclesChange(from oldVehicles: [Vehicle], to newVehicles: [Vehicle]) {
+        // Auto-select first vehicle when none is selected (e.g. iCloud sync after reinstall)
+        if appState.selectedVehicle == nil, let first = newVehicles.first {
+            appState.selectedVehicle = first
+        }
+        // Update selection if current vehicle was deleted
+        if let selected = appState.selectedVehicle,
+           !newVehicles.contains(where: { $0.id == selected.id }) {
+            // Clean up widget data for deleted vehicle
+            WidgetDataService.shared.removeWidgetData(for: selected.id.uuidString)
+            // Select the previous vehicle in the old list, or fall back to first remaining
+            if let oldIndex = oldVehicles.firstIndex(where: { $0.id == selected.id }),
+               oldIndex > 0,
+               let fallback = newVehicles.first(where: { $0.id == oldVehicles[oldIndex - 1].id }) {
+                appState.selectedVehicle = fallback
+            } else {
+                appState.selectedVehicle = newVehicles.first
+            }
+        }
+        // Update vehicle list when vehicles are added or removed
+        if oldVehicles.count != newVehicles.count {
+            WidgetDataService.shared.updateVehicleList(newVehicles)
+        }
+        // Fetch recalls for newly added vehicles
+        if newVehicles.count > oldVehicles.count {
+            let oldIDs = Set(oldVehicles.map(\.id))
+            for vehicle in newVehicles where !oldIDs.contains(vehicle.id) {
+                Task {
+                    await fetchRecalls(for: vehicle)
+                }
+            }
+        }
+    }
+
     // MARK: - Vehicle Selection Persistence
 
     /// Restore the previously selected vehicle from UserDefaults
@@ -61,14 +217,42 @@ extension ContentView {
     func fetchRecallsForAllVehicles() {
         for vehicle in vehicles {
             Task {
-                await appState.fetchRecalls(for: vehicle)
+                await fetchRecalls(for: vehicle)
             }
+        }
+    }
+
+    /// Fetch recalls for a vehicle over the network, then hand the result to
+    /// `AppState` to store. The network call lives here in the consuming layer
+    /// so `AppState` stays a pure state store (it only records the outcome).
+    func fetchRecalls(for vehicle: Vehicle) async {
+        guard !vehicle.make.isEmpty,
+              !vehicle.model.isEmpty,
+              vehicle.year > 0 else {
+            appState.setRecalls([], for: vehicle.id)
+            return
+        }
+
+        do {
+            let results = try await NHTSAService.shared.fetchRecalls(
+                make: vehicle.make,
+                model: vehicle.model,
+                year: vehicle.year
+            )
+            appState.setRecalls(results, for: vehicle.id)
+            RecallCheckCache.shared.recordSuccess()
+        } catch {
+            appState.setRecallFetchFailed(for: vehicle.id)
         }
     }
 
     // MARK: - App Icon
 
     func updateAppIcon() {
+        // Fetch imperatively at the point of use rather than holding a root-level
+        // @Query — the icon only needs the current service set on discrete events
+        // (foreground, mileage change), not a body re-render on every write.
+        let services = (try? modelContext.fetch(FetchDescriptor<Service>())) ?? []
         AppIconService.shared.updateIcon(for: currentVehicle, services: services)
     }
 
@@ -126,8 +310,8 @@ extension ContentView {
 
         // Navigate to home and show mileage update with prefilled value
         appState.selectedTab = .home
-        siriPrefilledMileage = mileage
-        showMileageUpdate = true
+        appState.siriPrefilledMileage = mileage
+        appState.showMileageUpdate = true
     }
 
     // MARK: - Widget Completions
@@ -151,12 +335,32 @@ extension ContentView {
         appState.recordCompletedAction()
     }
 
+    /// Presents the tip modal a beat after AppState queues it. The delay and
+    /// presentation are view-layer effects; AppState only flips the flag.
+    func presentQueuedTipPrompt() {
+        Task {
+            try? await Task.sleep(for: .seconds(1.5))
+            guard appState.tipPromptQueued else { return }
+            appState.tipPromptQueued = false
+            appState.showTipModal = true
+            PurchaseSettings.shared.hasShownTipModalThisSession = true
+            AnalyticsService.shared.capture(.tipModalShown(
+                actionCount: PurchaseSettings.shared.completedActionCount,
+                dismissCount: PurchaseSettings.shared.tipPromptDismissCount
+            ))
+        }
+    }
+
     // MARK: - Periodic Notifications
 
     func schedulePeriodicNotifications() {
         let calendar = Calendar.current
         let currentYear = calendar.component(.year, from: Date.now)
         let previousYear = currentYear - 1
+
+        // Fetch logs imperatively for the yearly-roundup cost calc rather than
+        // holding a root-level @Query that re-renders the body on every write.
+        let allLogs = (try? modelContext.fetch(FetchDescriptor<ServiceLog>())) ?? []
 
         for vehicle in vehicles {
             // Schedule mileage reminder if needed
@@ -169,7 +373,7 @@ extension ContentView {
             }
 
             // Calculate previous year's total cost for yearly roundup
-            let vehicleLogs = serviceLogs.filter { $0.vehicle?.id == vehicle.id }
+            let vehicleLogs = allLogs.filter { $0.vehicle?.id == vehicle.id }
             let previousYearLogs = vehicleLogs.filter {
                 calendar.component(.year, from: $0.performedDate) == previousYear
             }

@@ -13,13 +13,24 @@ import SwiftData
 import Charts
 
 struct CostsTab: View {
-    @Bindable var appState: AppState
+    @Environment(AppState.self) var appState
     let onboardingState: OnboardingState
     @Query var serviceLogs: [ServiceLog]
 
     @State var periodFilter: PeriodFilter = .year
     @State var categoryFilter: CategoryFilter = .all
-    @State var highlightedEventID: UUID?
+    @State var highlightedEventID: UUID? = nil
+
+    /// Scopes the log fetch to `vehicle` at the database level. `appState`
+    /// arrives through the environment.
+    init(vehicle: Vehicle?, onboardingState: OnboardingState) {
+        self.onboardingState = onboardingState
+        if let vehicleID = vehicle?.id {
+            _serviceLogs = Query(filter: #Predicate<ServiceLog> { $0.vehicle?.id == vehicleID })
+        } else {
+            _serviceLogs = Query(filter: #Predicate<ServiceLog> { _ in false })
+        }
+    }
 
     enum PeriodFilter: String, CaseIterable {
         case month = "Month"
@@ -95,8 +106,9 @@ struct CostsTab: View {
 
     return ZStack {
         AtmosphericBackground()
-        CostsTab(appState: appState, onboardingState: OnboardingState())
+        CostsTab(vehicle: appState.selectedVehicle, onboardingState: OnboardingState())
     }
+    .environment(appState)
     .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self], inMemory: true)
     .preferredColorScheme(.dark)
 }

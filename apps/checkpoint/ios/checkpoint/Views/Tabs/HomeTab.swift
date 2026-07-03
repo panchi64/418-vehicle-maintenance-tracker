@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct HomeTab: View {
-    @Bindable var appState: AppState
+    @Environment(AppState.self) var appState
     let onboardingState: OnboardingState
     @Environment(\.modelContext) var modelContext
     @Query var services: [Service]
@@ -17,12 +17,27 @@ struct HomeTab: View {
     @Query private var recallAcknowledgments: [RecallAcknowledgment]
 
     // Cluster state
-    @State var primaryCluster: ServiceCluster?
+    @State var primaryCluster: ServiceCluster? = nil
     @State var dismissedClusterHashes: Set<String> = []
     @AppStorage("dismissedClusterHashes") var dismissedClusterHashesStorage: String = ""
 
     // Seasonal reminders
     @State var activeSeasonalReminders: [SeasonalReminder] = []
+
+    /// Scopes the service + log fetches to `vehicle` at the database level so a
+    /// write to another vehicle's data doesn't re-run this tab's queries.
+    /// `appState` and the model context arrive through the environment.
+    init(vehicle: Vehicle?, onboardingState: OnboardingState) {
+        self.onboardingState = onboardingState
+        _recallAcknowledgments = Query()
+        if let vehicleID = vehicle?.id {
+            _services = Query(filter: #Predicate<Service> { $0.vehicle?.id == vehicleID })
+            _serviceLogs = Query(filter: #Predicate<ServiceLog> { $0.vehicle?.id == vehicleID })
+        } else {
+            _services = Query(filter: #Predicate<Service> { _ in false })
+            _serviceLogs = Query(filter: #Predicate<ServiceLog> { _ in false })
+        }
+    }
 
     private var syncService: SyncStatusService {
         SyncStatusService.shared
@@ -69,6 +84,7 @@ struct HomeTab: View {
     }
 
     var body: some View {
+        @Bindable var appState = appState
         ScrollView {
             VStack(spacing: Spacing.xl) {
                 // Instrument cluster: compact status cards grouped tightly
@@ -322,8 +338,9 @@ struct HomeTab: View {
 
     return ZStack {
         AtmosphericBackground()
-        HomeTab(appState: appState, onboardingState: OnboardingState())
+        HomeTab(vehicle: appState.selectedVehicle, onboardingState: OnboardingState())
     }
+    .environment(appState)
     .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self], inMemory: true)
     .preferredColorScheme(.dark)
 }

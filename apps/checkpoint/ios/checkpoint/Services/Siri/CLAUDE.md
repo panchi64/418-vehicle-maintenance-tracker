@@ -47,8 +47,7 @@ VehicleEntity and VehicleEntityQuery are defined in `CheckpointWidget/` and must
 
 ## Integration Points
 
-- **ContentView** — Checks `PendingMileageUpdate.shared` when `scenePhase == .active`, shows `MileageUpdateSheet` with `prefilledMileage`
-- **AppState** — Contains `pendingMileageUpdate` property for future use
+- **ContentView** — Checks `PendingMileageUpdate.shared` on foreground activation, shows `MileageUpdateSheet` with the prefilled mileage (stored on `AppState.siriPrefilledMileage`)
 
 ## Entitlements
 
