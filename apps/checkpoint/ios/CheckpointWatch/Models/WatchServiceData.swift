@@ -117,6 +117,10 @@ struct WatchMileageUpdate: Codable, Sendable {
 
 /// Message sent from Watch to iPhone to mark a service as done
 struct WatchMarkServiceDone: Codable, Sendable {
+    /// Per-tap identifier so the phone can discard a message that arrives twice
+    /// (a `sendMessage` whose reply timed out but was delivered, then retried via
+    /// `transferUserInfo`). One tap → one id → one `ServiceLog`.
+    let id: UUID
     let vehicleID: String
     let serviceID: String?
     let serviceName: String
@@ -124,6 +128,31 @@ struct WatchMarkServiceDone: Codable, Sendable {
     let performedDate: Date
 
     static let messageKey = "markServiceDone"
+
+    init(id: UUID = UUID(), vehicleID: String, serviceID: String?, serviceName: String, mileageAtService: Int, performedDate: Date) {
+        self.id = id
+        self.vehicleID = vehicleID
+        self.serviceID = serviceID
+        self.serviceName = serviceName
+        self.mileageAtService = mileageAtService
+        self.performedDate = performedDate
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        // Default a fresh id when decoding a message from an older build that
+        // predates the field, so backward-compatible payloads still decode.
+        id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        vehicleID = try container.decode(String.self, forKey: .vehicleID)
+        serviceID = try container.decodeIfPresent(String.self, forKey: .serviceID)
+        serviceName = try container.decode(String.self, forKey: .serviceName)
+        mileageAtService = try container.decode(Int.self, forKey: .mileageAtService)
+        performedDate = try container.decode(Date.self, forKey: .performedDate)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, vehicleID, serviceID, serviceName, mileageAtService, performedDate
+    }
 }
 
 // MARK: - iPhone → Watch Context

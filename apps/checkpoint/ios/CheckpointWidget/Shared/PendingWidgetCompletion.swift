@@ -17,7 +17,7 @@ struct PendingWidgetCompletion: Codable {
     let performedDate: Date
     let mileageAtService: Int
 
-    static let userDefaultsKey = "pendingWidgetCompletions"
+    static let userDefaultsKey = WidgetAppGroup.pendingWidgetCompletionsKey
 
     /// TTL for pending completions (7 days)
     private static let ttlSeconds: TimeInterval = 7 * 24 * 60 * 60

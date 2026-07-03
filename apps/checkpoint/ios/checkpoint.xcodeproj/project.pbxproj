@@ -31,6 +31,7 @@
 		5ACB20202F37C7BF00714E55 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5ACB20112F37C7BF00714E55 /* Assets.xcassets */; };
 		5ASIRI0012F3000000036D71B /* VehicleEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ASIRI0022F3000000036D71B /* VehicleEntity.swift */; };
 		5ASIRI0032F3000000036D71B /* VehicleEntityQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ASIRI0042F3000000036D71B /* VehicleEntityQuery.swift */; };
+		5ADUEP0012F3000000036D71B /* DuePeriodFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADUEP0022F3000000036D71B /* DuePeriodFormatter.swift */; };
 		F424A22B574B2CAB7D7CECB0 /* DesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = 25127F8914D55F849FB69D80 /* DesignKit */; };
 /* End PBXBuildFile section */
 
@@ -130,6 +131,7 @@
 		5ACB20142F37C7BF00714E55 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		5ASIRI0022F3000000036D71B /* VehicleEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VehicleEntity.swift; path = CheckpointWidget/VehicleEntity.swift; sourceTree = SOURCE_ROOT; };
 		5ASIRI0042F3000000036D71B /* VehicleEntityQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VehicleEntityQuery.swift; path = CheckpointWidget/VehicleEntityQuery.swift; sourceTree = SOURCE_ROOT; };
+		5ADUEP0022F3000000036D71B /* DuePeriodFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DuePeriodFormatter.swift; path = checkpoint/Utilities/DuePeriodFormatter.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -368,6 +370,7 @@
 			children = (
 				5ASIRI0022F3000000036D71B /* VehicleEntity.swift */,
 				5ASIRI0042F3000000036D71B /* VehicleEntityQuery.swift */,
+				5ADUEP0022F3000000036D71B /* DuePeriodFormatter.swift */,
 			);
 			name = SharedEntities;
 			sourceTree = "<group>";
@@ -711,6 +714,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5ADUEP0012F3000000036D71B /* DuePeriodFormatter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

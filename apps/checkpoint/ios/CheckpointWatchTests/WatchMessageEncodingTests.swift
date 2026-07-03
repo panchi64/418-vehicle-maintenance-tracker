@@ -52,6 +52,30 @@ struct WatchMessageEncodingTests {
         #expect(decoded.mileageAtService == 32000)
     }
 
+    @Test func markServiceDone_assignsAFreshIDPerTap() {
+        // Each constructed completion carries its own id so the phone can
+        // discard a duplicate delivery of the same tap.
+        let first = WatchMarkServiceDone(vehicleID: "v1", serviceID: "s1", serviceName: "Oil Change", mileageAtService: 1, performedDate: Date())
+        let second = WatchMarkServiceDone(vehicleID: "v1", serviceID: "s1", serviceName: "Oil Change", mileageAtService: 1, performedDate: Date())
+        #expect(first.id != second.id)
+    }
+
+    @Test func markServiceDone_idRoundTrips() throws {
+        let original = WatchMarkServiceDone(id: UUID(), vehicleID: "v1", serviceID: "s1", serviceName: "Oil Change", mileageAtService: 1, performedDate: Date(timeIntervalSince1970: 5))
+        let decoded = try JSONDecoder().decode(WatchMarkServiceDone.self, from: try JSONEncoder().encode(original))
+        #expect(decoded.id == original.id)
+    }
+
+    @Test func markServiceDone_decodesWithoutID_backwardCompatible() throws {
+        // Older Watch build with no id field must still decode (id defaulted).
+        let json = """
+        {"vehicleID":"v1","serviceID":"s1","serviceName":"Oil Change","mileageAtService":1,"performedDate":0}
+        """
+        let decoded = try JSONDecoder().decode(WatchMarkServiceDone.self, from: Data(json.utf8))
+        #expect(decoded.vehicleID == "v1")
+        #expect(decoded.serviceName == "Oil Change")
+    }
+
     // MARK: - WatchService Identifiable
 
     @Test func watchService_usesServiceIDForIdentifiable() {

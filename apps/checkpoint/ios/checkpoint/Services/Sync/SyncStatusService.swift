@@ -209,6 +209,7 @@ final class SyncStatusService {
 
         setupNetworkMonitor()
         setupRemoteChangeObserver()
+        setupCloudKitEventObserver()
 
         Task {
             await checkAccountStatus()
@@ -473,5 +474,53 @@ final class SyncStatusService {
             self?.didReceiveRemoteChanges()
         }
         .store(in: &cancellables)
+    }
+
+    // MARK: - CloudKit Sync Event Observer
+
+    /// Observe `NSPersistentCloudKitContainer` setup/import/export events and drive
+    /// the sync state machine from them. Without this the didStart/didComplete/
+    /// didFail hooks are never called, so the status is cosmetic and real failures
+    /// (e.g. iCloud quota) never surface.
+    private func setupCloudKitEventObserver() {
+        NotificationCenter.default.publisher(
+            for: NSPersistentCloudKitContainer.eventChangedNotification
+        )
+        .receive(on: DispatchQueue.main)
+        .sink { [weak self] notification in
+            self?.handleCloudKitEvent(notification)
+        }
+        .store(in: &cancellables)
+    }
+
+    private func handleCloudKitEvent(_ notification: Notification) {
+        guard let event = notification.userInfo?[NSPersistentCloudKitContainer.eventNotificationUserInfoKey]
+            as? NSPersistentCloudKitContainer.Event else { return }
+
+        switch Self.outcome(endDate: event.endDate, succeeded: event.succeeded) {
+        case .started:
+            didStartSync()
+        case .succeeded:
+            didCompleteSync()
+        case .failed:
+            // A finished-but-failed event should always carry an error; fall back
+            // to a generic one so the failure still surfaces instead of being lost.
+            didFailSync(with: event.error ?? NSError(domain: "CloudKitSync", code: -1))
+        }
+    }
+
+    /// Map a CloudKit event's raw fields onto a sync outcome. An event with no
+    /// `endDate` is still in flight (start); a finished event is a success or a
+    /// failure per `succeeded`. Kept static and pure so it's unit-testable without
+    /// constructing a non-public `NSPersistentCloudKitContainer.Event`.
+    enum SyncEventOutcome: Equatable {
+        case started
+        case succeeded
+        case failed
+    }
+
+    nonisolated static func outcome(endDate: Date?, succeeded: Bool) -> SyncEventOutcome {
+        guard endDate != nil else { return .started }
+        return succeeded ? .succeeded : .failed
     }
 }

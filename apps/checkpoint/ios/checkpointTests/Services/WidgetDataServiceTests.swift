@@ -264,6 +264,7 @@ final class WidgetDataServiceTests: XCTestCase {
     // MARK: - WidgetSharedData Tests
 
     func testWidgetSharedData_EncodesAndDecodes() throws {
+        let dueDate = Date(timeIntervalSince1970: 1_800_000_000)
         let sharedData = WidgetSharedData(
             vehicleID: "test-vehicle-id",
             vehicleName: "My Car",
@@ -278,7 +279,8 @@ final class WidgetDataServiceTests: XCTestCase {
                     dueDescription: "or 500 miles",
                     dueMileage: 50500,
                     daysRemaining: 10,
-                    duePeriod: "This week"
+                    duePeriod: "This week",
+                    dueDate: dueDate
                 )
             ],
             updatedAt: Date()
@@ -294,6 +296,61 @@ final class WidgetDataServiceTests: XCTestCase {
         XCTAssertEqual(decoded.services.count, 1)
         XCTAssertEqual(decoded.services[0].name, "Oil Change")
         XCTAssertEqual(decoded.services[0].status, .dueSoon)
+        XCTAssertEqual(decoded.services[0].dueDate, dueDate,
+                       "Raw due date must round-trip so the widget can recompute the countdown")
+    }
+
+    /// Older snapshots written before `dueDate` shipped must still decode, with
+    /// dueDate falling back to nil (widget then uses the precomputed fields).
+    func testWidgetSharedData_DecodesLegacyPayloadWithoutDueDate() throws {
+        let json = """
+        {"vehicleName":"Legacy Car","currentMileage":40000,"isEstimatedMileage":false,"updatedAt":0,
+         "services":[{"serviceID":"s1","name":"Oil Change","status":"dueSoon","dueDescription":"Due this week","dueMileage":null,"daysRemaining":3,"duePeriod":"This week"}]}
+        """
+        let decoded = try JSONDecoder().decode(WidgetSharedData.self, from: Data(json.utf8))
+        XCTAssertEqual(decoded.services.count, 1)
+        XCTAssertNil(decoded.services[0].dueDate)
+        XCTAssertEqual(decoded.services[0].duePeriod, "This week")
+    }
+
+    // MARK: - Selected-vehicle gating of the shared "match app" key (finding #3)
+
+    func testUpdateWidget_DoesNotRepointSharedKey_WhenVehicleNotSelected() throws {
+        guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
+            XCTFail("Could not access App Group UserDefaults"); return
+        }
+
+        let selected = Vehicle(name: "Selected", make: "Toyota", model: "Camry", year: 2022, currentMileage: 30000)
+        let background = Vehicle(name: "Background", make: "Mazda", model: "MX-5", year: 2020, currentMileage: 12000)
+
+        // Mark `selected` as the app's current selection, then publish its snapshot.
+        userDefaults.set(selected.id.uuidString, forKey: appSelectedVehicleIDKey)
+        WidgetDataService.shared.updateWidget(for: selected)
+
+        // Editing the non-selected background vehicle must not repoint the shared key.
+        WidgetDataService.shared.updateWidget(for: background)
+
+        let sharedData = userDefaults.data(forKey: widgetDataKey)
+            .flatMap { try? JSONDecoder().decode(WidgetSharedData.self, from: $0) }
+        XCTAssertEqual(sharedData?.vehicleID, selected.id.uuidString,
+                       "Shared 'match app' key must keep pointing at the selected vehicle")
+
+        // The background vehicle still gets its own per-vehicle snapshot.
+        XCTAssertNotNil(userDefaults.data(forKey: "widgetData_\(background.id.uuidString)"))
+    }
+
+    func testUpdateWidget_WritesSharedKey_WhenVehicleIsSelected() throws {
+        guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
+            XCTFail("Could not access App Group UserDefaults"); return
+        }
+        let vehicle = Vehicle(name: "Selected", make: "Honda", model: "Civic", year: 2021, currentMileage: 25000)
+        userDefaults.set(vehicle.id.uuidString, forKey: appSelectedVehicleIDKey)
+
+        WidgetDataService.shared.updateWidget(for: vehicle)
+
+        let sharedData = userDefaults.data(forKey: widgetDataKey)
+            .flatMap { try? JSONDecoder().decode(WidgetSharedData.self, from: $0) }
+        XCTAssertEqual(sharedData?.vehicleID, vehicle.id.uuidString)
     }
 
     func test_duePeriod_forDate() {

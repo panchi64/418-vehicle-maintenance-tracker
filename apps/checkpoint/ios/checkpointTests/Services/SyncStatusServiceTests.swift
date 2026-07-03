@@ -247,6 +247,22 @@ final class SyncStatusServiceTests: XCTestCase {
         XCTAssertNotNil(service.lastSyncDescription)
     }
 
+    // MARK: - CloudKit Event Mapping Tests (finding #8)
+
+    func testOutcome_inProgressEventMapsToStarted() {
+        // No endDate → the sync operation is still running.
+        XCTAssertEqual(SyncStatusService.outcome(endDate: nil, succeeded: false), .started)
+        XCTAssertEqual(SyncStatusService.outcome(endDate: nil, succeeded: true), .started)
+    }
+
+    func testOutcome_finishedSuccessMapsToSucceeded() {
+        XCTAssertEqual(SyncStatusService.outcome(endDate: Date(), succeeded: true), .succeeded)
+    }
+
+    func testOutcome_finishedFailureMapsToFailed() {
+        XCTAssertEqual(SyncStatusService.outcome(endDate: Date(), succeeded: false), .failed)
+    }
+
     // MARK: - SyncError IsTransient Tests
 
     func testTransientErrors() {

@@ -53,8 +53,8 @@ nonisolated enum SiriServiceStatus: String {
 /// Reads vehicle and service data from App Groups for Siri intents
 nonisolated struct SiriDataProvider {
     private static let logger = Logger(category: "Siri")
-    private static let widgetDataKey = "widgetData"
-    private static let vehicleListKey = "vehicleList"
+    private static let widgetDataKey = AppGroupConstants.widgetDataKey
+    private static let vehicleListKey = AppGroupConstants.vehicleListKey
 
     // MARK: - Public Methods
 
@@ -68,7 +68,7 @@ nonisolated struct SiriDataProvider {
 
         // If a specific vehicle is requested, try to load its data
         if let vehicleID = vehicleID {
-            let vehicleKey = "widgetData_\(vehicleID)"
+            let vehicleKey = AppGroupConstants.widgetDataKeyPrefix + vehicleID
             if let data = userDefaults.data(forKey: vehicleKey) {
                 return decodeServiceData(from: data)
             }

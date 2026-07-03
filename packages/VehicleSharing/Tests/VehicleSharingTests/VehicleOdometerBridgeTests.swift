@@ -76,6 +76,46 @@ final class VehicleOdometerBridgeTests: XCTestCase {
         XCTAssertTrue(VehicleOdometerBridge.drainPendingUpdates(defaults: defaults).isEmpty)
     }
 
+    func testRemovePendingUpdatesRemovesOnlyGivenIDs() {
+        let u1 = PendingOdometerUpdate(vehicleID: "v1", mileage: 1, recordedAt: Date(timeIntervalSince1970: 1))
+        let u2 = PendingOdometerUpdate(vehicleID: "v1", mileage: 2, recordedAt: Date(timeIntervalSince1970: 2))
+        let u3 = PendingOdometerUpdate(vehicleID: "v1", mileage: 3, recordedAt: Date(timeIntervalSince1970: 3))
+        [u1, u2, u3].forEach { VehicleOdometerBridge.queueUpdate($0, defaults: defaults) }
+
+        VehicleOdometerBridge.removePendingUpdates([u1.id, u3.id], defaults: defaults)
+
+        XCTAssertEqual(VehicleOdometerBridge.loadPendingUpdates(defaults: defaults), [u2])
+    }
+
+    func testRemovePendingUpdatesEmptySetIsNoOp() {
+        let u1 = PendingOdometerUpdate(vehicleID: "v1", mileage: 1, recordedAt: Date(timeIntervalSince1970: 1))
+        VehicleOdometerBridge.queueUpdate(u1, defaults: defaults)
+        VehicleOdometerBridge.removePendingUpdates([], defaults: defaults)
+        XCTAssertEqual(VehicleOdometerBridge.loadPendingUpdates(defaults: defaults), [u1])
+    }
+
+    /// The exactly-once fix: an update Biombo appends *after* Checkpoint has read
+    /// the queue must survive the subsequent id-scoped removal, where the old
+    /// blanket `removeObject` would have dropped it.
+    func testRemovingReadIDsPreservesConcurrentlyQueuedUpdate() {
+        let u1 = PendingOdometerUpdate(vehicleID: "v1", mileage: 1, recordedAt: Date(timeIntervalSince1970: 1))
+        let u2 = PendingOdometerUpdate(vehicleID: "v1", mileage: 2, recordedAt: Date(timeIntervalSince1970: 2))
+        VehicleOdometerBridge.queueUpdate(u1, defaults: defaults)
+        VehicleOdometerBridge.queueUpdate(u2, defaults: defaults)
+
+        // Checkpoint reads the queue (u1, u2) and starts applying...
+        let read = VehicleOdometerBridge.loadPendingUpdates(defaults: defaults)
+
+        // ...Biombo queues a fresh reading in the meantime...
+        let u3 = PendingOdometerUpdate(vehicleID: "v1", mileage: 3, recordedAt: Date(timeIntervalSince1970: 3))
+        VehicleOdometerBridge.queueUpdate(u3, defaults: defaults)
+
+        // ...then Checkpoint removes only what it read.
+        VehicleOdometerBridge.removePendingUpdates(Set(read.map(\.id)), defaults: defaults)
+
+        XCTAssertEqual(VehicleOdometerBridge.loadPendingUpdates(defaults: defaults), [u3])
+    }
+
     // MARK: - Unit conversion
 
     func testDistanceUnitConversionRoundTrips() {

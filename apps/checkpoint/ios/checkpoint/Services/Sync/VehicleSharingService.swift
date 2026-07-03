@@ -54,7 +54,10 @@ enum VehicleSharingService {
     ///   widgets and re-publish.
     @discardableResult
     static func applyPendingUpdates(in context: ModelContext) -> Bool {
-        let pending = VehicleOdometerBridge.drainPendingUpdates()
+        // Read without removing: the queue is only cleared once the applied
+        // readings are durably saved, so a save failure leaves them for the next
+        // drain instead of losing them.
+        let pending = VehicleOdometerBridge.loadPendingUpdates()
         guard !pending.isEmpty else { return false }
 
         sharingLogger.info("Applying \(pending.count) pending odometer update(s) from Biombo")
@@ -83,13 +86,26 @@ enum VehicleSharingService {
             applied = true
         }
 
-        guard applied else { return false }
+        let readIDs = Set(pending.map(\.id))
+
+        guard applied else {
+            // Nothing committed (every reading was stale, non-positive, or for an
+            // unknown vehicle). Those can never become valid — odometers only move
+            // forward — so drop them rather than let the queue grow unbounded.
+            VehicleOdometerBridge.removePendingUpdates(readIDs)
+            return false
+        }
 
         do {
             try context.save()
         } catch {
-            sharingLogger.error("Failed to save pending odometer updates: \(error.localizedDescription)")
+            // Save failed: leave the queue intact so the next foreground retries.
+            sharingLogger.error("Failed to save pending odometer updates: \(error.localizedDescription). Leaving queue intact for retry.")
+            return false
         }
-        return applied
+
+        // Committed successfully — now remove exactly the entries we read.
+        VehicleOdometerBridge.removePendingUpdates(readIDs)
+        return true
     }
 }

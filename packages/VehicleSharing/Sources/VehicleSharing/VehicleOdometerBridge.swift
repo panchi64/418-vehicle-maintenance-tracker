@@ -72,8 +72,9 @@ public enum VehicleOdometerBridge {
 
     // MARK: - Checkpoint: drain (reader/clear side)
 
-    /// Read the queued updates without clearing them. Prefer `drainPendingUpdates`
-    /// for the normal apply-then-clear flow.
+    /// Read the queued updates without clearing them. This is the preferred
+    /// entry point for Checkpoint's apply flow: read here, commit + save, then
+    /// call `removePendingUpdates(ids:)` so a failed save leaves the queue intact.
     public static func loadPendingUpdates(
         defaults: UserDefaults? = SharedAppGroup.defaults()
     ) -> [PendingOdometerUpdate] {
@@ -86,15 +87,44 @@ public enum VehicleOdometerBridge {
         }
     }
 
-    /// Atomically read and clear the pending queue. Called by Checkpoint on
-    /// foreground to apply Biombo's queued readings exactly once.
+    /// Remove exactly the entries with the given ids from the pending queue,
+    /// re-reading the queue immediately before the write so a `queueUpdate` that
+    /// Biombo appended after we read is preserved rather than clobbered.
+    ///
+    /// UserDefaults offers no cross-process lock, so a vanishingly small window
+    /// remains between this re-read and its write-back; because every update
+    /// carries a stable `id` and Checkpoint's apply is forward-only, a reading
+    /// caught in that window is at worst reprocessed idempotently, never one that
+    /// was silently dropped by a blanket clear.
+    public static func removePendingUpdates(
+        _ ids: Set<UUID>,
+        defaults: UserDefaults? = SharedAppGroup.defaults()
+    ) {
+        guard let defaults, !ids.isEmpty else { return }
+        let remaining = loadPendingUpdates(defaults: defaults).filter { !ids.contains($0.id) }
+        if remaining.isEmpty {
+            defaults.removeObject(forKey: pendingUpdatesKey)
+            return
+        }
+        do {
+            let data = try JSONEncoder().encode(remaining)
+            defaults.set(data, forKey: pendingUpdatesKey)
+        } catch {
+            logger.error("Failed to encode remaining odometer updates: \(error.localizedDescription)")
+        }
+    }
+
+    /// Read the pending queue and remove exactly what was read. Prefer the
+    /// `loadPendingUpdates` + `removePendingUpdates(ids:)` pairing when the caller
+    /// needs to gate removal on a successful commit; this convenience drains in
+    /// one call for cases that don't.
+    @discardableResult
     public static func drainPendingUpdates(
         defaults: UserDefaults? = SharedAppGroup.defaults()
     ) -> [PendingOdometerUpdate] {
-        guard let defaults else { return [] }
         let pending = loadPendingUpdates(defaults: defaults)
         guard !pending.isEmpty else { return [] }
-        defaults.removeObject(forKey: pendingUpdatesKey)
+        removePendingUpdates(Set(pending.map(\.id)), defaults: defaults)
         return pending
     }
 }

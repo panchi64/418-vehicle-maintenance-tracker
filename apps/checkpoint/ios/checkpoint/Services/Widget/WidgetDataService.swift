@@ -19,12 +19,19 @@ private let widgetLogger = Logger(category: "Widget")
 final class WidgetDataService {
     static let shared = WidgetDataService()
 
-    private let widgetDataKey = "widgetData"
-    private let vehicleListKey = "vehicleList"
+    private let widgetDataKey = AppGroupConstants.widgetDataKey
+    private let vehicleListKey = AppGroupConstants.vehicleListKey
+    private let appSelectedVehicleIDKey = AppGroupConstants.appSelectedVehicleIDKey
 
     private var widgetDefaults: UserDefaults? {
         AppGroupConstants.iPhoneWidgetDefaults()
     }
+
+    /// ModelContainer used to re-serialize snapshots when CloudKit reports a
+    /// remote change. Set during app init (see `checkpointApp`). Nil in contexts
+    /// that never wire it (e.g. tests), where remote-change handling degrades to
+    /// a plain timeline reload.
+    var modelContainer: ModelContainer?
 
     /// Cancellables for observation
     private var cancellables = Set<AnyCancellable>()
@@ -48,15 +55,61 @@ final class WidgetDataService {
         .store(in: &cancellables)
     }
 
-    /// Handle remote changes by reloading widgets
+    /// Handle remote changes by re-serializing snapshots, then reloading widgets.
+    ///
+    /// A bare `reloadAllTimelines()` would make the widget re-decode the *same*
+    /// stale JSON another device just superseded. Re-serialize every vehicle's
+    /// snapshot from the model container first so the reload reflects the synced
+    /// state. Falls back to a plain reload when no container is wired.
     private func handleRemoteChange() {
-        // Reload all widget timelines to reflect remote changes
+        // Prefer our own wired container; fall back to the one WatchSessionService
+        // already holds so this works even before `modelContainer` is set.
+        guard let container = modelContainer ?? WatchSessionService.shared.modelContainer else {
+            WidgetCenter.shared.reloadAllTimelines()
+            return
+        }
+
+        let context = ModelContext(container)
+        let vehicles: [Vehicle]
+        do {
+            vehicles = try context.fetch(FetchDescriptor<Vehicle>())
+        } catch {
+            widgetLogger.error("Failed to fetch vehicles on remote change: \(error.localizedDescription)")
+            WidgetCenter.shared.reloadAllTimelines()
+            return
+        }
+
+        for vehicle in vehicles {
+            let input = snapshotInput(for: vehicle)
+            writeSnapshot(
+                vehicleID: vehicle.id.uuidString,
+                vehicleName: input.vehicleName,
+                currentMileage: input.currentMileage,
+                estimatedMileage: input.estimatedMileage,
+                isEstimated: input.isEstimated,
+                services: input.services
+            )
+        }
+        updateVehicleList(vehicles)
+
+        // One reload after all snapshots are rewritten (avoids N reloads).
         WidgetCenter.shared.reloadAllTimelines()
     }
 
     /// Returns the vehicle-specific widget data key
     private func widgetDataKey(for vehicleID: String) -> String {
-        "widgetData_\(vehicleID)"
+        "\(AppGroupConstants.widgetDataKeyPrefix)\(vehicleID)"
+    }
+
+    /// Whether `vehicleID` is the vehicle the app currently has selected, i.e.
+    /// the one the "Match App" widget should mirror. When no selection is
+    /// persisted yet (fresh launch) we treat any vehicle as a match so the shared
+    /// key stays populated rather than leaving the widget blank.
+    private func isSelectedVehicle(_ vehicleID: String) -> Bool {
+        guard let selected = widgetDefaults?.string(forKey: appSelectedVehicleIDKey) else {
+            return true
+        }
+        return selected == vehicleID
     }
 
     /// Update the widget with current vehicle and service data
@@ -73,7 +126,45 @@ final class WidgetDataService {
         currentMileage: Int,
         estimatedMileage: Int? = nil,
         isEstimated: Bool = false,
-        services: [(serviceID: String?, name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?, duePeriod: String?)]
+        services: [WidgetServiceRow]
+    ) {
+        writeSnapshot(
+            vehicleID: vehicleID,
+            vehicleName: vehicleName,
+            currentMileage: currentMileage,
+            estimatedMileage: estimatedMileage,
+            isEstimated: isEstimated,
+            services: services
+        )
+
+        // Reload widget timelines
+        WidgetCenter.shared.reloadAllTimelines()
+
+        // Send to Apple Watch (include distance unit preference)
+        WatchSessionService.shared.sendVehicleData(
+            vehicleID: vehicleID,
+            vehicleName: vehicleName,
+            currentMileage: currentMileage,
+            estimatedMileage: estimatedMileage,
+            isEstimated: isEstimated,
+            services: services,
+            distanceUnit: DistanceSettings.shared.unit.rawValue
+        )
+    }
+
+    /// Serialize one vehicle's snapshot into the App Group without reloading
+    /// timelines or messaging the Watch — the shared write path used both by the
+    /// single-vehicle `updateWidgetData` and the bulk re-serialize on remote
+    /// change. Always writes the per-vehicle key; writes the shared "match app"
+    /// key only when this vehicle is the app's current selection, so editing a
+    /// background vehicle can't repoint the Match-App widget onto it.
+    private func writeSnapshot(
+        vehicleID: String,
+        vehicleName: String,
+        currentMileage: Int,
+        estimatedMileage: Int?,
+        isEstimated: Bool,
+        services: [WidgetServiceRow]
     ) {
         guard let userDefaults = widgetDefaults else {
             widgetLogger.error("Failed to access App Group UserDefaults")
@@ -88,7 +179,8 @@ final class WidgetDataService {
                 dueDescription: service.dueDescription,
                 dueMileage: service.dueMileage,
                 daysRemaining: service.daysRemaining,
-                duePeriod: service.duePeriod
+                duePeriod: service.duePeriod,
+                dueDate: service.dueDate
             )
         }
 
@@ -104,24 +196,12 @@ final class WidgetDataService {
 
         do {
             let data = try JSONEncoder().encode(widgetData)
-            // Store with vehicle-specific key
+            // Store with vehicle-specific key (used by explicitly-configured widgets).
             userDefaults.set(data, forKey: widgetDataKey(for: vehicleID))
-            // Also store with legacy key for backward compatibility
-            userDefaults.set(data, forKey: widgetDataKey)
-
-            // Reload widget timelines
-            WidgetCenter.shared.reloadAllTimelines()
-
-            // Send to Apple Watch (include distance unit preference)
-            WatchSessionService.shared.sendVehicleData(
-                vehicleID: vehicleID,
-                vehicleName: vehicleName,
-                currentMileage: currentMileage,
-                estimatedMileage: estimatedMileage,
-                isEstimated: isEstimated,
-                services: services,
-                distanceUnit: DistanceSettings.shared.unit.rawValue
-            )
+            // Mirror into the shared "match app" key only for the selected vehicle.
+            if isSelectedVehicle(vehicleID) {
+                userDefaults.set(data, forKey: widgetDataKey)
+            }
         } catch {
             widgetLogger.error("Failed to encode widget data: \(error.localizedDescription)")
         }
@@ -129,11 +209,26 @@ final class WidgetDataService {
 
     /// Update widget from a Vehicle and its services (including marbete if configured)
     func updateWidget(for vehicle: Vehicle) {
+        let input = snapshotInput(for: vehicle)
+        updateWidgetData(
+            vehicleID: vehicle.id.uuidString,
+            vehicleName: input.vehicleName,
+            currentMileage: input.currentMileage,
+            estimatedMileage: input.estimatedMileage,
+            isEstimated: input.isEstimated,
+            services: input.services
+        )
+    }
+
+    /// Build the widget/watch snapshot rows for a vehicle: its due-tracked
+    /// services plus the marbete row, sorted by urgency. Each row carries the raw
+    /// `dueDate` so the widget can recompute the countdown per timeline entry.
+    private func snapshotInput(for vehicle: Vehicle) -> (vehicleName: String, currentMileage: Int, estimatedMileage: Int?, isEstimated: Bool, services: [WidgetServiceRow]) {
         let effectiveMileage = vehicle.effectiveMileage
         let pace = vehicle.dailyMilesPace
 
         // Create service items (only services with due tracking)
-        var allItems: [(serviceID: String?, name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?, duePeriod: String?, urgencyScore: Int)] = (vehicle.services ?? [])
+        var allItems: [(row: WidgetServiceRow, urgencyScore: Int)] = (vehicle.services ?? [])
             .filter { $0.hasDueTracking }
             .map { service in
             let status = service.status(currentMileage: effectiveMileage)
@@ -146,7 +241,7 @@ final class WidgetDataService {
                 Calendar.current.dateComponents([.day], from: .now, to: $0).day ?? 0
             }
 
-            return (
+            let row: WidgetServiceRow = (
                 serviceID: service.id.uuidString,
                 name: service.name,
                 status: statusString(for: status),
@@ -154,8 +249,9 @@ final class WidgetDataService {
                 dueMileage: service.dueMileage,
                 daysRemaining: daysRemaining,
                 duePeriod: Self.duePeriod(for: effectiveDue),
-                urgencyScore: service.urgencyScore(currentMileage: effectiveMileage, dailyPace: pace)
+                dueDate: effectiveDue
             )
+            return (row: row, urgencyScore: service.urgencyScore(currentMileage: effectiveMileage, dailyPace: pace))
         }
 
         // Add marbete if configured
@@ -174,7 +270,7 @@ final class WidgetDataService {
                 dueDescription = vehicle.marbeteExpirationFormatted ?? "Set"
             }
 
-            allItems.append((
+            let row: WidgetServiceRow = (
                 serviceID: nil,
                 name: "Marbete Renewal",
                 status: statusString(for: marbeteStatus),
@@ -182,20 +278,15 @@ final class WidgetDataService {
                 dueMileage: nil,  // Marbete has no mileage component
                 daysRemaining: vehicle.daysUntilMarbeteExpiration,
                 duePeriod: Self.duePeriod(for: expiration),
-                urgencyScore: vehicle.marbeteUrgencyScore
-            ))
+                dueDate: expiration
+            )
+            allItems.append((row: row, urgencyScore: vehicle.marbeteUrgencyScore))
         }
 
-        // Sort all items by urgency score
-        let sortedItems = allItems.sorted { $0.urgencyScore < $1.urgencyScore }
+        // Sort all items by urgency score, then drop the score.
+        let serviceData = allItems.sorted { $0.urgencyScore < $1.urgencyScore }.map { $0.row }
 
-        // Convert to service data format (dropping urgencyScore)
-        let serviceData = sortedItems.map { item in
-            (serviceID: item.serviceID, name: item.name, status: item.status, dueDescription: item.dueDescription, dueMileage: item.dueMileage, daysRemaining: item.daysRemaining, duePeriod: item.duePeriod)
-        }
-
-        updateWidgetData(
-            vehicleID: vehicle.id.uuidString,
+        return (
             vehicleName: vehicle.displayName,
             currentMileage: vehicle.currentMileage,
             estimatedMileage: vehicle.estimatedMileage,
@@ -255,9 +346,6 @@ final class WidgetDataService {
         guard !pending.isEmpty else { return }
 
         widgetLogger.info("Processing \(pending.count) pending widget completion(s)")
-
-        // Clear immediately to avoid re-processing
-        PendingWidgetCompletion.clearAll()
 
         for completion in pending {
             do {
@@ -326,8 +414,13 @@ final class WidgetDataService {
 
         do {
             try context.save()
+            // Clear only after the logs are durably saved; a failed save leaves
+            // the queue so the completions are reprocessed next foreground rather
+            // than silently lost. Completions dedupe on serviceID, so a reprocess
+            // after partial work stays safe.
+            PendingWidgetCompletion.clearAll()
         } catch {
-            widgetLogger.error("Failed to save widget completions: \(error.localizedDescription)")
+            widgetLogger.error("Failed to save widget completions: \(error.localizedDescription). Leaving queue intact for retry.")
         }
     }
 
@@ -345,7 +438,7 @@ final class WidgetDataService {
     /// is a localized format string with a single `%@` for the period, so word
     /// order follows the locale (Spanish: "Vence a mediados de may").
     nonisolated static func periodPhrase(_ period: DuePeriodFormatter.Period, phraseFormat: String, overdueWord: String) -> String {
-        period.isOverdue ? overdueWord : String(format: phraseFormat, period.label.lowercased())
+        period.phrased(format: phraseFormat, overdueWord: overdueWord)
     }
 
     /// Due text for the shared payload: mileage phrasing for mileage-tracked
@@ -386,6 +479,20 @@ final class WidgetDataService {
 
 // MARK: - Shared Data Structures
 
+/// One service/marbete row destined for the widget + watch snapshot. Carries
+/// both the precomputed display fields and the raw `dueDate` so the widget can
+/// recompute the countdown against each timeline entry's date.
+typealias WidgetServiceRow = (
+    serviceID: String?,
+    name: String,
+    status: String,
+    dueDescription: String,
+    dueMileage: Int?,
+    daysRemaining: Int?,
+    duePeriod: String?,
+    dueDate: Date?
+)
+
 /// Data structure matching the widget's expected format
 struct WidgetSharedData: Codable {
     let vehicleID: String?
@@ -404,6 +511,7 @@ struct WidgetSharedData: Codable {
         let dueMileage: Int?        // The mileage when service is due (e.g., 35000)
         let daysRemaining: Int?     // Days until due (negative = overdue)
         let duePeriod: String?      // Abstracted month period for date-based hero (e.g. "Mid May")
+        let dueDate: Date?          // Raw due date; lets the widget recompute the countdown over time
     }
 
     enum ServiceStatus: String, Codable {
@@ -417,15 +525,20 @@ struct VehicleListItem: Codable, Sendable {
     let displayName: String
 }
 
-/// Pending service completion from widget "Done" button
-/// Written by widget extension, read and processed by main app on foreground
+/// Pending service completion from widget "Done" button.
+///
+/// Wire-compatible mirror of `CheckpointWidget/Shared/PendingWidgetCompletion.swift`
+/// (same key, same Codable shape): the widget target writes completions, this app
+/// copy reads and clears them. Kept as a separate definition only because the two
+/// files live in separate build targets; if that shared file is ever made a member
+/// of the app target, delete this and use the canonical one.
 struct PendingWidgetCompletion: Codable {
     let serviceID: String
     let vehicleID: String
     let performedDate: Date
     let mileageAtService: Int
 
-    static let userDefaultsKey = "pendingWidgetCompletions"
+    static let userDefaultsKey = AppGroupConstants.pendingWidgetCompletionsKey
 
     static func save(_ completion: PendingWidgetCompletion) {
         guard let userDefaults = AppGroupConstants.iPhoneWidgetDefaults() else { return }

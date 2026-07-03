@@ -15,6 +15,34 @@ private nonisolated enum WatchLog {
     static let logger = Logger(category: "WatchSession")
 }
 
+/// A small persisted ring of recently-processed Watch mark-done ids, used to
+/// discard duplicate deliveries of the same tap. Persisted (not just in-memory)
+/// because a `transferUserInfo` retry can be delivered after the app relaunches.
+/// Bounded so it can't grow without limit; the cap comfortably covers the handful
+/// of in-flight taps a duplicate could ever race against.
+enum WatchMarkDoneDedup {
+    static let key = "processedWatchMarkDoneIDs"
+    private static let capacity = 25
+
+    static func isDuplicate(_ id: UUID) -> Bool {
+        recentIDs().contains(id.uuidString)
+    }
+
+    static func record(_ id: UUID) {
+        var ids = recentIDs()
+        guard !ids.contains(id.uuidString) else { return }
+        ids.append(id.uuidString)
+        if ids.count > capacity {
+            ids.removeFirst(ids.count - capacity)
+        }
+        UserDefaults.standard.set(ids, forKey: key)
+    }
+
+    private static func recentIDs() -> [String] {
+        UserDefaults.standard.stringArray(forKey: key) ?? []
+    }
+}
+
 @Observable
 @MainActor
 final class WatchSessionService: NSObject {
@@ -61,7 +89,7 @@ final class WatchSessionService: NSObject {
         currentMileage: Int,
         estimatedMileage: Int?,
         isEstimated: Bool,
-        services: [(serviceID: String?, name: String, status: String, dueDescription: String, dueMileage: Int?, daysRemaining: Int?, duePeriod: String?)],
+        services: [WidgetServiceRow],
         distanceUnit: String = "miles"
     ) {
         guard WCSession.isSupported() else { return }
@@ -171,6 +199,16 @@ final class WatchSessionService: NSObject {
 
         do {
             let completion = try JSONDecoder().decode(WatchMarkServiceDoneDTO.self, from: data)
+
+            // Drop a message we've already logged. `sendMessage` can succeed on
+            // the Watch yet have its reply time out, prompting a `transferUserInfo`
+            // retry that delivers the same tap twice; without this the phone would
+            // write two ServiceLogs for one tap.
+            guard !WatchMarkDoneDedup.isDuplicate(completion.id) else {
+                WatchLog.logger.info("Ignoring duplicate Watch mark-done delivery: \(completion.id, privacy: .public)")
+                return
+            }
+
             let context = ModelContext(container)
 
             // Find vehicle
@@ -220,6 +258,9 @@ final class WatchSessionService: NSObject {
             )
 
             try context.save()
+            // Record the id only after the log is durably saved, so a failed
+            // save leaves the tap eligible for a retry delivery.
+            WatchMarkDoneDedup.record(completion.id)
             WatchLog.logger.info("Marked service done from Watch: \(completion.serviceName)")
 
             // Re-sync widget + Watch
@@ -349,10 +390,24 @@ struct WatchMileageUpdateDTO: Codable {
 
 /// Mark service done DTO from Watch
 struct WatchMarkServiceDoneDTO: Codable {
+    /// Per-tap identifier used to drop duplicate deliveries (see the dedup ring
+    /// in `handleMarkServiceDone`). Decoded defensively: a message from an older
+    /// Watch build without an id still processes, just without dedup coverage.
+    let id: UUID
     let vehicleID: String
     let serviceID: String?
     let serviceName: String
     let mileageAtService: Int
     let performedDate: Date
     static let messageKey = "markServiceDone"
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        vehicleID = try container.decode(String.self, forKey: .vehicleID)
+        serviceID = try container.decodeIfPresent(String.self, forKey: .serviceID)
+        serviceName = try container.decode(String.self, forKey: .serviceName)
+        mileageAtService = try container.decode(Int.self, forKey: .mileageAtService)
+        performedDate = try container.decode(Date.self, forKey: .performedDate)
+    }
 }

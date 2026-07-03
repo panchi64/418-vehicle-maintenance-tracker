@@ -26,6 +26,15 @@ nonisolated enum DuePeriodFormatter {
         /// Localized, natural-case label: "Overdue" / "This week" / "Mid May".
         /// Callers uppercase (brutalist hero) or lowercase (phrase) for display.
         let label: String
+
+        /// "verb + period" phrasing for due text, e.g. "Due mid May" / "Overdue",
+        /// or "Expires mid May" / "Expired" for marbete. `format` is a format
+        /// string with a single `%@` for the period, so word order follows the
+        /// locale. Shared by the app-side snapshot writer and the widget's
+        /// per-entry recompute so both read identically.
+        func phrased(format: String, overdueWord: String) -> String {
+            isOverdue ? overdueWord : String(format: format, label.lowercased())
+        }
     }
 
     /// Abstracted, localized due descriptor.

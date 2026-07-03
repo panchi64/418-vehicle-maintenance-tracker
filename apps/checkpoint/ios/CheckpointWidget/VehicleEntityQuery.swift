@@ -23,7 +23,11 @@ struct VehicleListItem: Codable, Sendable {
 
 /// Query to fetch vehicles for widget configuration picker and Siri intents
 struct VehicleEntityQuery: EntityQuery {
-    private let vehicleListKey = "vehicleList"
+    #if MAIN_APP_TARGET
+    private let vehicleListKey = AppGroupConstants.vehicleListKey
+    #else
+    private let vehicleListKey = WidgetAppGroup.vehicleListKey
+    #endif
 
     /// Pseudo-entity representing "use the app's current vehicle selection"
     private static let matchAppEntity = VehicleEntity(id: "match-app", displayName: "Match App")

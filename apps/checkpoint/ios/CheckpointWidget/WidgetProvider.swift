@@ -95,6 +95,11 @@ struct WidgetData: Codable {
         let dueMileage: Int?        // The mileage when service is due
         let daysRemaining: Int?     // Days until due (negative = overdue)
         let duePeriod: String?      // Abstracted month period for date-based hero (e.g. "Mid May")
+        // Raw due date for date-based rows. Optional so snapshots written before
+        // this field shipped still decode (older data falls back to the
+        // precomputed daysRemaining/duePeriod/dueDescription above). Optional
+        // Codable properties decode as nil when the key is absent.
+        let dueDate: Date?
     }
 
     /// Provide fallback for older data without currentMileage or vehicleID
@@ -118,7 +123,10 @@ struct WidgetProvider: AppIntentTimelineProvider {
     typealias Entry = ServiceEntry
     typealias Intent = CheckpointWidgetConfigurationIntent
 
-    private let widgetDataKey = "widgetData"
+    /// How many day-boundary entries to project ahead so date-based countdowns
+    /// advance ("in 3 days" → "in 2 days", "This week" → "Overdue") without the
+    /// app running. One week of daily transitions.
+    private let projectedDays = 7
 
     func placeholder(in context: Context) -> ServiceEntry {
         ServiceEntry.placeholder
@@ -127,23 +135,41 @@ struct WidgetProvider: AppIntentTimelineProvider {
     func snapshot(for configuration: CheckpointWidgetConfigurationIntent, in context: Context) async -> ServiceEntry {
         if context.isPreview {
             return ServiceEntry.placeholder
-        } else {
-            return loadEntry(configuration: configuration)
         }
+        guard let snapshot = loadSnapshot(configuration: configuration) else {
+            return makeEmptyEntry(configuration: configuration)
+        }
+        return makeEntry(from: snapshot, at: Date(), configuration: configuration)
     }
 
     func timeline(for configuration: CheckpointWidgetConfigurationIntent, in context: Context) async -> Timeline<ServiceEntry> {
-        let entry = loadEntry(configuration: configuration)
+        guard let snapshot = loadSnapshot(configuration: configuration) else {
+            let nextUpdate = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date()
+            return Timeline(entries: [makeEmptyEntry(configuration: configuration)], policy: .after(nextUpdate))
+        }
 
-        // Update every hour
-        let nextUpdate = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date()
-        return Timeline(entries: [entry], policy: .after(nextUpdate))
+        // Recompute each date-based row against every entry's date so the
+        // displayed countdown/period stays live between app writes, rather than
+        // re-rendering the same precomputed values the app baked in at write time.
+        let entries = timelineEntryDates(from: Date()).map { date in
+            makeEntry(from: snapshot, at: date, configuration: configuration)
+        }
+        return Timeline(entries: entries, policy: .atEnd)
     }
 
-    private func loadEntry(configuration: CheckpointWidgetConfigurationIntent) -> ServiceEntry {
-        guard let userDefaults = WidgetAppGroup.defaults() else {
-            return makeEmptyEntry(configuration: configuration)
-        }
+    // MARK: - Snapshot loading
+
+    /// Decoded snapshot plus the derived context needed to render an entry.
+    private struct LoadedSnapshot {
+        let data: WidgetData
+        let distanceUnit: WidgetDistanceUnit
+        let pendingIDs: Set<String>
+    }
+
+    /// Resolve which vehicle's JSON to show and decode it once. The per-entry
+    /// recompute in `makeEntry` then works off this single decode.
+    private func loadSnapshot(configuration: CheckpointWidgetConfigurationIntent) -> LoadedSnapshot? {
+        guard let userDefaults = WidgetAppGroup.defaults() else { return nil }
 
         // Load pending completion IDs to filter out already-logged services
         let pendingIDs = Set(PendingWidgetCompletion.loadAll().map { $0.serviceID })
@@ -151,63 +177,122 @@ struct WidgetProvider: AppIntentTimelineProvider {
         // Resolve distance unit from intent (single source of truth)
         let resolvedUnit = configuration.distanceUnit.resolve()
 
+        func decode(_ data: Data) -> WidgetData? {
+            do {
+                return try JSONDecoder().decode(WidgetData.self, from: data)
+            } catch {
+                print("Widget failed to decode data: \(error)")
+                return nil
+            }
+        }
+
         // Determine which vehicle to load:
         // - "match-app" or nil → use widgetData key (app's current selection)
         // - Specific vehicle → use per-vehicle key, fallback to widgetData
         let isMatchApp = configuration.vehicle == nil || configuration.vehicle?.id == "match-app"
 
         if !isMatchApp, let configuredVehicle = configuration.vehicle {
-            // Explicit per-widget vehicle selection
-            let vehicleKey = "widgetData_\(configuredVehicle.id)"
-            if let data = userDefaults.data(forKey: vehicleKey),
-               let entry = decodeEntry(from: data, configuration: configuration, distanceUnit: resolvedUnit, pendingIDs: pendingIDs) {
-                return entry
+            let vehicleKey = "\(WidgetAppGroup.widgetDataKeyPrefix)\(configuredVehicle.id)"
+            if let data = userDefaults.data(forKey: vehicleKey), let decoded = decode(data) {
+                return LoadedSnapshot(data: decoded, distanceUnit: resolvedUnit, pendingIDs: pendingIDs)
             }
         }
 
-        // Use the widgetData key (app's currently selected vehicle)
-        if let data = userDefaults.data(forKey: widgetDataKey),
-           let entry = decodeEntry(from: data, configuration: configuration, distanceUnit: resolvedUnit, pendingIDs: pendingIDs) {
-            return entry
+        if let data = userDefaults.data(forKey: WidgetAppGroup.widgetDataKey), let decoded = decode(data) {
+            return LoadedSnapshot(data: decoded, distanceUnit: resolvedUnit, pendingIDs: pendingIDs)
         }
 
-        return makeEmptyEntry(configuration: configuration, distanceUnit: resolvedUnit)
+        return nil
     }
 
-    private func decodeEntry(from data: Data, configuration: CheckpointWidgetConfigurationIntent, distanceUnit: WidgetDistanceUnit, pendingIDs: Set<String>) -> ServiceEntry? {
-        do {
-            let widgetData = try JSONDecoder().decode(WidgetData.self, from: data)
-
-            // Filter out services that have pending completions so the widget
-            // advances to the next service immediately after marking one done
-            let widgetServices = widgetData.services.compactMap { service -> WidgetService? in
-                if let serviceID = service.serviceID, pendingIDs.contains(serviceID) {
-                    return nil
-                }
-                return WidgetService(
-                    serviceID: service.serviceID,
-                    name: service.name,
-                    status: service.status,
-                    dueDescription: service.dueDescription,
-                    dueMileage: service.dueMileage,
-                    daysRemaining: service.daysRemaining,
-                    duePeriod: service.duePeriod
-                )
-            }
-
-            return ServiceEntry(
-                date: Date(),
-                vehicleID: widgetData.vehicleID,
-                vehicleName: widgetData.vehicleName,
-                currentMileage: widgetData.currentMileage,
-                services: widgetServices,
-                configuration: configuration,
-                distanceUnit: distanceUnit
-            )
-        } catch {
-            print("Widget failed to decode data: \(error)")
-            return nil
+    /// The entry dates for the timeline: now plus each of the next N local
+    /// midnights, so the day count and period bucket roll over at midnight.
+    private func timelineEntryDates(from now: Date, calendar: Calendar = .current) -> [Date] {
+        var dates = [now]
+        guard let firstMidnight = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now)) else {
+            return dates
         }
+        for offset in 0..<projectedDays {
+            if let date = calendar.date(byAdding: .day, value: offset, to: firstMidnight) {
+                dates.append(date)
+            }
+        }
+        return dates
+    }
+
+    // MARK: - Entry construction
+
+    /// Build a `ServiceEntry` for `entryDate`, recomputing each date-based row's
+    /// countdown, period, and status against that date. Mileage-based rows are
+    /// left as stored (mileage doesn't advance without an app write).
+    private func makeEntry(from snapshot: LoadedSnapshot, at entryDate: Date, configuration: CheckpointWidgetConfigurationIntent) -> ServiceEntry {
+        let widgetServices = snapshot.data.services.compactMap { service -> WidgetService? in
+            // Filter out services with pending completions so the widget advances
+            // to the next service immediately after marking one done.
+            if let serviceID = service.serviceID, snapshot.pendingIDs.contains(serviceID) {
+                return nil
+            }
+            return recomputedService(service, at: entryDate)
+        }
+
+        return ServiceEntry(
+            date: entryDate,
+            vehicleID: snapshot.data.vehicleID,
+            vehicleName: snapshot.data.vehicleName,
+            currentMileage: snapshot.data.currentMileage,
+            services: widgetServices,
+            configuration: configuration,
+            distanceUnit: snapshot.distanceUnit
+        )
+    }
+
+    /// Re-derive a row's time-relative fields against `entryDate`. Rows with a
+    /// mileage target (or no raw due date, e.g. older snapshots) pass through
+    /// unchanged; date-based rows recompute days/period/description/status from
+    /// the stored `dueDate` so the countdown never freezes.
+    private func recomputedService(_ service: WidgetData.SharedService, at entryDate: Date) -> WidgetService {
+        guard service.dueMileage == nil, let dueDate = service.dueDate else {
+            return WidgetService(
+                serviceID: service.serviceID,
+                name: service.name,
+                status: service.status,
+                dueDescription: service.dueDescription,
+                dueMileage: service.dueMileage,
+                daysRemaining: service.daysRemaining,
+                duePeriod: service.duePeriod
+            )
+        }
+
+        let calendar = Calendar.current
+        let period = DuePeriodFormatter.describe(dueDate, relativeTo: entryDate, calendar: calendar)
+        let days = calendar.dateComponents(
+            [.day],
+            from: calendar.startOfDay(for: entryDate),
+            to: calendar.startOfDay(for: dueDate)
+        ).day
+
+        // A marbete row (no serviceID) reads "Expires …/Expired"; services read
+        // "Due …/Overdue". Distinguishing on serviceID keeps the accessory
+        // dueDescription verb correct after recompute.
+        let isMarbete = service.serviceID == nil
+        let dueDescription = period.phrased(
+            format: isMarbete ? "Expires %@" : "Due %@",
+            overdueWord: isMarbete ? "Expired" : "Overdue"
+        )
+
+        // Once the date passes, an item is overdue regardless of the status the
+        // app baked in, so flip stale "due soon" chips to overdue.
+        let status: WidgetServiceStatus = period.isOverdue ? .overdue : service.status
+
+        return WidgetService(
+            serviceID: service.serviceID,
+            name: service.name,
+            status: status,
+            dueDescription: dueDescription,
+            dueMileage: nil,
+            daysRemaining: days,
+            duePeriod: period.label
+        )
     }
 
     private func makeEmptyEntry(configuration: CheckpointWidgetConfigurationIntent, distanceUnit: WidgetDistanceUnit = .miles) -> ServiceEntry {

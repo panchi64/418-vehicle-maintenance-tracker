@@ -59,7 +59,7 @@ struct MarkServiceDoneIntent: AppIntent {
         guard let defaults = WidgetAppGroup.defaults() else { return nil }
 
         // Try vehicle-specific key first, then generic key
-        let keys = ["widgetData_\(vehicleID)", "widgetData"]
+        let keys = ["\(WidgetAppGroup.widgetDataKeyPrefix)\(vehicleID)", WidgetAppGroup.widgetDataKey]
         for key in keys {
             if let data = defaults.data(forKey: key),
                let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
