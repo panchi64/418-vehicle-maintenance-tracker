@@ -27,17 +27,10 @@ struct checkpointApp: App {
     /// with the sample-data tour. Once onboarding completes, a notification triggers
     /// re-creation with CloudKit enabled.
     static func createContainer(syncEnabled: Bool) -> ModelContainer {
-        let schema = Schema([
-            Vehicle.self,
-            Service.self,
-            ServiceLog.self,
-            ServicePreset.self,
-            MileageSnapshot.self,
-            ServiceAttachment.self,
-            RecallAcknowledgment.self,
-            ServiceVisit.self,
-            VisitLineItem.self,
-        ])
+        // Built from the versioned schema so schema changes ship as staged
+        // migrations via CheckpointMigrationPlan rather than implicit
+        // lightweight migration. See CheckpointSchema.swift.
+        let schema = Schema(versionedSchema: CheckpointSchemaV1.self)
 
         let storeURL = AppGroupConstants.iPhoneWidgetContainerURL?.appendingPathComponent("checkpoint.store")
 
@@ -57,7 +50,11 @@ struct checkpointApp: App {
                         cloudKitDatabase: .private(cloudKitContainerID)
                     )
                 }
-                return try ModelContainer(for: schema, configurations: [cloudConfig])
+                return try ModelContainer(
+                    for: schema,
+                    migrationPlan: CheckpointMigrationPlan.self,
+                    configurations: [cloudConfig]
+                )
             } catch {
                 // CloudKit failed - fall back to local storage
                 appLogger.error("CloudKit initialization failed: \(error.localizedDescription). Falling back to local storage.")
@@ -74,7 +71,11 @@ struct checkpointApp: App {
         }
 
         do {
-            return try ModelContainer(for: schema, configurations: [localConfig])
+            return try ModelContainer(
+                for: schema,
+                migrationPlan: CheckpointMigrationPlan.self,
+                configurations: [localConfig]
+            )
         } catch {
             appLogger.fault("Could not create ModelContainer: \(error.localizedDescription)")
             fatalError("Could not create ModelContainer: \(error)")
@@ -100,17 +101,26 @@ struct checkpointApp: App {
         // Determine whether to enable CloudKit sync at launch.
         // Defer sync during onboarding so iCloud data doesn't interfere with the tour.
         let hasCompleted = OnboardingState.hasCompletedOnboarding
-        let userSyncPref = UserDefaults.standard.object(forKey: "iCloudSyncEnabled") as? Bool ?? true
+        let userSyncPref = SyncSettings.shared.iCloudSyncEnabled
         let syncEnabled = hasCompleted && userSyncPref
         let container = Self.createContainer(syncEnabled: syncEnabled)
         _modelContainer = State(initialValue: container)
 
-        // Each backfill is gated by its own UserDefaults flag so this is safe on every launch.
-        ServiceMigrationService.runPostLaunchBackfills(in: container.mainContext)
+        // Run post-launch backfills off the blocking launch path: dispatch as
+        // a main-actor task so the table scans happen after first render rather
+        // than delaying it. Each backfill is idempotent (gated by its own
+        // UserDefaults flag, or cheap and safe to repeat), so this stays correct
+        // on every launch.
+        Task { @MainActor in
+            ServiceMigrationService.runPostLaunchBackfills(in: container.mainContext)
+        }
 
         // Initialize Watch connectivity
         WatchSessionService.shared.modelContainer = container
         WatchSessionService.shared.activate()
+
+        // Widget snapshots re-serialize from this container on remote CloudKit changes
+        WidgetDataService.shared.modelContainer = container
     }
 
     var body: some Scene {
@@ -157,12 +167,13 @@ struct checkpointApp: App {
                     await StoreManager.shared.loadProducts()
                 }
                 .onReceive(NotificationCenter.default.publisher(for: .enableCloudSyncAfterOnboarding)) { _ in
-                    let userSyncPref = UserDefaults.standard.object(forKey: "iCloudSyncEnabled") as? Bool ?? true
+                    let userSyncPref = SyncSettings.shared.iCloudSyncEnabled
                     guard userSyncPref else { return }
                     appLogger.info("Onboarding complete — enabling CloudKit sync")
                     let newContainer = Self.createContainer(syncEnabled: true)
                     modelContainer = newContainer
                     WatchSessionService.shared.modelContainer = newContainer
+                    WidgetDataService.shared.modelContainer = newContainer
                 }
         }
         .modelContainer(modelContainer)

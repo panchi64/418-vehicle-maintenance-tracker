@@ -462,7 +462,7 @@ struct DocumentsView: View {
 
     private func deleteDocument(_ doc: Document) {
         modelContext.delete(doc)
-        try? modelContext.save()
+        saveAfterDelete()
         Document.purgeOrphans(in: modelContext)
         documentToDelete = nil
         selectedIDs.remove(doc.id)
@@ -473,9 +473,25 @@ struct DocumentsView: View {
         for doc in targets {
             modelContext.delete(doc)
         }
-        try? modelContext.save()
+        saveAfterDelete()
         Document.purgeOrphans(in: modelContext)
         exitSelectionMode()
+    }
+
+    /// Persist a user-initiated delete. On failure, log it and surface a toast
+    /// rather than silently swallowing the error — the row would otherwise
+    /// reappear on the next fetch with no explanation.
+    private func saveAfterDelete() {
+        do {
+            try modelContext.save()
+        } catch {
+            documentsViewLogger.error("Document delete save failed: \(error.localizedDescription)")
+            ToastService.shared.show(
+                L10n.documentsDeleteError,
+                icon: "exclamationmark.triangle",
+                style: .error
+            )
+        }
     }
 
     private func shareSingle(_ doc: Document) {

@@ -214,4 +214,90 @@ final class DocumentTests: XCTestCase {
         XCTAssertEqual(remaining.count, 1)
         XCTAssertNotNil(remaining.first?.serviceLog)
     }
+
+    // MARK: - Delete-rule semantics
+
+    /// Deleting a ServiceLog must not hard-delete its attachments. The
+    /// `ServiceLog.attachments` rule is `.nullify`, so the document survives
+    /// in the Documents library with its log link cleared but vehicle intact.
+    @MainActor
+    func testDeleteServiceLog_PreservesAttachmentAndVehicleLink() throws {
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
+        modelContext.insert(vehicle)
+
+        let log = ServiceLog(vehicle: vehicle, performedDate: .now, mileageAtService: 30_000)
+        modelContext.insert(log)
+
+        let doc = Document(
+            serviceLog: log,
+            data: Data(),
+            fileName: "receipt.jpg",
+            mimeType: "image/jpeg"
+        )
+        modelContext.insert(doc)
+        try modelContext.save()
+
+        modelContext.delete(log)
+        try modelContext.save()
+
+        let remaining = try modelContext.fetch(FetchDescriptor<Document>())
+        XCTAssertEqual(remaining.count, 1, "Attachment should survive its log's deletion")
+        XCTAssertNil(remaining.first?.serviceLog, "Log link should be nullified")
+        XCTAssertEqual(remaining.first?.vehicles?.first?.id, vehicle.id, "Vehicle link should remain")
+    }
+
+    /// Deleting a vehicle removes documents that were linked only to it: the
+    /// `.nullify` on `Vehicle.documents` clears the link and the orphan sweep
+    /// (run on the production vehicle-delete path) reclaims the now-ownerless
+    /// document. Mirrors `EditVehicleView.deleteVehicle`.
+    @MainActor
+    func testDeleteVehicle_RemovesItsExclusiveDocuments() throws {
+        let vehicle = Vehicle(make: "Honda", model: "Civic", year: 2021)
+        modelContext.insert(vehicle)
+
+        let doc = Document(
+            data: Data(),
+            fileName: "registration.pdf",
+            mimeType: "application/pdf",
+            documentType: .registration,
+            vehicles: [vehicle]
+        )
+        modelContext.insert(doc)
+        try modelContext.save()
+
+        modelContext.delete(vehicle)
+        try modelContext.save()
+        Document.purgeOrphans(in: modelContext)
+
+        let remaining = try modelContext.fetch(FetchDescriptor<Document>())
+        XCTAssertTrue(remaining.isEmpty, "Document linked only to the deleted vehicle should be purged")
+    }
+
+    /// A document shared across two vehicles survives deletion of one of them —
+    /// it still belongs to the other, so the orphan sweep must not reclaim it.
+    @MainActor
+    func testDeleteVehicle_KeepsDocumentStillLinkedToAnotherVehicle() throws {
+        let vehicleA = Vehicle(make: "Ford", model: "F-150", year: 2021)
+        let vehicleB = Vehicle(make: "Ford", model: "F-250", year: 2022)
+        modelContext.insert(vehicleA)
+        modelContext.insert(vehicleB)
+
+        let doc = Document(
+            data: Data(),
+            fileName: "fleet-insurance.pdf",
+            mimeType: "application/pdf",
+            documentType: .insurance,
+            vehicles: [vehicleA, vehicleB]
+        )
+        modelContext.insert(doc)
+        try modelContext.save()
+
+        modelContext.delete(vehicleA)
+        try modelContext.save()
+        Document.purgeOrphans(in: modelContext)
+
+        let remaining = try modelContext.fetch(FetchDescriptor<Document>())
+        XCTAssertEqual(remaining.count, 1, "Shared document must outlive one of its vehicles")
+        XCTAssertEqual(remaining.first?.vehicles?.map(\.id), [vehicleB.id])
+    }
 }

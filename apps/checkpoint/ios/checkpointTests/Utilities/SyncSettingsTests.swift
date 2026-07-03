@@ -72,39 +72,6 @@ final class SyncSettingsTests: XCTestCase {
         XCTAssertFalse(UserDefaults.standard.bool(forKey: "iCloudSyncEnabled"))
     }
 
-    // MARK: - Migration Completed Tests
-
-    func testMigrationCompletedDefaultValue() {
-        // Given defaults are registered
-        SyncSettings.registerDefaults()
-
-        // When accessing migrationCompleted
-        // Then it should be false by default
-        XCTAssertFalse(SyncSettings.shared.migrationCompleted)
-    }
-
-    func testMigrationCompletedCanBeSet() {
-        // Given defaults are registered
-        SyncSettings.registerDefaults()
-
-        // When marking migration as completed
-        SyncSettings.shared.migrationCompleted = true
-
-        // Then it should be true
-        XCTAssertTrue(SyncSettings.shared.migrationCompleted)
-    }
-
-    func testMigrationCompletedPersists() {
-        // Given defaults are registered
-        SyncSettings.registerDefaults()
-
-        // When marking migration as completed
-        SyncSettings.shared.migrationCompleted = true
-
-        // Then reading from UserDefaults directly should also be true
-        XCTAssertTrue(UserDefaults.standard.bool(forKey: "iCloudMigrationCompleted"))
-    }
-
     // MARK: - Last Sync Date Tests
 
     func testLastSyncDateDefaultValue() {
@@ -155,12 +122,10 @@ final class SyncSettingsTests: XCTestCase {
 
         // When modifying multiple settings
         SyncSettings.shared.iCloudSyncEnabled = false
-        SyncSettings.shared.migrationCompleted = true
         SyncSettings.shared.lastSyncDate = Date()
 
         // Then all settings should reflect the changes
         XCTAssertFalse(SyncSettings.shared.iCloudSyncEnabled)
-        XCTAssertTrue(SyncSettings.shared.migrationCompleted)
         XCTAssertNotNil(SyncSettings.shared.lastSyncDate)
     }
 }

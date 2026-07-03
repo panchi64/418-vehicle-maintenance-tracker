@@ -18,7 +18,6 @@ final class SyncSettings {
 
     private enum Keys {
         static let iCloudSyncEnabled = "iCloudSyncEnabled"
-        static let migrationCompleted = "iCloudMigrationCompleted"
         static let lastSyncDate = "lastSyncDate"
     }
 
@@ -28,12 +27,6 @@ final class SyncSettings {
     var iCloudSyncEnabled: Bool {
         get { defaults.bool(forKey: Keys.iCloudSyncEnabled) }
         set { defaults.set(newValue, forKey: Keys.iCloudSyncEnabled) }
-    }
-
-    /// Whether data migration from local store to CloudKit has been completed
-    var migrationCompleted: Bool {
-        get { defaults.bool(forKey: Keys.migrationCompleted) }
-        set { defaults.set(newValue, forKey: Keys.migrationCompleted) }
     }
 
     /// Last successful sync date
@@ -49,8 +42,7 @@ final class SyncSettings {
     /// Register default values for sync settings
     static func registerDefaults() {
         UserDefaults.standard.register(defaults: [
-            Keys.iCloudSyncEnabled: true,  // Enabled by default for new users
-            Keys.migrationCompleted: false
+            Keys.iCloudSyncEnabled: true  // Enabled by default for new users
         ])
     }
 }

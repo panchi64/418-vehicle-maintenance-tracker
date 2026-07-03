@@ -168,7 +168,7 @@ struct EditServiceView: View {
                 Button("Delete", role: .destructive) { deleteService() }
                 Button("Cancel", role: .cancel) { }
             } message: {
-                Text("This will also delete all service history for this service. This action cannot be undone.")
+                Text(L10n.serviceDeleteConfirmMessage)
             }
             .trackScreen(.editService)
             .onAppear {
@@ -217,6 +217,13 @@ struct EditServiceView: View {
     private func deleteService() {
         AnalyticsService.shared.capture(.serviceDeleted)
         modelContext.delete(service)
+        // Deleting the service cascades to its logs, which now .nullify their
+        // attachments rather than deleting them. Any attachment that had no
+        // vehicle link (e.g. a receipt saved before the Documents library and
+        // never backfilled) is left with neither a log nor a vehicle — sweep
+        // those so they don't linger in external storage with no owner.
+        // Documents that are linked to a vehicle survive in the library.
+        Document.purgeOrphans(in: modelContext)
         updateAppIcon()
         updateWidgetData()
         dismiss()

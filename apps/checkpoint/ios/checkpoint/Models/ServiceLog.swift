@@ -25,7 +25,14 @@ final class ServiceLog: Identifiable {
     /// Service Visit feature, and for any imported standalone log.
     var visit: ServiceVisit?
 
-    @Relationship(deleteRule: .cascade, inverse: \ServiceAttachment.serviceLog)
+    /// `.nullify`, not `.cascade`: attachments are Documents in their own
+    /// library, linked to vehicles independently of any log. Deleting a log
+    /// (or a Service, which cascades to its logs) must not hard-delete the
+    /// user's receipts — it only detaches them from the log. A document that
+    /// ends up with neither a log nor a vehicle is swept by
+    /// `Document.purgeOrphans`; documents are ultimately deleted with their
+    /// vehicle (via `Vehicle.documents` .nullify + the orphan sweep).
+    @Relationship(deleteRule: .nullify, inverse: \ServiceAttachment.serviceLog)
     var attachments: [ServiceAttachment]? = []
 
     var formattedCost: String? {

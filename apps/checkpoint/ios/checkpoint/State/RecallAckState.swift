@@ -40,7 +40,7 @@ struct RecallAckStore {
         let ack = upsert(vehicleID: vehicleID, campaignNumber: campaignNumber)
         ack.status = status
         ack.snoozedUntil = nil
-        try? context.save()
+        save()
         return ack
     }
 
@@ -67,7 +67,7 @@ struct RecallAckStore {
             ack.updatedAt = .now
             count += 1
         }
-        try? context.save()
+        save()
         return count
     }
 
@@ -86,7 +86,18 @@ struct RecallAckStore {
             ack.updatedAt = .now
             changed = true
         }
-        if changed { try? context.save() }
+        if changed { save() }
+    }
+
+    /// Persist pending changes, logging any failure instead of swallowing it.
+    /// A dropped write here would silently desync a recall's acknowledged /
+    /// snoozed state from what the user just chose.
+    private func save() {
+        do {
+            try context.save()
+        } catch {
+            recallAckLogger.error("RecallAcknowledgment save failed: \(error.localizedDescription)")
+        }
     }
 
     private func upsert(vehicleID: UUID, campaignNumber: String) -> RecallAcknowledgment {
