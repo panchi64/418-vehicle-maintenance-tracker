@@ -59,9 +59,7 @@ struct ServiceCompletionService {
         next.deriveDueFromIntervals(anchorDate: performedDate, anchorMileage: mileage)
         context.insert(next)
 
-        if let notificationID = ServiceNotificationScheduler.scheduleNotification(for: next, vehicle: vehicle) {
-            next.notificationID = notificationID
-        }
+        ServiceNotificationScheduler.scheduleNotification(for: next, vehicle: vehicle)
 
         return next
     }

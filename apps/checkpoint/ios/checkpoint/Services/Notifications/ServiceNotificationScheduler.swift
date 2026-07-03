@@ -14,6 +14,31 @@ private let serviceNotificationLogger = Logger(category: "Notifications.Service"
 /// Scheduler for service due notifications
 struct ServiceNotificationScheduler {
 
+    // MARK: - Notification IDs
+
+    /// Deterministic base ID for a service's notification set.
+    ///
+    /// The ID must be derivable from the service alone: `service.notificationID`
+    /// syncs through CloudKit while pending requests are per-device, so a
+    /// stored ID can point at a set that was scheduled on another device.
+    /// With a deterministic ID, re-adding a request replaces the pending one
+    /// with the same identifier and a reschedule can never orphan an old set
+    /// (which would keep firing with stale content, e.g. a pre-rename
+    /// vehicle name, alongside the fresh one).
+    static func baseNotificationID(forServiceID serviceID: UUID) -> String {
+        "service-\(serviceID.uuidString)"
+    }
+
+    static func baseNotificationID(for service: Service) -> String {
+        baseNotificationID(forServiceID: service.id)
+    }
+
+    /// Identifier for a snoozed reminder, derived from the same base so
+    /// `cancelAllNotifications(baseID:)` can always reach it.
+    static func snoozeNotificationID(baseID: String) -> String {
+        baseID + "-snooze"
+    }
+
     // MARK: - Build Notification Requests
 
     /// Build a notification request for a service
@@ -93,9 +118,7 @@ struct ServiceNotificationScheduler {
     /// Schedule notifications for all services of a vehicle
     static func scheduleNotifications(for vehicle: Vehicle) {
         for service in vehicle.services ?? [] {
-            if let notificationID = scheduleNotification(for: service, vehicle: vehicle) {
-                service.notificationID = notificationID
-            }
+            scheduleNotification(for: service, vehicle: vehicle)
         }
     }
 
@@ -113,9 +136,10 @@ struct ServiceNotificationScheduler {
     static func rescheduleNotifications(for vehicle: Vehicle) {
         let pace = vehicle.dailyMilesPace
         for service in vehicle.services ?? [] {
-            cancelNotification(for: service)
-            if let notificationID = scheduleNotificationWithPace(for: service, vehicle: vehicle, dailyPace: pace) {
-                service.notificationID = notificationID
+            // Scheduling replaces the pending set in place; only a service
+            // with no effective due date needs an explicit cancel.
+            if scheduleNotificationWithPace(for: service, vehicle: vehicle, dailyPace: pace) == nil {
+                cancelNotification(for: service)
             }
         }
     }
@@ -145,9 +169,7 @@ struct ServiceNotificationScheduler {
         let pace = vehicle.dailyMilesPace
 
         for service in standaloneServices {
-            if let notificationID = scheduleNotificationWithPace(for: service, vehicle: vehicle, dailyPace: pace) {
-                service.notificationID = notificationID
-            }
+            scheduleNotificationWithPace(for: service, vehicle: vehicle, dailyPace: pace)
         }
     }
 
@@ -155,11 +177,16 @@ struct ServiceNotificationScheduler {
     private static func scheduleNotificationsForDueDate(
         _ dueDate: Date, service: Service, vehicle: Vehicle
     ) -> String {
-        if let existingID = service.notificationID {
+        let baseNotificationID = baseNotificationID(for: service)
+
+        // Clear any set scheduled before IDs became deterministic
+        if let existingID = service.notificationID, existingID != baseNotificationID {
             cancelAllNotifications(baseID: existingID)
         }
+        // Clear variants a plain re-add wouldn't replace (skipped past-date
+        // intervals, pending snooze)
+        cancelAllNotifications(baseID: baseNotificationID)
 
-        let baseNotificationID = "service-\(UUID().uuidString)"
         let notificationCenter = UNUserNotificationCenter.current()
 
         for daysBeforeDue in NotificationService.defaultReminderIntervals {
@@ -175,6 +202,12 @@ struct ServiceNotificationScheduler {
                 if let error = error { serviceNotificationLogger.error("Failed to schedule notification (\(daysBeforeDue)d before): \(error.localizedDescription)") }
             }
         }
+
+        // Guard the write: this runs on every reschedule, and a same-value
+        // set would still dirty the record for CloudKit sync
+        if service.notificationID != baseNotificationID {
+            service.notificationID = baseNotificationID
+        }
         return baseNotificationID
     }
 
@@ -185,16 +218,24 @@ struct ServiceNotificationScheduler {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id])
     }
 
-    /// Cancel all notifications for a base ID (including all interval variants)
+    /// Cancel all notifications for a base ID: interval variants, the snooze
+    /// variant, and the bare ID itself (legacy single-request and snooze
+    /// schemes used the base as the full identifier)
     static func cancelAllNotifications(baseID: String) {
-        let allIDs = NotificationService.defaultReminderIntervals.map { baseID + NotificationService.intervalSuffix(for: $0) }
+        var allIDs = NotificationService.defaultReminderIntervals.map { baseID + NotificationService.intervalSuffix(for: $0) }
+        allIDs.append(snoozeNotificationID(baseID: baseID))
+        allIDs.append(baseID)
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: allIDs)
     }
 
     /// Cancel all notifications for a service
     static func cancelNotification(for service: Service) {
-        if let notificationID = service.notificationID {
-            cancelAllNotifications(baseID: notificationID)
+        let baseID = baseNotificationID(for: service)
+        if let storedID = service.notificationID, storedID != baseID {
+            cancelAllNotifications(baseID: storedID)
+        }
+        cancelAllNotifications(baseID: baseID)
+        if service.notificationID != nil {
             service.notificationID = nil
         }
     }
@@ -210,11 +251,12 @@ struct ServiceNotificationScheduler {
     static func snoozeNotification(for service: Service, vehicle: Vehicle) {
         cancelNotification(for: service)
         let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
-        let notificationID = "service-snooze-\(UUID().uuidString)"
+        let baseID = baseNotificationID(for: service)
         let request = buildSnoozeNotificationRequest(for: service, vehicle: vehicle,
-                                                     notificationID: notificationID, snoozeDate: tomorrow)
+                                                     notificationID: snoozeNotificationID(baseID: baseID),
+                                                     snoozeDate: tomorrow)
         UNUserNotificationCenter.current().add(request)
-        service.notificationID = notificationID
+        service.notificationID = baseID
     }
 
     // MARK: - Pending Notifications
@@ -224,10 +266,10 @@ struct ServiceNotificationScheduler {
         await UNUserNotificationCenter.current().pendingNotificationRequests()
     }
 
-    /// Check if a service has a pending notification
+    /// Check if a service has a pending notification (any interval or snooze variant)
     static func hasPendingNotification(for service: Service) async -> Bool {
-        guard let notificationID = service.notificationID else { return false }
+        let baseID = baseNotificationID(for: service)
         let pending = await getPendingNotifications()
-        return pending.contains { $0.identifier == notificationID }
+        return pending.contains { $0.identifier.hasPrefix(baseID) }
     }
 }

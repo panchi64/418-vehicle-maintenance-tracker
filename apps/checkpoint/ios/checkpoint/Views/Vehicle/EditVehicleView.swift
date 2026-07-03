@@ -358,6 +358,10 @@ struct EditVehicleView: View {
             NotificationService.shared.cancelMarbeteNotifications(for: vehicle)
         }
 
+        // Refresh pending service reminders so they pick up edits
+        // (name, mileage) instead of firing with stale content
+        NotificationService.shared.rescheduleNotifications(for: vehicle)
+
         updateAppIcon()
         updateWidgetData()
         ToastService.shared.show(L10n.toastVehicleUpdated, icon: "checkmark", style: .success)
@@ -367,6 +371,7 @@ struct EditVehicleView: View {
     private func deleteVehicle() {
         HapticService.shared.warning()
         AnalyticsService.shared.capture(.vehicleDeleted)
+        NotificationService.shared.cancelAllNotifications(for: vehicle)
         modelContext.delete(vehicle)
         // Sweep documents that were linked only to this vehicle and have no
         // service log — Vehicle.documents uses .nullify, not .cascade, so

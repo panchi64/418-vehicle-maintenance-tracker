@@ -8,7 +8,6 @@
 import SwiftUI
 import SwiftData
 import WidgetKit
-import UserNotifications
 
 struct VehiclePickerSheet: View {
     @Environment(\.dismiss) private var dismiss
@@ -212,22 +211,8 @@ struct VehiclePickerSheet: View {
         let vehicleID = vehicle.id.uuidString
         let isSelectedVehicle = selectedVehicle?.id == vehicle.id
 
-        // Cancel all notifications for this vehicle's services
-        if let services = vehicle.services {
-            for service in services {
-                if let notificationID = service.notificationID {
-                    UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [notificationID])
-                }
-            }
-        }
-
-        // Cancel mileage reminder notification
-        let mileageReminderID = "mileage-reminder-\(vehicleID)"
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [mileageReminderID])
-
-        // Cancel yearly roundup notification
-        let yearlyRoundupID = "yearly-roundup-\(vehicleID)"
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [yearlyRoundupID])
+        // Cancel every notification tied to this vehicle
+        NotificationService.shared.cancelAllNotifications(for: vehicle)
 
         // Remove widget data for this vehicle
         WidgetDataService.shared.removeWidgetData(for: vehicleID)

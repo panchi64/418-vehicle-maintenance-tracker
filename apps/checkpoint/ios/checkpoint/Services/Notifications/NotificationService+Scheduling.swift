@@ -86,6 +86,19 @@ extension NotificationService {
         ServiceNotificationScheduler.cancelNotifications(for: vehicle)
     }
 
+    /// Cancel every notification tied to a vehicle: service reminders,
+    /// mileage reminder, marbete, and yearly roundup. Call when deleting
+    /// a vehicle so no request is left to fire for data that no longer exists.
+    func cancelAllNotifications(for vehicle: Vehicle) {
+        ServiceNotificationScheduler.cancelNotifications(for: vehicle)
+        MileageReminderScheduler.cancelMileageReminder(for: vehicle)
+        MarbeteNotificationScheduler.cancelMarbeteNotifications(for: vehicle)
+        // Roundup IDs are per-year; only the previous or current year can be pending
+        let currentYear = Calendar.current.component(.year, from: .now)
+        YearlyRoundupScheduler.cancelYearlyRoundup(for: vehicle, year: currentYear - 1)
+        YearlyRoundupScheduler.cancelYearlyRoundup(for: vehicle, year: currentYear)
+    }
+
     func snoozeNotification(for service: Service, vehicle: Vehicle) {
         ServiceNotificationScheduler.snoozeNotification(for: service, vehicle: vehicle)
     }

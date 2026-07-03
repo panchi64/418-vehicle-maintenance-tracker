@@ -103,7 +103,23 @@ final class NotificationServiceTests: XCTestCase {
         XCTAssertTrue(notificationID?.hasPrefix("service-") ?? false, "ID should have service prefix")
     }
 
-    func testScheduleNotificationCancelsExistingNotification() {
+    func testScheduleNotificationUsesDeterministicID() {
+        // Given
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
+        let futureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
+        let serviceItem = Service(name: "Oil Change", dueDate: futureDate)
+        serviceItem.vehicle = vehicle
+
+        // When
+        let notificationID = service.scheduleNotification(for: serviceItem, vehicle: vehicle)
+
+        // Then - ID is derived from the service so a reschedule replaces the
+        // pending set in place instead of orphaning it
+        XCTAssertEqual(notificationID, "service-\(serviceItem.id.uuidString)")
+        XCTAssertEqual(serviceItem.notificationID, notificationID, "Scheduler should record the base ID on the service")
+    }
+
+    func testScheduleNotificationReplacesExistingNotification() {
         // Given
         let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
         let futureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
@@ -112,14 +128,13 @@ final class NotificationServiceTests: XCTestCase {
 
         // First scheduling
         let firstID = service.scheduleNotification(for: serviceItem, vehicle: vehicle)
-        serviceItem.notificationID = firstID
 
         // When - schedule again
         let secondID = service.scheduleNotification(for: serviceItem, vehicle: vehicle)
 
-        // Then
-        XCTAssertNotEqual(firstID, secondID, "Should create new notification ID")
-        XCTAssertNotNil(secondID, "Should return new notification ID")
+        // Then - same deterministic ID, so the second set replaces the first
+        XCTAssertNotNil(secondID, "Should return notification ID")
+        XCTAssertEqual(firstID, secondID, "Rescheduling should reuse the service-derived ID")
     }
 
     // MARK: - Notification Request Content Tests (using buildNotificationRequest)
@@ -419,7 +434,7 @@ final class NotificationServiceTests: XCTestCase {
 
     // MARK: - Snooze Tests
 
-    func testSnoozeNotificationCreatesNewID() {
+    func testSnoozeNotificationKeepsDerivedBaseID() {
         // Given
         let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
         let futureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
@@ -427,15 +442,36 @@ final class NotificationServiceTests: XCTestCase {
         serviceItem.vehicle = vehicle
 
         let originalID = service.scheduleNotification(for: serviceItem, vehicle: vehicle)
-        serviceItem.notificationID = originalID
 
         // When
         service.snoozeNotification(for: serviceItem, vehicle: vehicle)
 
-        // Then
+        // Then - snooze keeps the deterministic base so a later reschedule
+        // can still find and replace the snoozed request
         XCTAssertNotNil(serviceItem.notificationID)
-        XCTAssertNotEqual(serviceItem.notificationID, originalID, "Snooze should create new notification ID")
-        XCTAssertTrue(serviceItem.notificationID?.hasPrefix("service-snooze-") ?? false, "Snoozed ID should have snooze prefix")
+        XCTAssertEqual(serviceItem.notificationID, originalID, "Snooze should keep the service-derived base ID")
+        XCTAssertEqual(
+            ServiceNotificationScheduler.snoozeNotificationID(baseID: originalID!),
+            originalID! + "-snooze",
+            "Snooze ID should be derived from the base so cancellation can reach it"
+        )
+    }
+
+    func testCancelNotificationRemovesSnoozedRequest() async {
+        // Given - a snoozed reminder
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
+        let futureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
+        let serviceItem = Service(name: "Oil Change", dueDate: futureDate)
+        serviceItem.vehicle = vehicle
+        service.scheduleNotification(for: serviceItem, vehicle: vehicle)
+        service.snoozeNotification(for: serviceItem, vehicle: vehicle)
+
+        // When
+        service.cancelNotification(for: serviceItem)
+
+        // Then
+        let hasPending = await service.hasPendingNotification(for: serviceItem)
+        XCTAssertFalse(hasPending, "Cancel should remove the snoozed request too")
     }
 
     func testBuildSnoozeNotificationRequestSchedulesForTomorrow() {
@@ -611,6 +647,76 @@ final class NotificationServiceTests: XCTestCase {
 
         // Then - verify method completes without error
         XCTAssertTrue(true, "Cancel all notifications for base ID should complete without error")
+    }
+
+    // MARK: - Orphaned Notification Sweep Tests
+
+    func testOrphanSweepFlagsLegacyRandomIDForExistingService() {
+        // A set scheduled before IDs became deterministic can't be reached
+        // by cancelAllNotifications, so the sweep must remove it
+        let serviceID = UUID()
+        let isOrphan = ServiceNotificationScheduler.isOrphanedServiceRequest(
+            identifier: "service-\(UUID().uuidString)-due",
+            serviceIDString: serviceID.uuidString,
+            validServiceIDs: [serviceID]
+        )
+        XCTAssertTrue(isOrphan, "Legacy random-base request should be swept")
+    }
+
+    func testOrphanSweepKeepsDeterministicIDForExistingService() {
+        let serviceID = UUID()
+        let isOrphan = ServiceNotificationScheduler.isOrphanedServiceRequest(
+            identifier: "service-\(serviceID.uuidString)-7d",
+            serviceIDString: serviceID.uuidString,
+            validServiceIDs: [serviceID]
+        )
+        XCTAssertFalse(isOrphan, "Current-scheme request for a live service should be kept")
+    }
+
+    func testOrphanSweepFlagsRequestForDeletedService() {
+        let deletedServiceID = UUID()
+        let isOrphan = ServiceNotificationScheduler.isOrphanedServiceRequest(
+            identifier: "service-\(deletedServiceID.uuidString)-due",
+            serviceIDString: deletedServiceID.uuidString,
+            validServiceIDs: []
+        )
+        XCTAssertTrue(isOrphan, "Request for a deleted service should be swept")
+    }
+
+    func testOrphanSweepFlagsLegacySnoozeRequest() {
+        let serviceID = UUID()
+        let isOrphan = ServiceNotificationScheduler.isOrphanedServiceRequest(
+            identifier: "service-snooze-\(UUID().uuidString)",
+            serviceIDString: serviceID.uuidString,
+            validServiceIDs: [serviceID]
+        )
+        XCTAssertTrue(isOrphan, "Legacy snooze request should be swept")
+    }
+
+    func testOrphanSweepIgnoresNonServiceRequests() {
+        let vehicleID = UUID()
+        for identifier in [
+            "mileage-reminder-\(vehicleID.uuidString)",
+            "marbete-\(vehicleID.uuidString)-30d",
+            "cluster-\(UUID().uuidString)-due",
+            "yearly-roundup-\(vehicleID.uuidString)-2025"
+        ] {
+            let isOrphan = ServiceNotificationScheduler.isOrphanedServiceRequest(
+                identifier: identifier,
+                serviceIDString: nil,
+                validServiceIDs: []
+            )
+            XCTAssertFalse(isOrphan, "\(identifier) is not a service request and should be ignored")
+        }
+    }
+
+    func testOrphanSweepFlagsServiceRequestWithoutServiceID() {
+        let isOrphan = ServiceNotificationScheduler.isOrphanedServiceRequest(
+            identifier: "service-\(UUID().uuidString)-due",
+            serviceIDString: nil,
+            validServiceIDs: []
+        )
+        XCTAssertTrue(isOrphan, "Service request with no serviceID metadata should be swept")
     }
 
     // MARK: - Mileage Reminder Category Tests

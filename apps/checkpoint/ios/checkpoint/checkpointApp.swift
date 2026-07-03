@@ -136,6 +136,13 @@ struct checkpointApp: App {
                                 AnalyticsService.shared.capture(.notificationPermissionDenied)
                             }
                         }
+
+                        // Sweep orphaned service notifications and refresh pending
+                        // content (vehicle renames, pace changes). Skipped when the
+                        // fetch fails so a transient error can't wipe valid reminders.
+                        if let vehicles = try? modelContainer.mainContext.fetch(FetchDescriptor<Vehicle>()) {
+                            await ServiceNotificationScheduler.performLaunchMaintenance(for: vehicles)
+                        }
                     }
 
                     // Check iCloud account status
