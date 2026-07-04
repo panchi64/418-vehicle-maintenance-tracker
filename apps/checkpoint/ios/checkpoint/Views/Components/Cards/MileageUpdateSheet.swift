@@ -28,7 +28,7 @@ struct MileageUpdateSheet: View {
     @State private var ocrDebugImage: UIImage?
     @State private var isProcessingOCR = false
     @State private var ocrError: String?
-    @State private var showLowerWarning = false
+    @State private var mileageWarning: String?
 
     /// Delay before the "below previous reading" warning appears while typing.
     /// Why: the comparison fires per keystroke, so "32500" would flash the
@@ -50,16 +50,6 @@ struct MileageUpdateSheet: View {
         showEstimates && vehicle.isUsingEstimatedMileage && vehicle.estimatedMileage != nil
     }
 
-    /// True when the manually entered mileage is below the vehicle's last confirmed reading.
-    private var isLowerThanCurrent: Bool {
-        guard vehicle.currentMileage > 0, let entered = newMileage, entered > 0 else { return false }
-        return entered < vehicle.currentMileage
-    }
-
-    private var previousMileageText: String {
-        "\(Formatters.mileageNumber(vehicle.currentMileage)) \(DistanceSettings.shared.unit.uppercaseAbbreviation)"
-    }
-
     var body: some View {
         NavigationStack {
             ZStack {
@@ -73,8 +63,8 @@ struct MileageUpdateSheet: View {
                     // Mileage input with camera button
                     mileageInputSection
 
-                    if showLowerWarning {
-                        belowPreviousWarning
+                    if let mileageWarning {
+                        SanityWarningRow(message: mileageWarning)
                     }
 
                     // OCR error message
@@ -97,16 +87,17 @@ struct MileageUpdateSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button(L10n.commonCancel) { dismiss() }
                         .toolbarButtonStyle()
                 }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        commit(newMileage ?? 0)
-                    }
-                    .toolbarButtonStyle(isDisabled: (newMileage ?? 0) <= 0 || isProcessingOCR)
-                    .disabled((newMileage ?? 0) <= 0 || isProcessingOCR)
-                }
+            }
+            .safeAreaInset(edge: .bottom) {
+                FormActionBar(
+                    primaryTitle: L10n.commonUpdate,
+                    isPrimaryEnabled: (newMileage ?? 0) > 0 && !isProcessingOCR,
+                    onPrimary: { commit(newMileage ?? 0) },
+                    isKeyboardVisible: KeyboardVisibility.shared.isVisible
+                )
             }
         }
         .onAppear {
@@ -117,14 +108,20 @@ struct MileageUpdateSheet: View {
             // Otherwise leave newMileage nil so user enters actual reading
         }
         .task(id: newMileage) {
-            guard isLowerThanCurrent else {
-                showLowerWarning = false
+            let warning = ServiceFormValidation.mileageWarning(
+                entered: newMileage,
+                vehicleCurrentMileage: vehicle.currentMileage,
+                maxLoggedMileage: vehicle.currentMileage,
+                performedDate: .now
+            )
+            guard warning != nil else {
+                mileageWarning = nil
                 return
             }
-            showLowerWarning = false
+            mileageWarning = nil
             do {
                 try await Task.sleep(for: Self.lowerWarningDebounce)
-                showLowerWarning = true
+                mileageWarning = warning
             } catch {
                 // Task cancelled because the user typed another digit — keep the warning hidden.
             }
@@ -270,94 +267,16 @@ struct MileageUpdateSheet: View {
     // MARK: - Mileage Input Section
 
     private var mileageInputSection: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            // Label
-            Text("ENTER MILEAGE")
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1.5)
-
-            // Input with camera button
-            HStack(spacing: 0) {
-                // Number input
-                HStack(spacing: 8) {
-                    TextField(
-                        vehicle.currentMileage > 0
-                            ? Formatters.mileageNumber(vehicle.currentMileage)
-                            : "Enter mileage",
-                        text: mileageBinding
-                    )
-                        .font(.brutalistBody)
-                        .foregroundStyle(Theme.textPrimary)
-                        .keyboardType(.numberPad)
-
-                    Text(DistanceSettings.shared.unit.abbreviation)
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
-                }
-                .padding(16)
-                .background(Theme.surfaceInstrument)
-
-                // Camera button
-                if isCameraAvailable {
-                    Button {
-                        ocrError = nil
-                        showCamera = true
-                    } label: {
-                        Image(systemName: "camera.fill")
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundStyle(Theme.accent)
-                            .frame(width: 52, height: 52)
-                            .background(Theme.surfaceInstrument)
-                    }
-                    .accessibilityLabel("Scan odometer with camera")
-                    .brutalistBorder()
-                }
-            }
-            .brutalistBorder()
-        }
-    }
-
-    // MARK: - Mileage Binding
-
-    private var mileageBinding: Binding<String> {
-        Binding(
-            get: {
-                if let mileage = newMileage {
-                    return String(mileage)
-                }
-                return ""
-            },
-            set: { newValue in
-                let filtered = newValue.filter { $0.isNumber }
-                newMileage = Int(filtered)
-            }
-        )
-    }
-
-    // MARK: - Below Previous Warning
-
-    private var belowPreviousWarning: some View {
-        HStack(spacing: Spacing.sm) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(Theme.statusOverdue)
-
-            Text("BELOW PREVIOUS READING (\(previousMileageText))")
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.statusOverdue)
-                .tracking(1)
-                .lineLimit(2)
-                .multilineTextAlignment(.leading)
-
-            Spacer(minLength: 0)
-        }
-        .padding(Spacing.md)
-        .frame(maxWidth: .infinity)
-        .background(Theme.statusOverdue.opacity(0.1))
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.statusOverdue.opacity(0.5), lineWidth: Theme.borderWidth)
+        InstrumentNumberField(
+            label: "Enter Mileage",
+            value: $newMileage,
+            placeholder: vehicle.currentMileage > 0 ? Formatters.mileageNumber(vehicle.currentMileage) : "Enter mileage",
+            suffix: DistanceSettings.shared.unit.abbreviation,
+            showCameraButton: isCameraAvailable,
+            onCameraTap: isCameraAvailable ? {
+                ocrError = nil
+                showCamera = true
+            } : nil
         )
     }
 

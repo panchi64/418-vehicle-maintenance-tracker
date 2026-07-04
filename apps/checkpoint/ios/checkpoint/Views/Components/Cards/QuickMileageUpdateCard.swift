@@ -121,7 +121,7 @@ struct QuickMileageUpdateCard: View {
                     onUpdate(newMileage)
                 }
             )
-            .presentationDetents([.height(450)])
+            .presentationDetents([.medium, .large])
         }
     }
 }

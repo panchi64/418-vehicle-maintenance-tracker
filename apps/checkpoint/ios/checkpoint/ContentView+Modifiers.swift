@@ -110,7 +110,7 @@ extension ContentView {
                         }
                     )
                     .trackScreen(.mileageUpdate)
-                    .presentationDetents([.height(450)])
+                    .presentationDetents([.medium, .large])
                 }
             }
             .sheet(isPresented: $appState.showSettings) {

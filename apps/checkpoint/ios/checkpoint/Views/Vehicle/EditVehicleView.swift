@@ -71,6 +71,10 @@ struct EditVehicleView: View {
         !make.isEmpty && !model.isEmpty && year != nil
     }
 
+    private var detailsFilledCount: Int {
+        [vin, licensePlate, tireSize, oilType, notes].filter { !$0.isEmpty }.count
+    }
+
     /// Check if camera is available (requires physical device)
     private var isCameraAvailable: Bool {
         UIImagePickerController.isSourceTypeAvailable(.camera)
@@ -126,66 +130,72 @@ struct EditVehicleView: View {
                             isCameraAvailable: isCameraAvailable
                         )
 
-                        // VIN Section
-                        EditVehicleVINSection(
-                            vin: $vin,
-                            licensePlate: $licensePlate,
-                            make: $make,
-                            model: $model,
-                            year: $year,
-                            isDecodingVIN: $isDecodingVIN,
-                            vinLookupError: $vinLookupError,
-                            showVINCamera: $showVINCamera,
-                            isProcessingVINOCR: $isProcessingVINOCR,
-                            vinOCRError: $vinOCRError,
-                            vinOCROriginal: $vinOCROriginal,
-                            isCameraAvailable: isCameraAvailable
-                        )
-
-                        // Specifications Section
-                        VStack(alignment: .leading, spacing: Spacing.sm) {
-                            InstrumentSectionHeader(title: "Specifications")
-
-                            VStack(spacing: Spacing.md) {
-                                InstrumentTextField(
-                                    label: "Tire Size",
-                                    text: $tireSize,
-                                    placeholder: "225/45R17 (Optional)"
-                                )
-
-                                InstrumentTextField(
-                                    label: "Oil Type",
-                                    text: $oilType,
-                                    placeholder: "0W-20 Synthetic (Optional)"
-                                )
-                            }
-                        }
-
                         // Marbete Section (PR vehicle registration tag)
-                        VStack(alignment: .leading, spacing: Spacing.sm) {
-                            InstrumentSectionHeader(title: "Marbete")
-
+                        InstrumentSection(title: "Marbete", tag: L10n.formOptionalTag, chrome: .plain) {
                             MarbetePicker(
                                 month: $marbeteExpirationMonth,
                                 year: $marbeteExpirationYear
                             )
 
-                            Text("PUERTO RICO VEHICLE REGISTRATION TAG EXPIRATION (OPTIONAL)")
+                            Text("PUERTO RICO VEHICLE REGISTRATION TAG EXPIRATION")
                                 .font(.brutalistLabel)
                                 .foregroundStyle(Theme.textTertiary)
                                 .tracking(1)
                                 .padding(.leading, 4)
                         }
 
-                        // Notes Section
-                        VStack(alignment: .leading, spacing: Spacing.sm) {
-                            InstrumentSectionHeader(title: "Notes")
+                        CollapsibleDetailsSection(
+                            storageKey: "formDetailsEditVehicle",
+                            filledCount: detailsFilledCount,
+                            autoExpandWhenFilled: true
+                        ) {
+                            VStack(alignment: .leading, spacing: Spacing.lg) {
+                                // VIN Section
+                                EditVehicleVINSection(
+                                    vin: $vin,
+                                    licensePlate: $licensePlate,
+                                    make: $make,
+                                    model: $model,
+                                    year: $year,
+                                    isDecodingVIN: $isDecodingVIN,
+                                    vinLookupError: $vinLookupError,
+                                    showVINCamera: $showVINCamera,
+                                    isProcessingVINOCR: $isProcessingVINOCR,
+                                    vinOCRError: $vinOCRError,
+                                    vinOCROriginal: $vinOCROriginal,
+                                    isCameraAvailable: isCameraAvailable
+                                )
 
-                            InstrumentTextEditor(
-                                label: "Notes",
-                                text: $notes,
-                                placeholder: "Vehicle quirks, history, reminders..."
-                            )
+                                // Specifications Section
+                                VStack(alignment: .leading, spacing: Spacing.sm) {
+                                    InstrumentSectionHeader(title: "Specifications")
+
+                                    VStack(spacing: Spacing.md) {
+                                        InstrumentTextField(
+                                            label: "Tire Size",
+                                            text: $tireSize,
+                                            placeholder: "225/45R17 (Optional)"
+                                        )
+
+                                        InstrumentTextField(
+                                            label: "Oil Type",
+                                            text: $oilType,
+                                            placeholder: "0W-20 Synthetic (Optional)"
+                                        )
+                                    }
+                                }
+
+                                // Notes Section
+                                VStack(alignment: .leading, spacing: Spacing.sm) {
+                                    InstrumentSectionHeader(title: "Notes")
+
+                                    InstrumentTextEditor(
+                                        label: "Notes",
+                                        text: $notes,
+                                        placeholder: "Vehicle quirks, history, reminders..."
+                                    )
+                                }
+                            }
                         }
 
                         // Delete button
@@ -219,14 +229,20 @@ struct EditVehicleView: View {
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button(L10n.commonCancel) { dismiss() }
                         .toolbarButtonStyle()
                 }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { saveChanges() }
-                        .toolbarButtonStyle(isDisabled: !isFormValid)
-                        .disabled(!isFormValid)
-                }
+            }
+            .safeAreaInset(edge: .bottom) {
+                FormActionBar(
+                    primaryTitle: L10n.commonSave,
+                    isPrimaryEnabled: isFormValid,
+                    onPrimary: { saveChanges() },
+                    onDisabledPrimaryTap: {
+                        HapticService.shared.error()
+                    },
+                    isKeyboardVisible: KeyboardVisibility.shared.isVisible
+                )
             }
             .trackScreen(.editVehicle)
             .confirmationDialog(
@@ -235,7 +251,7 @@ struct EditVehicleView: View {
                 titleVisibility: .visible
             ) {
                 Button("Delete", role: .destructive) { deleteVehicle() }
-                Button("Cancel", role: .cancel) { }
+                Button(L10n.commonCancel, role: .cancel) { }
             } message: {
                 Text("This will also delete all services for this vehicle. This action cannot be undone.")
             }

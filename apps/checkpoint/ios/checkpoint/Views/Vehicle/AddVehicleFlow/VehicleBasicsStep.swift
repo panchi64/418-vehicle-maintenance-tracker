@@ -9,6 +9,7 @@ import SwiftUI
 
 struct VehicleBasicsStep: View {
     @Bindable var formState: VehicleFormState
+    @Binding var showValidationError: Bool
 
     var body: some View {
         ScrollView {
@@ -20,6 +21,12 @@ struct VehicleBasicsStep: View {
                 // Vehicle Basics Section
                 VStack(alignment: .leading, spacing: Spacing.sm) {
                     InstrumentSectionHeader(title: L10n.addVehicleBasics)
+
+                    if showValidationError, !formState.isBasicsValid {
+                        ErrorMessageRow(message: L10n.formVehicleBasicsRequired) {
+                            showValidationError = false
+                        }
+                    }
 
                     VStack(spacing: Spacing.md) {
                         InstrumentTextField(
@@ -70,9 +77,7 @@ struct VehicleBasicsStep: View {
                 }
 
                 // VIN Section
-                VStack(alignment: .leading, spacing: Spacing.sm) {
-                    InstrumentSectionHeader(title: L10n.vehicleIdentification)
-
+                InstrumentSection(title: L10n.vehicleIdentification, tag: L10n.formOptionalTag, chrome: .plain) {
                     VINInputSection(formState: formState)
 
                     InstrumentTextField(
@@ -347,10 +352,12 @@ private struct VINLookupButton: View {
 }
 
 #Preview {
+    @Previewable @State var showValidationError = false
+
     ZStack {
         AtmosphericBackground()
 
-        VehicleBasicsStep(formState: VehicleFormState())
+        VehicleBasicsStep(formState: VehicleFormState(), showValidationError: $showValidationError)
     }
     .preferredColorScheme(.dark)
 }

@@ -18,6 +18,7 @@ struct AddVehicleFlowView: View {
 
     @State private var formState = VehicleFormState()
     @State private var currentStep: Step = .basics
+    @State private var showBasicsValidationError = false
 
     enum Step {
         case basics
@@ -31,7 +32,7 @@ struct AddVehicleFlowView: View {
 
                 switch currentStep {
                 case .basics:
-                    VehicleBasicsStep(formState: formState)
+                    VehicleBasicsStep(formState: formState, showValidationError: $showBasicsValidationError)
                         .trackScreen(.addVehicleBasics)
                         .transition(.opacity)
 
@@ -48,41 +49,37 @@ struct AddVehicleFlowView: View {
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    if currentStep == .basics {
-                        Button(L10n.commonCancel) {
-                            dismiss()
-                        }
-                        .toolbarButtonStyle()
-                    } else {
-                        Button {
-                            withAnimation(.easeInOut(duration: Theme.animationMedium)) {
-                                currentStep = .basics
-                            }
-                        } label: {
-                            HStack(spacing: Spacing.xs) {
-                                Image(systemName: "chevron.left")
-                                Text(L10n.commonBack)
-                            }
-                        }
-                        .toolbarButtonStyle()
+                    Button(L10n.commonCancel) {
+                        dismiss()
                     }
+                    .toolbarButtonStyle()
                 }
-                ToolbarItem(placement: .confirmationAction) {
-                    if currentStep == .basics {
-                        Button(L10n.commonNext) {
+            }
+            .safeAreaInset(edge: .bottom) {
+                FormActionBar(
+                    primaryTitle: currentStep == .basics ? L10n.commonNext : L10n.vehicleSave,
+                    isPrimaryEnabled: currentStep == .basics ? formState.isBasicsValid : true,
+                    onPrimary: {
+                        if currentStep == .basics {
                             withAnimation(.easeInOut(duration: Theme.animationMedium)) {
                                 currentStep = .details
                             }
-                        }
-                        .toolbarButtonStyle(isDisabled: !formState.isBasicsValid)
-                        .disabled(!formState.isBasicsValid)
-                    } else {
-                        Button(L10n.vehicleSave) {
+                        } else {
                             saveVehicle()
                         }
-                        .toolbarButtonStyle()
-                    }
-                }
+                    },
+                    onDisabledPrimaryTap: {
+                        HapticService.shared.error()
+                        showBasicsValidationError = true
+                    },
+                    secondaryTitle: currentStep == .details ? L10n.commonBack : nil,
+                    onSecondary: currentStep == .details ? {
+                        withAnimation(.easeInOut(duration: Theme.animationMedium)) {
+                            currentStep = .basics
+                        }
+                    } : nil,
+                    isKeyboardVisible: KeyboardVisibility.shared.isVisible
+                )
             }
             .onAppear {
                 // Apply onboarding marbete prefill if set

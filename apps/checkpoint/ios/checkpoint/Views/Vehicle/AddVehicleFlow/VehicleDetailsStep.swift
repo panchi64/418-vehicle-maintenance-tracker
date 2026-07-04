@@ -47,9 +47,7 @@ struct VehicleDetailsStep: View {
                 }
 
                 // Specifications Section
-                VStack(alignment: .leading, spacing: Spacing.sm) {
-                    InstrumentSectionHeader(title: L10n.vehicleSpecifications)
-
+                InstrumentSection(title: L10n.vehicleSpecifications, tag: L10n.formOptionalTag, chrome: .plain) {
                     VStack(spacing: Spacing.md) {
                         InstrumentTextField(
                             label: L10n.vehicleTireSize,
@@ -66,9 +64,7 @@ struct VehicleDetailsStep: View {
                 }
 
                 // Marbete Section (Registration Tag)
-                VStack(alignment: .leading, spacing: Spacing.sm) {
-                    InstrumentSectionHeader(title: "Marbete")
-
+                InstrumentSection(title: "Marbete", tag: L10n.formOptionalTag, chrome: .plain) {
                     MarbetePicker(
                         month: $formState.marbeteExpirationMonth,
                         year: $formState.marbeteExpirationYear
@@ -81,9 +77,7 @@ struct VehicleDetailsStep: View {
                 }
 
                 // Notes Section
-                VStack(alignment: .leading, spacing: Spacing.sm) {
-                    InstrumentSectionHeader(title: L10n.vehicleNotes)
-
+                InstrumentSection(title: L10n.vehicleNotes, tag: L10n.formOptionalTag, chrome: .plain) {
                     InstrumentTextEditor(
                         label: L10n.vehicleNotes,
                         text: $formState.notes,

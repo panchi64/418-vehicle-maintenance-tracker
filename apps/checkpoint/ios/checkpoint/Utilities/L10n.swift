@@ -15,6 +15,7 @@ enum L10n {
     static var commonBack: String { localized("common.back") }
     static var commonNext: String { localized("common.next") }
     static var commonSave: String { localized("common.save") }
+    static var commonUpdate: String { localized("common.update") }
     static var commonDone: String { localized("common.done") }
     static var commonDismiss: String { localized("common.dismiss") }
     static var commonDays: String { localized("common.days") }
@@ -399,6 +400,7 @@ enum L10n {
     static var formSaveAndAddAnother: String { localized("form.saveAndAddAnother") }
     static var formSavedAddNext: String { localized("form.savedAddNext") }
     static var formServiceTypeRequired: String { localized("form.serviceTypeRequired") }
+    static var formVehicleBasicsRequired: String { localized("form.vehicleBasicsRequired") }
     static var formDraftResumeTitle: String { localized("form.draftResumeTitle") }
     static func formDraftFrom(_ relativeDate: String) -> String {
         String(format: localized("form.draftFrom"), relativeDate)
