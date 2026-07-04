@@ -3,10 +3,10 @@ import SwiftUI
 struct RecordServiceFields: View {
     @Bindable var model: AddServiceFormModel
     let anchors: ServiceFormAnchors
-    let onSaveAndAddAnother: () -> Void
 
+    /// Never shown when there's nothing computable to project (G5).
     private var nextDuePreview: String? {
-        guard model.isRecurring else { return nil }
+        guard model.isRecurring, model.hasIntervalPolicy else { return nil }
         var parts: [String] = []
 
         if let months = model.intervalMonths, months > 0,
@@ -120,44 +120,51 @@ struct RecordServiceFields: View {
                             .foregroundStyle(Theme.accent)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
+
+                    if !model.hasIntervalPolicy {
+                        Text(L10n.recordSetIntervalHint)
+                            .font(.brutalistSecondary)
+                            .foregroundStyle(Theme.textTertiary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        ChipRow(items: ServiceFormChips.monthIntervalChips, label: \.label) { chip in
+                            model.intervalMonths = chip.months
+                            HapticService.shared.selectionChanged()
+                        }
+
+                        ChipRow(items: ServiceFormChips.mileageIntervalChips, label: \.label) { chip in
+                            model.intervalMiles = chip.miles
+                            HapticService.shared.selectionChanged()
+                        }
+
+                        SanityWarningRow(message: L10n.remindNoScheduleWarning)
+                    }
                 }
             }
         }
 
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "Notes")
-            RichNotesEditor(label: "Notes", text: $model.notes, placeholder: "Add notes...", minHeight: 100)
-        }
+        CollapsibleDetailsSection(
+            storageKey: "formDetailsAddServiceRecord",
+            filledCount: detailsFilledCount
+        ) {
+            VStack(alignment: .leading, spacing: Spacing.lg) {
+                VStack(alignment: .leading, spacing: Spacing.sm) {
+                    InstrumentSectionHeader(title: "Notes")
+                    RichNotesEditor(label: "Notes", text: $model.recordNotes, placeholder: "Add notes...", minHeight: 100)
+                }
 
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "Attachments")
-            AttachmentPicker(attachments: $model.pendingAttachments)
-        }
-
-        Button {
-            onSaveAndAddAnother()
-        } label: {
-            HStack(spacing: Spacing.sm) {
-                Image(systemName: "plus.square.on.square")
-                    .font(.system(size: 14, weight: .medium))
-                Text("SAVE & ADD ANOTHER")
-                    .font(.brutalistLabel)
-                    .tracking(1)
+                VStack(alignment: .leading, spacing: Spacing.sm) {
+                    InstrumentSectionHeader(title: "Attachments")
+                    AttachmentPicker(attachments: $model.pendingAttachments)
+                }
             }
-            .foregroundStyle(model.isFormValid ? Theme.accent : Theme.textTertiary)
-            .frame(maxWidth: .infinity)
-            .frame(height: Theme.buttonHeight)
-            .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(
-                        (model.isFormValid ? Theme.accent : Theme.gridLine).opacity(0.5),
-                        lineWidth: Theme.borderWidth
-                    )
-            )
         }
-        .disabled(!model.isFormValid)
-        .padding(.top, Spacing.sm)
-        .accessibilityLabel("Save and add another")
+    }
+
+    private var detailsFilledCount: Int {
+        var count = 0
+        if !model.recordNotes.isEmpty { count += 1 }
+        if !model.pendingAttachments.isEmpty { count += 1 }
+        return count
     }
 }

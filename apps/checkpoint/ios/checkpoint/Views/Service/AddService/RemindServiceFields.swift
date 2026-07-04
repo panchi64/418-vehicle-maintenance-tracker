@@ -18,15 +18,14 @@ struct RemindServiceFields: View {
         lastLog.flatMap { log in policyMiles.map { log.mileageAtService + $0 } }
     }
 
-    var body: some View {
-        if let lastLog {
-            Text("Last done: \(Formatters.shortDate.string(from: lastLog.performedDate)) · \(Formatters.mileage(lastLog.mileageAtService))")
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
+    /// G5: this is the only path that produces the Service's initial due
+    /// tracking (unlike record mode, intervals here only govern the *next*
+    /// occurrence after this reminder is completed).
+    private var hasComputableSchedule: Bool {
+        model.hasCustomDate || model.nextDueMileage != nil
+    }
 
+    var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             InstrumentSectionHeader(title: "Next Due")
 
@@ -85,55 +84,73 @@ struct RemindServiceFields: View {
             }
         }
 
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "Repeats")
+        if !hasComputableSchedule {
+            SanityWarningRow(message: L10n.remindNoScheduleWarning)
+        }
 
-            VStack(spacing: Spacing.md) {
-                LabeledInstrumentToggle(
-                    label: "REPEAT AFTER COMPLETION",
-                    accessibilityLabel: "Repeat after completion",
-                    isOn: $model.isRecurring
-                )
+        CollapsibleDetailsSection(
+            storageKey: "formDetailsAddServiceRemind",
+            filledCount: detailsFilledCount
+        ) {
+            VStack(alignment: .leading, spacing: Spacing.lg) {
+                VStack(alignment: .leading, spacing: Spacing.sm) {
+                    InstrumentSectionHeader(title: "Repeats")
 
-                if model.isRecurring {
-                    ChipRow(items: ServiceFormChips.monthIntervalChips, label: \.label) { chip in
-                        model.intervalMonths = chip.months
-                        HapticService.shared.selectionChanged()
-                    }
+                    VStack(spacing: Spacing.md) {
+                        LabeledInstrumentToggle(
+                            label: "REPEAT AFTER COMPLETION",
+                            accessibilityLabel: "Repeat after completion",
+                            isOn: $model.isRecurring
+                        )
 
-                    InstrumentNumberField(label: "Every", value: $model.intervalMonths, placeholder: "6", suffix: "months")
-                    if model.intervalMonths == nil, let suggested = policyMonths {
-                        SuggestedValueRow(label: "Suggest \(suggested) months") {
-                            model.intervalMonths = suggested
+                        if model.isRecurring {
+                            ChipRow(items: ServiceFormChips.monthIntervalChips, label: \.label) { chip in
+                                model.intervalMonths = chip.months
+                                HapticService.shared.selectionChanged()
+                            }
+
+                            InstrumentNumberField(label: "Every", value: $model.intervalMonths, placeholder: "6", suffix: "months")
+                            if model.intervalMonths == nil, let suggested = policyMonths {
+                                SuggestedValueRow(label: "Suggest \(suggested) months") {
+                                    model.intervalMonths = suggested
+                                }
+                            }
+
+                            ChipRow(items: ServiceFormChips.mileageIntervalChips, label: \.label) { chip in
+                                model.intervalMiles = chip.miles
+                                HapticService.shared.selectionChanged()
+                            }
+
+                            InstrumentNumberField(label: "Or Every", value: $model.intervalMiles, placeholder: "5000", suffix: "miles")
+                            if model.intervalMiles == nil, let suggested = policyMiles {
+                                SuggestedValueRow(label: "Suggest \(Formatters.mileage(suggested))") {
+                                    model.intervalMiles = suggested
+                                }
+                            }
+
+                            if let preview = recurrencePolicyPreview {
+                                Text(preview)
+                                    .font(.system(size: 12, weight: .regular, design: .monospaced))
+                                    .foregroundStyle(Theme.textSecondary)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
                         }
                     }
+                }
 
-                    ChipRow(items: ServiceFormChips.mileageIntervalChips, label: \.label) { chip in
-                        model.intervalMiles = chip.miles
-                        HapticService.shared.selectionChanged()
-                    }
-
-                    InstrumentNumberField(label: "Or Every", value: $model.intervalMiles, placeholder: "5000", suffix: "miles")
-                    if model.intervalMiles == nil, let suggested = policyMiles {
-                        SuggestedValueRow(label: "Suggest \(Formatters.mileage(suggested))") {
-                            model.intervalMiles = suggested
-                        }
-                    }
-
-                    if let preview = recurrencePolicyPreview {
-                        Text(preview)
-                            .font(.system(size: 12, weight: .regular, design: .monospaced))
-                            .foregroundStyle(Theme.textSecondary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
+                VStack(alignment: .leading, spacing: Spacing.sm) {
+                    InstrumentSectionHeader(title: "Notes")
+                    RichNotesEditor(label: "Notes", text: $model.remindNotes, placeholder: "Add notes...", minHeight: 100)
                 }
             }
         }
+    }
 
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "Notes")
-            RichNotesEditor(label: "Notes", text: $model.notes, placeholder: "Add notes...", minHeight: 100)
-        }
+    private var detailsFilledCount: Int {
+        var count = 0
+        if model.isRecurring { count += 1 }
+        if !model.remindNotes.isEmpty { count += 1 }
+        return count
     }
 
     private func whicheverFirstSummary(date: Date, mileage: Int, pace: Double?) -> some View {

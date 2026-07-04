@@ -28,6 +28,14 @@ final class AddServiceViewTests: XCTestCase {
         XCTAssertEqual(ServiceMode.remind.rawValue, "Remind")
     }
 
+    func testServiceMode_DisplayNameAndCaptionAreLocalized() {
+        // Then: displayName/caption resolve through L10n, not the raw value
+        XCTAssertEqual(ServiceMode.record.displayName, L10n.serviceModeRecord)
+        XCTAssertEqual(ServiceMode.remind.displayName, L10n.serviceModeRemind)
+        XCTAssertEqual(ServiceMode.record.caption, L10n.serviceModeRecordCaption)
+        XCTAssertEqual(ServiceMode.remind.caption, L10n.serviceModeRemindCaption)
+    }
+
     // MARK: - Form Validation Tests (Log Mode)
     //
     // Validation mirrors AddServiceView.isFormValid: only the service name is required.

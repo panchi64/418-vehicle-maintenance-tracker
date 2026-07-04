@@ -14,6 +14,9 @@ struct AddServiceView: View {
     var initialMode: ServiceMode = .record
 
     @State var model: AddServiceFormModel
+    @State private var draftResumeBanner: ServiceFormDraft?
+    @State private var saveAndAddAnotherFlash: String?
+    @State private var showServiceTypeError = false
 
     init(
         vehicle: Vehicle,
@@ -55,119 +58,207 @@ struct AddServiceView: View {
         )
     }
 
+    private var hasExplicitPrefill: Bool {
+        seasonalPrefill != nil || postRecordPrefill != nil
+    }
+
+    /// A content-only snapshot (fixed timestamp) so the autosave debounce
+    /// restarts on real edits, not on every unrelated re-render.
+    private var draftComparisonSnapshot: ServiceFormDraft {
+        var snapshot = model.toDraft()
+        snapshot.savedAt = .distantPast
+        return snapshot
+    }
+
     var body: some View {
         NavigationStack {
-            ZStack {
-                AtmosphericBackground()
+            ScrollViewReader { proxy in
+                ZStack {
+                    AtmosphericBackground()
 
-                ScrollView {
-                    VStack(spacing: Spacing.lg) {
-                        InstrumentSegmentedControl(
-                            options: ServiceMode.allCases,
-                            selection: $model.mode
-                        ) { option in
-                            option.rawValue
-                        }
-
-                        if model.mode == .record, let last = lastLogForVehicle {
-                            UseLastEntryButton(
-                                serviceName: last.service?.name ?? "previous service",
-                                performedDate: last.performedDate,
-                                action: { model.useLastEntry(from: last) }
-                            )
-                        } else if model.mode == .remind, let last = lastLogForServiceType {
-                            UseLastEntryButton(
-                                serviceName: last.service?.name ?? "previous service",
-                                performedDate: last.performedDate,
-                                action: { model.useLastEntryForRemind(from: last) }
-                            )
-                        }
-
-                        VStack(alignment: .leading, spacing: Spacing.sm) {
-                            InstrumentSectionHeader(title: "Service Type")
-
-                            if model.selectedPreset == nil, !quickChips.isEmpty {
-                                QuickServiceChipsRow(chips: quickChips) { preset in
-                                    model.selectedPreset = preset
-                                    HapticService.shared.selectionChanged()
-                                }
+                    ScrollView {
+                        VStack(spacing: Spacing.lg) {
+                            if let draft = draftResumeBanner {
+                                DraftResumeBanner(
+                                    savedAt: draft.savedAt,
+                                    onResume: {
+                                        model.apply(draft)
+                                        draftResumeBanner = nil
+                                    },
+                                    onDiscard: {
+                                        ServiceFormDraftStore.clear(for: vehicle.id)
+                                        draftResumeBanner = nil
+                                    }
+                                )
                             }
 
-                            ServiceTypePicker(
-                                selectedPreset: $model.selectedPreset,
-                                customServiceName: $model.customServiceName
-                            )
-                        }
+                            VStack(spacing: Spacing.sm) {
+                                InstrumentSegmentedControl(
+                                    options: ServiceMode.allCases,
+                                    selection: $model.mode
+                                ) { option in
+                                    option.displayName
+                                }
 
-                        if model.mode == .record {
-                            RecordServiceFields(
-                                model: model,
-                                anchors: anchors,
-                                onSaveAndAddAnother: { saveService(keepOpen: true) }
-                            )
-                        } else {
-                            RemindServiceFields(model: model, lastLog: lastLogForServiceType)
+                                HStack(spacing: 0) {
+                                    ForEach(ServiceMode.allCases, id: \.self) { option in
+                                        Button {
+                                            model.mode = option
+                                        } label: {
+                                            Text(option.caption)
+                                                .font(.brutalistSecondary)
+                                                .foregroundStyle(model.mode == option ? Theme.textPrimary : Theme.textTertiary)
+                                                .multilineTextAlignment(.center)
+                                                .frame(maxWidth: .infinity)
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                            }
+                            .id("top")
+
+                            VStack(alignment: .leading, spacing: Spacing.sm) {
+                                InstrumentSectionHeader(title: "Service Type") {
+                                    Text("*")
+                                        .font(.brutalistLabel)
+                                        .foregroundStyle(Theme.statusOverdue)
+                                }
+
+                                if model.selectedPreset == nil, !quickChips.isEmpty {
+                                    QuickServiceChipsRow(chips: quickChips) { preset in
+                                        model.selectedPreset = preset
+                                        HapticService.shared.selectionChanged()
+                                    }
+                                }
+
+                                ServiceTypePicker(
+                                    selectedPreset: $model.selectedPreset,
+                                    customServiceName: $model.customServiceName
+                                )
+
+                                if showServiceTypeError, model.serviceName.isEmpty {
+                                    ErrorMessageRow(message: L10n.formServiceTypeRequired) {
+                                        showServiceTypeError = false
+                                    }
+                                }
+                            }
+                            .id("serviceType")
+
+                            if !model.serviceName.isEmpty, let last = lastLogForServiceType {
+                                LastServiceReferenceCard(
+                                    serviceName: model.serviceName,
+                                    log: last,
+                                    onUseValues: model.mode == .record ? { model.useLastEntry(from: last) } : nil
+                                )
+                                .transition(.opacity.combined(with: .move(edge: .top)))
+                            }
+
+                            if model.mode == .record {
+                                RecordServiceFields(model: model, anchors: anchors)
+                            } else {
+                                RemindServiceFields(model: model, lastLog: lastLogForServiceType)
+                            }
                         }
+                        .animation(.easeInOut(duration: Theme.animationMedium), value: lastLogForServiceType?.id)
+                        .padding(Spacing.screenHorizontal)
+                        .padding(.bottom, Spacing.xxl)
                     }
-                    .padding(Spacing.screenHorizontal)
-                    .padding(.bottom, Spacing.xxl)
                 }
-            }
-            .numberPadDoneButton()
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                .numberPadDoneButton()
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
+                .toolbarBackground(.visible, for: .navigationBar)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button(L10n.commonCancel) {
+                            if !model.isDirty {
+                                ServiceFormDraftStore.clear(for: vehicle.id)
+                            }
+                            dismiss()
+                        }
                         .toolbarButtonStyle()
-                }
-                ToolbarItem(placement: .principal) {
-                    VStack(spacing: 2) {
-                        Text(vehicle.displayName)
-                            .font(.brutalistBody)
-                            .foregroundStyle(Theme.textPrimary)
-                            .lineLimit(1)
-                        Text(model.mode == .record ? "RECORD SERVICE" : "SET REMINDER")
+                    }
+                    ToolbarItem(placement: .principal) {
+                        VStack(spacing: 2) {
+                            Text(vehicle.displayName)
+                                .font(.brutalistBody)
+                                .foregroundStyle(Theme.textPrimary)
+                                .lineLimit(1)
+                            Group {
+                                if model.mode == .record {
+                                    Text("RECORD SERVICE")
+                                } else {
+                                    Text("SET REMINDER")
+                                }
+                            }
                             .font(.brutalistLabel)
                             .foregroundStyle(Theme.textTertiary)
                             .tracking(1)
+                        }
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel("\(vehicle.displayName), \(model.mode == .record ? "Record Service" : "Set Reminder")")
                     }
-                    .accessibilityElement(children: .combine)
-                    .accessibilityLabel("\(vehicle.displayName), \(model.mode == .record ? "Record Service" : "Set Reminder")")
                 }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { saveService() }
-                        .toolbarButtonStyle(isDisabled: !model.isFormValid)
-                        .disabled(!model.isFormValid)
+                .safeAreaInset(edge: .bottom) {
+                    FormActionBar(
+                        primaryTitle: L10n.commonSave,
+                        isPrimaryEnabled: model.isFormValid,
+                        onPrimary: { saveService() },
+                        onDisabledPrimaryTap: {
+                            HapticService.shared.error()
+                            showServiceTypeError = true
+                            withAnimation { proxy.scrollTo("serviceType", anchor: .top) }
+                        },
+                        secondaryTitle: model.mode == .record ? L10n.formSaveAndAddAnother : nil,
+                        onSecondary: model.mode == .record ? {
+                            saveService(keepOpen: true)
+                            saveAndAddAnotherFlash = L10n.formSavedAddNext
+                            withAnimation { proxy.scrollTo("top", anchor: .top) }
+                        } : nil,
+                        successFlash: $saveAndAddAnotherFlash,
+                        isKeyboardVisible: KeyboardVisibility.shared.isVisible
+                    )
                 }
-            }
-            .onChange(of: model.selectedPreset) { _, newPreset in
-                guard let preset = newPreset else { return }
-                if let months = preset.defaultIntervalMonths { model.intervalMonths = months }
-                if let miles = preset.defaultIntervalMiles { model.intervalMiles = miles }
-                if Service.hasIntervalPolicy(
-                    intervalMonths: preset.defaultIntervalMonths,
-                    intervalMiles: preset.defaultIntervalMiles
-                ) {
-                    model.isRecurring = true
+                .onChange(of: model.selectedPreset) { _, newPreset in
+                    guard let preset = newPreset else { return }
+                    if let months = preset.defaultIntervalMonths { model.intervalMonths = months }
+                    if let miles = preset.defaultIntervalMiles { model.intervalMiles = miles }
+                    if Service.hasIntervalPolicy(
+                        intervalMonths: preset.defaultIntervalMonths,
+                        intervalMiles: preset.defaultIntervalMiles
+                    ) {
+                        model.isRecurring = true
+                    }
                 }
-            }
-            .onChange(of: model.mode) { _, _ in
-                // Per-completion notes and per-schedule notes are different things;
-                // carrying typed text across the segmented control is surprising.
-                model.notes = ""
-            }
-            .trackScreen(.addService)
-            .onAppear {
-                if model.presets.isEmpty {
-                    model.presets = PresetDataService.shared.loadPresets()
+                .onChange(of: model.serviceName) { _, newValue in
+                    if !newValue.isEmpty { showServiceTypeError = false }
                 }
-                if model.mileageAtService == nil {
-                    model.mileageAtService = vehicle.currentMileage
+                .onChange(of: model.mode) { _, _ in
+                    withAnimation { proxy.scrollTo("top", anchor: .top) }
                 }
-                if let prefill = seasonalPrefill { model.applySeasonalPrefill(prefill) }
-                if let prefill = postRecordPrefill { model.applyPostRecordPrefill(prefill) }
+                .onChange(of: draftComparisonSnapshot) { _, _ in
+                    draftResumeBanner = nil
+                }
+                .task(id: draftComparisonSnapshot) {
+                    guard !hasExplicitPrefill, draftResumeBanner == nil else { return }
+                    try? await Task.sleep(for: .seconds(0.5))
+                    guard !Task.isCancelled else { return }
+                    ServiceFormDraftStore.save(model.toDraft(), for: vehicle.id)
+                }
+                .trackScreen(.addService)
+                .onAppear {
+                    if model.presets.isEmpty {
+                        model.presets = PresetDataService.shared.loadPresets()
+                    }
+                    if model.mileageAtService == nil {
+                        model.mileageAtService = vehicle.currentMileage
+                    }
+                    if let prefill = seasonalPrefill { model.applySeasonalPrefill(prefill) }
+                    if let prefill = postRecordPrefill { model.applyPostRecordPrefill(prefill) }
+                    if !hasExplicitPrefill {
+                        draftResumeBanner = ServiceFormDraftStore.load(for: vehicle.id)
+                    }
+                }
             }
         }
     }

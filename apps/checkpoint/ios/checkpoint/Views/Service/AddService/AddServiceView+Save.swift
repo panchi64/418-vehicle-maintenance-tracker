@@ -24,6 +24,9 @@ extension AddServiceView {
                 hasInterval: hasInterval
             ))
             undo = saveLoggedService()
+            if model.isRecurring {
+                ServiceNotificationScheduler.rescheduleNotifications(for: vehicle)
+            }
         } else {
             AnalyticsService.shared.capture(.serviceScheduled(
                 isPreset: isPreset,
@@ -31,9 +34,11 @@ extension AddServiceView {
                 hasInterval: hasInterval
             ))
             saveScheduledService()
+            ServiceNotificationScheduler.rescheduleNotifications(for: vehicle)
         }
         updateAppIcon()
         updateWidgetData()
+        ServiceFormDraftStore.clear(for: vehicle.id)
 
         if model.mode == .record {
             let context = modelContext
@@ -118,7 +123,7 @@ extension AddServiceView {
             mileageAtService: mileage,
             cost: costDecimal,
             costCategory: costDecimal != nil ? model.costCategory : nil,
-            notes: model.notes.isEmpty ? nil : model.notes
+            notes: model.recordNotes.isEmpty ? nil : model.recordNotes
         )
         modelContext.insert(log)
 
@@ -162,7 +167,7 @@ extension AddServiceView {
             dueMileage: model.nextDueMileage,
             intervalMonths: model.isRecurring ? model.intervalMonths : nil,
             intervalMiles: model.isRecurring ? model.intervalMiles : nil,
-            notes: model.notes.isEmpty ? nil : model.notes,
+            notes: model.remindNotes.isEmpty ? nil : model.remindNotes,
             isRecurring: model.isRecurringSchedule
         )
         service.vehicle = vehicle

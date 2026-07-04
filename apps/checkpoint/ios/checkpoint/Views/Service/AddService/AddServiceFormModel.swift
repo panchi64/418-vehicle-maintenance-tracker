@@ -14,7 +14,10 @@ final class AddServiceFormModel {
     var cost: String = ""
     var costError: String?
     var costCategory: CostCategory = .maintenance
-    var notes: String = ""
+    /// Separate per-mode buffers — switching the segmented control must never
+    /// destroy what the user typed in the other mode.
+    var recordNotes: String = ""
+    var remindNotes: String = ""
     /// Shared "this should repeat after completion" toggle. In record mode it
     /// also schedules the next occurrence inline; in remind mode it gates
     /// whether `isRecurring` is persisted on the Service.
@@ -29,9 +32,31 @@ final class AddServiceFormModel {
 
     var presets: [PresetData] = []
 
+    /// Blank-form snapshot captured once at creation, used to tell whether
+    /// the user has made any real change (R9's cancel-without-nagging rule).
+    private(set) var baselineDraft: ServiceFormDraft = ServiceFormDraft(
+        mode: ServiceMode.record.rawValue,
+        serviceName: "",
+        presetName: nil,
+        performedDate: .now,
+        costText: "",
+        costCategoryRaw: nil,
+        mileageText: "",
+        recordNotes: "",
+        remindNotes: "",
+        dueDate: nil,
+        hasCustomDate: false,
+        dueMileage: nil,
+        intervalMonths: nil,
+        intervalMiles: nil,
+        isRecurring: false,
+        savedAt: .now
+    )
+
     init(vehicle: Vehicle, initialMode: ServiceMode) {
         self.vehicle = vehicle
         self.mode = initialMode
+        self.baselineDraft = toDraft()
     }
 
     /// Drives `Service.dueDate` directly at save time — no derivation from
@@ -40,11 +65,15 @@ final class AddServiceFormModel {
         hasCustomDate ? dueDate : nil
     }
 
+    var hasIntervalPolicy: Bool {
+        Service.hasIntervalPolicy(intervalMonths: intervalMonths, intervalMiles: intervalMiles)
+    }
+
     /// Whether the scheduled occurrence should chain forward on completion.
     /// Only meaningful when intervals are also set — explicit user intent
     /// (the toggle) plus a non-zero policy.
     var isRecurringSchedule: Bool {
-        isRecurring && Service.hasIntervalPolicy(intervalMonths: intervalMonths, intervalMiles: intervalMiles)
+        isRecurring && hasIntervalPolicy
     }
 
     var serviceName: String {
@@ -55,6 +84,14 @@ final class AddServiceFormModel {
         !serviceName.isEmpty
     }
 
+    /// `true` once anything differs from the blank form this model started
+    /// as — used to decide whether a Cancel should keep or clear the draft.
+    var isDirty: Bool {
+        var current = toDraft()
+        current.savedAt = baselineDraft.savedAt
+        return current != baselineDraft
+    }
+
     func useLastEntry(from log: ServiceLog) {
         let template = LoggedServiceTemplate(from: log)
         selectedPreset = nil
@@ -63,7 +100,7 @@ final class AddServiceFormModel {
         if let category = template.costCategory {
             costCategory = category
         }
-        notes = template.notes ?? ""
+        recordNotes = template.notes ?? ""
         intervalMonths = template.intervalMonths
         intervalMiles = template.intervalMiles
         isRecurring = template.hasRecurringIntervals
@@ -98,44 +135,20 @@ final class AddServiceFormModel {
         }
     }
 
-    /// Remind-mode counterpart to `useLastEntry(from:)`. Diverges by projecting a
-    /// next-due date/mileage from the historic anchor + interval policy, and
-    /// by skipping cost/notes (which only matter when recording a completion).
-    /// The service name is preserved if the user already has one in flight.
-    func useLastEntryForRemind(from log: ServiceLog) {
-        let template = LoggedServiceTemplate(from: log)
-        if selectedPreset == nil && customServiceName.isEmpty {
-            customServiceName = template.serviceName
-        }
-        intervalMonths = template.intervalMonths
-        intervalMiles = template.intervalMiles
-        isRecurring = template.hasRecurringIntervals
-        if let interval = template.intervalMiles, interval > 0 {
-            nextDueMileage = log.mileageAtService + interval
-        }
-        if let months = template.intervalMonths, months > 0,
-           let suggested = Calendar.current.date(byAdding: .month, value: months, to: log.performedDate) {
-            hasCustomDate = true
-            dueDate = suggested
-        }
-        HapticService.shared.selectionChanged()
-    }
-
+    /// Clears everything a "Save & add another" round should not carry into
+    /// the next entry, while preserving visit context (date + mileage), the
+    /// active mode, and the Details disclosure state (owned by the view).
     func resetLogModeFields() {
         selectedPreset = nil
         customServiceName = ""
-        performedDate = Date()
-        mileageAtService = vehicle.currentMileage
         cost = ""
+        costError = nil
         costCategory = .maintenance
-        notes = ""
-        isRecurring = false
+        recordNotes = ""
         pendingAttachments = []
+        isRecurring = false
         intervalMonths = nil
         intervalMiles = nil
-        hasCustomDate = false
-        dueDate = Date()
-        nextDueMileage = nil
     }
 
     // MARK: - Draft (R9)
@@ -149,8 +162,8 @@ final class AddServiceFormModel {
             costText: cost,
             costCategoryRaw: costCategory.rawValue,
             mileageText: mileageAtService.map(String.init) ?? "",
-            recordNotes: mode == .record ? notes : "",
-            remindNotes: mode == .remind ? notes : "",
+            recordNotes: recordNotes,
+            remindNotes: remindNotes,
             dueDate: hasCustomDate ? dueDate : nil,
             hasCustomDate: hasCustomDate,
             dueMileage: nextDueMileage,
@@ -178,7 +191,8 @@ final class AddServiceFormModel {
             costCategory = category
         }
         mileageAtService = Int(draft.mileageText)
-        notes = mode == .record ? draft.recordNotes : draft.remindNotes
+        recordNotes = draft.recordNotes
+        remindNotes = draft.remindNotes
         hasCustomDate = draft.hasCustomDate
         if let dueDate = draft.dueDate {
             self.dueDate = dueDate
