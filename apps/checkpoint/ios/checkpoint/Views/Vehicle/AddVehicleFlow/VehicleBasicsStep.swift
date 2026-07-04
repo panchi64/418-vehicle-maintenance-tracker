@@ -81,7 +81,7 @@ struct VehicleBasicsStep: View {
                     VINInputSection(formState: formState)
 
                     InstrumentTextField(
-                        label: "License Plate",
+                        label: L10n.vehicleLicensePlate,
                         text: $formState.licensePlate,
                         placeholder: "ABC-1234"
                     )
@@ -256,7 +256,7 @@ private struct VINCharacterCountLabel: View {
             .tracking(1.5)
             .textCase(.uppercase)
         } else {
-            Text("\(vin.count) / 17 CHARACTERS")
+            Text(L10n.vehicleVINCharacterCount(vin.count))
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1.5)

@@ -17,7 +17,13 @@ struct FormActionBar: View {
     var secondaryTitle: String? = nil
     var onSecondary: (() -> Void)? = nil
     var successFlash: Binding<String?> = .constant(nil)
-    var isKeyboardVisible: Bool = false
+
+    /// G3: the bar must never ride above the keyboard (it would eat
+    /// number-pad space and invite accidental saves). Observed here rather
+    /// than threaded by every caller, so no form can silently opt out.
+    private var isKeyboardVisible: Bool {
+        KeyboardVisibility.shared.isVisible
+    }
 
     var body: some View {
         if isKeyboardVisible {
@@ -66,6 +72,9 @@ struct FormActionBar: View {
                     if isPrimaryEnabled {
                         onPrimary()
                     } else {
+                        // G2: every form gets the same disabled-save feedback;
+                        // callers only supply the scroll-to-field behavior.
+                        HapticService.shared.error()
                         onDisabledPrimaryTap?()
                     }
                 } label: {

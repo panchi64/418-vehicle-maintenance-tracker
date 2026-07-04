@@ -23,19 +23,21 @@ enum ServiceFormChips {
         let cal = Calendar.current
         let now = Date.now
         return [
-            FuzzyDateChip(label: "Next Week", date: cal.date(byAdding: .day, value: 7, to: now) ?? now),
-            FuzzyDateChip(label: "~1 mo", date: cal.date(byAdding: .month, value: 1, to: now) ?? now),
-            FuzzyDateChip(label: "~3 mo", date: cal.date(byAdding: .month, value: 3, to: now) ?? now),
-            FuzzyDateChip(label: "~6 mo", date: cal.date(byAdding: .month, value: 6, to: now) ?? now)
+            FuzzyDateChip(label: L10n.chipNextWeek, date: cal.date(byAdding: .day, value: 7, to: now) ?? now),
+            FuzzyDateChip(label: L10n.chipMonths1Approx, date: cal.date(byAdding: .month, value: 1, to: now) ?? now),
+            FuzzyDateChip(label: L10n.chipMonths3Approx, date: cal.date(byAdding: .month, value: 3, to: now) ?? now),
+            FuzzyDateChip(label: L10n.chipMonths6Approx, date: cal.date(byAdding: .month, value: 6, to: now) ?? now)
         ]
     }
 
-    static let monthIntervalChips: [MonthIntervalChip] = [
-        MonthIntervalChip(months: 3, label: "3 mo"),
-        MonthIntervalChip(months: 6, label: "6 mo"),
-        MonthIntervalChip(months: 12, label: "1 yr"),
-        MonthIntervalChip(months: 24, label: "2 yr")
-    ]
+    static var monthIntervalChips: [MonthIntervalChip] {
+        [
+            MonthIntervalChip(months: 3, label: L10n.chipMonths3),
+            MonthIntervalChip(months: 6, label: L10n.chipMonths6),
+            MonthIntervalChip(months: 12, label: L10n.chipYears1),
+            MonthIntervalChip(months: 24, label: L10n.chipYears2)
+        ]
+    }
 
     static let mileageIntervalChips: [MileageChip] = [
         MileageChip(miles: 3000, label: "+3k"),

@@ -27,7 +27,7 @@ struct RemindServiceFields: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "Next Due")
+            InstrumentSectionHeader(title: L10n.formNextDue)
 
             VStack(spacing: Spacing.md) {
                 ChipRow(items: ServiceFormChips.fuzzyDateChips, label: \.label) { chip in
@@ -37,19 +37,19 @@ struct RemindServiceFields: View {
                 }
 
                 LabeledInstrumentToggle(
-                    label: "SET DUE DATE",
-                    accessibilityLabel: "Set due date",
+                    label: L10n.formSetDueDate.uppercased(),
+                    accessibilityLabel: L10n.formSetDueDate,
                     isOn: $model.hasCustomDate
                 )
 
                 if model.hasCustomDate {
-                    InstrumentDatePicker(label: "Due Date", date: $model.dueDate)
+                    InstrumentDatePicker(label: L10n.formDueDate, date: $model.dueDate)
                 }
 
                 InstrumentNumberField(
-                    label: "Due Mileage",
+                    label: L10n.formDueMileage,
                     value: $model.nextDueMileage,
-                    placeholder: "Optional",
+                    placeholder: L10n.formOptionalTag,
                     suffix: DistanceSettings.shared.unit.abbreviation
                 )
 
@@ -59,13 +59,13 @@ struct RemindServiceFields: View {
                 }
 
                 if model.nextDueMileage == nil, let suggested = projectedDueMileage {
-                    SuggestedValueRow(label: "Suggest \(Formatters.mileage(suggested))") {
+                    SuggestedValueRow(label: L10n.formSuggestValue(Formatters.mileage(suggested))) {
                         model.nextDueMileage = suggested
                     }
                 }
 
                 if let nextDueDate = model.nextDueDate, nextDueDate < Date.now {
-                    Text("This date is in the past — will be marked overdue.")
+                    Text(L10n.formDatePastWarning)
                         .font(.brutalistSecondary)
                         .foregroundStyle(Theme.textTertiary)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -94,12 +94,12 @@ struct RemindServiceFields: View {
         ) {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 VStack(alignment: .leading, spacing: Spacing.sm) {
-                    InstrumentSectionHeader(title: "Repeats")
+                    InstrumentSectionHeader(title: L10n.formRepeats)
 
                     VStack(spacing: Spacing.md) {
                         LabeledInstrumentToggle(
-                            label: "REPEAT AFTER COMPLETION",
-                            accessibilityLabel: "Repeat after completion",
+                            label: L10n.formRepeatAfterCompletion.uppercased(),
+                            accessibilityLabel: L10n.formRepeatAfterCompletion,
                             isOn: $model.isRecurring
                         )
 
@@ -109,9 +109,9 @@ struct RemindServiceFields: View {
                                 HapticService.shared.selectionChanged()
                             }
 
-                            InstrumentNumberField(label: "Every", value: $model.intervalMonths, placeholder: "6", suffix: "months")
+                            InstrumentNumberField(label: L10n.formEvery, value: $model.intervalMonths, placeholder: "6", suffix: L10n.formMonthsSuffix)
                             if model.intervalMonths == nil, let suggested = policyMonths {
-                                SuggestedValueRow(label: "Suggest \(suggested) months") {
+                                SuggestedValueRow(label: L10n.formSuggestMonths(suggested)) {
                                     model.intervalMonths = suggested
                                 }
                             }
@@ -121,9 +121,9 @@ struct RemindServiceFields: View {
                                 HapticService.shared.selectionChanged()
                             }
 
-                            InstrumentNumberField(label: "Or Every", value: $model.intervalMiles, placeholder: "5000", suffix: "miles")
+                            InstrumentNumberField(label: L10n.formOrEvery, value: $model.intervalMiles, placeholder: "5000", suffix: L10n.formMilesSuffix)
                             if model.intervalMiles == nil, let suggested = policyMiles {
-                                SuggestedValueRow(label: "Suggest \(Formatters.mileage(suggested))") {
+                                SuggestedValueRow(label: L10n.formSuggestValue(Formatters.mileage(suggested))) {
                                     model.intervalMiles = suggested
                                 }
                             }
@@ -139,8 +139,8 @@ struct RemindServiceFields: View {
                 }
 
                 VStack(alignment: .leading, spacing: Spacing.sm) {
-                    InstrumentSectionHeader(title: "Notes")
-                    RichNotesEditor(label: "Notes", text: $model.remindNotes, placeholder: "Add notes...", minHeight: 100)
+                    InstrumentSectionHeader(title: L10n.formNotes)
+                    RichNotesEditor(label: L10n.formNotes, text: $model.remindNotes, placeholder: L10n.formNotesPlaceholder, minHeight: 100)
                 }
             }
         }
@@ -159,14 +159,16 @@ struct RemindServiceFields: View {
         let mileageText = Formatters.mileage(mileage)
 
         return VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text("WHICHEVER COMES FIRST")
+            Text(L10n.formWhicheverFirst)
+                .textCase(.uppercase)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1)
 
             HStack(spacing: Spacing.sm) {
                 triggerCell(text: dateText, isLeading: dateLeads)
-                Text("OR")
+                Text(L10n.formOr)
+                    .textCase(.uppercase)
                     .font(.brutalistLabel)
                     .foregroundStyle(Theme.textTertiary)
                 triggerCell(text: mileageText, isLeading: !dateLeads)
@@ -198,7 +200,9 @@ struct RemindServiceFields: View {
     private func dateTriggerLeads(date: Date, mileage: Int, pace: Double?) -> Bool {
         guard let pace, pace > 0 else { return true }
         let milesRemaining = max(mileage - model.vehicle.currentMileage, 0)
-        let daysUntilMileage = Int((Double(milesRemaining) / pace).rounded())
+        // ceil, matching Service.predictedDueDate — the urgency engine and
+        // this preview must agree on which trigger fires first.
+        let daysUntilMileage = Int(ceil(Double(milesRemaining) / pace))
         let daysUntilDate = Calendar.current.dateComponents([.day], from: Date.now, to: date).day ?? Int.max
         return daysUntilDate <= daysUntilMileage
     }
@@ -206,13 +210,13 @@ struct RemindServiceFields: View {
     private var recurrencePolicyPreview: String? {
         var parts: [String] = []
         if let months = model.intervalMonths, months > 0 {
-            parts.append(months == 1 ? "every month" : "every \(months) months")
+            parts.append(months == 1 ? L10n.formEveryMonth : L10n.formEveryNMonths(months))
         }
         if let miles = model.intervalMiles, miles > 0 {
-            parts.append("every \(Formatters.mileage(miles))")
+            parts.append(L10n.formEveryMileage(Formatters.mileage(miles)))
         }
         guard !parts.isEmpty else { return nil }
-        return parts.joined(separator: " or ")
+        return parts.joined(separator: " \(L10n.formOr) ")
     }
 
     /// Returns nil when neither trigger is set so the strip doesn't render.
@@ -223,20 +227,20 @@ struct RemindServiceFields: View {
         if let date {
             let days = Calendar.current.dateComponents([.day], from: Date.now, to: date).day ?? 0
             if days < 0 {
-                parts.append("\(-days) days overdue")
+                parts.append(L10n.formDaysOverdue(-days))
                 isOverdue = true
             } else {
-                parts.append("~\(days) days")
+                parts.append(L10n.formDaysAhead(days))
             }
         }
 
         if let mileage {
             let delta = mileage - model.vehicle.currentMileage
             if delta < 0 {
-                parts.append("\(Formatters.mileage(-delta)) past")
+                parts.append(L10n.formMileagePast(Formatters.mileage(-delta)))
                 isOverdue = true
             } else {
-                parts.append("~\(Formatters.mileage(delta)) ahead")
+                parts.append(L10n.formMileageAhead(Formatters.mileage(delta)))
             }
         }
 

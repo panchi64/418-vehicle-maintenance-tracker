@@ -8,10 +8,7 @@ extension AddServiceView {
     func saveService(keepOpen: Bool = false) {
         let isPreset = model.selectedPreset != nil
         let category = model.selectedPreset?.category
-        let hasInterval = model.isRecurring && Service.hasIntervalPolicy(
-            intervalMonths: model.intervalMonths,
-            intervalMiles: model.intervalMiles
-        )
+        let hasInterval = model.isRecurringSchedule
 
         HapticService.shared.success()
 
@@ -54,7 +51,7 @@ extension AddServiceView {
                     intervalMiles: model.intervalMiles
                 )
                 let state = appState
-                toastAction = ToastService.ToastAction(label: "SCHEDULE NEXT") {
+                toastAction = ToastService.ToastAction(label: L10n.toastScheduleNext.uppercased()) {
                     state.postRecordPrefill = prefill
                     state.addServiceMode = .remind
                     state.showAddService = true
@@ -62,7 +59,7 @@ extension AddServiceView {
                 }
             } else {
                 toastAction = undo.map { snapshot in
-                    ToastService.ToastAction(label: "UNDO") {
+                    ToastService.ToastAction(label: L10n.commonUndo.uppercased()) {
                         snapshot.perform(in: context)
                         HapticService.shared.selectionChanged()
                         AnalyticsService.shared.capture(.serviceLogUndone)

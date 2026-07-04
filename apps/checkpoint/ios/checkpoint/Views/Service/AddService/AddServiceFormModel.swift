@@ -32,31 +32,27 @@ final class AddServiceFormModel {
 
     var presets: [PresetData] = []
 
-    /// Blank-form snapshot captured once at creation, used to tell whether
-    /// the user has made any real change (R9's cancel-without-nagging rule).
-    private(set) var baselineDraft: ServiceFormDraft = ServiceFormDraft(
-        mode: ServiceMode.record.rawValue,
-        serviceName: "",
-        presetName: nil,
-        performedDate: .now,
-        costText: "",
-        costCategoryRaw: nil,
-        mileageText: "",
-        recordNotes: "",
-        remindNotes: "",
-        dueDate: nil,
-        hasCustomDate: false,
-        dueMileage: nil,
-        intervalMonths: nil,
-        intervalMiles: nil,
-        isRecurring: false,
-        savedAt: .now
-    )
+    /// Pristine-form snapshot captured at creation (after the mileage
+    /// prefill), used to tell whether the user has made any real change
+    /// (R9's cancel-without-nagging rule).
+    private var baselineSnapshot: ServiceFormDraft?
 
     init(vehicle: Vehicle, initialMode: ServiceMode) {
         self.vehicle = vehicle
         self.mode = initialMode
-        self.baselineDraft = toDraft()
+        // Prefill before capturing the baseline — a prefilled-but-untouched
+        // form must not count as dirty, or Cancel would keep phantom drafts.
+        self.mileageAtService = vehicle.currentMileage
+        self.baselineSnapshot = contentSnapshot
+    }
+
+    /// Content-only snapshot (fixed timestamp). Drives both `isDirty` and the
+    /// view's autosave debounce so the two can never disagree about what
+    /// counts as an edit.
+    var contentSnapshot: ServiceFormDraft {
+        var snapshot = toDraft()
+        snapshot.savedAt = .distantPast
+        return snapshot
     }
 
     /// Drives `Service.dueDate` directly at save time — no derivation from
@@ -84,12 +80,10 @@ final class AddServiceFormModel {
         !serviceName.isEmpty
     }
 
-    /// `true` once anything differs from the blank form this model started
+    /// `true` once anything differs from the pristine form this model started
     /// as — used to decide whether a Cancel should keep or clear the draft.
     var isDirty: Bool {
-        var current = toDraft()
-        current.savedAt = baselineDraft.savedAt
-        return current != baselineDraft
+        contentSnapshot != baselineSnapshot
     }
 
     func useLastEntry(from log: ServiceLog) {
@@ -104,7 +98,6 @@ final class AddServiceFormModel {
         intervalMonths = template.intervalMonths
         intervalMiles = template.intervalMiles
         isRecurring = template.hasRecurringIntervals
-        HapticService.shared.selectionChanged()
     }
 
     func applySeasonalPrefill(_ prefill: SeasonalPrefill) {
@@ -125,13 +118,20 @@ final class AddServiceFormModel {
             intervalMonths: prefill.intervalMonths,
             intervalMiles: prefill.intervalMiles
         )
-        if let months = prefill.intervalMonths, months > 0,
-           let projected = Calendar.current.date(byAdding: .month, value: months, to: prefill.performedDate) {
+        let projected = ReminderImpactCalculator.projected(
+            intervalMonths: prefill.intervalMonths,
+            intervalMiles: prefill.intervalMiles,
+            anchorDate: prefill.performedDate,
+            anchorMileage: prefill.performedMileage,
+            explicitDueDate: nil,
+            explicitDueMileage: nil
+        )
+        if let projectedDate = projected.dueDate {
             hasCustomDate = true
-            dueDate = projected
+            dueDate = projectedDate
         }
-        if let miles = prefill.intervalMiles, miles > 0 {
-            nextDueMileage = prefill.performedMileage + miles
+        if let projectedMileage = projected.dueMileage {
+            nextDueMileage = projectedMileage
         }
     }
 
@@ -149,6 +149,15 @@ final class AddServiceFormModel {
         isRecurring = false
         intervalMonths = nil
         intervalMiles = nil
+        // Remind-side schedule state must not leak into the next entry —
+        // a due date/mileage set (then abandoned) in Remind mode would
+        // otherwise silently attach to the next saved service.
+        hasCustomDate = false
+        dueDate = Date()
+        nextDueMileage = nil
+        // The reset form is the new pristine state: without re-baselining,
+        // the autosave would immediately persist a phantom draft of it.
+        baselineSnapshot = contentSnapshot
     }
 
     // MARK: - Draft (R9)

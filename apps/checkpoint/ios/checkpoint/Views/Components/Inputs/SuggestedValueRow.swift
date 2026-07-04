@@ -23,7 +23,8 @@ struct SuggestedValueRow: View {
             Spacer()
 
             Button(action: onUse) {
-                Text("USE")
+                Text(L10n.formUse)
+                    .textCase(.uppercase)
                     .font(.brutalistLabel)
                     .foregroundStyle(Theme.accent)
                     .tracking(1)
@@ -35,7 +36,7 @@ struct SuggestedValueRow: View {
                     )
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Use suggested value: \(label)")
+            .accessibilityLabel(L10n.formUseSuggestedValue(label))
         }
         .padding(.horizontal, Spacing.md)
         .padding(.vertical, Spacing.xs)

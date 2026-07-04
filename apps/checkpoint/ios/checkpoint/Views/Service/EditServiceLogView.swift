@@ -27,6 +27,11 @@ struct EditServiceLogView: View {
     @State private var loadedPerformedDate: Date = Date()
     @State private var loadedMileageAtService: Int? = nil
 
+    // Fixed for the sheet's lifetime — computed once in loadFromLog().
+    @State private var adjacentBefore: ServiceLog?
+    @State private var adjacentAfter: ServiceLog?
+    @State private var isMostRecentLogOfRecurringService = false
+
     private var serviceName: String { log.service?.name ?? "" }
 
     private var anchors: ServiceFormAnchors? {
@@ -42,20 +47,11 @@ struct EditServiceLogView: View {
         )
     }
 
-    /// This vehicle's logs in chronological order, for the "between two logs" context line.
-    private var vehicleLogsSorted: [ServiceLog] {
-        guard let vehicle = log.vehicle else { return [] }
-        return allServiceLogs
-            .filter { $0.vehicle?.id == vehicle.id }
-            .sorted { $0.performedDate < $1.performedDate }
-    }
-
+    /// Computed once in `loadFromLog()` — the neighbor logs can't change
+    /// while the edit sheet is open, and re-sorting every log on each
+    /// keystroke-driven render would be wasted work.
     private var adjacentLogs: (before: ServiceLog?, after: ServiceLog?) {
-        let logs = vehicleLogsSorted
-        guard let index = logs.firstIndex(where: { $0.id == log.id }) else { return (nil, nil) }
-        let before = index > 0 ? logs[index - 1] : nil
-        let after = index < logs.count - 1 ? logs[index + 1] : nil
-        return (before, after)
+        (adjacentBefore, adjacentAfter)
     }
 
     private func logSummary(_ log: ServiceLog) -> String {
@@ -77,16 +73,15 @@ struct EditServiceLogView: View {
         }
     }
 
-    private var dateOrMileageChanged: Bool {
-        performedDate != loadedPerformedDate || mileageAtService != loadedMileageAtService
+    /// A cleared mileage field keeps the log's stored mileage at save, so it
+    /// counts as "unchanged" for the toggle, the impact preview, and the
+    /// reminder recalculation alike.
+    private var effectiveMileage: Int? {
+        mileageAtService ?? loadedMileageAtService
     }
 
-    /// Only the most recent log of a recurring service can move that
-    /// service's next reminder — earlier logs are historical record-keeping.
-    private var isMostRecentLogOfRecurringService: Bool {
-        guard let service = log.service, service.hasIntervalPolicy else { return false }
-        let serviceLogsNewestFirst = (service.logs ?? []).sorted { $0.performedDate > $1.performedDate }
-        return serviceLogsNewestFirst.first?.id == log.id
+    private var dateOrMileageChanged: Bool {
+        performedDate != loadedPerformedDate || effectiveMileage != loadedMileageAtService
     }
 
     private var showAlsoMoveReminderToggle: Bool {
@@ -100,7 +95,7 @@ struct EditServiceLogView: View {
     /// Mirrors `Service.recalculateDueDates`: always interval-derived from
     /// this log's (edited) date/mileage, no explicit override.
     private var proposedServiceSchedule: ReminderImpactCalculator.Schedule {
-        guard let service = log.service, let mileage = mileageAtService else { return currentServiceSchedule }
+        guard let service = log.service, let mileage = effectiveMileage else { return currentServiceSchedule }
         return ReminderImpactCalculator.projected(
             intervalMonths: service.intervalMonths,
             intervalMiles: service.intervalMiles,
@@ -128,8 +123,8 @@ struct EditServiceLogView: View {
                         }
 
                         VStack(alignment: .leading, spacing: Spacing.sm) {
-                            InstrumentSectionHeader(title: "Date Performed")
-                            InstrumentDatePicker(label: "Date Performed", date: $performedDate)
+                            InstrumentSectionHeader(title: L10n.formDatePerformed)
+                            InstrumentDatePicker(label: L10n.formDatePerformed, date: $performedDate)
 
                             if performedDate != loadedPerformedDate {
                                 OriginalValueHint(text: L10n.editWas(Formatters.shortDate.string(from: loadedPerformedDate)))
@@ -143,7 +138,7 @@ struct EditServiceLogView: View {
                         if showAlsoMoveReminderToggle {
                             VStack(alignment: .leading, spacing: Spacing.sm) {
                                 LabeledInstrumentToggle(
-                                    label: "ALSO MOVE NEXT REMINDER",
+                                    label: L10n.editAlsoMoveReminder.uppercased(),
                                     accessibilityLabel: L10n.editAlsoMoveReminder,
                                     isOn: $alsoMoveNextReminder
                                 )
@@ -156,8 +151,8 @@ struct EditServiceLogView: View {
                         }
 
                         VStack(alignment: .leading, spacing: Spacing.sm) {
-                            InstrumentSectionHeader(title: "Notes")
-                            RichNotesEditor(label: "Notes", text: $notes, placeholder: "Add notes...", minHeight: 100)
+                            InstrumentSectionHeader(title: L10n.formNotes)
+                            RichNotesEditor(label: L10n.formNotes, text: $notes, placeholder: L10n.formNotesPlaceholder, minHeight: 100)
                         }
 
                         if !(log.attachments ?? []).isEmpty {
@@ -168,7 +163,7 @@ struct EditServiceLogView: View {
                         }
 
                         VStack(alignment: .leading, spacing: Spacing.sm) {
-                            InstrumentSectionHeader(title: "Add Attachments")
+                            InstrumentSectionHeader(title: L10n.formAddAttachments)
                             AttachmentPicker(attachments: $pendingAttachments)
                         }
                     }
@@ -177,7 +172,7 @@ struct EditServiceLogView: View {
                 }
             }
             .numberPadDoneButton()
-            .navigationTitle("Edit Service")
+            .navigationTitle(L10n.serviceEditTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
@@ -191,8 +186,7 @@ struct EditServiceLogView: View {
                 FormActionBar(
                     primaryTitle: L10n.commonSave,
                     isPrimaryEnabled: true,
-                    onPrimary: { saveChanges() },
-                    isKeyboardVisible: KeyboardVisibility.shared.isVisible
+                    onPrimary: { saveChanges() }
                 )
             }
             .trackScreen(.editServiceLog)
@@ -206,12 +200,13 @@ struct EditServiceLogView: View {
 
     private var contextHeader: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text("EDITING")
+            Text(L10n.formEditingTag)
+                .textCase(.uppercase)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1.5)
 
-            Text(log.service?.name ?? "Service")
+            Text(log.service?.name ?? L10n.serviceFallbackName)
                 .font(.brutalistTitle)
                 .foregroundStyle(Theme.textPrimary)
 
@@ -231,11 +226,11 @@ struct EditServiceLogView: View {
     @ViewBuilder
     private var costSection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "Cost")
+            InstrumentSectionHeader(title: L10n.formCost)
 
             VStack(spacing: Spacing.md) {
                 InstrumentTextField(
-                    label: "Amount",
+                    label: L10n.formAmount,
                     text: $cost,
                     placeholder: "0.00",
                     keyboardType: .decimalPad
@@ -264,7 +259,8 @@ struct EditServiceLogView: View {
                 }
 
                 VStack(alignment: .leading, spacing: Spacing.xs) {
-                    Text("CATEGORY")
+                    Text(L10n.formCategory)
+                        .textCase(.uppercase)
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
                         .tracking(1)
@@ -281,12 +277,12 @@ struct EditServiceLogView: View {
     @ViewBuilder
     private var mileageSection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "Mileage")
+            InstrumentSectionHeader(title: L10n.formMileage)
 
             InstrumentNumberField(
-                label: "Mileage",
+                label: L10n.formMileage,
                 value: $mileageAtService,
-                placeholder: "Optional",
+                placeholder: L10n.formOptionalTag,
                 suffix: DistanceSettings.shared.unit.abbreviation
             )
 
@@ -309,6 +305,21 @@ struct EditServiceLogView: View {
 
         loadedPerformedDate = log.performedDate
         loadedMileageAtService = log.mileageAtService
+
+        if let vehicle = log.vehicle {
+            let vehicleLogs: [ServiceLog] = allServiceLogs.forVehicleNewestFirst(vehicle).reversed()
+            if let index = vehicleLogs.firstIndex(where: { $0.id == log.id }) {
+                adjacentBefore = index > 0 ? vehicleLogs[index - 1] : nil
+                adjacentAfter = index < vehicleLogs.count - 1 ? vehicleLogs[index + 1] : nil
+            }
+        }
+
+        // Only the most recent log of a recurring service can move that
+        // service's next reminder — earlier logs are historical record-keeping.
+        if let service = log.service, service.hasIntervalPolicy {
+            let newest = (service.logs ?? []).max { $0.performedDate < $1.performedDate }
+            isMostRecentLogOfRecurringService = newest?.id == log.id
+        }
     }
 
     private func saveChanges() {
@@ -332,7 +343,7 @@ struct EditServiceLogView: View {
         log.notes = newNotes
 
         if alsoMoveNextReminder, showAlsoMoveReminderToggle,
-           let service = log.service, let mileage = mileageAtService {
+           let service = log.service, let mileage = effectiveMileage {
             service.recalculateDueDates(performedDate: performedDate, mileage: mileage)
             if let vehicle = log.vehicle {
                 ServiceNotificationScheduler.rescheduleNotifications(for: vehicle)

@@ -62,13 +62,6 @@ struct AddServiceView: View {
         seasonalPrefill != nil || postRecordPrefill != nil
     }
 
-    /// A content-only snapshot (fixed timestamp) so the autosave debounce
-    /// restarts on real edits, not on every unrelated re-render.
-    private var draftComparisonSnapshot: ServiceFormDraft {
-        var snapshot = model.toDraft()
-        snapshot.savedAt = .distantPast
-        return snapshot
-    }
 
     var body: some View {
         NavigationStack {
@@ -118,7 +111,7 @@ struct AddServiceView: View {
                             .id("top")
 
                             VStack(alignment: .leading, spacing: Spacing.sm) {
-                                InstrumentSectionHeader(title: "Service Type") {
+                                InstrumentSectionHeader(title: L10n.formServiceType) {
                                     Text("*")
                                         .font(.brutalistLabel)
                                         .foregroundStyle(Theme.statusOverdue)
@@ -148,7 +141,10 @@ struct AddServiceView: View {
                                 LastServiceReferenceCard(
                                     serviceName: model.serviceName,
                                     log: last,
-                                    onUseValues: model.mode == .record ? { model.useLastEntry(from: last) } : nil
+                                    onUseValues: model.mode == .record ? {
+                                        model.useLastEntry(from: last)
+                                        HapticService.shared.selectionChanged()
+                                    } : nil
                                 )
                                 .transition(.opacity.combined(with: .move(edge: .top)))
                             }
@@ -186,17 +182,18 @@ struct AddServiceView: View {
                                 .lineLimit(1)
                             Group {
                                 if model.mode == .record {
-                                    Text("RECORD SERVICE")
+                                    Text(L10n.addServiceTitleRecord)
                                 } else {
-                                    Text("SET REMINDER")
+                                    Text(L10n.addServiceTitleRemind)
                                 }
                             }
+                            .textCase(.uppercase)
                             .font(.brutalistLabel)
                             .foregroundStyle(Theme.textTertiary)
                             .tracking(1)
                         }
                         .accessibilityElement(children: .combine)
-                        .accessibilityLabel("\(vehicle.displayName), \(model.mode == .record ? "Record Service" : "Set Reminder")")
+                        .accessibilityLabel("\(vehicle.displayName), \(model.mode == .record ? L10n.addServiceTitleRecord : L10n.addServiceTitleRemind)")
                     }
                 }
                 .safeAreaInset(edge: .bottom) {
@@ -205,7 +202,6 @@ struct AddServiceView: View {
                         isPrimaryEnabled: model.isFormValid,
                         onPrimary: { saveService() },
                         onDisabledPrimaryTap: {
-                            HapticService.shared.error()
                             showServiceTypeError = true
                             withAnimation { proxy.scrollTo("serviceType", anchor: .top) }
                         },
@@ -215,8 +211,7 @@ struct AddServiceView: View {
                             saveAndAddAnotherFlash = L10n.formSavedAddNext
                             withAnimation { proxy.scrollTo("top", anchor: .top) }
                         } : nil,
-                        successFlash: $saveAndAddAnotherFlash,
-                        isKeyboardVisible: KeyboardVisibility.shared.isVisible
+                        successFlash: $saveAndAddAnotherFlash
                     )
                 }
                 .onChange(of: model.selectedPreset) { _, newPreset in
@@ -236,11 +231,14 @@ struct AddServiceView: View {
                 .onChange(of: model.mode) { _, _ in
                     withAnimation { proxy.scrollTo("top", anchor: .top) }
                 }
-                .onChange(of: draftComparisonSnapshot) { _, _ in
+                .onChange(of: model.contentSnapshot) { _, _ in
                     draftResumeBanner = nil
                 }
-                .task(id: draftComparisonSnapshot) {
-                    guard !hasExplicitPrefill, draftResumeBanner == nil else { return }
+                .task(id: model.contentSnapshot) {
+                    // Only real edits produce a draft — a pristine (or freshly
+                    // reset) form must never overwrite a stored draft or leave
+                    // a phantom one behind on swipe-dismiss.
+                    guard !hasExplicitPrefill, draftResumeBanner == nil, model.isDirty else { return }
                     try? await Task.sleep(for: .seconds(0.5))
                     guard !Task.isCancelled else { return }
                     ServiceFormDraftStore.save(model.toDraft(), for: vehicle.id)
@@ -249,9 +247,6 @@ struct AddServiceView: View {
                 .onAppear {
                     if model.presets.isEmpty {
                         model.presets = PresetDataService.shared.loadPresets()
-                    }
-                    if model.mileageAtService == nil {
-                        model.mileageAtService = vehicle.currentMileage
                     }
                     if let prefill = seasonalPrefill { model.applySeasonalPrefill(prefill) }
                     if let prefill = postRecordPrefill { model.applyPostRecordPrefill(prefill) }

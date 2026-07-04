@@ -132,4 +132,16 @@ final class ServiceFormValidationTests: XCTestCase {
             serviceName: "Oil Change"
         ))
     }
+
+    func testMileageWarning_NilForFirstReadingOnUnsetOdometer() {
+        // A vehicle whose odometer was never set (currentMileage 0) getting
+        // its first real reading is not a typo, however large the jump.
+        let result = ServiceFormValidation.mileageWarning(
+            entered: 62_000,
+            vehicleCurrentMileage: 0,
+            maxLoggedMileage: nil,
+            performedDate: Date()
+        )
+        XCTAssertNil(result, "First reading against an unset odometer should not warn")
+    }
 }

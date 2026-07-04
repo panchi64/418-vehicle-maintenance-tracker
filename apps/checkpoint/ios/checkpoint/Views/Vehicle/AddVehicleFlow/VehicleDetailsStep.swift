@@ -25,7 +25,7 @@ struct VehicleDetailsStep: View {
                         label: L10n.vehicleCurrentMileage,
                         value: $formState.currentMileage,
                         placeholder: L10n.vehicleMileagePlaceholder,
-                        suffix: "mi",
+                        suffix: DistanceSettings.shared.unit.abbreviation,
                         showCameraButton: formState.isCameraAvailable,
                         onCameraTap: {
                             formState.clearOdometerError()
@@ -70,7 +70,7 @@ struct VehicleDetailsStep: View {
                         year: $formState.marbeteExpirationYear
                     )
 
-                    Text("Yearly vehicle registration tag expiration")
+                    Text(L10n.vehicleMarbeteHelp)
                         .font(.brutalistSecondary)
                         .foregroundStyle(Theme.textTertiary)
                         .padding(.leading, 4)

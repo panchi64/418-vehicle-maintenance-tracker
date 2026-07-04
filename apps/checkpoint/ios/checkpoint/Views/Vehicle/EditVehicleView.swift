@@ -91,7 +91,7 @@ struct EditVehicleView: View {
                     VStack(spacing: Spacing.lg) {
                         // Vehicle Details Section
                         VStack(alignment: .leading, spacing: Spacing.sm) {
-                            InstrumentSectionHeader(title: "Vehicle Details")
+                            InstrumentSectionHeader(title: L10n.vehicleDetails)
 
                             if showBasicsError, !isFormValid {
                                 ErrorMessageRow(message: L10n.formVehicleBasicsRequired) {
@@ -101,29 +101,29 @@ struct EditVehicleView: View {
 
                             VStack(spacing: Spacing.md) {
                                 InstrumentTextField(
-                                    label: "Nickname",
+                                    label: L10n.vehicleNickname,
                                     text: $name,
-                                    placeholder: "Optional"
+                                    placeholder: L10n.vehicleNicknamePlaceholder
                                 )
 
                                 InstrumentTextField(
-                                    label: "Make",
+                                    label: L10n.vehicleMake,
                                     text: $make,
-                                    placeholder: "Toyota, Honda, Ford...",
+                                    placeholder: L10n.vehicleMakePlaceholder,
                                     isRequired: true
                                 )
 
                                 InstrumentTextField(
-                                    label: "Model",
+                                    label: L10n.vehicleModel,
                                     text: $model,
-                                    placeholder: "Camry, Civic, F-150...",
+                                    placeholder: L10n.vehicleModelPlaceholder,
                                     isRequired: true
                                 )
 
                                 InstrumentNumberField(
-                                    label: "Year",
+                                    label: L10n.vehicleYear,
                                     value: $year,
-                                    placeholder: "2024",
+                                    placeholder: L10n.vehicleYearPlaceholder,
                                     isRequired: true
                                 )
                             }
@@ -146,7 +146,8 @@ struct EditVehicleView: View {
                                 year: $marbeteExpirationYear
                             )
 
-                            Text("PUERTO RICO VEHICLE REGISTRATION TAG EXPIRATION")
+                            Text(L10n.vehicleMarbeteHelpLong)
+                                .textCase(.uppercase)
                                 .font(.brutalistLabel)
                                 .foregroundStyle(Theme.textTertiary)
                                 .tracking(1)
@@ -177,31 +178,31 @@ struct EditVehicleView: View {
 
                                 // Specifications Section
                                 VStack(alignment: .leading, spacing: Spacing.sm) {
-                                    InstrumentSectionHeader(title: "Specifications")
+                                    InstrumentSectionHeader(title: L10n.vehicleSpecifications)
 
                                     VStack(spacing: Spacing.md) {
                                         InstrumentTextField(
-                                            label: "Tire Size",
+                                            label: L10n.vehicleTireSize,
                                             text: $tireSize,
-                                            placeholder: "225/45R17 (Optional)"
+                                            placeholder: L10n.vehicleTireSizePlaceholderOptional
                                         )
 
                                         InstrumentTextField(
-                                            label: "Oil Type",
+                                            label: L10n.vehicleOilType,
                                             text: $oilType,
-                                            placeholder: "0W-20 Synthetic (Optional)"
+                                            placeholder: L10n.vehicleOilTypePlaceholderOptional
                                         )
                                     }
                                 }
 
                                 // Notes Section
                                 VStack(alignment: .leading, spacing: Spacing.sm) {
-                                    InstrumentSectionHeader(title: "Notes")
+                                    InstrumentSectionHeader(title: L10n.vehicleNotes)
 
                                     InstrumentTextEditor(
-                                        label: "Notes",
+                                        label: L10n.vehicleNotes,
                                         text: $notes,
-                                        placeholder: "Vehicle quirks, history, reminders..."
+                                        placeholder: L10n.vehicleNotesPlaceholder
                                     )
                                 }
                             }
@@ -213,7 +214,7 @@ struct EditVehicleView: View {
                         } label: {
                             HStack {
                                 Image(systemName: "trash")
-                                Text("Delete Vehicle")
+                                Text(L10n.vehicleDeleteAction)
                             }
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundStyle(Theme.statusOverdue)
@@ -232,7 +233,7 @@ struct EditVehicleView: View {
                 }
             }
             .numberPadDoneButton()
-            .navigationTitle("Edit Vehicle")
+            .navigationTitle(L10n.vehicleEditTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
@@ -248,30 +249,28 @@ struct EditVehicleView: View {
                     isPrimaryEnabled: isFormValid,
                     onPrimary: { saveChanges() },
                     onDisabledPrimaryTap: {
-                        HapticService.shared.error()
                         showBasicsError = true
                         withAnimation { proxy.scrollTo("vehicleDetails", anchor: .top) }
-                    },
-                    isKeyboardVisible: KeyboardVisibility.shared.isVisible
+                    }
                 )
             }
             .trackScreen(.editVehicle)
             .confirmationDialog(
-                "Delete Vehicle?",
+                L10n.vehicleDeleteConfirmTitle,
                 isPresented: $showDeleteConfirmation,
                 titleVisibility: .visible
             ) {
-                Button("Delete", role: .destructive) { deleteVehicle() }
+                Button(L10n.commonDelete, role: .destructive) { deleteVehicle() }
                 Button(L10n.commonCancel, role: .cancel) { }
             } message: {
-                Text("This will also delete all services for this vehicle. This action cannot be undone.")
+                Text(L10n.vehicleDeleteConfirmMessage)
             }
             .fullScreenCover(isPresented: $showVINCamera) {
                 OdometerCameraSheet(
                     onImageCaptured: { image in
                         processVINOCR(image: image)
                     },
-                    guideText: "ALIGN VIN HERE",
+                    guideText: L10n.addVehicleVINAlignGuide,
                     viewfinderAspectRatio: 5.0
                 )
             }

@@ -586,4 +586,62 @@ final class AddServiceViewTests: XCTestCase {
         let result = effectiveDueDate(hasCustomDate: hasCustomDate, dueDate: dueDate, intervalMonths: intervalMonths)
         XCTAssertEqual(result, seasonalDate, "Seasonal prefill date should take priority over interval derivation")
     }
+
+    // MARK: - Form Model Draft Lifecycle (R9)
+
+    @MainActor
+    private func makeModel(currentMileage: Int = 32_500) -> AddServiceFormModel {
+        let vehicle = Vehicle(make: "Toyota", model: "Corolla", year: 2020, currentMileage: currentMileage)
+        return AddServiceFormModel(vehicle: vehicle, initialMode: .record)
+    }
+
+    @MainActor
+    func testFormModel_PristineAfterInit_IsNotDirty() {
+        // The mileage prefill happens before the baseline is captured, so an
+        // untouched form must not count as dirty (no phantom drafts on Cancel).
+        let model = makeModel()
+        XCTAssertEqual(model.mileageAtService, 32_500)
+        XCTAssertFalse(model.isDirty)
+    }
+
+    @MainActor
+    func testFormModel_EditMakesDirty() {
+        let model = makeModel()
+        model.customServiceName = "Oil Change"
+        XCTAssertTrue(model.isDirty)
+    }
+
+    @MainActor
+    func testFormModel_ResetLogModeFields_ClearsRemindStateAndRebaselines() {
+        let model = makeModel()
+        model.customServiceName = "Oil Change"
+        model.hasCustomDate = true
+        model.nextDueMileage = 40_000
+        model.intervalMonths = 6
+        model.isRecurring = true
+
+        model.resetLogModeFields()
+
+        // Remind-side schedule state must not leak into the next entry.
+        XCTAssertFalse(model.hasCustomDate)
+        XCTAssertNil(model.nextDueMileage)
+        XCTAssertNil(model.intervalMonths)
+        XCTAssertFalse(model.isRecurring)
+        // The reset form is the new pristine state — otherwise the autosave
+        // would persist a phantom draft right after "Save & add another".
+        XCTAssertFalse(model.isDirty)
+    }
+
+    @MainActor
+    func testFormModel_ApplyDraftWithUnknownPreset_FallsBackToTypedName() {
+        let model = makeModel()
+        var draft = model.toDraft()
+        draft.presetName = "No Longer Exists"
+        draft.serviceName = "Custom Wax"
+
+        model.apply(draft)
+
+        XCTAssertNil(model.selectedPreset, "Unknown preset names are dropped silently")
+        XCTAssertEqual(model.serviceName, "Custom Wax")
+    }
 }

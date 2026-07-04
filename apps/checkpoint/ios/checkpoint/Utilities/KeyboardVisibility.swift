@@ -15,19 +15,25 @@ final class KeyboardVisibility {
     private var hideObserver: NSObjectProtocol?
 
     private init() {
+        // queue: .main guarantees these closures run on the main thread, but
+        // the compiler can't prove it — assumeIsolated makes it explicit.
         showObserver = NotificationCenter.default.addObserver(
             forName: UIResponder.keyboardWillShowNotification,
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.isVisible = true
+            MainActor.assumeIsolated {
+                self?.isVisible = true
+            }
         }
         hideObserver = NotificationCenter.default.addObserver(
             forName: UIResponder.keyboardWillHideNotification,
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.isVisible = false
+            MainActor.assumeIsolated {
+                self?.isVisible = false
+            }
         }
     }
 }

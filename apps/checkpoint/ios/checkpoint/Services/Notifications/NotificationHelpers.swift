@@ -23,7 +23,7 @@ enum NotificationHelpers {
     /// iOS silently keeps only the 64 soonest-firing pending notification
     /// requests and drops the rest. Trim to headroom below that after any bulk
     /// reschedule so a nearer reminder is never dropped for a farther one.
-    static let pendingRequestBudget = 60
+    nonisolated static let pendingRequestBudget = 60
 
     /// Build a calendar trigger for a given date at the default notification time
     static func calendarTrigger(for date: Date, hour: Int = defaultHour, minute: Int = defaultMinute) -> UNCalendarNotificationTrigger {

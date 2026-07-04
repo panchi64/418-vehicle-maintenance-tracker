@@ -28,8 +28,10 @@ enum ServiceFormValidation {
             return "Lower than your last logged mileage (\(maxLogged.formatted()) on this vehicle). Typo?"
         }
 
+        // A zero current mileage means the odometer was never set — the first
+        // real reading is not a typo, however large.
         let jump = entered - vehicleCurrentMileage
-        if jump > implausibleMileageJump {
+        if vehicleCurrentMileage > 0, jump > implausibleMileageJump {
             return "That's \(jump.formatted()) above this vehicle's current mileage — typo?"
         }
 

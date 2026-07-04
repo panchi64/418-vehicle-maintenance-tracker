@@ -11,7 +11,6 @@ import SwiftUI
 struct CollapsibleDetailsSection<Content: View>: View {
     let filledCount: Int
     let autoExpandWhenFilled: Bool
-    var forceExpanded: Binding<Bool>?
     let content: Content
 
     @AppStorage private var isExpanded: Bool
@@ -20,12 +19,10 @@ struct CollapsibleDetailsSection<Content: View>: View {
         storageKey: String,
         filledCount: Int = 0,
         autoExpandWhenFilled: Bool = false,
-        forceExpanded: Binding<Bool>? = nil,
         @ViewBuilder content: () -> Content
     ) {
         self.filledCount = filledCount
         self.autoExpandWhenFilled = autoExpandWhenFilled
-        self.forceExpanded = forceExpanded
         self.content = content()
         self._isExpanded = AppStorage(wrappedValue: false, storageKey)
     }
@@ -69,15 +66,6 @@ struct CollapsibleDetailsSection<Content: View>: View {
         }
         .onAppear {
             if autoExpandWhenFilled && filledCount > 0 {
-                isExpanded = true
-            }
-            if forceExpanded?.wrappedValue == true {
-                isExpanded = true
-            }
-        }
-        .onChange(of: forceExpanded?.wrappedValue) { _, newValue in
-            guard newValue == true, !isExpanded else { return }
-            withAnimation(.easeInOut(duration: Theme.animationMedium)) {
                 isExpanded = true
             }
         }

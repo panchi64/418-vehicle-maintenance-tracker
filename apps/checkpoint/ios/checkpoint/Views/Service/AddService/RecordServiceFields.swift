@@ -4,36 +4,44 @@ struct RecordServiceFields: View {
     @Bindable var model: AddServiceFormModel
     let anchors: ServiceFormAnchors
 
-    /// Never shown when there's nothing computable to project (G5).
+    /// Never shown when there's nothing computable to project (G5). Uses the
+    /// same projection as the save path, so the preview can't disagree with
+    /// the reminder that actually gets scheduled.
     private var nextDuePreview: String? {
         guard model.isRecurring, model.hasIntervalPolicy else { return nil }
-        var parts: [String] = []
+        let projected = ReminderImpactCalculator.projected(
+            intervalMonths: model.intervalMonths,
+            intervalMiles: model.intervalMiles,
+            anchorDate: model.performedDate,
+            anchorMileage: model.mileageAtService ?? model.vehicle.currentMileage,
+            explicitDueDate: nil,
+            explicitDueMileage: nil
+        )
 
-        if let months = model.intervalMonths, months > 0,
-           let nextDate = Calendar.current.date(byAdding: .month, value: months, to: model.performedDate) {
+        var parts: [String] = []
+        if let nextDate = projected.dueDate {
             parts.append(Formatters.shortDate.string(from: nextDate))
         }
-
-        if let miles = model.intervalMiles, miles > 0, let currentMileage = model.mileageAtService {
-            parts.append("at \(Formatters.mileage(currentMileage + miles))")
+        if let nextMileage = projected.dueMileage {
+            parts.append(L10n.formAtMileage(Formatters.mileage(nextMileage)))
         }
 
         guard !parts.isEmpty else { return nil }
-        return "Next due: \(parts.joined(separator: " or "))"
+        return L10n.formNextDuePreview(parts.joined(separator: " \(L10n.formOr) "))
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "Date Performed")
-            InstrumentDatePicker(label: "Date Performed", date: $model.performedDate)
+            InstrumentSectionHeader(title: L10n.formDatePerformed)
+            InstrumentDatePicker(label: L10n.formDatePerformed, date: $model.performedDate)
         }
 
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "Cost")
+            InstrumentSectionHeader(title: L10n.formCost)
 
             VStack(spacing: Spacing.md) {
                 InstrumentTextField(
-                    label: "Amount",
+                    label: L10n.formAmount,
                     text: $model.cost,
                     placeholder: "0.00",
                     keyboardType: .decimalPad
@@ -63,7 +71,8 @@ struct RecordServiceFields: View {
                 }
 
                 VStack(alignment: .leading, spacing: Spacing.xs) {
-                    Text("CATEGORY")
+                    Text(L10n.formCategory)
+                        .textCase(.uppercase)
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
                         .tracking(1)
@@ -77,17 +86,17 @@ struct RecordServiceFields: View {
         }
 
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "Mileage")
+            InstrumentSectionHeader(title: L10n.formMileage)
 
             InstrumentNumberField(
-                label: "Mileage",
+                label: L10n.formMileage,
                 value: $model.mileageAtService,
-                placeholder: "Optional",
+                placeholder: L10n.formOptionalTag,
                 suffix: DistanceSettings.shared.unit.abbreviation
             )
 
             if model.mileageAtService == nil {
-                Text("If left blank, current vehicle mileage will be used.")
+                Text(L10n.formMileageBlankHint)
                     .font(.brutalistSecondary)
                     .foregroundStyle(Theme.textTertiary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -99,12 +108,12 @@ struct RecordServiceFields: View {
         }
 
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "Reminder")
+            InstrumentSectionHeader(title: L10n.formReminder)
 
             VStack(spacing: Spacing.sm) {
                 LabeledInstrumentToggle(
-                    label: "REMIND ME NEXT TIME",
-                    accessibilityLabel: "Remind me next time",
+                    label: L10n.formRemindNextTime.uppercased(),
+                    accessibilityLabel: L10n.formRemindNextTime,
                     isOn: $model.isRecurring
                 )
 
@@ -149,12 +158,12 @@ struct RecordServiceFields: View {
         ) {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 VStack(alignment: .leading, spacing: Spacing.sm) {
-                    InstrumentSectionHeader(title: "Notes")
-                    RichNotesEditor(label: "Notes", text: $model.recordNotes, placeholder: "Add notes...", minHeight: 100)
+                    InstrumentSectionHeader(title: L10n.formNotes)
+                    RichNotesEditor(label: L10n.formNotes, text: $model.recordNotes, placeholder: L10n.formNotesPlaceholder, minHeight: 100)
                 }
 
                 VStack(alignment: .leading, spacing: Spacing.sm) {
-                    InstrumentSectionHeader(title: "Attachments")
+                    InstrumentSectionHeader(title: L10n.formAttachments)
                     AttachmentPicker(attachments: $model.pendingAttachments)
                 }
             }

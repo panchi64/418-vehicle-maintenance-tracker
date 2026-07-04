@@ -69,7 +69,6 @@ struct AddVehicleFlowView: View {
                         }
                     },
                     onDisabledPrimaryTap: {
-                        HapticService.shared.error()
                         showBasicsValidationError = true
                     },
                     secondaryTitle: currentStep == .details ? L10n.commonBack : nil,
@@ -77,8 +76,7 @@ struct AddVehicleFlowView: View {
                         withAnimation(.easeInOut(duration: Theme.animationMedium)) {
                             currentStep = .basics
                         }
-                    } : nil,
-                    isKeyboardVisible: KeyboardVisibility.shared.isVisible
+                    } : nil
                 )
             }
             .onAppear {

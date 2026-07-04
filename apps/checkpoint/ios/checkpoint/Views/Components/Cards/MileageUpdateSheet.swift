@@ -83,7 +83,7 @@ struct MileageUpdateSheet: View {
                 .padding(.top, Spacing.lg)
             }
             .numberPadDoneButton()
-            .navigationTitle("Update Mileage")
+            .navigationTitle(L10n.mileageUpdateTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -95,8 +95,7 @@ struct MileageUpdateSheet: View {
                 FormActionBar(
                     primaryTitle: L10n.commonUpdate,
                     isPrimaryEnabled: (newMileage ?? 0) > 0 && !isProcessingOCR,
-                    onPrimary: { commit(newMileage ?? 0) },
-                    isKeyboardVisible: KeyboardVisibility.shared.isVisible
+                    onPrimary: { commit(newMileage ?? 0) }
                 )
             }
         }
@@ -171,7 +170,8 @@ struct MileageUpdateSheet: View {
 
     private var estimateContextCard: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text("CURRENT ESTIMATE")
+            Text(L10n.mileageCurrentEstimate)
+                .textCase(.uppercase)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1)
@@ -200,7 +200,8 @@ struct MileageUpdateSheet: View {
 
     private var lastConfirmedContextCard: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text("LAST CONFIRMED")
+            Text(L10n.mileageLastConfirmed)
+                .textCase(.uppercase)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1)
@@ -221,7 +222,8 @@ struct MileageUpdateSheet: View {
 
     private var lastConfirmedOnlyCard: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text("LAST CONFIRMED")
+            Text(L10n.mileageLastConfirmed)
+                .textCase(.uppercase)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1)
@@ -249,12 +251,13 @@ struct MileageUpdateSheet: View {
 
     private var noEstimateHint: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text("NO ESTIMATE AVAILABLE")
+            Text(L10n.mileageNoEstimate)
+                .textCase(.uppercase)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1)
 
-            Text("Update a few more times to enable driving pace estimates")
+            Text(L10n.mileageNoEstimateHint)
                 .font(.brutalistSecondary)
                 .foregroundStyle(Theme.textTertiary)
         }
@@ -268,9 +271,9 @@ struct MileageUpdateSheet: View {
 
     private var mileageInputSection: some View {
         InstrumentNumberField(
-            label: "Enter Mileage",
+            label: L10n.mileageEnterLabel,
             value: $newMileage,
-            placeholder: vehicle.currentMileage > 0 ? Formatters.mileageNumber(vehicle.currentMileage) : "Enter mileage",
+            placeholder: vehicle.currentMileage > 0 ? Formatters.mileageNumber(vehicle.currentMileage) : L10n.mileageEnterPlaceholder,
             suffix: DistanceSettings.shared.unit.abbreviation,
             showCameraButton: isCameraAvailable,
             onCameraTap: isCameraAvailable ? {
@@ -304,7 +307,7 @@ struct MileageUpdateSheet: View {
                     .frame(minWidth: 44, minHeight: 44)
                     .contentShape(Rectangle())
             }
-            .accessibilityLabel("Dismiss error")
+            .accessibilityLabel(L10n.mileageDismissError)
         }
         .padding(Spacing.md)
         .background(Theme.statusOverdue.opacity(0.1))
@@ -321,7 +324,8 @@ struct MileageUpdateSheet: View {
             ProgressView()
                 .tint(Theme.accent)
 
-            Text("SCANNING ODOMETER...")
+            Text(L10n.addVehicleScanningOdometer)
+                .textCase(.uppercase)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textSecondary)
                 .tracking(1)

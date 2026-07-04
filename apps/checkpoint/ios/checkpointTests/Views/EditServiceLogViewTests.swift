@@ -373,4 +373,35 @@ final class EditServiceLogViewTests: XCTestCase {
 
         XCTAssertFalse(isMostRecentLogOfRecurringService(older, service: service))
     }
+
+    // MARK: - Cleared mileage semantics
+    //
+    // Mirrors EditServiceLogView.effectiveMileage / dateOrMileageChanged: a
+    // cleared mileage field keeps the log's stored mileage at save, so it
+    // must count as "unchanged" for the toggle, the impact preview, and the
+    // reminder recalculation alike.
+
+    private func dateOrMileageChanged(
+        performedDate: Date, loadedPerformedDate: Date,
+        enteredMileage: Int?, loadedMileage: Int?
+    ) -> Bool {
+        let effectiveMileage = enteredMileage ?? loadedMileage
+        return performedDate != loadedPerformedDate || effectiveMileage != loadedMileage
+    }
+
+    func testAlsoMoveToggle_ClearedMileageAloneIsNotAChange() {
+        let loaded = date(-30)
+        XCTAssertFalse(dateOrMileageChanged(
+            performedDate: loaded, loadedPerformedDate: loaded,
+            enteredMileage: nil, loadedMileage: 48_000
+        ), "Clearing the field keeps the stored mileage, so nothing changed")
+    }
+
+    func testAlsoMoveToggle_RealMileageEditIsAChange() {
+        let loaded = date(-30)
+        XCTAssertTrue(dateOrMileageChanged(
+            performedDate: loaded, loadedPerformedDate: loaded,
+            enteredMileage: 52_000, loadedMileage: 48_000
+        ))
+    }
 }

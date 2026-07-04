@@ -41,15 +41,22 @@ struct EditServiceView: View {
         !serviceName.isEmpty
     }
 
-    /// Mirrors `Service.deriveDueFromIntervals`'s "explicit wins, else interval
-    /// projects from the anchor, else clear" contract, so an interval-only
-    /// edit actually reschedules the service instead of silently no-op'ing.
+    /// Explicit values always win; an interval is only allowed to re-derive a
+    /// due when the user actually changed that interval in this edit AND the
+    /// service has a real completion anchor. Never fabricates an anchor from
+    /// `.now` — otherwise a notes-only save would silently shift the schedule,
+    /// and clearing a due date/mileage would be impossible on a recurring
+    /// service (the interval would immediately re-populate it).
     private var proposedSchedule: ReminderImpactCalculator.Schedule {
-        ReminderImpactCalculator.projected(
-            intervalMonths: isRecurring ? intervalMonths : nil,
-            intervalMiles: isRecurring ? intervalMiles : nil,
-            anchorDate: service.lastPerformed ?? .now,
-            anchorMileage: service.lastMileage ?? vehicle.currentMileage,
+        let effectiveMonths = isRecurring ? intervalMonths : nil
+        let effectiveMiles = isRecurring ? intervalMiles : nil
+        let monthsChanged = effectiveMonths != loadedIntervalMonths
+        let milesChanged = effectiveMiles != loadedIntervalMiles
+        return ReminderImpactCalculator.projected(
+            intervalMonths: (monthsChanged && service.lastPerformed != nil) ? effectiveMonths : nil,
+            intervalMiles: (milesChanged && service.lastMileage != nil) ? effectiveMiles : nil,
+            anchorDate: service.lastPerformed ?? .distantPast,
+            anchorMileage: service.lastMileage ?? 0,
             explicitDueDate: hasDueDate ? dueDate : nil,
             explicitDueMileage: dueMileage
         )
@@ -63,12 +70,12 @@ struct EditServiceView: View {
 
                     ScrollView {
                         VStack(spacing: Spacing.lg) {
-                            InstrumentSection(title: "Service Details", chrome: .plain) {
+                            InstrumentSection(title: L10n.serviceDetailsTitle, chrome: .plain) {
                                 VStack(alignment: .leading, spacing: Spacing.sm) {
                                     InstrumentTextField(
-                                        label: "Service Name",
+                                        label: L10n.serviceNameLabel,
                                         text: $serviceName,
-                                        placeholder: "Oil Change, Tire Rotation...",
+                                        placeholder: L10n.serviceNamePlaceholder,
                                         isRequired: true
                                     )
 
@@ -85,25 +92,25 @@ struct EditServiceView: View {
                             }
                             .id("serviceName")
 
-                            InstrumentSection(title: "Next Due", chrome: .plain) {
+                            InstrumentSection(title: L10n.formNextDue, chrome: .plain) {
                                 VStack(spacing: Spacing.md) {
                                     LabeledInstrumentToggle(
-                                        label: "SET DUE DATE",
-                                        accessibilityLabel: "Set due date",
+                                        label: L10n.formSetDueDate.uppercased(),
+                                        accessibilityLabel: L10n.formSetDueDate,
                                         isOn: $hasDueDate
                                     )
 
                                     if hasDueDate {
                                         InstrumentDatePicker(
-                                            label: "Due Date",
+                                            label: L10n.formDueDate,
                                             date: $dueDate
                                         )
                                     }
 
                                     InstrumentNumberField(
-                                        label: "Due Mileage",
+                                        label: L10n.formDueMileage,
                                         value: $dueMileage,
-                                        placeholder: "Optional",
+                                        placeholder: L10n.formOptionalTag,
                                         suffix: DistanceSettings.shared.unit.abbreviation
                                     )
 
@@ -116,24 +123,24 @@ struct EditServiceView: View {
                                 }
                             }
 
-                            InstrumentSection(title: "Repeats", chrome: .plain) {
+                            InstrumentSection(title: L10n.formRepeats, chrome: .plain) {
                                 VStack(spacing: Spacing.md) {
                                     LabeledInstrumentToggle(
-                                        label: "REPEAT AFTER COMPLETION",
-                                        accessibilityLabel: "Repeat after completion",
+                                        label: L10n.formRepeatAfterCompletion.uppercased(),
+                                        accessibilityLabel: L10n.formRepeatAfterCompletion,
                                         isOn: $isRecurring
                                     )
 
                                     if isRecurring {
                                         InstrumentNumberField(
-                                            label: "Every",
+                                            label: L10n.formEvery,
                                             value: $intervalMonths,
                                             placeholder: "6",
-                                            suffix: "months"
+                                            suffix: L10n.formMonthsSuffix
                                         )
 
                                         InstrumentNumberField(
-                                            label: "Or Every",
+                                            label: L10n.formOrEvery,
                                             value: $intervalMiles,
                                             placeholder: "5000",
                                             suffix: DistanceSettings.shared.unit.abbreviation
@@ -153,11 +160,11 @@ struct EditServiceView: View {
                                 ReminderImpactRow(impact: reminderImpact)
                             }
 
-                            InstrumentSection(title: "Notes", chrome: .plain) {
+                            InstrumentSection(title: L10n.formNotes, chrome: .plain) {
                                 RichNotesEditor(
-                                    label: "Notes",
+                                    label: L10n.formNotes,
                                     text: $notes,
-                                    placeholder: "Add notes...",
+                                    placeholder: L10n.formNotesPlaceholder,
                                     minHeight: 100
                                 )
                             }
@@ -168,7 +175,7 @@ struct EditServiceView: View {
                             } label: {
                                 HStack {
                                     Image(systemName: "trash")
-                                    Text("Delete Service")
+                                    Text(L10n.serviceDeleteAction)
                                 }
                                 .font(.system(size: 16, weight: .semibold))
                                 .foregroundStyle(Theme.statusOverdue)
@@ -187,7 +194,7 @@ struct EditServiceView: View {
                     }
                 }
                 .numberPadDoneButton()
-                .navigationTitle("Edit Service")
+                .navigationTitle(L10n.serviceEditTitle)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
                 .toolbarBackground(.visible, for: .navigationBar)
@@ -203,11 +210,9 @@ struct EditServiceView: View {
                         isPrimaryEnabled: isFormValid,
                         onPrimary: { saveChanges() },
                         onDisabledPrimaryTap: {
-                            HapticService.shared.error()
                             showNameError = true
                             withAnimation { proxy.scrollTo("serviceName", anchor: .top) }
-                        },
-                        isKeyboardVisible: KeyboardVisibility.shared.isVisible
+                        }
                     )
                 }
                 .onChange(of: serviceName) { _, newValue in
@@ -219,11 +224,11 @@ struct EditServiceView: View {
                     reminderImpact = ReminderImpactCalculator.impact(current: loadedSchedule, proposed: proposedSchedule)
                 }
                 .confirmationDialog(
-                    "Delete Service?",
+                    L10n.serviceDeleteConfirmTitle,
                     isPresented: $showDeleteConfirmation,
                     titleVisibility: .visible
                 ) {
-                    Button("Delete", role: .destructive) { deleteService() }
+                    Button(L10n.commonDelete, role: .destructive) { deleteService() }
                     Button(L10n.commonCancel, role: .cancel) { }
                 } message: {
                     Text(L10n.serviceDeleteConfirmMessage)
