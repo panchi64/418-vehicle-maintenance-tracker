@@ -6,18 +6,18 @@ extension AddServiceView {
     /// Persist the form. When `keepOpen` is true, the screen stays open and
     /// the form resets so the user can immediately log another entry.
     func saveService(keepOpen: Bool = false) {
-        let isPreset = selectedPreset != nil
-        let category = selectedPreset?.category
-        let hasInterval = isRecurring && Service.hasIntervalPolicy(
-            intervalMonths: intervalMonths,
-            intervalMiles: intervalMiles
+        let isPreset = model.selectedPreset != nil
+        let category = model.selectedPreset?.category
+        let hasInterval = model.isRecurring && Service.hasIntervalPolicy(
+            intervalMonths: model.intervalMonths,
+            intervalMiles: model.intervalMiles
         )
 
         HapticService.shared.success()
 
         var undo: RecordedServiceUndo?
 
-        if mode == .record {
+        if model.mode == .record {
             AnalyticsService.shared.capture(.serviceLogged(
                 isPreset: isPreset,
                 category: category,
@@ -35,18 +35,18 @@ extension AddServiceView {
         updateAppIcon()
         updateWidgetData()
 
-        if mode == .record {
+        if model.mode == .record {
             let context = modelContext
             let toastAction: ToastService.ToastAction?
-            if !isRecurring {
+            if !model.isRecurring {
                 // No future Service was spawned — offer the user a one-tap
                 // way to schedule one from the completion's anchors.
                 let prefill = PostRecordPrefill(
-                    serviceName: serviceName,
-                    performedDate: performedDate,
-                    performedMileage: mileageAtService ?? vehicle.currentMileage,
-                    intervalMonths: intervalMonths,
-                    intervalMiles: intervalMiles
+                    serviceName: model.serviceName,
+                    performedDate: model.performedDate,
+                    performedMileage: model.mileageAtService ?? vehicle.currentMileage,
+                    intervalMonths: model.intervalMonths,
+                    intervalMiles: model.intervalMiles
                 )
                 let state = appState
                 toastAction = ToastService.ToastAction(label: "SCHEDULE NEXT") {
@@ -76,27 +76,10 @@ extension AddServiceView {
         appState.recordCompletedAction()
 
         if keepOpen {
-            resetLogModeFields()
+            model.resetLogModeFields()
         } else {
             dismiss()
         }
-    }
-
-    func resetLogModeFields() {
-        selectedPreset = nil
-        customServiceName = ""
-        performedDate = Date()
-        mileageAtService = vehicle.currentMileage
-        cost = ""
-        costCategory = .maintenance
-        notes = ""
-        isRecurring = false
-        pendingAttachments = []
-        intervalMonths = nil
-        intervalMiles = nil
-        hasCustomDate = false
-        dueDate = Date()
-        nextDueMileage = nil
     }
 
     private func updateAppIcon() {
@@ -108,39 +91,39 @@ extension AddServiceView {
     }
 
     private func saveLoggedService() -> RecordedServiceUndo {
-        let mileage = mileageAtService ?? vehicle.currentMileage
+        let mileage = model.mileageAtService ?? vehicle.currentMileage
         let priorMileage = vehicle.currentMileage
 
         let service = Service(
-            name: serviceName,
-            lastPerformed: performedDate,
+            name: model.serviceName,
+            lastPerformed: model.performedDate,
             lastMileage: mileage,
-            intervalMonths: isRecurring ? intervalMonths : nil,
-            intervalMiles: isRecurring ? intervalMiles : nil,
-            isRecurring: isRecurring
+            intervalMonths: model.isRecurring ? model.intervalMonths : nil,
+            intervalMiles: model.isRecurring ? model.intervalMiles : nil,
+            isRecurring: model.isRecurring
         )
         service.vehicle = vehicle
 
-        if isRecurring {
-            service.deriveDueFromIntervals(anchorDate: performedDate, anchorMileage: mileage)
+        if model.isRecurring {
+            service.deriveDueFromIntervals(anchorDate: model.performedDate, anchorMileage: mileage)
         }
 
         modelContext.insert(service)
 
-        let costDecimal = Decimal(string: cost)
+        let costDecimal = Decimal(string: model.cost)
         let log = ServiceLog(
             service: service,
             vehicle: vehicle,
-            performedDate: performedDate,
+            performedDate: model.performedDate,
             mileageAtService: mileage,
             cost: costDecimal,
-            costCategory: costDecimal != nil ? costCategory : nil,
-            notes: notes.isEmpty ? nil : notes
+            costCategory: costDecimal != nil ? model.costCategory : nil,
+            notes: model.notes.isEmpty ? nil : model.notes
         )
         modelContext.insert(log)
 
         var insertedAttachments: [ServiceAttachment] = []
-        for attachmentData in pendingAttachments {
+        for attachmentData in model.pendingAttachments {
             let thumbnailData = ServiceAttachment.generateThumbnailData(
                 from: attachmentData.data,
                 mimeType: attachmentData.mimeType
@@ -174,13 +157,13 @@ extension AddServiceView {
         // When the user has not enabled "Repeats", drop any interval values
         // they may have typed — the policy should match the toggle's intent.
         let service = Service(
-            name: serviceName,
-            dueDate: nextDueDate,
-            dueMileage: nextDueMileage,
-            intervalMonths: isRecurring ? intervalMonths : nil,
-            intervalMiles: isRecurring ? intervalMiles : nil,
-            notes: notes.isEmpty ? nil : notes,
-            isRecurring: isRecurringSchedule
+            name: model.serviceName,
+            dueDate: model.nextDueDate,
+            dueMileage: model.nextDueMileage,
+            intervalMonths: model.isRecurring ? model.intervalMonths : nil,
+            intervalMiles: model.isRecurring ? model.intervalMiles : nil,
+            notes: model.notes.isEmpty ? nil : model.notes,
+            isRecurring: model.isRecurringSchedule
         )
         service.vehicle = vehicle
         modelContext.insert(service)
