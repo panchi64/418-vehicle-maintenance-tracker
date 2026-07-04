@@ -11,9 +11,9 @@ import Synchronization
 
 enum AppGroupConstants {
     /// App Group shared between the main iPhone app and its widget extension.
-    /// Must stay equal to `WidgetAppGroup.identifier` in the widget target (they
-    /// live in separate targets and can't reference each other directly).
-    nonisolated static let iPhoneWidget = "group.com.418-studio.checkpoint.shared"
+    /// Canonical value lives in `WidgetAppGroup`, which is compiled into both
+    /// targets, so the two sides can never drift.
+    nonisolated static let iPhoneWidget = WidgetAppGroup.identifier
 
     /// App Group shared between the Watch app and its widget extension.
     /// Must stay equal to `WatchDataStore.appGroupID` in the watch target.
@@ -21,19 +21,19 @@ enum AppGroupConstants {
 
     // MARK: - Shared UserDefaults keys (iPhone↔widget)
     //
-    // Centralized here so the app side has a single source for these literals.
-    // The widget target mirrors them in `WidgetAppGroup`; keep the two in sync.
+    // Aliased from `WidgetAppGroup` (compiled into both targets) so app and
+    // widget always read the same definitions.
 
     /// Snapshot for the app's currently selected vehicle ("Match App" widgets).
-    nonisolated static let widgetDataKey = "widgetData"
+    nonisolated static let widgetDataKey = WidgetAppGroup.widgetDataKey
     /// Prefix for per-vehicle snapshots ("widgetData_<uuid>").
-    nonisolated static let widgetDataKeyPrefix = "widgetData_"
+    nonisolated static let widgetDataKeyPrefix = WidgetAppGroup.widgetDataKeyPrefix
     /// Lightweight vehicle list for the widget/Siri configuration picker.
-    nonisolated static let vehicleListKey = "vehicleList"
+    nonisolated static let vehicleListKey = WidgetAppGroup.vehicleListKey
     /// The vehicle id the app currently has selected (mirrors the "Match App" target).
-    nonisolated static let appSelectedVehicleIDKey = "appSelectedVehicleID"
+    nonisolated static let appSelectedVehicleIDKey = WidgetAppGroup.appSelectedVehicleIDKey
     /// Queue of service completions tapped from the widget "Done" button.
-    nonisolated static let pendingWidgetCompletionsKey = "pendingWidgetCompletions"
+    nonisolated static let pendingWidgetCompletionsKey = WidgetAppGroup.pendingWidgetCompletionsKey
 
     /// Filesystem container URL for the iPhone↔widget App Group, or nil if entitlements
     /// don't grant access (e.g. test bundles).

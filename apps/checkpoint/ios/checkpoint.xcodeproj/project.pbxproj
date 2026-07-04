@@ -32,6 +32,8 @@
 		5ASIRI0012F3000000036D71B /* VehicleEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ASIRI0022F3000000036D71B /* VehicleEntity.swift */; };
 		5ASIRI0032F3000000036D71B /* VehicleEntityQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ASIRI0042F3000000036D71B /* VehicleEntityQuery.swift */; };
 		5ADUEP0012F3000000036D71B /* DuePeriodFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADUEP0022F3000000036D71B /* DuePeriodFormatter.swift */; };
+		5APWCP0012F3000000036D71B /* PendingWidgetCompletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5APWCP0022F3000000036D71B /* PendingWidgetCompletion.swift */; };
+		5AWAGR0012F3000000036D71B /* WidgetAppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AWAGR0022F3000000036D71B /* WidgetAppGroup.swift */; };
 		F424A22B574B2CAB7D7CECB0 /* DesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = 25127F8914D55F849FB69D80 /* DesignKit */; };
 /* End PBXBuildFile section */
 
@@ -132,6 +134,8 @@
 		5ASIRI0022F3000000036D71B /* VehicleEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VehicleEntity.swift; path = CheckpointWidget/VehicleEntity.swift; sourceTree = SOURCE_ROOT; };
 		5ASIRI0042F3000000036D71B /* VehicleEntityQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VehicleEntityQuery.swift; path = CheckpointWidget/VehicleEntityQuery.swift; sourceTree = SOURCE_ROOT; };
 		5ADUEP0022F3000000036D71B /* DuePeriodFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DuePeriodFormatter.swift; path = checkpoint/Utilities/DuePeriodFormatter.swift; sourceTree = SOURCE_ROOT; };
+		5APWCP0022F3000000036D71B /* PendingWidgetCompletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PendingWidgetCompletion.swift; path = CheckpointWidget/Shared/PendingWidgetCompletion.swift; sourceTree = SOURCE_ROOT; };
+		5AWAGR0022F3000000036D71B /* WidgetAppGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WidgetAppGroup.swift; path = CheckpointWidget/Shared/WidgetAppGroup.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -371,6 +375,8 @@
 				5ASIRI0022F3000000036D71B /* VehicleEntity.swift */,
 				5ASIRI0042F3000000036D71B /* VehicleEntityQuery.swift */,
 				5ADUEP0022F3000000036D71B /* DuePeriodFormatter.swift */,
+				5APWCP0022F3000000036D71B /* PendingWidgetCompletion.swift */,
+				5AWAGR0022F3000000036D71B /* WidgetAppGroup.swift */,
 			);
 			name = SharedEntities;
 			sourceTree = "<group>";
@@ -693,6 +699,8 @@
 			files = (
 				5ASIRI0012F3000000036D71B /* VehicleEntity.swift in Sources */,
 				5ASIRI0032F3000000036D71B /* VehicleEntityQuery.swift in Sources */,
+				5APWCP0012F3000000036D71B /* PendingWidgetCompletion.swift in Sources */,
+				5AWAGR0012F3000000036D71B /* WidgetAppGroup.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

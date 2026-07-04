@@ -525,41 +525,6 @@ struct VehicleListItem: Codable, Sendable {
     let displayName: String
 }
 
-/// Pending service completion from widget "Done" button.
-///
-/// Wire-compatible mirror of `CheckpointWidget/Shared/PendingWidgetCompletion.swift`
-/// (same key, same Codable shape): the widget target writes completions, this app
-/// copy reads and clears them. Kept as a separate definition only because the two
-/// files live in separate build targets; if that shared file is ever made a member
-/// of the app target, delete this and use the canonical one.
-struct PendingWidgetCompletion: Codable {
-    let serviceID: String
-    let vehicleID: String
-    let performedDate: Date
-    let mileageAtService: Int
-
-    static let userDefaultsKey = AppGroupConstants.pendingWidgetCompletionsKey
-
-    static func save(_ completion: PendingWidgetCompletion) {
-        guard let userDefaults = AppGroupConstants.iPhoneWidgetDefaults() else { return }
-        var pending = loadAll()
-        pending.append(completion)
-        if let data = try? JSONEncoder().encode(pending) {
-            userDefaults.set(data, forKey: userDefaultsKey)
-        }
-    }
-
-    static func loadAll() -> [PendingWidgetCompletion] {
-        guard let userDefaults = AppGroupConstants.iPhoneWidgetDefaults(),
-              let data = userDefaults.data(forKey: userDefaultsKey) else {
-            return []
-        }
-        return (try? JSONDecoder().decode([PendingWidgetCompletion].self, from: data)) ?? []
-    }
-
-    static func clearAll() {
-        guard let userDefaults = AppGroupConstants.iPhoneWidgetDefaults() else { return }
-        userDefaults.removeObject(forKey: userDefaultsKey)
-    }
-}
+// PendingWidgetCompletion is defined in CheckpointWidget/Shared/ and compiled
+// into both the widget and app targets (see the SharedEntities group).
 
