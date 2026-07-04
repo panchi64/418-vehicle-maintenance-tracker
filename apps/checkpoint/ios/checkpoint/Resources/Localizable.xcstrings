@@ -6198,13 +6198,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "0W-20 Synthetic (Optional)"
+            "value" : "0W-20 Synthetic"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "0W-20 Sintético (opcional)"
+            "value" : "0W-20 Sintético"
           }
         }
       }
@@ -6300,13 +6300,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "225/45R17 (Optional)"
+            "value" : "225/45R17"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "225/45R17 (opcional)"
+            "value" : "225/45R17"
           }
         }
       }

@@ -83,7 +83,7 @@ struct VehicleBasicsStep: View {
                     InstrumentTextField(
                         label: "License Plate",
                         text: $formState.licensePlate,
-                        placeholder: "ABC-1234 (Optional)"
+                        placeholder: "ABC-1234"
                     )
                 }
 

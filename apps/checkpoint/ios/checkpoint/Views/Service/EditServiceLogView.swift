@@ -291,17 +291,13 @@ struct EditServiceLogView: View {
             )
 
             if mileageAtService != loadedMileageAtService {
-                OriginalValueHint(text: L10n.editWas(hintValue(forMileage: loadedMileageAtService)))
+                OriginalValueHint(text: L10n.editWas(OriginalValueHint.value(forMileage: loadedMileageAtService)))
             }
 
             if let warning = anchors?.mileageWarning {
                 SanityWarningRow(message: warning)
             }
         }
-    }
-
-    private func hintValue(forMileage mileage: Int?) -> String {
-        mileage.map { Formatters.mileage($0) } ?? L10n.impactNone
     }
 
     private func loadFromLog() {

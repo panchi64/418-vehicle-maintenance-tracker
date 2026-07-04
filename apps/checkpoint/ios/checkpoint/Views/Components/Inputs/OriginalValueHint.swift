@@ -20,6 +20,20 @@ struct OriginalValueHint: View {
     }
 }
 
+extension OriginalValueHint {
+    static func value(forDate date: Date?) -> String {
+        date.map { Formatters.shortDate.string(from: $0) } ?? L10n.impactNone
+    }
+
+    static func value(forMileage mileage: Int?) -> String {
+        mileage.map { Formatters.mileage($0) } ?? L10n.impactNone
+    }
+
+    static func value(forMonths months: Int?) -> String {
+        months.map { "\($0) mo" } ?? L10n.impactNone
+    }
+}
+
 #Preview {
     ZStack {
         Theme.backgroundPrimary.ignoresSafeArea()

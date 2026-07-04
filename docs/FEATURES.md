@@ -53,6 +53,7 @@ v1.0 features are tracked throughout this document. Future versions are outlined
 | Service log detail     | Medium   | ✅     | Tap any history/activity/expense row to view full log details |
 | Edit service log       | Medium   | ✅     | Edit notes and add attachments to existing service logs |
 | One-off service logging| Medium   | ✅     | "Schedule Recurring" toggle — log without creating a recurring schedule |
+| Forms usability overhaul | High   | ✅     | Essentials-first layout, shared action bar, history reference card, draft autosave/resume, and edit-form change transparency across Add Service, Edit Service, Edit Service Log, Update Mileage, and Vehicle forms. Tests: `ReminderImpactCalculatorTests`, `ServiceFormDraftStoreTests`, `EditServiceViewRescheduleTests`, extended `AddServiceViewTests`/`EditServiceLogViewTests` |
 
 #### On-Device Document Intelligence
 
@@ -953,4 +954,4 @@ See [DATA_RELIABILITY.md](./DATA_RELIABILITY.md) for the full data reliability c
 
 ---
 
-_Last updated: February 2026_
+_Last updated: July 2026_

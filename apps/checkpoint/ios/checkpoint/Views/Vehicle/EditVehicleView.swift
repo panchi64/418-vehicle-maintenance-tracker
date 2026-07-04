@@ -16,6 +16,7 @@ struct EditVehicleView: View {
     @Bindable var vehicle: Vehicle
 
     @State private var showDeleteConfirmation = false
+    @State private var showBasicsError = false
 
     // Form state (initialize from vehicle)
     @State private var name: String
@@ -82,6 +83,7 @@ struct EditVehicleView: View {
 
     var body: some View {
         NavigationStack {
+            ScrollViewReader { proxy in
             ZStack {
                 AtmosphericBackground()
 
@@ -90,6 +92,12 @@ struct EditVehicleView: View {
                         // Vehicle Details Section
                         VStack(alignment: .leading, spacing: Spacing.sm) {
                             InstrumentSectionHeader(title: "Vehicle Details")
+
+                            if showBasicsError, !isFormValid {
+                                ErrorMessageRow(message: L10n.formVehicleBasicsRequired) {
+                                    showBasicsError = false
+                                }
+                            }
 
                             VStack(spacing: Spacing.md) {
                                 InstrumentTextField(
@@ -120,6 +128,7 @@ struct EditVehicleView: View {
                                 )
                             }
                         }
+                        .id("vehicleDetails")
 
                         // Odometer Section
                         EditVehicleOdometerSection(
@@ -240,6 +249,8 @@ struct EditVehicleView: View {
                     onPrimary: { saveChanges() },
                     onDisabledPrimaryTap: {
                         HapticService.shared.error()
+                        showBasicsError = true
+                        withAnimation { proxy.scrollTo("vehicleDetails", anchor: .top) }
                     },
                     isKeyboardVisible: KeyboardVisibility.shared.isVisible
                 )
@@ -284,6 +295,7 @@ struct EditVehicleView: View {
                     )
                     .presentationDetents([.medium])
                 }
+            }
             }
         }
     }

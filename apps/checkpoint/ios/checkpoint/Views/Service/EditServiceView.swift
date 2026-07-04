@@ -108,10 +108,10 @@ struct EditServiceView: View {
                                     )
 
                                     if (hasDueDate ? dueDate : nil) != loadedSchedule.dueDate {
-                                        OriginalValueHint(text: L10n.editWas(hintValue(forDate: loadedSchedule.dueDate)))
+                                        OriginalValueHint(text: L10n.editWas(OriginalValueHint.value(forDate: loadedSchedule.dueDate)))
                                     }
                                     if dueMileage != loadedSchedule.dueMileage {
-                                        OriginalValueHint(text: L10n.editWas(hintValue(forMileage: loadedSchedule.dueMileage)))
+                                        OriginalValueHint(text: L10n.editWas(OriginalValueHint.value(forMileage: loadedSchedule.dueMileage)))
                                     }
                                 }
                             }
@@ -140,10 +140,10 @@ struct EditServiceView: View {
                                         )
 
                                         if intervalMonths != loadedIntervalMonths {
-                                            OriginalValueHint(text: L10n.editWas(hintValue(forMonths: loadedIntervalMonths)))
+                                            OriginalValueHint(text: L10n.editWas(OriginalValueHint.value(forMonths: loadedIntervalMonths)))
                                         }
                                         if intervalMiles != loadedIntervalMiles {
-                                            OriginalValueHint(text: L10n.editWas(hintValue(forMileage: loadedIntervalMiles)))
+                                            OriginalValueHint(text: L10n.editWas(OriginalValueHint.value(forMileage: loadedIntervalMiles)))
                                         }
                                     }
                                 }
@@ -234,18 +234,6 @@ struct EditServiceView: View {
                 }
             }
         }
-    }
-
-    private func hintValue(forDate date: Date?) -> String {
-        date.map { Formatters.shortDate.string(from: $0) } ?? L10n.impactNone
-    }
-
-    private func hintValue(forMileage mileage: Int?) -> String {
-        mileage.map { Formatters.mileage($0) } ?? L10n.impactNone
-    }
-
-    private func hintValue(forMonths months: Int?) -> String {
-        months.map { "\($0) mo" } ?? L10n.impactNone
     }
 
     // MARK: - Data Loading
