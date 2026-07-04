@@ -79,6 +79,16 @@ final class WidgetDataService {
             return
         }
 
+        // Elect the match-app vehicle once for the whole bulk pass. Reading the
+        // persisted selection here (instead of per-vehicle) means exactly one
+        // vehicle owns the shared "widgetData" key; otherwise each writeSnapshot
+        // would treat itself as the match and the last-iterated vehicle would win.
+        let persistedSelection = widgetDefaults?.string(forKey: appSelectedVehicleIDKey)
+        let matchAppVehicleID = Self.matchAppVehicleID(
+            from: vehicles.map { $0.id.uuidString },
+            persistedSelection: persistedSelection
+        )
+
         for vehicle in vehicles {
             let input = snapshotInput(for: vehicle)
             writeSnapshot(
@@ -87,7 +97,8 @@ final class WidgetDataService {
                 currentMileage: input.currentMileage,
                 estimatedMileage: input.estimatedMileage,
                 isEstimated: input.isEstimated,
-                services: input.services
+                services: input.services,
+                isMatchAppVehicle: vehicle.id.uuidString == matchAppVehicleID
             )
         }
         updateVehicleList(vehicles)
@@ -112,6 +123,17 @@ final class WidgetDataService {
         return selected == vehicleID
     }
 
+    /// Elect which vehicle owns the shared "match app" key during a bulk
+    /// re-serialize. Prefers the app's persisted selection; when it's `nil`
+    /// (e.g. reinstall-with-iCloud before the app records one), falls back to the
+    /// first of a deterministically (uuid-)sorted list so the choice is stable
+    /// across runs rather than depending on fetch order. A non-nil selection is
+    /// used as-is: if it names a vehicle absent from this pass, no vehicle matches
+    /// and the shared key keeps its previous value.
+    nonisolated static func matchAppVehicleID(from vehicleIDs: [String], persistedSelection: String?) -> String? {
+        persistedSelection ?? vehicleIDs.sorted().first
+    }
+
     /// Update the widget with current vehicle and service data
     /// - Parameters:
     ///   - vehicleID: The vehicle's UUID string for vehicle-specific storage
@@ -134,7 +156,8 @@ final class WidgetDataService {
             currentMileage: currentMileage,
             estimatedMileage: estimatedMileage,
             isEstimated: isEstimated,
-            services: services
+            services: services,
+            isMatchAppVehicle: isSelectedVehicle(vehicleID)
         )
 
         // Reload widget timelines
@@ -156,15 +179,18 @@ final class WidgetDataService {
     /// timelines or messaging the Watch — the shared write path used both by the
     /// single-vehicle `updateWidgetData` and the bulk re-serialize on remote
     /// change. Always writes the per-vehicle key; writes the shared "match app"
-    /// key only when this vehicle is the app's current selection, so editing a
-    /// background vehicle can't repoint the Match-App widget onto it.
+    /// key only when `isMatchAppVehicle` is true, so editing a background vehicle
+    /// can't repoint the Match-App widget onto it. Callers decide match-app
+    /// ownership: the single-vehicle path uses the app's persisted selection; the
+    /// bulk path elects exactly one vehicle up front (see `handleRemoteChange`).
     private func writeSnapshot(
         vehicleID: String,
         vehicleName: String,
         currentMileage: Int,
         estimatedMileage: Int?,
         isEstimated: Bool,
-        services: [WidgetServiceRow]
+        services: [WidgetServiceRow],
+        isMatchAppVehicle: Bool
     ) {
         guard let userDefaults = widgetDefaults else {
             widgetLogger.error("Failed to access App Group UserDefaults")
@@ -198,8 +224,8 @@ final class WidgetDataService {
             let data = try JSONEncoder().encode(widgetData)
             // Store with vehicle-specific key (used by explicitly-configured widgets).
             userDefaults.set(data, forKey: widgetDataKey(for: vehicleID))
-            // Mirror into the shared "match app" key only for the selected vehicle.
-            if isSelectedVehicle(vehicleID) {
+            // Mirror into the shared "match app" key only for the elected vehicle.
+            if isMatchAppVehicle {
                 userDefaults.set(data, forKey: widgetDataKey)
             }
         } catch {
@@ -347,26 +373,35 @@ final class WidgetDataService {
 
         widgetLogger.info("Processing \(pending.count) pending widget completion(s)")
 
+        // Track exactly which completions this pass handled — successes plus the
+        // permanently-unmatchable entries skipped below — so we remove only those
+        // and leave anything the widget enqueued mid-drain queued for next time.
+        var processedServiceIDs = Set<String>()
+
         for completion in pending {
             do {
                 // Find vehicle by UUID
                 guard let vehicleUUID = UUID(uuidString: completion.vehicleID) else {
                     widgetLogger.error("Invalid vehicle UUID: \(completion.vehicleID)")
+                    processedServiceIDs.insert(completion.serviceID)  // unmatchable; don't retry forever
                     continue
                 }
                 let vehicles = try context.fetch(FetchDescriptor<Vehicle>())
                 guard let vehicle = vehicles.first(where: { $0.id == vehicleUUID }) else {
                     widgetLogger.error("Vehicle not found for widget completion: \(completion.vehicleID)")
+                    processedServiceIDs.insert(completion.serviceID)  // unmatchable; don't retry forever
                     continue
                 }
 
                 // Find service by UUID
                 guard let serviceUUID = UUID(uuidString: completion.serviceID) else {
                     widgetLogger.error("Invalid service UUID: \(completion.serviceID)")
+                    processedServiceIDs.insert(completion.serviceID)  // unmatchable; don't retry forever
                     continue
                 }
                 guard let service = (vehicle.services ?? []).first(where: { $0.id == serviceUUID }) else {
                     widgetLogger.error("Service not found for widget completion: \(completion.serviceID)")
+                    processedServiceIDs.insert(completion.serviceID)  // unmatchable; don't retry forever
                     continue
                 }
 
@@ -404,21 +439,24 @@ final class WidgetDataService {
                 }
 
                 widgetLogger.info("Processed widget completion: \(service.name) for \(vehicle.displayName)")
+                processedServiceIDs.insert(completion.serviceID)
 
                 // Re-sync widget data
                 updateWidget(for: vehicle)
             } catch {
+                // A fetch error is transient — leave this completion queued so it
+                // retries next foreground rather than being dropped.
                 widgetLogger.error("Failed to process widget completion: \(error.localizedDescription)")
             }
         }
 
         do {
             try context.save()
-            // Clear only after the logs are durably saved; a failed save leaves
-            // the queue so the completions are reprocessed next foreground rather
-            // than silently lost. Completions dedupe on serviceID, so a reprocess
-            // after partial work stays safe.
-            PendingWidgetCompletion.clearAll()
+            // Remove only the completions this pass handled. A blanket clear would
+            // erase completions the widget's MarkServiceDoneIntent enqueued mid-drain
+            // (a separate process), silently losing them. A failed save removes
+            // nothing, so everything reprocesses next foreground.
+            PendingWidgetCompletion.remove(serviceIDs: processedServiceIDs)
         } catch {
             widgetLogger.error("Failed to save widget completions: \(error.localizedDescription). Leaving queue intact for retry.")
         }

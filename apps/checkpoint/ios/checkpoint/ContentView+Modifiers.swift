@@ -232,25 +232,11 @@ extension ContentView {
                             year: result.modelYear,
                             vin: vin
                         )
-                        clearSampleData()
-                        onboardingState.complete()
-                        delayedTask?.cancel()
-                        delayedTask = Task {
-                            try? await Task.sleep(for: .seconds(0.4))
-                            guard !Task.isCancelled else { return }
-                            appState.showAddVehicle = true
-                        }
+                        completeOnboardingAndPresentAddVehicle()
                     },
                     onManualEntry: {
                         AnalyticsService.shared.capture(.onboardingManualEntry)
-                        clearSampleData()
-                        onboardingState.complete()
-                        delayedTask?.cancel()
-                        delayedTask = Task {
-                            try? await Task.sleep(for: .seconds(0.4))
-                            guard !Task.isCancelled else { return }
-                            appState.showAddVehicle = true
-                        }
+                        completeOnboardingAndPresentAddVehicle()
                     },
                     onUseICloudVehicles: {
                         AnalyticsService.shared.capture(.onboardingICloudSync)
@@ -274,18 +260,10 @@ extension ContentView {
         content
             // Handle mileage update notification navigation
             .onReceive(NotificationCenter.default.publisher(for: .navigateToMileageUpdateFromNotification)) { notification in
-                if let vehicleIDString = notification.userInfo?["vehicleID"] as? String,
-                   let vehicleID = UUID(uuidString: vehicleIDString) {
-                    // Select the vehicle if it matches, otherwise find it
-                    if currentVehicle?.id != vehicleID {
-                        if let vehicle = vehicles.first(where: { $0.id == vehicleID }) {
-                            appState.selectedVehicle = vehicle
-                        }
-                    }
-                    // Navigate to home and show mileage update
-                    appState.selectedTab = .home
-                    appState.showMileageUpdate = true
-                }
+                guard selectVehicleFromNotification(notification.userInfo) else { return }
+                // Navigate to home and show mileage update
+                appState.selectedTab = .home
+                appState.showMileageUpdate = true
             }
             // Handle snooze mileage reminder
             .onReceive(NotificationCenter.default.publisher(for: .mileageReminderSnoozedFromNotification)) { notification in
@@ -297,24 +275,58 @@ extension ContentView {
             }
             // Handle yearly roundup navigation to costs
             .onReceive(NotificationCenter.default.publisher(for: .navigateToCostsFromNotification)) { notification in
-                if let vehicleIDString = notification.userInfo?["vehicleID"] as? String,
-                   let vehicleID = UUID(uuidString: vehicleIDString) {
-                    // Select the vehicle if it matches, otherwise find it
-                    if currentVehicle?.id != vehicleID {
-                        if let vehicle = vehicles.first(where: { $0.id == vehicleID }) {
-                            appState.selectedVehicle = vehicle
-                        }
-                    }
-                    // Navigate to costs tab
-                    appState.selectedTab = .costs
-                }
+                guard selectVehicleFromNotification(notification.userInfo) else { return }
+                // Navigate to costs tab
+                appState.selectedTab = .costs
             }
             // Clear AppState's retained SwiftData references before the App swaps
             // the ModelContainer on this notification (onboarding → CloudKit).
             // Without this, selectedVehicle et al. would point into the outgoing
             // container's dead context after the swap.
             .onReceive(NotificationCenter.default.publisher(for: .enableCloudSyncAfterOnboarding)) { _ in
+                // Only tear down the retained references when a swap will actually
+                // happen. checkpointApp guards the real container swap on this same
+                // preference; finishing onboarding with sync OFF performs no swap,
+                // so wiping the selection here would strand the user with no
+                // vehicle. Must stay in lockstep with checkpointApp's guard.
+                guard SyncSettings.shared.iCloudSyncEnabled else { return }
                 appState.prepareForContainerSwap()
             }
+    }
+
+    // MARK: - Onboarding Helpers
+
+    /// Shared exit path for the "get started" onboarding surface when the user
+    /// chooses to add a vehicle (VIN lookup or manual entry): clear the sample
+    /// tour data, mark onboarding complete, and present the Add Vehicle sheet a
+    /// beat later so the onboarding cover has finished dismissing first.
+    private func completeOnboardingAndPresentAddVehicle() {
+        clearSampleData()
+        onboardingState.complete()
+        delayedTask?.cancel()
+        delayedTask = Task {
+            try? await Task.sleep(for: .seconds(0.4))
+            guard !Task.isCancelled else { return }
+            appState.showAddVehicle = true
+        }
+    }
+
+    // MARK: - Notification Helpers
+
+    /// Decodes a `vehicleID` from a notification payload and selects that vehicle
+    /// when it isn't already current. Returns `true` when the payload carried a
+    /// valid vehicle ID (the caller then performs its navigation), `false`
+    /// otherwise.
+    private func selectVehicleFromNotification(_ userInfo: [AnyHashable: Any]?) -> Bool {
+        guard let vehicleIDString = userInfo?["vehicleID"] as? String,
+              let vehicleID = UUID(uuidString: vehicleIDString) else {
+            return false
+        }
+        // Select the vehicle if it matches, otherwise find it
+        if currentVehicle?.id != vehicleID,
+           let vehicle = vehicles.first(where: { $0.id == vehicleID }) {
+            appState.selectedVehicle = vehicle
+        }
+        return true
     }
 }

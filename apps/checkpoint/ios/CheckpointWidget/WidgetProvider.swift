@@ -151,8 +151,11 @@ struct WidgetProvider: AppIntentTimelineProvider {
         // Recompute each date-based row against every entry's date so the
         // displayed countdown/period stays live between app writes, rather than
         // re-rendering the same precomputed values the app baked in at write time.
-        let entries = timelineEntryDates(from: Date()).map { date in
-            makeEntry(from: snapshot, at: date, configuration: configuration)
+        // Build one calendar for the whole timeline and thread it through so we
+        // don't allocate `Calendar.current` per service per entry.
+        let calendar = Calendar.current
+        let entries = timelineEntryDates(from: Date(), calendar: calendar).map { date in
+            makeEntry(from: snapshot, at: date, configuration: configuration, calendar: calendar)
         }
         return Timeline(entries: entries, policy: .atEnd)
     }
@@ -225,14 +228,14 @@ struct WidgetProvider: AppIntentTimelineProvider {
     /// Build a `ServiceEntry` for `entryDate`, recomputing each date-based row's
     /// countdown, period, and status against that date. Mileage-based rows are
     /// left as stored (mileage doesn't advance without an app write).
-    private func makeEntry(from snapshot: LoadedSnapshot, at entryDate: Date, configuration: CheckpointWidgetConfigurationIntent) -> ServiceEntry {
+    private func makeEntry(from snapshot: LoadedSnapshot, at entryDate: Date, configuration: CheckpointWidgetConfigurationIntent, calendar: Calendar = .current) -> ServiceEntry {
         let widgetServices = snapshot.data.services.compactMap { service -> WidgetService? in
             // Filter out services with pending completions so the widget advances
             // to the next service immediately after marking one done.
             if let serviceID = service.serviceID, snapshot.pendingIDs.contains(serviceID) {
                 return nil
             }
-            return recomputedService(service, at: entryDate)
+            return recomputedService(service, at: entryDate, calendar: calendar)
         }
 
         return ServiceEntry(
@@ -250,7 +253,7 @@ struct WidgetProvider: AppIntentTimelineProvider {
     /// mileage target (or no raw due date, e.g. older snapshots) pass through
     /// unchanged; date-based rows recompute days/period/description/status from
     /// the stored `dueDate` so the countdown never freezes.
-    private func recomputedService(_ service: WidgetData.SharedService, at entryDate: Date) -> WidgetService {
+    private func recomputedService(_ service: WidgetData.SharedService, at entryDate: Date, calendar: Calendar) -> WidgetService {
         guard service.dueMileage == nil, let dueDate = service.dueDate else {
             return WidgetService(
                 serviceID: service.serviceID,
@@ -263,7 +266,6 @@ struct WidgetProvider: AppIntentTimelineProvider {
             )
         }
 
-        let calendar = Calendar.current
         let period = DuePeriodFormatter.describe(dueDate, relativeTo: entryDate, calendar: calendar)
         let days = calendar.dateComponents(
             [.day],
@@ -276,8 +278,8 @@ struct WidgetProvider: AppIntentTimelineProvider {
         // dueDescription verb correct after recompute.
         let isMarbete = service.serviceID == nil
         let dueDescription = period.phrased(
-            format: isMarbete ? "Expires %@" : "Due %@",
-            overdueWord: isMarbete ? "Expired" : "Overdue"
+            format: isMarbete ? String(localized: "Expires %@") : String(localized: "Due %@"),
+            overdueWord: isMarbete ? String(localized: "Expired") : String(localized: "Overdue")
         )
 
         // Once the date passes, an item is overdue regardless of the status the
@@ -295,7 +297,7 @@ struct WidgetProvider: AppIntentTimelineProvider {
         )
     }
 
-    private func makeEmptyEntry(configuration: CheckpointWidgetConfigurationIntent, distanceUnit: WidgetDistanceUnit = .miles) -> ServiceEntry {
+    private func makeEmptyEntry(configuration: CheckpointWidgetConfigurationIntent) -> ServiceEntry {
         ServiceEntry(
             date: Date(),
             vehicleID: nil,
@@ -303,7 +305,7 @@ struct WidgetProvider: AppIntentTimelineProvider {
             currentMileage: 0,
             services: [],
             configuration: configuration,
-            distanceUnit: distanceUnit
+            distanceUnit: .miles
         )
     }
 }

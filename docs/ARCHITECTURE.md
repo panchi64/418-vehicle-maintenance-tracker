@@ -291,7 +291,6 @@ StoreKit 2 purchase engine for Pro unlock and tip jar:
 
 ### Sync/
 - `SyncStatusService` — Consolidated iCloud sync status, network monitoring, remote change observation, and retry with backoff (`.synced`, `.syncing`, `.error`, `.disabled`, `.noAccount`)
-- `DataMigrationService` — Local to iCloud migration, schema upgrades
 
 ### Utilities/
 - `NHTSAService` — VIN decoding and recall alerts via NHTSA API
@@ -521,7 +520,6 @@ ContentView
 - **ReceiptOCRServiceTests** — Receipt text extraction
 - **OCRErrorTests** — Error type handling
 - **SyncStatusServiceTests** — Consolidated sync status, SyncError properties, retry logic
-- **DataMigrationServiceTests** — Migration logic
 - **ServiceHistoryPDFServiceTests** — PDF generation
 - **WidgetDataServiceTests** — Widget data serialization
 - **StoreManagerTests** — StoreKit purchase flow, entitlements

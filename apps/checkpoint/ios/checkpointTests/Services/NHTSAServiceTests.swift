@@ -784,6 +784,50 @@ final class PersistentRecallCacheTests: XCTestCase {
     }
 }
 
+// MARK: - CacheEntry Prune Tests
+
+final class CacheEntryPruneTests: XCTestCase {
+
+    private func entry(_ value: String, ageSeconds: TimeInterval) -> CacheEntry<String> {
+        CacheEntry(data: value, timestamp: Date(timeIntervalSinceNow: -ageSeconds))
+    }
+
+    func testPrune_dropsEntriesFailingValidity() {
+        let store: [String: CacheEntry<String>] = [
+            "keep": entry("keep", ageSeconds: 10),
+            "drop": entry("drop", ageSeconds: 100),
+        ]
+
+        let pruned = CacheEntry.prune(store, maxEntries: 10) { $0.isValid(ttl: 50) }
+
+        XCTAssertEqual(Set(pruned.keys), ["keep"], "Entries failing the validity predicate should be dropped")
+    }
+
+    func testPrune_overCap_keepsMostRecentEntries() {
+        var store: [String: CacheEntry<String>] = [:]
+        for i in 0..<10 {
+            // Larger index ⇒ smaller age ⇒ more recent; "9" is newest.
+            store["\(i)"] = entry("\(i)", ageSeconds: TimeInterval(10 - i))
+        }
+
+        let pruned = CacheEntry.prune(store, maxEntries: 3) { _ in true }
+
+        XCTAssertEqual(pruned.count, 3)
+        XCTAssertEqual(Set(pruned.keys), ["7", "8", "9"], "Only the three most recently written entries survive the cap")
+    }
+
+    func testPrune_underCap_retainsAllValidEntries() {
+        let store: [String: CacheEntry<String>] = [
+            "a": entry("a", ageSeconds: 1),
+            "b": entry("b", ageSeconds: 2),
+        ]
+
+        let pruned = CacheEntry.prune(store, maxEntries: 5) { _ in true }
+
+        XCTAssertEqual(Set(pruned.keys), ["a", "b"], "Entries under the cap should all be retained")
+    }
+}
+
 // MARK: - NHTSAError Equatable
 
 extension NHTSAError: Equatable {}

@@ -369,6 +369,43 @@ final class WidgetDataServiceTests: XCTestCase {
         XCTAssertEqual(WidgetDataService.periodPhrase(overdue, phraseFormat: "Expires %@", overdueWord: "Expired"), "Expired")
     }
 
+    // MARK: - Bulk match-app election (finding #2)
+
+    func test_matchAppVehicleID_prefersPersistedSelection() {
+        // A persisted selection wins regardless of sort order.
+        XCTAssertEqual(
+            WidgetDataService.matchAppVehicleID(from: ["ccc", "aaa", "bbb"], persistedSelection: "bbb"),
+            "bbb"
+        )
+    }
+
+    func test_matchAppVehicleID_nilSelection_picksFirstSorted() {
+        // With no selection, the election is the lexicographically-first id and
+        // must not depend on the order vehicles were fetched in.
+        XCTAssertEqual(
+            WidgetDataService.matchAppVehicleID(from: ["ccc", "aaa", "bbb"], persistedSelection: nil),
+            "aaa"
+        )
+        XCTAssertEqual(
+            WidgetDataService.matchAppVehicleID(from: ["bbb", "ccc", "aaa"], persistedSelection: nil),
+            "aaa",
+            "Election must be independent of fetch order"
+        )
+    }
+
+    func test_matchAppVehicleID_nilSelection_emptyList_isNil() {
+        XCTAssertNil(WidgetDataService.matchAppVehicleID(from: [], persistedSelection: nil))
+    }
+
+    func test_matchAppVehicleID_staleSelection_matchesNoCurrentVehicle() {
+        // A selection naming a vehicle absent from this pass is returned as-is; no
+        // current vehicle equals it, so the shared key is left untouched.
+        let ids = ["aaa", "bbb"]
+        let elected = WidgetDataService.matchAppVehicleID(from: ids, persistedSelection: "zzz")
+        XCTAssertEqual(elected, "zzz")
+        XCTAssertFalse(ids.contains(elected!))
+    }
+
     func testWidgetSharedData_ServiceStatusRawValues() {
         XCTAssertEqual(WidgetSharedData.ServiceStatus.overdue.rawValue, "overdue")
         XCTAssertEqual(WidgetSharedData.ServiceStatus.dueSoon.rawValue, "dueSoon")

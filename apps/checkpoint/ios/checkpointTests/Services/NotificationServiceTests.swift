@@ -22,6 +22,9 @@ final class NotificationServiceTests: XCTestCase {
     override func tearDown() {
         // Clean up any scheduled notifications after each test
         service.cancelAllNotifications()
+        // Cancel any debounced budget-enforcement task a scheduling call left
+        // pending so it can't run part-way through a later test.
+        service.budgetEnforcementTask?.cancel()
         service = nil
         super.tearDown()
     }
@@ -647,6 +650,54 @@ final class NotificationServiceTests: XCTestCase {
 
         // Then - verify method completes without error
         XCTAssertTrue(true, "Cancel all notifications for base ID should complete without error")
+    }
+
+    func testServiceCancellationIDsCoverIntervalsSnoozeAndBase() {
+        // The cancellation sweep must reach every ID a service's set can take:
+        // each interval variant, the snooze variant, and the bare base ID that
+        // legacy single-request/snooze schemes used as the full identifier.
+        let baseID = ServiceNotificationScheduler.baseNotificationID(forServiceID: UUID())
+        let ids = ServiceNotificationScheduler.serviceCancellationIDs(baseID: baseID)
+
+        for days in NotificationService.defaultReminderIntervals {
+            let intervalID = baseID + NotificationService.intervalSuffix(for: days)
+            XCTAssertTrue(ids.contains(intervalID), "Interval \(days)d must be in the cancellation sweep")
+        }
+        XCTAssertTrue(
+            ids.contains(ServiceNotificationScheduler.snoozeNotificationID(baseID: baseID)),
+            "Snooze variant must be in the cancellation sweep"
+        )
+        XCTAssertTrue(ids.contains(baseID), "Bare base ID must be in the cancellation sweep")
+    }
+
+    // MARK: - Budget Enforcement Debounce Tests
+    //
+    // The simulator test host has no notification authorization, so live
+    // pending-request state can't be asserted. The unit-testable contract is
+    // the hook's cancel-and-replace of its debounce task: a burst of schedule
+    // calls collapses to a single pending enforcement.
+
+    func testScheduleBudgetEnforcementInstallsLiveTask() {
+        service.scheduleBudgetEnforcement()
+        guard let task = service.budgetEnforcementTask else {
+            return XCTFail("Scheduling must install a debounce task")
+        }
+        XCTAssertFalse(task.isCancelled, "A freshly installed debounce task must be live")
+    }
+
+    func testScheduleBudgetEnforcementReplacesPriorTask() {
+        service.scheduleBudgetEnforcement()
+        guard let first = service.budgetEnforcementTask else {
+            return XCTFail("First call should install a debounce task")
+        }
+
+        service.scheduleBudgetEnforcement()
+        guard let second = service.budgetEnforcementTask else {
+            return XCTFail("Second call should install a replacement debounce task")
+        }
+
+        XCTAssertTrue(first.isCancelled, "Replacing the hook must cancel the prior debounce task")
+        XCTAssertFalse(second.isCancelled, "The replacement task must be live")
     }
 
     // MARK: - Orphaned Notification Sweep Tests

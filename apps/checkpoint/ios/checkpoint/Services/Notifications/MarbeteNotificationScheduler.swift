@@ -131,6 +131,8 @@ struct MarbeteNotificationScheduler {
             }
         }
 
+        NotificationService.shared.scheduleBudgetEnforcement()
+
         vehicle.marbeteNotificationID = baseNotificationID
         return baseNotificationID
     }
@@ -175,5 +177,7 @@ struct MarbeteNotificationScheduler {
         } catch {
             marbeteNotificationLogger.error("Failed to snooze marbete reminder: \(error.localizedDescription)")
         }
+
+        NotificationService.shared.scheduleBudgetEnforcement()
     }
 }

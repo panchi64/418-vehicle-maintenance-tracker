@@ -119,6 +119,8 @@ struct YearlyRoundupScheduler {
                 yearlyNotificationLogger.error("Failed to schedule yearly roundup: \(error.localizedDescription)")
             }
         }
+
+        NotificationService.shared.scheduleBudgetEnforcement()
     }
 
     // MARK: - Cancel Notifications

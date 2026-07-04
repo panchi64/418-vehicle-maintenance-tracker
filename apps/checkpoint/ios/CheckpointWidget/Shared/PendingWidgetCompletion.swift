@@ -70,4 +70,20 @@ struct PendingWidgetCompletion: Codable {
         guard let userDefaults = WidgetAppGroup.defaults() else { return }
         userDefaults.removeObject(forKey: userDefaultsKey)
     }
+
+    /// Remove only the completions whose `serviceID` is in `serviceIDs`, leaving
+    /// the rest of the queue intact. Re-reads the current queue before writing so
+    /// entries the widget's `MarkServiceDoneIntent` enqueued after the caller
+    /// snapshotted its work-set aren't clobbered. Clears the key entirely when
+    /// nothing remains so an empty queue leaves no stale data behind.
+    static func remove(serviceIDs: Set<String>) {
+        guard !serviceIDs.isEmpty, let userDefaults = WidgetAppGroup.defaults() else { return }
+
+        let remaining = loadAll().filter { !serviceIDs.contains($0.serviceID) }
+        if remaining.isEmpty {
+            userDefaults.removeObject(forKey: userDefaultsKey)
+        } else if let data = try? JSONEncoder().encode(remaining) {
+            userDefaults.set(data, forKey: userDefaultsKey)
+        }
+    }
 }

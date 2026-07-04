@@ -22,6 +22,11 @@ final class NotificationService: NSObject {
 
     private let notificationCenter = UNUserNotificationCenter.current()
 
+    /// Pending debounce task for a coalesced budget enforcement. Replaced
+    /// (cancel-and-replace) on each `scheduleBudgetEnforcement()` so a burst of
+    /// scheduling calls trims once, after the burst settles.
+    @ObservationIgnored private(set) var budgetEnforcementTask: Task<Void, Never>?
+
     // MARK: - Category Identifiers
 
     static let serviceDueCategoryID = "SERVICE_DUE"
@@ -48,6 +53,9 @@ final class NotificationService: NSObject {
 
     /// Default reminder intervals (days before due date)
     static let defaultReminderIntervals: [Int] = [30, 7, 1, 0]
+
+    /// Debounce window before a coalesced mid-session budget enforcement runs.
+    static let budgetEnforcementDebounce: Duration = .seconds(2)
 
     /// Notification ID suffixes for each interval
     static func intervalSuffix(for days: Int) -> String {
@@ -141,6 +149,24 @@ final class NotificationService: NSObject {
             yearlyRoundupCategory,
             marbeteDueCategory
         ])
+    }
+
+    // MARK: - Budget Enforcement
+
+    /// Debounced trim of the pending set back under the OS's 64-request cap.
+    /// Every mid-session add (a service edit, or a marbete/mileage/roundup
+    /// schedule or snooze) can push the pending total past 64, at which point
+    /// iOS silently keeps only the 64 soonest — potentially evicting a nearer
+    /// reminder. Only the launch sweep enforced the budget before, so each
+    /// scheduling entry point calls this; a burst coalesces into a single
+    /// enforcement `budgetEnforcementDebounce` after the last call.
+    func scheduleBudgetEnforcement() {
+        budgetEnforcementTask?.cancel()
+        budgetEnforcementTask = Task {
+            try? await Task.sleep(for: Self.budgetEnforcementDebounce)
+            guard !Task.isCancelled else { return }
+            await NotificationHelpers.enforcePendingBudget()
+        }
     }
 
     // MARK: - Cancel All Notifications

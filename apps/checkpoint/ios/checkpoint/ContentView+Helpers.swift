@@ -16,6 +16,10 @@ extension ContentView {
     func performLaunchSetup() {
         // Restore persisted vehicle selection
         restoreSelectedVehicle()
+        // If no selection was ever persisted, seed the shared App Group key from
+        // the resolved current vehicle so widgets / the Biombo bridge have an ID
+        // to read before the first CloudKit remote change.
+        seedSharedSelectionIfUnsaved()
         // Only seed sample data for returning users (onboarding completed).
         // New users get sample data seeded when the tour starts.
         if OnboardingState.hasCompletedOnboarding {
@@ -69,9 +73,16 @@ extension ContentView {
         switch newPhase {
         case .active:
             enterForeground()
-        case .background:
-            // Reset so the next foreground re-runs the per-activation work
+        case .inactive:
+            // Reset on ANY departure from .active — not just a full background
+            // transition. A Control Center pull-down, Siri overlay, or system
+            // alert resigns the app to .inactive without ever hitting
+            // .background; returning to .active must re-run the per-activation
+            // work (e.g. draining a PendingMileageUpdate a Siri intent queued
+            // while the app was up). A full background transition also passes
+            // through .inactive first, so this still covers that case.
             isForegroundActive = false
+        case .background:
             updateAppIcon()
             updateWidgetData()
             AnalyticsService.shared.capture(.appBackgrounded)
@@ -136,6 +147,11 @@ extension ContentView {
         // Auto-select first vehicle when none is selected (e.g. iCloud sync after reinstall)
         if appState.selectedVehicle == nil, let first = newVehicles.first {
             appState.selectedVehicle = first
+            // Persist eagerly: the selectedVehicle onChange doesn't reliably fire
+            // for a mutation made inside this vehicles-onChange, so the shared
+            // appSelectedVehicleID key would otherwise stay unset (reinstall +
+            // iCloud sync) until the user's first manual switch.
+            seedSharedSelectionIfUnsaved()
         }
         // Update selection if current vehicle was deleted
         if let selected = appState.selectedVehicle,
@@ -211,6 +227,22 @@ extension ContentView {
         // Note: Widget reload happens in updateWidgetData() via WidgetDataService
     }
 
+    /// Writes the resolved current vehicle to the shared App Group selection key
+    /// when the user has never made an explicit selection (no persisted ID yet).
+    ///
+    /// The `selectedVehicle` `onChange` is the normal path that persists the
+    /// shared `appSelectedVehicleID` key, but it doesn't reliably fire for
+    /// selections resolved during launch or set from inside the `vehicles`
+    /// `onChange` (reinstall + iCloud sync). Without this eager seed the shared
+    /// key would stay unset — leaving widgets and the Biombo bridge without a
+    /// vehicle to read — until the user's first manual vehicle switch. Idempotent
+    /// and a no-op until a vehicle has resolved.
+    func seedSharedSelectionIfUnsaved() {
+        guard UserDefaults.standard.string(forKey: Self.selectedVehicleIDKey) == nil,
+              let vehicle = currentVehicle else { return }
+        persistSelectedVehicle(vehicle)
+    }
+
     // MARK: - Recalls
 
     /// Fetch recalls for all existing vehicles (called once on app launch)
@@ -249,11 +281,11 @@ extension ContentView {
     // MARK: - App Icon
 
     func updateAppIcon() {
-        // Fetch imperatively at the point of use rather than holding a root-level
-        // @Query — the icon only needs the current service set on discrete events
-        // (foreground, mileage change), not a body re-render on every write.
-        let services = (try? modelContext.fetch(FetchDescriptor<Service>())) ?? []
-        AppIconService.shared.updateIcon(for: currentVehicle, services: services)
+        // The icon only reflects the current vehicle, so hand AppIconService that
+        // vehicle's already-materialized `services` relationship instead of
+        // fetching (and then re-filtering) the entire Service table on every
+        // activation and selection change.
+        AppIconService.shared.updateIcon(for: currentVehicle, services: currentVehicle?.services ?? [])
     }
 
     // MARK: - Widget Data
@@ -360,7 +392,12 @@ extension ContentView {
 
         // Fetch logs imperatively for the yearly-roundup cost calc rather than
         // holding a root-level @Query that re-renders the body on every write.
+        // Group once by vehicle ID so the per-vehicle loop is O(logs), not
+        // O(vehicles × logs). (Grouping in memory keeps the SwiftData fetch a
+        // simple whole-table read — cleaner than a #Predicate on the optional
+        // `vehicle` relationship.)
         let allLogs = (try? modelContext.fetch(FetchDescriptor<ServiceLog>())) ?? []
+        let logsByVehicleID = Dictionary(grouping: allLogs) { $0.vehicle?.id }
 
         for vehicle in vehicles {
             // Schedule mileage reminder if needed
@@ -373,7 +410,7 @@ extension ContentView {
             }
 
             // Calculate previous year's total cost for yearly roundup
-            let vehicleLogs = allLogs.filter { $0.vehicle?.id == vehicle.id }
+            let vehicleLogs = logsByVehicleID[vehicle.id] ?? []
             let previousYearLogs = vehicleLogs.filter {
                 calendar.component(.year, from: $0.performedDate) == previousYear
             }

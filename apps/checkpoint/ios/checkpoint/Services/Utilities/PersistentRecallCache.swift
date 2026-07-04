@@ -81,14 +81,9 @@ actor PersistentRecallCache {
         _ store: [String: CacheEntry<[RecallInfo]>],
         now: Date = .now
     ) -> [String: CacheEntry<[RecallInfo]>] {
-        var result = store.filter { now.timeIntervalSince($0.value.timestamp) < maxEntryAge }
-        if result.count > maxEntries {
-            let survivors = result
-                .sorted { $0.value.timestamp > $1.value.timestamp }
-                .prefix(maxEntries)
-            result = Dictionary(uniqueKeysWithValues: survivors.map { ($0.key, $0.value) })
+        CacheEntry.prune(store, maxEntries: maxEntries) {
+            now.timeIntervalSince($0.timestamp) < maxEntryAge
         }
-        return result
     }
 
     private func flush(_ snapshot: [String: CacheEntry<[RecallInfo]>]) {

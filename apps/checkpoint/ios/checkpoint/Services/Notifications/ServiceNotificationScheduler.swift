@@ -130,12 +130,25 @@ struct ServiceNotificationScheduler {
     static func scheduleNotificationWithPace(
         for service: Service, vehicle: Vehicle, dailyPace: Double? = nil
     ) -> String? {
-        let effectiveDate = service.effectiveDueDate(currentMileage: vehicle.currentMileage, dailyPace: dailyPace)
-        guard let dueDate = effectiveDate, dueDate > Date() else { return nil }
+        guard let dueDate = schedulableDueDate(for: service, vehicle: vehicle, dailyPace: dailyPace) else { return nil }
         return scheduleNotificationsForDueDate(dueDate, service: service, vehicle: vehicle)
     }
 
-    /// Reschedule all notifications for a vehicle using current pace data
+    /// The effective due date to schedule a service against, or nil if it has
+    /// none in the future (the caller should cancel instead). Shared by the
+    /// sync and async reschedule paths so the future-gate lives in one place.
+    private static func schedulableDueDate(
+        for service: Service, vehicle: Vehicle, dailyPace: Double?
+    ) -> Date? {
+        let effectiveDate = service.effectiveDueDate(currentMileage: vehicle.currentMileage, dailyPace: dailyPace)
+        guard let dueDate = effectiveDate, dueDate > Date() else { return nil }
+        return dueDate
+    }
+
+    /// Reschedule all notifications for a vehicle using current pace data.
+    /// Fire-and-forget adds for UI callers; the launch sweep uses the awaited
+    /// `rescheduleNotificationsAwaitingAdds` so a follow-on budget trim reads
+    /// the settled pending set rather than a pre-add snapshot.
     static func rescheduleNotifications(for vehicle: Vehicle) {
         let pace = vehicle.dailyMilesPace
         for service in vehicle.services ?? [] {
@@ -147,10 +160,27 @@ struct ServiceNotificationScheduler {
         }
     }
 
-    /// Internal helper to schedule notifications for a due date
-    private static func scheduleNotificationsForDueDate(
-        _ dueDate: Date, service: Service, vehicle: Vehicle
-    ) -> String {
+    /// Reschedule a vehicle's services, awaiting each notification-center add
+    /// so a caller can trim the pending budget against the settled set. Used
+    /// by launch maintenance; UI callers use the fire-and-forget variant.
+    static func rescheduleNotificationsAwaitingAdds(for vehicle: Vehicle) async {
+        let pace = vehicle.dailyMilesPace
+        for service in vehicle.services ?? [] {
+            if let dueDate = schedulableDueDate(for: service, vehicle: vehicle, dailyPace: pace) {
+                await addNotificationsAwaitingCenter(forDueDate: dueDate, service: service, vehicle: vehicle)
+            } else {
+                cancelNotification(for: service)
+            }
+        }
+    }
+
+    /// Build a service's interval requests for a due date and clear the stale
+    /// variants a plain re-add wouldn't replace, recording the deterministic
+    /// base ID on the service. The single source of the pending set: the sync
+    /// and async add paths differ only in how they hand these to the center.
+    private static func notificationRequests(
+        forDueDate dueDate: Date, service: Service, vehicle: Vehicle
+    ) -> [UNNotificationRequest] {
         let baseNotificationID = baseNotificationID(for: service)
 
         // Clear any set scheduled before IDs became deterministic
@@ -161,8 +191,7 @@ struct ServiceNotificationScheduler {
         // intervals, pending snooze)
         cancelAllNotifications(baseID: baseNotificationID)
 
-        let notificationCenter = UNUserNotificationCenter.current()
-
+        var requests: [UNNotificationRequest] = []
         for daysBeforeDue in NotificationService.defaultReminderIntervals {
             guard let notificationDate = Calendar.current.date(byAdding: .day, value: -daysBeforeDue, to: dueDate) else { continue }
             // Gate on the actual 9 AM-snapped fire date, not the raw date: a
@@ -171,13 +200,10 @@ struct ServiceNotificationScheduler {
             guard let trigger = NotificationHelpers.reminderTrigger(for: notificationDate) else { continue }
 
             let notificationID = baseNotificationID + NotificationService.intervalSuffix(for: daysBeforeDue)
-            let request = buildNotificationRequest(
+            requests.append(buildNotificationRequest(
                 for: service, vehicle: vehicle, notificationID: notificationID,
                 notificationDate: notificationDate, daysBeforeDue: daysBeforeDue, trigger: trigger
-            )
-            notificationCenter.add(request) { error in
-                if let error = error { serviceNotificationLogger.error("Failed to schedule notification (\(daysBeforeDue)d before): \(error.localizedDescription)") }
-            }
+            ))
         }
 
         // Guard the write: this runs on every reschedule, and a same-value
@@ -185,7 +211,40 @@ struct ServiceNotificationScheduler {
         if service.notificationID != baseNotificationID {
             service.notificationID = baseNotificationID
         }
-        return baseNotificationID
+        return requests
+    }
+
+    /// Sync (fire-and-forget) schedule for a due date. Triggers a debounced
+    /// budget enforcement so a mid-session add can't leave the pending set over
+    /// the OS's 64-request cap until the next cold launch.
+    private static func scheduleNotificationsForDueDate(
+        _ dueDate: Date, service: Service, vehicle: Vehicle
+    ) -> String {
+        let notificationCenter = UNUserNotificationCenter.current()
+        for request in notificationRequests(forDueDate: dueDate, service: service, vehicle: vehicle) {
+            notificationCenter.add(request) { error in
+                if let error = error { serviceNotificationLogger.error("Failed to schedule notification: \(error.localizedDescription)") }
+            }
+        }
+        NotificationService.shared.scheduleBudgetEnforcement()
+        return baseNotificationID(for: service)
+    }
+
+    /// Async schedule for a due date that awaits each add, so a follow-on
+    /// `enforcePendingBudget()` reads the settled pending set rather than a
+    /// pre-add snapshot. No debounced enforcement here: the launch caller
+    /// awaits the trim directly.
+    private static func addNotificationsAwaitingCenter(
+        forDueDate dueDate: Date, service: Service, vehicle: Vehicle
+    ) async {
+        let notificationCenter = UNUserNotificationCenter.current()
+        for request in notificationRequests(forDueDate: dueDate, service: service, vehicle: vehicle) {
+            do {
+                try await notificationCenter.add(request)
+            } catch {
+                serviceNotificationLogger.error("Failed to schedule notification: \(error.localizedDescription)")
+            }
+        }
     }
 
     // MARK: - Cancel Notifications
@@ -196,13 +255,23 @@ struct ServiceNotificationScheduler {
     }
 
     /// Cancel all notifications for a base ID: interval variants, the snooze
-    /// variant, and the bare ID itself (legacy single-request and snooze
-    /// schemes used the base as the full identifier)
+    /// variant, and the bare ID itself.
     static func cancelAllNotifications(baseID: String) {
-        var allIDs = NotificationService.defaultReminderIntervals.map { baseID + NotificationService.intervalSuffix(for: $0) }
-        allIDs.append(snoozeNotificationID(baseID: baseID))
-        allIDs.append(baseID)
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: allIDs)
+        UNUserNotificationCenter.current().removePendingNotificationRequests(
+            withIdentifiers: serviceCancellationIDs(baseID: baseID)
+        )
+    }
+
+    /// Every notification ID a service's set could have pending for a base ID:
+    /// the interval variants, the snooze variant, and the bare base ID (legacy
+    /// single-request and snooze schemes used the base as the full identifier).
+    /// Mirrors `MarbeteNotificationScheduler.marbeteCancellationIDs` so "all IDs
+    /// an entity can have" lives in one function per family.
+    static func serviceCancellationIDs(baseID: String) -> [String] {
+        var ids = NotificationService.defaultReminderIntervals.map { baseID + NotificationService.intervalSuffix(for: $0) }
+        ids.append(snoozeNotificationID(baseID: baseID))
+        ids.append(baseID)
+        return ids
     }
 
     /// Cancel all notifications for a service
@@ -234,6 +303,7 @@ struct ServiceNotificationScheduler {
                                                      snoozeDate: tomorrow)
         UNUserNotificationCenter.current().add(request)
         service.notificationID = baseID
+        NotificationService.shared.scheduleBudgetEnforcement()
     }
 
     // MARK: - Pending Notifications

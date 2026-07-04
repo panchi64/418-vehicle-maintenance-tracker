@@ -26,10 +26,12 @@ extension ServiceNotificationScheduler {
         let serviceIDs = vehicles.flatMap { $0.services ?? [] }.map(\.id)
         await removeOrphanedNotifications(validServiceIDs: Set(serviceIDs))
         for vehicle in vehicles {
-            rescheduleNotifications(for: vehicle)
+            await rescheduleNotificationsAwaitingAdds(for: vehicle)
         }
         // Rescheduling every vehicle × service × interval plus marbete/mileage/
         // roundup can exceed the OS's 64-request cap; keep only the soonest.
+        // The awaited adds above ensure this trims the settled pending set, not
+        // a pre-add snapshot.
         await NotificationHelpers.enforcePendingBudget()
     }
 

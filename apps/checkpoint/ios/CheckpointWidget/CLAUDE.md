@@ -17,10 +17,19 @@ Both the main app and widget extension must have this App Group enabled in their
 
 ## Data Flow
 
+Two triggers write the shared snapshot and reload timelines:
+
+**App-foreground path:**
 1. Main app calls `WidgetDataService.updateWidget()` when data changes
 2. Data serialized to JSON and stored in shared UserDefaults (key: `"widgetData"`)
 3. `WidgetCenter.reloadAllTimelines()` triggers widget refresh
 4. Widget's `WidgetProvider.getTimeline()` reads from shared UserDefaults
+
+**CloudKit remote-change path:**
+`WidgetDataService` observes `.NSPersistentStoreRemoteChange` (debounced) and, on
+each remote change, `handleRemoteChange` re-serializes every vehicle's snapshot from
+the synced model store before reloading timelines once — so the widget reflects data
+another device pushed, not the stale JSON it superseded.
 
 ## Interactive Widgets (iOS 17+)
 

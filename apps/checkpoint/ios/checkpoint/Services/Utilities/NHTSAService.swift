@@ -134,6 +134,25 @@ nonisolated struct CacheEntry<T: Sendable>: Sendable {
     func isValid(ttl: TimeInterval) -> Bool {
         Date().timeIntervalSince(timestamp) < ttl
     }
+
+    /// Shared eviction policy for both the in-memory (`NHTSAService`) and disk-backed
+    /// (`PersistentRecallCache`) caches: drop entries failing `isValid`, then, if still
+    /// over `maxEntries`, keep only the most recently written ones. Each cache supplies
+    /// its own cap and validity rule (TTL vs. retention age).
+    static func prune(
+        _ store: [String: CacheEntry<T>],
+        maxEntries: Int,
+        isValid: (CacheEntry<T>) -> Bool
+    ) -> [String: CacheEntry<T>] {
+        var result = store.filter { isValid($0.value) }
+        if result.count > maxEntries {
+            let survivors = result
+                .sorted { $0.value.timestamp > $1.value.timestamp }
+                .prefix(maxEntries)
+            result = Dictionary(uniqueKeysWithValues: survivors.map { ($0.key, $0.value) })
+        }
+        return result
+    }
 }
 
 extension CacheEntry: Codable where T: Codable {}
@@ -164,14 +183,7 @@ actor NHTSAService {
     /// Returns the cache with expired entries dropped and, if still over the size
     /// bound, only the most recently written entries retained.
     private func pruned<T: Sendable>(_ cache: [String: CacheEntry<T>], ttl: TimeInterval) -> [String: CacheEntry<T>] {
-        var result = cache.filter { $0.value.isValid(ttl: ttl) }
-        if result.count > Self.maxCacheEntries {
-            let survivors = result
-                .sorted { $0.value.timestamp > $1.value.timestamp }
-                .prefix(Self.maxCacheEntries)
-            result = Dictionary(uniqueKeysWithValues: survivors.map { ($0.key, $0.value) })
-        }
-        return result
+        CacheEntry.prune(cache, maxEntries: Self.maxCacheEntries) { $0.isValid(ttl: ttl) }
     }
 
     /// Clears all cached data (useful for testing or manual refresh)

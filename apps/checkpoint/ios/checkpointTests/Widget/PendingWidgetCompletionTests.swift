@@ -27,9 +27,19 @@ final class PendingWidgetCompletionTests: XCTestCase {
     }
 
     override func tearDown() {
+        PendingWidgetCompletion.clearAll()
         modelContainer = nil
         modelContext = nil
         super.tearDown()
+    }
+
+    private func makeCompletion(serviceID: String) -> PendingWidgetCompletion {
+        PendingWidgetCompletion(
+            serviceID: serviceID,
+            vehicleID: "11111111-2222-3333-4444-555555555555",
+            performedDate: Date(),
+            mileageAtService: 50000
+        )
     }
 
     // MARK: - Encoding/Decoding
@@ -230,5 +240,73 @@ final class PendingWidgetCompletionTests: XCTestCase {
         // No pending completions - should not crash
         WidgetDataService.shared.processPendingWidgetCompletions(context: modelContext)
         // Success if no crash
+    }
+
+    /// A completion whose vehicle/service don't exist can never succeed. Processing
+    /// must drop it (it's counted as handled) so it doesn't retry every foreground.
+    func testProcessPendingWidgetCompletions_removesUnmatchableCompletion() throws {
+        let completion = PendingWidgetCompletion(
+            serviceID: UUID().uuidString,
+            vehicleID: UUID().uuidString,
+            performedDate: Date(),
+            mileageAtService: 50000
+        )
+        let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget)
+        if let data = try? JSONEncoder().encode([completion]) {
+            userDefaults?.set(data, forKey: PendingWidgetCompletion.userDefaultsKey)
+        }
+
+        WidgetDataService.shared.processPendingWidgetCompletions(context: modelContext)
+
+        XCTAssertTrue(PendingWidgetCompletion.loadAll().isEmpty,
+                      "Unmatchable completion should be removed, not retried forever")
+        let logs = try modelContext.fetch(FetchDescriptor<ServiceLog>())
+        XCTAssertTrue(logs.isEmpty, "No ServiceLog should be created for an unmatchable completion")
+    }
+
+    // MARK: - remove(serviceIDs:)
+
+    func testRemove_dropsOnlySpecifiedIDs_keepsOthers() {
+        PendingWidgetCompletion.save(makeCompletion(serviceID: "svc-A"))
+        PendingWidgetCompletion.save(makeCompletion(serviceID: "svc-B"))
+        PendingWidgetCompletion.save(makeCompletion(serviceID: "svc-C"))
+
+        PendingWidgetCompletion.remove(serviceIDs: ["svc-A", "svc-C"])
+
+        XCTAssertEqual(PendingWidgetCompletion.loadAll().map { $0.serviceID }, ["svc-B"],
+                       "Only the named serviceIDs should be removed")
+    }
+
+    /// Models the widget enqueuing a completion mid-drain: the app's processed
+    /// work-set is {A}, but by removal time the queue also holds a freshly
+    /// enqueued D. remove(serviceIDs:) re-reads the queue and must preserve D.
+    func testRemove_preservesEntryEnqueuedAfterWorkSetCaptured() {
+        PendingWidgetCompletion.save(makeCompletion(serviceID: "svc-A"))
+        PendingWidgetCompletion.save(makeCompletion(serviceID: "svc-D"))
+
+        PendingWidgetCompletion.remove(serviceIDs: ["svc-A"])
+
+        XCTAssertEqual(PendingWidgetCompletion.loadAll().map { $0.serviceID }, ["svc-D"],
+                       "Completions outside the processed set must survive")
+    }
+
+    func testRemove_clearsKey_whenNothingRemains() {
+        PendingWidgetCompletion.save(makeCompletion(serviceID: "svc-A"))
+        PendingWidgetCompletion.save(makeCompletion(serviceID: "svc-B"))
+
+        PendingWidgetCompletion.remove(serviceIDs: ["svc-A", "svc-B"])
+
+        XCTAssertTrue(PendingWidgetCompletion.loadAll().isEmpty)
+        let userDefaults = UserDefaults(suiteName: AppGroupConstants.iPhoneWidget)
+        XCTAssertNil(userDefaults?.data(forKey: PendingWidgetCompletion.userDefaultsKey),
+                     "Emptying the queue should remove the key, not leave an empty array")
+    }
+
+    func testRemove_emptySet_isNoOp() {
+        PendingWidgetCompletion.save(makeCompletion(serviceID: "svc-A"))
+
+        PendingWidgetCompletion.remove(serviceIDs: [])
+
+        XCTAssertEqual(PendingWidgetCompletion.loadAll().map { $0.serviceID }, ["svc-A"])
     }
 }

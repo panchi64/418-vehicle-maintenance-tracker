@@ -19,9 +19,11 @@ struct ContentView: View {
     @State var delayedTask: Task<Void, Never>?
 
     /// Guards the per-activation foreground work so it runs once each time the
-    /// app becomes active (cold launch or return from background) rather than
-    /// twice — `onAppear` and the launch `scenePhase == .active` both fire at
-    /// cold launch. Reset on background so the next foreground re-runs it.
+    /// app becomes active (cold launch or return from background/interruption)
+    /// rather than twice — `onAppear` and the launch `scenePhase == .active`
+    /// both fire at cold launch. Reset on any departure from `.active`
+    /// (`.inactive`, which precedes `.background`) so the next return to
+    /// `.active` re-runs it.
     @State var isForegroundActive = false
 
     // MARK: - Vehicle Selection Persistence

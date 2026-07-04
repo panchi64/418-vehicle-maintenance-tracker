@@ -80,6 +80,8 @@ struct MileageReminderScheduler {
                 mileageNotificationLogger.error("Failed to schedule mileage reminder: \(error.localizedDescription)")
             }
         }
+
+        NotificationService.shared.scheduleBudgetEnforcement()
     }
 
     // MARK: - Cancel Notifications
@@ -110,5 +112,7 @@ struct MileageReminderScheduler {
                 mileageNotificationLogger.error("Failed to snooze mileage reminder: \(error.localizedDescription)")
             }
         }
+
+        NotificationService.shared.scheduleBudgetEnforcement()
     }
 }
