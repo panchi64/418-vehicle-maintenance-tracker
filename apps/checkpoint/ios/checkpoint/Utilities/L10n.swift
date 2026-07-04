@@ -123,6 +123,7 @@ enum L10n {
     static var toastSyncError: String { localized("toast.sync_error") }
     static var toastReadingCaptured: String { localized("toast.reading_captured") }
     static var toastServiceLogUpdated: String { localized("toast.service_log_updated") }
+    static var toastServiceUpdated: String { localized("toast.service_updated") }
     static func toastCopied(_ fieldLabel: String) -> String {
         String(format: localized("toast.copied"), fieldLabel)
     }
@@ -423,6 +424,12 @@ enum L10n {
     static var editAlsoMoveReminder: String { localized("edit.alsoMoveReminder") }
     static func editBetweenLogs(_ first: String, _ second: String) -> String {
         String(format: localized("edit.betweenLogs"), first, second)
+    }
+    static func editSinceLog(_ value: String) -> String {
+        String(format: localized("edit.sinceLog"), value)
+    }
+    static func editBeforeLog(_ value: String) -> String {
+        String(format: localized("edit.beforeLog"), value)
     }
     static var remindNoScheduleWarning: String { localized("remind.noScheduleWarning") }
     static var recordSetIntervalHint: String { localized("record.setIntervalHint") }

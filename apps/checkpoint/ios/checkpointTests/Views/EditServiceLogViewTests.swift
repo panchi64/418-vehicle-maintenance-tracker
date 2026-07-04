@@ -279,4 +279,98 @@ final class EditServiceLogViewTests: XCTestCase {
 
         XCTAssertEqual(othersMedian, 45, "Median should exclude the log being edited")
     }
+
+    // MARK: - Adjacent-log context line
+    //
+    // Mirrors EditServiceLogView.adjacentLogs: the chronologically-sorted
+    // neighbors of a log among all of that vehicle's logs.
+
+    private func adjacentLogs(for target: ServiceLog, in allLogs: [ServiceLog]) -> (before: ServiceLog?, after: ServiceLog?) {
+        let sorted = allLogs.sorted { $0.performedDate < $1.performedDate }
+        guard let index = sorted.firstIndex(where: { $0.id == target.id }) else { return (nil, nil) }
+        let before = index > 0 ? sorted[index - 1] : nil
+        let after = index < sorted.count - 1 ? sorted[index + 1] : nil
+        return (before, after)
+    }
+
+    private func date(_ daysFromNow: Int) -> Date {
+        Date.now.addingTimeInterval(TimeInterval(daysFromNow) * 86400)
+    }
+
+    func testAdjacentLogs_MiddleLogHasBothNeighbors() {
+        let early = ServiceLog(performedDate: date(-60), mileageAtService: 48000)
+        let middle = ServiceLog(performedDate: date(-30), mileageAtService: 50000)
+        let late = ServiceLog(performedDate: date(-10), mileageAtService: 52100)
+
+        let (before, after) = adjacentLogs(for: middle, in: [early, middle, late])
+
+        XCTAssertEqual(before?.id, early.id)
+        XCTAssertEqual(after?.id, late.id)
+    }
+
+    func testAdjacentLogs_EarliestLogHasNoBefore() {
+        let early = ServiceLog(performedDate: date(-60), mileageAtService: 48000)
+        let late = ServiceLog(performedDate: date(-10), mileageAtService: 52100)
+
+        let (before, after) = adjacentLogs(for: early, in: [early, late])
+
+        XCTAssertNil(before)
+        XCTAssertEqual(after?.id, late.id)
+    }
+
+    func testAdjacentLogs_LatestLogHasNoAfter() {
+        let early = ServiceLog(performedDate: date(-60), mileageAtService: 48000)
+        let late = ServiceLog(performedDate: date(-10), mileageAtService: 52100)
+
+        let (before, after) = adjacentLogs(for: late, in: [early, late])
+
+        XCTAssertEqual(before?.id, early.id)
+        XCTAssertNil(after)
+    }
+
+    func testAdjacentLogs_OnlyLogHasNeitherNeighbor() {
+        let onlyLog = ServiceLog(performedDate: date(-10), mileageAtService: 52100)
+
+        let (before, after) = adjacentLogs(for: onlyLog, in: [onlyLog])
+
+        XCTAssertNil(before)
+        XCTAssertNil(after)
+    }
+
+    // MARK: - "Also move next reminder" toggle visibility
+    //
+    // Mirrors EditServiceLogView.showAlsoMoveReminderToggle: only offered when
+    // date/mileage changed AND this is the most recent log of a recurring service.
+
+    private func isMostRecentLogOfRecurringService(_ target: ServiceLog, service: Service) -> Bool {
+        guard service.hasIntervalPolicy else { return false }
+        let newestFirst = (service.logs ?? []).sorted { $0.performedDate > $1.performedDate }
+        return newestFirst.first?.id == target.id
+    }
+
+    func testAlsoMoveToggle_HiddenWhenServiceHasNoIntervalPolicy() {
+        let service = Service(name: "Custom Service")
+        let log = ServiceLog(service: service, performedDate: date(-1), mileageAtService: 30000)
+        service.logs = [log]
+
+        XCTAssertFalse(isMostRecentLogOfRecurringService(log, service: service))
+    }
+
+    func testAlsoMoveToggle_ShownForMostRecentLogOfRecurringService() {
+        let service = Service(name: "Oil Change", intervalMonths: 6, intervalMiles: 5000)
+        let older = ServiceLog(service: service, performedDate: date(-90), mileageAtService: 28000)
+        let newest = ServiceLog(service: service, performedDate: date(-1), mileageAtService: 30000)
+        service.logs = [older, newest]
+
+        XCTAssertTrue(isMostRecentLogOfRecurringService(newest, service: service))
+    }
+
+    func testAlsoMoveToggle_HiddenForOlderLogEvenIfServiceRecurs() {
+        let service = Service(name: "Oil Change", intervalMonths: 6, intervalMiles: 5000)
+        let older = ServiceLog(service: service, performedDate: date(-90), mileageAtService: 28000)
+        let newest = ServiceLog(service: service, performedDate: date(-1), mileageAtService: 30000)
+        service.logs = [older, newest]
+
+        XCTAssertFalse(isMostRecentLogOfRecurringService(older, service: service))
+    }
 }

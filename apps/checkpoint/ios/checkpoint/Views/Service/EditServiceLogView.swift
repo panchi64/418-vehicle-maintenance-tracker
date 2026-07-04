@@ -20,6 +20,12 @@ struct EditServiceLogView: View {
     @State private var notes: String = ""
     @State private var pendingAttachments: [AttachmentPicker.AttachmentData] = []
     @State private var attachmentForDetail: Document?
+    @State private var alsoMoveNextReminder = false
+
+    // Loaded originals, for change-transparency hints (G8) and gating the
+    // "also move next reminder" toggle to real date/mileage edits.
+    @State private var loadedPerformedDate: Date = Date()
+    @State private var loadedMileageAtService: Int? = nil
 
     private var serviceName: String { log.service?.name ?? "" }
 
@@ -36,6 +42,75 @@ struct EditServiceLogView: View {
         )
     }
 
+    /// This vehicle's logs in chronological order, for the "between two logs" context line.
+    private var vehicleLogsSorted: [ServiceLog] {
+        guard let vehicle = log.vehicle else { return [] }
+        return allServiceLogs
+            .filter { $0.vehicle?.id == vehicle.id }
+            .sorted { $0.performedDate < $1.performedDate }
+    }
+
+    private var adjacentLogs: (before: ServiceLog?, after: ServiceLog?) {
+        let logs = vehicleLogsSorted
+        guard let index = logs.firstIndex(where: { $0.id == log.id }) else { return (nil, nil) }
+        let before = index > 0 ? logs[index - 1] : nil
+        let after = index < logs.count - 1 ? logs[index + 1] : nil
+        return (before, after)
+    }
+
+    private func logSummary(_ log: ServiceLog) -> String {
+        "\(Formatters.mileage(log.mileageAtService)) (\(Formatters.shortDate.string(from: log.performedDate)))"
+    }
+
+    /// Omits whichever half doesn't exist — the earliest/latest log for a
+    /// vehicle only has one neighbor (R5).
+    private var contextLine: String? {
+        switch adjacentLogs {
+        case let (before?, after?):
+            return L10n.editBetweenLogs(logSummary(before), logSummary(after))
+        case let (before?, nil):
+            return L10n.editSinceLog(logSummary(before))
+        case let (nil, after?):
+            return L10n.editBeforeLog(logSummary(after))
+        case (nil, nil):
+            return nil
+        }
+    }
+
+    private var dateOrMileageChanged: Bool {
+        performedDate != loadedPerformedDate || mileageAtService != loadedMileageAtService
+    }
+
+    /// Only the most recent log of a recurring service can move that
+    /// service's next reminder — earlier logs are historical record-keeping.
+    private var isMostRecentLogOfRecurringService: Bool {
+        guard let service = log.service, service.hasIntervalPolicy else { return false }
+        let serviceLogsNewestFirst = (service.logs ?? []).sorted { $0.performedDate > $1.performedDate }
+        return serviceLogsNewestFirst.first?.id == log.id
+    }
+
+    private var showAlsoMoveReminderToggle: Bool {
+        dateOrMileageChanged && isMostRecentLogOfRecurringService
+    }
+
+    private var currentServiceSchedule: ReminderImpactCalculator.Schedule {
+        ReminderImpactCalculator.Schedule(dueDate: log.service?.dueDate, dueMileage: log.service?.dueMileage)
+    }
+
+    /// Mirrors `Service.recalculateDueDates`: always interval-derived from
+    /// this log's (edited) date/mileage, no explicit override.
+    private var proposedServiceSchedule: ReminderImpactCalculator.Schedule {
+        guard let service = log.service, let mileage = mileageAtService else { return currentServiceSchedule }
+        return ReminderImpactCalculator.projected(
+            intervalMonths: service.intervalMonths,
+            intervalMiles: service.intervalMiles,
+            anchorDate: performedDate,
+            anchorMileage: mileage,
+            explicitDueDate: nil,
+            explicitDueMileage: nil
+        )
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -45,14 +120,40 @@ struct EditServiceLogView: View {
                     VStack(spacing: Spacing.lg) {
                         contextHeader
 
+                        if let contextLine {
+                            Text(contextLine)
+                                .font(.brutalistSecondary)
+                                .foregroundStyle(Theme.textTertiary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+
                         VStack(alignment: .leading, spacing: Spacing.sm) {
                             InstrumentSectionHeader(title: "Date Performed")
                             InstrumentDatePicker(label: "Date Performed", date: $performedDate)
+
+                            if performedDate != loadedPerformedDate {
+                                OriginalValueHint(text: L10n.editWas(Formatters.shortDate.string(from: loadedPerformedDate)))
+                            }
                         }
 
                         costSection
 
                         mileageSection
+
+                        if showAlsoMoveReminderToggle {
+                            VStack(alignment: .leading, spacing: Spacing.sm) {
+                                LabeledInstrumentToggle(
+                                    label: "ALSO MOVE NEXT REMINDER",
+                                    accessibilityLabel: L10n.editAlsoMoveReminder,
+                                    isOn: $alsoMoveNextReminder
+                                )
+
+                                if alsoMoveNextReminder,
+                                   let impact = ReminderImpactCalculator.impact(current: currentServiceSchedule, proposed: proposedServiceSchedule) {
+                                    ReminderImpactRow(impact: impact)
+                                }
+                            }
+                        }
 
                         VStack(alignment: .leading, spacing: Spacing.sm) {
                             InstrumentSectionHeader(title: "Notes")
@@ -82,13 +183,17 @@ struct EditServiceLogView: View {
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button(L10n.commonCancel) { dismiss() }
                         .toolbarButtonStyle()
                 }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { saveChanges() }
-                        .toolbarButtonStyle()
-                }
+            }
+            .safeAreaInset(edge: .bottom) {
+                FormActionBar(
+                    primaryTitle: L10n.commonSave,
+                    isPrimaryEnabled: true,
+                    onPrimary: { saveChanges() },
+                    isKeyboardVisible: KeyboardVisibility.shared.isVisible
+                )
             }
             .trackScreen(.editServiceLog)
             .onAppear(perform: loadFromLog)
@@ -185,10 +290,18 @@ struct EditServiceLogView: View {
                 suffix: DistanceSettings.shared.unit.abbreviation
             )
 
+            if mileageAtService != loadedMileageAtService {
+                OriginalValueHint(text: L10n.editWas(hintValue(forMileage: loadedMileageAtService)))
+            }
+
             if let warning = anchors?.mileageWarning {
                 SanityWarningRow(message: warning)
             }
         }
+    }
+
+    private func hintValue(forMileage mileage: Int?) -> String {
+        mileage.map { Formatters.mileage($0) } ?? L10n.impactNone
     }
 
     private func loadFromLog() {
@@ -197,6 +310,9 @@ struct EditServiceLogView: View {
         cost = log.cost.map { NSDecimalNumber(decimal: $0).stringValue } ?? ""
         costCategory = log.costCategory ?? .maintenance
         notes = log.notes ?? ""
+
+        loadedPerformedDate = log.performedDate
+        loadedMileageAtService = log.mileageAtService
     }
 
     private func saveChanges() {
@@ -218,6 +334,14 @@ struct EditServiceLogView: View {
         log.cost = costDecimal
         log.costCategory = costDecimal != nil ? costCategory : nil
         log.notes = newNotes
+
+        if alsoMoveNextReminder, showAlsoMoveReminderToggle,
+           let service = log.service, let mileage = mileageAtService {
+            service.recalculateDueDates(performedDate: performedDate, mileage: mileage)
+            if let vehicle = log.vehicle {
+                ServiceNotificationScheduler.rescheduleNotifications(for: vehicle)
+            }
+        }
 
         for attachmentData in pendingAttachments {
             let thumbnailData = ServiceAttachment.generateThumbnailData(
