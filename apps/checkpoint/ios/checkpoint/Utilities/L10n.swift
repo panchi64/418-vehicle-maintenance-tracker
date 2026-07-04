@@ -388,6 +388,45 @@ enum L10n {
     static var documentTypeReceipt: String { localized("document.type.receipt") }
     static var documentTypeOther: String { localized("document.type.other") }
 
+    // MARK: - Forms (shared)
+
+    static var formDetails: String { localized("form.details") }
+    static func formDetailsCount(_ count: Int) -> String {
+        String(format: localized("form.detailsCount"), count)
+    }
+    static var formOptionalTag: String { localized("form.optionalTag") }
+    static var formSaveAndAddAnother: String { localized("form.saveAndAddAnother") }
+    static var formSavedAddNext: String { localized("form.savedAddNext") }
+    static var formServiceTypeRequired: String { localized("form.serviceTypeRequired") }
+    static var formDraftResumeTitle: String { localized("form.draftResumeTitle") }
+    static func formDraftFrom(_ relativeDate: String) -> String {
+        String(format: localized("form.draftFrom"), relativeDate)
+    }
+    static var formDraftResume: String { localized("form.draftResume") }
+    static var formDraftDiscard: String { localized("form.draftDiscard") }
+
+    static var serviceModeRecord: String { localized("serviceMode.record") }
+    static var serviceModeRemind: String { localized("serviceMode.remind") }
+    static var serviceModeRecordCaption: String { localized("serviceMode.recordCaption") }
+    static var serviceModeRemindCaption: String { localized("serviceMode.remindCaption") }
+
+    static func refCardLast(_ serviceName: String) -> String {
+        String(format: localized("refCard.last"), serviceName)
+    }
+    static var refCardUseValues: String { localized("refCard.useValues") }
+
+    static func editWas(_ value: String) -> String {
+        String(format: localized("edit.was"), value)
+    }
+    static var impactNextReminder: String { localized("impact.nextReminder") }
+    static var impactNone: String { localized("impact.none") }
+    static var editAlsoMoveReminder: String { localized("edit.alsoMoveReminder") }
+    static func editBetweenLogs(_ first: String, _ second: String) -> String {
+        String(format: localized("edit.betweenLogs"), first, second)
+    }
+    static var remindNoScheduleWarning: String { localized("remind.noScheduleWarning") }
+    static var recordSetIntervalHint: String { localized("record.setIntervalHint") }
+
     // MARK: - Helper
 
     private static func localized(_ key: String) -> String {
