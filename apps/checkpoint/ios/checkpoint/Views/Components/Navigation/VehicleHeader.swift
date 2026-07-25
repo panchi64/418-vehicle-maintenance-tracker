@@ -13,6 +13,9 @@ struct VehicleHeader: View {
     var onTap: () -> Void
     var onMileageTap: (() -> Void)? = nil
     var onSettingsTap: (() -> Void)? = nil
+    /// Drives the vehicle-specs panel that hangs below the header. Owned by the
+    /// shell (ContentView) so the panel can render outside this view's bounds.
+    var isSpecsExpanded: Binding<Bool>?
 
     private var syncService: SyncStatusService {
         SyncStatusService.shared
@@ -23,7 +26,10 @@ struct VehicleHeader: View {
         // icon target plus the mileage block), so bottom alignment pushed the
         // vehicle name down and left dead space above it.
         HStack(alignment: .top, spacing: Spacing.md) {
-            leftColumn
+            VStack(alignment: .leading, spacing: 0) {
+                leftColumn
+                specsToggle
+            }
 
             Spacer()
 
@@ -91,6 +97,57 @@ struct VehicleHeader: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel(vehicle?.displayName ?? L10n.headerSelectVehicleAccessibility)
         .accessibilityHint(L10n.headerSelectVehicleHint)
+    }
+
+    /// Specs disclosure, directly beneath the vehicle name so all vehicle
+    /// identity — name, reference data, odometer — reads as one block.
+    ///
+    /// A separate control from the name button: the name opens the vehicle
+    /// picker, and one control cannot own two actions.
+    @ViewBuilder
+    private var specsToggle: some View {
+        if let isSpecsExpanded, vehicle != nil {
+            Button {
+                withAnimation(.easeOut(duration: Theme.animationMedium)) {
+                    isSpecsExpanded.wrappedValue.toggle()
+                }
+            } label: {
+                // Bordered chip, not bare text. A tinted label with a small
+                // chevron reads as a caption; the outline is what makes it
+                // legible as a control at a glance. Deliberately distinct from
+                // the `[SELECT]` bracket style directly above it so the two
+                // controls don't blur together.
+                HStack(spacing: Spacing.xs) {
+                    Text(L10n.headerSpecs)
+                        .font(.brutalistLabel)
+                        .tracking(1.5)
+
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 10, weight: .bold))
+                        .rotationEffect(.degrees(isSpecsExpanded.wrappedValue ? 180 : 0))
+                }
+                .foregroundStyle(
+                    isSpecsExpanded.wrappedValue ? Theme.backgroundPrimary : Theme.accent
+                )
+                .padding(.horizontal, Spacing.sm)
+                .padding(.vertical, 6)
+                .background(isSpecsExpanded.wrappedValue ? Theme.accent : Color.clear)
+                .overlay(
+                    Rectangle()
+                        .strokeBorder(Theme.accent, lineWidth: Theme.borderWidth)
+                )
+                // Keeps the 44pt target without letting the chip itself grow.
+                .frame(minHeight: 44, alignment: .center)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(L10n.headerSpecsAccessibility)
+            .accessibilityValue(
+                isSpecsExpanded.wrappedValue
+                    ? L10n.headerSpecsExpanded
+                    : L10n.headerSpecsCollapsed
+            )
+        }
     }
 
     // MARK: - Right column: settings/sync icons + mileage

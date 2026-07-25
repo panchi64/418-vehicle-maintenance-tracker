@@ -62,6 +62,10 @@ enum L10n {
     static var rowNoDueDate: String { localized("row.noDueDate") }
     static var rowViewDetailsHint: String { localized("row.viewDetailsHint") }
     static var rowServiceFallback: String { localized("row.serviceFallback") }
+    static var headerSpecs: String { localized("header.specs") }
+    static var headerSpecsAccessibility: String { localized("header.specsAccessibility") }
+    static var headerSpecsExpanded: String { localized("header.specsExpanded") }
+    static var headerSpecsCollapsed: String { localized("header.specsCollapsed") }
     static var headerSelectVehicle: String { localized("header.selectVehicle") }
     static var headerSelectVehicleAccessibility: String { localized("header.selectVehicleAccessibility") }
     static var headerSelectVehicleHint: String { localized("header.selectVehicleHint") }

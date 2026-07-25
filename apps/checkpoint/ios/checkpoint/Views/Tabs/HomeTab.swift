@@ -87,29 +87,22 @@ struct HomeTab: View {
         @Bindable var appState = appState
         ScrollView {
             VStack(spacing: Spacing.xl) {
-                // Instrument cluster: compact status cards grouped tightly
-                VStack(spacing: Spacing.md) {
-                    // Recall Alert Card (safety-critical, shown above everything)
-                    if let vehicle = vehicle, !visibleRecalls.isEmpty {
-                        RecallAlertCard(
-                            vehicle: vehicle,
-                            recalls: visibleRecalls,
-                            allRecalls: appState.currentRecalls,
-                            appState: appState
-                        )
-                        .revealAnimation(delay: 0.05)
-                    }
-
-                    // Quick Specs Card
-                    if let vehicle = vehicle {
-                        QuickSpecsCard(
-                            vehicle: vehicle,
-                            onEdit: { appState.showEditVehicle = true },
-                            onDocumentsTap: { appState.showDocuments = true }
-                        )
-                        .tourTarget(.dashboardSpecs, active: onboardingState.currentPhase.isTour)
-                        .revealAnimation(delay: 0.1)
-                    }
+                // Recall alert is safety-critical and outranks everything else,
+                // so it stays first.
+                //
+                // It used to share a tighter-spaced wrapper VStack with
+                // QuickSpecsCard. With specs moved to the persistent shell in
+                // ContentView, that wrapper was left empty whenever there was no
+                // recall — still consuming Spacing.xl above and below, so the
+                // screen opened with ~64pt of dead space.
+                if let vehicle = vehicle, !visibleRecalls.isEmpty {
+                    RecallAlertCard(
+                        vehicle: vehicle,
+                        recalls: visibleRecalls,
+                        allRecalls: appState.currentRecalls,
+                        appState: appState
+                    )
+                    .revealAnimation(delay: 0.05)
                 }
 
                 // Next Up hero card (service or marbete, whichever is more urgent)

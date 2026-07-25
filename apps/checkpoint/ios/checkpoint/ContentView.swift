@@ -18,6 +18,10 @@ struct ContentView: View {
     @State var onboardingState = OnboardingState()
     @State var delayedTask: Task<Void, Never>?
 
+    /// Vehicle-specs disclosure. Lives here rather than inside `VehicleHeader`
+    /// because the trigger is in the header but the panel renders beneath it.
+    @State var isSpecsExpanded = false
+
     /// Guards the per-activation foreground work so it runs once each time the
     /// app becomes active (cold launch or return from background/interruption)
     /// rather than twice — `onAppear` and the launch `scenePhase == .active`
@@ -70,6 +74,10 @@ struct ContentView: View {
 
     /// The persistent visual shell: atmospheric background, vehicle header,
     /// swipeable tab content, bottom fade, floating tab bar, and toast overlay.
+    ///
+    /// Owns the specs disclosure state so the panel can render below the header
+    /// rather than inside it — the trigger lives in `VehicleHeader`, the content
+    /// hangs beneath it, and both stay outside the tabs' scroll views.
     private var rootLayout: some View {
         ZStack {
             AtmosphericBackground()
@@ -80,11 +88,27 @@ struct ContentView: View {
                     vehicle: currentVehicle,
                     onTap: { appState.showVehiclePicker = true },
                     onMileageTap: { appState.showMileageUpdate = true },
-                    onSettingsTap: { appState.showSettings = true }
+                    onSettingsTap: { appState.showSettings = true },
+                    isSpecsExpanded: $isSpecsExpanded
                 )
                 .tourTarget(.vehicleHeader, active: onboardingState.currentPhase.isTour)
                 .padding(.top, Spacing.sm)
                 .revealAnimation(delay: 0.1)
+
+                // Vehicle reference data hangs off the header rather than living
+                // in Home's scroll flow: it is identity, not maintenance state,
+                // and Home's job is answering "what needs doing". Sitting in the
+                // shell also makes it reachable from Services and Costs.
+                //
+                // Collapsed by default, so it costs nothing until asked for.
+                if isSpecsExpanded, let vehicle = currentVehicle {
+                    QuickSpecsCard(
+                        vehicle: vehicle,
+                        onEdit: { appState.showEditVehicle = true },
+                        onDocumentsTap: { appState.showDocuments = true }
+                    )
+                    .tourTarget(.dashboardSpecs, active: onboardingState.currentPhase.isTour)
+                }
 
                 tabContent
             }

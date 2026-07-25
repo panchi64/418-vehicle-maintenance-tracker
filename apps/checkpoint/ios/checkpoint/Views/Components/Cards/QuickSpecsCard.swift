@@ -2,8 +2,22 @@
 //  QuickSpecsCard.swift
 //  checkpoint
 //
-//  Collapsible card showing VIN, tire size, oil type
-//  Collapsed by default, tap to expand
+//  Vehicle reference detail — plate, VIN, tires, oil, marbete, notes, documents.
+//
+//  Presented as a panel hanging directly off `VehicleHeader`, not as a card in
+//  Home's scroll flow. Two reasons:
+//
+//    - This is *identity* data, not maintenance state. Tire size and oil type
+//      never need doing; they are lookup values you want at a parts counter.
+//      Home's job is answering "what needs doing", so reference data was
+//      occupying its most valuable space.
+//    - Living in the persistent shell makes it reachable from Services and
+//      Costs too, not only Home.
+//
+//  The disclosure trigger lives in `VehicleHeader` beneath the vehicle name, so
+//  all vehicle identity reads as one block. This type owns only the expanded
+//  detail — it has no header row of its own, and no border, so it reads as a
+//  continuation of the header rather than a second competing card.
 //
 
 import SwiftUI
@@ -13,7 +27,6 @@ struct QuickSpecsCard: View {
     let onEdit: () -> Void
     let onDocumentsTap: () -> Void
 
-    @State private var isExpanded = false
     @State private var showFullNotes = false
 
     private var hasAnySpecs: Bool {
@@ -39,67 +52,9 @@ struct QuickSpecsCard: View {
         return notes.count > 50
     }
 
+    // No header row of its own: the disclosure trigger lives in VehicleHeader.
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Header (always visible, tappable)
-            Button {
-                withAnimation(.easeOut(duration: Theme.animationMedium)) {
-                    isExpanded.toggle()
-                }
-            } label: {
-                HStack {
-                    Text("SPECS")
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
-                        .tracking(2)
-
-                    Spacer()
-
-                    // Quick preview when collapsed (if has data)
-                    if !isExpanded && hasAnySpecs {
-                        HStack(spacing: Spacing.sm) {
-                            if let licensePlate = vehicle.licensePlate {
-                                Text(licensePlate)
-                                    .font(.brutalistSecondary)
-                                    .foregroundStyle(Theme.textSecondary)
-                            }
-
-                            if let tireSize = vehicle.tireSize {
-                                if vehicle.licensePlate != nil {
-                                    Text("•")
-                                        .font(.brutalistSecondary)
-                                        .foregroundStyle(Theme.gridLine)
-                                }
-
-                                Text(tireSize)
-                                    .font(.brutalistSecondary)
-                                    .foregroundStyle(Theme.textSecondary)
-                            }
-                        }
-                    }
-
-                    // Chevron indicator with rotation
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(Theme.accent)
-                        .rotationEffect(.degrees(isExpanded ? 180 : 0))
-                }
-                .padding(Spacing.md)
-                .background(Theme.surfaceInstrument)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Vehicle specs")
-            .accessibilityValue(isExpanded ? "Expanded" : "Collapsed")
-            .accessibilityHint(isExpanded ? "Double tap to collapse" : "Double tap to expand")
-
-            // Expandable content
-            if isExpanded {
-                VStack(spacing: 0) {
-                    Rectangle()
-                        .fill(Theme.gridLine)
-                        .frame(height: 1)
-
+        VStack(spacing: 0) {
                     // Specs grid - values first, labels below
                     VStack(spacing: Spacing.lg) {
                         // License Plate and VIN
@@ -212,7 +167,12 @@ struct QuickSpecsCard: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
-                    .padding(Spacing.md)
+                    // Horizontal inset matches VehicleHeader and the tabs
+                    // (Spacing.screenHorizontal), so the panel's values line up
+                    // with the vehicle name above them rather than sitting 4pt
+                    // inboard.
+                    .padding(.horizontal, Spacing.screenHorizontal)
+                    .padding(.vertical, Spacing.md)
                     .padding(.bottom, Spacing.xs)
 
                     // Divider before edit button
@@ -237,13 +197,11 @@ struct QuickSpecsCard: View {
                         .contentShape(Rectangle())
                     }
                     .accessibilityLabel(hasAnySpecs ? "Edit vehicle specs" : "Add vehicle specs")
-                }
-                .background(Theme.surfaceInstrument)
-                .transition(.opacity)
-            }
         }
-        .brutalistBorder()
-        .clipped()
+        .background(Theme.surfaceInstrument)
+        // No border: this reads as a continuation of the header above it, not a
+        // second card. Fade-only transition per AESTHETIC.md (Motion).
+        .transition(.opacity)
         .sheet(isPresented: $showFullNotes) {
             FullNotesView(notes: vehicle.notes ?? "")
         }

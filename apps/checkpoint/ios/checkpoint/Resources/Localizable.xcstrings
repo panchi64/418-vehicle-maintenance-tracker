@@ -708,6 +708,35 @@
         "es" : { "stringUnit" : { "state" : "translated", "value" : "%lld días de retraso" } }
       }
     },
+    "header.specs" : {
+      "comment" : "Disclosure trigger beneath the vehicle name that reveals reference data (plate, VIN, tires, oil).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "SPECS" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "FICHA" } }
+      }
+    },
+    "header.specsAccessibility" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Vehicle specs" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ficha del vehículo" } }
+      }
+    },
+    "header.specsExpanded" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Expanded" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Expandido" } }
+      }
+    },
+    "header.specsCollapsed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Collapsed" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Contraído" } }
+      }
+    },
     "header.selectVehicle" : {
       "comment" : "Vehicle header placeholder when no vehicle is selected. Displayed uppercase.",
       "extractionState" : "manual",
