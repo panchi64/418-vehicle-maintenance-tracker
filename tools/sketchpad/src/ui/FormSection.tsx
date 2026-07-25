@@ -50,13 +50,24 @@ export function FormSection(props: {
           {props.title}
         </LabelBold>
 
+        {/* 2px, not 1. The section title is 11pt Bold caps and a field label is
+            11pt Medium caps — the same size, so the RULE is what actually marks a
+            section boundary, and it should be as heavy as any other structural
+            border in the app. */}
         <div
           aria-hidden="true"
-          style={{ flex: '1 1 auto', height: '1px', background: 'var(--grid-line)' }}
+          style={{
+            flex: '1 1 auto',
+            height: 'var(--border-width)',
+            background: 'var(--grid-line)',
+          }}
         />
 
+        {/* Tertiary, not accent. In the default theme `accent` equals
+            `textPrimary`, so an accent-coloured note renders at FULL brightness —
+            this annotation was outshining the section title it belongs to. */}
         <Show when={props.trailing}>
-          <Label color="accent" tracking={1}>
+          <Label color="tertiary" tracking={1}>
             {props.trailing}
           </Label>
         </Show>

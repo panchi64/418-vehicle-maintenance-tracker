@@ -5,7 +5,7 @@
 import type { JSX } from 'solid-js'
 import { createSignal, For, Show } from 'solid-js'
 import { Dynamic } from 'solid-js/web'
-import { Body, Label, LabelBold, Secondary } from './Text'
+import { Body, Emphasis, Label, LabelBold, Secondary } from './Text'
 import { Backdrop, OptionList, type Option } from './OptionList'
 
 // --- Segmented control (InstrumentSegmentedControl) -----------------------
@@ -70,28 +70,36 @@ interface ChipProps {
   selected?: boolean
   onClick?: () => void
   /**
-   * `outlined` — a real choice set. Spend an enclosure here.
-   * `plain` — a shortcut. No enclosure at all; selection is accent text over a rule.
+   * `decision` (default) — the choice a surface exists to capture. Outlined, and
+   *   set in **15 Medium sentence case**: `brutalistBodyEmphasis`, which the type
+   *   scale defines as "the one primary datum". A timing chip IS that datum.
+   * `plain` — a shortcut. No enclosure, 11 Medium caps, selection by weight.
    *
-   * The form previously rendered every control as an outlined rectangle: eight
-   * quick-service chips, seven timing chips, six category chips, three boxed
-   * fields. Twenty-four identical enclosures, so none of them read as the
-   * decision — which is what made the form a wall. Enclosure is now a budget
-   * spent only on the choice that derives the intent.
+   * Two faults are being corrected here.
+   *
+   * ENCLOSURE. The form once rendered every control as an outlined rectangle —
+   * eight quick-service chips, seven timing chips, six category chips, three
+   * boxed fields. Twenty-four identical enclosures, so none read as the decision.
+   *
+   * TYPE. Every chip was then 11pt Medium caps at 1.5 tracking, which is exactly
+   * the FIELD-LABEL treatment. Measured across the whole form, 25 of 36 text
+   * elements were 11pt: the decision was set in the smallest, most label-like
+   * type in the system, and only its border said otherwise. Caps and heavy
+   * tracking also make a phrase read as metadata — "PICK A DATE…" is shouted
+   * where "Pick a date…" is offered.
    */
-  variant?: 'outlined' | 'plain'
+  variant?: 'decision' | 'plain'
 }
 
 export function Chip(props: ChipProps) {
   const plain = () => props.variant === 'plain'
 
-  /* A plain chip's selected state is colour + WEIGHT, never a rule.
-     It first used an accent underline, which is the same visual device as a
-     Field's bottom rule — so the input and the suggestions below it read as the
-     same kind of control, and since tapping a chip copies its text into the
-     field, the same words appeared twice in the same treatment. Weight keeps two
-     channels without borrowing the field's. */
-  const Type = () => (plain() && props.selected ? LabelBold : Label)
+  /* Plain chips: selection is colour + WEIGHT, never a rule. An accent underline
+     was tried first and is the same visual device as a Field's bottom rule — so
+     the input and the suggestions beneath it read as the same kind of control,
+     and since tapping a chip copies its text into the field, the same words
+     appeared twice in the same treatment. */
+  const Type = () => (plain() ? (props.selected ? LabelBold : Label) : Emphasis)
 
   return (
     <button
@@ -121,7 +129,7 @@ export function Chip(props: ChipProps) {
               : 'var(--text-secondary)'
             : props.selected
               ? 'var(--background-primary)'
-              : 'var(--text-secondary)',
+              : 'var(--text-primary)',
           'white-space': 'nowrap',
         }}
       >
@@ -219,8 +227,10 @@ export function Field(props: FieldProps) {
             'min-width': '0',
           }}
         />
+        {/* 13pt, not 15. A unit annotation set at the same size as the value it
+            annotates competes with it; "mi" is not as important as "33,417". */}
         <Show when={props.suffix}>
-          <Body color="tertiary">{props.suffix}</Body>
+          <Secondary color="tertiary">{props.suffix}</Secondary>
         </Show>
       </div>
 

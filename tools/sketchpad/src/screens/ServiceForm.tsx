@@ -25,7 +25,7 @@ import { Chip, ChipRow, Field, InlinePicker, Toggle } from '../ui/Controls'
 import { FormSection, FormSubgroup } from '../ui/FormSection'
 import { FormAdvisory } from '../ui/FormAdvisory'
 import { FormActionBar } from '../ui/FormActionBar'
-import { Body, Emphasis, Label, Secondary } from '../ui/Text'
+import { Body, Emphasis, Heading, Label, Secondary } from '../ui/Text'
 import {
   categoryLabels,
   fmtMileageBare,
@@ -185,10 +185,13 @@ export function ServiceForm(props: { onClose?: () => void }) {
         }}
       >
         {/* The title states what will happen, which is how the derived intent
-            becomes visible without ever asking the user to pick a mode. */}
-        <Emphasis rank="primary" uppercase tracking={1}>
+            becomes visible without ever asking the user to pick a mode.
+
+            20pt, not 15. At 15 Medium it was the same size as the body text and
+            the save button, so the sheet had no title tier at all. */}
+        <Heading rank="primary" uppercase tracking={1}>
           {intent() === 'schedule' ? 'New reminder' : intent() === 'log' ? 'New entry' : 'Add service'}
-        </Emphasis>
+        </Heading>
         <button onClick={props.onClose} style={{ 'min-height': 'var(--touch-target)' }}>
           <Label color="accent" tracking={1}>
             [Cancel]

@@ -70,6 +70,27 @@ The rule does most of the work: a section boundary becomes a line across the scr
 
 When a `FormSection` header already names its single field, that field takes no label. Two identical labels stacked on one input is worse than none.
 
+## Measure the type distribution, don't eyeball it
+
+"Does this have hierarchy?" is answerable with a DOM query, and the answer is often not what looking at it suggests. Paste this in the console:
+
+```js
+const b = {}; const app = document.querySelector('.hz-app');
+(function walk(el){ for (const c of el.children) {
+  if ([...c.childNodes].some(n => n.nodeType === 3 && n.textContent.trim())) {
+    const s = getComputedStyle(c);
+    const k = `${Math.round(parseFloat(s.fontSize))}px/${s.fontWeight}${s.textTransform!=='none'?' CAPS':''}`;
+    b[k] = (b[k]||0)+1;
+  } walk(c); } })(app);
+console.table(b)
+```
+
+On the service form this returned **25 of 36 elements at 11pt — 69% of the screen in one size**, and showed that the timing chips (the decision the form exists to capture) were set in 11pt Medium caps at 1.5 tracking: *the exact field-label treatment*. Only their border said they were anything more. That is invisible by eye because each group looks locally fine; it is obvious in a histogram.
+
+The fix was to give the decision the type it deserves — 15 Medium sentence case, which the scale defines as "the one primary datum" — and to stop caps-and-tracking making offers read as metadata (`PICK A DATE…` is shouted; `Pick a date…` is offered). 11pt went to 54%, and the form now has four legible tiers: 20 title → 15 decisions and values → 13 subgroups and support → 11 labels and shortcuts.
+
+**Watch for accent-equals-primary.** In the default theme `accent` (#F5F0DC) *is* `textPrimary`, so colouring something `accent` buys no differentiation — it just renders at full brightness. A `REQUIRED` note tinted accent was outshining the section title it annotated. This is why the app leans on bracket notation for affordances rather than colour, and it is a good reason to check any colour-based hierarchy in a second theme.
+
 ## Advisory or readout?
 
 Both are quiet 13pt lines, so it is easy to reach for the wrong one. The severity ladder is for things that need **attention or resolution**. A projected outcome is a **value**, and gets a label plus emphasis weight.
