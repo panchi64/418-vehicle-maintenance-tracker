@@ -116,3 +116,6 @@ Secrets.xcconfig
 node_modules
 .vinxi
 dist
+
+# Claude Code local overrides (machine-specific)
+.claude/settings.local.json

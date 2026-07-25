@@ -8,6 +8,8 @@ Read [`docs/SURFACE_DOCTRINE.md`](../../../docs/SURFACE_DOCTRINE.md) — surface
 
 Short version: every section gets exactly one primary element distinguished on two or more channels (never color alone — status owns color), and anything a feature needs in order to *function* stays on the default path rather than inside a disclosure drawer.
 
+**Sketch the layout before you build it.** [`tools/sketchpad/`](../../../tools/sketchpad/CLAUDE.md) is a SolidJS recreation of this app's UI running against the real `Themes.json` and JetBrains Mono. Iterating there is ~1 second versus ~40 for a `xcodebuild` → launch → screenshot cycle, and it audits the one-primary rule, blurs for the squint test, counts taps against a budget, and switches all eight themes and Dynamic Type. Settle the arrangement there, implement it here, then verify on the Simulator — the sketchpad cannot see keyboard avoidance, VoiceOver, or scroll physics.
+
 ## Security Posture
 
 These invariants were validated in the pre-launch security audit. Preserve them as the app evolves:

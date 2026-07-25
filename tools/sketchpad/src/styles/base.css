@@ -1,0 +1,138 @@
+/*
+ * base.css — Checkpoint's design tokens, transcribed to CSS.
+ *
+ * Sizes are 1:1 with iOS points: the device frame renders at logical size, so
+ * 15pt in Typography.swift is 15px here.
+ *
+ * Color tokens are NOT defined here. They are injected at runtime from the real
+ * apps/checkpoint/ios/checkpoint/Resources/Themes.json — see src/theme/themes.ts.
+ * Anything hardcoding a hue in this file would defeat the point.
+ */
+
+/* JetBrains Mono, read straight out of DesignKit rather than copied in, so the
+   sketchpad can never render a different cut of the font than the app does. */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-weight: 300;
+  font-style: normal;
+  font-display: block;
+  src: url('../../../../packages/DesignKit/Sources/DesignKit/Resources/Fonts/JetBrainsMono-Light.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+  src: url('../../../../packages/DesignKit/Sources/DesignKit/Resources/Fonts/JetBrainsMono-Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-weight: 500;
+  font-style: normal;
+  font-display: block;
+  src: url('../../../../packages/DesignKit/Sources/DesignKit/Resources/Fonts/JetBrainsMono-Medium.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+  src: url('../../../../packages/DesignKit/Sources/DesignKit/Resources/Fonts/JetBrainsMono-Bold.ttf') format('truetype');
+}
+
+:root {
+  /* --- Type scale (Typography.swift) -------------------------------------
+     Multiplied by --type-scale so the harness can simulate Dynamic Type.
+     Dynamic Type support is a [REQUIREMENT] in AESTHETIC.md, which means a
+     layout that only survives at 1.0 is not done. */
+  --type-scale: 1;
+
+  --font-hero: 300 calc(56px * var(--type-scale)) / 1.02 var(--font-family);
+  --font-title: 500 calc(32px * var(--type-scale)) / 1.1 var(--font-family);
+  --font-heading: 500 calc(20px * var(--type-scale)) / 1.2 var(--font-family);
+  --font-body-emphasis: 500 calc(15px * var(--type-scale)) / 1.35 var(--font-family);
+  --font-body: 400 calc(15px * var(--type-scale)) / 1.35 var(--font-family);
+  --font-secondary: 400 calc(13px * var(--type-scale)) / 1.35 var(--font-family);
+  --font-label: 500 calc(11px * var(--type-scale)) / 1.2 var(--font-family);
+  --font-label-bold: 700 calc(11px * var(--type-scale)) / 1.2 var(--font-family);
+
+  /* Swapped per theme by fontDesign: monospaced | rounded | serif */
+  --font-family: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* --- Spacing (Spacing.swift, 4pt base) --------------------------------- */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-list-item: 12px;
+  --space-md: 16px;
+  --space-screen-h: 20px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-xxl: 48px;
+  --space-tab-bar-offset: 56px;
+
+  /* --- Layout constants (Theme.swift) ----------------------------------- */
+  --border-width: 2px;
+  --card-padding: 16px;
+  --button-height: 48px;
+  --radius: 0px; /* Sharp corners. AESTHETIC.md [REQUIREMENT]. */
+  --touch-target: 44px;
+  --tab-bar-height: 72px;
+
+  /* --- Animation -------------------------------------------------------- */
+  --anim-fast: 0.1s;
+  --anim-medium: 0.2s;
+  --anim-slow: 0.3s;
+}
+
+/* Themes with a non-monospaced fontDesign fall back to SF, matching
+   Font.brutalist(...) in Typography.swift. */
+:root[data-font-design='rounded'] {
+  --font-family: ui-rounded, 'SF Pro Rounded', system-ui, sans-serif;
+}
+:root[data-font-design='serif'] {
+  --font-family: ui-serif, 'New York', Georgia, serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border-radius: var(--radius);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font: var(--font-body);
+  background: #0a0a0b;
+  color: #e8e8ea;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+}
+
+input:focus,
+button:focus-visible,
+select:focus-visible {
+  outline: var(--border-width) solid var(--accent);
+  outline-offset: 2px;
+}

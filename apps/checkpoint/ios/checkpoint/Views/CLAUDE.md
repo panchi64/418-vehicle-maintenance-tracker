@@ -4,6 +4,10 @@ All SwiftUI views, organized by feature area.
 
 **Before designing or changing any screen, read [`docs/SURFACE_DOCTRINE.md`](../../../../../docs/SURFACE_DOCTRINE.md).** It defines the three surface classes (Readout / Switchboard / Decision), the hierarchy and disclosure rules, the advisory severity ladder, the required/optional vocabulary, and the `F*` invariants that this directory's components cite in their comments. Available tokens and modifiers are catalogued in [`DesignSystem/CLAUDE.md`](../DesignSystem/CLAUDE.md).
 
+**Non-trivial layout changes start in [`tools/sketchpad/`](../../../../../tools/sketchpad/CLAUDE.md), not here.** It mirrors these views in SolidJS against the real themes and fonts, so an arrangement can be tried in a second instead of a 40-second rebuild — and it audits the one-primary rule mechanically. Port the settled design into this directory, then verify on the Simulator. Several sketchpad screens (the unified service form, the single-`[+]` tab bar, the collapsed Services chrome) are deliberately **ahead** of the code here; where they disagree, the sketchpad shows the target.
+
+Every `#Preview` in this directory hot-reloads in roughly a second in Xcode. Reach for that before a full rebuild — a full `xcodebuild` cycle is only needed to verify an integrated screen end to end.
+
 ## Directory structure
 
 ```

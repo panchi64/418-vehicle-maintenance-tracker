@@ -175,6 +175,14 @@ Answer these in the PR description for any new or changed surface. They are shor
 
 **Tap-budget test (Decision).** From cold launch, complete the default path. Count the taps and check them against the budget stated in the PR. No drawer expansion permitted on the default path.
 
+**Squint test (any surface).** Blur the screen until the words are unreadable. The primary element must still be identifiable. If it isn't, the hierarchy is carried by the content rather than the layout — which reads fine at a desk and fails in a parking lot.
+
+### Run them before implementing, not after
+
+[`tools/sketchpad/`](../tools/sketchpad/CLAUDE.md) recreates the UI in SolidJS against the real `Themes.json` and fonts, and implements three of these as instruments: it audits every section for exactly one primary, blurs on demand, and counts taps against a declared budget. It also switches all eight themes and scales Dynamic Type to 2×.
+
+A SwiftUI iteration costs ~40 seconds; the sketchpad costs about one. **Resolve the layout there, port it, then verify on the Simulator** — the sketchpad is blind to keyboard avoidance (so invariant F3 always looks satisfied), VoiceOver order, scroll physics, and real font rasterization.
+
 ## Known open items
 
 Recorded so they are not rediscovered as though they were new:

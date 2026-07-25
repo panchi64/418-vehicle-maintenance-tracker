@@ -39,6 +39,8 @@ Other themes diverge substantially, including in `colorScheme` and `fontDesign`.
 
 Add it to `ThemeProviding`, implement it on every provider, and add it to all eight entries in `Themes.json`. See [`packages/DesignKit/CLAUDE.md`](../../../../../packages/DesignKit/CLAUDE.md).
 
+Then add the key to `COLOR_KEYS` in [`tools/sketchpad/src/theme/themes.ts`](../../../../../tools/sketchpad/src/theme/themes.ts). The sketchpad imports `Themes.json` directly rather than copying it, so hues never drift — but that one array is the list of keys it exposes as CSS variables, and a token missing from it simply won't render there.
+
 ## Typography
 
 Monospaced themes use bundled JetBrains Mono via DesignKit; other themes fall back to `.system` with the theme's `fontDesign`. All accessors are `@MainActor` because they read `ThemeManager`.

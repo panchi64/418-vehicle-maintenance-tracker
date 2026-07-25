@@ -16,6 +16,7 @@
 - `packages/VehicleSharing/` — Cross-app odometer bridge over App Group `group.com.418-studio.shared`. Checkpoint publishes odometers + drains queued updates; Biombo reads + queues. See `packages/VehicleSharing/CLAUDE.md`.
 
 **Internal tooling:**
+- `tools/sketchpad/` — **SolidJS recreation of Checkpoint's UI, for settling layouts before writing SwiftUI.** Reads the real `Themes.json` and JetBrains Mono, so it renders what the app renders. Ships nothing. Run `tools/sketchpad/dev.sh`. See `tools/sketchpad/CLAUDE.md`.
 - `tools/depth-backdrops/` — Local web app (Python/FastAPI + React/WebGL) that generates the cerulean depth-map backdrops behind device mockups in App Store screenshots. Run `tools/depth-backdrops/dev.sh`. See `tools/depth-backdrops/CLAUDE.md`.
 
 **Docs:**
@@ -33,6 +34,8 @@ Checkpoint's identity is strong on **readouts** (hero cards, status headlines) a
 - **Default-disclose what makes a feature *work*; hide what makes it *complete*.** An interval that makes a reminder fire belongs on the default path; notes and attachments belong in depth.
 
 `docs/SURFACE_DOCTRINE.md` has the rest, including a pre-flight checklist for PRs.
+
+**Resolve the layout in `tools/sketchpad/` first.** A SwiftUI iteration is a ~40 second build-install-launch-screenshot loop; the sketchpad is about a second, and it reads the real themes and fonts. It also runs the one-primary audit, the squint test, and the tap-budget count as tooling rather than as things to remember. Explore there, port the resolved design to SwiftUI, then verify on the Simulator — the sketchpad cannot see keyboard avoidance, VoiceOver, or scroll physics.
 
 ## Progressive disclosure
 
