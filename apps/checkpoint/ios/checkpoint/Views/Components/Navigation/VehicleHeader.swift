@@ -112,31 +112,20 @@ struct VehicleHeader: View {
                     isSpecsExpanded.wrappedValue.toggle()
                 }
             } label: {
-                // Bordered chip, not bare text. A tinted label with a small
-                // chevron reads as a caption; the outline is what makes it
-                // legible as a control at a glance. Deliberately distinct from
-                // the `[SELECT]` bracket style directly above it so the two
-                // controls don't blur together.
+                // Bracket notation, matching `[SELECT]` above and `[UPDATE]`
+                // opposite. Brackets are this app's established signal for
+                // "this text is a control" — a boxed chip is foreign to the
+                // header, and a bare unbracketed label reads as a caption.
                 HStack(spacing: Spacing.xs) {
-                    Text(L10n.headerSpecs)
+                    Text("[\(L10n.headerSpecs)]")
                         .font(.brutalistLabel)
-                        .tracking(1.5)
+                        .tracking(1)
 
                     Image(systemName: "chevron.down")
-                        .font(.system(size: 10, weight: .bold))
+                        .font(.system(size: 9, weight: .semibold))
                         .rotationEffect(.degrees(isSpecsExpanded.wrappedValue ? 180 : 0))
                 }
-                .foregroundStyle(
-                    isSpecsExpanded.wrappedValue ? Theme.backgroundPrimary : Theme.accent
-                )
-                .padding(.horizontal, Spacing.sm)
-                .padding(.vertical, 6)
-                .background(isSpecsExpanded.wrappedValue ? Theme.accent : Color.clear)
-                .overlay(
-                    Rectangle()
-                        .strokeBorder(Theme.accent, lineWidth: Theme.borderWidth)
-                )
-                // Keeps the 44pt target without letting the chip itself grow.
+                .foregroundStyle(Theme.accent)
                 .frame(minHeight: 44, alignment: .center)
                 .contentShape(Rectangle())
             }
