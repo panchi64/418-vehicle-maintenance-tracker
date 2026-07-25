@@ -11,7 +11,7 @@ extension CostsTab {
                 options: PeriodFilter.allCases,
                 selection: $periodFilter
             ) { filter in
-                filter.rawValue
+                filter.displayName
             }
             .revealAnimation(delay: 0.1)
 
@@ -19,7 +19,7 @@ extension CostsTab {
                 options: CategoryFilter.allCases,
                 selection: $categoryFilter
             ) { filter in
-                filter.rawValue
+                filter.displayName
             }
             .revealAnimation(delay: 0.12)
         }

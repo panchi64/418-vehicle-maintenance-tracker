@@ -35,6 +35,97 @@ enum L10n {
         String(format: localized("mileage.alsoUpdates"), previous, updated)
     }
 
+    // MARK: - List rows
+    //
+    // Rule 11: no display string built by concatenation. These replaced
+    // hand-assembled strings like "\(days)D OVERDUE" and "LAST: \(time)",
+    // which could not be translated and forced English word order.
+
+    static func rowDistanceLeft(_ distance: String) -> String {
+        String(format: localized("row.distanceLeft"), distance)
+    }
+    static func rowDistanceOverdue(_ distance: String) -> String {
+        String(format: localized("row.distanceOverdue"), distance)
+    }
+    static var rowDueNow: String { localized("row.dueNow") }
+    static var rowDueToday: String { localized("row.dueToday") }
+    static var rowDueTomorrow: String { localized("row.dueTomorrow") }
+    static func rowDaysLeft(_ days: Int) -> String {
+        String(format: localized("row.daysLeft"), days)
+    }
+    static func rowDaysOverdue(_ days: Int) -> String {
+        String(format: localized("row.daysOverdue"), days)
+    }
+    static func rowLastPerformed(_ relativeTime: String) -> String {
+        String(format: localized("row.lastPerformed"), relativeTime)
+    }
+    static var rowNoDueDate: String { localized("row.noDueDate") }
+    static var rowViewDetailsHint: String { localized("row.viewDetailsHint") }
+    static var rowServiceFallback: String { localized("row.serviceFallback") }
+    static var headerSelectVehicle: String { localized("header.selectVehicle") }
+    static var headerSelectVehicleAccessibility: String { localized("header.selectVehicleAccessibility") }
+    static var headerSelectVehicleHint: String { localized("header.selectVehicleHint") }
+    static var rowNoCostRecorded: String { localized("row.noCostRecorded") }
+    static var rowNoTotalRecorded: String { localized("row.noTotalRecorded") }
+    static var rowOutlierAccessibility: String { localized("row.outlierAccessibility") }
+    static var rowVisitTitle: String { localized("row.visitTitle") }
+    static var rowVisitTag: String { localized("row.visitTag") }
+    static func rowVisitTitleCount(_ count: Int) -> String {
+        String(format: localized("row.visitTitleCount"), count)
+    }
+    static func rowCompletedAccessibility(_ name: String, _ date: String) -> String {
+        String(format: localized("row.completedAccessibility"), name, date)
+    }
+    static func rowVisitAccessibility(_ date: String, _ count: Int) -> String {
+        String(format: localized("row.visitAccessibility"), date, count)
+    }
+
+    // MARK: - Relative time
+
+    /// Lowercase — composes inside a sentence ("Last done today").
+    static var timeSinceToday: String { localized("timeSince.today") }
+    /// Sentence-cased — stands alone as a value.
+    static var timeSinceTodaySentence: String { localized("timeSince.todaySentence") }
+    static var timeSinceYesterdaySentence: String { localized("timeSince.yesterdaySentence") }
+    static var timeSinceYesterday: String { localized("timeSince.yesterday") }
+    static var timeSinceOneMonthAgo: String { localized("timeSince.oneMonthAgo") }
+    static func timeSinceDaysAgo(_ days: Int) -> String {
+        String(format: localized("timeSince.daysAgo"), days)
+    }
+    static func timeSinceMonthsAgo(_ months: Int) -> String {
+        String(format: localized("timeSince.monthsAgo"), months)
+    }
+    static func timeSinceDaysAgoShort(_ days: Int) -> String {
+        String(format: localized("timeSince.daysAgoShort"), days)
+    }
+    static func timeSinceMonthsAgoShort(_ months: Int) -> String {
+        String(format: localized("timeSince.monthsAgoShort"), months)
+    }
+
+    // MARK: - Filters and view modes
+    //
+    // Rule 10: enums that reach the UI expose `displayName`; `rawValue` stays
+    // storage. These previously rendered their raw values directly, so the tab
+    // chrome was unlocalizable and presentation was welded to persistence.
+
+    /// Shared across every "no filter applied" control.
+    static var filterAll: String { localized("filter.all") }
+
+    static var servicesViewList: String { localized("servicesTab.viewList") }
+    static var servicesViewTimeline: String { localized("servicesTab.viewTimeline") }
+    static var servicesViewDocuments: String { localized("servicesTab.viewDocuments") }
+
+    static var costsPeriodMonth: String { localized("costs.periodMonth") }
+    static var costsPeriodYTD: String { localized("costs.periodYTD") }
+    static var costsPeriodYear: String { localized("costs.periodYear") }
+    static var costsPeriodAll: String { localized("costs.periodAll") }
+
+    static var categoryMaintenance: String { localized("category.maintenance") }
+    /// Abbreviated form for the width-constrained segmented filter.
+    static var categoryMaintenanceShort: String { localized("category.maintenanceShort") }
+    static var categoryRepair: String { localized("category.repair") }
+    static var categoryUpgrade: String { localized("category.upgrade") }
+
     static var advisoryBlocking: String { localized("advisory.a11yBlocking") }
     static var advisoryCaution: String { localized("advisory.a11yCaution") }
     static var advisoryDecision: String { localized("advisory.a11yDecision") }

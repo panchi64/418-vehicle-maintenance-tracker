@@ -32,11 +32,27 @@ struct CostsTab: View {
         }
     }
 
+    /// Raw values are **storage** — they persist in analytics events and must
+    /// stay stable. `displayName` is what reaches the screen (rule 10).
+    ///
+    /// Note for Phase 3: these labels mix rolling windows (`month` = last 30
+    /// days, `year` = last 12 months) with a calendar-anchored one (`ytd` =
+    /// since Jan 1), which is genuinely ambiguous to a reader. Relabeling is a
+    /// Costs-tab layout decision, so it is deferred rather than changed here.
     enum PeriodFilter: String, CaseIterable {
         case month = "Month"
         case ytd = "YTD"
         case year = "Year"
         case all = "All"
+
+        var displayName: String {
+            switch self {
+            case .month: return L10n.costsPeriodMonth
+            case .ytd: return L10n.costsPeriodYTD
+            case .year: return L10n.costsPeriodYear
+            case .all: return L10n.costsPeriodAll
+            }
+        }
 
         var startDate: Date? {
             let calendar = Calendar.current
@@ -58,6 +74,14 @@ struct CostsTab: View {
         case maintenance = "Maint."
         case repair = "Repair"
         case upgrade = "Upgrade"
+
+        /// Defers to `CostCategory.shortDisplayName` rather than carrying its
+        /// own copy of the category names — the filter and the category badge
+        /// on an expense row must always read the same.
+        var displayName: String {
+            guard let costCategory else { return L10n.filterAll }
+            return costCategory.shortDisplayName
+        }
 
         var costCategory: CostCategory? {
             switch self {

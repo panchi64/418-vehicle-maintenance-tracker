@@ -2,10 +2,14 @@
 //  VisitExpenseRow.swift
 //  checkpoint
 //
-//  Single-row representation of a Service Visit inside expense lists.
-//  Mirrors `ExpenseRow` so the two render side-by-side without visual
-//  drift, but the row collapses N child services into one summary line —
-//  the whole point of fixing the divide-by-N bug.
+//  Maps a `ServiceVisit` onto `ServiceEventRow`. The row collapses N child
+//  services into one summary line — the whole point of fixing the divide-by-N
+//  bug, where a single entered total was split across children and stored as a
+//  fabricated per-service cost.
+//
+//  Shares `ServiceEventRow` with `ExpenseRow` so the two render side-by-side in
+//  the same list without drifting apart. Previously they were separate
+//  implementations kept in sync by hand.
 //
 
 import SwiftUI
@@ -28,95 +32,47 @@ struct VisitExpenseRow: View {
         self.isHighlighted = isHighlighted
     }
 
+    private var tint: Color {
+        visit.costCategory?.color ?? Theme.accent
+    }
+
+    private var formattedDate: String {
+        Formatters.mediumDate.string(from: visit.performedDate)
+    }
+
+    /// A single-service visit reads as that service; multiple reads as a count.
+    private var title: String {
+        switch visit.serviceCount {
+        case 0:
+            return L10n.rowVisitTitle
+        case 1:
+            return (visit.logs ?? []).first?.service?.name ?? L10n.rowVisitTitle
+        default:
+            return L10n.rowVisitTitleCount(visit.serviceCount)
+        }
+    }
+
+    private var metadata: [ServiceEventRow.Metadatum] {
+        var items: [ServiceEventRow.Metadatum] = [
+            .detail(formattedDate),
+            .tag(L10n.rowVisitTag, color: tint)
+        ]
+        if isAnomalous {
+            items.append(.tag(L10n.costsRowOutlier, color: Theme.statusOverdue))
+        }
+        return items
+    }
+
     var body: some View {
-        Button {
-            onTap?()
-        } label: {
-            content
-        }
-        .buttonStyle(.plain)
-        .disabled(onTap == nil)
-    }
-
-    private var content: some View {
-        HStack(spacing: Spacing.sm) {
-            Image(systemName: "checkmark.rectangle.stack")
-                .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(visit.costCategory?.color ?? Theme.accent)
-                .frame(width: 20)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(serviceListLabel)
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textPrimary)
-                    .lineLimit(1)
-
-                metadataRow
-            }
-
-            Spacer()
-
-            if let formattedTotal = visit.formattedTotalCost {
-                Text(formattedTotal)
-                    .font(.brutalistHeading)
-                    .foregroundStyle(visit.costCategory?.color ?? Theme.accent)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-            }
-
-            if onTap != nil {
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Theme.textTertiary)
-            }
-        }
-        .padding(Spacing.md)
-        .background(isHighlighted ? Theme.accent.opacity(0.12) : Color.clear)
-        .contentShape(Rectangle())
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Service Visit on \(formatDate(visit.performedDate)), \(visit.serviceCount) services")
-        .accessibilityValue(visit.formattedTotalCost ?? "No total recorded")
-        .accessibilityHint(onTap != nil ? "Double tap to view the visit" : "")
-    }
-
-    private var metadataRow: some View {
-        HStack(spacing: 4) {
-            Text(formatDate(visit.performedDate))
-                .font(.brutalistSecondary)
-                .foregroundStyle(Theme.textTertiary)
-
-            Text("//")
-                .font(.brutalistSecondary)
-                .foregroundStyle(Theme.textTertiary)
-
-            Text("SERVICE VISIT")
-                .font(.brutalistLabel)
-                .foregroundStyle(visit.costCategory?.color ?? Theme.accent)
-                .tracking(0.5)
-
-            if isAnomalous {
-                Text("//")
-                    .font(.brutalistSecondary)
-                    .foregroundStyle(Theme.textTertiary)
-
-                Text(L10n.costsRowOutlier)
-                    .font(.brutalistLabelBold)
-                    .foregroundStyle(Theme.statusOverdue)
-                    .tracking(1.5)
-            }
-        }
-    }
-
-    private var serviceListLabel: String {
-        let count = visit.serviceCount
-        switch count {
-        case 0: return "Service Visit"
-        case 1: return (visit.logs ?? []).first?.service?.name ?? "Service Visit"
-        default: return "Service Visit · \(count) services"
-        }
-    }
-
-    private func formatDate(_ date: Date) -> String {
-        Formatters.mediumDate.string(from: date)
+        ServiceEventRow(
+            indicator: .bundledVisit(tint),
+            title: title,
+            metadata: metadata,
+            amount: visit.formattedTotalCost.map { .init(text: $0, color: tint) },
+            isHighlighted: isHighlighted,
+            accessibilityValueText: visit.formattedTotalCost ?? L10n.rowNoTotalRecorded,
+            accessibilityLabelText: L10n.rowVisitAccessibility(formattedDate, visit.serviceCount),
+            onTap: onTap
+        )
     }
 }

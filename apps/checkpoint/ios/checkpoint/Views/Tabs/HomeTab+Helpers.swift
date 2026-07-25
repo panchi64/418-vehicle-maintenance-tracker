@@ -89,41 +89,22 @@ extension HomeTab {
 
     // MARK: - Activity Row
 
+    /// Recent activity uses the shared `ServiceEventRow`, so it can no longer
+    /// disagree with the Services tab's history rows or the Costs tab's expense
+    /// rows on hierarchy, date format, or cost styling — which it previously did
+    /// (this row rendered cost at brutalistBody while ExpenseRow used
+    /// brutalistHeading for the same value).
     func activityRow(log: ServiceLog) -> some View {
-        HStack(spacing: Spacing.sm) {
-            Image(systemName: "checkmark")
-                .font(.system(size: 12, weight: .bold))
-                .foregroundStyle(Theme.statusGood)
-                .frame(width: 20)
-                .accessibilityHidden(true)
+        let name = log.service?.name ?? L10n.rowServiceFallback
+        let date = Formatters.shortDate.string(from: log.performedDate)
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(log.service?.name ?? "Service")
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textPrimary)
-                    .lineLimit(1)
-
-                Text(Formatters.shortDate.string(from: log.performedDate))
-                    .font(.brutalistSecondary)
-                    .foregroundStyle(Theme.textTertiary)
-            }
-
-            Spacer()
-
-            if let cost = log.formattedCost {
-                Text(cost)
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.accent)
-            }
-
-            Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(Theme.textTertiary)
-        }
-        .padding(Spacing.md)
-        .contentShape(Rectangle())
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(log.service?.name ?? "Service") completed \(Formatters.shortDate.string(from: log.performedDate))")
-        .accessibilityValue(log.formattedCost ?? "")
+        return ServiceEventRow(
+            indicator: .completed(),
+            title: name,
+            metadata: [.detail(date)],
+            amount: log.formattedCost.map { .init(text: $0, color: Theme.accent) },
+            accessibilityLabelText: L10n.rowCompletedAccessibility(name, date),
+            onTap: { appState.selectedServiceLog = log }
+        )
     }
 }

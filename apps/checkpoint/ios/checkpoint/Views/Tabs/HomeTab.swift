@@ -261,12 +261,8 @@ struct HomeTab: View {
                                 .prefix(3)
 
                             ForEach(Array(recentLogs.enumerated()), id: \.element.id) { index, log in
-                                Button {
-                                    appState.selectedServiceLog = log
-                                } label: {
-                                    activityRow(log: log)
-                                }
-                                .buttonStyle(.plain)
+                                // ServiceEventRow owns its own tap target.
+                                activityRow(log: log)
 
                                 if index < recentLogs.count - 1 {
                                     ListDivider(leadingPadding: 28)

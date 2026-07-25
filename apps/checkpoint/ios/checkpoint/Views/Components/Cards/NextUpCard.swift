@@ -41,31 +41,8 @@ struct NextUpCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header row: status + service name
-            HStack(alignment: .top) {
-                // Status indicator (square, not circle - brutalist) with glow
-                Rectangle()
-                    .fill(status.color)
-                    .frame(width: 8, height: 8)
-                    .statusGlow(color: status.color, isActive: isUrgent)
-                    .pulseAnimation(isActive: isUrgent)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(status.label.isEmpty ? "SCHEDULED" : status.label)
-                        .font(.brutalistLabel)
-                        .foregroundStyle(status.color)
-                        .textCase(.uppercase)
-                        .tracking(1.5)
-
-                    Text(service.name)
-                        .font(.brutalistHeading)
-                        .foregroundStyle(Theme.textPrimary)
-                        .textCase(.uppercase)
-                }
-
-                Spacer()
-            }
-            .padding(.bottom, Spacing.md)
+            UpcomingItemHeader(status: status, itemName: service.name)
+                .padding(.bottom, Spacing.md)
 
             // Divider
             Rectangle()
@@ -218,16 +195,63 @@ struct NextUpCard: View {
 
 // MARK: - Due Period Hero
 
+/// Status square + eyebrow label + item name. Shared by both Next Up cards,
+/// which previously carried byte-identical copies of this block.
+///
+/// The square is baseline-aligned to the eyebrow rather than top-aligned: a
+/// top-aligned 8pt square pins to the text's frame top while the uppercase
+/// cap-height sits lower, so it read as floating above the label.
+struct UpcomingItemHeader: View {
+    let status: ServiceStatus
+    let itemName: String
+
+    private var isUrgent: Bool {
+        status == .overdue || status == .dueSoon
+    }
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: Spacing.sm) {
+            Rectangle()
+                .fill(status.color)
+                .frame(width: 8, height: 8)
+                .statusGlow(color: status.color, isActive: isUrgent)
+                .pulseAnimation(isActive: isUrgent)
+                // Sit the square's bottom edge on the text baseline; uppercase
+                // caps also sit on the baseline, so the two optically align.
+                .alignmentGuide(.firstTextBaseline) { $0.height }
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(status.label.isEmpty ? String(localized: "SCHEDULED") : status.label)
+                    .font(.brutalistLabel)
+                    .foregroundStyle(status.color)
+                    .textCase(.uppercase)
+                    .tracking(1.5)
+
+                Text(itemName)
+                    .font(.brutalistHeading)
+                    .foregroundStyle(Theme.textPrimary)
+                    .textCase(.uppercase)
+            }
+
+            Spacer()
+        }
+    }
+}
+
 /// Hero display for date-based Next Up items: an abstracted month period
-/// (e.g. "MID MAY") with a label beneath, or the domain "overdue" word when
-/// past due. Shared by date-only services and marbete renewal.
+/// (e.g. "MID MAY") with an optional label beneath, or the domain "overdue"
+/// word when past due. Shared by date-only services and marbete renewal.
 struct DuePeriodHero: View {
     let date: Date
     let status: ServiceStatus
     /// Word shown when overdue, e.g. "OVERDUE" (services) or "EXPIRED" (marbete).
     let overdueWord: String
-    /// Label shown beneath the period when not overdue, e.g. "DUE" / "EXPIRES".
-    let dueLabel: String
+    /// Label beneath the period, e.g. "DUE". Pass nil when the card already
+    /// labels the same value elsewhere — the marbete card previously rendered
+    /// "EXPIRES" here *and* in its footer row, so the word appeared twice for
+    /// one fact.
+    var dueLabel: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
@@ -237,7 +261,7 @@ struct DuePeriodHero: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
 
-            if status != .overdue {
+            if status != .overdue, let dueLabel {
                 Text(dueLabel)
                     .font(.brutalistLabel)
                     .foregroundStyle(Theme.textTertiary)
@@ -274,31 +298,8 @@ struct MarbeteNextUpCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header row: status + item name
-            HStack(alignment: .top) {
-                // Status indicator (square, brutalist) with glow
-                Rectangle()
-                    .fill(status.color)
-                    .frame(width: 8, height: 8)
-                    .statusGlow(color: status.color, isActive: isUrgent)
-                    .pulseAnimation(isActive: isUrgent)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(status.label.isEmpty ? "SCHEDULED" : status.label)
-                        .font(.brutalistLabel)
-                        .foregroundStyle(status.color)
-                        .textCase(.uppercase)
-                        .tracking(1.5)
-
-                    Text(marbeteItem.itemName)
-                        .font(.brutalistHeading)
-                        .foregroundStyle(Theme.textPrimary)
-                        .textCase(.uppercase)
-                }
-
-                Spacer()
-            }
-            .padding(.bottom, Spacing.md)
+            UpcomingItemHeader(status: status, itemName: marbeteItem.itemName)
+                .padding(.bottom, Spacing.md)
 
             // Divider
             Rectangle()
@@ -307,7 +308,14 @@ struct MarbeteNextUpCard: View {
 
             // Hero data display — abstracted month period instead of raw days
             if let expiration = marbeteItem.vehicle.marbeteExpirationDate {
-                DuePeriodHero(date: expiration, status: status, overdueWord: String(localized: "EXPIRED"), dueLabel: String(localized: "EXPIRES"))
+                // No dueLabel: the footer row below already says EXPIRES with
+                // the precise date. The hero is the primary; the footer is its
+                // supporting detail — one fact, labeled once.
+                DuePeriodHero(
+                    date: expiration,
+                    status: status,
+                    overdueWord: String(localized: "EXPIRED")
+                )
             }
 
             // Divider

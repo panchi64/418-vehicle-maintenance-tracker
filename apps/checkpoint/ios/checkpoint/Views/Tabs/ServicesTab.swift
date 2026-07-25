@@ -122,7 +122,7 @@ struct ServicesTab: View {
                     options: ViewMode.allCases,
                     selection: $appState.servicesTab.viewMode
                 ) { mode in
-                    mode.rawValue
+                    mode.displayName
                 }
                 .revealAnimation(delay: 0.12)
 
@@ -132,7 +132,7 @@ struct ServicesTab: View {
                         options: StatusFilter.allCases,
                         selection: $appState.servicesTab.statusFilter
                     ) { filter in
-                        filter.rawValue
+                        filter.displayName
                     }
                     .revealAnimation(delay: 0.15)
 
@@ -242,14 +242,9 @@ struct ServicesTab: View {
 
                         VStack(spacing: 0) {
                             ForEach(Array(filteredLogs.enumerated()), id: \.element.id) { index, log in
-                                Button {
-                                    appState.selectedServiceLog = log
-                                } label: {
-                                    historyRow(log: log)
-                                        .contentShape(Rectangle())
-                                }
-                                .buttonStyle(.plain)
-                                .staggeredReveal(index: index, baseDelay: 0.3)
+                                // ServiceEventRow owns its own tap target.
+                                historyRow(log: log)
+                                    .staggeredReveal(index: index, baseDelay: 0.3)
 
                                 if index < filteredLogs.count - 1 {
                                     ListDivider(leadingPadding: 28)
@@ -306,52 +301,24 @@ struct ServicesTab: View {
 
     // MARK: - History Row
 
+    /// Uses the shared `ServiceEventRow`. This was previously a hand-built
+    /// HStack that had drifted from the otherwise-identical rows on Home and in
+    /// Costs — different cost styling, different date format, hardcoded strings.
     private func historyRow(log: ServiceLog) -> some View {
-        HStack(spacing: Spacing.sm) {
-            Image(systemName: "checkmark")
-                .font(.system(size: 12, weight: .bold))
-                .foregroundStyle(Theme.statusGood)
-                .frame(width: 20)
-                .accessibilityHidden(true)
+        let name = log.service?.name ?? L10n.rowServiceFallback
+        let date = Formatters.mediumDate.string(from: log.performedDate)
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(log.service?.name ?? "Service")
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textPrimary)
-                    .lineLimit(1)
-
-                HStack(spacing: Spacing.xs) {
-                    Text(Formatters.mediumDate.string(from: log.performedDate))
-                        .font(.brutalistSecondary)
-                        .foregroundStyle(Theme.textTertiary)
-
-                    Text("//")
-                        .font(.brutalistSecondary)
-                        .foregroundStyle(Theme.gridLine)
-
-                    Text(Formatters.mileage(log.mileageAtService))
-                        .font(.brutalistSecondary)
-                        .foregroundStyle(Theme.textTertiary)
-                }
-            }
-
-            Spacer()
-
-            if let cost = log.formattedCost {
-                Text(cost)
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.accent)
-            }
-
-            Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(Theme.textTertiary)
-        }
-        .padding(Spacing.md)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(log.service?.name ?? "Service"), \(Formatters.mediumDate.string(from: log.performedDate))")
-        .accessibilityValue(log.formattedCost ?? "")
-        .accessibilityHint("Double tap to view details")
+        return ServiceEventRow(
+            indicator: .completed(),
+            title: name,
+            metadata: [
+                .detail(date),
+                .detail(Formatters.mileage(log.mileageAtService))
+            ],
+            amount: log.formattedCost.map { .init(text: $0, color: Theme.accent) },
+            accessibilityLabelText: "\(name), \(date)",
+            onTap: { appState.selectedServiceLog = log }
+        )
     }
 
     // MARK: - Empty States

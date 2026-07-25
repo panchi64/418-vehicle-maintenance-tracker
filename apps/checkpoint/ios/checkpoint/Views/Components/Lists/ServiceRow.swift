@@ -40,59 +40,83 @@ struct ServiceRow: View {
         return min(max(elapsed / total, 0), 1)
     }
 
+    /// The row's reason for existing: how urgent is this, in the unit the user
+    /// actually tracks. Mileage leads when the service has a mileage trigger,
+    /// since that's what the odometer answers; otherwise the date does.
+    private var urgencyText: String? {
+        if let miles = milesRemaining {
+            if miles < 0 {
+                return L10n.rowDistanceOverdue(formattedDistance(abs(miles)))
+            } else if miles == 0 {
+                return L10n.rowDueNow
+            }
+            return L10n.rowDistanceLeft(formattedDistance(miles))
+        }
+        if let days = daysUntilDue {
+            if days < 0 { return L10n.rowDaysOverdue(-days) }
+            if days == 0 { return L10n.rowDueToday }
+            if days == 1 { return L10n.rowDueTomorrow }
+            return L10n.rowDaysLeft(days)
+        }
+        return nil
+    }
+
+    /// Two channels, not one: urgent rows differ from healthy rows in both
+    /// weight (via `urgencyColor`) and the width of the status bar, so the
+    /// distinction survives color blindness and sunlight.
+    private var urgencyColor: Color {
+        switch status {
+        case .overdue, .dueSoon: return status.color
+        default: return Theme.textSecondary
+        }
+    }
+
     var body: some View {
         HStack(spacing: Spacing.md) {
-            // Status indicator (square - brutalist) with glow for urgent
-            ZStack {
-                Rectangle()
-                    .fill(status.color.opacity(0.15))
-                    .frame(width: 32, height: 32)
+            statusBar
 
-                Rectangle()
-                    .fill(status.color)
-                    .frame(width: 8, height: 8)
-                    .statusGlow(color: status.color, isActive: isUrgent)
-                    .pulseAnimation(isActive: isUrgent)
-            }
-
-            // Service info with progress
-            VStack(alignment: .leading, spacing: 6) {
-                // Service name - monospace
-                Text(service.name.uppercased())
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textPrimary)
-
-                // Last performed context
-                if let lastPerformed = service.lastPerformed {
-                    Text("LAST: \(TimeSinceFormatter.abbreviated(from: lastPerformed))")
+            VStack(alignment: .leading, spacing: Spacing.xs) {
+                // Urgency as a status eyebrow: small, uppercase, tracked, in
+                // the status color. Mirrors NextUpCard, which is the pattern
+                // in this app that already reads correctly.
+                //
+                // It is deliberately NOT the largest element. Scanning a list
+                // of upcoming work, the user is looking for *which service*;
+                // urgency qualifies it. Position plus color make the qualifier
+                // unmissable without it competing for the same rank.
+                if let urgencyText {
+                    Text(urgencyText.uppercased())
                         .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
-                        .tracking(0.5)
+                        .foregroundStyle(urgencyColor)
+                        .tracking(1.5)
                 }
 
-                // Mini progress bar + due info - miles first
+                // Primary: which service this is. Differs from the eyebrow on
+                // four channels — size (20 vs 11), weight, case, and color —
+                // so the ranking survives monospace's narrow weight contrast.
+                // Sentence case: long names ("Transmission fluid change") lose
+                // scannability in caps.
+                Text(service.name)
+                    .font(.brutalistHeading)
+                    .foregroundStyle(Theme.textPrimary)
+                    .lineLimit(2)
+
+                // Supporting: progress + history, at the quietest level.
                 HStack(spacing: Spacing.sm) {
-                    // Mini progress indicator
                     if service.dueMileage != nil {
                         miniProgressBar
                     }
 
-                    // Miles info (primary) or days info (fallback for date-only services)
-                    if let miles = milesRemaining {
-                        Text(formatMilesText(miles))
-                            .font(.brutalistLabel)
-                            .foregroundStyle(status == .overdue ? status.color : Theme.textTertiary)
-                            .tracking(0.5)
-                    } else if let days = daysUntilDue {
-                        Text(dueText(days: days))
-                            .font(.brutalistLabel)
-                            .foregroundStyle(status == .overdue ? status.color : Theme.textTertiary)
-                            .tracking(0.5)
+                    if let lastPerformed = service.lastPerformed {
+                        Text(L10n.rowLastPerformed(TimeSinceFormatter.abbreviated(from: lastPerformed)))
+                            .font(.brutalistSecondary)
+                            .foregroundStyle(Theme.textTertiary)
+                            .lineLimit(1)
                     }
                 }
             }
 
-            Spacer()
+            Spacer(minLength: Spacing.sm)
 
             Image(systemName: "chevron.right")
                 .font(.system(size: 12, weight: .semibold))
@@ -102,9 +126,24 @@ struct ServiceRow: View {
         .padding(.vertical, Spacing.listItem)
         .tappableCard(action: onTap)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(service.name)")
-        .accessibilityValue(service.dueDescription ?? "No due date")
-        .accessibilityHint("Double tap to view details")
+        .accessibilityLabel(service.name)
+        // VoiceOver gets the urgency as the value, matching the visual
+        // hierarchy — weight and color don't survive a screen reader.
+        .accessibilityValue(urgencyText ?? service.dueDescription ?? L10n.rowNoDueDate)
+        .accessibilityHint(L10n.rowViewDetailsHint)
+    }
+
+    /// Replaces the 8×8 dot inside a 32×32 tint. A vertical bar the height of
+    /// the row's content gives status real presence and lets urgency read from
+    /// the row's left edge before any text is parsed.
+    private var statusBar: some View {
+        Rectangle()
+            .fill(status.color)
+            .frame(width: isUrgent ? 4 : 2)
+            .frame(maxHeight: .infinity)
+            .statusGlow(color: status.color, isActive: isUrgent)
+            .pulseAnimation(isActive: isUrgent)
+            .accessibilityHidden(true)
     }
 
     // MARK: - Subviews
@@ -126,29 +165,14 @@ struct ServiceRow: View {
 
     // MARK: - Helpers
 
-    private func dueText(days: Int) -> String {
-        if days < 0 {
-            return "\(abs(days))D OVERDUE"
-        } else if days == 0 {
-            return "TODAY"
-        } else if days == 1 {
-            return "TOMORROW"
-        } else {
-            return "IN \(days) DAYS"
-        }
-    }
-
-    private func formatMilesText(_ miles: Int) -> String {
+    /// Distance with its unit, converted to the user's preference. Returned as
+    /// one string so the surrounding sentence stays a single format key and
+    /// translators control word order.
+    private func formattedDistance(_ miles: Int) -> String {
         let unit = DistanceSettings.shared.unit
-        let displayValue = unit.fromMiles(abs(miles))
+        let displayValue = unit.fromMiles(miles)
         let formatted = Formatters.decimal.string(from: NSNumber(value: displayValue)) ?? "\(displayValue)"
-        if miles < 0 {
-            return "\(formatted) \(unit.uppercaseAbbreviation) OVERDUE"
-        } else if miles == 0 {
-            return "DUE NOW"
-        } else {
-            return "\(formatted) \(unit.uppercaseAbbreviation)"
-        }
+        return "\(formatted) \(unit.abbreviation)"
     }
 }
 
