@@ -17,6 +17,8 @@ Here the loop is about one second. The point is not that the web is a better pla
 
 Or `bun run dev`. `bun run typecheck` before committing.
 
+**If a control stops responding, hard-reload before debugging it.** Solid's HMR sometimes fails to swap a module (the console says `[hmr] Failed to reload …`) and leaves the DOM on screen with a **disposed reactive root**. Clicks land, handlers run, and nothing updates — including `aria-expanded`, so it looks exactly like a broken event binding. This cost real time once; a hard reload is the first thing to try, not the last.
+
 ## It reads the real design system
 
 Nothing here re-declares a token. The sketchpad is only useful if it renders what the app renders, so:
@@ -77,7 +79,9 @@ Where the sketchpad and the shipping app disagree, **the sketchpad is showing wh
 
 - `ServiceForm` — one unified form with **derived intent**. No Record/Remind mode switch: the user answers "when", and a past answer means logging while a future answer means scheduling. The repeat interval is on the default path because it is what makes a reminder fire; notes and receipts are in depth because they only make an entry complete.
 - `TabBar` — a single `[+]`, not the two-way `[LOG]`/`[SCHEDULE]` expansion.
-- `ServicesTab` — one control row; Documents is a destination, not a view mode.
+- `ServicesTab` / `CostsTab` — **one** control row instead of two-to-four. A segmented control for the dimension that changes what the screen *is* (mode, period), and a `FilterControl` for refinement. The scrolling chip rows they replace hid options off the right edge — "On track" was cut to "ON TR…", and three of six Costs categories were off-screen — which fails recognition-over-recall outright.
+- `FilterControl` — the trigger is labelled with the **dimension**, never the selected value. Labelling it with the value widened it on selection and crushed the segmented control beside it until `ALL` collided with the trigger; any control whose width depends on its own value cannot share a fixed row. The active value gets `ActiveFilterBar`, a row that exists only while a filter is on — a consequence of the user's action rather than permanent chrome, and it replaces the old always-present filter-indicator row.
+- `ServicesTab` — Documents is a destination, not a view mode.
 - `CostsTab` — fixed card order; "not enough data" is one quiet line, never a card.
 - `AddVehicle` — single scroll, VIN above the fields it fills, odometer required.
 - `VehicleHeader` — the specs disclosure is a **full-width strip whose collapsed label is the specs themselves** (plate · trim). The shipping version uses a `[SPECS] ⌄` label, whose target was only as wide as the word and which showed nothing until tapped — so the reference data that used to be glanceable on Home became two taps away. The header comment records all five iterations and why each failed; read it before revisiting.

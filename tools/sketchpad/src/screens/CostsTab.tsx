@@ -4,13 +4,16 @@
  * The problem being solved: two stacked segmented controls (4 periods × 4
  * categories = 16 states) above nine independently-gated cards.
  *
- * The fix modelled here: period is the segmented control, category is a chip row
- * (chips scale to six categories where a segmented control does not), then a
- * FIXED card order. "Not enough data yet" is one quiet line, never a full card
- * whose only content is absence.
+ * The fix modelled here: period is the segmented control because it changes the
+ * scope of every number on the screen; category is a FilterControl, which scales
+ * to six categories where neither a segmented control nor a scrolling chip row
+ * does — the chip row hid three of the six off the right edge. Then a FIXED card
+ * order. "Not enough data yet" is one quiet line, never a full card whose only
+ * content is absence.
  */
 import { createSignal, For, Show } from 'solid-js'
-import { Chip, ChipRow, SegmentedControl } from '../ui/Controls'
+import { SegmentedControl } from '../ui/Controls'
+import { ActiveFilterBar, ControlRow, FilterControl } from '../ui/FilterControl'
 import { CostHeadlineCard, StatsGrid } from '../components/Cards'
 import { ExpenseRow, ListDivider } from '../components/Rows'
 import { ReadoutSection } from '../ui/ReadoutSection'
@@ -51,48 +54,54 @@ export function CostsTab() {
     return [...map.entries()].sort((a, b) => b[1] - a[1])
   }
 
-  const categories: CategoryFilter[] = [
-    'all',
-    'maintenance',
-    'repair',
-    'registration',
-    'insurance',
-    'fuel',
-  ]
+  /* Every category the vehicle actually has an entry for, plus All. Offering a
+     category with zero entries is offering a route to an empty screen. */
+  const categoryFilters = () => {
+    const present = new Set(serviceLogs.map((l) => l.category))
+    return [
+      { value: 'all' as CategoryFilter, label: 'All', count: serviceLogs.length },
+      ...([...present] as CostCategory[])
+        .map((c) => ({
+          value: c as CategoryFilter,
+          label: categoryLabels[c],
+          count: serviceLogs.filter((l) => l.category === c).length,
+        }))
+        .sort((a, b) => b.count - a.count),
+    ]
+  }
 
   return (
     <div style={{ display: 'flex', 'flex-direction': 'column', flex: '1 1 auto', 'min-height': '0' }}>
-      <div
-        style={{
-          display: 'flex',
-          'flex-direction': 'column',
-          gap: 'var(--space-sm)',
-          padding: 'var(--space-md) var(--space-screen-h)',
-          'border-bottom': 'var(--border-width) solid var(--grid-line)',
-        }}
-      >
-        <SegmentedControl
-          options={[
-            { value: '30d', label: '30D' },
-            { value: '90d', label: '90D' },
-            { value: 'ytd', label: 'YTD' },
-            { value: 'all', label: 'All' },
-          ]}
-          value={period()}
-          onChange={setPeriod}
+      <ControlRow>
+        <div style={{ flex: '1 1 auto', 'min-width': '0' }}>
+          <SegmentedControl
+            options={[
+              { value: '30d', label: '30D' },
+              { value: '90d', label: '90D' },
+              { value: 'ytd', label: 'YTD' },
+              { value: 'all', label: 'All' },
+            ]}
+            value={period()}
+            onChange={setPeriod}
+          />
+        </div>
+
+        <FilterControl
+          name="Category"
+          options={categoryFilters()}
+          value={category()}
+          onChange={setCategory}
+          defaultValue="all"
         />
-        <ChipRow wrap={false}>
-          <For each={categories}>
-            {(c) => (
-              <Chip
-                label={c === 'all' ? 'All' : categoryLabels[c]}
-                selected={category() === c}
-                onClick={() => setCategory(c)}
-              />
-            )}
-          </For>
-        </ChipRow>
-      </div>
+      </ControlRow>
+
+      <ActiveFilterBar
+        name="Category"
+        options={categoryFilters()}
+        value={category()}
+        defaultValue="all"
+        onClear={() => setCategory('all')}
+      />
 
       <Screen>
         {/* 1. The hero. */}
