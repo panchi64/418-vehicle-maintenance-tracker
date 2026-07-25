@@ -158,7 +158,11 @@ export type Requirement =
 // --- Text field (InstrumentTextField / MileageInputField) -----------------
 
 interface FieldProps {
-  label: string
+  /**
+   * Omit when the enclosing `FormSection` header already names this field —
+   * stacking two identical labels on one input is worse than none.
+   */
+  label?: string
   value: string
   onInput?: (value: string) => void
   placeholder?: string
@@ -175,16 +179,18 @@ export function Field(props: FieldProps) {
 
   return (
     <div style={{ display: 'flex', 'flex-direction': 'column', gap: 'var(--space-xs)' }}>
-      <div style={{ display: 'flex', 'align-items': 'baseline', gap: 'var(--space-sm)' }}>
-        <Label>{props.label}</Label>
-        <Show when={req().kind === 'required'}>
-          {/* The word, not a bare asterisk — an asterisk requires knowing the
-              convention, which is recall rather than recognition. */}
-          <Label color="accent" tracking={1}>
-            Required
-          </Label>
-        </Show>
-      </div>
+      <Show when={props.label}>
+        <div style={{ display: 'flex', 'align-items': 'baseline', gap: 'var(--space-sm)' }}>
+          <Label>{props.label}</Label>
+          <Show when={req().kind === 'required'}>
+            {/* The word, not a bare asterisk — an asterisk requires knowing the
+                convention, which is recall rather than recognition. */}
+            <Label color="accent" tracking={1}>
+              Required
+            </Label>
+          </Show>
+        </div>
+      </Show>
 
       {/* A single rule, not a four-sided box. The value sits ON the line, which
           is the same idiom the readouts use, and it removes three enclosures per

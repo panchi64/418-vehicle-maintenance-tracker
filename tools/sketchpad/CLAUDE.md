@@ -56,6 +56,26 @@ The doctrine says rank content *before* styling it, because ranking is a product
 
 `ReadoutSection` takes `primary` as a **required slot**, so a section cannot be built without deciding its most important element — mirroring `ReadoutSection.swift`. Content placed in that slot must **not** also carry `rank="primary"`; the slot already declares it, and doubling up is how a section claims two primaries.
 
+## Three label levels, not one
+
+A form has section titles, field labels, and subgroup labels. Rendering all three as 11pt tracked caps — which is what happened once the enclosures came off — leaves a screen that is a sequence rather than a structure. `SERVICE`, `COMMON`, `WHEN`, `COST` and `CATEGORY` all looked identical while meaning three different things, and the whole form melded together.
+
+| Level | Treatment | Component |
+|---|---|---|
+| Section | 11 Bold caps, secondary, **+ a full-width rule** | `FormSection` |
+| Field | 11 Medium caps, tertiary, no rule | `Field`, `InlinePicker` |
+| Subgroup | 13 Regular sentence case, tertiary | `FormSubgroup` |
+
+The rule does most of the work: a section boundary becomes a line across the screen rather than a marginally larger gap. With it in place the between-section gap can come *down* — paying 32pt of whitespace on top of a rule buys the same grouping twice and pushes content below the fold.
+
+When a `FormSection` header already names its single field, that field takes no label. Two identical labels stacked on one input is worse than none.
+
+## Advisory or readout?
+
+Both are quiet 13pt lines, so it is easy to reach for the wrong one. The severity ladder is for things that need **attention or resolution**. A projected outcome is a **value**, and gets a label plus emphasis weight.
+
+The reminder's fire time was an `.info` advisory, which made the most important line on the screen — the proof the reminder will actually fire — the quietest thing on it. Odometer adoption stays `.info`, correctly: that one is the app telling you it will change something you did not ask it to change.
+
 ## Layout
 
 ```

@@ -22,6 +22,7 @@
  */
 import { createMemo, createSignal, For, Show } from 'solid-js'
 import { Chip, ChipRow, Field, InlinePicker, Toggle } from '../ui/Controls'
+import { FormSection, FormSubgroup } from '../ui/FormSection'
 import { FormAdvisory } from '../ui/FormAdvisory'
 import { FormActionBar } from '../ui/FormActionBar'
 import { Body, Emphasis, Label, Secondary } from '../ui/Text'
@@ -119,6 +120,34 @@ export function ServiceForm(props: { onClose?: () => void }) {
 
   const canSave = () => blockingReason() == null
 
+  /**
+   * When the reminder will fire, and whether that is yet knowable.
+   *
+   * `known: false` means the user has chosen a trigger but not supplied its
+   * value, so the readout must say what is missing rather than print a
+   * confident-looking placeholder date.
+   */
+  const fireTime = createMemo<{ text: string; known: boolean }>(() => {
+    const kind = timing()?.kind
+    if (kind === 'atMileage') {
+      const target = parseInt(remindAtMileage().replace(/\D/g, ''), 10)
+      if (!Number.isFinite(target)) {
+        return { text: 'once you enter a mileage', known: false }
+      }
+      // ~940 mi/month, from the fixture vehicle's recent pace.
+      const months = Math.max(1, Math.round((target - vehicle.currentMileage) / 940))
+      return {
+        text: `at ${fmtMileageBare(target)} mi — about ${months} ${
+          months === 1 ? 'month' : 'months'
+        } away at your pace`,
+        known: true,
+      }
+    }
+    if (kind === 'in3mo') return { text: '25 Oct 2026', known: true }
+    if (kind === 'in6mo') return { text: '25 Jan 2027', known: true }
+    return { text: 'on the date you pick', known: false }
+  })
+
   /* Neutral until a timing is picked. Saying "Log it" before the user has said
      when it happened claims an intent they have not expressed yet, and the
      button would silently change meaning under their finger. */
@@ -174,38 +203,36 @@ export function ServiceForm(props: { onClose?: () => void }) {
           'overflow-y': 'auto',
           display: 'flex',
           'flex-direction': 'column',
+          /* lg, not xl. The section header rules now carry the separation, so
+             paying 32pt of gap on top of them was buying the same grouping
+             twice — and it pushed the last field below the fold. */
           gap: 'var(--space-lg)',
           padding: 'var(--space-md) var(--space-screen-h) var(--space-lg)',
         }}
       >
-        {/* ---------- 1. WHAT ---------- */}
-        <section data-section="What">
+        {/* ---------- 1. WHAT ----------
+            The section header IS this field's label, so the field carries none.
+            Labelling both "SERVICE" stacked two identical labels on one input. */}
+        <FormSection title="Service" trailing="Required">
           <Field
-            label="Service"
             value={name()}
             onInput={setName}
             placeholder="Oil change"
-            requirement={{ kind: 'required' }}
             /* No autofocus. It scrolled the section label out of view on open,
                and on device it would raise the keyboard over the timing chips —
                hiding the control that derives the intent in order to save one
                tap on a field the quick chips can fill anyway. */
           />
+
           {/* Plain, not outlined. These are a shortcut for the field above, not
               a choice the form requires — eight outlined rectangles made them
               compete with the timing control, which IS required.
 
               The row carries its own label. Without one it read as a second
               input: an unlabelled strip of text sitting directly beneath a
-              labelled field, in a form where every other line IS a field. Naming
-              the role is cheaper than trying to signal it with styling. */}
+              labelled field, in a form where every other line IS a field. */}
           <div
-            style={{
-              display: 'flex',
-              'flex-direction': 'column',
-              gap: 'var(--space-xs)',
-              'padding-top': 'var(--space-md)',
-            }}
+            style={{ display: 'flex', 'flex-direction': 'column', gap: 'var(--space-xs)' }}
           >
             <Label>Common</Label>
             <ChipRow wrap={false}>
@@ -221,17 +248,11 @@ export function ServiceForm(props: { onClose?: () => void }) {
               </For>
             </ChipRow>
           </div>
-        </section>
+        </FormSection>
 
         {/* ---------- 2. WHEN — the control that derives intent ---------- */}
-        <section
-          data-section="When"
-          style={{ display: 'flex', 'flex-direction': 'column', gap: 'var(--space-sm)' }}
-        >
-          <Label>When</Label>
-
-          <div style={{ display: 'flex', 'flex-direction': 'column', gap: 'var(--space-xs)' }}>
-            <Secondary color="tertiary">Already done</Secondary>
+        <FormSection title="When">
+          <FormSubgroup title="Already done">
             <ChipRow>
               <For each={pastChips}>
                 {(c) => (
@@ -243,17 +264,9 @@ export function ServiceForm(props: { onClose?: () => void }) {
                 )}
               </For>
             </ChipRow>
-          </div>
+          </FormSubgroup>
 
-          <div
-            style={{
-              display: 'flex',
-              'flex-direction': 'column',
-              gap: 'var(--space-xs)',
-              'padding-top': 'var(--space-sm)',
-            }}
-          >
-            <Secondary color="tertiary">Coming up</Secondary>
+          <FormSubgroup title="Coming up">
             <ChipRow>
               <For each={futureChips}>
                 {(c) => (
@@ -265,29 +278,24 @@ export function ServiceForm(props: { onClose?: () => void }) {
                 )}
               </For>
             </ChipRow>
-          </div>
+          </FormSubgroup>
 
           <Show when={timing()?.kind === 'earlier' || timing()?.kind === 'onDate'}>
-            <div style={{ 'padding-top': 'var(--space-sm)' }}>
-              <Field
-                label="Date"
-                value={customDate()}
-                onInput={setCustomDate}
-                placeholder="2023-08-14"
-                requirement={{ kind: 'required' }}
-              />
-            </div>
+            <Field
+              label="Date"
+              value={customDate()}
+              onInput={setCustomDate}
+              placeholder="2023-08-14"
+              requirement={{ kind: 'required' }}
+            />
           </Show>
-        </section>
+        </FormSection>
 
         {/* ---------- 3. BRANCH BODY ---------- */}
 
         {/* Past: what it cost and what the odometer read. */}
         <Show when={intent() === 'log'}>
-          <section
-            data-section="Log details"
-            style={{ display: 'flex', 'flex-direction': 'column', gap: 'var(--space-md)' }}
-          >
+          <FormSection title="The visit">
             <Field
               // Distinct from "Remind me at". Identical labels across the two
               // branches are what made "should this update current mileage?"
@@ -369,15 +377,12 @@ export function ServiceForm(props: { onClose?: () => void }) {
                 label: categoryLabels[c],
               }))}
             />
-          </section>
+          </FormSection>
         </Show>
 
         {/* Future: what makes it fire, and whether it comes back. */}
         <Show when={intent() === 'schedule'}>
-          <section
-            data-section="Reminder details"
-            style={{ display: 'flex', 'flex-direction': 'column', gap: 'var(--space-md)' }}
-          >
+          <FormSection title="The reminder">
             <Show when={timing()?.kind === 'atMileage'}>
               <Field
                 label="Remind me at"
@@ -429,32 +434,35 @@ export function ServiceForm(props: { onClose?: () => void }) {
               </Show>
             </div>
 
-            {/* The projection preview shares the save path's calculation (F4),
-                so the preview cannot promise something the save does not do. */}
-            <FormAdvisory
-              severity="info"
-              message={
-                timing()?.kind === 'atMileage'
-                  ? remindAtMileage()
-                    ? `Fires at ${fmtMileageBare(
-                        parseInt(remindAtMileage().replace(/\D/g, ''), 10) || 0,
-                      )} mi — about ${Math.max(
-                        1,
-                        Math.round(
-                          ((parseInt(remindAtMileage().replace(/\D/g, ''), 10) || 0) -
-                            vehicle.currentMileage) /
-                            940,
-                        ),
-                      )} months away at your current pace.`
-                    : 'Enter a mileage to see when this will fire.'
-                  : timing()?.kind === 'in3mo'
-                    ? 'Fires 25 Oct 2026.'
-                    : timing()?.kind === 'in6mo'
-                      ? 'Fires 25 Jan 2027.'
-                      : 'Fires on the date you pick.'
-              }
-            />
-          </section>
+            {/* The projection is a READOUT, not an advisory.
+
+                It was an `.info` advisory, which made the most important line on
+                the screen the quietest thing on it — this is the proof that the
+                reminder will actually fire, which is the entire point of the
+                surface. The severity ladder is for things needing attention or
+                resolution; a projected outcome is a value, so it gets a label and
+                emphasis weight instead.
+
+                It shares the save path's calculation (F4), so the preview cannot
+                promise something the save does not do. */}
+            <div
+              style={{
+                display: 'flex',
+                'align-items': 'baseline',
+                gap: 'var(--space-md)',
+                'padding-top': 'var(--space-xs)',
+                'border-top': '1px solid var(--grid-line)',
+              }}
+            >
+              <Label style={{ flex: '0 0 auto', 'padding-top': 'var(--space-sm)' }}>Fires</Label>
+              <Emphasis
+                color={fireTime().known ? 'primary' : 'tertiary'}
+                style={{ flex: '1 1 auto', 'padding-top': 'var(--space-sm)' }}
+              >
+                {fireTime().text}
+              </Emphasis>
+            </div>
+          </FormSection>
         </Show>
 
         {/* ---------- 4. DEPTH — what makes it complete ---------- */}
