@@ -3,7 +3,7 @@
 //  checkpoint
 //
 //  Shows how an edit would shift a service's next reminder before the user
-//  confirms (R6). Uses null grammar ("MAR 12 → NONE") so a change that clears
+//  confirms (F9). Uses null grammar ("MAR 12 → NONE") so a change that clears
 //  the reminder reads as clearly as one that sets it.
 //
 

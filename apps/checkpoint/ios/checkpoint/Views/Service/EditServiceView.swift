@@ -27,7 +27,7 @@ struct EditServiceView: View {
     @State private var isRecurring: Bool = false
     @State private var notes: String = ""
 
-    // Loaded originals, for change-transparency hints (G8) and the impact preview (R6)
+    // Loaded originals, for change-transparency hints (F6) and the impact preview (F9)
     @State private var loadedServiceName: String = ""
     @State private var loadedSchedule = ReminderImpactCalculator.Schedule(dueDate: nil, dueMileage: nil)
     @State private var loadedIntervalMonths: Int? = nil

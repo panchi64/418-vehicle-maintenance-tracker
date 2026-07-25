@@ -313,25 +313,23 @@ struct MarkServiceVisitDoneSheet: View {
             )
         }
 
-        // Update vehicle mileage if higher than current.
-        if mileageInt > vehicle.currentMileage {
-            vehicle.currentMileage = mileageInt
-            vehicle.mileageUpdatedAt = performedDate
-        }
-
-        // One mileage snapshot per day, regardless of how many services.
-        let shouldCreateSnapshot = !MileageSnapshot.hasSnapshotToday(
-            snapshots: vehicle.mileageSnapshots ?? []
+        // F11: one commit path, shared with the add-service form. Handles the
+        // odometer, `mileageUpdatedAt`, and the once-per-day snapshot together.
+        //
+        // Two deliberate behavior changes from the inlined version this
+        // replaces: adoption is now gated on the reading being the *newest*
+        // (so backdating a visit can't overwrite a current odometer), and the
+        // snapshot is only written when the reading is adopted. Previously the
+        // snapshot was created unconditionally — so completing a visit at a
+        // mileage *below* current wrote a lower reading at a later timestamp,
+        // which showed the pace calculation a negative delta.
+        MileageCommit.commitIfNewest(
+            reading: mileageInt,
+            observedAt: performedDate,
+            source: .serviceCompletion,
+            for: vehicle,
+            in: modelContext
         )
-        if shouldCreateSnapshot {
-            let snapshot = MileageSnapshot(
-                vehicle: vehicle,
-                mileage: mileageInt,
-                recordedAt: performedDate,
-                source: .serviceCompletion
-            )
-            modelContext.insert(snapshot)
-        }
 
         AppIconService.shared.updateIcon(for: vehicle, services: allServices)
         WidgetDataService.shared.updateWidget(for: vehicle)

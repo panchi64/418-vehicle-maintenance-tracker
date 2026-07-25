@@ -3,7 +3,7 @@
 //  checkpoint
 //
 //  Pure projection of a service's next due date/mileage, used to preview
-//  reminder scheduling changes before an edit is saved (R6). Mirrors
+//  reminder scheduling changes before an edit is saved (F9). Mirrors
 //  Service.deriveDueFromIntervals exactly: a positive interval projects a
 //  deadline from the anchor; a nil/zero interval clears it. Explicit values
 //  always win over derived ones.

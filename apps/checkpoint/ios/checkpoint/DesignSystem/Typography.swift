@@ -47,6 +47,17 @@ extension Font {
         brutalist(size: 15, weight: .regular, jetBrains: .regular)
     }
 
+    /// 15pt Medium - The *primary* datum in a section or form.
+    ///
+    /// Exists because the scale previously jumped straight from 15 Regular to
+    /// 11 Medium, leaving color as the only way to mark one line as more
+    /// important than another — and color is already spoken for by status
+    /// semantics. Without this step, hierarchy in a readout or a form is not
+    /// expressible. See `docs/SURFACE_DOCTRINE.md` (Part 1, "Visual hierarchy").
+    @MainActor static var brutalistBodyEmphasis: Font {
+        brutalist(size: 15, weight: .medium, jetBrains: .medium)
+    }
+
     /// 13pt Regular - Secondary content
     @MainActor static var brutalistSecondary: Font {
         brutalist(size: 13, weight: .regular, jetBrains: .regular)
@@ -100,6 +111,18 @@ struct BrutalistBodyStyle: ViewModifier {
     }
 }
 
+/// The one primary element of a section or form. Uses weight rather than color
+/// so it composes with status tinting instead of competing with it.
+struct BrutalistBodyEmphasisStyle: ViewModifier {
+    var color: Color = Theme.textPrimary
+
+    func body(content: Content) -> some View {
+        content
+            .font(.brutalistBodyEmphasis)
+            .foregroundStyle(color)
+    }
+}
+
 struct BrutalistSecondaryStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
@@ -137,6 +160,10 @@ extension View {
 
     func brutalistBodyStyle() -> some View {
         modifier(BrutalistBodyStyle())
+    }
+
+    func brutalistBodyEmphasisStyle(color: Color = Theme.textPrimary) -> some View {
+        modifier(BrutalistBodyEmphasisStyle(color: color))
     }
 
     func brutalistSecondaryStyle() -> some View {

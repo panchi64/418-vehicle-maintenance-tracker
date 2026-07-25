@@ -22,6 +22,24 @@ enum L10n {
     static var commonDelete: String { localized("common.delete") }
     static var commonUndo: String { localized("common.undo") }
 
+    // MARK: - Form Advisories
+    //
+    // VoiceOver prefixes for the FormAdvisory severity ladder. Sighted users
+    // read severity from weight, enclosure, and color; these carry the same
+    // distinction to screen readers, which would otherwise hear four
+    // identical-sounding sentences.
+
+    /// Stated before saving whenever a service reading will also advance the
+    /// vehicle's odometer (F11). Two positional args: previous, then new.
+    static func mileageAlsoUpdates(_ previous: String, _ updated: String) -> String {
+        String(format: localized("mileage.alsoUpdates"), previous, updated)
+    }
+
+    static var advisoryBlocking: String { localized("advisory.a11yBlocking") }
+    static var advisoryCaution: String { localized("advisory.a11yCaution") }
+    static var advisoryDecision: String { localized("advisory.a11yDecision") }
+    static var advisoryInfo: String { localized("advisory.a11yInfo") }
+
     // MARK: - Vehicle
 
     static var vehicleAdd: String { localized("vehicle.add") }
@@ -465,6 +483,8 @@ enum L10n {
     }
     static var formDatePastWarning: String { localized("form.datePastWarning") }
     static var formRepeats: String { localized("form.repeats") }
+    static var formRequiredTag: String { localized("form.requiredTag") }
+    static var formRequiredAccessibility: String { localized("form.requiredAccessibility") }
     static var formRepeatAfterCompletion: String { localized("form.repeatAfterCompletion") }
     static var formEvery: String { localized("form.every") }
     static var formOrEvery: String { localized("form.orEvery") }

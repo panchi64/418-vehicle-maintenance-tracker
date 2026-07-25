@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Shown at the top of Add Service when a saved draft is found and no
-/// explicit prefill (seasonal / post-record) is already driving the form (R9).
+/// explicit prefill (seasonal / post-record) is already driving the form (F10).
 struct DraftResumeBanner: View {
     let savedAt: Date
     let onResume: () -> Void

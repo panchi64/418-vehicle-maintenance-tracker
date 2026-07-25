@@ -2,7 +2,7 @@
 //  FormActionBar.swift
 //  checkpoint
 //
-//  Single bottom action bar shared by every data-entry form (G1): one
+//  Single bottom action bar shared by every data-entry form (F1): one
 //  primary action, an optional secondary action, and a success flash for
 //  forms that stay open after saving (e.g. "Save & add another").
 //
@@ -18,7 +18,7 @@ struct FormActionBar: View {
     var onSecondary: (() -> Void)? = nil
     var successFlash: Binding<String?> = .constant(nil)
 
-    /// G3: the bar must never ride above the keyboard (it would eat
+    /// F3: the bar must never ride above the keyboard (it would eat
     /// number-pad space and invite accidental saves). Observed here rather
     /// than threaded by every caller, so no form can silently opt out.
     private var isKeyboardVisible: Bool {
@@ -72,7 +72,7 @@ struct FormActionBar: View {
                     if isPrimaryEnabled {
                         onPrimary()
                     } else {
-                        // G2: every form gets the same disabled-save feedback;
+                        // F2: every form gets the same disabled-save feedback;
                         // callers only supply the scroll-to-field behavior.
                         HapticService.shared.error()
                         onDisabledPrimaryTap?()

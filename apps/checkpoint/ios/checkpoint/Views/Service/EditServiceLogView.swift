@@ -22,7 +22,7 @@ struct EditServiceLogView: View {
     @State private var attachmentForDetail: Document?
     @State private var alsoMoveNextReminder = false
 
-    // Loaded originals, for change-transparency hints (G8) and gating the
+    // Loaded originals, for change-transparency hints (F6) and gating the
     // "also move next reminder" toggle to real date/mileage edits.
     @State private var loadedPerformedDate: Date = Date()
     @State private var loadedMileageAtService: Int? = nil
@@ -59,7 +59,7 @@ struct EditServiceLogView: View {
     }
 
     /// Omits whichever half doesn't exist — the earliest/latest log for a
-    /// vehicle only has one neighbor (R5).
+    /// vehicle only has one neighbor (F8).
     private var contextLine: String? {
         switch adjacentLogs {
         case let (before?, after?):

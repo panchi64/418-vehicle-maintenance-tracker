@@ -64,23 +64,15 @@ extension HomeTab {
 
     // MARK: - Mileage
 
+    /// Manual entry is an authoritative statement about the odometer *right
+    /// now*, so it commits directly rather than going through
+    /// `MileageCommit.commitIfNewest` — the user must be able to correct a
+    /// too-high reading downward, which a newest-and-higher gate would block.
+    /// Only readings derived as a side effect of logging a service are gated.
     func updateMileage(_ newMileage: Int, for vehicle: Vehicle) {
-        vehicle.currentMileage = newMileage
-        vehicle.mileageUpdatedAt = .now
-
-        let shouldCreateSnapshot = !MileageSnapshot.hasSnapshotToday(
-            snapshots: vehicle.mileageSnapshots ?? []
-        )
-
-        if shouldCreateSnapshot {
-            let snapshot = MileageSnapshot(
-                vehicle: vehicle,
-                mileage: newMileage,
-                recordedAt: .now,
-                source: .manual
-            )
-            modelContext.insert(snapshot)
-        }
+        // Was a hand-rolled duplicate of `recordMileage`, which meant two
+        // implementations of the same commit could drift apart.
+        vehicle.recordMileage(newMileage, source: .manual, in: modelContext)
 
         // Force immediate save to trigger SwiftUI observation for dependent views
         try? modelContext.save()

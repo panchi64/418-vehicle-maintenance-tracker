@@ -3,7 +3,7 @@
 //  checkpoint
 //
 //  Snapshot of in-progress Add Service form state, persisted so the form
-//  survives dismissal or the app being killed (R9). Attachments are excluded —
+//  survives dismissal or the app being killed (F10). Attachments are excluded —
 //  they live on disk/CloudKit already and aren't safe to re-attach blindly.
 //
 

@@ -4,1228 +4,6 @@
     "" : {
 
     },
-    "edit.sinceLog" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Since %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Desde %@"
-          }
-        }
-      }
-    },
-    "edit.beforeLog" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Before %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Antes de %@"
-          }
-        }
-      }
-    },
-    "common.undo" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Undo"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Deshacer"
-          }
-        }
-      }
-    },
-    "common.update" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Update"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Actualizar"
-          }
-        }
-      }
-    },
-    "form.use" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Use"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Usar"
-          }
-        }
-      }
-    },
-    "form.useSuggestedValue" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Use suggested value: %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Usar valor sugerido: %@"
-          }
-        }
-      }
-    },
-    "form.vehicleBasicsRequired" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Make, model, and year are required"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Marca, modelo y año son obligatorios"
-          }
-        }
-      }
-    },
-    "toast.service_updated" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Service updated"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Servicio actualizado"
-          }
-        }
-      }
-    },
-    "form.details" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Details"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Detalles"
-          }
-        }
-      }
-    },
-    "form.detailsCount" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Details · %d"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Detalles · %d"
-          }
-        }
-      }
-    },
-    "form.addAttachments" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add Attachments"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Añadir adjuntos"
-          }
-        }
-      }
-    },
-    "form.amount" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Amount"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Monto"
-          }
-        }
-      }
-    },
-    "form.atMileage" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "at %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "a las %@"
-          }
-        }
-      }
-    },
-    "form.attachments" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Attachments"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Adjuntos"
-          }
-        }
-      }
-    },
-    "form.category" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Category"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Categoría"
-          }
-        }
-      }
-    },
-    "form.cost" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cost"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Costo"
-          }
-        }
-      }
-    },
-    "form.datePastWarning" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This date is in the past — will be marked overdue."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esta fecha ya pasó — se marcará como vencido."
-          }
-        }
-      }
-    },
-    "form.datePerformed" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Date Performed"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fecha del servicio"
-          }
-        }
-      }
-    },
-    "form.daysAhead" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "~%d days"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "~%d días"
-          }
-        }
-      }
-    },
-    "form.daysOverdue" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d days overdue"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d días de atraso"
-          }
-        }
-      }
-    },
-    "form.dueDate" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Due Date"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fecha de vencimiento"
-          }
-        }
-      }
-    },
-    "form.dueMileage" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Due Mileage"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Millaje de vencimiento"
-          }
-        }
-      }
-    },
-    "form.editingTag" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Editing"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Editando"
-          }
-        }
-      }
-    },
-    "form.every" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Every"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cada"
-          }
-        }
-      }
-    },
-    "form.everyMileage" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "every %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "cada %@"
-          }
-        }
-      }
-    },
-    "form.everyMonth" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "every month"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "cada mes"
-          }
-        }
-      }
-    },
-    "form.everyNMonths" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "every %d months"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "cada %d meses"
-          }
-        }
-      }
-    },
-    "form.mileage" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mileage"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Millaje"
-          }
-        }
-      }
-    },
-    "form.mileageAhead" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "~%@ ahead"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "~%@ restantes"
-          }
-        }
-      }
-    },
-    "form.mileageBlankHint" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "If left blank, current vehicle mileage will be used."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Si lo dejas en blanco, se usará el millaje actual del vehículo."
-          }
-        }
-      }
-    },
-    "form.mileagePast" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ past"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ de más"
-          }
-        }
-      }
-    },
-    "form.milesSuffix" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "miles"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "millas"
-          }
-        }
-      }
-    },
-    "form.monthsSuffix" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "months"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "meses"
-          }
-        }
-      }
-    },
-    "form.nextDue" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Next Due"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Próximo vencimiento"
-          }
-        }
-      }
-    },
-    "form.nextDuePreview" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Next due: %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Próximo vencimiento: %@"
-          }
-        }
-      }
-    },
-    "form.notes" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Notes"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Notas"
-          }
-        }
-      }
-    },
-    "form.notesPlaceholder" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add notes..."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Añade notas…"
-          }
-        }
-      }
-    },
-    "form.or" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "or"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "o"
-          }
-        }
-      }
-    },
-    "form.orEvery" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Or Every"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O cada"
-          }
-        }
-      }
-    },
-    "form.optionalTag" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Optional"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opcional"
-          }
-        }
-      }
-    },
-    "form.remindNextTime" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remind me next time"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recuérdame la próxima vez"
-          }
-        }
-      }
-    },
-    "form.reminder" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reminder"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recordatorio"
-          }
-        }
-      }
-    },
-    "form.repeatAfterCompletion" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repeat after completion"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repetir al completar"
-          }
-        }
-      }
-    },
-    "form.repeats" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repeats"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repetición"
-          }
-        }
-      }
-    },
-    "form.saveAndAddAnother" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Save & Add Another"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Guardar y añadir otro"
-          }
-        }
-      }
-    },
-    "form.savedAddNext" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saved ✓ — add next"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Guardado ✓ — añade el siguiente"
-          }
-        }
-      }
-    },
-    "form.serviceType" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Service Type"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tipo de servicio"
-          }
-        }
-      }
-    },
-    "form.setDueDate" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Set due date"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Definir fecha de vencimiento"
-          }
-        }
-      }
-    },
-    "form.suggestMonths" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suggest %d months"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sugerir %d meses"
-          }
-        }
-      }
-    },
-    "form.suggestValue" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suggest %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sugerir %@"
-          }
-        }
-      }
-    },
-    "form.whicheverFirst" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Whichever comes first"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lo que ocurra primero"
-          }
-        }
-      }
-    },
-    "form.serviceTypeRequired" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Service type is required"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Elige un tipo de servicio"
-          }
-        }
-      }
-    },
-    "form.draftResumeTitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Resume where you left off?"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¿Continuar donde quedaste?"
-          }
-        }
-      }
-    },
-    "form.draftFrom" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Draft from %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Borrador de %@"
-          }
-        }
-      }
-    },
-    "form.draftResume" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Resume"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Continuar"
-          }
-        }
-      }
-    },
-    "form.draftDiscard" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Discard"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Descartar"
-          }
-        }
-      }
-    },
-    "serviceMode.record" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Record"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Registrar"
-          }
-        }
-      }
-    },
-    "serviceMode.remind" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remind"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recordar"
-          }
-        }
-      }
-    },
-    "serviceMode.recordCaption" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Log what you already did"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Registra lo que ya hiciste"
-          }
-        }
-      }
-    },
-    "serviceMode.remindCaption" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Get reminded before it's due"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recibe un aviso antes de que venza"
-          }
-        }
-      }
-    },
-    "refCard.last" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Last %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Último %@"
-          }
-        }
-      }
-    },
-    "refCard.useValues" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Use these values"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Usar estos valores"
-          }
-        }
-      }
-    },
-    "edit.was" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Was: %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Antes: %@"
-          }
-        }
-      }
-    },
-    "impact.nextReminder" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Next reminder"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Próximo recordatorio"
-          }
-        }
-      }
-    },
-    "impact.none" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "None"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ninguno"
-          }
-        }
-      }
-    },
-    "edit.alsoMoveReminder" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Also move next reminder"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mover también el próximo recordatorio"
-          }
-        }
-      }
-    },
-    "edit.betweenLogs" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Between %@ and %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Entre %@ y %@"
-          }
-        }
-      }
-    },
-    "remind.noScheduleWarning" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Set a due date, mileage, or interval — this reminder won't fire yet"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Define fecha, millaje o intervalo — este recordatorio aún no se activará"
-          }
-        }
-      }
-    },
-    "record.setIntervalHint" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Set an interval to get reminded"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Define un intervalo para recibir avisos"
-          }
-        }
-      }
-    },
-    "store.error.product_unavailable" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Purchase is unavailable right now. Please try again in a moment."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La compra no está disponible en este momento. Vuelve a intentarlo en un momento."
-          }
-        }
-      }
-    },
-    "%@ is out of time. Renew the marbete today." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ is out of time. Renew the marbete today."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A %@ se le acabó el tiempo. Renueva el marbete hoy."
-          }
-        }
-      }
-    },
-    "Marbete Status: FINAL NOTICE" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Marbete Status: FINAL NOTICE"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Estado del Marbete: AVISO FINAL"
-          }
-        }
-      }
-    },
     "-" : {
 
     },
@@ -1278,16 +56,6 @@
     "%@" : {
 
     },
-    "%@ · %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ · %2$@"
-          }
-        }
-      }
-    },
     "%@ · %lld" : {
       "localizations" : {
         "en" : {
@@ -1338,12 +106,38 @@
         }
       }
     },
+    "%@ → %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ → %2$@"
+          }
+        }
+      }
+    },
     "%@ completed %@" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@ completed %2$@"
+          }
+        }
+      }
+    },
+    "%@ is out of time. Renew the marbete today." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is out of time. Renew the marbete today."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A %@ se le acabó el tiempo. Renueva el marbete hoy."
           }
         }
       }
@@ -1425,9 +219,6 @@
       }
     },
     "%lld" : {
-
-    },
-    "%lld / 17 CHARACTERS" : {
 
     },
     "%lld %@" : {
@@ -1732,6 +523,78 @@
         }
       }
     },
+    "advisory.a11yBlocking" : {
+      "comment" : "VoiceOver prefix for a blocking advisory — the thing will not work as configured.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Needs fixing"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requiere corrección"
+          }
+        }
+      }
+    },
+    "advisory.a11yCaution" : {
+      "comment" : "VoiceOver prefix for a caution advisory — probably a typo, but not blocking.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check this"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verifica esto"
+          }
+        }
+      }
+    },
+    "advisory.a11yDecision" : {
+      "comment" : "VoiceOver prefix for a contradiction advisory — the app cannot tell which input is wrong.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Needs your decision"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requiere tu decisión"
+          }
+        }
+      }
+    },
+    "advisory.a11yInfo" : {
+      "comment" : "VoiceOver prefix for an informational advisory — a consequence or projection, no action needed.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Note"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nota"
+          }
+        }
+      }
+    },
     "ALL RARE THEMES COLLECTED" : {
 
     },
@@ -1748,9 +611,6 @@
 
     },
     "Back" : {
-
-    },
-    "BELOW PREVIOUS READING (%@)" : {
 
     },
     "BROWSE ALL PRESETS" : {
@@ -1790,30 +650,6 @@
 
     },
     "CHECKPOINT PRO" : {
-
-    },
-    "Choose the climate zone that best matches where you drive most often." : {
-
-    },
-    "Clear search" : {
-
-    },
-    "Clear service type" : {
-
-    },
-    "Clears the selected preset and lets you type any service name" : {
-
-    },
-    "Climate Zone" : {
-
-    },
-    "Close" : {
-
-    },
-    "Collapsed" : {
-
-    },
-    "Coming up: %@" : {
 
     },
     "chip.months1Approx" : {
@@ -1952,6 +788,33 @@
         }
       }
     },
+    "Choose the climate zone that best matches where you drive most often." : {
+
+    },
+    "Clear search" : {
+
+    },
+    "Clear service type" : {
+
+    },
+    "Clears the selected preset and lets you type any service name" : {
+
+    },
+    "Climate Zone" : {
+
+    },
+    "Close" : {
+
+    },
+    "Collapsed" : {
+
+    },
+    "Collapses details" : {
+
+    },
+    "Coming up: %@" : {
+
+    },
     "common.back" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2084,6 +947,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Guardar"
+          }
+        }
+      }
+    },
+    "common.undo" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undo"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deshacer"
+          }
+        }
+      }
+    },
+    "common.update" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizar"
           }
         }
       }
@@ -2547,9 +1444,6 @@
         }
       }
     },
-    "CURRENT ESTIMATE" : {
-
-    },
     "Currently selected" : {
 
     },
@@ -2568,15 +1462,6 @@
     "Delete" : {
 
     },
-    "Delete Service" : {
-
-    },
-    "Delete Service?" : {
-
-    },
-    "Delete Vehicle" : {
-
-    },
     "Delete Vehicle?" : {
 
     },
@@ -2584,9 +1469,6 @@
 
     },
     "DETECTED VALUE" : {
-
-    },
-    "Dismiss error" : {
 
     },
     "Dismiss hint" : {
@@ -3605,20 +2487,96 @@
     "Edit service" : {
 
     },
-    "Edit Service" : {
-
-    },
     "Edit service log" : {
-
-    },
-    "Edit Vehicle" : {
 
     },
     "Edit vehicle specs" : {
 
     },
-    "EDITING" : {
-
+    "edit.alsoMoveReminder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Also move next reminder"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mover también el próximo recordatorio"
+          }
+        }
+      }
+    },
+    "edit.beforeLog" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Before %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Antes de %@"
+          }
+        }
+      }
+    },
+    "edit.betweenLogs" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Between %@ and %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entre %@ y %@"
+          }
+        }
+      }
+    },
+    "edit.sinceLog" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Since %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desde %@"
+          }
+        }
+      }
+    },
+    "edit.was" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Antes: %@"
+          }
+        }
+      }
     },
     "Empty" : {
 
@@ -3742,9 +2700,6 @@
         }
       }
     },
-    "ENTER MILEAGE" : {
-
-    },
     "error.could_not_read_odometer" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3838,6 +2793,9 @@
     "Expanded" : {
 
     },
+    "Expands details" : {
+
+    },
     "Expands to show log and schedule options" : {
 
     },
@@ -3926,6 +2884,909 @@
     "Find Gas Prices" : {
 
     },
+    "form.addAttachments" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add Attachments"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añadir adjuntos"
+          }
+        }
+      }
+    },
+    "form.amount" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amount"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monto"
+          }
+        }
+      }
+    },
+    "form.atMileage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "at %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "a las %@"
+          }
+        }
+      }
+    },
+    "form.attachments" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attachments"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adjuntos"
+          }
+        }
+      }
+    },
+    "form.category" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Category"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Categoría"
+          }
+        }
+      }
+    },
+    "form.cost" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cost"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Costo"
+          }
+        }
+      }
+    },
+    "form.datePastWarning" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This date is in the past — will be marked overdue."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta fecha ya pasó — se marcará como vencido."
+          }
+        }
+      }
+    },
+    "form.datePerformed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date Performed"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fecha del servicio"
+          }
+        }
+      }
+    },
+    "form.daysAhead" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~%d days"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~%d días"
+          }
+        }
+      }
+    },
+    "form.daysOverdue" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d days overdue"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d días de atraso"
+          }
+        }
+      }
+    },
+    "form.details" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Details"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detalles"
+          }
+        }
+      }
+    },
+    "form.detailsCount" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Details · %d"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detalles · %d"
+          }
+        }
+      }
+    },
+    "form.draftDiscard" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discard"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descartar"
+          }
+        }
+      }
+    },
+    "form.draftFrom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Draft from %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrador de %@"
+          }
+        }
+      }
+    },
+    "form.draftResume" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resume"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar"
+          }
+        }
+      }
+    },
+    "form.draftResumeTitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resume where you left off?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Continuar donde quedaste?"
+          }
+        }
+      }
+    },
+    "form.dueDate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Due Date"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fecha de vencimiento"
+          }
+        }
+      }
+    },
+    "form.dueMileage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Due Mileage"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Millaje de vencimiento"
+          }
+        }
+      }
+    },
+    "form.editingTag" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editing"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editando"
+          }
+        }
+      }
+    },
+    "form.every" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada"
+          }
+        }
+      }
+    },
+    "form.everyMileage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "every %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cada %@"
+          }
+        }
+      }
+    },
+    "form.everyMonth" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "every month"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cada mes"
+          }
+        }
+      }
+    },
+    "form.everyNMonths" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "every %d months"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cada %d meses"
+          }
+        }
+      }
+    },
+    "form.mileage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mileage"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Millaje"
+          }
+        }
+      }
+    },
+    "form.mileageAhead" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~%@ ahead"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~%@ restantes"
+          }
+        }
+      }
+    },
+    "form.mileageBlankHint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If left blank, current vehicle mileage will be used."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si lo dejas en blanco, se usará el millaje actual del vehículo."
+          }
+        }
+      }
+    },
+    "form.mileagePast" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ past"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ de más"
+          }
+        }
+      }
+    },
+    "form.milesSuffix" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "miles"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "millas"
+          }
+        }
+      }
+    },
+    "form.monthsSuffix" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "months"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "meses"
+          }
+        }
+      }
+    },
+    "form.nextDue" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next Due"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo vencimiento"
+          }
+        }
+      }
+    },
+    "form.nextDuePreview" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next due: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo vencimiento: %@"
+          }
+        }
+      }
+    },
+    "form.notes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notes"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notas"
+          }
+        }
+      }
+    },
+    "form.notesPlaceholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add notes..."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añade notas…"
+          }
+        }
+      }
+    },
+    "form.optionalTag" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optional"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opcional"
+          }
+        }
+      }
+    },
+    "form.or" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "or"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "o"
+          }
+        }
+      }
+    },
+    "form.orEvery" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Or Every"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O cada"
+          }
+        }
+      }
+    },
+    "form.reminder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reminder"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recordatorio"
+          }
+        }
+      }
+    },
+    "form.remindNextTime" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remind me next time"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recuérdame la próxima vez"
+          }
+        }
+      }
+    },
+    "form.repeatAfterCompletion" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repeat after completion"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repetir al completar"
+          }
+        }
+      }
+    },
+    "form.repeats" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repeats"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repetición"
+          }
+        }
+      }
+    },
+    "form.requiredAccessibility" : {
+      "comment" : "VoiceOver label for the required-field marker.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Required"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requerido"
+          }
+        }
+      }
+    },
+    "form.requiredTag" : {
+      "comment" : "Visible marker beside a required field's label. Uppercased at the call site; a word rather than an asterisk, which is a convention the user must already know.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "REQUIRED"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "REQUERIDO"
+          }
+        }
+      }
+    },
+    "form.saveAndAddAnother" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save & Add Another"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardar y añadir otro"
+          }
+        }
+      }
+    },
+    "form.savedAddNext" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved ✓ — add next"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardado ✓ — añade el siguiente"
+          }
+        }
+      }
+    },
+    "form.serviceType" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Service Type"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipo de servicio"
+          }
+        }
+      }
+    },
+    "form.serviceTypeRequired" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Service type is required"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige un tipo de servicio"
+          }
+        }
+      }
+    },
+    "form.setDueDate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set due date"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Definir fecha de vencimiento"
+          }
+        }
+      }
+    },
+    "form.suggestMonths" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suggest %d months"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sugerir %d meses"
+          }
+        }
+      }
+    },
+    "form.suggestValue" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suggest %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sugerir %@"
+          }
+        }
+      }
+    },
+    "form.use" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usar"
+          }
+        }
+      }
+    },
+    "form.useSuggestedValue" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use suggested value: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usar valor sugerido: %@"
+          }
+        }
+      }
+    },
+    "form.vehicleBasicsRequired" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make, model, and year are required"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marca, modelo y año son obligatorios"
+          }
+        }
+      }
+    },
+    "form.whicheverFirst" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Whichever comes first"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo que ocurra primero"
+          }
+        }
+      }
+    },
     "Free • No account required" : {
 
     },
@@ -3969,8 +3830,39 @@
     "ICLOUD SYNC" : {
 
     },
-    "If left blank, current vehicle mileage will be used." : {
-
+    "impact.nextReminder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next reminder"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo recordatorio"
+          }
+        }
+      }
+    },
+    "impact.none" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ninguno"
+          }
+        }
+      }
     },
     "Import" : {
 
@@ -4002,19 +3894,6 @@
     },
     "KEEPS %lld SERVICE REMINDERS ACCURATE" : {
 
-    },
-    "LAST CONFIRMED" : {
-
-    },
-    "Last done: %@ · %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Last done: %1$@ · %2$@"
-          }
-        }
-      }
     },
     "Last synced %@" : {
 
@@ -4103,6 +3982,22 @@
     "Marbete status: %@" : {
 
     },
+    "Marbete Status: FINAL NOTICE" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marbete Status: FINAL NOTICE"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estado del Marbete: AVISO FINAL"
+          }
+        }
+      }
+    },
     "MARK ALL DONE" : {
 
     },
@@ -4146,6 +4041,160 @@
     "Mileage: %@" : {
 
     },
+    "mileage.current_estimate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current Estimate"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimado actual"
+          }
+        }
+      }
+    },
+    "mileage.alsoUpdates" : {
+      "comment" : "Shown before saving when a service's odometer reading will also become the vehicle's current mileage. %1$@ is the previous reading, %2$@ the new one.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Also updates odometer — %1$@ → %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "También actualiza el odómetro — %1$@ → %2$@"
+          }
+        }
+      }
+    },
+    "mileage.dismiss_error" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dismiss error"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descartar error"
+          }
+        }
+      }
+    },
+    "mileage.enter_label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter Mileage"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingresar millaje"
+          }
+        }
+      }
+    },
+    "mileage.enter_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter mileage"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingresa el millaje"
+          }
+        }
+      }
+    },
+    "mileage.last_confirmed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last Confirmed"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última confirmación"
+          }
+        }
+      }
+    },
+    "mileage.no_estimate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No estimate available"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay estimado disponible"
+          }
+        }
+      }
+    },
+    "mileage.no_estimate_hint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update a few more times to enable driving pace estimates"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualiza unas cuantas veces más para activar estimados de ritmo de manejo"
+          }
+        }
+      }
+    },
+    "mileage.update_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update Mileage"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizar millaje"
+          }
+        }
+      }
+    },
     "Month" : {
 
     },
@@ -4156,9 +4205,6 @@
 
     },
     "No cost recorded" : {
-
-    },
-    "NO ESTIMATE AVAILABLE" : {
 
     },
     "No linked vehicles" : {
@@ -5163,9 +5209,6 @@
     "Optional" : {
 
     },
-    "OR" : {
-
-    },
     "OR TYPE A CUSTOM SERVICE" : {
 
     },
@@ -5217,9 +5260,6 @@
 
     },
     "Preview Import" : {
-
-    },
-    "PUERTO RICO VEHICLE REGISTRATION TAG EXPIRATION (OPTIONAL)" : {
 
     },
     "recall.action.add_planned_service" : {
@@ -5724,8 +5764,56 @@
     "RECORD COMPLETED SERVICE" : {
 
     },
-    "RECORD SERVICE" : {
-
+    "record.setIntervalHint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set an interval to get reminded"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Define un intervalo para recibir avisos"
+          }
+        }
+      }
+    },
+    "refCard.last" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Último %@"
+          }
+        }
+      }
+    },
+    "refCard.useValues" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use these values"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usar estos valores"
+          }
+        }
+      }
     },
     "REGISTRATION TAG" : {
 
@@ -5748,6 +5836,23 @@
     },
     "REMEDY" : {
 
+    },
+    "remind.noScheduleWarning" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set a due date, mileage, or interval — this reminder won't fire yet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Define fecha, millaje o intervalo — este recordatorio aún no se activará"
+          }
+        }
+      }
     },
     "reminder.helper_text" : {
       "extractionState" : "manual",
@@ -5798,19 +5903,7 @@
     "Save" : {
 
     },
-    "SAVE & ADD ANOTHER" : {
-
-    },
-    "Save and add another" : {
-
-    },
-    "Scan odometer with camera" : {
-
-    },
     "Scan with camera" : {
-
-    },
-    "SCANNING ODOMETER..." : {
 
     },
     "Schedule service" : {
@@ -5927,142 +6020,6 @@
     "Service visit opportunity, %lld services due soon" : {
 
     },
-    "mileage.current_estimate" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Current Estimate"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Estimado actual"
-          }
-        }
-      }
-    },
-    "mileage.dismiss_error" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dismiss error"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Descartar error"
-          }
-        }
-      }
-    },
-    "mileage.enter_label" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enter Mileage"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingresar millaje"
-          }
-        }
-      }
-    },
-    "mileage.enter_placeholder" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enter mileage"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingresa el millaje"
-          }
-        }
-      }
-    },
-    "mileage.last_confirmed" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Last Confirmed"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Última confirmación"
-          }
-        }
-      }
-    },
-    "mileage.no_estimate" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No estimate available"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No hay estimado disponible"
-          }
-        }
-      }
-    },
-    "mileage.no_estimate_hint" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Update a few more times to enable driving pace estimates"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Actualiza unas cuantas veces más para activar estimados de ritmo de manejo"
-          }
-        }
-      }
-    },
-    "mileage.update_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Update Mileage"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Actualizar millaje"
-          }
-        }
-      }
-    },
     "service.delete.action" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6076,6 +6033,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Eliminar servicio"
+          }
+        }
+      }
+    },
+    "service.delete.confirm_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This deletes the service and its logged history. Any receipts or documents attached to it stay in your Documents library. This action cannot be undone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esto elimina el servicio y su historial registrado. Los recibos o documentos adjuntos permanecen en tu biblioteca de Documentos. Esta acción no se puede deshacer."
           }
         }
       }
@@ -6182,19 +6156,70 @@
         }
       }
     },
-    "service.delete.confirm_message" : {
+    "serviceMode.record" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This deletes the service and its logged history. Any receipts or documents attached to it stay in your Documents library. This action cannot be undone."
+            "value" : "Record"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esto elimina el servicio y su historial registrado. Los recibos o documentos adjuntos permanecen en tu biblioteca de Documentos. Esta acción no se puede deshacer."
+            "value" : "Registrar"
+          }
+        }
+      }
+    },
+    "serviceMode.recordCaption" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log what you already did"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra lo que ya hiciste"
+          }
+        }
+      }
+    },
+    "serviceMode.remind" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remind"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recordar"
+          }
+        }
+      }
+    },
+    "serviceMode.remindCaption" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get reminded before it's due"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recibe un aviso antes de que venza"
           }
         }
       }
@@ -6212,9 +6237,6 @@
 
     },
     "Set a reminder for future service" : {
-
-    },
-    "SET REMINDER" : {
 
     },
     "Set up reminder" : {
@@ -6621,6 +6643,23 @@
     "Status: %@" : {
 
     },
+    "store.error.product_unavailable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Purchase is unavailable right now. Please try again in a moment."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La compra no está disponible en este momento. Vuelve a intentarlo en un momento."
+          }
+        }
+      }
+    },
     "SUMMARY" : {
 
     },
@@ -6675,9 +6714,6 @@
     "THEME UNLOCKED" : {
 
     },
-    "This date is in the past — will be marked overdue." : {
-
-    },
     "This is your only vehicle. Deleting it will remove all associated services and maintenance history. You'll need to add a new vehicle to continue using Checkpoint." : {
 
     },
@@ -6696,12 +6732,6 @@
           }
         }
       }
-    },
-    "This will also delete all service history for this service. This action cannot be undone." : {
-
-    },
-    "This will also delete all services for this vehicle. This action cannot be undone." : {
-
     },
     "This will permanently delete \"%@\" and all its services and maintenance history." : {
 
@@ -6902,6 +6932,23 @@
         }
       }
     },
+    "toast.service_updated" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Service updated"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servicio actualizado"
+          }
+        }
+      }
+    },
     "toast.sync_error" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7004,9 +7051,6 @@
     "UPDATE" : {
 
     },
-    "Update a few more times to enable driving pace estimates" : {
-
-    },
     "Update mileage" : {
 
     },
@@ -7037,22 +7081,10 @@
     "Usage Analytics" : {
 
     },
-    "USE" : {
-
-    },
     "Use %@" : {
 
     },
     "USE A CUSTOM SERVICE INSTEAD" : {
-
-    },
-    "USE LAST ENTRY" : {
-
-    },
-    "Use last entry: %@" : {
-
-    },
-    "Use suggested value: %@" : {
 
     },
     "USE THIS" : {
@@ -7246,40 +7278,6 @@
         }
       }
     },
-    "vehicle.marbete_help" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yearly vehicle registration tag expiration"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vencimiento anual del marbete"
-          }
-        }
-      }
-    },
-    "vehicle.marbete_help_long" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Puerto Rico vehicle registration tag expiration"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vencimiento del marbete de Puerto Rico"
-          }
-        }
-      }
-    },
     "vehicle.make" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7310,6 +7308,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Toyota, Honda, Ford…"
+          }
+        }
+      }
+    },
+    "vehicle.marbete_help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yearly vehicle registration tag expiration"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vencimiento anual del marbete"
+          }
+        }
+      }
+    },
+    "vehicle.marbete_help_long" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puerto Rico vehicle registration tag expiration"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vencimiento del marbete de Puerto Rico"
           }
         }
       }
@@ -7743,16 +7775,10 @@
     "Which vehicle would you like to update?" : {
 
     },
-    "WHICHEVER COMES FIRST" : {
-
-    },
     "WINDOW" : {
 
     },
     "WITHIN %@" : {
-
-    },
-    "Yearly vehicle registration tag expiration" : {
 
     }
   },

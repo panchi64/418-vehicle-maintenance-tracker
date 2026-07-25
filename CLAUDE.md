@@ -19,10 +19,20 @@
 - `tools/depth-backdrops/` — Local web app (Python/FastAPI + React/WebGL) that generates the cerulean depth-map backdrops behind device mockups in App Store screenshots. Run `tools/depth-backdrops/dev.sh`. See `tools/depth-backdrops/CLAUDE.md`.
 
 **Docs:**
+- `docs/SURFACE_DOCTRINE.md` — **read before designing or changing any screen.** Surface classes, visual hierarchy, disclosure rules, the `F*` invariants cited in code comments.
+- `docs/AESTHETIC.md` — visual identity across 418 products. Rules are tagged `[REQUIREMENT]` or `[PREFERENCE]`; cite the tag when you cite the rule.
 - `docs/BIOMBO_IMPLEMENTATION_PLAN.md` — active implementation plan
-- `docs/AESTHETIC.md` — visual design philosophy (shared across 418 products)
 - `docs/FUEL_PRICE_TRACKER.md` — original Biombo feature spec
 - `docs/ARCHITECTURE.md`, `docs/FEATURES.md` — Checkpoint reference
+
+## UI work
+
+Checkpoint's identity is strong on **readouts** (hero cards, status headlines) and weak wherever a screen asks the user to *decide* something. The cause was documented as taste rather than usability, so it propagated. Two rules carry most of the weight:
+
+- **Every section has exactly one primary element**, distinguished on at least two channels (size, weight, spacing, position) — never color alone, since color carries status meaning. A screen whose content all sits at one weight has no reading order.
+- **Default-disclose what makes a feature *work*; hide what makes it *complete*.** An interval that makes a reminder fire belongs on the default path; notes and attachments belong in depth.
+
+`docs/SURFACE_DOCTRINE.md` has the rest, including a pre-flight checklist for PRs.
 
 ## Progressive disclosure
 

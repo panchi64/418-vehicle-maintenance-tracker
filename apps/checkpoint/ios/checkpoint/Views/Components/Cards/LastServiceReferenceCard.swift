@@ -3,7 +3,7 @@
 //  checkpoint
 //
 //  Single history reference artifact shown once a service type is chosen
-//  (R4). Informational only in Remind mode (onUseValues nil); in Record mode
+//  (F7). Informational only in Remind mode (onUseValues nil); in Record mode
 //  it can port the last log's values onto the form.
 //
 

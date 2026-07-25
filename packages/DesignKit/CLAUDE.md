@@ -37,7 +37,7 @@ struct SomeView: View {
 
 ## What's NOT here yet
 
-Phase 0 ships the skeleton only. Still to migrate from `checkpoint-app/checkpoint/DesignSystem/`:
+Phase 0 ships the skeleton only. Still to migrate from `apps/checkpoint/ios/checkpoint/DesignSystem/`:
 - `Theme.swift` view modifiers (`.cardStyle`, `.brutalistBorder`, `.glassCardStyle`, `.screenPadding`)
 - `Typography.swift` font extensions
 - `InstrumentSection`, `BrutalistChartStyle`, `TappableCardModifier`, `TouchTarget`

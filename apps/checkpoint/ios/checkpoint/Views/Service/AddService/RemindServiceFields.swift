@@ -18,7 +18,7 @@ struct RemindServiceFields: View {
         lastLog.flatMap { log in policyMiles.map { log.mileageAtService + $0 } }
     }
 
-    /// G5: this is the only path that produces the Service's initial due
+    /// F4: this is the only path that produces the Service's initial due
     /// tracking (unlike record mode, intervals here only govern the *next*
     /// occurrence after this reminder is completed).
     private var hasComputableSchedule: Bool {

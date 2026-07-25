@@ -3,7 +3,7 @@
 //  checkpoint
 //
 //  Persists a ServiceFormDraft per vehicle in UserDefaults. Drafts older than
-//  7 days are treated as abandoned and cleared on read (R9).
+//  7 days are treated as abandoned and cleared on read (F10).
 //
 
 import Foundation

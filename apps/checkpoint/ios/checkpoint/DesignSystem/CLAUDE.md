@@ -1,78 +1,118 @@
-# DesignSystem - Visual Design Tokens
+# DesignSystem — Tokens and Modifiers
 
-This directory contains the design system tokens and modifiers that define Checkpoint's visual language.
+The **current implementation** of Checkpoint's visual language: tokens, fonts, and view modifiers as they exist in code.
 
-## Color Tokens
+This file describes *what is available*. It deliberately does not describe when to use which — that's a structural question and it lives in [`docs/SURFACE_DOCTRINE.md`](../../../../../docs/SURFACE_DOCTRINE.md). Identity and brand rules live in [`docs/AESTHETIC.md`](../../../../../docs/AESTHETIC.md).
 
-### Backgrounds
+**This file is expected to change.** Values here are implementation choices, not principles. If you find it disagreeing with the code, the code is right — fix this file.
+
+## Colors are theme-driven
+
+Every color token is a computed property resolving through `ThemeManager.shared.current`, not a literal:
+
 ```swift
-Theme.backgroundPrimary    // Near-black base
-Theme.backgroundElevated   // Slightly lighter for cards
-Theme.backgroundSubtle     // Subtle differentiation
+static var accent: Color { ThemeManager.shared.current.accentColor }
 ```
 
-### Text
-```swift
-Theme.textPrimary          // White/near-white
-Theme.textSecondary        // Muted text
-Theme.textTertiary         // Very subtle text
-```
+Themes are `ThemeDefinition` values loaded from `Resources/Themes.json`. **Eight ship today** — `default`, `clean_slate`, `red_line`, `blueprint`, `terra`, `midnight_oil`, `garage_day`, `stealth` — some unlocked via tips. Each defines every token, so **never assume a specific hue**. Write against the token, verify against more than one theme.
 
-### Accent
-```swift
-Theme.accent               // Amber #E89B3C
-Theme.accentMuted          // Dimmed amber
-```
+### Token inventory
 
-### Status Colors
-```swift
-Theme.statusOverdue        // Red - immediate attention
-Theme.statusDueSoon        // Yellow/amber - upcoming
-Theme.statusGood           // Green - no action needed
-Theme.statusNeutral        // Gray - no due date set
-```
+| Group | Tokens |
+|---|---|
+| Backgrounds | `backgroundPrimary`, `backgroundElevated`, `backgroundSubtle` |
+| Surfaces | `surfaceInstrument`, `glow`, `gridLine` |
+| Text | `textPrimary`, `textSecondary`, `textTertiary` |
+| Borders | `borderSubtle` |
+| Accent | `accent`, `accentMuted` |
+| Status | `statusOverdue`, `statusDueSoon`, `statusGood`, `statusNeutral` |
 
-## Typography Scale
+### The default theme, for orientation only
 
-All fonts use SF Pro (system font):
+The `default` theme ("Checkpoint") is a **saturated cerulean ground with off-white ink** — not a dark-neutral theme:
 
-| Style | Size | Weight | Usage |
-|-------|------|--------|-------|
-| `displayLarge` | 34pt | Bold rounded | Hero numbers |
-| `headlineLarge` | 28pt | Semibold | Screen titles |
-| `headline` | 22pt | Semibold | Section headers |
-| `title` | 17pt | Semibold | Card titles |
-| `bodyText` | 17pt | Regular | Body copy |
-| `bodySecondary` | 15pt | Regular | Secondary text |
-| `caption` | 13pt | Medium | Labels, metadata |
-| `captionSmall` | 11pt | Regular | Fine print |
+`backgroundPrimary #0033BE` · `textPrimary #F5F0DC` · `accent #F5F0DC` · `statusOverdue #FF6B6B` · `statusDueSoon #F7AD55` · `statusGood #38D9A9` · `statusNeutral #A5ADB5`
 
-## Spacing System
+Other themes diverge substantially, including in `colorScheme` and `fontDesign`.
 
-Base unit: 4pt
+### Adding a token
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `xs` | 4pt | Tight spacing |
-| `sm` | 8pt | Component internal |
-| `listItem` | 12pt | List item padding |
-| `md` | 16pt | Standard spacing |
-| `screenHorizontal` | 20pt | Screen edge padding |
-| `lg` | 24pt | Section gaps |
-| `xl` | 32pt | Major sections |
-| `xxl` | 48pt | Hero spacing |
+Add it to `ThemeProviding`, implement it on every provider, and add it to all eight entries in `Themes.json`. See [`packages/DesignKit/CLAUDE.md`](../../../../../packages/DesignKit/CLAUDE.md).
 
-## View Modifiers
+## Typography
 
-- `.cardStyle()` — Elevated card with gradient overlay, zero corner radius, shadow
-- `.screenPadding()` — Standard horizontal padding
-- `.buttonStyle(.primary)` — Amber filled button
-- `.buttonStyle(.secondary)` — Outlined button
+Monospaced themes use bundled JetBrains Mono via DesignKit; other themes fall back to `.system` with the theme's `fontDesign`. All accessors are `@MainActor` because they read `ThemeManager`.
 
-## Usage Guidelines
+| Font | Size / Weight | Role |
+|---|---|---|
+| `brutalistHero` | 56 Light | Hero data displays |
+| `brutalistTitle` | 32 Medium | Primary headings (uppercased by its style modifier) |
+| `brutalistHeading` | 20 Medium | Section titles, service names |
+| `brutalistBodyEmphasis` | 15 Medium | **The one primary datum** of a section or form |
+| `brutalistBody` | 15 Regular | Ordinary values, body text |
+| `brutalistSecondary` | 13 Regular | Supporting text |
+| `brutalistLabel` | 11 Medium | Labels, uppercased + tracked |
+| `brutalistLabelBold` | 11 Bold | Emphasized labels |
 
-1. **Always use tokens** - Never hardcode colors, fonts, or spacing
-2. **Zero corner radius** - No `cornerRadius()` modifiers
-3. **Dark backgrounds** - Cards float on dark backgrounds
-4. **Status colors for meaning** - Use status colors only for urgency indicators
-5. **Typography hierarchy** - Use appropriate text styles for information hierarchy
+### The four-step working hierarchy
+
+For readouts and forms, the usable range is:
+
+**15 Medium** (primary) → **15 Regular** (values) → **13 Regular** (support) → **11 Medium caps** (labels)
+
+`brutalistHero` and `brutalistTitle` are reserved for genuine hero elements — a single dominant number, a status headline. They are not a substitute for having a hierarchy in the rest of the screen.
+
+`brutalistBodyEmphasis` was added because the scale previously jumped 15 Regular → 11 Medium, leaving **color as the only channel for importance** — and color is already carrying status meaning. Without it, hierarchy was not expressible. Don't remove it without replacing the capability.
+
+### Style modifiers
+
+`.brutalistHeroStyle(color:)` · `.brutalistTitleStyle()` · `.brutalistHeadingStyle()` · `.brutalistBodyEmphasisStyle(color:)` · `.brutalistBodyStyle()` · `.brutalistSecondaryStyle()` · `.brutalistLabelStyle(color:)`
+
+## Spacing (`Spacing`, 4pt base)
+
+| Token | Value | Use |
+|---|---|---|
+| `xs` | 4 | Tight gaps, icon-to-text |
+| `sm` | 8 | Related elements |
+| `listItem` | 12 | Between list items |
+| `md` | 16 | Standard padding |
+| `screenHorizontal` | 20 | Screen edge padding |
+| `lg` | 24 | Section separation |
+| `xl` | 32 | Major sections |
+| `xxl` | 48 | Hero spacing |
+| `tabBarOffset` | 56 | Bottom clearance under the tab bar |
+
+⚠️ **Known inconsistency:** `Theme.screenHorizontalPadding` is **16** while `Spacing.screenHorizontal` is **20**. `VehicleHeader` uses the former and the tabs use the latter, so the persistent header is inset 4pt tighter than the content beneath it. Prefer `Spacing.screenHorizontal`; the `Theme` constant should be retired.
+
+## Layout constants (`Theme`)
+
+`cardCornerRadius` / `buttonCornerRadius` / `instrumentCornerRadius` are all **0** (sharp corners). `borderWidth` 2 · `cardPadding` 16 · `buttonHeight` 48 · `frameWidth` 35 (web-parity frame, rarely used on iOS).
+
+## Animation
+
+`animationFast` 0.1 · `animationMedium` 0.2 · `animationSlow` 0.3 · `revealStagger` 0.05 · `pulseAnimationDuration` 1.5
+
+Glow: `glowRadius` 8 / `glowOpacity` 0.3 · `statusGlowRadius` 12 / `statusGlowOpacity` 0.4 · `focusGlowRadius` 6 / `focusGlowOpacity` 0.5
+
+## View modifiers
+
+**Surfaces** — `.brutalistBorder(color:)`, `.cardStyle(padding:)`, `.instrumentCardStyle(padding:)`, `.glassCardStyle(intensity:padding:)`, `.screenPadding()`
+
+**Effects** — `.statusGlow(color:isActive:)`, `.focusGlow(color:isActive:)`, `.pulseAnimation(isActive:)`
+
+**Entrance** — `.revealAnimation(delay:animation:)`, `.staggeredReveal(index:baseDelay:)`
+
+**Buttons** — `.buttonStyle(.primary)` (filled), `.buttonStyle(.secondary)` (outlined), `.buttonStyle(.instrument)`, `.toolbarButtonStyle(isDisabled:)`
+
+**Structural components** — `InstrumentSection`, `InstrumentSectionHeader`, `BrutalistDataRow`, `AtmosphericBackground`
+
+## Rules
+
+1. **Always use tokens.** Never hardcode a color, font, or spacing value.
+2. **Zero corner radius.** No `cornerRadius()` modifiers.
+3. **Never assume a hue.** Eight themes; verify against more than one, including a light-scheme theme.
+4. **Status colors carry meaning, and never carry it alone.** Pair with a label, shape, or position.
+5. **Hierarchy is expressed with weight and spacing, not color.** Color is spoken for.
+6. **Use the `textStyle:` font accessors where Dynamic Type scaling matters.**
+
+For *when* to reach for each of these — section structure, disclosure, advisory severity, required/optional — see `docs/SURFACE_DOCTRINE.md`.

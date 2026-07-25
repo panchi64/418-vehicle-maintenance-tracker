@@ -19,7 +19,7 @@ struct InstrumentSection<Content: View, Trailing: View>: View {
 
     let title: String
     let trailing: Trailing?
-    /// Uppercase-tracked tag rendered in the header's trailing slot, e.g. "OPTIONAL" (G6).
+    /// Uppercase-tracked tag rendered in the header's trailing slot, e.g. "OPTIONAL" (F5).
     let tag: String?
     let chrome: Chrome
     let content: Content

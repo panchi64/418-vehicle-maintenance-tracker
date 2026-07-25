@@ -2,6 +2,12 @@
 
 SwiftUI + SwiftData iOS app for vehicle maintenance tracking. See sibling `CLAUDE.md` files under `checkpoint/Models/`, `checkpoint/Views/`, `checkpoint/Services/`, `checkpoint/DesignSystem/`, `CheckpointWidget/`, and `checkpointTests/` for scoped guidance.
 
+## Before building UI
+
+Read [`docs/SURFACE_DOCTRINE.md`](../../../docs/SURFACE_DOCTRINE.md) — surface classes, visual hierarchy, disclosure order, advisory severity, and the `F*` invariants that this app's form components cite in their comments. [`docs/AESTHETIC.md`](../../../docs/AESTHETIC.md) covers visual identity, with each rule tagged `[REQUIREMENT]` or `[PREFERENCE]`.
+
+Short version: every section gets exactly one primary element distinguished on two or more channels (never color alone — status owns color), and anything a feature needs in order to *function* stays on the default path rather than inside a disclosure drawer.
+
 ## Security Posture
 
 These invariants were validated in the pre-launch security audit. Preserve them as the app evolves:

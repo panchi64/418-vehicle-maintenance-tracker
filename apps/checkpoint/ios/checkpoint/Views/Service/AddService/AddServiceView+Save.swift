@@ -142,9 +142,19 @@ extension AddServiceView {
             insertedAttachments.append(attachment)
         }
 
-        if mileage > vehicle.currentMileage {
-            vehicle.currentMileage = mileage
-        }
+        // F11: one commit path. Gated on the reading being the *newest* rather
+        // than merely the highest, so backfilling an old service can't
+        // overwrite a current odometer — and routed through `recordMileage` so
+        // `mileageUpdatedAt` and the snapshot move with it. Previously this was
+        // a bare `currentMileage = mileage`, which advanced the number while
+        // leaving the app believing the reading was weeks old.
+        MileageCommit.commitIfNewest(
+            reading: mileage,
+            observedAt: model.performedDate,
+            source: .serviceCompletion,
+            for: vehicle,
+            in: modelContext
+        )
 
         return RecordedServiceUndo(
             service: service,

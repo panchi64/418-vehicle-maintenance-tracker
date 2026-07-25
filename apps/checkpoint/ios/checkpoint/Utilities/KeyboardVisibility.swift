@@ -2,7 +2,7 @@ import SwiftUI
 import UIKit
 
 /// Tracks system keyboard visibility so bottom action bars can hide while a
-/// number pad or keyboard would otherwise overlap them (G3). There is only
+/// number pad or keyboard would otherwise overlap them (F3). There is only
 /// ever one keyboard, so a single shared observer is sufficient for every form.
 @Observable
 @MainActor

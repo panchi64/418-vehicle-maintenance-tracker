@@ -414,7 +414,9 @@ struct WidgetColors {
 | Component | Purpose |
 |-----------|---------|
 | `CategoryBreakdownCard.swift` | Cost breakdown by category |
-| `ChartPlaceholderCard.swift` | Placeholder when chart has no data |
+| `ChartPlaceholderCard.swift` | ⚠️ Full-size "no data" card. Being replaced by `InsufficientDataNote` (Readout rule 3 — a card must never advertise an absence) |
+| `InsufficientDataNote.swift` | One quiet line for "not enough data yet" |
+| `ReadoutSection.swift` | Section shell for readout surfaces: header + one required primary slot + supporting slot. Makes "one primary per section" the default |
 | `CostSummaryCard.swift` | Total spent hero card |
 | `CumulativeCostChartCard.swift` | Area chart of cumulative spending |
 | `MileageUpdateSheet.swift` | Full mileage update sheet (extracted from QuickMileageUpdateCard) |
@@ -440,12 +442,15 @@ struct WidgetColors {
 | Component | Purpose |
 |-----------|---------|
 | `FeatureHintView.swift` | Feature discovery hints |
+| `FormAdvisory.swift` | **The** advisory component for data-entry surfaces (F12). Four-rung severity ladder — `.blocking` / `.contradiction` / `.caution` / `.info` — differentiated on type, enclosure, and color |
 | `ToastView.swift` | In-app toast notification |
 
 ### Components/Inputs/
 | Component | Purpose |
 |-----------|---------|
-| `ErrorMessageRow.swift` | Inline error message |
+| `ErrorMessageRow.swift` | ⚠️ Inline error message. Superseded by `FormAdvisory` (`.blocking` / `.caution`) |
+| `FieldRequirement.swift` | The single required/optional vocabulary (F5), plus `RequiredFieldMarker` |
+| `FormActionBar.swift` | The only place Save lives (F1–F3) |
 | `InstrumentSegmentedControl.swift` | Styled segmented control |
 | `InstrumentTextField.swift` | Styled text field |
 | `MarbetePicker.swift` | Month/year picker for PR registration |

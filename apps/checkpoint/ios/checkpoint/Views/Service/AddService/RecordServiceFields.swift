@@ -4,7 +4,7 @@ struct RecordServiceFields: View {
     @Bindable var model: AddServiceFormModel
     let anchors: ServiceFormAnchors
 
-    /// Never shown when there's nothing computable to project (G5). Uses the
+    /// Never shown when there's nothing computable to project (F4). Uses the
     /// same projection as the save path, so the preview can't disagree with
     /// the reminder that actually gets scheduled.
     private var nextDuePreview: String? {

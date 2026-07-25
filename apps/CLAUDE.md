@@ -4,13 +4,8 @@ Top-level directory for each product in the monorepo. Every app has its own scop
 
 ## What lives here
 
+- **`checkpoint/`** — Checkpoint (vehicle maintenance). Contains `ios/` (SwiftUI + SwiftData app, widget, watch app) and `web/` (SolidJS marketing site on Cloudflare).
 - **`biombo/`** — Biombo (PR gas prices). Contains `ios/` (Swift iOS app) and `backend/` (Node/TS + Postgres). The backend is strictly separate from the iOS code and is **not bundled** into the app binary.
-
-## What's NOT here yet
-
-- **Checkpoint** currently lives at `checkpoint-app/` (iOS) and `checkpoint-website/` (web) at the repo root. The planned move to `apps/checkpoint/{ios,web}/` is pending Xcode availability for build verification.
-
-When that move happens, this file is updated to describe the unified layout.
 
 ## Conventions
 
@@ -19,3 +14,7 @@ Each product directory owns its own tooling:
 - Backend services: `package.json`, migrations, self-contained tests
 
 Shared SwiftPM packages live under `packages/`, not here.
+
+## UI/UX rules apply across apps
+
+`docs/SURFACE_DOCTRINE.md` governs screen structure for every app here, not just Checkpoint. `docs/AESTHETIC.md` governs visual identity. Read both before building a user-facing surface in either product.

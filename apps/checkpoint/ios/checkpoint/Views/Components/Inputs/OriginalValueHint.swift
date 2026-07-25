@@ -3,7 +3,7 @@
 //  checkpoint
 //
 //  Shows a field's original value while editing, only for as long as the
-//  current value differs from it (G8). Never a permanent badge.
+//  current value differs from it (F6). Never a permanent badge.
 //
 
 import SwiftUI
