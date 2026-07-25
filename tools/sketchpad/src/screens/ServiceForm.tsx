@@ -206,10 +206,14 @@ export function ServiceForm(props: { onClose?: () => void }) {
           'overflow-y': 'auto',
           display: 'flex',
           'flex-direction': 'column',
-          /* lg, not xl. The section header rules now carry the separation, so
-             paying 32pt of gap on top of them was buying the same grouping
-             twice — and it pushed the last field below the fold. */
-          gap: 'var(--space-lg)',
+          /* xl between sections, against 16px between fields and 8px from a
+             header to its own content. Three unambiguous steps.
+             This was lg (24px) for a while, on the theory that the header rules
+             already carried the separation and the extra gap only cost height.
+             They don't: at 24-vs-16 the sections did not read as separate at a
+             glance, because a 1.5:1 ratio is not a signal. Tightening the inner
+             steps pays for this one. */
+          gap: 'var(--space-xl)',
           padding: 'var(--space-md) var(--space-screen-h) var(--space-lg)',
         }}
       >

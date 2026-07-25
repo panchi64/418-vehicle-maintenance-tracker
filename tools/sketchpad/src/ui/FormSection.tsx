@@ -34,6 +34,22 @@ import type { JSX } from 'solid-js'
 import { Show } from 'solid-js'
 import { Label, LabelBold } from './Text'
 
+/*
+ * SPACING. Three distinct steps, not two similar ones:
+ *
+ *   8px   header → its content     (sm)  the label belongs to what follows
+ *   16px  field → field            (md)  siblings inside one group
+ *   32px  section → section        (xl)  set by the parent scroll container
+ *
+ * A single `gap` on this section previously put the header 16px from its own
+ * content while sections sat 24px apart — so the header was very nearly
+ * equidistant between the group it labels and the one above it, and at a glance
+ * the sections did not separate. A 1.5:1 ratio does not communicate grouping;
+ * proximity has to be unambiguous to do any work.
+ *
+ * Tightening the inner steps is what pays for the wider outer one, so the extra
+ * separation costs almost no height.
+ */
 export function FormSection(props: {
   title: string
   /** Short trailing note, e.g. `Required`. Sits past the rule. */
@@ -43,9 +59,16 @@ export function FormSection(props: {
   return (
     <section
       data-form-section={props.title}
-      style={{ display: 'flex', 'flex-direction': 'column', gap: 'var(--space-md)' }}
+      style={{ display: 'flex', 'flex-direction': 'column' }}
     >
-      <div style={{ display: 'flex', 'align-items': 'center', gap: 'var(--space-sm)' }}>
+      <div
+        style={{
+          display: 'flex',
+          'align-items': 'center',
+          gap: 'var(--space-sm)',
+          'margin-bottom': 'var(--space-sm)',
+        }}
+      >
         <LabelBold color="secondary" tracking={1.5}>
           {props.title}
         </LabelBold>
@@ -73,7 +96,13 @@ export function FormSection(props: {
         </Show>
       </div>
 
-      {props.children}
+      {/* Content owns its own gap, so the header can sit closer to it than the
+          fields sit to each other. */}
+      <div
+        style={{ display: 'flex', 'flex-direction': 'column', gap: 'var(--space-md)' }}
+      >
+        {props.children}
+      </div>
     </section>
   )
 }

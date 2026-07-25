@@ -95,7 +95,9 @@ export function AddVehicle(props: { onClose?: () => void }) {
           'overflow-y': 'auto',
           display: 'flex',
           'flex-direction': 'column',
-          gap: 'var(--space-lg)',
+          /* Matches ServiceForm: 32px between sections, 16px between fields,
+             8px from a header to its content. */
+          gap: 'var(--space-xl)',
           padding: 'var(--space-md) var(--space-screen-h) var(--space-lg)',
         }}
       >

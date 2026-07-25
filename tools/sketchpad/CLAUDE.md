@@ -66,7 +66,22 @@ A form has section titles, field labels, and subgroup labels. Rendering all thre
 | Field | 11 Medium caps, tertiary, no rule | `Field`, `InlinePicker` |
 | Subgroup | 13 Regular sentence case, tertiary | `FormSubgroup` |
 
-The rule does most of the work: a section boundary becomes a line across the screen rather than a marginally larger gap. With it in place the between-section gap can come *down* — paying 32pt of whitespace on top of a rule buys the same grouping twice and pushes content below the fold.
+The rule marks the boundary; the spacing is what makes it read as one at a glance.
+
+### Spacing is 8 / 16 / 32 — and the ratio is the point
+
+| Step | Gap | |
+|---|---|---|
+| Header → its own content | **8px** | the label belongs to what follows |
+| Field → field | **16px** | siblings inside one group |
+| Section → section | **32px** | different groups |
+
+A clean 1:2:4, so each step is unambiguous. This went wrong twice in opposite directions before landing here, and both failures are instructive:
+
+- At 32px between sections with 16px inside them, the last field fell below the fold, so it was cut to 24px.
+- At **24-vs-16** the sections stopped reading as separate at all. A 1.5:1 ratio is not a signal — and worse, `FormSection` used one `gap` for everything, so a header sat 16px from its own content and 24px from the section above it. **Nearly equidistant between the group it labels and the one before it**, which is why nothing looked grouped.
+
+The resolution wasn't "more space", it was *tightening the inner steps to pay for the outer one*. Binding the header to its content at 8px and widening sections to 32px made the form marginally **shorter** than the 24px version while finally reading as three blocks. Whenever separation feels weak, check the ratio between adjacent steps before adding height.
 
 When a `FormSection` header already names its single field, that field takes no label. Two identical labels stacked on one input is worse than none.
 
