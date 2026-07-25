@@ -5,7 +5,7 @@
  * after Phase 2. Between them they replaced six drifted implementations, so a
  * change here is the highest-leverage change available to a readout screen.
  */
-import { For, Show } from 'solid-js'
+import { Show } from 'solid-js'
 import { Body, Emphasis, Heading, Label, Secondary } from '../ui/Text'
 import {
   daysUntil,
@@ -121,17 +121,18 @@ export type Indicator =
   | { kind: 'bundledVisit'; count: number }
   | { kind: 'category'; symbol: string }
 
-export interface Metadatum {
-  text: string
-  /** A tag renders tinted; a detail renders as ordinary support text. */
-  tag?: boolean
-  color?: string
-}
-
 interface ServiceEventRowProps {
   title: string
   indicator?: Indicator
-  metadata?: Metadatum[]
+  /**
+   * Support facts, joined with `//` on ONE line that truncates.
+   *
+   * Was a wrapping flex row of separate items, which on a 375pt screen shattered
+   * into "3 / days / ago" and "Toyota / de / Puerto / Rico" — every item shrank
+   * to its minimum content width and wrapped internally. A support line must
+   * degrade by truncating, never by breaking phrases apart.
+   */
+  metadata?: string[]
   amount?: number
   onClick?: () => void
 }
@@ -189,64 +190,68 @@ export function ServiceEventRow(props: ServiceEventRowProps) {
       </Show>
 
       <div style={{ flex: '1 1 auto', 'min-width': '0', display: 'flex', 'flex-direction': 'column' }}>
-        <Show
-          when={hasAmount()}
-          fallback={
-            <Emphasis rank="primary" lines={2} as="div">
-              {props.title}
-            </Emphasis>
-          }
+        {/* Title and amount share a line, baseline-aligned. The amount used to
+            be a sibling of this whole column, vertically centred across both
+            lines — so it stole width from the metadata line as well as the
+            title, on a row where the metadata needed it most. */}
+        <div
+          style={{
+            display: 'flex',
+            'align-items': 'baseline',
+            gap: 'var(--space-sm)',
+            width: '100%',
+          }}
         >
-          <Body lines={2} as="div">
-            {props.title}
-          </Body>
-        </Show>
+          <Show
+            when={hasAmount()}
+            fallback={
+              <Emphasis rank="primary" lines={2} as="div" style={{ flex: '1 1 auto', 'min-width': '0' }}>
+                {props.title}
+              </Emphasis>
+            }
+          >
+            <Body lines={2} as="div" style={{ flex: '1 1 auto', 'min-width': '0' }}>
+              {props.title}
+            </Body>
+          </Show>
 
+          <Show when={hasAmount()}>
+            <Heading rank="primary" style={{ flex: '0 0 auto' }}>
+              {fmtCurrency(props.amount!)}
+            </Heading>
+          </Show>
+        </div>
+
+        {/* One line, nowrap, ellipsis — and now the full row width. */}
         <Show when={props.metadata?.length}>
-          <div
+          <Secondary
+            color="tertiary"
+            as="div"
             style={{
-              display: 'flex',
-              'align-items': 'center',
-              gap: 'var(--space-xs)',
+              width: '100%',
               'padding-top': '2px',
+              'white-space': 'nowrap',
+              overflow: 'hidden',
+              'text-overflow': 'ellipsis',
+              'text-align': 'left',
             }}
           >
-            <For each={props.metadata}>
-              {(m, i) => (
-                <>
-                  <Show when={i() > 0}>
-                    <Secondary color="tertiary">//</Secondary>
-                  </Show>
-                  <Secondary
-                    color="tertiary"
-                    style={m.color ? { color: m.color } : undefined}
-                    uppercase={m.tag}
-                    tracking={m.tag ? 1 : undefined}
-                  >
-                    {m.text}
-                  </Secondary>
-                </>
-              )}
-            </For>
-          </div>
+            {props.metadata!.join('  //  ')}
+          </Secondary>
         </Show>
       </div>
-
-      <Show when={hasAmount()}>
-        <Heading rank="primary" style={{ flex: '0 0 auto' }}>
-          {fmtCurrency(props.amount!)}
-        </Heading>
-      </Show>
     </button>
   )
 }
 
 /** Thin model-to-row adapter, mirroring ExpenseRow.swift. */
 export function ExpenseRow(props: { log: ServiceLog; onClick?: () => void }) {
-  const metadata = (): Metadatum[] => {
-    const out: Metadatum[] = [{ text: timeSince(props.log.performedAt) }]
-    if (props.log.mileage) out.push({ text: `${fmtMileageBare(props.log.mileage)} mi` })
-    if (props.log.vendor) out.push({ text: props.log.vendor })
+  /* Ordered by how reliably it is wanted, because this line truncates: when
+     it does, the vendor is what should fall off the end, not the date. */
+  const metadata = (): string[] => {
+    const out = [timeSince(props.log.performedAt)]
+    if (props.log.mileage) out.push(`${fmtMileageBare(props.log.mileage)} mi`)
+    if (props.log.vendor) out.push(props.log.vendor)
     return out
   }
 

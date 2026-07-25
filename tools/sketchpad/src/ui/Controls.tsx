@@ -186,7 +186,19 @@ export function Field(props: FieldProps) {
   const req = () => props.requirement ?? { kind: 'optional' as const }
 
   return (
-    <div style={{ display: 'flex', 'flex-direction': 'column', gap: 'var(--space-xs)' }}>
+    /* `min-width: 0` is load-bearing, not defensive. A flex item defaults to
+       `min-width: auto`, which resolves to its content's min-content width — and
+       an <input> has a wide intrinsic minimum. Without this a Field placed in a
+       flex row refuses to shrink and overflows its container: the Year/Make row
+       on Add Vehicle was 381px inside 333px. */
+    <div
+      style={{
+        display: 'flex',
+        'flex-direction': 'column',
+        gap: 'var(--space-xs)',
+        'min-width': '0',
+      }}
+    >
       <Show when={props.label}>
         <div style={{ display: 'flex', 'align-items': 'baseline', gap: 'var(--space-sm)' }}>
           <Label>{props.label}</Label>
@@ -211,6 +223,7 @@ export function Field(props: FieldProps) {
           'align-items': 'center',
           gap: 'var(--space-sm)',
           'min-height': '40px',
+          'min-width': '0',
           'border-bottom': 'var(--border-width) solid var(--border-subtle)',
         }}
       >

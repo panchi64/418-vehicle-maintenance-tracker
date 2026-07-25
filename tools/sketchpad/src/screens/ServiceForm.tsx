@@ -411,8 +411,11 @@ export function ServiceForm(props: { onClose?: () => void }) {
               />
 
               <Show when={repeats()}>
-                <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-                  <div style={{ flex: '1 1 0' }}>
+                {/* Wraps to two rows at large type, same as Add Vehicle's
+                    Year/Make pair — a fixed two-column split cannot survive
+                    Dynamic Type on a 375pt screen. */}
+                <div style={{ display: 'flex', 'flex-wrap': 'wrap', gap: 'var(--space-sm)' }}>
+                  <div style={{ flex: '1 1 calc(130px * var(--type-scale))', 'min-width': '0' }}>
                     <Field
                       label="Every"
                       value={intervalMonths()}
@@ -421,7 +424,7 @@ export function ServiceForm(props: { onClose?: () => void }) {
                       numeric
                     />
                   </div>
-                  <div style={{ flex: '1 1 0' }}>
+                  <div style={{ flex: '1 1 calc(130px * var(--type-scale))', 'min-width': '0' }}>
                     <Field
                       label="Or every"
                       value={intervalMiles()}

@@ -22,7 +22,8 @@ import { createMemo, createSignal, Show } from 'solid-js'
 import { Field } from '../ui/Controls'
 import { FormAdvisory } from '../ui/FormAdvisory'
 import { FormActionBar } from '../ui/FormActionBar'
-import { Emphasis, Label, Secondary } from '../ui/Text'
+import { Emphasis, Heading, Label, Secondary } from '../ui/Text'
+import { FormSection } from '../ui/FormSection'
 
 type VinState = 'empty' | 'tooShort' | 'invalid' | 'looking' | 'resolved'
 
@@ -75,9 +76,11 @@ export function AddVehicle(props: { onClose?: () => void }) {
           'border-bottom': 'var(--border-width) solid var(--grid-line)',
         }}
       >
-        <Emphasis rank="primary" uppercase tracking={1}>
+        {/* 20pt, matching the service form. A sheet title at body size has no
+            title tier. */}
+        <Heading rank="primary" uppercase tracking={1}>
           Add vehicle
-        </Emphasis>
+        </Heading>
         <button onClick={props.onClose} style={{ 'min-height': 'var(--touch-target)' }}>
           <Label color="accent" tracking={1}>
             [Cancel]
@@ -97,12 +100,8 @@ export function AddVehicle(props: { onClose?: () => void }) {
         }}
       >
         {/* ---------- 1. THE FAST PATH, FIRST ---------- */}
-        <section
-          data-section="VIN"
-          style={{ display: 'flex', 'flex-direction': 'column', gap: 'var(--space-sm)' }}
-        >
+        <FormSection title="VIN" trailing="Optional">
           <Field
-            label="VIN"
             value={vin()}
             onInput={setVin}
             placeholder="17 characters"
@@ -148,12 +147,11 @@ export function AddVehicle(props: { onClose?: () => void }) {
           <Secondary color="tertiary">
             On the driver's door jamb, or the corner of the windshield.
           </Secondary>
-        </section>
+        </FormSection>
 
         {/* ---------- 2. THE ONE THING THE APP CANNOT INFER ---------- */}
-        <section data-section="Odometer">
+        <FormSection title="Current odometer" trailing="Required">
           <Field
-            label="Current odometer"
             value={odometer()}
             onInput={setOdometer}
             placeholder="33,417"
@@ -166,49 +164,47 @@ export function AddVehicle(props: { onClose?: () => void }) {
               </Secondary>
             }
           />
-        </section>
+        </FormSection>
 
         {/* ---------- 3. WHAT THE VIN WOULD HAVE FILLED ---------- */}
-        <section
-          data-section="Identity"
-          style={{ display: 'flex', 'flex-direction': 'column', gap: 'var(--space-md)' }}
-        >
-          <Label>Vehicle</Label>
-          <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-            <div style={{ flex: '0 0 96px' }}>
+        <FormSection title="Vehicle" trailing="Required">
+          {/* Two columns at normal type, stacked at large type.
+              The flex bases are multiplied by --type-scale so the wrap point
+              tracks Dynamic Type: at 375pt and 1.5x these no longer fit side by
+              side, and forcing them to crushed "MAKE" to 28px against a 46px
+              word. `min-width: 0` alone cannot save a row that is genuinely too
+              narrow — the row has to be allowed to become two rows. */}
+          <div style={{ display: 'flex', 'flex-wrap': 'wrap', gap: 'var(--space-sm)' }}>
+            {/* grow:1 so that when this wraps onto its own line it fills the
+                row, rather than leaving a stub underline the width of "2026". */}
+            <div style={{ flex: '1 1 calc(84px * var(--type-scale))', 'min-width': '0' }}>
               <Field
                 label="Year"
                 value={effectiveYear()}
                 onInput={setYear}
                 placeholder="2026"
                 numeric
-                requirement={{ kind: 'required' }}
               />
             </div>
-            <div style={{ flex: '1 1 0' }}>
+            {/* grow:2 keeps Make roughly twice Year's width while they share a
+                line — a year needs four characters, a make needs a word. */}
+            <div style={{ flex: '2 1 calc(150px * var(--type-scale))', 'min-width': '0' }}>
               <Field
                 label="Make"
                 value={effectiveMake()}
                 onInput={setMake}
                 placeholder="Toyota"
-                requirement={{ kind: 'required' }}
               />
             </div>
           </div>
-          <Field
-            label="Model"
-            value={effectiveModel()}
-            onInput={setModel}
-            placeholder="RAV4"
-            requirement={{ kind: 'required' }}
-          />
-        </section>
+          <Field label="Model" value={effectiveModel()} onInput={setModel} placeholder="RAV4" />
+        </FormSection>
 
         {/* ---------- 4. OPTIONAL, AND HONEST ABOUT CONSEQUENCES ---------- */}
-        <section
-          data-section="Optional"
-          style={{ display: 'flex', 'flex-direction': 'column', gap: 'var(--space-md)' }}
-        >
+        {/* The section header carries the optionality once, rather than each of
+            its fields repeating it. Three "Optional" tags in a column is noise
+            that stops meaning anything. */}
+        <FormSection title="Details" trailing="Optional">
           <Field
             label="Nickname"
             value={nickname()}
@@ -235,7 +231,7 @@ export function AddVehicle(props: { onClose?: () => void }) {
                 'Puerto Rico inspection sticker. Set it and you will be reminded a month before it expires.',
             }}
           />
-        </section>
+        </FormSection>
       </div>
 
       <FormActionBar

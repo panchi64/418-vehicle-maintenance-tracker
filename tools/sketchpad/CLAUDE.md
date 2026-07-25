@@ -91,6 +91,31 @@ The fix was to give the decision the type it deserves — 15 Medium sentence cas
 
 **Watch for accent-equals-primary.** In the default theme `accent` (#F5F0DC) *is* `textPrimary`, so colouring something `accent` buys no differentiation — it just renders at full brightness. A `REQUIRED` note tinted accent was outshining the section title it annotated. This is why the app leans on bracket notation for affordances rather than colour, and it is a good reason to check any colour-based hierarchy in a second theme.
 
+## Check for overflow, don't trust your eyes
+
+A layout can overflow without looking broken — text just gets clipped somewhere you aren't looking. One query, worth running at every width and type size:
+
+```js
+const app = document.querySelector('.hz-app');
+[...app.querySelectorAll('*')]
+  .filter(e => e.scrollWidth > e.clientWidth + 1 && getComputedStyle(e).overflowX !== 'auto')
+  .map(e => ({ text: (e.value || e.textContent || '').trim().slice(0, 26), s: e.scrollWidth, c: e.clientWidth }))
+```
+
+Two traps it caught, both of which apply equally to SwiftUI:
+
+**`min-width: 0` on anything holding an input.** A flex item defaults to `min-width: auto`, which resolves to its content's min-content width — and an `<input>` has a wide intrinsic minimum. Add Vehicle's Year/Make row was 381px inside 333px because the wrapper refused to shrink. This is on `Field`'s root now, so it can't recur per call site.
+
+**A fixed two-column split cannot survive Dynamic Type.** `min-width: 0` lets a *box* shrink, but a one-word label like `MAKE` still can't go below its word width — at 375pt and 1.5× it was crushed into 28px against a 46px word. The row has to be allowed to become two rows: `flex-wrap: wrap` with the flex bases multiplied by `var(--type-scale)`, so the wrap point tracks the type size. Applied to Year/Make and to the reminder's interval pair.
+
+Verified: zero overflow on both forms at 375/393pt × 1.0/1.5/2.0×.
+
+## Support lines truncate; they never re-wrap
+
+A metadata line ("3 days ago // 33,290 mi // Toyota de Puerto Rico") must be **one line with `nowrap` and ellipsis**, ordered so the least important fact falls off the end. Built as a wrapping flex row of separate items it shattered on a 375pt screen into `3 / days / ago` and `Toyota / de / Puerto / Rico` — each item shrank to min-content and wrapped internally.
+
+Related: in a row with a trailing amount, put the amount on the **title's** line rather than vertically centred beside the whole block. Centred, it steals width from the support line too, which is exactly where width is scarcest.
+
 ## Advisory or readout?
 
 Both are quiet 13pt lines, so it is easy to reach for the wrong one. The severity ladder is for things that need **attention or resolution**. A projected outcome is a **value**, and gets a label plus emphasis weight.
