@@ -130,9 +130,18 @@ textarea {
   border: none;
 }
 
-input:focus,
 button:focus-visible,
 select:focus-visible {
   outline: var(--border-width) solid var(--accent);
   outline-offset: 2px;
+}
+
+/* Bottom-ruled fields carry focus on the rule itself rather than an outline
+   around the whole row — an outline would reinstate the box the rule replaced. */
+.field-line:focus-within {
+  border-bottom-color: var(--accent) !important;
+}
+
+input::placeholder {
+  color: var(--text-tertiary);
 }

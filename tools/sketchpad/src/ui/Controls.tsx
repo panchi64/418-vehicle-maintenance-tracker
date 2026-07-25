@@ -3,8 +3,10 @@
  * Mirrors Views/Components/Inputs/.
  */
 import type { JSX } from 'solid-js'
-import { For, Show } from 'solid-js'
-import { Body, Label, Secondary } from './Text'
+import { createSignal, For, Show } from 'solid-js'
+import { Dynamic } from 'solid-js/web'
+import { Body, Label, LabelBold, Secondary } from './Text'
+import { Backdrop, OptionList, type Option } from './OptionList'
 
 // --- Segmented control (InstrumentSegmentedControl) -----------------------
 
@@ -67,11 +69,30 @@ interface ChipProps {
   label: string
   selected?: boolean
   onClick?: () => void
-  /** Renders the chip as the affordance that opens further input, e.g. `EARLIER…`. */
-  opensInput?: boolean
+  /**
+   * `outlined` — a real choice set. Spend an enclosure here.
+   * `plain` — a shortcut. No enclosure at all; selection is accent text over a rule.
+   *
+   * The form previously rendered every control as an outlined rectangle: eight
+   * quick-service chips, seven timing chips, six category chips, three boxed
+   * fields. Twenty-four identical enclosures, so none of them read as the
+   * decision — which is what made the form a wall. Enclosure is now a budget
+   * spent only on the choice that derives the intent.
+   */
+  variant?: 'outlined' | 'plain'
 }
 
 export function Chip(props: ChipProps) {
+  const plain = () => props.variant === 'plain'
+
+  /* A plain chip's selected state is colour + WEIGHT, never a rule.
+     It first used an accent underline, which is the same visual device as a
+     Field's bottom rule — so the input and the suggestions below it read as the
+     same kind of control, and since tapping a chip copies its text into the
+     field, the same words appeared twice in the same treatment. Weight keeps two
+     channels without borrowing the field's. */
+  const Type = () => (plain() && props.selected ? LabelBold : Label)
+
   return (
     <button
       onClick={props.onClick}
@@ -81,22 +102,31 @@ export function Chip(props: ChipProps) {
         'align-items': 'center',
         gap: 'var(--space-xs)',
         'min-height': 'var(--touch-target)',
-        padding: '0 var(--space-md)',
-        border: `var(--border-width) solid ${
-          props.selected ? 'var(--accent)' : 'var(--border-subtle)'
-        }`,
-        background: props.selected ? 'var(--accent)' : 'transparent',
+        padding: plain() ? '0 var(--space-xs)' : '0 var(--space-md)',
+        border: plain()
+          ? 'none'
+          : `var(--border-width) solid ${
+              props.selected ? 'var(--accent)' : 'var(--border-subtle)'
+            }`,
+        background: !plain() && props.selected ? 'var(--accent)' : 'transparent',
         transition: 'background var(--anim-fast) ease-out, border-color var(--anim-fast) ease-out',
       }}
     >
-      <Label
+      <Dynamic
+        component={Type()}
         style={{
-          color: props.selected ? 'var(--background-primary)' : 'var(--text-secondary)',
+          color: plain()
+            ? props.selected
+              ? 'var(--accent)'
+              : 'var(--text-secondary)'
+            : props.selected
+              ? 'var(--background-primary)'
+              : 'var(--text-secondary)',
           'white-space': 'nowrap',
         }}
       >
         {props.label}
-      </Label>
+      </Dynamic>
     </button>
   )
 }
@@ -156,15 +186,18 @@ export function Field(props: FieldProps) {
         </Show>
       </div>
 
+      {/* A single rule, not a four-sided box. The value sits ON the line, which
+          is the same idiom the readouts use, and it removes three enclosures per
+          form without costing any clarity about where to type. The rule goes
+          accent on focus, so the affordance is stronger than the box ever was. */}
       <div
+        class="field-line"
         style={{
           display: 'flex',
           'align-items': 'center',
           gap: 'var(--space-sm)',
-          'min-height': 'var(--button-height)',
-          padding: '0 var(--space-md)',
-          border: 'var(--border-width) solid var(--border-subtle)',
-          background: 'var(--background-subtle)',
+          'min-height': '40px',
+          'border-bottom': 'var(--border-width) solid var(--border-subtle)',
         }}
       >
         <input
@@ -192,6 +225,79 @@ export function Field(props: FieldProps) {
       </Show>
 
       {props.below}
+    </div>
+  )
+}
+
+// --- InlinePicker ---------------------------------------------------------
+
+/**
+ * A one-of-N form value that does not deserve a visible option set.
+ *
+ * Replaces the six outlined category chips. Category has a sensible default and
+ * is rarely changed, so six permanent enclosures were six rectangles spent on a
+ * decision most users never make — while the timing chips, which every user must
+ * answer, looked exactly the same. Shaped like `Field` (label, value, rule) so a
+ * form reads as one column of lines rather than a mix of lines and boxes.
+ *
+ * Unlike `FilterControl`, the trigger shows the VALUE: this sets a value rather
+ * than narrowing a list, and it is not sharing a row with another control, so a
+ * value-dependent width is safe here.
+ */
+export function InlinePicker<T extends string>(props: {
+  label: string
+  options: Option<T>[]
+  value: T
+  onChange: (value: T) => void
+}) {
+  const [open, setOpen] = createSignal(false)
+  const active = () => props.options.find((o) => o.value === props.value)
+
+  return (
+    <div style={{ position: 'relative', display: 'flex', 'flex-direction': 'column', gap: 'var(--space-xs)' }}>
+      <Label>{props.label}</Label>
+
+      <button
+        onClick={() => setOpen(!open())}
+        aria-expanded={open()}
+        aria-label={props.label}
+        style={{
+          display: 'flex',
+          'align-items': 'center',
+          gap: 'var(--space-sm)',
+          'min-height': '40px',
+          'border-bottom': `var(--border-width) solid ${
+            open() ? 'var(--accent)' : 'var(--border-subtle)'
+          }`,
+        }}
+      >
+        <Body style={{ flex: '1 1 auto', 'text-align': 'left' }}>{active()?.label ?? '—'}</Body>
+        <span
+          aria-hidden="true"
+          style={{
+            font: 'var(--font-label)',
+            color: 'var(--accent)',
+            display: 'inline-block',
+            transform: open() ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform var(--anim-medium) ease-out',
+          }}
+        >
+          ⌄
+        </span>
+      </button>
+
+      <Show when={open()}>
+        <Backdrop onClick={() => setOpen(false)} />
+        <OptionList
+          options={props.options}
+          value={props.value}
+          align="left"
+          onChange={(v) => {
+            props.onChange(v)
+            setOpen(false)
+          }}
+        />
+      </Show>
     </div>
   )
 }

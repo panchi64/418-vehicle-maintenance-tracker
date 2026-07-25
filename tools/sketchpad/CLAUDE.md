@@ -77,6 +77,7 @@ Harness chrome is styled deliberately unlike Checkpoint. The controls around the
 
 Where the sketchpad and the shipping app disagree, **the sketchpad is showing where we are going**. Each screen file opens with a comment stating the problem it solves. Currently ahead of the iOS app:
 
+- `ServiceForm` — **enclosure is a budget.** The form once rendered every control as an outlined rectangle: eight quick-service chips, seven timing chips, six category chips, three boxed fields — twenty-four identical enclosures, so nothing read as the decision. Now only the timing chips are outlined, because that choice derives the intent and every user must answer it. Fields are a single bottom rule (accent on focus), shortcut chips are plain text with an underline when active, and category is an `InlinePicker` since it has a working default most users never change. Same information, seven rectangles instead of twenty-four, and the form fits one screen. This follows the doctrine's own "proximity and whitespace communicate grouping before borders do" — it is not a style preference.
 - `ServiceForm` — one unified form with **derived intent**. No Record/Remind mode switch: the user answers "when", and a past answer means logging while a future answer means scheduling. The repeat interval is on the default path because it is what makes a reminder fire; notes and receipts are in depth because they only make an entry complete.
 - `TabBar` — a single `[+]`, not the two-way `[LOG]`/`[SCHEDULE]` expansion.
 - `ServicesTab` / `CostsTab` — **one** control row instead of two-to-four. A segmented control for the dimension that changes what the screen *is* (mode, period), and a `FilterControl` for refinement. The scrolling chip rows they replace hid options off the right edge — "On track" was cut to "ON TR…", and three of six Costs categories were off-screen — which fails recognition-over-recall outright.
@@ -108,9 +109,10 @@ Use the web for **exploration**, ship SwiftUI.
 ## Rules
 
 1. **Never a hardcoded hue.** Use the CSS variables. If a color isn't a variable, it isn't in the design system.
-2. **Verify against more than one theme**, including a light-scheme one and a non-monospaced one, before calling a layout resolved. Eight themes ship.
-3. **Every screen states its problem** in a header comment. A mock with no thesis cannot be reviewed.
-4. **Don't let it rot into a second source of truth.** It models one screen's structure, not the app's behavior. No routing, persistence, or business logic beyond what a layout decision needs.
-5. **When a decision is settled, port it and say so** in the SwiftUI implementation, then update the screen comment here.
+2. **Spend enclosures deliberately.** A border is emphasis, and emphasis is a budget. Before adding one, name the control it is supposed to outrank. If a screen's controls all carry the same enclosure, none of them is the decision — see `ServiceForm`.
+3. **Verify against more than one theme**, including a light-scheme one and a non-monospaced one, before calling a layout resolved. Eight themes ship.
+4. **Every screen states its problem** in a header comment. A mock with no thesis cannot be reviewed.
+5. **Don't let it rot into a second source of truth.** It models one screen's structure, not the app's behavior. No routing, persistence, or business logic beyond what a layout decision needs.
+6. **When a decision is settled, port it and say so** in the SwiftUI implementation, then update the screen comment here.
 
 Structure and disclosure rules: [`docs/SURFACE_DOCTRINE.md`](../../docs/SURFACE_DOCTRINE.md). Identity: [`docs/AESTHETIC.md`](../../docs/AESTHETIC.md). Current tokens: [`DesignSystem/CLAUDE.md`](../../apps/checkpoint/ios/checkpoint/DesignSystem/CLAUDE.md).

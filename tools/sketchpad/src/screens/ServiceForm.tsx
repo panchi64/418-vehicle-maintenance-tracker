@@ -21,7 +21,7 @@
  *    taps so this is measured, not asserted.
  */
 import { createMemo, createSignal, For, Show } from 'solid-js'
-import { Chip, ChipRow, Field, Toggle } from '../ui/Controls'
+import { Chip, ChipRow, Field, InlinePicker, Toggle } from '../ui/Controls'
 import { FormAdvisory } from '../ui/FormAdvisory'
 import { FormActionBar } from '../ui/FormActionBar'
 import { Body, Emphasis, Label, Secondary } from '../ui/Text'
@@ -186,13 +186,37 @@ export function ServiceForm(props: { onClose?: () => void }) {
             onInput={setName}
             placeholder="Oil change"
             requirement={{ kind: 'required' }}
-            autofocus
+            /* No autofocus. It scrolled the section label out of view on open,
+               and on device it would raise the keyboard over the timing chips —
+               hiding the control that derives the intent in order to save one
+               tap on a field the quick chips can fill anyway. */
           />
-          <div style={{ 'padding-top': 'var(--space-sm)' }}>
+          {/* Plain, not outlined. These are a shortcut for the field above, not
+              a choice the form requires — eight outlined rectangles made them
+              compete with the timing control, which IS required.
+
+              The row carries its own label. Without one it read as a second
+              input: an unlabelled strip of text sitting directly beneath a
+              labelled field, in a form where every other line IS a field. Naming
+              the role is cheaper than trying to signal it with styling. */}
+          <div
+            style={{
+              display: 'flex',
+              'flex-direction': 'column',
+              gap: 'var(--space-xs)',
+              'padding-top': 'var(--space-md)',
+            }}
+          >
+            <Label>Common</Label>
             <ChipRow wrap={false}>
               <For each={quickServiceTypes}>
                 {(t) => (
-                  <Chip label={t} selected={name() === t} onClick={() => setName(t)} />
+                  <Chip
+                    variant="plain"
+                    label={t}
+                    selected={name() === t}
+                    onClick={() => setName(t)}
+                  />
                 )}
               </For>
             </ChipRow>
@@ -333,20 +357,18 @@ export function ServiceForm(props: { onClose?: () => void }) {
               requirement={{ kind: 'optional' }}
             />
 
-            <div style={{ display: 'flex', 'flex-direction': 'column', gap: 'var(--space-xs)' }}>
-              <Label>Category</Label>
-              <ChipRow>
-                <For each={Object.keys(categoryLabels) as CostCategory[]}>
-                  {(c) => (
-                    <Chip
-                      label={categoryLabels[c]}
-                      selected={category() === c}
-                      onClick={() => setCategory(c)}
-                    />
-                  )}
-                </For>
-              </ChipRow>
-            </div>
+            {/* A picker, not six chips. Category has a working default and is
+                rarely changed, so a permanent option set spent six enclosures on
+                a decision most users never make. */}
+            <InlinePicker
+              label="Category"
+              value={category()}
+              onChange={setCategory}
+              options={(Object.keys(categoryLabels) as CostCategory[]).map((c) => ({
+                value: c,
+                label: categoryLabels[c],
+              }))}
+            />
           </section>
         </Show>
 
@@ -438,19 +460,59 @@ export function ServiceForm(props: { onClose?: () => void }) {
         {/* ---------- 4. DEPTH — what makes it complete ---------- */}
         <Show when={intent() != null}>
           <section data-section="Depth">
+            {/* A full-width row with a rule, not a bare bracket label. As an
+                11pt label at the end of a long form it was invisible — the
+                cheapest control on screen guarding the only content still
+                hidden. It now gets the same presence as the header's specs
+                strip, and names its contents so you can tell whether to bother
+                opening it. */}
             <button
               onClick={() => setDepthOpen(!depthOpen())}
               aria-expanded={depthOpen()}
               style={{
                 display: 'flex',
                 'align-items': 'center',
-                gap: 'var(--space-xs)',
-                'min-height': 'var(--touch-target)',
+                gap: 'var(--space-sm)',
+                width: '100%',
+                'min-height': '54px',
+                /* Bottom rule only. A top rule sat a few pixels under the
+                   category field's own underline and read as a doubled line. */
+                'border-bottom': 'var(--border-width) solid var(--grid-line)',
               }}
             >
-              <Label color="accent" tracking={1}>
-                [{depthOpen() ? 'Fewer details' : 'More details'}]
-              </Label>
+              <div
+                style={{
+                  display: 'flex',
+                  'flex-direction': 'column',
+                  gap: '2px',
+                  flex: '1 1 auto',
+                  'min-width': '0',
+                }}
+              >
+                <Label color="accent" tracking={1.5}>
+                  {depthOpen() ? 'Fewer details' : 'More details'}
+                </Label>
+                <Show when={!depthOpen()}>
+                  <Secondary color="tertiary" lines={1} as="div">
+                    Shop, notes, receipt
+                  </Secondary>
+                </Show>
+              </div>
+
+              <span
+                aria-hidden="true"
+                style={{
+                  flex: '0 0 auto',
+                  font: 'var(--font-heading)',
+                  color: 'var(--accent)',
+                  display: 'inline-block',
+                  'line-height': '1',
+                  transform: depthOpen() ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform var(--anim-medium) ease-out',
+                }}
+              >
+                ⌄
+              </span>
             </button>
 
             {/* Fade only. AESTHETIC.md forbids slide transitions. */}

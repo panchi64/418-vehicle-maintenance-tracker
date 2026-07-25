@@ -40,14 +40,11 @@
  * the active value is surfaced by `ActiveFilterBar` instead, where it has a whole
  * row and cannot truncate.
  */
-import { createSignal, For, Show, type JSX } from 'solid-js'
+import { createSignal, Show, type JSX } from 'solid-js'
 import { Body, Label, Secondary } from './Text'
+import { Backdrop, OptionList, type Option } from './OptionList'
 
-export interface FilterOption<T extends string> {
-  value: T
-  label: string
-  count?: number
-}
+export type FilterOption<T extends string> = Option<T>
 
 interface FilterControlProps<T extends string> {
   /** Names the dimension, e.g. "Status". Used for the accessible label. */
@@ -108,73 +105,10 @@ export function FilterControl<T extends string>(props: FilterControlProps<T>) {
       </button>
 
       <Show when={open()}>
-        {/* A backdrop, so tapping anywhere else dismisses the list. Without it
-            the only way out is re-tapping the trigger, which is a trap on a
-            touch screen. */}
-        <div
-          onClick={() => setOpen(false)}
-          style={{
-            position: 'fixed',
-            inset: '0',
-            'z-index': '9',
-          }}
-        />
-        <div
-          role="listbox"
-          style={{
-            position: 'absolute',
-            'z-index': '10',
-            top: '100%',
-            right: '0',
-            'min-width': '190px',
-            border: 'var(--border-width) solid var(--accent)',
-            background: 'var(--background-elevated)',
-            animation: 'fade-in var(--anim-fast) ease-out',
-          }}
-        >
-          <For each={props.options}>
-            {(option, i) => {
-              const selected = () => option.value === props.value
-              return (
-                <button
-                  role="option"
-                  aria-selected={selected()}
-                  onClick={() => choose(option.value)}
-                  style={{
-                    display: 'flex',
-                    'align-items': 'center',
-                    gap: 'var(--space-md)',
-                    width: '100%',
-                    'min-height': 'var(--touch-target)',
-                    padding: '0 var(--space-md)',
-                    'border-top':
-                      i() > 0 ? '1px solid var(--grid-line)' : undefined,
-                    background: selected() ? 'var(--background-subtle)' : 'transparent',
-                  }}
-                >
-                  {/* Selection is a rule plus weight, not color alone. */}
-                  <div
-                    aria-hidden="true"
-                    style={{
-                      width: '2px',
-                      'align-self': 'stretch',
-                      background: selected() ? 'var(--accent)' : 'transparent',
-                    }}
-                  />
-                  <Body
-                    color={selected() ? 'primary' : 'secondary'}
-                    style={{ flex: '1 1 auto', 'text-align': 'left' }}
-                  >
-                    {option.label}
-                  </Body>
-                  <Show when={option.count != null}>
-                    <Secondary color="tertiary">{option.count}</Secondary>
-                  </Show>
-                </button>
-              )
-            }}
-          </For>
-        </div>
+        {/* Without a backdrop the only way out is re-tapping the trigger, which
+            is a trap on a touch screen. */}
+        <Backdrop onClick={() => setOpen(false)} />
+        <OptionList options={props.options} value={props.value} onChange={choose} />
       </Show>
     </div>
   )
