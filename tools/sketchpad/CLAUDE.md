@@ -154,9 +154,13 @@ Fixtures include an overdue item, a due-soon item, a healthy item, a **date-only
 
 Harness chrome is styled deliberately unlike Checkpoint. The controls around the frame must never be mistaken for the app inside it.
 
-## Screens model the target, not the current app
+## Screens model the target
 
-Where the sketchpad and the shipping app disagree, **the sketchpad is showing where we are going**. Each screen file opens with a comment stating the problem it solves. Currently ahead of the iOS app:
+**Everything below now ships in the iOS app.** The sketchpad is no longer ahead of it, so where the two disagree, treat that as drift and work out which one is wrong — do not assume the sketchpad leads.
+
+Each screen file opens with a comment stating the problem it solves. Those comments are the durable part: they record what was tried and why it failed, and several of them were expensive to learn. The SwiftUI files carry the same reasoning at their own call sites, so the rationale survives even if this directory is eventually retired.
+
+The resolved decisions:
 
 - `ServiceForm` — **enclosure is a budget.** The form once rendered every control as an outlined rectangle: eight quick-service chips, seven timing chips, six category chips, three boxed fields — twenty-four identical enclosures, so nothing read as the decision. Now only the timing chips are outlined, because that choice derives the intent and every user must answer it. Fields are a single bottom rule (accent on focus), shortcut chips are plain text with an underline when active, and category is an `InlinePicker` since it has a working default most users never change. Same information, seven rectangles instead of twenty-four, and the form fits one screen. This follows the doctrine's own "proximity and whitespace communicate grouping before borders do" — it is not a style preference.
 - `ServiceForm` — one unified form with **derived intent**. No Record/Remind mode switch: the user answers "when", and a past answer means logging while a future answer means scheduling. The repeat interval is on the default path because it is what makes a reminder fire; notes and receipts are in depth because they only make an entry complete.
@@ -166,7 +170,14 @@ Where the sketchpad and the shipping app disagree, **the sketchpad is showing wh
 - `ServicesTab` — Documents is a destination, not a view mode.
 - `CostsTab` — fixed card order; "not enough data" is one quiet line, never a card.
 - `AddVehicle` — single scroll, VIN above the fields it fills, odometer required.
-- `VehicleHeader` — the specs disclosure is a **full-width strip whose collapsed label is the specs themselves** (plate · trim). The shipping version uses a `[SPECS] ⌄` label, whose target was only as wide as the word and which showed nothing until tapped — so the reference data that used to be glanceable on Home became two taps away. The header comment records all five iterations and why each failed; read it before revisiting.
+- `VehicleHeader` — the specs disclosure is a **full-width strip whose collapsed label is the specs themselves**. The version before it used a `[SPECS] ⌄` label, whose target was only as wide as the word and which showed nothing until tapped — so the reference data that used to be glanceable on Home became two taps away. The header comment records all five iterations and why each failed; read it before revisiting. (The sketchpad's fixture has a `trim` field and `Vehicle` does not, so the shipping strip pairs the plate with the oil or tire spec instead.)
+
+### Where SwiftUI had to diverge
+
+Two places where the port could not copy the sketchpad literally, both worth knowing before you compare screenshots:
+
+- **Dropdowns are inline bands, not floating panels.** The sketchpad anchors an absolutely-positioned list under its trigger with a backdrop to dismiss. SwiftUI's nearest equivalent is `.popover`, which draws rounded, translucent system chrome that cannot be squared off — and this app draws no rounded corners anywhere. `FilterControl` and `InlinePicker` expand in place instead, which also makes the list full-width so no option label can truncate. This is why `FilterControlRow` owns the whole control row rather than just the trigger.
+- **Wrapping rows use `ViewThatFits`, not flex-wrap.** CSS wraps per item; `ViewThatFits` picks one layout for the whole row. For two-field pairs (Year/Make, the interval fields) the result is the same, and it tracks Dynamic Type the same way. `WrappingChipRow` needs true per-item wrapping, so it uses a custom `Layout` (`FlowLayout`).
 
 ## What the sketchpad cannot answer
 

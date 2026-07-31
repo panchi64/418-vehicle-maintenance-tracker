@@ -54,6 +54,9 @@ v1.0 features are tracked throughout this document. Future versions are outlined
 | Edit service log       | Medium   | ✅     | Edit notes and add attachments to existing service logs |
 | One-off service logging| Medium   | ✅     | "Schedule Recurring" toggle — log without creating a recurring schedule |
 | Forms usability overhaul | High   | ✅     | Essentials-first layout, shared action bar, history reference card, draft autosave/resume, and edit-form change transparency across Add Service, Edit Service, Edit Service Log, Update Mileage, and Vehicle forms. Tests: `ReminderImpactCalculatorTests`, `ServiceFormDraftStoreTests`, `EditServiceViewRescheduleTests`, extended `AddServiceViewTests`/`EditServiceLogViewTests` |
+| Unified service form   | High     | ✅     | One form with **derived intent** — the Record/Remind fork and the tab bar's `[LOG]`/`[SCHEDULE]` expansion are gone. The user answers "when"; a past answer logs, a future one schedules. Repeat interval moves onto the default path, the fire-time projection becomes a readout, and backfill no longer inherits a preset's cadence. Draft schema is versioned (v2). Tests: extended `AddServiceViewTests`, `ServiceFormDraftStoreTests` |
+| Single-scroll Add Vehicle | High  | ✅     | Two-step wizard deleted. VIN sits above the fields it fills, the odometer is required (it used to default to zero, making every mileage reminder fiction), year is not, and the nine-state VIN block collapses into the advisory ladder |
+| One control row per tab | Medium  | ✅     | Services and Costs collapse two-to-four rows of chrome into one: a segmented control plus a `FilterControl` whose options carry counts. Documents stops being a Services view mode and becomes a destination |
 
 #### On-Device Document Intelligence
 
