@@ -8,9 +8,14 @@
 //  a filter names its dimension, a form field shows its value — but the list
 //  they open is the same object, and two copies would drift.
 //
-//  Presented in a popover rather than as an overlay: on a touch screen the list
-//  needs a way out that isn't "find the trigger again", and a popover gets
-//  tap-away dismissal, anchoring, and safe-area avoidance for free.
+//  Presented as an inline band that pushes content down, NOT as a popover. A
+//  SwiftUI popover draws its own rounded, translucent system chrome, which
+//  cannot be squared off — and every corner radius in this app is 0. It also
+//  floats a narrow panel over content, where a full-width band can't truncate an
+//  option label.
+//
+//  This is the same disclosure idiom the vehicle specs panel already uses:
+//  expand in place, collapse by re-tapping the trigger or by choosing.
 //
 
 import SwiftUI
@@ -45,14 +50,6 @@ struct OptionList<Value: Hashable>: View {
                     onSelect(option.value)
                 } label: {
                     HStack(spacing: Spacing.md) {
-                        // Selection is a rule plus weight, not color alone —
-                        // color is spoken for by status semantics, and in the
-                        // default theme `accent` equals `textPrimary`, so an
-                        // accent-tinted label is no signal at all there.
-                        Rectangle()
-                            .fill(isSelected ? Theme.accent : Color.clear)
-                            .frame(width: Theme.borderWidth)
-
                         Text(option.label)
                             .font(isSelected ? .brutalistBodyEmphasis : .brutalistBody)
                             .foregroundStyle(isSelected ? Theme.textPrimary : Theme.textSecondary)
@@ -65,9 +62,25 @@ struct OptionList<Value: Hashable>: View {
                                 .monospacedDigit()
                         }
                     }
-                    .padding(.trailing, Spacing.md)
+                    // Text lands on the same left edge as the screen content
+                    // below the band, with the selection rule occupying the
+                    // 2pt outboard of it.
+                    .padding(.horizontal, Spacing.screenHorizontal)
                     .frame(minHeight: TouchTarget.minimum)
                     .background(isSelected ? Theme.backgroundSubtle : Color.clear)
+                    // Selection is a rule plus weight, not color alone — color
+                    // is spoken for by status semantics, and in the default
+                    // theme `accent` equals `textPrimary`, so an accent-tinted
+                    // label is no signal at all there.
+                    //
+                    // An overlay rather than an HStack member: a bare Rectangle
+                    // in the flow has no ideal height, so it drove each row to
+                    // fill whatever space the band offered.
+                    .overlay(alignment: .leading) {
+                        Rectangle()
+                            .fill(isSelected ? Theme.accent : Color.clear)
+                            .frame(width: Theme.borderWidth)
+                    }
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -80,33 +93,10 @@ struct OptionList<Value: Hashable>: View {
                 }
             }
         }
-        .frame(minWidth: 190)
         .background(Theme.backgroundElevated)
-    }
-}
-
-// MARK: - Presentation
-
-extension View {
-    /// Presents an `OptionList` anchored to this view, as a popover on every
-    /// size class rather than a sheet on compact ones — the list belongs to the
-    /// control that opened it, and a full sheet for four statuses is a
-    /// disproportionate amount of ceremony.
-    func optionListPopover<Value: Hashable>(
-        isPresented: Binding<Bool>,
-        options: [PickerOption<Value>],
-        selection: Value,
-        onSelect: @escaping (Value) -> Void
-    ) -> some View {
-        popover(isPresented: isPresented, arrowEdge: .top) {
-            OptionList(options: options, selection: selection) { value in
-                onSelect(value)
-                isPresented.wrappedValue = false
-            }
-            .presentationCompactAdaptation(.popover)
-            .presentationBackground(Theme.backgroundElevated)
-            .fixedSize()
-        }
+        // Fade only, per AESTHETIC.md (Motion) — never slide.
+        .transition(.opacity)
+        .accessibilityElement(children: .contain)
     }
 }
 
@@ -123,8 +113,6 @@ extension View {
             ],
             selection: "overdue"
         ) { _ in }
-        .brutalistBorder(color: Theme.accent)
-        .padding(Spacing.screenHorizontal)
     }
     .preferredColorScheme(.dark)
 }

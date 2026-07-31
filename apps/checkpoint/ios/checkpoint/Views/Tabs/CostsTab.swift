@@ -94,23 +94,29 @@ struct CostsTab: View {
     }
 
     var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                VStack(spacing: Spacing.lg) {
-                    filtersSection
-                    summaryCardsSection
-                    breakdownSections
-                    expenseListSection(scrollProxy: proxy)
-                    emptyStates
+        // The control row is pinned above the scroll area, so the cards scroll
+        // under it rather than pushing the only means of changing them
+        // off-screen.
+        VStack(spacing: 0) {
+            filtersSection
+
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(spacing: Spacing.xl) {
+                        summaryCardsSection
+                        breakdownSections
+                        expenseListSection(scrollProxy: proxy)
+                        emptyStates
+                    }
+                    .padding(.horizontal, Spacing.screenHorizontal)
+                    .padding(.top, Spacing.md)
+                    .padding(.bottom, Spacing.xxl + Spacing.tabBarOffset)
                 }
-                .padding(.horizontal, Spacing.screenHorizontal)
-                .padding(.top, Spacing.md)
-                .padding(.bottom, Spacing.xxl + Spacing.tabBarOffset)
-            }
-            .onChange(of: highlightedEventID) { _, newID in
-                guard let newID else { return }
-                withAnimation(.easeInOut(duration: Theme.animationMedium)) {
-                    proxy.scrollTo(newID, anchor: .center)
+                .onChange(of: highlightedEventID) { _, newID in
+                    guard let newID else { return }
+                    withAnimation(.easeInOut(duration: Theme.animationMedium)) {
+                        proxy.scrollTo(newID, anchor: .center)
+                    }
                 }
             }
         }

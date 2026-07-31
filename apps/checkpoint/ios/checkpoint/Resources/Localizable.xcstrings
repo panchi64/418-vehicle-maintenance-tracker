@@ -625,6 +625,14 @@
         "es" : { "stringUnit" : { "state" : "translated", "value" : "Mejora" } }
       }
     },
+    "costs.categoryDimension" : {
+      "comment" : "Names the category filter dimension on the Costs tab.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Category" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Categoría" } }
+      }
+    },
     "costs.periodAll" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -963,11 +971,51 @@
         "es" : { "stringUnit" : { "state" : "translated", "value" : "Todos" } }
       }
     },
-    "servicesTab.viewDocuments" : {
+    "servicesTab.documentLibrary" : {
+      "comment" : "Destination link at the bottom of the Services tab.",
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Documents" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Documentos" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Document library" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Biblioteca de documentos" } }
+      }
+    },
+    "servicesTab.export" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Export" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Exportar" } }
+      }
+    },
+    "servicesTab.historyCount" : {
+      "comment" : "Section title over the service-history list. %lld is the number of entries.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld entries" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%lld registros" } }
+      }
+    },
+    "servicesTab.reference" : {
+      "comment" : "Heading over destination links that are not maintenance state.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reference" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Referencia" } }
+      }
+    },
+    "servicesTab.scheduledCount" : {
+      "comment" : "Section title over the upcoming-services list. %lld is the number shown.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld scheduled" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%lld programados" } }
+      }
+    },
+    "servicesTab.statusDimension" : {
+      "comment" : "Names the status filter dimension on the Services tab.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Status" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Estado" } }
       }
     },
     "servicesTab.viewList" : {
@@ -3020,6 +3068,48 @@
             "value" : "Registra 2+ servicios con kilometraje para calcular"
           }
         }
+      }
+    },
+    "empty.noResultsMessage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Try a different search term\nor filter" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Prueba otro término de búsqueda\no filtro" } }
+      }
+    },
+    "empty.noResultsTitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No results" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin resultados" } }
+      }
+    },
+    "empty.noServicesMessage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add your first service to\nstart tracking maintenance" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añade tu primer servicio para\nempezar a dar seguimiento" } }
+      }
+    },
+    "empty.noServicesTitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No services" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin servicios" } }
+      }
+    },
+    "empty.noVehicleMessage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Select or add a vehicle\nto view services" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Selecciona o añade un vehículo\npara ver los servicios" } }
+      }
+    },
+    "empty.noVehicleTitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No vehicle" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin vehículo" } }
       }
     },
     "empty.filter_clear" : {

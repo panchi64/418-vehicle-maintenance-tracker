@@ -32,16 +32,18 @@ struct ServicesTabState {
         }
     }
 
+    /// `documents` is deliberately absent. It was a third view mode that then
+    /// offered "OPEN LIBRARY" to leave for the real documents screen — a content
+    /// type masquerading as a view of services. The library is now a destination
+    /// reachable from the bottom of the tab, which is what it always was.
     enum ViewMode: String, CaseIterable {
         case list = "List"
         case timeline = "Timeline"
-        case documents = "Documents"
 
         var displayName: String {
             switch self {
             case .list: return L10n.servicesViewList
             case .timeline: return L10n.servicesViewTimeline
-            case .documents: return L10n.servicesViewDocuments
             }
         }
     }

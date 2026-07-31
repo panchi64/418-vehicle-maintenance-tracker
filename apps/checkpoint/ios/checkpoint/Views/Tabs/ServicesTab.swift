@@ -103,174 +103,48 @@ struct ServicesTab: View {
         }
     }
 
+    /// Status options with live counts, so choosing a filter is informed rather
+    /// than a guess followed by an empty list.
+    private var statusOptions: [PickerOption<StatusFilter>] {
+        let effectiveMileage = vehicle?.effectiveMileage ?? 0
+        let tracked = vehicleServices.filter { $0.hasDueTracking }
+        func count(_ status: ServiceStatus) -> Int {
+            tracked.filter { $0.status(currentMileage: effectiveMileage) == status }.count
+        }
+        return [
+            PickerOption(value: .all, label: StatusFilter.all.displayName, count: tracked.count),
+            PickerOption(value: .overdue, label: StatusFilter.overdue.displayName, count: count(.overdue)),
+            PickerOption(value: .dueSoon, label: StatusFilter.dueSoon.displayName, count: count(.dueSoon)),
+            PickerOption(value: .good, label: StatusFilter.good.displayName, count: count(.good))
+        ]
+    }
+
     var body: some View {
         @Bindable var appState = appState
-        ScrollView {
-            VStack(spacing: Spacing.lg) {
-                // Search field
-                ServiceSearchField(
-                    text: $appState.servicesTab.searchText,
-                    onSearchStarted: {
-                        AnalyticsService.shared.capture(.servicesSearchUsed)
-                    }
-                )
-                .tourTarget(.servicesSearch, active: onboardingState.currentPhase.isTour)
-                .revealAnimation(delay: 0.1)
 
-                // View mode toggle
-                InstrumentSegmentedControl(
-                    options: ViewMode.allCases,
-                    selection: $appState.servicesTab.viewMode
-                ) { mode in
-                    mode.displayName
+        // ONE row of pinned chrome, not four. Mode is the segmented control
+        // because it changes what the screen *is*; status is a FilterControl
+        // because filtering is refinement and does not deserve permanent real
+        // estate. Search scrolls with the content rather than pinning a second
+        // row above it — it is reached deliberately, not glanced at.
+        VStack(spacing: 0) {
+            // Status only exists for scheduled items, so the filter only exists
+            // there too. A no-op control in Timeline mode costs a target and
+            // answers nothing.
+            if appState.servicesTab.viewMode == .list {
+                FilterControlRow(
+                    name: L10n.servicesStatusDimension,
+                    options: statusOptions,
+                    selection: $appState.servicesTab.statusFilter,
+                    defaultValue: .all
+                ) {
+                    modeControl
                 }
-                .revealAnimation(delay: 0.12)
-
-                // Status filter (only show in list mode)
-                if appState.servicesTab.viewMode == .list {
-                    InstrumentSegmentedControl(
-                        options: StatusFilter.allCases,
-                        selection: $appState.servicesTab.statusFilter
-                    ) { filter in
-                        filter.displayName
-                    }
-                    .revealAnimation(delay: 0.15)
-
-                    // Active filter indicator
-                    if appState.servicesTab.statusFilter != .all || !appState.servicesTab.searchText.isEmpty {
-                        HStack {
-                            Text(L10n.emptyFilterShowing(filteredServices.count, vehicleServices.count).uppercased())
-                                .font(.brutalistLabel)
-                                .foregroundStyle(Theme.accent)
-                                .tracking(1.5)
-
-                            Spacer()
-
-                            Button {
-                                appState.servicesTab.statusFilter = .all
-                                appState.servicesTab.searchText = ""
-                            } label: {
-                                Text(L10n.emptyFilterClear.uppercased())
-                                    .font(.brutalistLabel)
-                                    .foregroundStyle(Theme.accent)
-                                    .tracking(1.5)
-                            }
-                            .buttonStyle(.instrument)
-                        }
-                    }
-                }
-
-                // Documents view mode — embedded read-only preview. Tapping a
-                // row opens the detail sheet; full multi-select / share lives
-                // in the dedicated library opened by "Open library".
-                if appState.servicesTab.viewMode == .documents, let vehicle = vehicle {
-                    documentsSection(vehicle: vehicle)
-                        .revealAnimation(delay: 0.2)
-                }
-
-                // Content based on view mode
-                if appState.servicesTab.viewMode == .timeline, let vehicle = vehicle {
-                    if vehicleServiceLogs.isEmpty {
-                        EmptyStateView(
-                            icon: "clock.arrow.circlepath",
-                            title: L10n.emptyTimelineTitle,
-                            message: L10n.emptyTimelineMessage
-                        )
-                        .revealAnimation(delay: 0.2)
-                    } else {
-                        MaintenanceTimeline(
-                            services: vehicleServices,
-                            serviceLogs: vehicleServiceLogs,
-                            vehicle: vehicle,
-                            onServiceTap: { service in
-                                appState.selectedService = service
-                            },
-                            onLogTap: { log in
-                                appState.selectedServiceLog = log
-                            }
-                        )
-                        .revealAnimation(delay: 0.2)
-                    }
-                }
-
-                // Upcoming services section (list mode)
-                if appState.servicesTab.viewMode == .list && !filteredServices.isEmpty, let vehicle = vehicle {
-                    VStack(alignment: .leading, spacing: Spacing.sm) {
-                        InstrumentSectionHeader(title: "Upcoming")
-
-                        VStack(spacing: 0) {
-                            ForEach(Array(filteredServices.enumerated()), id: \.element.id) { index, service in
-                                ServiceRow(
-                                    service: service,
-                                    currentMileage: vehicle.effectiveMileage,
-                                    isEstimatedMileage: vehicle.isUsingEstimatedMileage
-                                ) {
-                                    appState.selectedService = service
-                                }
-                                .staggeredReveal(index: index, baseDelay: 0.2)
-
-                                if index < filteredServices.count - 1 {
-                                    ListDivider()
-                                }
-                            }
-                        }
-                        .background(Theme.surfaceInstrument)
-                        .brutalistBorder()
-                    }
-                }
-
-                // Service History section (list mode only)
-                if appState.servicesTab.viewMode == .list && !filteredLogs.isEmpty {
-                    VStack(alignment: .leading, spacing: Spacing.sm) {
-                        InstrumentSectionHeader(title: "Service History") {
-                            Button {
-                                showExportOptions = true
-                            } label: {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "square.and.arrow.up")
-                                        .font(.system(size: 11, weight: .medium))
-                                    Text("EXPORT")
-                                        .font(.brutalistLabel)
-                                        .tracking(1)
-                                }
-                                .foregroundStyle(Theme.accent)
-                                .frame(minHeight: 44)
-                                .contentShape(Rectangle())
-                            }
-                            .accessibilityLabel("Export service history")
-                        }
-
-                        VStack(spacing: 0) {
-                            ForEach(Array(filteredLogs.enumerated()), id: \.element.id) { index, log in
-                                // ServiceEventRow owns its own tap target.
-                                historyRow(log: log)
-                                    .staggeredReveal(index: index, baseDelay: 0.3)
-
-                                if index < filteredLogs.count - 1 {
-                                    ListDivider(leadingPadding: 28)
-                                }
-                            }
-                        }
-                        .background(Theme.surfaceInstrument)
-                        .brutalistBorder()
-                    }
-                }
-
-                // Empty state (only in list mode when no content)
-                if appState.servicesTab.viewMode == .list && filteredServices.isEmpty && filteredLogs.isEmpty && vehicle != nil {
-                    emptyState
-                        .revealAnimation(delay: 0.2)
-                }
-
-                // No vehicle state
-                if vehicle == nil {
-                    noVehicleState
-                        .revealAnimation(delay: 0.2)
-                }
+            } else {
+                ControlRow { modeControl }
             }
-            .padding(.horizontal, Spacing.screenHorizontal)
-            .padding(.top, Spacing.md)
-            .padding(.bottom, Spacing.xxl + Spacing.tabBarOffset)
+
+            scrollContent
         }
         .trackScreen(.services)
         .onChange(of: appState.servicesTab.viewMode) { _, newMode in
@@ -299,6 +173,155 @@ struct ServicesTab: View {
         }
     }
 
+    private var modeControl: some View {
+        @Bindable var appState = appState
+        return InstrumentSegmentedControl(
+            options: ViewMode.allCases,
+            selection: $appState.servicesTab.viewMode
+        ) { mode in
+            mode.displayName
+        }
+    }
+
+    private var scrollContent: some View {
+        @Bindable var appState = appState
+        return ScrollView {
+            VStack(spacing: Spacing.xl) {
+                ServiceSearchField(
+                    text: $appState.servicesTab.searchText,
+                    onSearchStarted: {
+                        AnalyticsService.shared.capture(.servicesSearchUsed)
+                    }
+                )
+                .tourTarget(.servicesSearch, active: onboardingState.currentPhase.isTour)
+                .revealAnimation(delay: 0.1)
+
+                // Content based on view mode
+                if appState.servicesTab.viewMode == .timeline, let vehicle = vehicle {
+                    if vehicleServiceLogs.isEmpty {
+                        EmptyStateView(
+                            icon: "clock.arrow.circlepath",
+                            title: L10n.emptyTimelineTitle,
+                            message: L10n.emptyTimelineMessage
+                        )
+                        .revealAnimation(delay: 0.2)
+                    } else {
+                        MaintenanceTimeline(
+                            services: vehicleServices,
+                            serviceLogs: vehicleServiceLogs,
+                            vehicle: vehicle,
+                            onServiceTap: { service in
+                                appState.selectedService = service
+                            },
+                            onLogTap: { log in
+                                appState.selectedServiceLog = log
+                            }
+                        )
+                        .revealAnimation(delay: 0.2)
+                    }
+                }
+
+                // Upcoming services (list mode). The bordered container is gone:
+                // rows separated by dividers inside a titled section already
+                // read as one group, and the box was one more enclosure
+                // competing with the cards above it.
+                if appState.servicesTab.viewMode == .list && !filteredServices.isEmpty, let vehicle = vehicle {
+                    ReadoutSection(title: L10n.servicesScheduledCount(filteredServices.count)) {
+                        VStack(spacing: 0) {
+                            ForEach(Array(filteredServices.enumerated()), id: \.element.id) { index, service in
+                                ServiceRow(
+                                    service: service,
+                                    currentMileage: vehicle.effectiveMileage,
+                                    isEstimatedMileage: vehicle.isUsingEstimatedMileage
+                                ) {
+                                    appState.selectedService = service
+                                }
+                                .staggeredReveal(index: index, baseDelay: 0.2)
+
+                                if index < filteredServices.count - 1 {
+                                    ListDivider()
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Service History section (list mode only)
+                if appState.servicesTab.viewMode == .list && !filteredLogs.isEmpty {
+                    ReadoutSection(title: L10n.servicesHistoryCount(filteredLogs.count)) {
+                        VStack(spacing: 0) {
+                            ForEach(Array(filteredLogs.enumerated()), id: \.element.id) { index, log in
+                                // ServiceEventRow owns its own tap target.
+                                historyRow(log: log)
+                                    .staggeredReveal(index: index, baseDelay: 0.3)
+
+                                if index < filteredLogs.count - 1 {
+                                    ListDivider(leadingPadding: 28)
+                                }
+                            }
+                        }
+                    } action: {
+                        ReadoutSectionAction(
+                            label: L10n.servicesExport,
+                            systemImage: "square.and.arrow.up"
+                        ) {
+                            showExportOptions = true
+                        }
+                    }
+                }
+
+                // Empty state (only in list mode when no content)
+                if appState.servicesTab.viewMode == .list && filteredServices.isEmpty && filteredLogs.isEmpty && vehicle != nil {
+                    emptyState
+                        .revealAnimation(delay: 0.2)
+                }
+
+                // No vehicle state
+                if vehicle == nil {
+                    noVehicleState
+                        .revealAnimation(delay: 0.2)
+                }
+
+                if vehicle != nil {
+                    referenceSection
+                }
+            }
+            .padding(.horizontal, Spacing.screenHorizontal)
+            .padding(.top, Spacing.md)
+            .padding(.bottom, Spacing.xxl + Spacing.tabBarOffset)
+        }
+    }
+
+    // MARK: - Reference
+
+    /// The documents library, as a destination rather than a view mode. It was a
+    /// third segment of the mode control that, once selected, offered "OPEN
+    /// LIBRARY" to leave for the real screen — so the mode existed only to host
+    /// a link.
+    private var referenceSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            Text(L10n.servicesReference.uppercased())
+                .font(.brutalistLabel)
+                .foregroundStyle(Theme.textTertiary)
+                .tracking(1.5)
+
+            Button {
+                appState.showDocuments = true
+            } label: {
+                Text("[\(L10n.servicesDocumentLibrary.uppercased())]")
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.accent)
+                    .tracking(1)
+                    .frame(minHeight: TouchTarget.minimum, alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(L10n.servicesDocumentLibrary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     // MARK: - History Row
 
     /// Uses the shared `ServiceEventRow`. This was previously a hand-built
@@ -323,159 +346,28 @@ struct ServicesTab: View {
 
     // MARK: - Empty States
 
+    /// "No services" and "nothing matches" are different facts, and saying the
+    /// first when the second is true tells the user their data is gone. A status
+    /// filter counts as narrowing just as much as a search term does — before
+    /// filtering took one tap this was rarely wrong, and now it would be.
+    private var isNarrowed: Bool {
+        !appState.servicesTab.searchText.isEmpty || appState.servicesTab.statusFilter != .all
+    }
+
     private var emptyState: some View {
         EmptyStateView(
-            icon: appState.servicesTab.searchText.isEmpty ? "wrench.and.screwdriver" : "magnifyingglass",
-            title: appState.servicesTab.searchText.isEmpty ? "No Services" : "No Results",
-            message: appState.servicesTab.searchText.isEmpty ? "Add your first service to\nstart tracking maintenance" : "Try a different search term\nor filter"
+            icon: isNarrowed ? "magnifyingglass" : "wrench.and.screwdriver",
+            title: isNarrowed ? L10n.emptyNoResultsTitle : L10n.emptyNoServicesTitle,
+            message: isNarrowed ? L10n.emptyNoResultsMessage : L10n.emptyNoServicesMessage
         )
     }
 
     private var noVehicleState: some View {
         EmptyStateView(
             icon: "car.side.fill",
-            title: "No Vehicle",
-            message: "Select or add a vehicle\nto view services"
+            title: L10n.emptyNoVehicleTitle,
+            message: L10n.emptyNoVehicleMessage
         )
-    }
-
-    // MARK: - Documents Section (in-tab embedded view)
-
-    /// Read-only document list grouped by DocumentType, with the search bar
-    /// above filtering results. Tap a row to open the detail sheet; tap
-    /// "Open library" for multi-select / share / bulk operations.
-    @ViewBuilder
-    private func documentsSection(vehicle: Vehicle) -> some View {
-        let query = appState.servicesTab.searchText.trimmingCharacters(in: .whitespaces)
-        let allDocs = vehicle.documents ?? []
-        let filtered: [Document] = query.isEmpty ? allDocs : allDocs.filter { doc in
-            if doc.fileName.localizedCaseInsensitiveContains(query) { return true }
-            if let notes = doc.notes, notes.localizedCaseInsensitiveContains(query) { return true }
-            if let text = doc.extractedText, text.localizedCaseInsensitiveContains(query) { return true }
-            if doc.documentType.displayName.localizedCaseInsensitiveContains(query) { return true }
-            return false
-        }
-        let grouped: [(type: DocumentType, docs: [Document])] = DocumentType.listOrder.compactMap { type in
-            let matches = filtered.filter { $0.documentType == type }.sorted { $0.createdAt > $1.createdAt }
-            return matches.isEmpty ? nil : (type, matches)
-        }
-
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            HStack {
-                Text("VEHICLE DOCUMENTS")
-                    .font(.brutalistLabel)
-                    .foregroundStyle(Theme.textTertiary)
-                    .tracking(2)
-
-                Spacer()
-
-                Button {
-                    appState.showDocuments = true
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "arrow.up.right.square")
-                            .font(.system(size: 11, weight: .medium))
-                        Text("OPEN LIBRARY")
-                            .font(.brutalistLabel)
-                            .tracking(1)
-                    }
-                    .foregroundStyle(Theme.accent)
-                    .frame(minHeight: 44)
-                    .contentShape(Rectangle())
-                }
-                .accessibilityLabel("Open documents library")
-            }
-
-            if allDocs.isEmpty {
-                EmptyStateView(
-                    icon: "doc.text",
-                    title: L10n.documentsEmptyTitle,
-                    message: L10n.documentsEmptyMessage,
-                    action: { appState.showDocuments = true },
-                    actionLabel: L10n.documentsEmptyAction
-                )
-            } else if filtered.isEmpty {
-                Text(L10n.emptyFilterShowing(0, allDocs.count).uppercased())
-                    .font(.brutalistLabel)
-                    .foregroundStyle(Theme.textTertiary)
-                    .tracking(1.5)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, Spacing.md)
-            } else {
-                VStack(spacing: Spacing.md) {
-                    ForEach(grouped, id: \.type) { group in
-                        documentsGroup(type: group.type, docs: group.docs)
-                    }
-                }
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func documentsGroup(type: DocumentType, docs: [Document]) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            HStack(spacing: Spacing.xs) {
-                Image(systemName: type.icon)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(type.accentColor)
-                Text("\(type.displayName.uppercased()) · \(docs.count)")
-                    .font(.brutalistLabel)
-                    .foregroundStyle(Theme.textSecondary)
-                    .tracking(1.5)
-            }
-
-            VStack(spacing: 0) {
-                ForEach(Array(docs.enumerated()), id: \.element.id) { index, doc in
-                    Button {
-                        appState.selectedDocument = doc
-                    } label: {
-                        documentsInlineRow(doc: doc)
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-
-                    if index < docs.count - 1 {
-                        ListDivider(leadingPadding: 76)
-                    }
-                }
-            }
-            .background(Theme.surfaceInstrument)
-            .brutalistBorder()
-        }
-    }
-
-    private func documentsInlineRow(doc: Document) -> some View {
-        HStack(spacing: Spacing.md) {
-            AttachmentThumbnail(attachment: doc)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(doc.fileName)
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textPrimary)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-
-                if let notes = doc.notes, !notes.isEmpty {
-                    Text(notes)
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
-                        .lineLimit(1)
-                }
-
-                if let count = doc.vehicles?.count, count > 1 {
-                    Text(L10n.documentsLinkedCount(count).uppercased())
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.accent)
-                        .tracking(1)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-
-            Image(systemName: "chevron.right")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(Theme.textTertiary)
-        }
-        .padding(Spacing.md)
     }
 
 }

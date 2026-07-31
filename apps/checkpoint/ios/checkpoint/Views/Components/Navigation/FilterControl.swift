@@ -40,23 +40,66 @@
 
 import SwiftUI
 
-struct FilterControl<Value: Hashable>: View {
+/// A tab's complete chrome: the control row, the filter's expanded band, and the
+/// active-filter bar.
+///
+/// These are one component rather than three because the expanded option band
+/// has to span the full screen width — a panel floating under a right-aligned
+/// trigger would truncate labels at exactly the moment the user is reading them.
+/// Owning the row means the band can be a sibling of it rather than an overlay,
+/// so nothing clips and nothing needs a z-index.
+struct FilterControlRow<Value: Hashable, Leading: View>: View {
     /// Names the dimension, e.g. "Status". Also the accessible label.
     let name: String
     let options: [PickerOption<Value>]
     @Binding var selection: Value
     /// The value meaning "no filter". Shown as cleared, and clearable in one tap.
     let defaultValue: Value
+    /// The control that keeps its row — a view or period switch, which changes
+    /// what the screen *is* rather than merely what it shows.
+    @ViewBuilder let leading: Leading
 
     @State private var isExpanded = false
 
     private var isFiltered: Bool { selection != defaultValue }
 
-    private var tint: Color { isFiltered ? Theme.accent : Theme.textTertiary }
-
     var body: some View {
+        VStack(spacing: 0) {
+            ControlRow {
+                leading
+                trigger
+            }
+
+            if isExpanded {
+                OptionList(options: options, selection: selection) { value in
+                    selection = value
+                    withAnimation(.easeOut(duration: Theme.animationFast)) {
+                        isExpanded = false
+                    }
+                }
+                .overlay(alignment: .bottom) {
+                    Rectangle()
+                        .fill(Theme.gridLine)
+                        .frame(height: Theme.borderWidth)
+                }
+            }
+
+            ActiveFilterBar(
+                name: name,
+                options: options,
+                selection: selection,
+                defaultValue: defaultValue
+            ) {
+                selection = defaultValue
+            }
+        }
+    }
+
+    private var trigger: some View {
         Button {
-            isExpanded = true
+            withAnimation(.easeOut(duration: Theme.animationFast)) {
+                isExpanded.toggle()
+            }
         } label: {
             HStack(spacing: Spacing.xs) {
                 Text("[\(name.uppercased())")
@@ -71,7 +114,7 @@ struct FilterControl<Value: Hashable>: View {
                     .font(.brutalistLabel)
                     .tracking(1)
             }
-            .foregroundStyle(tint)
+            .foregroundStyle(isFiltered ? Theme.accent : Theme.textTertiary)
             .lineLimit(1)
             .fixedSize(horizontal: true, vertical: false)
             .padding(.horizontal, Spacing.sm)
@@ -82,11 +125,7 @@ struct FilterControl<Value: Hashable>: View {
         .animation(.easeOut(duration: Theme.animationMedium), value: isExpanded)
         .accessibilityLabel(L10n.filterDimension(name))
         .accessibilityValue(options.first { $0.value == selection }?.label ?? "")
-        .optionListPopover(
-            isPresented: $isExpanded,
-            options: options,
-            selection: selection
-        ) { selection = $0 }
+        .accessibilityAddTraits(isExpanded ? [.isButton, .isSelected] : .isButton)
     }
 }
 
@@ -193,26 +232,17 @@ struct ControlRow<Content: View>: View {
         AtmosphericBackground()
 
         VStack(spacing: 0) {
-            ControlRow {
+            FilterControlRow(
+                name: "Status",
+                options: options,
+                selection: $status,
+                defaultValue: "all"
+            ) {
                 Text("SEGMENTED CONTROL")
                     .font(.brutalistLabel)
                     .foregroundStyle(Theme.textTertiary)
                     .frame(maxWidth: .infinity)
-
-                FilterControl(
-                    name: "Status",
-                    options: options,
-                    selection: $status,
-                    defaultValue: "all"
-                )
             }
-
-            ActiveFilterBar(
-                name: "Status",
-                options: options,
-                selection: status,
-                defaultValue: "all"
-            ) { status = "all" }
 
             Spacer()
         }

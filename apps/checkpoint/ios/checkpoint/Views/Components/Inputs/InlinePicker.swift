@@ -40,7 +40,9 @@ struct InlinePicker<Value: Hashable>: View {
             }
 
             Button {
-                isExpanded = true
+                withAnimation(.easeOut(duration: Theme.animationFast)) {
+                    isExpanded.toggle()
+                }
             } label: {
                 HStack(spacing: Spacing.sm) {
                     Text(activeLabel)
@@ -65,11 +67,20 @@ struct InlinePicker<Value: Hashable>: View {
             .animation(.easeOut(duration: Theme.animationMedium), value: isExpanded)
             .accessibilityLabel(label ?? "")
             .accessibilityValue(activeLabel)
-            .optionListPopover(
-                isPresented: $isExpanded,
-                options: options,
-                selection: selection
-            ) { selection = $0 }
+            .accessibilityAddTraits(isExpanded ? [.isButton, .isSelected] : .isButton)
+
+            // Expands in place beneath the field rather than floating a
+            // popover: SwiftUI's popover chrome is rounded and translucent,
+            // and this app draws no rounded corners. See OptionList.
+            if isExpanded {
+                OptionList(options: options, selection: selection) { value in
+                    selection = value
+                    withAnimation(.easeOut(duration: Theme.animationFast)) {
+                        isExpanded = false
+                    }
+                }
+                .brutalistBorder(color: Theme.accent)
+            }
         }
     }
 }

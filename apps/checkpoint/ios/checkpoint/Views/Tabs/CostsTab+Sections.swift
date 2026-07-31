@@ -5,23 +5,53 @@ extension CostsTab {
     // MARK: - Filters
 
     @ViewBuilder
+    /// Category options for the period currently in view, plus All.
+    ///
+    /// Only categories the vehicle actually has an entry for are offered:
+    /// listing a category with zero entries is offering a route to an empty
+    /// screen. Counts sit beside each option so the choice is informed.
+    var categoryOptions: [PickerOption<CategoryFilter>] {
+        let inPeriod: [ExpenseEvent] = {
+            guard let startDate = periodFilter.startDate else { return vehicleEvents }
+            return vehicleEvents.filter { $0.date >= startDate }
+        }()
+
+        let present = CategoryFilter.allCases.filter { filter in
+            guard let category = filter.costCategory else { return false }
+            return inPeriod.contains { $0.category == category }
+        }
+
+        return [PickerOption(value: .all, label: CategoryFilter.all.displayName, count: inPeriod.count)]
+            + present
+                .map { filter in
+                    PickerOption(
+                        value: filter,
+                        label: filter.displayName,
+                        count: inPeriod.filter { $0.category == filter.costCategory }.count
+                    )
+                }
+                .sorted { ($0.count ?? 0) > ($1.count ?? 0) }
+    }
+
+    /// ONE row of chrome, not two. Period is the segmented control because it
+    /// changes the scope of every number on the screen; category is a
+    /// FilterControl, which scales to six categories where neither a segmented
+    /// control nor a scrolling chip row does — the chip row hid three of the six
+    /// off the right edge, and 4 periods × 4 categories was 16 states stacked
+    /// above nine independently-gated cards.
     var filtersSection: some View {
-        VStack(spacing: Spacing.lg) {
+        FilterControlRow(
+            name: L10n.costsCategoryDimension,
+            options: categoryOptions,
+            selection: $categoryFilter,
+            defaultValue: .all
+        ) {
             InstrumentSegmentedControl(
                 options: PeriodFilter.allCases,
                 selection: $periodFilter
             ) { filter in
                 filter.displayName
             }
-            .revealAnimation(delay: 0.1)
-
-            InstrumentSegmentedControl(
-                options: CategoryFilter.allCases,
-                selection: $categoryFilter
-            ) { filter in
-                filter.displayName
-            }
-            .revealAnimation(delay: 0.12)
         }
     }
 
