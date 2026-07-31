@@ -21,6 +21,7 @@ enum L10n {
     static var commonDays: String { localized("common.days") }
     static var commonDelete: String { localized("common.delete") }
     static var commonUndo: String { localized("common.undo") }
+    static var commonViewAll: String { localized("common.viewAll") }
 
     // MARK: - Form Advisories
     //
@@ -133,6 +134,9 @@ enum L10n {
     static var servicesViewList: String { localized("servicesTab.viewList") }
     static var servicesViewTimeline: String { localized("servicesTab.viewTimeline") }
     static var costsCategoryDimension: String { localized("costs.categoryDimension") }
+    static var costsExpenses: String { localized("costs.expenses") }
+    static var homeUpcoming: String { localized("home.upcoming") }
+    static var homeRecentActivity: String { localized("home.recentActivity") }
     static var servicesStatusDimension: String { localized("servicesTab.statusDimension") }
     static var servicesExport: String { localized("servicesTab.export") }
     static var servicesReference: String { localized("servicesTab.reference") }

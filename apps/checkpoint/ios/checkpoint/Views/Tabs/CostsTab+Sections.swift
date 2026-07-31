@@ -170,7 +170,12 @@ extension CostsTab {
             UpcomingServicesLinkCard(
                 nextServiceName: upcoming.nextName,
                 additionalCount: upcoming.additional,
-                onTap: { appState.selectedTab = .home }
+                // Services, not Home. Home shows at most three upcoming items;
+                // this card names one and counts the rest, so it has to land on
+                // the list that actually contains them. Sending it to Home also
+                // completed a loop — Home's Recent Activity used to point back
+                // here.
+                onTap: { appState.selectedTab = .services }
             )
             .revealAnimation(delay: 0.32)
         }
@@ -182,9 +187,11 @@ extension CostsTab {
     func expenseListSection(scrollProxy: ScrollViewProxy) -> some View {
         if !eventsWithCosts.isEmpty {
             let anomalies = anomalyEventIDs
-            VStack(alignment: .leading, spacing: Spacing.sm) {
-                InstrumentSectionHeader(title: "Expenses")
-
+            // Unboxed, matching Home and Services: a titled section of
+            // divider-separated rows is already one group, and this tab's
+            // headline and stat cards are boxed, so a bordered list here
+            // competed with them.
+            ReadoutSection(title: L10n.costsExpenses) {
                 VStack(spacing: 0) {
                     ForEach(Array(eventsWithCosts.enumerated()), id: \.element.id) { index, event in
                         expenseRow(for: event, isAnomalous: anomalies.contains(event.id))
@@ -196,8 +203,6 @@ extension CostsTab {
                         }
                     }
                 }
-                .background(Theme.surfaceInstrument)
-                .brutalistBorder()
             }
         }
     }

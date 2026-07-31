@@ -5,10 +5,12 @@ struct TopExpensesCard: View {
     let onSelectLog: (ServiceLog) -> Void
     let onSelectVisit: (ServiceVisit) -> Void
 
+    // Unboxed, matching every other divider-separated list. This one is a list
+    // despite the "Card" name — the enclosure was the only thing making it read
+    // as a card, and it competed with the headline and stat cards above it,
+    // which genuinely are.
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: L10n.costsTopTitle)
-
+        ReadoutSection(title: L10n.costsTopTitle) {
             VStack(spacing: 0) {
                 ForEach(Array(events.enumerated()), id: \.element.id) { index, event in
                     rowView(for: event)
@@ -18,8 +20,6 @@ struct TopExpensesCard: View {
                     }
                 }
             }
-            .background(Theme.surfaceInstrument)
-            .brutalistBorder()
         }
     }
 

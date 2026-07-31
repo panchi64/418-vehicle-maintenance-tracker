@@ -185,27 +185,15 @@ struct HomeTab: View {
                     .revealAnimation(delay: 0.3)
                 }
 
-                // Upcoming services list (max 3 for home tab)
+                // Upcoming services list (max 3 for home tab).
+                //
+                // No bordered container. Rows separated by dividers under a
+                // titled header already read as one group — proximity carries
+                // grouping before borders do — and the box put a second
+                // enclosure inside a screen whose hero cards are already boxed,
+                // so the list competed with the thing it sits beneath.
                 if !remainingServices.isEmpty, let vehicle = vehicle {
-                    VStack(alignment: .leading, spacing: Spacing.sm) {
-                        HStack {
-                            InstrumentSectionHeader(title: "Upcoming")
-                            Spacer()
-                            if remainingServices.count > 3 {
-                                Button {
-                                    appState.selectedTab = .services
-                                } label: {
-                                    Text("View All")
-                                        .font(.brutalistLabel)
-                                        .foregroundStyle(Theme.accent)
-                                        .tracking(1)
-                                        .frame(minHeight: 44)
-                                        .contentShape(Rectangle())
-                                }
-                                .accessibilityLabel("View all upcoming services")
-                            }
-                        }
-
+                    ReadoutSection(title: L10n.homeUpcoming) {
                         VStack(spacing: 0) {
                             ForEach(Array(remainingServices.prefix(3).enumerated()), id: \.element.id) { index, service in
                                 ServiceRow(
@@ -222,32 +210,18 @@ struct HomeTab: View {
                                 }
                             }
                         }
-                        .background(Theme.surfaceInstrument)
-                        .brutalistBorder()
+                    } action: {
+                        if remainingServices.count > 3 {
+                            ReadoutSectionAction(label: L10n.commonViewAll) {
+                                appState.selectedTab = .services
+                            }
+                        }
                     }
                 }
 
-                // Recent Activity Feed (max 3, with VIEW_ALL)
+                // Recent Activity Feed (max 3, with View All)
                 if !vehicleServiceLogs.isEmpty {
-                    VStack(alignment: .leading, spacing: Spacing.sm) {
-                        HStack {
-                            InstrumentSectionHeader(title: "Recent Activity")
-                            Spacer()
-                            if vehicleServiceLogs.count > 3 {
-                                Button {
-                                    appState.selectedTab = .costs
-                                } label: {
-                                    Text("View All")
-                                        .font(.brutalistLabel)
-                                        .foregroundStyle(Theme.accent)
-                                        .tracking(1)
-                                        .frame(minHeight: 44)
-                                        .contentShape(Rectangle())
-                                }
-                                .accessibilityLabel("View all recent activity")
-                            }
-                        }
-
+                    ReadoutSection(title: L10n.homeRecentActivity) {
                         VStack(spacing: 0) {
                             let recentLogs = vehicleServiceLogs
                                 .sorted { $0.performedDate > $1.performedDate }
@@ -262,8 +236,16 @@ struct HomeTab: View {
                                 }
                             }
                         }
-                        .background(Theme.surfaceInstrument)
-                        .brutalistBorder()
+                    } action: {
+                        if vehicleServiceLogs.count > 3 {
+                            // Services, not Costs. This sent a maintenance
+                            // history list to a financial view — the rule is
+                            // that "View All" lands on a list containing the
+                            // items the section actually showed.
+                            ReadoutSectionAction(label: L10n.commonViewAll) {
+                                appState.selectedTab = .services
+                            }
+                        }
                     }
                     .revealAnimation(delay: 0.35)
                 }

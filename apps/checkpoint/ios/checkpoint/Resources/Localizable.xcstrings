@@ -655,6 +655,35 @@
         "es" : { "stringUnit" : { "state" : "translated", "value" : "Mejora" } }
       }
     },
+    "common.viewAll" : {
+      "comment" : "Trailing action on a readout section header.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "View all" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ver todo" } }
+      }
+    },
+    "costs.expenses" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Expenses" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Gastos" } }
+      }
+    },
+    "home.recentActivity" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Recent activity" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Actividad reciente" } }
+      }
+    },
+    "home.upcoming" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Upcoming" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Próximos" } }
+      }
+    },
     "costs.categoryDimension" : {
       "comment" : "Names the category filter dimension on the Costs tab.",
       "extractionState" : "manual",
