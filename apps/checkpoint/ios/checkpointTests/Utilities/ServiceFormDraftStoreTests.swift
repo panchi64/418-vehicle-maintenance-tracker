@@ -13,17 +13,15 @@ final class ServiceFormDraftStoreTests: XCTestCase {
 
     private func makeDraft(savedAt: Date = .now) -> ServiceFormDraft {
         ServiceFormDraft(
-            mode: "record",
+            version: ServiceFormDraft.currentVersion,
+            timing: .today,
+            customDate: .now,
             serviceName: "Oil Change",
             presetName: "oil_change",
-            performedDate: .now,
             costText: "48",
             costCategoryRaw: "maintenance",
             mileageText: "32500",
-            recordNotes: "Synthetic 0W-20",
-            remindNotes: "",
-            dueDate: nil,
-            hasCustomDate: false,
+            notes: "Synthetic 0W-20",
             dueMileage: nil,
             intervalMonths: 6,
             intervalMiles: 5000,
@@ -77,6 +75,21 @@ final class ServiceFormDraftStoreTests: XCTestCase {
         ServiceFormDraftStore.save(makeDraft(), for: vehicleID)
         ServiceFormDraftStore.clear(for: vehicleID)
 
+        XCTAssertNil(ServiceFormDraftStore.load(for: vehicleID))
+    }
+
+    func testLoad_DiscardsADraftFromAnUnrecognisedSchema() {
+        // A draft written before the Record/Remind fork was removed means
+        // something different field-for-field. It must be dropped, not
+        // partially applied — the store's job is convenience, and a wrong
+        // resumption is worse than starting clean.
+        let vehicleID = UUID()
+        var draft = makeDraft()
+        draft.version = ServiceFormDraft.currentVersion - 1
+        ServiceFormDraftStore.save(draft, for: vehicleID)
+
+        XCTAssertNil(ServiceFormDraftStore.load(for: vehicleID))
+        // Rejection clears as a side effect — a second load is still nil.
         XCTAssertNil(ServiceFormDraftStore.load(for: vehicleID))
     }
 

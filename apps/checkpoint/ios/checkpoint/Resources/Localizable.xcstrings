@@ -319,38 +319,44 @@
     "Add vehicle specs" : {
 
     },
-    "addservice.titleRecord" : {
+    "addservice.saveLog" : {
+      "comment" : "Save button once a past timing is chosen.",
       "extractionState" : "manual",
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Record Service"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Registrar servicio"
-          }
-        }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Log it" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Registrarlo" } }
       }
     },
-    "addservice.titleRemind" : {
+    "addservice.saveSchedule" : {
+      "comment" : "Save button once a future timing is chosen.",
       "extractionState" : "manual",
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Set Reminder"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Configurar recordatorio"
-          }
-        }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Schedule it" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Programarlo" } }
+      }
+    },
+    "addservice.titleLog" : {
+      "comment" : "Sheet subtitle once a past timing is chosen.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "New entry" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Nuevo registro" } }
+      }
+    },
+    "addservice.titleNeutral" : {
+      "comment" : "Sheet subtitle before a timing is chosen, when the intent is not yet known.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add service" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añadir servicio" } }
+      }
+    },
+    "addservice.titleSchedule" : {
+      "comment" : "Sheet subtitle once a future timing is chosen.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "New reminder" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Nuevo recordatorio" } }
       }
     },
     "addvehicle.basics" : {
@@ -3432,6 +3438,270 @@
             "value" : "Filtro de %@"
           }
         }
+      }
+    },
+    "form.alreadyDone" : {
+      "comment" : "Subgroup heading over the past-timing chips.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Already done" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ya realizado" } }
+      }
+    },
+    "form.comingUp" : {
+      "comment" : "Subgroup heading over the future-timing chips.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Coming up" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Próximamente" } }
+      }
+    },
+    "form.common" : {
+      "comment" : "Label over the quick service-type shortcut chips.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Common" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Frecuentes" } }
+      }
+    },
+    "form.correctItUpward" : {
+      "comment" : "Outcome button: adopt the entered reading despite the older date.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Correct it upward" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Corregirlo hacia arriba" } }
+      }
+    },
+    "form.depthContents" : {
+      "comment" : "Names what is inside the collapsed details section.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Notes, receipt" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Notas, recibo" } }
+      }
+    },
+    "form.fewerDetails" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Fewer details" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Menos detalles" } }
+      }
+    },
+    "form.fires" : {
+      "comment" : "Label on the readout stating when a reminder will fire.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Fires" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Avisa" } }
+      }
+    },
+    "form.firesAtMileage" : {
+      "comment" : "Fire-time readout with no pace data. %@ is the target mileage.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "At %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "A las %@" } }
+      }
+    },
+    "form.firesAtMileageInDays" : {
+      "comment" : "Fire-time readout. %1$@ is the target mileage, %2$lld the days away at current pace.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "At %1$@ — about %2$lld days away at your pace" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "A las %1$@ — unos %2$lld días a tu ritmo" } }
+      }
+    },
+    "form.firesOnceYouEnterMileage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Once you enter a mileage" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cuando ingreses un millaje" } }
+      }
+    },
+    "form.firesOnceYouPickDate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Once you pick a date" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cuando elijas una fecha" } }
+      }
+    },
+    "form.keepMyOdometer" : {
+      "comment" : "Outcome button: leave the vehicle's odometer untouched.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Keep my odometer" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Mantener mi odómetro" } }
+      }
+    },
+    "form.moreDetails" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "More details" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Más detalles" } }
+      }
+    },
+    "form.odometerAtService" : {
+      "comment" : "Past-branch mileage field. Deliberately distinct from form.remindMeAt.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Odometer at service" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Odómetro al servicio" } }
+      }
+    },
+    "form.odometerContradiction" : {
+      "comment" : "Contradiction advisory. %@ is the vehicle's current odometer.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This is dated earlier than your last reading but is higher than it (%@). Which is right?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Esto tiene una fecha anterior a tu última lectura pero es mayor que ella (%@). ¿Cuál es correcta?" } }
+      }
+    },
+    "form.odometerStaysAt" : {
+      "comment" : "Confirms the odometer will not move. %@ is the current reading.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your odometer stays at %@." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tu odómetro se queda en %@." } }
+      }
+    },
+    "form.remindMeAt" : {
+      "comment" : "Future-branch mileage target. Deliberately distinct from form.odometerAtService.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Remind me at" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Avísame a las" } }
+      }
+    },
+    "form.remindMileageRequired" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Enter the mileage to be reminded at, or this reminder will not fire." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ingresa el millaje del aviso, o este recordatorio no se activará." } }
+      }
+    },
+    "form.remindsOnceThenStops" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This will remind you once, then stop." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Te avisará una vez y luego parará." } }
+      }
+    },
+    "form.resolveOdometerConflict" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Resolve the odometer conflict above." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Resuelve el conflicto del odómetro de arriba." } }
+      }
+    },
+    "form.theReminder" : {
+      "comment" : "Section title over the future branch.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The reminder" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "El recordatorio" } }
+      }
+    },
+    "form.theVisit" : {
+      "comment" : "Section title over the past branch.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The visit" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "La visita" } }
+      }
+    },
+    "form.timingRequired" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose when it happened, or when it is due." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Elige cuándo ocurrió, o cuándo vence." } }
+      }
+    },
+    "form.when" : {
+      "comment" : "Section title over the timing chips — the control that derives intent.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "When" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cuándo" } }
+      }
+    },
+    "form.whicheverFirstFromCompletion" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Whichever comes first, counted from the day you mark it done." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Lo que ocurra primero, contado desde el día que lo marques hecho." } }
+      }
+    },
+    "tabBar.addService" : {
+      "comment" : "VoiceOver label for the tab bar's [+] button.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add service" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añadir servicio" } }
+      }
+    },
+    "timing.atMileage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "At mileage…" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "A cierto millaje…" } }
+      }
+    },
+    "timing.earlier" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Earlier…" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Antes…" } }
+      }
+    },
+    "timing.inSixMonths" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "In 6 months" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "En 6 meses" } }
+      }
+    },
+    "timing.inThreeMonths" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "In 3 months" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "En 3 meses" } }
+      }
+    },
+    "timing.onDate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pick a date…" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Elegir fecha…" } }
+      }
+    },
+    "timing.today" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Today" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Hoy" } }
+      }
+    },
+    "timing.yesterday" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Yesterday" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ayer" } }
+      }
+    },
+    "toast.reminderSetAt" : {
+      "comment" : "Confirms a mileage-triggered reminder. %@ is the target mileage.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reminder set for %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Recordatorio para %@" } }
+      }
+    },
+    "toast.reminderSetFor" : {
+      "comment" : "Confirms a date-triggered reminder. %@ is the due date.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reminder set for %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Recordatorio para %@" } }
       }
     },
     "form.amount" : {
@@ -6685,74 +6955,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cambio de aceite, rotación de gomas…"
-          }
-        }
-      }
-    },
-    "serviceMode.record" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Record"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Registrar"
-          }
-        }
-      }
-    },
-    "serviceMode.recordCaption" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Log what you already did"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Registra lo que ya hiciste"
-          }
-        }
-      }
-    },
-    "serviceMode.remind" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remind"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recordar"
-          }
-        }
-      }
-    },
-    "serviceMode.remindCaption" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Get reminded before it's due"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recibe un aviso antes de que venza"
           }
         }
       }

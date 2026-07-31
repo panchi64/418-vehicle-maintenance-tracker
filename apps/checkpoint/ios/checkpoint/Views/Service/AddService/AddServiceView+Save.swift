@@ -3,28 +3,33 @@ import SwiftData
 
 extension AddServiceView {
 
-    /// Persist the form. When `keepOpen` is true, the screen stays open and
-    /// the form resets so the user can immediately log another entry.
+    /// Persist the form. One entry point branching on the DERIVED intent —
+    /// there were two (`saveLoggedService` / `saveScheduledService`) selected by
+    /// a mode the user had to choose. When `keepOpen` is true, the screen stays
+    /// open and the form resets so another entry can be logged immediately.
     func saveService(keepOpen: Bool = false) {
+        guard let intent = model.intent else { return }
+
         let isPreset = model.selectedPreset != nil
         let category = model.selectedPreset?.category
         let hasInterval = model.isRecurringSchedule
 
         HapticService.shared.success()
 
-        var undo: RecordedServiceUndo?
-
-        if model.mode == .record {
+        switch intent {
+        case .log:
             AnalyticsService.shared.capture(.serviceLogged(
                 isPreset: isPreset,
                 category: category,
                 hasInterval: hasInterval
             ))
-            undo = saveLoggedService()
+            let undo = saveLoggedService()
             if model.isRecurring {
                 ServiceNotificationScheduler.rescheduleNotifications(for: vehicle)
             }
-        } else {
+            finish(keepOpen: keepOpen) { showLoggedToast(undo: undo) }
+
+        case .schedule:
             AnalyticsService.shared.capture(.serviceScheduled(
                 isPreset: isPreset,
                 category: category,
@@ -32,49 +37,22 @@ extension AddServiceView {
             ))
             saveScheduledService()
             ServiceNotificationScheduler.rescheduleNotifications(for: vehicle)
+            finish(keepOpen: keepOpen) {
+                ToastService.shared.show(
+                    scheduledToastMessage,
+                    icon: "clock",
+                    style: .success
+                )
+            }
         }
-        updateAppIcon()
-        updateWidgetData()
+    }
+
+    private func finish(keepOpen: Bool, showToast: () -> Void) {
+        AppIconService.shared.updateIcon(for: vehicle, services: services)
+        WidgetDataService.shared.updateWidget(for: vehicle)
         ServiceFormDraftStore.clear(for: vehicle.id)
 
-        if model.mode == .record {
-            let context = modelContext
-            let toastAction: ToastService.ToastAction?
-            if !model.isRecurring {
-                // No future Service was spawned — offer the user a one-tap
-                // way to schedule one from the completion's anchors.
-                let prefill = PostRecordPrefill(
-                    serviceName: model.serviceName,
-                    performedDate: model.performedDate,
-                    performedMileage: model.mileageAtService ?? vehicle.currentMileage,
-                    intervalMonths: model.intervalMonths,
-                    intervalMiles: model.intervalMiles
-                )
-                let state = appState
-                toastAction = ToastService.ToastAction(label: L10n.toastScheduleNext.uppercased()) {
-                    state.postRecordPrefill = prefill
-                    state.addServiceMode = .remind
-                    state.showAddService = true
-                    HapticService.shared.selectionChanged()
-                }
-            } else {
-                toastAction = undo.map { snapshot in
-                    ToastService.ToastAction(label: L10n.commonUndo.uppercased()) {
-                        snapshot.perform(in: context)
-                        HapticService.shared.selectionChanged()
-                        AnalyticsService.shared.capture(.serviceLogUndone)
-                    }
-                }
-            }
-            ToastService.shared.show(
-                L10n.toastServiceRecorded,
-                icon: "checkmark",
-                style: .success,
-                action: toastAction
-            )
-        } else {
-            ToastService.shared.show(L10n.toastReminderSet, icon: "clock", style: .success)
-        }
+        showToast()
         appState.recordCompletedAction()
 
         if keepOpen {
@@ -84,13 +62,60 @@ extension AddServiceView {
         }
     }
 
-    private func updateAppIcon() {
-        AppIconService.shared.updateIcon(for: vehicle, services: services)
+    // MARK: - Toasts
+
+    /// A recurring completion states the occurrence it just scheduled, rather
+    /// than a bare "saved" — the user asked for something to come back, and the
+    /// app should say when.
+    private var scheduledToastMessage: String {
+        if let due = model.nextDueDate {
+            return L10n.toastReminderSetFor(Formatters.mediumDate.string(from: due))
+        }
+        if let mileage = model.nextDueMileage {
+            return L10n.toastReminderSetAt(Formatters.mileage(mileage))
+        }
+        return L10n.toastReminderSet
     }
 
-    private func updateWidgetData() {
-        WidgetDataService.shared.updateWidget(for: vehicle)
+    private func showLoggedToast(undo: RecordedServiceUndo?) {
+        let context = modelContext
+        let toastAction: ToastService.ToastAction?
+
+        if !model.isRecurring {
+            // No future Service was spawned — offer a one-tap way to schedule
+            // one from the completion's anchors.
+            let prefill = PostRecordPrefill(
+                serviceName: model.serviceName,
+                performedDate: model.performedDate,
+                performedMileage: model.mileageAtService ?? vehicle.currentMileage,
+                intervalMonths: model.intervalMonths,
+                intervalMiles: model.intervalMiles
+            )
+            let state = appState
+            toastAction = ToastService.ToastAction(label: L10n.toastScheduleNext.uppercased()) {
+                state.postRecordPrefill = prefill
+                state.showAddService = true
+                HapticService.shared.selectionChanged()
+            }
+        } else {
+            toastAction = undo.map { snapshot in
+                ToastService.ToastAction(label: L10n.commonUndo.uppercased()) {
+                    snapshot.perform(in: context)
+                    HapticService.shared.selectionChanged()
+                    AnalyticsService.shared.capture(.serviceLogUndone)
+                }
+            }
+        }
+
+        ToastService.shared.show(
+            L10n.toastServiceRecorded,
+            icon: "checkmark",
+            style: .success,
+            action: toastAction
+        )
     }
+
+    // MARK: - Persistence
 
     private func saveLoggedService() -> RecordedServiceUndo {
         let mileage = model.mileageAtService ?? vehicle.currentMileage
@@ -120,7 +145,7 @@ extension AddServiceView {
             mileageAtService: mileage,
             cost: costDecimal,
             costCategory: costDecimal != nil ? model.costCategory : nil,
-            notes: model.recordNotes.isEmpty ? nil : model.recordNotes
+            notes: model.notes.isEmpty ? nil : model.notes
         )
         modelContext.insert(log)
 
@@ -145,16 +170,19 @@ extension AddServiceView {
         // F11: one commit path. Gated on the reading being the *newest* rather
         // than merely the highest, so backfilling an old service can't
         // overwrite a current odometer — and routed through `recordMileage` so
-        // `mileageUpdatedAt` and the snapshot move with it. Previously this was
-        // a bare `currentMileage = mileage`, which advanced the number while
-        // leaving the app believing the reading was weeks old.
-        MileageCommit.commitIfNewest(
-            reading: mileage,
-            observedAt: model.performedDate,
-            source: .serviceCompletion,
-            for: vehicle,
-            in: modelContext
-        )
+        // `mileageUpdatedAt` and the snapshot move with it.
+        //
+        // `keepCurrent` is the user's explicit answer to the one contradiction
+        // the app cannot settle, so it wins over the automatic rule.
+        if model.mileageResolution != .keepCurrent {
+            MileageCommit.commitIfNewest(
+                reading: mileage,
+                observedAt: model.performedDate,
+                source: .serviceCompletion,
+                for: vehicle,
+                in: modelContext
+            )
+        }
 
         return RecordedServiceUndo(
             service: service,
@@ -174,7 +202,7 @@ extension AddServiceView {
             dueMileage: model.nextDueMileage,
             intervalMonths: model.isRecurring ? model.intervalMonths : nil,
             intervalMiles: model.isRecurring ? model.intervalMiles : nil,
-            notes: model.remindNotes.isEmpty ? nil : model.remindNotes,
+            notes: model.notes.isEmpty ? nil : model.notes,
             isRecurring: model.isRecurringSchedule
         )
         service.vehicle = vehicle

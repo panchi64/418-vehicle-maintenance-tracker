@@ -10,30 +10,110 @@ import XCTest
 
 final class AddServiceViewTests: XCTestCase {
 
-    // MARK: - Mode Switching Tests
+    // MARK: - Derived intent
+    //
+    // `ServiceMode` is gone. The form asks WHEN and derives whether it is
+    // logging or scheduling; these guard that derivation, because every save
+    // branch and half the visible copy now hangs off it.
 
-    func testServiceMode_HasCorrectCases() {
-        // Given: ServiceMode enum
-        let allCases = ServiceMode.allCases
-
-        // Then: Should have exactly two cases
-        XCTAssertEqual(allCases.count, 2)
-        XCTAssertTrue(allCases.contains(.record))
-        XCTAssertTrue(allCases.contains(.remind))
+    func testTiming_PastCasesDeriveLogIntent() {
+        for timing in ServiceTiming.pastCases {
+            XCTAssertEqual(timing.intent, .log, "\(timing) should log")
+        }
     }
 
-    func testServiceMode_HasCorrectRawValues() {
-        // Then: Raw values should match expected labels
-        XCTAssertEqual(ServiceMode.record.rawValue, "Record")
-        XCTAssertEqual(ServiceMode.remind.rawValue, "Remind")
+    func testTiming_FutureCasesDeriveScheduleIntent() {
+        for timing in ServiceTiming.futureCases {
+            XCTAssertEqual(timing.intent, .schedule, "\(timing) should schedule")
+        }
     }
 
-    func testServiceMode_DisplayNameAndCaptionAreLocalized() {
-        // Then: displayName/caption resolve through L10n, not the raw value
-        XCTAssertEqual(ServiceMode.record.displayName, L10n.serviceModeRecord)
-        XCTAssertEqual(ServiceMode.remind.displayName, L10n.serviceModeRemind)
-        XCTAssertEqual(ServiceMode.record.caption, L10n.serviceModeRecordCaption)
-        XCTAssertEqual(ServiceMode.remind.caption, L10n.serviceModeRemindCaption)
+    func testTiming_EveryCaseIsInExactlyOneGroup() {
+        // A case missing from both arrays would be unreachable in the UI.
+        let grouped = Set(ServiceTiming.pastCases + ServiceTiming.futureCases)
+        XCTAssertEqual(grouped, Set(ServiceTiming.allCases))
+        XCTAssertEqual(
+            ServiceTiming.pastCases.count + ServiceTiming.futureCases.count,
+            ServiceTiming.allCases.count,
+            "A timing appears in both groups"
+        )
+    }
+
+    func testTiming_OnlyEarlierIsBackfill() {
+        // Backfill suppresses both odometer adoption and preset recurrence, so
+        // widening this predicate silently changes two behaviours.
+        XCTAssertTrue(ServiceTiming.earlier.isBackfill)
+        for timing in ServiceTiming.allCases where timing != .earlier {
+            XCTAssertFalse(timing.isBackfill, "\(timing) should not be backfill")
+        }
+    }
+
+    func testTiming_ResolvesPerformedDates() {
+        let now = Date(timeIntervalSince1970: 1_700_000_000)
+        let explicit = Date(timeIntervalSince1970: 1_600_000_000)
+
+        XCTAssertEqual(ServiceTiming.today.performedDate(explicit: explicit, now: now), now)
+        XCTAssertEqual(
+            ServiceTiming.yesterday.performedDate(explicit: explicit, now: now),
+            Calendar.current.date(byAdding: .day, value: -1, to: now)
+        )
+        XCTAssertEqual(ServiceTiming.earlier.performedDate(explicit: explicit, now: now), explicit)
+    }
+
+    func testTiming_MileageTriggeredHasNoDueDate() {
+        // A mileage-triggered reminder must not also claim a date, or the
+        // fire-time readout would print one the scheduler never uses.
+        XCTAssertNil(ServiceTiming.atMileage.dueDate(explicit: .now))
+        XCTAssertNotNil(ServiceTiming.inThreeMonths.dueDate(explicit: .now))
+        XCTAssertNotNil(ServiceTiming.inSixMonths.dueDate(explicit: .now))
+    }
+
+    func testTiming_DisplayNamesAreLocalized() {
+        XCTAssertEqual(ServiceTiming.today.displayName, L10n.timingToday)
+        XCTAssertEqual(ServiceTiming.atMileage.displayName, L10n.timingAtMileage)
+    }
+
+    // MARK: - Draft migration
+    //
+    // The draft schema changed with the fork's removal. A pre-refactor payload
+    // must be discarded, never half-applied.
+
+    func testDraft_PreRefactorPayloadIsRejected() {
+        let legacy = """
+        {"mode":"Record","serviceName":"Oil change","performedDate":0,"costText":"",
+         "mileageText":"","recordNotes":"","remindNotes":"","hasCustomDate":false,
+         "isRecurring":false,"savedAt":0}
+        """.data(using: .utf8)!
+
+        XCTAssertNil(
+            try? JSONDecoder().decode(ServiceFormDraft.self, from: legacy),
+            "A v1 draft must fail to decode rather than losing fields silently"
+        )
+    }
+
+    func testDraft_RoundTripsThroughCurrentVersion() throws {
+        let draft = ServiceFormDraft(
+            version: ServiceFormDraft.currentVersion,
+            timing: .atMileage,
+            customDate: Date(timeIntervalSince1970: 1_700_000_000),
+            serviceName: "Oil change",
+            presetName: nil,
+            costText: "42.50",
+            costCategoryRaw: CostCategory.maintenance.rawValue,
+            mileageText: "33417",
+            notes: "Full synthetic",
+            dueMileage: 38_000,
+            intervalMonths: 6,
+            intervalMiles: 5_000,
+            isRecurring: true,
+            savedAt: Date(timeIntervalSince1970: 1_700_000_000)
+        )
+
+        let decoded = try JSONDecoder().decode(
+            ServiceFormDraft.self,
+            from: JSONEncoder().encode(draft)
+        )
+        XCTAssertEqual(decoded, draft)
     }
 
     // MARK: - Form Validation Tests (Log Mode)
@@ -474,56 +554,59 @@ final class AddServiceViewTests: XCTestCase {
         XCTAssertFalse(hasInterval)
     }
 
-    // MARK: - Effective Due Date Tests
+    // MARK: - Due date comes from the timing, not from intervals
+    //
+    // The form used to carry `hasCustomDate` + `dueDate` + `performedDate` as
+    // three independent stored values that could disagree. They collapsed into
+    // one `customDate` resolved by the chosen timing.
 
-    /// Helper mirroring AddServiceView.effectiveDueDate computed property
-    private func effectiveDueDate(hasCustomDate: Bool, dueDate: Date, intervalMonths: Int?) -> Date? {
-        if hasCustomDate {
-            return dueDate
-        } else if let months = intervalMonths, months > 0 {
-            return Calendar.current.date(byAdding: .month, value: months, to: Date())
-        } else {
-            return nil
+    @MainActor
+    func testNextDueDate_NilWhileLogging() {
+        let model = makeModel()
+        model.timing = .today
+        XCTAssertNil(model.nextDueDate, "A logged visit has no due date")
+    }
+
+    @MainActor
+    func testNextDueDate_DerivesFromRelativeTiming() {
+        let model = makeModel()
+        model.timing = .inSixMonths
+        guard let due = model.nextDueDate else {
+            return XCTFail("A relative timing must resolve to a due date")
         }
+        // Compared against an expected instant rather than by counting whole
+        // months: the model samples `.now` a moment after the test does, so a
+        // six-month span measures as five months and change.
+        let expected = Calendar.current.date(byAdding: .month, value: 6, to: .now)!
+        XCTAssertEqual(due.timeIntervalSince(expected), 0, accuracy: 5)
     }
 
-    func testEffectiveDueDate_DerivesFromInterval() {
-        // Given: No custom date, interval is 6 months
-        let now = Date()
-
-        // When: Computing effective due date
-        let result = effectiveDueDate(hasCustomDate: false, dueDate: now, intervalMonths: 6)
-
-        // Then: Should be 6 months from now
-        XCTAssertNotNil(result)
-        let monthsDiff = Calendar.current.dateComponents([.month], from: now, to: result!).month
-        XCTAssertEqual(monthsDiff, 6)
+    @MainActor
+    func testNextDueDate_UsesTheExplicitDateOnPickADate() {
+        let model = makeModel()
+        let chosen = Date().addingTimeInterval(86400 * 60)
+        model.timing = .onDate
+        model.customDate = chosen
+        XCTAssertEqual(model.nextDueDate, chosen)
     }
 
-    func testEffectiveDueDate_NilWhenNoIntervalNoCustomDate() {
-        // Given: No custom date, no interval (mileage-only)
-        let result = effectiveDueDate(hasCustomDate: false, dueDate: Date(), intervalMonths: nil)
-
-        // Then: Should be nil
-        XCTAssertNil(result, "Mileage-only service should have no due date")
+    @MainActor
+    func testNextDueDate_NilWhenMileageTriggered() {
+        // A mileage-triggered reminder must not also carry a date, or the
+        // scheduler would fire on whichever came first without being asked to.
+        let model = makeModel()
+        model.timing = .atMileage
+        model.nextDueMileage = 40_000
+        XCTAssertNil(model.nextDueDate)
     }
 
-    func testEffectiveDueDate_UsesCustomDateOverInterval() {
-        // Given: Custom date set (e.g., seasonal prefill), interval also set
-        let customDate = Date().addingTimeInterval(86400 * 60)
-        let result = effectiveDueDate(hasCustomDate: true, dueDate: customDate, intervalMonths: 12)
-
-        // Then: Custom date wins over interval-derived date
-        XCTAssertEqual(result, customDate)
-    }
-
-    func testEffectiveDueDate_CustomDateWithoutInterval() {
-        // Given: Custom one-off date, no interval
-        let customDate = Date().addingTimeInterval(86400 * 45)
-        let result = effectiveDueDate(hasCustomDate: true, dueDate: customDate, intervalMonths: nil)
-
-        // Then: Should use the custom date
-        XCTAssertEqual(result, customDate)
+    @MainActor
+    func testPerformedDate_UsesTheExplicitDateOnBackfill() {
+        let model = makeModel()
+        let backdated = Date().addingTimeInterval(-86400 * 900)
+        model.timing = .earlier
+        model.customDate = backdated
+        XCTAssertEqual(model.performedDate, backdated)
     }
 
     // MARK: - Scheduled Service Save Logic Tests
@@ -570,21 +653,26 @@ final class AddServiceViewTests: XCTestCase {
         XCTAssertEqual(service.dueMileage, 55000)
     }
 
-    func testSeasonalPrefill_SetsCustomDateAndInterval() {
-        // Given: Seasonal prefill with meaningful date and yearly interval
+    @MainActor
+    func testSeasonalPrefill_LandsOnPickADateWithScheduleIntent() {
+        // A seasonal prefill carries a concrete due date, so it must resolve to
+        // a scheduling timing without anyone setting a mode.
+        let model = makeModel()
         let seasonalDate = Date().addingTimeInterval(86400 * 120)
 
-        // When: Applying prefill (simulating onAppear logic)
-        var hasCustomDate = false
-        var dueDate = Date()
-        var intervalMonths: Int? = nil
-        hasCustomDate = true
-        dueDate = seasonalDate
-        intervalMonths = 12
+        model.applySeasonalPrefill(
+            SeasonalPrefill(
+                reminderID: "antifreeze",
+                serviceName: "Antifreeze",
+                dueDate: seasonalDate,
+                intervalMonths: 12
+            )
+        )
 
-        // Then: Custom date preserves the seasonal date
-        let result = effectiveDueDate(hasCustomDate: hasCustomDate, dueDate: dueDate, intervalMonths: intervalMonths)
-        XCTAssertEqual(result, seasonalDate, "Seasonal prefill date should take priority over interval derivation")
+        XCTAssertEqual(model.timing, .onDate)
+        XCTAssertEqual(model.intent, .schedule)
+        XCTAssertEqual(model.nextDueDate, seasonalDate)
+        XCTAssertTrue(model.isRecurring)
     }
 
     // MARK: - Form Model Draft Lifecycle (R9)
@@ -592,7 +680,75 @@ final class AddServiceViewTests: XCTestCase {
     @MainActor
     private func makeModel(currentMileage: Int = 32_500) -> AddServiceFormModel {
         let vehicle = Vehicle(make: "Toyota", model: "Corolla", year: 2020, currentMileage: currentMileage)
-        return AddServiceFormModel(vehicle: vehicle, initialMode: .record)
+        return AddServiceFormModel(vehicle: vehicle)
+    }
+
+    // MARK: - Blocking reasons
+    //
+    // The save button's enablement and its disabled-tap message come from one
+    // property, so they cannot disagree about why a save is refused.
+
+    @MainActor
+    func testBlocking_NameFirst() {
+        let model = makeModel()
+        XCTAssertEqual(model.blockingReason, L10n.formServiceTypeRequired)
+    }
+
+    @MainActor
+    func testBlocking_ThenTiming() {
+        let model = makeModel()
+        model.customServiceName = "Oil change"
+        XCTAssertEqual(model.blockingReason, L10n.formTimingRequired)
+    }
+
+    @MainActor
+    func testBlocking_MileageTriggeredReminderWithoutATarget() {
+        // The one case that genuinely blocks: a reminder with no trigger would
+        // never fire, so saving it would be saving nothing.
+        let model = makeModel()
+        model.customServiceName = "Tire rotation"
+        model.timing = .atMileage
+        XCTAssertEqual(model.blockingReason, L10n.formRemindMileageRequired)
+
+        model.nextDueMileage = 40_000
+        XCTAssertNil(model.blockingReason)
+    }
+
+    @MainActor
+    func testBlocking_UnresolvedOdometerContradiction() {
+        let model = makeModel(currentMileage: 33_000)
+        model.customServiceName = "Oil change"
+        model.timing = .earlier
+        model.customDate = Date().addingTimeInterval(-86400 * 900)
+        model.mileageAtService = 40_000
+
+        XCTAssertTrue(model.hasUnresolvedMileageContradiction)
+        XCTAssertEqual(model.blockingReason, L10n.formResolveOdometerConflict)
+
+        model.mileageResolution = .keepCurrent
+        XCTAssertNil(model.blockingReason)
+    }
+
+    @MainActor
+    func testBackfill_NeverAdoptsTheOdometer() {
+        // Logging a 2023 service at 40,000 mi must not overwrite a current
+        // odometer of 33,000 (F11).
+        let model = makeModel(currentMileage: 33_000)
+        model.vehicle.mileageUpdatedAt = .now
+        model.timing = .earlier
+        model.customDate = Date().addingTimeInterval(-86400 * 900)
+        model.mileageAtService = 40_000
+
+        XCTAssertFalse(model.wouldAdoptMileage)
+    }
+
+    @MainActor
+    func testCurrentEntry_AdoptsAHigherOdometer() {
+        let model = makeModel(currentMileage: 32_500)
+        model.timing = .today
+        model.mileageAtService = 33_100
+
+        XCTAssertTrue(model.wouldAdoptMileage)
     }
 
     @MainActor
@@ -612,18 +768,20 @@ final class AddServiceViewTests: XCTestCase {
     }
 
     @MainActor
-    func testFormModel_ResetLogModeFields_ClearsRemindStateAndRebaselines() {
+    func testFormModel_ResetLogModeFields_ClearsScheduleStateAndRebaselines() {
         let model = makeModel()
+        model.timing = .today
         model.customServiceName = "Oil Change"
-        model.hasCustomDate = true
         model.nextDueMileage = 40_000
         model.intervalMonths = 6
         model.isRecurring = true
 
         model.resetLogModeFields()
 
-        // Remind-side schedule state must not leak into the next entry.
-        XCTAssertFalse(model.hasCustomDate)
+        // Schedule-side state must not leak into the next entry. The timing
+        // survives on purpose: "Save & add another" is one visit's worth of
+        // work, so re-answering "when" for each line item would be busywork.
+        XCTAssertEqual(model.timing, .today)
         XCTAssertNil(model.nextDueMileage)
         XCTAssertNil(model.intervalMonths)
         XCTAssertFalse(model.isRecurring)

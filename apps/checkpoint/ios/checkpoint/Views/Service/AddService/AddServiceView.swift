@@ -1,3 +1,27 @@
+//
+//  AddServiceView.swift
+//  checkpoint
+//
+//  The unified service form. There is no Record/Remind mode switch.
+//
+//  Three ideas carry the design:
+//
+//  1. ONE FORM, INTENT DERIVED. The user answers "when". A past answer means
+//     they are logging; a future answer means they are scheduling. They never
+//     see or name those words — the sheet title and the save button state what
+//     will happen. The mode switch was asking the user to classify their own
+//     intent before the app would let them describe it.
+//
+//  2. DEFAULT-DISCLOSE WHAT MAKES IT WORK; HIDE WHAT MAKES IT COMPLETE. The
+//     repeat interval is what makes a reminder fire again, so it is on the
+//     default path. Notes and receipts make an entry complete, so they live in
+//     depth. This was inverted: the interval sat in a collapsed drawer while a
+//     raw due-mileage field sat at the top.
+//
+//  3. THE TAP BUDGET IS A REAL CONSTRAINT. Log an oil change with a cost in ≤6
+//     taps; schedule a reminder that provably fires in ≤5.
+//
+
 import SwiftUI
 import SwiftData
 
@@ -11,24 +35,21 @@ struct AddServiceView: View {
     let vehicle: Vehicle
     var seasonalPrefill: SeasonalPrefill?
     var postRecordPrefill: PostRecordPrefill?
-    var initialMode: ServiceMode = .record
 
     @State var model: AddServiceFormModel
     @State private var draftResumeBanner: ServiceFormDraft?
     @State private var saveAndAddAnotherFlash: String?
-    @State private var showServiceTypeError = false
+    @State private var showBlockingReason = false
 
     init(
         vehicle: Vehicle,
         seasonalPrefill: SeasonalPrefill? = nil,
-        postRecordPrefill: PostRecordPrefill? = nil,
-        initialMode: ServiceMode = .record
+        postRecordPrefill: PostRecordPrefill? = nil
     ) {
         self.vehicle = vehicle
         self.seasonalPrefill = seasonalPrefill
         self.postRecordPrefill = postRecordPrefill
-        self.initialMode = initialMode
-        _model = State(initialValue: AddServiceFormModel(vehicle: vehicle, initialMode: initialMode))
+        _model = State(initialValue: AddServiceFormModel(vehicle: vehicle))
     }
 
     var lastLogForVehicle: ServiceLog? {
@@ -62,6 +83,26 @@ struct AddServiceView: View {
         seasonalPrefill != nil || postRecordPrefill != nil
     }
 
+    /// The title states what will happen, which is how the derived intent
+    /// becomes visible without ever asking the user to pick a mode.
+    private var sheetTitle: String {
+        switch model.intent {
+        case .log: return L10n.addServiceTitleLog
+        case .schedule: return L10n.addServiceTitleSchedule
+        case nil: return L10n.addServiceTitleNeutral
+        }
+    }
+
+    /// Neutral until a timing is picked. Saying "Log it" before the user has
+    /// said when it happened claims an intent they have not expressed, and the
+    /// button would silently change meaning under their finger.
+    private var saveTitle: String {
+        switch model.intent {
+        case .log: return L10n.addServiceSaveLog
+        case .schedule: return L10n.addServiceSaveSchedule
+        case nil: return L10n.commonSave
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -70,7 +111,11 @@ struct AddServiceView: View {
                     AtmosphericBackground()
 
                     ScrollView {
-                        VStack(spacing: Spacing.lg) {
+                        // 32 between sections, against 16 between fields and 8
+                        // from a header to its own content. Three unambiguous
+                        // steps — at 24-vs-16 the sections did not read as
+                        // separate, because a 1.5:1 ratio is not a signal.
+                        VStack(alignment: .leading, spacing: Spacing.xl) {
                             if let draft = draftResumeBanner {
                                 DraftResumeBanner(
                                     savedAt: draft.savedAt,
@@ -83,80 +128,42 @@ struct AddServiceView: View {
                                         draftResumeBanner = nil
                                     }
                                 )
+                                .id("top")
                             }
 
-                            VStack(spacing: Spacing.sm) {
-                                InstrumentSegmentedControl(
-                                    options: ServiceMode.allCases,
-                                    selection: $model.mode
-                                ) { option in
-                                    option.displayName
-                                }
+                            serviceSection
+                            whenSection
 
-                                HStack(spacing: 0) {
-                                    ForEach(ServiceMode.allCases, id: \.self) { option in
-                                        Button {
-                                            model.mode = option
-                                        } label: {
-                                            Text(option.caption)
-                                                .font(.brutalistSecondary)
-                                                .foregroundStyle(model.mode == option ? Theme.textPrimary : Theme.textTertiary)
-                                                .multilineTextAlignment(.center)
-                                                .frame(maxWidth: .infinity)
-                                        }
-                                        .buttonStyle(.plain)
-                                    }
-                                }
+                            if model.isLogging {
+                                ServiceVisitFields(model: model, anchors: anchors)
                             }
-                            .id("top")
 
-                            VStack(alignment: .leading, spacing: Spacing.sm) {
-                                InstrumentSectionHeader(title: L10n.formServiceType) {
-                                    Text("*")
-                                        .font(.brutalistLabel)
-                                        .foregroundStyle(Theme.statusOverdue)
-                                }
-
-                                if model.selectedPreset == nil, !quickChips.isEmpty {
-                                    QuickServiceChipsRow(chips: quickChips) { preset in
-                                        model.selectedPreset = preset
-                                        HapticService.shared.selectionChanged()
-                                    }
-                                }
-
-                                ServiceTypePicker(
-                                    selectedPreset: $model.selectedPreset,
-                                    customServiceName: $model.customServiceName
-                                )
-
-                                if showServiceTypeError, model.serviceName.isEmpty {
-                                    ErrorMessageRow(message: L10n.formServiceTypeRequired) {
-                                        showServiceTypeError = false
-                                    }
-                                }
+                            if model.isScheduling {
+                                ServiceReminderFields(model: model, lastLog: lastLogForServiceType)
                             }
-                            .id("serviceType")
 
                             if !model.serviceName.isEmpty, let last = lastLogForServiceType {
                                 LastServiceReferenceCard(
                                     serviceName: model.serviceName,
                                     log: last,
-                                    onUseValues: model.mode == .record ? {
+                                    onUseValues: model.isLogging ? {
                                         model.useLastEntry(from: last)
                                         HapticService.shared.selectionChanged()
                                     } : nil
                                 )
-                                .transition(.opacity.combined(with: .move(edge: .top)))
+                                // Fade only, per AESTHETIC.md (Motion). This
+                                // was `.opacity.combined(with: .move(edge:))`.
+                                .transition(.opacity)
                             }
 
-                            if model.mode == .record {
-                                RecordServiceFields(model: model, anchors: anchors)
-                            } else {
-                                RemindServiceFields(model: model, lastLog: lastLogForServiceType)
+                            if model.intent != nil {
+                                ServiceDepthSection(model: model)
                             }
                         }
                         .animation(.easeInOut(duration: Theme.animationMedium), value: lastLogForServiceType?.id)
-                        .padding(Spacing.screenHorizontal)
+                        .animation(.easeInOut(duration: Theme.animationMedium), value: model.timing)
+                        .padding(.horizontal, Spacing.screenHorizontal)
+                        .padding(.top, Spacing.md)
                         .padding(.bottom, Spacing.xxl)
                     }
                 }
@@ -180,56 +187,50 @@ struct AddServiceView: View {
                                 .font(.brutalistBody)
                                 .foregroundStyle(Theme.textPrimary)
                                 .lineLimit(1)
-                            Group {
-                                if model.mode == .record {
-                                    Text(L10n.addServiceTitleRecord)
-                                } else {
-                                    Text(L10n.addServiceTitleRemind)
-                                }
-                            }
-                            .textCase(.uppercase)
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.textTertiary)
-                            .tracking(1)
+                            Text(sheetTitle)
+                                .textCase(.uppercase)
+                                .font(.brutalistLabel)
+                                .foregroundStyle(Theme.textTertiary)
+                                .tracking(1)
                         }
                         .accessibilityElement(children: .combine)
-                        .accessibilityLabel("\(vehicle.displayName), \(model.mode == .record ? L10n.addServiceTitleRecord : L10n.addServiceTitleRemind)")
+                        .accessibilityLabel("\(vehicle.displayName), \(sheetTitle)")
                     }
                 }
                 .safeAreaInset(edge: .bottom) {
                     FormActionBar(
-                        primaryTitle: L10n.commonSave,
+                        primaryTitle: saveTitle,
                         isPrimaryEnabled: model.isFormValid,
                         onPrimary: { saveService() },
                         onDisabledPrimaryTap: {
-                            showServiceTypeError = true
+                            showBlockingReason = true
                             withAnimation { proxy.scrollTo("serviceType", anchor: .top) }
                         },
-                        secondaryTitle: model.mode == .record ? L10n.formSaveAndAddAnother : nil,
-                        onSecondary: model.mode == .record ? {
+                        secondaryTitle: model.isLogging ? L10n.formSaveAndAddAnother : nil,
+                        onSecondary: model.isLogging ? {
                             saveService(keepOpen: true)
                             saveAndAddAnotherFlash = L10n.formSavedAddNext
-                            withAnimation { proxy.scrollTo("top", anchor: .top) }
+                            withAnimation { proxy.scrollTo("serviceType", anchor: .top) }
                         } : nil,
                         successFlash: $saveAndAddAnotherFlash
                     )
                 }
                 .onChange(of: model.selectedPreset) { _, newPreset in
-                    guard let preset = newPreset else { return }
-                    if let months = preset.defaultIntervalMonths { model.intervalMonths = months }
-                    if let miles = preset.defaultIntervalMiles { model.intervalMiles = miles }
-                    if Service.hasIntervalPolicy(
-                        intervalMonths: preset.defaultIntervalMonths,
-                        intervalMiles: preset.defaultIntervalMiles
-                    ) {
-                        model.isRecurring = true
+                    applyPresetDefaults(newPreset)
+                }
+                .onChange(of: model.timing) { _, _ in
+                    // A backfilled entry must not inherit a preset's recurrence
+                    // and quietly spawn reminders for a service done years ago.
+                    if model.timing?.isBackfill == true {
+                        model.isRecurring = false
                     }
+                    model.mileageResolution = nil
                 }
-                .onChange(of: model.serviceName) { _, newValue in
-                    if !newValue.isEmpty { showServiceTypeError = false }
+                .onChange(of: model.mileageAtService) { _, _ in
+                    model.mileageResolution = nil
                 }
-                .onChange(of: model.mode) { _, _ in
-                    withAnimation { proxy.scrollTo("top", anchor: .top) }
+                .onChange(of: model.blockingReason) { _, newValue in
+                    if newValue == nil { showBlockingReason = false }
                 }
                 .onChange(of: model.contentSnapshot) { _, _ in
                     draftResumeBanner = nil
@@ -255,6 +256,97 @@ struct AddServiceView: View {
                     }
                 }
             }
+        }
+    }
+
+    // MARK: - 1. What
+
+    /// The section header IS this field's label, so the picker carries none.
+    /// Labelling both "SERVICE" stacked two identical labels on one input.
+    private var serviceSection: some View {
+        FormSection(title: L10n.formServiceType, trailing: L10n.formRequiredTag) {
+            ServiceTypePicker(
+                selectedPreset: $model.selectedPreset,
+                customServiceName: $model.customServiceName
+            )
+
+            // Plain chips, not outlined. These are a shortcut for the field
+            // above, not a choice the form requires — eight outlined rectangles
+            // made them compete with the timing control, which IS required.
+            //
+            // The row carries its own label. Without one it read as a second
+            // input: an unlabelled strip of text directly beneath a labelled
+            // field, in a form where every other line IS a field.
+            if !quickChips.isEmpty {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    Text(L10n.formCommon.uppercased())
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.textTertiary)
+                        .tracking(1.5)
+
+                    QuickServiceChipsRow(chips: quickChips, selectedName: model.serviceName) { preset in
+                        model.selectedPreset = preset
+                        HapticService.shared.selectionChanged()
+                    }
+                }
+            }
+
+            if showBlockingReason, let reason = model.blockingReason {
+                FormAdvisory.blocking(reason)
+            }
+        }
+        .id("serviceType")
+    }
+
+    // MARK: - 2. When — the control that derives intent
+
+    private var whenSection: some View {
+        FormSection(title: L10n.formWhen, trailing: L10n.formRequiredTag) {
+            FormSubgroup(title: L10n.formAlreadyDone) {
+                WrappingChipRow(
+                    items: ServiceTiming.pastCases,
+                    label: \.displayName,
+                    isSelected: { model.timing == $0 },
+                    onTap: select
+                )
+            }
+
+            FormSubgroup(title: L10n.formComingUp) {
+                WrappingChipRow(
+                    items: ServiceTiming.futureCases,
+                    label: \.displayName,
+                    isSelected: { model.timing == $0 },
+                    onTap: select
+                )
+            }
+
+            if model.timing?.needsExplicitDate == true {
+                InstrumentDatePicker(
+                    label: model.isLogging ? L10n.formDatePerformed : L10n.formDueDate,
+                    date: $model.customDate
+                )
+            }
+        }
+    }
+
+    private func select(_ timing: ServiceTiming) {
+        model.timing = timing
+        HapticService.shared.selectionChanged()
+    }
+
+    /// A preset carries a default cadence. Adopting it is right for anything
+    /// current, and wrong for a backfill — combined, they generated dozens of
+    /// bogus future reminders from a history import.
+    private func applyPresetDefaults(_ preset: PresetData?) {
+        guard let preset else { return }
+        if let months = preset.defaultIntervalMonths { model.intervalMonths = months }
+        if let miles = preset.defaultIntervalMiles { model.intervalMiles = miles }
+        guard model.timing?.isBackfill != true else { return }
+        if Service.hasIntervalPolicy(
+            intervalMonths: preset.defaultIntervalMonths,
+            intervalMiles: preset.defaultIntervalMiles
+        ) {
+            model.isRecurring = true
         }
     }
 }

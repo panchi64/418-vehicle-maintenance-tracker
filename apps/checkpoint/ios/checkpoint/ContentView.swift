@@ -119,12 +119,7 @@ struct ContentView: View {
         .overlay(alignment: .bottom) {
             BrutalistTabBar(
                 selectedTab: $appState.selectedTab,
-                onLogTapped: currentVehicle != nil ? {
-                    appState.addServiceMode = .record
-                    appState.showAddService = true
-                } : nil,
-                onScheduleTapped: currentVehicle != nil ? {
-                    appState.addServiceMode = .remind
+                onAddTapped: currentVehicle != nil ? {
                     appState.showAddService = true
                 } : nil
             )

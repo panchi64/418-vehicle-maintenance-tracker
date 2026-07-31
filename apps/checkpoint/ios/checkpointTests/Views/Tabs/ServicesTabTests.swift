@@ -38,18 +38,18 @@ final class ServicesTabTests: XCTestCase {
         // Given
         let allModes = ServicesTabState.ViewMode.allCases
 
-        // Then
-        XCTAssertEqual(allModes.count, 3)
+        // Then: two modes. `documents` was removed — it was a content type
+        // masquerading as a view of services, whose only content was a link out
+        // to the real documents screen.
+        XCTAssertEqual(allModes.count, 2)
         XCTAssertTrue(allModes.contains(.list))
         XCTAssertTrue(allModes.contains(.timeline))
-        XCTAssertTrue(allModes.contains(.documents))
     }
 
     func testViewMode_RawValues() {
-        // Then
+        // Raw values are storage — they persist in analytics events.
         XCTAssertEqual(ServicesTabState.ViewMode.list.rawValue, "List")
         XCTAssertEqual(ServicesTabState.ViewMode.timeline.rawValue, "Timeline")
-        XCTAssertEqual(ServicesTabState.ViewMode.documents.rawValue, "Documents")
     }
 
     // MARK: - Status Filter Tests

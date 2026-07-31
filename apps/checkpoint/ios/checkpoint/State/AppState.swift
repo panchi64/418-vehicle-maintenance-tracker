@@ -52,9 +52,9 @@ final class AppState {
     /// remind form on the just-recorded service's data.
     var postRecordPrefill: PostRecordPrefill?
 
-    // MARK: - Add Service Mode
-
-    var addServiceMode: ServiceMode?
+    // `addServiceMode` was deleted with the Record/Remind fork. Prefills now
+    // carry a `ServiceTiming` instead of a mode, and the form derives its
+    // intent from that.
 
     // MARK: - Domain State
 

@@ -133,8 +133,9 @@ struct RecallAlertCard: View {
     /// AddServiceView can present cleanly without iOS's only-one-sheet-at-a-time race.
     private func presentPendingAddServiceIfNeeded() {
         guard let prefill = pendingAddServicePrefill else { return }
+        // The prefill carries a due date, so the form lands on `.onDate` and
+        // derives the scheduling intent from that — no mode to set.
         appState.seasonalPrefill = prefill
-        appState.addServiceMode = .remind
         appState.showAddService = true
         pendingAddServicePrefill = nil
     }

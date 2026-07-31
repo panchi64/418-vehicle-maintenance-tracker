@@ -1,6 +1,52 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "—" : {
+
+    },
+    "— —" : {
+
+    },
+    "— NO SERVICES DUE —" : {
+
+    },
+    "%@" : {
+
+    },
+    "%@ • %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ • %2$@"
+          }
+        }
+      }
+    },
+    "ALL CAUGHT UP" : {
+
+    },
+    "Always show kilometers (KM)" : {
+
+    },
+    "Always show miles (MI)" : {
+
+    },
+    "Checkpoint" : {
+
+    },
+    "Checkpoint Widget" : {
+
+    },
+    "Configure which vehicle to display, how mileage is shown, and distance units" : {
+
+    },
+    "Distance Unit" : {
+
+    },
+    "DONE" : {
+
+    },
     "Due %@" : {
       "localizations" : {
         "en" : {
@@ -16,6 +62,9 @@
           }
         }
       }
+    },
+    "Due Mileage" : {
+
     },
     "Early %@" : {
       "localizations" : {
@@ -65,6 +114,9 @@
         }
       }
     },
+    "Kilometers" : {
+
+    },
     "Late %@" : {
       "localizations" : {
         "en" : {
@@ -80,6 +132,18 @@
           }
         }
       }
+    },
+    "MAINTENANCE" : {
+
+    },
+    "Mark a vehicle service as completed from the widget" : {
+
+    },
+    "Mark Service Done" : {
+
+    },
+    "Match App" : {
+
     },
     "Mid %@" : {
       "localizations" : {
@@ -97,6 +161,18 @@
         }
       }
     },
+    "Mileage" : {
+
+    },
+    "Mileage Display" : {
+
+    },
+    "Miles" : {
+
+    },
+    "Miles Remaining" : {
+
+    },
     "Overdue" : {
       "localizations" : {
         "en" : {
@@ -113,6 +189,21 @@
         }
       }
     },
+    "See your upcoming vehicle maintenance at a glance." : {
+
+    },
+    "Service ID" : {
+
+    },
+    "Show miles until due (e.g., 500 MI)" : {
+
+    },
+    "Show when service is due (e.g., 35,000 MI)" : {
+
+    },
+    "TAP TO SET UP" : {
+
+    },
     "This week" : {
       "localizations" : {
         "en" : {
@@ -128,6 +219,18 @@
           }
         }
       }
+    },
+    "UPCOMING" : {
+
+    },
+    "Use the distance unit from the app" : {
+
+    },
+    "Vehicle" : {
+
+    },
+    "Vehicle ID" : {
+
     }
   },
   "version" : "1.0"

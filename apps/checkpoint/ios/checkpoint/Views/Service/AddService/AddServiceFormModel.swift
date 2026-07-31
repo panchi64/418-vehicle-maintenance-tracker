@@ -5,46 +5,68 @@ import SwiftUI
 final class AddServiceFormModel {
     let vehicle: Vehicle
 
-    var mode: ServiceMode
+    /// The one control that derives intent. Nil until the user answers "when",
+    /// which is why the save button reads "Save" rather than claiming an intent
+    /// the user has not expressed.
+    var timing: ServiceTiming?
+
+    /// Supplies the date for the two timings that need one — `.earlier` and
+    /// `.onDate`. A single field replaces the old `hasCustomDate` + `dueDate` +
+    /// `performedDate` trio, which could disagree with each other.
+    var customDate: Date = Date()
+
     var selectedPreset: PresetData?
     var customServiceName: String = ""
 
-    var performedDate: Date = Date()
     var mileageAtService: Int?
     var cost: String = ""
     var costError: String?
     var costCategory: CostCategory = .maintenance
-    /// Separate per-mode buffers — switching the segmented control must never
-    /// destroy what the user typed in the other mode.
-    var recordNotes: String = ""
-    var remindNotes: String = ""
-    /// Shared "this should repeat after completion" toggle. In record mode it
-    /// also schedules the next occurrence inline; in remind mode it gates
-    /// whether `isRecurring` is persisted on the Service.
+
+    /// One notes buffer. There were two — `recordNotes` and `remindNotes` —
+    /// because the mode switch could destroy what the user typed in the other
+    /// mode. With no mode there is nothing to switch between.
+    var notes: String = ""
+
+    /// Whether the item should chain forward after completion.
     var isRecurring: Bool = false
     var pendingAttachments: [AttachmentPicker.AttachmentData] = []
 
-    var hasCustomDate: Bool = false
-    var dueDate: Date = Date()
     var nextDueMileage: Int?
     var intervalMonths: Int?
     var intervalMiles: Int?
 
     var presets: [PresetData] = []
 
+    /// How the user resolved an odometer contradiction the app cannot settle
+    /// on its own. Nil until they answer; cleared whenever the inputs change.
+    enum MileageResolution: Equatable {
+        case keepCurrent
+        case correctUpward
+    }
+    var mileageResolution: MileageResolution?
+
     /// Pristine-form snapshot captured at creation (after the mileage
     /// prefill), used to tell whether the user has made any real change
     /// (R9's cancel-without-nagging rule).
     private var baselineSnapshot: ServiceFormDraft?
 
-    init(vehicle: Vehicle, initialMode: ServiceMode) {
+    init(vehicle: Vehicle, initialTiming: ServiceTiming? = nil) {
         self.vehicle = vehicle
-        self.mode = initialMode
+        self.timing = initialTiming
         // Prefill before capturing the baseline — a prefilled-but-untouched
         // form must not count as dirty, or Cancel would keep phantom drafts.
         self.mileageAtService = vehicle.currentMileage
         self.baselineSnapshot = contentSnapshot
     }
+
+    // MARK: - Derived intent
+
+    /// Nil until a timing is chosen. Nothing in the UI names these values.
+    var intent: ServiceIntent? { timing?.intent }
+
+    var isLogging: Bool { intent == .log }
+    var isScheduling: Bool { intent == .schedule }
 
     /// Content-only snapshot (fixed timestamp). Drives both `isDirty` and the
     /// view's autosave debounce so the two can never disagree about what
@@ -55,10 +77,15 @@ final class AddServiceFormModel {
         return snapshot
     }
 
+    var performedDate: Date {
+        timing?.performedDate(explicit: customDate) ?? customDate
+    }
+
     /// Drives `Service.dueDate` directly at save time — no derivation from
     /// intervals. Intervals are recurrence policy only.
     var nextDueDate: Date? {
-        hasCustomDate ? dueDate : nil
+        guard let timing, timing.intent == .schedule else { return nil }
+        return timing.dueDate(explicit: customDate)
     }
 
     var hasIntervalPolicy: Bool {
@@ -76,15 +103,62 @@ final class AddServiceFormModel {
         selectedPreset?.name ?? customServiceName
     }
 
-    var isFormValid: Bool {
-        !serviceName.isEmpty
+    // MARK: - Mileage reasoning (F11)
+
+    /// Whether saving would also advance the vehicle's odometer. Mirrors
+    /// `MileageCommit.wouldAdopt` rather than re-deriving it, so the advisory
+    /// shown before save cannot disagree with what the save does.
+    var wouldAdoptMileage: Bool {
+        guard isLogging, let reading = mileageAtService else { return false }
+        guard mileageResolution != .keepCurrent else { return false }
+        return MileageCommit.wouldAdopt(
+            reading: reading,
+            observedAt: performedDate,
+            for: vehicle
+        )
     }
+
+    /// The one case the app genuinely cannot resolve: a backfilled entry
+    /// carrying a reading above the current odometer. Either the odometer is
+    /// wrong or the date is, and only the user knows which.
+    var hasUnresolvedMileageContradiction: Bool {
+        guard isLogging, let timing, timing.isBackfill else { return false }
+        guard let reading = mileageAtService, reading > vehicle.currentMileage else { return false }
+        return mileageResolution == nil
+    }
+
+    // MARK: - Validity
+
+    /// Why this cannot be saved yet, phrased as the next thing to do. Nil means
+    /// it can be saved. The action bar surfaces this on a disabled tap (F2), so
+    /// the user is never left guessing which field is at fault.
+    var blockingReason: String? {
+        if serviceName.trimmingCharacters(in: .whitespaces).isEmpty {
+            return L10n.formServiceTypeRequired
+        }
+        if timing == nil {
+            return L10n.formTimingRequired
+        }
+        if hasUnresolvedMileageContradiction {
+            return L10n.formResolveOdometerConflict
+        }
+        // A mileage-triggered reminder with no mileage has no trigger and would
+        // never fire. This is the only case that genuinely blocks a save.
+        if timing?.isMileageTriggered == true, nextDueMileage == nil {
+            return L10n.formRemindMileageRequired
+        }
+        return nil
+    }
+
+    var isFormValid: Bool { blockingReason == nil }
 
     /// `true` once anything differs from the pristine form this model started
     /// as — used to decide whether a Cancel should keep or clear the draft.
     var isDirty: Bool {
         contentSnapshot != baselineSnapshot
     }
+
+    // MARK: - Prefills
 
     func useLastEntry(from log: ServiceLog) {
         let template = LoggedServiceTemplate(from: log)
@@ -94,23 +168,23 @@ final class AddServiceFormModel {
         if let category = template.costCategory {
             costCategory = category
         }
-        recordNotes = template.notes ?? ""
+        notes = template.notes ?? ""
         intervalMonths = template.intervalMonths
         intervalMiles = template.intervalMiles
         isRecurring = template.hasRecurringIntervals
     }
 
+    /// Seasonal prefills carry a concrete due date, so they land on `.onDate`
+    /// rather than on a mode.
     func applySeasonalPrefill(_ prefill: SeasonalPrefill) {
-        mode = .remind
+        timing = .onDate
         customServiceName = prefill.serviceName
-        hasCustomDate = true
-        dueDate = prefill.dueDate
+        customDate = prefill.dueDate
         intervalMonths = prefill.intervalMonths
         isRecurring = true
     }
 
     func applyPostRecordPrefill(_ prefill: PostRecordPrefill) {
-        mode = .remind
         customServiceName = prefill.serviceName
         intervalMonths = prefill.intervalMonths
         intervalMiles = prefill.intervalMiles
@@ -127,8 +201,10 @@ final class AddServiceFormModel {
             explicitDueMileage: nil
         )
         if let projectedDate = projected.dueDate {
-            hasCustomDate = true
-            dueDate = projectedDate
+            timing = .onDate
+            customDate = projectedDate
+        } else {
+            timing = .atMileage
         }
         if let projectedMileage = projected.dueMileage {
             nextDueMileage = projectedMileage
@@ -136,25 +212,21 @@ final class AddServiceFormModel {
     }
 
     /// Clears everything a "Save & add another" round should not carry into
-    /// the next entry, while preserving visit context (date + mileage), the
-    /// active mode, and the Details disclosure state (owned by the view).
+    /// the next entry, while preserving the chosen timing (the user is logging
+    /// one visit's worth of work) and the Details disclosure state.
     func resetLogModeFields() {
         selectedPreset = nil
         customServiceName = ""
         cost = ""
         costError = nil
         costCategory = .maintenance
-        recordNotes = ""
+        notes = ""
         pendingAttachments = []
         isRecurring = false
         intervalMonths = nil
         intervalMiles = nil
-        // Remind-side schedule state must not leak into the next entry —
-        // a due date/mileage set (then abandoned) in Remind mode would
-        // otherwise silently attach to the next saved service.
-        hasCustomDate = false
-        dueDate = Date()
         nextDueMileage = nil
+        mileageResolution = nil
         // The reset form is the new pristine state: without re-baselining,
         // the autosave would immediately persist a phantom draft of it.
         baselineSnapshot = contentSnapshot
@@ -164,17 +236,15 @@ final class AddServiceFormModel {
 
     func toDraft() -> ServiceFormDraft {
         ServiceFormDraft(
-            mode: mode.rawValue,
+            version: ServiceFormDraft.currentVersion,
+            timing: timing,
+            customDate: customDate,
             serviceName: customServiceName,
             presetName: selectedPreset?.name,
-            performedDate: performedDate,
             costText: cost,
             costCategoryRaw: costCategory.rawValue,
             mileageText: mileageAtService.map(String.init) ?? "",
-            recordNotes: recordNotes,
-            remindNotes: remindNotes,
-            dueDate: hasCustomDate ? dueDate : nil,
-            hasCustomDate: hasCustomDate,
+            notes: notes,
             dueMileage: nextDueMileage,
             intervalMonths: intervalMonths,
             intervalMiles: intervalMiles,
@@ -186,7 +256,8 @@ final class AddServiceFormModel {
     /// Silently drops `presetName` when it no longer matches a known preset,
     /// falling back to the free-typed service name instead.
     func apply(_ draft: ServiceFormDraft) {
-        mode = ServiceMode(rawValue: draft.mode) ?? mode
+        timing = draft.timing
+        customDate = draft.customDate
         if let presetName = draft.presetName, let preset = presets.first(where: { $0.name == presetName }) {
             selectedPreset = preset
             customServiceName = ""
@@ -194,18 +265,12 @@ final class AddServiceFormModel {
             selectedPreset = nil
             customServiceName = draft.serviceName
         }
-        performedDate = draft.performedDate
         cost = draft.costText
         if let categoryRaw = draft.costCategoryRaw, let category = CostCategory(rawValue: categoryRaw) {
             costCategory = category
         }
         mileageAtService = Int(draft.mileageText)
-        recordNotes = draft.recordNotes
-        remindNotes = draft.remindNotes
-        hasCustomDate = draft.hasCustomDate
-        if let dueDate = draft.dueDate {
-            self.dueDate = dueDate
-        }
+        notes = draft.notes
         nextDueMileage = draft.dueMileage
         intervalMonths = draft.intervalMonths
         intervalMiles = draft.intervalMiles

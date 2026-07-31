@@ -20,7 +20,12 @@ enum ServiceFormDraftStore {
     static func load(for vehicleID: UUID) -> ServiceFormDraft? {
         let storageKey = key(for: vehicleID)
         guard let data = UserDefaults.standard.data(forKey: storageKey) else { return nil }
-        guard let draft = try? JSONDecoder().decode(ServiceFormDraft.self, from: data) else {
+        guard let draft = try? JSONDecoder().decode(ServiceFormDraft.self, from: data),
+              draft.version == ServiceFormDraft.currentVersion else {
+            // Either the payload predates the current schema (decode fails on
+            // the non-optional `version`) or it decoded but means something
+            // different. Both are discarded rather than partially applied — a
+            // draft is a convenience, and a wrong one is worse than none.
             UserDefaults.standard.removeObject(forKey: storageKey)
             return nil
         }
