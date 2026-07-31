@@ -256,7 +256,7 @@ struct ServicesTab: View {
                                     .staggeredReveal(index: index, baseDelay: 0.3)
 
                                 if index < filteredLogs.count - 1 {
-                                    ListDivider(leadingPadding: 28)
+                                    ListDivider()
                                 }
                             }
                         }

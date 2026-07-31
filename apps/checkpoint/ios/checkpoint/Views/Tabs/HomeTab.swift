@@ -232,7 +232,7 @@ struct HomeTab: View {
                                 activityRow(log: log)
 
                                 if index < recentLogs.count - 1 {
-                                    ListDivider(leadingPadding: 28)
+                                    ListDivider()
                                 }
                             }
                         }

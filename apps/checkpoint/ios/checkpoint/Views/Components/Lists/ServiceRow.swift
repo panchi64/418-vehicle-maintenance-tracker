@@ -122,7 +122,10 @@ struct ServiceRow: View {
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(Theme.textTertiary.opacity(0.5))
         }
-        .padding(.horizontal, Spacing.md)
+        // Vertical padding only. The 16pt horizontal inset existed because this
+        // row lived inside a bordered card that needed interior padding — with
+        // the card gone it just indented every row 16pt past the section header
+        // above it, so the list read as hanging off the screen's left edge.
         .padding(.vertical, Spacing.listItem)
         .tappableCard(action: onTap)
         .accessibilityElement(children: .combine)

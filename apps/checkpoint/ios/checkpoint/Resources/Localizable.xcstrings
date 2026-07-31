@@ -663,6 +663,27 @@
         "es" : { "stringUnit" : { "state" : "translated", "value" : "Ver todo" } }
       }
     },
+    "costs.statAvgCost" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Avg cost" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Costo prom." } }
+      }
+    },
+    "costs.statPerMile" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Per mile" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Por milla" } }
+      }
+    },
+    "costs.statServices" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Services" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Servicios" } }
+      }
+    },
     "costs.expenses" : {
       "extractionState" : "manual",
       "localizations" : {

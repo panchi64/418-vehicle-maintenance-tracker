@@ -16,7 +16,7 @@ struct TopExpensesCard: View {
                     rowView(for: event)
 
                     if index < events.count - 1 {
-                        ListDivider(leadingPadding: 28)
+                        ListDivider()
                     }
                 }
             }

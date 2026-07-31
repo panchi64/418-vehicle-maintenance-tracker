@@ -135,6 +135,9 @@ enum L10n {
     static var servicesViewTimeline: String { localized("servicesTab.viewTimeline") }
     static var costsCategoryDimension: String { localized("costs.categoryDimension") }
     static var costsExpenses: String { localized("costs.expenses") }
+    static var costsStatServices: String { localized("costs.statServices") }
+    static var costsStatAvgCost: String { localized("costs.statAvgCost") }
+    static var costsStatPerMile: String { localized("costs.statPerMile") }
     static var homeUpcoming: String { localized("home.upcoming") }
     static var homeRecentActivity: String { localized("home.recentActivity") }
     static var servicesStatusDimension: String { localized("servicesTab.statusDimension") }

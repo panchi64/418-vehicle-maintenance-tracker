@@ -76,11 +76,11 @@ extension CostsTab {
             .revealAnimation(delay: 0.15)
 
             let cpm = cpmDelta
-            HStack(spacing: Spacing.md) {
-                StatsCard(label: "SERVICES", value: "\(serviceCount)")
-                StatsCard(label: "AVG COST", value: formattedAverageCost)
+            StatsCardRow {
+                StatsCard(label: L10n.costsStatServices, value: "\(serviceCount)")
+                StatsCard(label: L10n.costsStatAvgCost, value: formattedAverageCost)
                 StatsCard(
-                    label: "PER MILE",
+                    label: L10n.costsStatPerMile,
                     value: formattedCostPerMile,
                     valueColor: Theme.accent,
                     subvalue: cpm?.label,
@@ -199,7 +199,7 @@ extension CostsTab {
                             .staggeredReveal(index: index, baseDelay: 0.25)
 
                         if index < eventsWithCosts.count - 1 {
-                            ListDivider(leadingPadding: 28)
+                            ListDivider()
                         }
                     }
                 }

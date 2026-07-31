@@ -134,7 +134,9 @@ struct ServiceEventRow: View {
                     .accessibilityHidden(true)
             }
         }
-        .padding(Spacing.md)
+        // Vertical only — see ServiceRow. The horizontal inset was interior
+        // padding for a card these rows no longer sit inside.
+        .padding(.vertical, Spacing.listItem)
         .background(isHighlighted ? Theme.accent.opacity(0.12) : Color.clear)
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
@@ -176,7 +178,7 @@ struct ServiceEventRow: View {
                 onTap: {}
             )
 
-            ListDivider(leadingPadding: 28)
+            ListDivider()
 
             ServiceEventRow(
                 indicator: .bundledVisit(CostCategory.repair.color),
@@ -186,7 +188,7 @@ struct ServiceEventRow: View {
                 onTap: {}
             )
 
-            ListDivider(leadingPadding: 28)
+            ListDivider()
 
             // No amount: the title becomes the primary.
             ServiceEventRow(

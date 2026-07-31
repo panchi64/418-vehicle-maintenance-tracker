@@ -93,9 +93,9 @@ struct ExpenseRow: View {
 
         VStack(spacing: 0) {
             ExpenseRow(log: log1) { print("Tapped") }
-            ListDivider(leadingPadding: 28)
+            ListDivider()
             ExpenseRow(log: log2, isAnomalous: true) { print("Tapped") }
-            ListDivider(leadingPadding: 28)
+            ListDivider()
             ExpenseRow(log: log3) { print("Tapped") }
         }
         .background(Theme.surfaceInstrument)

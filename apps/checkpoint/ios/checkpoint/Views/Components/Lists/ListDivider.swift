@@ -7,8 +7,18 @@
 
 import SwiftUI
 
+/// The rule between two rows in a list.
+///
+/// Full width by default. It used to inset 56pt to clear a row icon, which only
+/// made sense while the list sat inside a bordered card — the card's edge was
+/// what told you where the list began, so the divider was free to start late.
+/// Without the card the divider IS the list's structure, and a partial rule left
+/// each row looking as though it began somewhere different from its heading.
+///
+/// `leadingPadding` survives for callers that genuinely want a hanging indent,
+/// but the default is now flush.
 struct ListDivider: View {
-    var leadingPadding: CGFloat = 56  // Default matches icon + spacing
+    var leadingPadding: CGFloat = 0
 
     var body: some View {
         Rectangle()
