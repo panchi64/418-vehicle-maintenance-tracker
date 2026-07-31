@@ -71,6 +71,12 @@ enum L10n {
         String(format: localized("filter.clear"), name)
     }
 
+    static var headerOdometer: String { localized("header.odometer") }
+    /// Rule 11: the make/model/year support line was built by concatenation,
+    /// which does not survive translation. Three positional args.
+    static func headerMakeModelYear(_ make: String, _ model: String, _ year: String) -> String {
+        String(format: localized("header.makeModelYear"), make, model, year)
+    }
     static var headerSpecs: String { localized("header.specs") }
     static var headerSpecsAccessibility: String { localized("header.specsAccessibility") }
     static var headerSpecsExpanded: String { localized("header.specsExpanded") }

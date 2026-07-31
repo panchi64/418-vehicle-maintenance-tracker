@@ -708,6 +708,42 @@
         "es" : { "stringUnit" : { "state" : "translated", "value" : "%lld días de retraso" } }
       }
     },
+    "header.makeModelYear" : {
+      "comment" : "Support line under the vehicle nickname. Args: make, model, year.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ · %3$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ · %3$@"
+          }
+        }
+      }
+    },
+    "header.odometer" : {
+      "comment" : "Label on the header's odometer cell.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ODOMETER"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ODÓMETRO"
+          }
+        }
+      }
+    },
     "header.specs" : {
       "comment" : "Disclosure trigger beneath the vehicle name that reveals reference data (plate, VIN, tires, oil).",
       "extractionState" : "manual",
