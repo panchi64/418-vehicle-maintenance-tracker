@@ -174,6 +174,19 @@ enum L10n {
     static var vehicleNicknamePlaceholder: String { localized("vehicle.nickname_placeholder") }
     static var vehicleOptional: String { localized("vehicle.optional") }
     static var vehicleOdometer: String { localized("vehicle.odometer") }
+    static var vehicleOdometerRequired: String { localized("vehicle.odometerRequired") }
+    static var vehicleIdentityRequired: String { localized("vehicle.identityRequired") }
+    static var vehicleYearOutOfRange: String { localized("vehicle.yearOutOfRange") }
+    static var vehicleNicknameEffect: String { localized("vehicle.nicknameEffect") }
+    static var vehicleMarbete: String { localized("vehicle.marbete") }
+    static var addVehicleScanVIN: String { localized("addvehicle.scanVIN") }
+    static var addVehicleVINForbiddenLetters: String { localized("addvehicle.vinForbiddenLetters") }
+    static func addVehicleVINCharactersRemaining(_ count: Int) -> String {
+        String(format: localized("addvehicle.vinCharactersRemaining"), count)
+    }
+    static func stepOfTotal(_ step: Int, _ total: Int) -> String {
+        String(format: localized("common.stepOfTotal"), step, total)
+    }
     static var vehicleCurrentMileage: String { localized("vehicle.current_mileage") }
     static var vehicleMileagePlaceholder: String { localized("vehicle.mileage_placeholder") }
     static var vehicleIdentification: String { localized("vehicle.identification") }

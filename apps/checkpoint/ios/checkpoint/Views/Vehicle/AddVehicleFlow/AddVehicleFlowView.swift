@@ -2,7 +2,14 @@
 //  AddVehicleFlowView.swift
 //  checkpoint
 //
-//  Coordinator view for the 2-step add vehicle wizard flow
+//  Add a vehicle. One scroll, no wizard.
+//
+//  The two-step wizard is gone: one entity should not have two disclosure
+//  models, and Edit Vehicle's single scroll was already the better one. Section
+//  order follows what the app needs — VIN (the fast path) above the fields it
+//  fills, then the odometer, then make/model/year, then everything optional.
+//
+//  See `VehicleFormSections` for the per-section reasoning.
 //
 //  FeatureHintView integration deferred — onboarding flow is already dense;
 //  hints would add noise without measurable benefit to completion rate.
@@ -17,68 +24,68 @@ struct AddVehicleFlowView: View {
     @Environment(AppState.self) private var appState
 
     @State private var formState = VehicleFormState()
-    @State private var currentStep: Step = .basics
-    @State private var showBasicsValidationError = false
-
-    enum Step {
-        case basics
-        case details
-    }
+    @State private var showBlockingReason = false
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                AtmosphericBackground()
+            ScrollViewReader { proxy in
+                ZStack {
+                    AtmosphericBackground()
 
-                switch currentStep {
-                case .basics:
-                    VehicleBasicsStep(formState: formState, showValidationError: $showBasicsValidationError)
-                        .trackScreen(.addVehicleBasics)
-                        .transition(.opacity)
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: Spacing.xl) {
+                            VehicleVINSection(formState: formState)
+                                .id("top")
 
-                case .details:
-                    VehicleDetailsStep(formState: formState)
-                        .trackScreen(.addVehicleDetails)
-                        .transition(.opacity)
-                }
-            }
-            .numberPadDoneButton()
-            .navigationTitle(navigationTitle)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L10n.commonCancel) {
-                        dismiss()
-                    }
-                    .toolbarButtonStyle()
-                }
-            }
-            .safeAreaInset(edge: .bottom) {
-                FormActionBar(
-                    primaryTitle: currentStep == .basics ? L10n.commonNext : L10n.vehicleSave,
-                    isPrimaryEnabled: currentStep == .basics ? formState.isBasicsValid : true,
-                    onPrimary: {
-                        if currentStep == .basics {
-                            withAnimation(.easeInOut(duration: Theme.animationMedium)) {
-                                currentStep = .details
+                            VehicleOdometerSection(formState: formState)
+                                .id("odometer")
+
+                            VehicleIdentitySection(formState: formState)
+
+                            if showBlockingReason, let reason = formState.blockingReason {
+                                FormAdvisory.blocking(reason)
                             }
-                        } else {
-                            saveVehicle()
+
+                            VehicleDetailsSection(formState: formState)
                         }
-                    },
-                    onDisabledPrimaryTap: {
-                        showBasicsValidationError = true
-                    },
-                    secondaryTitle: currentStep == .details ? L10n.commonBack : nil,
-                    onSecondary: currentStep == .details ? {
-                        withAnimation(.easeInOut(duration: Theme.animationMedium)) {
-                            currentStep = .basics
+                        .padding(.horizontal, Spacing.screenHorizontal)
+                        .padding(.top, Spacing.md)
+                        .padding(.bottom, Spacing.xxl)
+                    }
+                }
+                .numberPadDoneButton()
+                .trackScreen(.addVehicleBasics)
+                .navigationTitle(L10n.vehicleAdd)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
+                .toolbarBackground(.visible, for: .navigationBar)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button(L10n.commonCancel) {
+                            dismiss()
                         }
-                    } : nil
-                )
-            }
+                        .toolbarButtonStyle()
+                    }
+                }
+                .onChange(of: formState.blockingReason) { _, newValue in
+                    if newValue == nil { showBlockingReason = false }
+                }
+                .safeAreaInset(edge: .bottom) {
+                    FormActionBar(
+                        primaryTitle: L10n.vehicleSave,
+                        isPrimaryEnabled: formState.blockingReason == nil,
+                        onPrimary: { saveVehicle() },
+                        onDisabledPrimaryTap: {
+                            showBlockingReason = true
+                            withAnimation {
+                                proxy.scrollTo(
+                                    formState.currentMileage == nil ? "odometer" : "top",
+                                    anchor: .top
+                                )
+                            }
+                        }
+                    )
+                }
             .onAppear {
                 // Apply onboarding marbete prefill if set
                 if let month = appState.onboarding.marbeteMonth {
@@ -127,17 +134,7 @@ struct AddVehicleFlowView: View {
                     .presentationDetents([.medium])
                 }
             }
-        }
-    }
-
-    // MARK: - Computed Properties
-
-    private var navigationTitle: String {
-        switch currentStep {
-        case .basics:
-            return L10n.vehicleAdd
-        case .details:
-            return L10n.vehicleDetails
+            }
         }
     }
 
@@ -210,6 +207,11 @@ struct AddVehicleFlowView: View {
             hasNickname: !formState.name.isEmpty
         ))
 
+        // `currentMileage` is force-unwrappable in spirit — the odometer is
+        // required and Save is disabled without it — but the fallback stays
+        // rather than trapping. The old form had this same `?? 0` with no
+        // requirement behind it, which is how vehicles shipped at zero miles
+        // and every mileage-based reminder became fiction.
         let vehicle = Vehicle(
             name: formState.name,
             make: formState.make,

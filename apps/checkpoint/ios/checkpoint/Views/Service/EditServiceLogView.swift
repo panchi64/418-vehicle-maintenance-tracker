@@ -138,7 +138,7 @@ struct EditServiceLogView: View {
                         if showAlsoMoveReminderToggle {
                             VStack(alignment: .leading, spacing: Spacing.sm) {
                                 LabeledInstrumentToggle(
-                                    label: L10n.editAlsoMoveReminder.uppercased(),
+                                    label: L10n.editAlsoMoveReminder,
                                     accessibilityLabel: L10n.editAlsoMoveReminder,
                                     isOn: $alsoMoveNextReminder
                                 )

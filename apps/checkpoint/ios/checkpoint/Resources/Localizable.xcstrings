@@ -444,6 +444,30 @@
         }
       }
     },
+    "addvehicle.scanVIN" : {
+      "comment" : "VoiceOver label for the VIN camera button.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Scan the VIN plate" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Escanear la placa del VIN" } }
+      }
+    },
+    "addvehicle.vinCharactersRemaining" : {
+      "comment" : "How many more characters a VIN needs before it can be looked up.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld more characters to look this up." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Faltan %lld caracteres para buscarlo." } }
+      }
+    },
+    "addvehicle.vinForbiddenLetters" : {
+      "comment" : "Names the likely typo rather than saying 'invalid'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "A VIN never contains I, O, or Q. Check for a 1 or a 0." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Un VIN nunca lleva I, O ni Q. Busca un 1 o un 0." } }
+      }
+    },
     "addvehicle.vin_details_filled" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8082,18 +8106,19 @@
       }
     },
     "vehicle.mileage_placeholder" : {
+      "comment" : "A plausible reading. Was '0', which reads as a real value on a field that used to default to zero.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "0"
+            "value" : "33,417"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "0"
+            "value" : "33,417"
           }
         }
       }
@@ -8150,18 +8175,19 @@
       }
     },
     "vehicle.nickname_placeholder" : {
+      "comment" : "An example nickname. Was 'Optional', which repeated the section tag.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Optional"
+            "value" : "Daily driver"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Opcional"
+            "value" : "Carro diario"
           }
         }
       }
@@ -8198,6 +8224,51 @@
             "value" : "Particularidades, historial, recordatorios…"
           }
         }
+      }
+    },
+    "common.stepOfTotal" : {
+      "comment" : "VoiceOver label for a paged flow's progress dots.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Step %1$lld of %2$lld" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Paso %1$lld de %2$lld" } }
+      }
+    },
+    "vehicle.identityRequired" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Scan or enter a VIN, or fill in the make and model." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Escanea o escribe un VIN, o completa la marca y el modelo." } }
+      }
+    },
+    "vehicle.marbete" : {
+      "comment" : "Puerto Rico vehicle registration sticker. Kept untranslated — it is the local term in both languages.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Marbete" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Marbete" } }
+      }
+    },
+    "vehicle.nicknameEffect" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Shown instead of the year, make, and model in the header." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Se muestra en vez del año, marca y modelo en el encabezado." } }
+      }
+    },
+    "vehicle.odometerRequired" : {
+      "comment" : "Why the odometer cannot be optional.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No VIN lookup can supply this, and every mileage reminder is measured from it." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ninguna búsqueda de VIN puede darlo, y cada recordatorio por millaje se mide desde ahí." } }
+      }
+    },
+    "vehicle.yearOutOfRange" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "That model year looks wrong — check it, or leave it blank." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ese año de modelo parece incorrecto — revísalo o déjalo en blanco." } }
       }
     },
     "vehicle.odometer" : {
@@ -8439,18 +8510,19 @@
       }
     },
     "vehicle.vin_placeholder" : {
+      "comment" : "Shows the expected shape. Was 'Optional', which repeated the section tag and told the user nothing.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Optional"
+            "value" : "17 characters"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Opcional"
+            "value" : "17 caracteres"
           }
         }
       }

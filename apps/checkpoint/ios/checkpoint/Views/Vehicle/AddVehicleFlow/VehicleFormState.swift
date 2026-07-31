@@ -2,20 +2,21 @@
 //  VehicleFormState.swift
 //  checkpoint
 //
-//  Shared state for the 2-step add vehicle wizard flow
+//  State for the single-scroll add-vehicle form. The `Step 1` / `Step 2`
+//  grouping below is gone with the wizard — the fields are one set.
 //
 
 import SwiftUI
 
 @Observable
 final class VehicleFormState {
-    // MARK: - Step 1: Basics
+    // MARK: - Identity
     var name: String = ""
     var make: String = ""
     var model: String = ""
     var year: Int? = nil
 
-    // MARK: - Step 2: Details
+    // MARK: - Reference
     var currentMileage: Int? = nil
     var vin: String = ""
     var licensePlate: String = ""
@@ -60,11 +61,33 @@ final class VehicleFormState {
         return (1900...maxYear).contains(year)
     }
 
-    /// Step 1 is valid when Make, Model, and Year are all provided and year is in range
-    var isBasicsValid: Bool {
+    /// Whether the vehicle is identified well enough to be useful. Year is
+    /// deliberately not required: it is nice to have, but nothing in the app
+    /// breaks without it, and a required field the user cannot answer from the
+    /// driveway is a dead end.
+    var hasIdentity: Bool {
         !make.trimmingCharacters(in: .whitespaces).isEmpty &&
-        !model.trimmingCharacters(in: .whitespaces).isEmpty &&
-        isYearValid
+        !model.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    /// Why this cannot be saved yet, phrased as the next thing to do. Nil means
+    /// it can be saved.
+    ///
+    /// THE ODOMETER IS FIRST AND REQUIRED. The wizard's second step was
+    /// unconditionally valid, so `currentMileage ?? 0` created vehicles at zero
+    /// miles — and every mileage-based reminder computed from that is fiction.
+    /// No VIN lookup can supply it, which is exactly why it cannot be optional.
+    var blockingReason: String? {
+        if currentMileage == nil {
+            return L10n.vehicleOdometerRequired
+        }
+        if !hasIdentity {
+            return L10n.vehicleIdentityRequired
+        }
+        if year != nil, !isYearValid {
+            return L10n.vehicleYearOutOfRange
+        }
+        return nil
     }
 
     /// VIN is valid when it's 17 alphanumeric characters (excluding I, O, Q)

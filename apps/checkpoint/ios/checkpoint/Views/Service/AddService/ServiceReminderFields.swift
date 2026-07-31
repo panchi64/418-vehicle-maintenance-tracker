@@ -71,7 +71,7 @@ struct ServiceReminderFields: View {
     @ViewBuilder
     private var repeatPolicy: some View {
         LabeledInstrumentToggle(
-            label: L10n.formRepeatAfterCompletion.uppercased(),
+            label: L10n.formRepeatAfterCompletion,
             accessibilityLabel: L10n.formRepeatAfterCompletion,
             isOn: $model.isRecurring
         )

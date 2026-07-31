@@ -95,7 +95,7 @@ struct EditServiceView: View {
                             InstrumentSection(title: L10n.formNextDue, chrome: .plain) {
                                 VStack(spacing: Spacing.md) {
                                     LabeledInstrumentToggle(
-                                        label: L10n.formSetDueDate.uppercased(),
+                                        label: L10n.formSetDueDate,
                                         accessibilityLabel: L10n.formSetDueDate,
                                         isOn: $hasDueDate
                                     )
@@ -126,7 +126,7 @@ struct EditServiceView: View {
                             InstrumentSection(title: L10n.formRepeats, chrome: .plain) {
                                 VStack(spacing: Spacing.md) {
                                     LabeledInstrumentToggle(
-                                        label: L10n.formRepeatAfterCompletion.uppercased(),
+                                        label: L10n.formRepeatAfterCompletion,
                                         accessibilityLabel: L10n.formRepeatAfterCompletion,
                                         isOn: $isRecurring
                                     )
