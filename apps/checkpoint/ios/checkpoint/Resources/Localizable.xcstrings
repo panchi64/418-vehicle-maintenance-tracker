@@ -29,25 +29,22 @@
         }
       }
     },
+    "[%@" : {
+
+    },
+    "[%@]" : {
+
+    },
     "[+]" : {
-
-    },
-    "[LOG]" : {
-
-    },
-    "[SCHEDULE]" : {
 
     },
     "[SELECT]" : {
 
     },
-    "[UPDATE]" : {
+    "]" : {
 
     },
     "@ %@" : {
-
-    },
-    "*" : {
 
     },
     "//" : {
@@ -55,16 +52,6 @@
     },
     "%@" : {
 
-    },
-    "%@ · %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ · %2$lld"
-          }
-        }
-      }
     },
     "%@ (%lld)" : {
       "localizations" : {
@@ -112,16 +99,6 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@ → %2$@"
-          }
-        }
-      }
-    },
-    "%@ completed %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ completed %2$@"
           }
         }
       }
@@ -174,16 +151,6 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@, %2$@. Tap for details."
-          }
-        }
-      }
-    },
-    "%@, %@%@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@, %2$@%3$@"
           }
         }
       }
@@ -289,13 +256,7 @@
     "%lld/17" : {
 
     },
-    "•" : {
-
-    },
     "+%lld MORE" : {
-
-    },
-    "◆" : {
 
     },
     "$14.99" : {
@@ -305,9 +266,6 @@
 
     },
     "Add new vehicle" : {
-
-    },
-    "Add service" : {
 
     },
     "ADD SPECS" : {
@@ -323,40 +281,90 @@
       "comment" : "Save button once a past timing is chosen.",
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Log it" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Registrarlo" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log it"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrarlo"
+          }
+        }
       }
     },
     "addservice.saveSchedule" : {
       "comment" : "Save button once a future timing is chosen.",
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Schedule it" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Programarlo" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schedule it"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programarlo"
+          }
+        }
       }
     },
     "addservice.titleLog" : {
       "comment" : "Sheet subtitle once a past timing is chosen.",
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "New entry" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Nuevo registro" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New entry"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuevo registro"
+          }
+        }
       }
     },
     "addservice.titleNeutral" : {
       "comment" : "Sheet subtitle before a timing is chosen, when the intent is not yet known.",
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add service" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añadir servicio" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add service"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añadir servicio"
+          }
+        }
       }
     },
     "addservice.titleSchedule" : {
       "comment" : "Sheet subtitle once a future timing is chosen.",
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "New reminder" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Nuevo recordatorio" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New reminder"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuevo recordatorio"
+          }
+        }
       }
     },
     "addvehicle.basics" : {
@@ -410,6 +418,24 @@
         }
       }
     },
+    "addvehicle.scanVIN" : {
+      "comment" : "VoiceOver label for the VIN camera button.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan the VIN plate"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escanear la placa del VIN"
+          }
+        }
+      }
+    },
     "addvehicle.step" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -442,30 +468,6 @@
             "value" : "ALINEAR VIN AQUÍ"
           }
         }
-      }
-    },
-    "addvehicle.scanVIN" : {
-      "comment" : "VoiceOver label for the VIN camera button.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Scan the VIN plate" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Escanear la placa del VIN" } }
-      }
-    },
-    "addvehicle.vinCharactersRemaining" : {
-      "comment" : "How many more characters a VIN needs before it can be looked up.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld more characters to look this up." } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Faltan %lld caracteres para buscarlo." } }
-      }
-    },
-    "addvehicle.vinForbiddenLetters" : {
-      "comment" : "Names the likely typo rather than saying 'invalid'.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "A VIN never contains I, O, or Q. Check for a 1 or a 0." } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Un VIN nunca lleva I, O ni Q. Busca un 1 o un 0." } }
       }
     },
     "addvehicle.vin_details_filled" : {
@@ -553,6 +555,42 @@
         }
       }
     },
+    "addvehicle.vinCharactersRemaining" : {
+      "comment" : "How many more characters a VIN needs before it can be looked up.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld more characters to look this up."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faltan %lld caracteres para buscarlo."
+          }
+        }
+      }
+    },
+    "addvehicle.vinForbiddenLetters" : {
+      "comment" : "Names the likely typo rather than saying 'invalid'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A VIN never contains I, O, or Q. Check for a 1 or a 0."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un VIN nunca lleva I, O ni Q. Busca un 1 o un 0."
+          }
+        }
+      }
+    },
     "advisory.a11yBlocking" : {
       "comment" : "VoiceOver prefix for a blocking advisory — the thing will not work as configured.",
       "extractionState" : "manual",
@@ -625,493 +663,6 @@
         }
       }
     },
-    "category.maintenance" : {
-      "comment" : "Cost category. Canonical name — reused by the Costs tab category filter.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Maintenance" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Mantenimiento" } }
-      }
-    },
-    "category.maintenanceShort" : {
-      "comment" : "Abbreviated cost category for the width-constrained segmented filter.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Maint." } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Mant." } }
-      }
-    },
-    "category.repair" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Repair" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Reparación" } }
-      }
-    },
-    "category.upgrade" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Upgrade" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Mejora" } }
-      }
-    },
-    "common.viewAll" : {
-      "comment" : "Trailing action on a readout section header.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "View all" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ver todo" } }
-      }
-    },
-    "costs.statAvgCost" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Avg cost" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Costo prom." } }
-      }
-    },
-    "costs.statPerMile" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Per mile" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Por milla" } }
-      }
-    },
-    "costs.statServices" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Services" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Servicios" } }
-      }
-    },
-    "costs.expenses" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Expenses" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Gastos" } }
-      }
-    },
-    "home.recentActivity" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Recent activity" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Actividad reciente" } }
-      }
-    },
-    "home.upcoming" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Upcoming" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Próximos" } }
-      }
-    },
-    "costs.categoryDimension" : {
-      "comment" : "Names the category filter dimension on the Costs tab.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Category" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Categoría" } }
-      }
-    },
-    "costs.periodAll" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "All" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Todo" } }
-      }
-    },
-    "costs.periodMonth" : {
-      "comment" : "Costs period filter: the last 30 days (a rolling window, not the calendar month).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Month" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Mes" } }
-      }
-    },
-    "costs.periodYTD" : {
-      "comment" : "Costs period filter: since January 1 of the current year.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "YTD" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "YTD" } }
-      }
-    },
-    "costs.periodYear" : {
-      "comment" : "Costs period filter: the last 12 months (a rolling window, not the calendar year).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Year" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Año" } }
-      }
-    },
-    "row.distanceLeft" : {
-      "comment" : "Primary urgency value on a service row. %@ is a formatted distance including its unit, e.g. '1,200 mi'.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "%@ left" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "%@ restantes" } }
-      }
-    },
-    "row.distanceOverdue" : {
-      "comment" : "Primary urgency value when a mileage-based service is past due. %@ is a formatted distance including its unit.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "%@ overdue" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "%@ de retraso" } }
-      }
-    },
-    "row.dueNow" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Due now" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Vence ahora" } }
-      }
-    },
-    "row.dueToday" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Due today" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Vence hoy" } }
-      }
-    },
-    "row.dueTomorrow" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Due tomorrow" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Vence mañana" } }
-      }
-    },
-    "row.daysLeft" : {
-      "comment" : "Primary urgency value for a date-based service.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "In %lld days" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "En %lld días" } }
-      }
-    },
-    "row.daysOverdue" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld days overdue" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "%lld días de retraso" } }
-      }
-    },
-    "header.makeModelYear" : {
-      "comment" : "Support line under the vehicle nickname. Args: make, model, year.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ %2$@ · %3$@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ %2$@ · %3$@"
-          }
-        }
-      }
-    },
-    "header.odometer" : {
-      "comment" : "Label on the header's odometer cell.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ODOMETER"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ODÓMETRO"
-          }
-        }
-      }
-    },
-    "header.specs" : {
-      "comment" : "Disclosure trigger beneath the vehicle name that reveals reference data (plate, VIN, tires, oil).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "SPECS" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "FICHA" } }
-      }
-    },
-    "header.specsAccessibility" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Vehicle specs" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ficha del vehículo" } }
-      }
-    },
-    "header.specsExpanded" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Expanded" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Expandido" } }
-      }
-    },
-    "header.specsCollapsed" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Collapsed" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Contraído" } }
-      }
-    },
-    "header.selectVehicle" : {
-      "comment" : "Vehicle header placeholder when no vehicle is selected. Displayed uppercase.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "SELECT VEHICLE" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "ELEGIR VEHÍCULO" } }
-      }
-    },
-    "header.selectVehicleAccessibility" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Select vehicle" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Elegir vehículo" } }
-      }
-    },
-    "header.selectVehicleHint" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Double tap to choose a vehicle" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Toca dos veces para elegir un vehículo" } }
-      }
-    },
-    "row.serviceFallback" : {
-      "comment" : "Title for a log whose service relationship is missing.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Service" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Servicio" } }
-      }
-    },
-    "row.noCostRecorded" : {
-      "comment" : "VoiceOver value when a row has no amount.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "No cost recorded" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin costo registrado" } }
-      }
-    },
-    "row.completedAccessibility" : {
-      "comment" : "VoiceOver label for a completed-service row. %1$@ is the service name, %2$@ the date.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ completed %2$@" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ completado el %2$@" } }
-      }
-    },
-    "row.visitTitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Service Visit" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Visita de servicio" } }
-      }
-    },
-    "row.visitTitleCount" : {
-      "comment" : "Title for a bundled visit covering several services. %lld is the count.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Service Visit · %lld services" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Visita de servicio · %lld servicios" } }
-      }
-    },
-    "row.visitTag" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "SERVICE VISIT" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "VISITA" } }
-      }
-    },
-    "row.visitAccessibility" : {
-      "comment" : "VoiceOver label for a bundled visit row. %1$@ is the date, %2$lld the service count.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Service visit on %1$@, %2$lld services" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Visita de servicio el %1$@, %2$lld servicios" } }
-      }
-    },
-    "row.noTotalRecorded" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "No total recorded" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin total registrado" } }
-      }
-    },
-    "row.outlierAccessibility" : {
-      "comment" : "Appended to a row's VoiceOver label when the amount is a statistical outlier.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : ", outlier" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : ", atípico" } }
-      }
-    },
-    "row.noDueDate" : {
-      "comment" : "VoiceOver value for a service with no schedule configured.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "No due date" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin fecha de vencimiento" } }
-      }
-    },
-    "row.viewDetailsHint" : {
-      "comment" : "VoiceOver hint for a tappable list row.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Double tap to view details" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Toca dos veces para ver detalles" } }
-      }
-    },
-    "row.lastPerformed" : {
-      "comment" : "Supporting line on a service row. %@ is a relative time such as 'Today' or '3 mo ago'.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Last done %@" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Última vez %@" } }
-      }
-    },
-    "timeSince.todaySentence" : {
-      "comment" : "Standalone, sentence-cased. Used where the value stands alone rather than inside a sentence.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Today" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Hoy" } }
-      }
-    },
-    "timeSince.yesterdaySentence" : {
-      "comment" : "Standalone, sentence-cased.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Yesterday" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ayer" } }
-      }
-    },
-    "timeSince.today" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "today" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "hoy" } }
-      }
-    },
-    "timeSince.yesterday" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "yesterday" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "ayer" } }
-      }
-    },
-    "timeSince.daysAgo" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld days ago" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "hace %lld días" } }
-      }
-    },
-    "timeSince.monthsAgo" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld months ago" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "hace %lld meses" } }
-      }
-    },
-    "timeSince.oneMonthAgo" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "1 month ago" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "hace 1 mes" } }
-      }
-    },
-    "timeSince.daysAgoShort" : {
-      "comment" : "Abbreviated relative time for width-constrained rows.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lldd ago" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "hace %lldd" } }
-      }
-    },
-    "timeSince.monthsAgoShort" : {
-      "comment" : "Abbreviated relative time for width-constrained rows.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld mo ago" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "hace %lld m" } }
-      }
-    },
-    "filter.all" : {
-      "comment" : "Shared 'no filter applied' option for status and category filters.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "All" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Todos" } }
-      }
-    },
-    "servicesTab.documentLibrary" : {
-      "comment" : "Destination link at the bottom of the Services tab.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Document library" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Biblioteca de documentos" } }
-      }
-    },
-    "servicesTab.export" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Export" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Exportar" } }
-      }
-    },
-    "servicesTab.historyCount" : {
-      "comment" : "Section title over the service-history list. %lld is the number of entries.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld entries" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "%lld registros" } }
-      }
-    },
-    "servicesTab.reference" : {
-      "comment" : "Heading over destination links that are not maintenance state.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reference" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Referencia" } }
-      }
-    },
-    "servicesTab.scheduledCount" : {
-      "comment" : "Section title over the upcoming-services list. %lld is the number shown.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld scheduled" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "%lld programados" } }
-      }
-    },
-    "servicesTab.statusDimension" : {
-      "comment" : "Names the status filter dimension on the Services tab.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Status" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Estado" } }
-      }
-    },
-    "servicesTab.viewList" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "List" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Lista" } }
-      }
-    },
-    "servicesTab.viewTimeline" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Timeline" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cronología" } }
-      }
-    },
     "ALL RARE THEMES COLLECTED" : {
 
     },
@@ -1150,6 +701,76 @@
     },
     "CATEGORY" : {
 
+    },
+    "category.maintenance" : {
+      "comment" : "Cost category. Canonical name — reused by the Costs tab category filter.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maintenance"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantenimiento"
+          }
+        }
+      }
+    },
+    "category.maintenanceShort" : {
+      "comment" : "Abbreviated cost category for the width-constrained segmented filter.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maint."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mant."
+          }
+        }
+      }
+    },
+    "category.repair" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repair"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reparación"
+          }
+        }
+      }
+    },
+    "category.upgrade" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upgrade"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejora"
+          }
+        }
+      }
     },
     "Change service type. Currently %@" : {
 
@@ -1323,9 +944,6 @@
     "Close" : {
 
     },
-    "Collapsed" : {
-
-    },
     "Collapses details" : {
 
     },
@@ -1468,6 +1086,24 @@
         }
       }
     },
+    "common.stepOfTotal" : {
+      "comment" : "VoiceOver label for a paged flow's progress dots.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Step %1$lld of %2$lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paso %1$lld de %2$lld"
+          }
+        }
+      }
+    },
     "common.undo" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1502,6 +1138,24 @@
         }
       }
     },
+    "common.viewAll" : {
+      "comment" : "Trailing action on a readout section header.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View all"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver todo"
+          }
+        }
+      }
+    },
     "COMPLETED" : {
 
     },
@@ -1516,6 +1170,24 @@
     },
     "Copy marbete expiration" : {
 
+    },
+    "costs.categoryDimension" : {
+      "comment" : "Names the category filter dimension on the Costs tab.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Category"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Categoría"
+          }
+        }
+      }
     },
     "costs.cluster.body" : {
       "extractionState" : "manual",
@@ -1666,6 +1338,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Buen comienzo"
+          }
+        }
+      }
+    },
+    "costs.expenses" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expenses"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gastos"
           }
         }
       }
@@ -1840,6 +1529,77 @@
         }
       }
     },
+    "costs.periodAll" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo"
+          }
+        }
+      }
+    },
+    "costs.periodMonth" : {
+      "comment" : "Costs period filter: the last 30 days (a rolling window, not the calendar month).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Month"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes"
+          }
+        }
+      }
+    },
+    "costs.periodYear" : {
+      "comment" : "Costs period filter: the last 12 months (a rolling window, not the calendar year).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Year"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Año"
+          }
+        }
+      }
+    },
+    "costs.periodYTD" : {
+      "comment" : "Costs period filter: since January 1 of the current year.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YTD"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YTD"
+          }
+        }
+      }
+    },
     "costs.row.outlier" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1870,6 +1630,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Costos del vehículo"
+          }
+        }
+      }
+    },
+    "costs.statAvgCost" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avg cost"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Costo prom."
+          }
+        }
+      }
+    },
+    "costs.statPerMile" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per mile"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por milla"
+          }
+        }
+      }
+    },
+    "costs.statServices" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Services"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servicios"
           }
         }
       }
@@ -2806,9 +2617,6 @@
     "DONE" : {
 
     },
-    "Double tap to choose a vehicle" : {
-
-    },
     "Double tap to collapse" : {
 
     },
@@ -2833,9 +2641,6 @@
     "Double tap to select" : {
 
     },
-    "Double tap to update odometer reading" : {
-
-    },
     "Double tap to view details" : {
 
     },
@@ -2843,9 +2648,6 @@
 
     },
     "Double tap to view the Service Visit" : {
-
-    },
-    "Double tap to view the visit" : {
 
     },
     "DUE" : {
@@ -3150,48 +2952,6 @@
         }
       }
     },
-    "empty.noResultsMessage" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Try a different search term\nor filter" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Prueba otro término de búsqueda\no filtro" } }
-      }
-    },
-    "empty.noResultsTitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "No results" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin resultados" } }
-      }
-    },
-    "empty.noServicesMessage" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add your first service to\nstart tracking maintenance" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añade tu primer servicio para\nempezar a dar seguimiento" } }
-      }
-    },
-    "empty.noServicesTitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "No services" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin servicios" } }
-      }
-    },
-    "empty.noVehicleMessage" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Select or add a vehicle\nto view services" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Selecciona o añade un vehículo\npara ver los servicios" } }
-      }
-    },
-    "empty.noVehicleTitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "No vehicle" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin vehículo" } }
-      }
-    },
     "empty.filter_clear" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3222,6 +2982,108 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mostrando %d de %d"
+          }
+        }
+      }
+    },
+    "empty.noResultsMessage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try a different search term\nor filter"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba otro término de búsqueda\no filtro"
+          }
+        }
+      }
+    },
+    "empty.noResultsTitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No results"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin resultados"
+          }
+        }
+      }
+    },
+    "empty.noServicesMessage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add your first service to\nstart tracking maintenance"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añade tu primer servicio para\nempezar a dar seguimiento"
+          }
+        }
+      }
+    },
+    "empty.noServicesTitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No services"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin servicios"
+          }
+        }
+      }
+    },
+    "empty.noVehicleMessage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select or add a vehicle\nto view services"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecciona o añade un vehículo\npara ver los servicios"
+          }
+        }
+      }
+    },
+    "empty.noVehicleTitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No vehicle"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin vehículo"
           }
         }
       }
@@ -3367,13 +3229,7 @@
     "EVERY TIP UNLOCKS A RARE THEME" : {
 
     },
-    "Expanded" : {
-
-    },
     "Expands details" : {
-
-    },
-    "Expands to show log and schedule options" : {
 
     },
     "EXPIRATION MONTH" : {
@@ -3446,34 +3302,26 @@
         }
       }
     },
-    "EXPORT" : {
-
-    },
-    "Export service history" : {
-
-    },
     "EXPORT SERVICE HISTORY" : {
 
     },
     "Extracted Mileage" : {
 
     },
-    "Find Gas Prices" : {
-
-    },
-    "form.addAttachments" : {
+    "filter.all" : {
+      "comment" : "Shared 'no filter applied' option for status and category filters.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add Attachments"
+            "value" : "All"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Añadir adjuntos"
+            "value" : "Todos"
           }
         }
       }
@@ -3514,268 +3362,42 @@
         }
       }
     },
+    "Find Gas Prices" : {
+
+    },
+    "form.addAttachments" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add Attachments"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añadir adjuntos"
+          }
+        }
+      }
+    },
     "form.alreadyDone" : {
       "comment" : "Subgroup heading over the past-timing chips.",
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Already done" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ya realizado" } }
-      }
-    },
-    "form.comingUp" : {
-      "comment" : "Subgroup heading over the future-timing chips.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Coming up" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Próximamente" } }
-      }
-    },
-    "form.common" : {
-      "comment" : "Label over the quick service-type shortcut chips.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Common" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Frecuentes" } }
-      }
-    },
-    "form.correctItUpward" : {
-      "comment" : "Outcome button: adopt the entered reading despite the older date.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Correct it upward" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Corregirlo hacia arriba" } }
-      }
-    },
-    "form.depthContents" : {
-      "comment" : "Names what is inside the collapsed details section.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Notes, receipt" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Notas, recibo" } }
-      }
-    },
-    "form.fewerDetails" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Fewer details" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Menos detalles" } }
-      }
-    },
-    "form.fires" : {
-      "comment" : "Label on the readout stating when a reminder will fire.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Fires" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Avisa" } }
-      }
-    },
-    "form.firesAtMileage" : {
-      "comment" : "Fire-time readout with no pace data. %@ is the target mileage.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "At %@" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "A las %@" } }
-      }
-    },
-    "form.firesAtMileageInDays" : {
-      "comment" : "Fire-time readout. %1$@ is the target mileage, %2$lld the days away at current pace.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "At %1$@ — about %2$lld days away at your pace" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "A las %1$@ — unos %2$lld días a tu ritmo" } }
-      }
-    },
-    "form.firesOnceYouEnterMileage" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Once you enter a mileage" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cuando ingreses un millaje" } }
-      }
-    },
-    "form.firesOnceYouPickDate" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Once you pick a date" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cuando elijas una fecha" } }
-      }
-    },
-    "form.keepMyOdometer" : {
-      "comment" : "Outcome button: leave the vehicle's odometer untouched.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Keep my odometer" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Mantener mi odómetro" } }
-      }
-    },
-    "form.moreDetails" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "More details" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Más detalles" } }
-      }
-    },
-    "form.odometerAtService" : {
-      "comment" : "Past-branch mileage field. Deliberately distinct from form.remindMeAt.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Odometer at service" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Odómetro al servicio" } }
-      }
-    },
-    "form.odometerContradiction" : {
-      "comment" : "Contradiction advisory. %@ is the vehicle's current odometer.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "This is dated earlier than your last reading but is higher than it (%@). Which is right?" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Esto tiene una fecha anterior a tu última lectura pero es mayor que ella (%@). ¿Cuál es correcta?" } }
-      }
-    },
-    "form.odometerStaysAt" : {
-      "comment" : "Confirms the odometer will not move. %@ is the current reading.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your odometer stays at %@." } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tu odómetro se queda en %@." } }
-      }
-    },
-    "form.remindMeAt" : {
-      "comment" : "Future-branch mileage target. Deliberately distinct from form.odometerAtService.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Remind me at" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Avísame a las" } }
-      }
-    },
-    "form.remindMileageRequired" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Enter the mileage to be reminded at, or this reminder will not fire." } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ingresa el millaje del aviso, o este recordatorio no se activará." } }
-      }
-    },
-    "form.remindsOnceThenStops" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "This will remind you once, then stop." } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Te avisará una vez y luego parará." } }
-      }
-    },
-    "form.resolveOdometerConflict" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Resolve the odometer conflict above." } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Resuelve el conflicto del odómetro de arriba." } }
-      }
-    },
-    "form.theReminder" : {
-      "comment" : "Section title over the future branch.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "The reminder" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "El recordatorio" } }
-      }
-    },
-    "form.theVisit" : {
-      "comment" : "Section title over the past branch.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "The visit" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "La visita" } }
-      }
-    },
-    "form.timingRequired" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose when it happened, or when it is due." } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Elige cuándo ocurrió, o cuándo vence." } }
-      }
-    },
-    "form.when" : {
-      "comment" : "Section title over the timing chips — the control that derives intent.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "When" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cuándo" } }
-      }
-    },
-    "form.whicheverFirstFromCompletion" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Whichever comes first, counted from the day you mark it done." } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Lo que ocurra primero, contado desde el día que lo marques hecho." } }
-      }
-    },
-    "tabBar.addService" : {
-      "comment" : "VoiceOver label for the tab bar's [+] button.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add service" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añadir servicio" } }
-      }
-    },
-    "timing.atMileage" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "At mileage…" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "A cierto millaje…" } }
-      }
-    },
-    "timing.earlier" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Earlier…" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Antes…" } }
-      }
-    },
-    "timing.inSixMonths" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "In 6 months" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "En 6 meses" } }
-      }
-    },
-    "timing.inThreeMonths" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "In 3 months" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "En 3 meses" } }
-      }
-    },
-    "timing.onDate" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pick a date…" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Elegir fecha…" } }
-      }
-    },
-    "timing.today" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Today" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Hoy" } }
-      }
-    },
-    "timing.yesterday" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Yesterday" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ayer" } }
-      }
-    },
-    "toast.reminderSetAt" : {
-      "comment" : "Confirms a mileage-triggered reminder. %@ is the target mileage.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reminder set for %@" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Recordatorio para %@" } }
-      }
-    },
-    "toast.reminderSetFor" : {
-      "comment" : "Confirms a date-triggered reminder. %@ is the due date.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reminder set for %@" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Recordatorio para %@" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Already done"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ya realizado"
+          }
+        }
       }
     },
     "form.amount" : {
@@ -3842,6 +3464,60 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Categoría"
+          }
+        }
+      }
+    },
+    "form.comingUp" : {
+      "comment" : "Subgroup heading over the future-timing chips.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coming up"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximamente"
+          }
+        }
+      }
+    },
+    "form.common" : {
+      "comment" : "Label over the quick service-type shortcut chips.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Common"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frecuentes"
+          }
+        }
+      }
+    },
+    "form.correctItUpward" : {
+      "comment" : "Outcome button: adopt the entered reading despite the older date.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correct it upward"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Corregirlo hacia arriba"
           }
         }
       }
@@ -3927,6 +3603,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%d días de atraso"
+          }
+        }
+      }
+    },
+    "form.depthContents" : {
+      "comment" : "Names what is inside the collapsed details section.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notes, receipt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notas, recibo"
           }
         }
       }
@@ -4152,6 +3846,129 @@
         }
       }
     },
+    "form.fewerDetails" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fewer details"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menos detalles"
+          }
+        }
+      }
+    },
+    "form.fires" : {
+      "comment" : "Label on the readout stating when a reminder will fire.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fires"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avisa"
+          }
+        }
+      }
+    },
+    "form.firesAtMileage" : {
+      "comment" : "Fire-time readout with no pace data. %@ is the target mileage.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A las %@"
+          }
+        }
+      }
+    },
+    "form.firesAtMileageInDays" : {
+      "comment" : "Fire-time readout. %1$@ is the target mileage, %2$lld the days away at current pace.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At %1$@ — about %2$lld days away at your pace"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A las %1$@ — unos %2$lld días a tu ritmo"
+          }
+        }
+      }
+    },
+    "form.firesOnceYouEnterMileage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Once you enter a mileage"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuando ingreses un millaje"
+          }
+        }
+      }
+    },
+    "form.firesOnceYouPickDate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Once you pick a date"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuando elijas una fecha"
+          }
+        }
+      }
+    },
+    "form.keepMyOdometer" : {
+      "comment" : "Outcome button: leave the vehicle's odometer untouched.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep my odometer"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantener mi odómetro"
+          }
+        }
+      }
+    },
     "form.mileage" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4254,6 +4071,23 @@
         }
       }
     },
+    "form.moreDetails" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More details"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Más detalles"
+          }
+        }
+      }
+    },
     "form.nextDue" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4318,6 +4152,60 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Añade notas…"
+          }
+        }
+      }
+    },
+    "form.odometerAtService" : {
+      "comment" : "Past-branch mileage field. Deliberately distinct from form.remindMeAt.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odometer at service"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odómetro al servicio"
+          }
+        }
+      }
+    },
+    "form.odometerContradiction" : {
+      "comment" : "Contradiction advisory. %@ is the vehicle's current odometer.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is dated earlier than your last reading but is higher than it (%@). Which is right?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esto tiene una fecha anterior a tu última lectura pero es mayor que ella (%@). ¿Cuál es correcta?"
+          }
+        }
+      }
+    },
+    "form.odometerStaysAt" : {
+      "comment" : "Confirms the odometer will not move. %@ is the current reading.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your odometer stays at %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu odómetro se queda en %@."
           }
         }
       }
@@ -4390,6 +4278,41 @@
         }
       }
     },
+    "form.remindMeAt" : {
+      "comment" : "Future-branch mileage target. Deliberately distinct from form.odometerAtService.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remind me at"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avísame a las"
+          }
+        }
+      }
+    },
+    "form.remindMileageRequired" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter the mileage to be reminded at, or this reminder will not fire."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingresa el millaje del aviso, o este recordatorio no se activará."
+          }
+        }
+      }
+    },
     "form.remindNextTime" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4403,6 +4326,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recuérdame la próxima vez"
+          }
+        }
+      }
+    },
+    "form.remindsOnceThenStops" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This will remind you once, then stop."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Te avisará una vez y luego parará."
           }
         }
       }
@@ -4473,6 +4413,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "REQUERIDO"
+          }
+        }
+      }
+    },
+    "form.resolveOdometerConflict" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resolve the odometer conflict above."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resuelve el conflicto del odómetro de arriba."
           }
         }
       }
@@ -4596,6 +4553,59 @@
         }
       }
     },
+    "form.theReminder" : {
+      "comment" : "Section title over the future branch.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The reminder"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El recordatorio"
+          }
+        }
+      }
+    },
+    "form.theVisit" : {
+      "comment" : "Section title over the past branch.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The visit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La visita"
+          }
+        }
+      }
+    },
+    "form.timingRequired" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose when it happened, or when it is due."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige cuándo ocurrió, o cuándo vence."
+          }
+        }
+      }
+    },
     "form.use" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4647,6 +4657,24 @@
         }
       }
     },
+    "form.when" : {
+      "comment" : "Section title over the timing chips — the control that derives intent.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuándo"
+          }
+        }
+      }
+    },
     "form.whicheverFirst" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4660,6 +4688,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lo que ocurra primero"
+          }
+        }
+      }
+    },
+    "form.whicheverFirstFromCompletion" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Whichever comes first, counted from the day you mark it done."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo que ocurra primero, contado desde el día que lo marques hecho."
           }
         }
       }
@@ -4692,11 +4737,202 @@
     "Handling multiple services in one visit reduces trips and may lower labor costs." : {
 
     },
+    "header.makeModelYear" : {
+      "comment" : "Support line under the vehicle nickname. Args: make, model, year.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ · %3$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ · %3$@"
+          }
+        }
+      }
+    },
+    "header.odometer" : {
+      "comment" : "Label on the header's odometer cell.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ODOMETER"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ODÓMETRO"
+          }
+        }
+      }
+    },
+    "header.selectVehicle" : {
+      "comment" : "Vehicle header placeholder when no vehicle is selected. Displayed uppercase.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SELECT VEHICLE"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ELEGIR VEHÍCULO"
+          }
+        }
+      }
+    },
+    "header.selectVehicleAccessibility" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select vehicle"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegir vehículo"
+          }
+        }
+      }
+    },
+    "header.selectVehicleHint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Double tap to choose a vehicle"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca dos veces para elegir un vehículo"
+          }
+        }
+      }
+    },
+    "header.specs" : {
+      "comment" : "Disclosure trigger beneath the vehicle name that reveals reference data (plate, VIN, tires, oil).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SPECS"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FICHA"
+          }
+        }
+      }
+    },
+    "header.specsAccessibility" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vehicle specs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ficha del vehículo"
+          }
+        }
+      }
+    },
+    "header.specsCollapsed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collapsed"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contraído"
+          }
+        }
+      }
+    },
+    "header.specsExpanded" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expanded"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expandido"
+          }
+        }
+      }
+    },
     "Help keep Checkpoint free and actively developed. Every tip unlocks an exclusive rare theme." : {
 
     },
     "Helps us improve Checkpoint. No personal data is ever collected." : {
 
+    },
+    "home.recentActivity" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recent activity"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actividad reciente"
+          }
+        }
+      }
+    },
+    "home.upcoming" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upcoming"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximos"
+          }
+        }
+      }
     },
     "I couldn't find any vehicle data. Please open Checkpoint to set up your vehicles." : {
 
@@ -4791,9 +5027,6 @@
         }
       }
     },
-    "LAST: %@" : {
-
-    },
     "Late %@" : {
       "localizations" : {
         "en" : {
@@ -4826,9 +5059,6 @@
 
     },
     "LOG ALL %lld SERVICES AT CURRENT MILEAGE" : {
-
-    },
-    "Log service" : {
 
     },
     "Look Up VIN" : {
@@ -4915,26 +5145,6 @@
     "MILEAGE WINDOW" : {
 
     },
-    "Mileage: %@" : {
-
-    },
-    "mileage.current_estimate" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Current Estimate"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Estimado actual"
-          }
-        }
-      }
-    },
     "mileage.alsoUpdates" : {
       "comment" : "Shown before saving when a service's odometer reading will also become the vehicle's current mileage. %1$@ is the previous reading, %2$@ the new one.",
       "extractionState" : "manual",
@@ -4949,6 +5159,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "También actualiza el odómetro — %1$@ → %2$@"
+          }
+        }
+      }
+    },
+    "mileage.current_estimate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current Estimate"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimado actual"
           }
         }
       }
@@ -5119,6 +5346,348 @@
     },
     "NOTES" : {
 
+    },
+    "notification.bundle.body" : {
+      "comment" : "Body of a bundled service reminder. %1$@ is the vehicle, %2$@ the list of service names.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ - %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ - %2$@"
+          }
+        }
+      }
+    },
+    "notification.bundle.body.overflow" : {
+      "comment" : "Body of a bundled reminder listing too many services to name. %1$@ vehicle, %2$@ named services, %3$lld how many more.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ - %2$@ and %3$lld more"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ - %2$@ y %3$lld más"
+          }
+        }
+      }
+    },
+    "notification.bundle.title.generic" : {
+      "comment" : "Title when several services come due at a non-standard lead time. %1$lld count, %2$lld days.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld services due in %2$lld days"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld servicios vencen en %2$lld días"
+          }
+        }
+      }
+    },
+    "notification.bundle.title.month" : {
+      "comment" : "Title when several services come due in 30 days. %lld is the count.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld services coming up"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld servicios se acercan"
+          }
+        }
+      }
+    },
+    "notification.bundle.title.today" : {
+      "comment" : "Title when several services come due today. %lld is the count.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld services due today"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld servicios vencen hoy"
+          }
+        }
+      }
+    },
+    "notification.bundle.title.tomorrow" : {
+      "comment" : "Title when several services come due tomorrow. %lld is the count.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld services due tomorrow"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld servicios vencen mañana"
+          }
+        }
+      }
+    },
+    "notification.bundle.title.week" : {
+      "comment" : "Title when several services come due in a week. %lld is the count.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld services due in 1 week"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld servicios vencen en 1 semana"
+          }
+        }
+      }
+    },
+    "notification.serviceDue.body.generic" : {
+      "comment" : "Body for a single service at a non-standard lead time. %1$@ vehicle, %2$@ service, %3$lld days.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ - %2$@ is due in %3$lld days"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ - %2$@ vence en %3$lld días"
+          }
+        }
+      }
+    },
+    "notification.serviceDue.body.month" : {
+      "comment" : "Body for a single service due in 30 days. %1$@ vehicle, %2$@ service.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ - %2$@ is due in 30 days"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ - %2$@ vence en 30 días"
+          }
+        }
+      }
+    },
+    "notification.serviceDue.body.today" : {
+      "comment" : "Body for a single service due today. %1$@ vehicle, %2$@ service.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ - %2$@ is due for maintenance"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ - %2$@ requiere mantenimiento"
+          }
+        }
+      }
+    },
+    "notification.serviceDue.body.tomorrow" : {
+      "comment" : "Body for a single service due tomorrow. %1$@ vehicle, %2$@ service.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ - %2$@ is due tomorrow"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ - %2$@ vence mañana"
+          }
+        }
+      }
+    },
+    "notification.serviceDue.body.week" : {
+      "comment" : "Body for a single service due in a week. %1$@ vehicle, %2$@ service.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ - %2$@ is due in 7 days"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ - %2$@ vence en 7 días"
+          }
+        }
+      }
+    },
+    "notification.serviceDue.title.generic" : {
+      "comment" : "Title for a single service at a non-standard lead time. %@ is the service name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Reminder"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recordatorio: %@"
+          }
+        }
+      }
+    },
+    "notification.serviceDue.title.month" : {
+      "comment" : "Title for a single service due in 30 days. %@ is the service name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Coming Up"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ se acerca"
+          }
+        }
+      }
+    },
+    "notification.serviceDue.title.today" : {
+      "comment" : "Title for a single service due today. %@ is the service name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Due Today"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ vence hoy"
+          }
+        }
+      }
+    },
+    "notification.serviceDue.title.tomorrow" : {
+      "comment" : "Title for a single service due tomorrow. %@ is the service name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Due Tomorrow"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ vence mañana"
+          }
+        }
+      }
+    },
+    "notification.serviceDue.title.week" : {
+      "comment" : "Title for a single service due in a week. %@ is the service name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Due in 1 Week"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ vence en 1 semana"
+          }
+        }
+      }
+    },
+    "notification.snooze.body" : {
+      "comment" : "Body of a snoozed service reminder. %1$@ vehicle, %2$@ service.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ - %2$@ is due for maintenance"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ - %2$@ requiere mantenimiento"
+          }
+        }
+      }
+    },
+    "notification.snooze.title" : {
+      "comment" : "Title of a snoozed service reminder. %@ is the service name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Reminder"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recordatorio: %@"
+          }
+        }
+      }
     },
     "ocr.error.image_processing_failed" : {
       "extractionState" : "manual",
@@ -6046,13 +6615,7 @@
     "Open document" : {
 
     },
-    "Open documents library" : {
-
-    },
     "Open full document" : {
-
-    },
-    "OPEN LIBRARY" : {
 
     },
     "Opening Checkpoint to update %@ to %lld miles." : {
@@ -6635,12 +7198,6 @@
     "RECEIPT" : {
 
     },
-    "Record a completed service" : {
-
-    },
-    "RECORD COMPLETED SERVICE" : {
-
-    },
     "record.setIntervalHint" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6777,13 +7334,345 @@
     "RISK" : {
 
     },
+    "row.completedAccessibility" : {
+      "comment" : "VoiceOver label for a completed-service row. %1$@ is the service name, %2$@ the date.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ completed %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ completado el %2$@"
+          }
+        }
+      }
+    },
+    "row.daysLeft" : {
+      "comment" : "Primary urgency value for a date-based service.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In %lld days"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En %lld días"
+          }
+        }
+      }
+    },
+    "row.daysOverdue" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld days overdue"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld días de retraso"
+          }
+        }
+      }
+    },
+    "row.distanceLeft" : {
+      "comment" : "Primary urgency value on a service row. %@ is a formatted distance including its unit, e.g. '1,200 mi'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ left"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ restantes"
+          }
+        }
+      }
+    },
+    "row.distanceOverdue" : {
+      "comment" : "Primary urgency value when a mileage-based service is past due. %@ is a formatted distance including its unit.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ overdue"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ de retraso"
+          }
+        }
+      }
+    },
+    "row.dueNow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Due now"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence ahora"
+          }
+        }
+      }
+    },
+    "row.dueToday" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Due today"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence hoy"
+          }
+        }
+      }
+    },
+    "row.dueTomorrow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Due tomorrow"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence mañana"
+          }
+        }
+      }
+    },
+    "row.lastPerformed" : {
+      "comment" : "Supporting line on a service row. %@ is a relative time such as 'Today' or '3 mo ago'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last done %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última vez %@"
+          }
+        }
+      }
+    },
+    "row.noCostRecorded" : {
+      "comment" : "VoiceOver value when a row has no amount.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No cost recorded"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin costo registrado"
+          }
+        }
+      }
+    },
+    "row.noDueDate" : {
+      "comment" : "VoiceOver value for a service with no schedule configured.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No due date"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin fecha de vencimiento"
+          }
+        }
+      }
+    },
+    "row.noTotalRecorded" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No total recorded"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin total registrado"
+          }
+        }
+      }
+    },
+    "row.outlierAccessibility" : {
+      "comment" : "Appended to a row's VoiceOver label when the amount is a statistical outlier.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ", outlier"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ", atípico"
+          }
+        }
+      }
+    },
+    "row.serviceFallback" : {
+      "comment" : "Title for a log whose service relationship is missing.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Service"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servicio"
+          }
+        }
+      }
+    },
+    "row.viewDetailsHint" : {
+      "comment" : "VoiceOver hint for a tappable list row.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Double tap to view details"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca dos veces para ver detalles"
+          }
+        }
+      }
+    },
+    "row.visitAccessibility" : {
+      "comment" : "VoiceOver label for a bundled visit row. %1$@ is the date, %2$lld the service count.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Service visit on %1$@, %2$lld services"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visita de servicio el %1$@, %2$lld servicios"
+          }
+        }
+      }
+    },
+    "row.visitTag" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SERVICE VISIT"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VISITA"
+          }
+        }
+      }
+    },
+    "row.visitTitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Service Visit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visita de servicio"
+          }
+        }
+      }
+    },
+    "row.visitTitleCount" : {
+      "comment" : "Title for a bundled visit covering several services. %lld is the count.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Service Visit · %lld services"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visita de servicio · %lld servicios"
+          }
+        }
+      }
+    },
     "Save" : {
 
     },
     "Scan with camera" : {
-
-    },
-    "Schedule service" : {
 
     },
     "SCHEDULE SERVICE" : {
@@ -6799,7 +7688,6 @@
 
     },
     "SCHEDULED" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6877,19 +7765,6 @@
     },
     "SERVICE VISIT" : {
 
-    },
-    "Service Visit · %lld services" : {
-
-    },
-    "Service Visit on %@, %lld services" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Service Visit on %1$@, %2$lld services"
-          }
-        }
-      }
     },
     "SERVICE VISIT OPPORTUNITY" : {
 
@@ -7042,11 +7917,146 @@
     "Services within this mileage range of each other will be suggested for bundling." : {
 
     },
-    "SET A REMINDER" : {
-
+    "servicesTab.documentLibrary" : {
+      "comment" : "Destination link at the bottom of the Services tab.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Document library"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biblioteca de documentos"
+          }
+        }
+      }
     },
-    "Set a reminder for future service" : {
-
+    "servicesTab.export" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportar"
+          }
+        }
+      }
+    },
+    "servicesTab.historyCount" : {
+      "comment" : "Section title over the service-history list. %lld is the number of entries.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld entries"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld registros"
+          }
+        }
+      }
+    },
+    "servicesTab.reference" : {
+      "comment" : "Heading over destination links that are not maintenance state.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reference"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Referencia"
+          }
+        }
+      }
+    },
+    "servicesTab.scheduledCount" : {
+      "comment" : "Section title over the upcoming-services list. %lld is the number shown.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld scheduled"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld programados"
+          }
+        }
+      }
+    },
+    "servicesTab.statusDimension" : {
+      "comment" : "Names the status filter dimension on the Services tab.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Status"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estado"
+          }
+        }
+      }
+    },
+    "servicesTab.viewList" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lista"
+          }
+        }
+      }
+    },
+    "servicesTab.viewTimeline" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timeline"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cronología"
+          }
+        }
+      }
     },
     "Set up reminder" : {
 
@@ -7443,9 +8453,6 @@
     "Sign in to iCloud in Settings" : {
 
     },
-    "SPECS" : {
-
-    },
     "Spending pace chart showing cumulative costs over time" : {
 
     },
@@ -7496,6 +8503,24 @@
     "Syncs your vehicles and maintenance data across your Apple devices via iCloud." : {
 
     },
+    "tabBar.addService" : {
+      "comment" : "VoiceOver label for the tab bar's [+] button.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add service"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añadir servicio"
+          }
+        }
+      }
+    },
     "TAP TO EDIT" : {
 
     },
@@ -7544,6 +8569,282 @@
     },
     "This will permanently delete \"%@\" and all its services and maintenance history." : {
 
+    },
+    "timeSince.daysAgo" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld days ago"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hace %lld días"
+          }
+        }
+      }
+    },
+    "timeSince.daysAgoShort" : {
+      "comment" : "Abbreviated relative time for width-constrained rows.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lldd ago"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hace %lldd"
+          }
+        }
+      }
+    },
+    "timeSince.monthsAgo" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld months ago"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hace %lld meses"
+          }
+        }
+      }
+    },
+    "timeSince.monthsAgoShort" : {
+      "comment" : "Abbreviated relative time for width-constrained rows.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld mo ago"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hace %lld m"
+          }
+        }
+      }
+    },
+    "timeSince.oneMonthAgo" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 month ago"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hace 1 mes"
+          }
+        }
+      }
+    },
+    "timeSince.today" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "today"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hoy"
+          }
+        }
+      }
+    },
+    "timeSince.todaySentence" : {
+      "comment" : "Standalone, sentence-cased. Used where the value stands alone rather than inside a sentence.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoy"
+          }
+        }
+      }
+    },
+    "timeSince.yesterday" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "yesterday"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ayer"
+          }
+        }
+      }
+    },
+    "timeSince.yesterdaySentence" : {
+      "comment" : "Standalone, sentence-cased.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yesterday"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayer"
+          }
+        }
+      }
+    },
+    "timing.atMileage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At mileage…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A cierto millaje…"
+          }
+        }
+      }
+    },
+    "timing.earlier" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Earlier…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Antes…"
+          }
+        }
+      }
+    },
+    "timing.inSixMonths" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In 6 months"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En 6 meses"
+          }
+        }
+      }
+    },
+    "timing.inThreeMonths" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In 3 months"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En 3 meses"
+          }
+        }
+      }
+    },
+    "timing.onDate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick a date…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegir fecha…"
+          }
+        }
+      }
+    },
+    "timing.today" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoy"
+          }
+        }
+      }
+    },
+    "timing.yesterday" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yesterday"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayer"
+          }
+        }
+      }
     },
     "TIP" : {
 
@@ -7635,6 +8936,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recordatorio configurado"
+          }
+        }
+      }
+    },
+    "toast.reminderSetAt" : {
+      "comment" : "Confirms a mileage-triggered reminder. %@ is the target mileage.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reminder set for %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recordatorio para %@"
+          }
+        }
+      }
+    },
+    "toast.reminderSetFor" : {
+      "comment" : "Confirms a date-triggered reminder. %@ is the due date.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reminder set for %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recordatorio para %@"
           }
         }
       }
@@ -7869,9 +9206,6 @@
     "Update mileage on ${vehicle} to ${mileage} miles" : {
 
     },
-    "Update needed" : {
-
-    },
     "Update recall status" : {
 
     },
@@ -7890,9 +9224,6 @@
     "Usage Analytics" : {
 
     },
-    "Use %@" : {
-
-    },
     "USE A CUSTOM SERVICE INSTEAD" : {
 
     },
@@ -7902,9 +9233,6 @@
     "Vehicle" : {
 
     },
-    "VEHICLE DOCUMENTS" : {
-
-    },
     "Vehicle Name" : {
 
     },
@@ -7912,9 +9240,6 @@
 
     },
     "Vehicle options" : {
-
-    },
-    "Vehicle specs" : {
 
     },
     "vehicle.add" : {
@@ -8070,6 +9395,23 @@
         }
       }
     },
+    "vehicle.identityRequired" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan or enter a VIN, or fill in the make and model."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escanea o escribe un VIN, o completa la marca y el modelo."
+          }
+        }
+      }
+    },
     "vehicle.license_plate" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8117,6 +9459,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Toyota, Honda, Ford…"
+          }
+        }
+      }
+    },
+    "vehicle.marbete" : {
+      "comment" : "Puerto Rico vehicle registration sticker. Kept untranslated — it is the local term in both languages.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marbete"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marbete"
           }
         }
       }
@@ -8242,6 +9602,23 @@
         }
       }
     },
+    "vehicle.nicknameEffect" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shown instead of the year, make, and model in the header."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se muestra en vez del año, marca y modelo en el encabezado."
+          }
+        }
+      }
+    },
     "vehicle.notes" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8276,51 +9653,6 @@
         }
       }
     },
-    "common.stepOfTotal" : {
-      "comment" : "VoiceOver label for a paged flow's progress dots.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Step %1$lld of %2$lld" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Paso %1$lld de %2$lld" } }
-      }
-    },
-    "vehicle.identityRequired" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Scan or enter a VIN, or fill in the make and model." } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Escanea o escribe un VIN, o completa la marca y el modelo." } }
-      }
-    },
-    "vehicle.marbete" : {
-      "comment" : "Puerto Rico vehicle registration sticker. Kept untranslated — it is the local term in both languages.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Marbete" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Marbete" } }
-      }
-    },
-    "vehicle.nicknameEffect" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Shown instead of the year, make, and model in the header." } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Se muestra en vez del año, marca y modelo en el encabezado." } }
-      }
-    },
-    "vehicle.odometerRequired" : {
-      "comment" : "Why the odometer cannot be optional.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "No VIN lookup can supply this, and every mileage reminder is measured from it." } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ninguna búsqueda de VIN puede darlo, y cada recordatorio por millaje se mide desde ahí." } }
-      }
-    },
-    "vehicle.yearOutOfRange" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "That model year looks wrong — check it, or leave it blank." } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ese año de modelo parece incorrecto — revísalo o déjalo en blanco." } }
-      }
-    },
     "vehicle.odometer" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8334,6 +9666,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Odómetro"
+          }
+        }
+      }
+    },
+    "vehicle.odometerRequired" : {
+      "comment" : "Why the odometer cannot be optional.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No VIN lookup can supply this, and every mileage reminder is measured from it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ninguna búsqueda de VIN puede darlo, y cada recordatorio por millaje se mide desde ahí."
           }
         }
       }
@@ -8611,14 +9961,22 @@
         }
       }
     },
-    "View All" : {
-
-    },
-    "View all recent activity" : {
-
-    },
-    "View all upcoming services" : {
-
+    "vehicle.yearOutOfRange" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That model year looks wrong — check it, or leave it blank."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ese año de modelo parece incorrecto — revísalo o déjalo en blanco."
+          }
+        }
+      }
     },
     "VIN" : {
 

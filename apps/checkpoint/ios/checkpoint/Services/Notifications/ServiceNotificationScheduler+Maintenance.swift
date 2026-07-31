@@ -35,9 +35,8 @@ extension ServiceNotificationScheduler {
         await NotificationHelpers.enforcePendingBudget()
     }
 
-    /// Remove pending service requests whose service no longer exists or
-    /// whose identifier predates the deterministic `service-<serviceID>`
-    /// scheme — neither can be reached by `cancelAllNotifications(baseID:)`.
+    /// Remove pending service requests that no longer match live data — a
+    /// service that was deleted, or a bundle naming one.
     static func removeOrphanedNotifications(validServiceIDs: Set<UUID>) async {
         let center = UNUserNotificationCenter.current()
         let pending = await center.pendingNotificationRequests()
@@ -45,7 +44,7 @@ extension ServiceNotificationScheduler {
         let orphanedIDs = pending.filter {
             isOrphanedServiceRequest(
                 identifier: $0.identifier,
-                serviceIDString: $0.content.userInfo["serviceID"] as? String,
+                userInfo: $0.content.userInfo,
                 validServiceIDs: validServiceIDs
             )
         }.map(\.identifier)
@@ -55,16 +54,26 @@ extension ServiceNotificationScheduler {
         center.removePendingNotificationRequests(withIdentifiers: orphanedIDs)
     }
 
-    /// Whether a pending request no longer maps to a live service's
-    /// deterministic notification set. Non-service requests (mileage,
-    /// marbete, cluster, roundup) are never considered orphans here.
+    /// Whether a pending request no longer maps to live services. Non-service
+    /// requests (mileage, marbete, roundup) are never considered orphans here.
+    ///
+    /// A bundle is orphaned if *any* service it names is gone: its body lists
+    /// that service, so the content is wrong even though the rest of the set
+    /// still exists. The reschedule that follows this sweep re-adds a correct
+    /// bundle for whatever remains.
     static func isOrphanedServiceRequest(
-        identifier: String, serviceIDString: String?, validServiceIDs: Set<UUID>
+        identifier: String, userInfo: [AnyHashable: Any], validServiceIDs: Set<UUID>
     ) -> Bool {
-        guard identifier.hasPrefix("service-") else { return false }
-        guard let serviceIDString,
-              let serviceID = UUID(uuidString: serviceIDString),
-              validServiceIDs.contains(serviceID) else { return true }
-        return !identifier.hasPrefix(baseNotificationID(forServiceID: serviceID))
+        guard identifier.hasPrefix(requestPrefix) else { return false }
+
+        let referenced = referencedServiceIDs(in: userInfo)
+        // A service request that names no service can't be verified, and
+        // nothing that still schedules is capable of producing one.
+        guard !referenced.isEmpty else { return true }
+
+        return referenced.contains { idString in
+            guard let id = UUID(uuidString: idString) else { return true }
+            return !validServiceIDs.contains(id)
+        }
     }
 }

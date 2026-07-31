@@ -767,6 +767,74 @@ enum L10n {
     static var remindNoScheduleWarning: String { localized("remind.noScheduleWarning") }
     static var recordSetIntervalHint: String { localized("record.setIntervalHint") }
 
+    // MARK: - Service reminder notifications
+    //
+    // One family per lead time rather than one string with an interpolated
+    // interval: "due tomorrow" and "due in 30 days" are different sentences in
+    // most languages, not one sentence with a number in it.
+
+    static func notificationServiceDueTitleToday(_ serviceName: String) -> String {
+        String(format: localized("notification.serviceDue.title.today"), serviceName)
+    }
+    static func notificationServiceDueTitleTomorrow(_ serviceName: String) -> String {
+        String(format: localized("notification.serviceDue.title.tomorrow"), serviceName)
+    }
+    static func notificationServiceDueTitleWeek(_ serviceName: String) -> String {
+        String(format: localized("notification.serviceDue.title.week"), serviceName)
+    }
+    static func notificationServiceDueTitleMonth(_ serviceName: String) -> String {
+        String(format: localized("notification.serviceDue.title.month"), serviceName)
+    }
+    static func notificationServiceDueTitleGeneric(_ serviceName: String) -> String {
+        String(format: localized("notification.serviceDue.title.generic"), serviceName)
+    }
+
+    static func notificationServiceDueBodyToday(_ vehicleName: String, _ serviceName: String) -> String {
+        String(format: localized("notification.serviceDue.body.today"), vehicleName, serviceName)
+    }
+    static func notificationServiceDueBodyTomorrow(_ vehicleName: String, _ serviceName: String) -> String {
+        String(format: localized("notification.serviceDue.body.tomorrow"), vehicleName, serviceName)
+    }
+    static func notificationServiceDueBodyWeek(_ vehicleName: String, _ serviceName: String) -> String {
+        String(format: localized("notification.serviceDue.body.week"), vehicleName, serviceName)
+    }
+    static func notificationServiceDueBodyMonth(_ vehicleName: String, _ serviceName: String) -> String {
+        String(format: localized("notification.serviceDue.body.month"), vehicleName, serviceName)
+    }
+    static func notificationServiceDueBodyGeneric(_ vehicleName: String, _ serviceName: String, _ days: Int) -> String {
+        String(format: localized("notification.serviceDue.body.generic"), vehicleName, serviceName, days)
+    }
+
+    static func notificationBundleTitleToday(_ count: Int) -> String {
+        String(format: localized("notification.bundle.title.today"), count)
+    }
+    static func notificationBundleTitleTomorrow(_ count: Int) -> String {
+        String(format: localized("notification.bundle.title.tomorrow"), count)
+    }
+    static func notificationBundleTitleWeek(_ count: Int) -> String {
+        String(format: localized("notification.bundle.title.week"), count)
+    }
+    static func notificationBundleTitleMonth(_ count: Int) -> String {
+        String(format: localized("notification.bundle.title.month"), count)
+    }
+    static func notificationBundleTitleGeneric(_ count: Int, _ days: Int) -> String {
+        String(format: localized("notification.bundle.title.generic"), count, days)
+    }
+
+    static func notificationBundleBody(_ vehicleName: String, _ serviceList: String) -> String {
+        String(format: localized("notification.bundle.body"), vehicleName, serviceList)
+    }
+    static func notificationBundleBodyOverflow(_ vehicleName: String, _ serviceList: String, _ remaining: Int) -> String {
+        String(format: localized("notification.bundle.body.overflow"), vehicleName, serviceList, remaining)
+    }
+
+    static func notificationSnoozeTitle(_ serviceName: String) -> String {
+        String(format: localized("notification.snooze.title"), serviceName)
+    }
+    static func notificationSnoozeBody(_ vehicleName: String, _ serviceName: String) -> String {
+        String(format: localized("notification.snooze.body"), vehicleName, serviceName)
+    }
+
     // MARK: - Helper
 
     private static func localized(_ key: String) -> String {

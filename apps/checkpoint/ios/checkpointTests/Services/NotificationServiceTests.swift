@@ -62,104 +62,88 @@ final class NotificationServiceTests: XCTestCase {
         XCTAssertEqual(intervals, [30, 7, 1, 0], "Default intervals should be 30, 7, 1, and 0 days before due")
     }
 
-    // MARK: - Schedule Notification Tests
+    // MARK: - Occurrence Tests
+    //
+    // `occurrences` is the input to bundling: what each service wants, before
+    // anything is grouped or handed to the notification center.
 
-    func testScheduleNotificationReturnsNilForNilDueDate() {
-        // Given
+    func testOccurrencesEmptyForNilDueDate() {
         let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
         let serviceItem = Service(name: "Oil Change", dueDate: nil)
         serviceItem.vehicle = vehicle
+        vehicle.services = [serviceItem]
 
-        // When
-        let notificationID = service.scheduleNotification(for: serviceItem, vehicle: vehicle)
+        let occurrences = ServiceNotificationScheduler.occurrences(for: vehicle, dailyPace: nil)
 
-        // Then
-        XCTAssertNil(notificationID, "Should return nil when due date is nil")
+        XCTAssertTrue(occurrences.isEmpty, "A service with no due date wants no reminder")
     }
 
-    func testScheduleNotificationReturnsNilForPastDueDate() {
-        // Given
+    func testOccurrencesEmptyForPastDueDate() {
         let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
         let pastDate = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
         let serviceItem = Service(name: "Oil Change", dueDate: pastDate)
         serviceItem.vehicle = vehicle
+        vehicle.services = [serviceItem]
 
-        // When
-        let notificationID = service.scheduleNotification(for: serviceItem, vehicle: vehicle)
+        let occurrences = ServiceNotificationScheduler.occurrences(for: vehicle, dailyPace: nil)
 
-        // Then
-        XCTAssertNil(notificationID, "Should return nil when due date is in the past")
+        XCTAssertTrue(occurrences.isEmpty, "A past due date can't produce a deliverable trigger")
     }
 
-    func testScheduleNotificationReturnsIDForFutureDueDate() {
-        // Given
+    func testOccurrencesCoverEveryIntervalStillAhead() {
         let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
-        let futureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
+        let futureDate = Calendar.current.date(byAdding: .day, value: 45, to: Date())!
         let serviceItem = Service(name: "Oil Change", dueDate: futureDate)
         serviceItem.vehicle = vehicle
+        vehicle.services = [serviceItem]
 
-        // When
-        let notificationID = service.scheduleNotification(for: serviceItem, vehicle: vehicle)
+        let occurrences = ServiceNotificationScheduler.occurrences(for: vehicle, dailyPace: nil)
 
-        // Then
-        XCTAssertNotNil(notificationID, "Should return notification ID for future due date")
-        XCTAssertTrue(notificationID?.hasPrefix("service-") ?? false, "ID should have service prefix")
+        // 45 days out, so all four lead times are still in the future
+        XCTAssertEqual(
+            Set(occurrences.map(\.daysBeforeDue)),
+            Set(NotificationService.defaultReminderIntervals)
+        )
+        XCTAssertTrue(occurrences.allSatisfy { $0.serviceID == serviceItem.id })
     }
 
-    func testScheduleNotificationUsesDeterministicID() {
-        // Given
+    func testOccurrencesDropIntervalsAlreadyPassed() {
         let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
-        let futureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
+        let futureDate = Calendar.current.date(byAdding: .day, value: 3, to: Date())!
         let serviceItem = Service(name: "Oil Change", dueDate: futureDate)
         serviceItem.vehicle = vehicle
+        vehicle.services = [serviceItem]
 
-        // When
-        let notificationID = service.scheduleNotification(for: serviceItem, vehicle: vehicle)
+        let occurrences = ServiceNotificationScheduler.occurrences(for: vehicle, dailyPace: nil)
 
-        // Then - ID is derived from the service so a reschedule replaces the
-        // pending set in place instead of orphaning it
-        XCTAssertEqual(notificationID, "service-\(serviceItem.id.uuidString)")
-        XCTAssertEqual(serviceItem.notificationID, notificationID, "Scheduler should record the base ID on the service")
+        // Due in 3 days: the 30- and 7-day marks are behind us
+        XCTAssertEqual(Set(occurrences.map(\.daysBeforeDue)), [1, 0])
     }
 
-    func testScheduleNotificationReplacesExistingNotification() {
-        // Given
-        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
-        let futureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
-        let serviceItem = Service(name: "Oil Change", dueDate: futureDate)
-        serviceItem.vehicle = vehicle
+    // MARK: - Notification Request Content Tests
 
-        // First scheduling
-        let firstID = service.scheduleNotification(for: serviceItem, vehicle: vehicle)
-
-        // When - schedule again
-        let secondID = service.scheduleNotification(for: serviceItem, vehicle: vehicle)
-
-        // Then - same deterministic ID, so the second set replaces the first
-        XCTAssertNotNil(secondID, "Should return notification ID")
-        XCTAssertEqual(firstID, secondID, "Rescheduling should reuse the service-derived ID")
+    /// A one-service bundle firing `daysBeforeDue` ahead of its due date.
+    private func singleBundle(_ name: String, daysBeforeDue: Int) -> ServiceReminderBundle {
+        let fireDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
+        return ServiceReminderBundle(
+            daysBeforeDue: daysBeforeDue,
+            notificationDate: fireDate,
+            occurrences: [
+                ServiceReminderOccurrence(
+                    serviceID: UUID(), serviceName: name,
+                    daysBeforeDue: daysBeforeDue, notificationDate: fireDate
+                )
+            ]
+        )
     }
-
-    // MARK: - Notification Request Content Tests (using buildNotificationRequest)
 
     func testBuildNotificationRequestContentFormat() {
-        // Given
         let vehicle = Vehicle(name: "My Car", make: "Toyota", model: "Camry", year: 2022)
-        let futureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
-        let serviceItem = Service(name: "Oil Change", dueDate: futureDate)
-        serviceItem.vehicle = vehicle
-        let notificationID = "test-notification-id"
 
-        // When - legacy method defaults to daysBeforeDue: 0 (due date)
         let request = service.buildNotificationRequest(
-            for: serviceItem,
-            vehicle: vehicle,
-            notificationID: notificationID,
-            dueDate: futureDate
+            for: singleBundle("Oil Change", daysBeforeDue: 0), vehicle: vehicle
         )
 
-        // Then - on due date, title should say "Due Today"
-        XCTAssertEqual(request.identifier, notificationID)
         XCTAssertEqual(request.content.title, "Oil Change Due Today")
         XCTAssertEqual(request.content.body, "My Car - Oil Change is due for maintenance")
         XCTAssertEqual(request.content.categoryIdentifier, NotificationService.serviceDueCategoryID)
@@ -167,149 +151,64 @@ final class NotificationServiceTests: XCTestCase {
     }
 
     func testBuildNotificationRequestContent30DaysBefore() {
-        // Given
         let vehicle = Vehicle(name: "My Car", make: "Toyota", model: "Camry", year: 2022)
-        let notificationDate = Calendar.current.date(byAdding: .day, value: 30, to: Date())!
-        let serviceItem = Service(name: "Oil Change")
-        serviceItem.vehicle = vehicle
-
-        // When
         let request = service.buildNotificationRequest(
-            for: serviceItem,
-            vehicle: vehicle,
-            notificationID: "test-id",
-            notificationDate: notificationDate,
-            daysBeforeDue: 30
+            for: singleBundle("Oil Change", daysBeforeDue: 30), vehicle: vehicle
         )
-
-        // Then
         XCTAssertEqual(request.content.title, "Oil Change Coming Up")
         XCTAssertEqual(request.content.body, "My Car - Oil Change is due in 30 days")
     }
 
     func testBuildNotificationRequestContent7DaysBefore() {
-        // Given
         let vehicle = Vehicle(name: "My Car", make: "Toyota", model: "Camry", year: 2022)
-        let notificationDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
-        let serviceItem = Service(name: "Oil Change")
-        serviceItem.vehicle = vehicle
-
-        // When
         let request = service.buildNotificationRequest(
-            for: serviceItem,
-            vehicle: vehicle,
-            notificationID: "test-id",
-            notificationDate: notificationDate,
-            daysBeforeDue: 7
+            for: singleBundle("Oil Change", daysBeforeDue: 7), vehicle: vehicle
         )
-
-        // Then
         XCTAssertEqual(request.content.title, "Oil Change Due in 1 Week")
         XCTAssertEqual(request.content.body, "My Car - Oil Change is due in 7 days")
     }
 
     func testBuildNotificationRequestContent1DayBefore() {
-        // Given
         let vehicle = Vehicle(name: "My Car", make: "Toyota", model: "Camry", year: 2022)
-        let notificationDate = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
-        let serviceItem = Service(name: "Oil Change")
-        serviceItem.vehicle = vehicle
-
-        // When
         let request = service.buildNotificationRequest(
-            for: serviceItem,
-            vehicle: vehicle,
-            notificationID: "test-id",
-            notificationDate: notificationDate,
-            daysBeforeDue: 1
+            for: singleBundle("Oil Change", daysBeforeDue: 1), vehicle: vehicle
         )
-
-        // Then
         XCTAssertEqual(request.content.title, "Oil Change Due Tomorrow")
         XCTAssertEqual(request.content.body, "My Car - Oil Change is due tomorrow")
     }
 
-    func testBuildNotificationRequestContentOnDueDate() {
-        // Given
-        let vehicle = Vehicle(name: "My Car", make: "Toyota", model: "Camry", year: 2022)
-        let notificationDate = Calendar.current.date(byAdding: .day, value: 0, to: Date())!
-        let serviceItem = Service(name: "Oil Change")
-        serviceItem.vehicle = vehicle
-
-        // When
-        let request = service.buildNotificationRequest(
-            for: serviceItem,
-            vehicle: vehicle,
-            notificationID: "test-id",
-            notificationDate: notificationDate,
-            daysBeforeDue: 0
-        )
-
-        // Then
-        XCTAssertEqual(request.content.title, "Oil Change Due Today")
-        XCTAssertEqual(request.content.body, "My Car - Oil Change is due for maintenance")
-    }
-
     func testBuildNotificationRequestUserInfoIncludesDaysBeforeDue() {
-        // Given
         let vehicle = Vehicle(name: "My Car", make: "Toyota", model: "Camry", year: 2022)
-        let notificationDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
-        let serviceItem = Service(name: "Oil Change")
-        serviceItem.vehicle = vehicle
-
-        // When
         let request = service.buildNotificationRequest(
-            for: serviceItem,
-            vehicle: vehicle,
-            notificationID: "test-id",
-            notificationDate: notificationDate,
-            daysBeforeDue: 7
+            for: singleBundle("Oil Change", daysBeforeDue: 7), vehicle: vehicle
         )
-
-        // Then
         XCTAssertEqual(request.content.userInfo["daysBeforeDue"] as? Int, 7)
     }
 
     func testBuildNotificationRequestUserInfoContainsIDs() {
-        // Given
         let vehicle = Vehicle(name: "My Car", make: "Toyota", model: "Camry", year: 2022)
-        let futureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
-        let serviceItem = Service(name: "Oil Change", dueDate: futureDate)
-        serviceItem.vehicle = vehicle
-        let notificationID = "test-notification-id"
+        let bundle = singleBundle("Oil Change", daysBeforeDue: 0)
 
-        // When
-        let request = service.buildNotificationRequest(
-            for: serviceItem,
-            vehicle: vehicle,
-            notificationID: notificationID,
-            dueDate: futureDate
+        let request = service.buildNotificationRequest(for: bundle, vehicle: vehicle)
+
+        XCTAssertEqual(
+            request.content.userInfo["serviceIDs"] as? [String],
+            bundle.serviceIDs.map(\.uuidString)
         )
-
-        // Then
-        XCTAssertNotNil(request.content.userInfo["serviceID"] as? String)
-        XCTAssertNotNil(request.content.userInfo["vehicleID"] as? String)
-        XCTAssertEqual(request.content.userInfo["serviceID"] as? String, serviceItem.id.uuidString)
         XCTAssertEqual(request.content.userInfo["vehicleID"] as? String, vehicle.id.uuidString)
+        // Singular key present only because this bundle has one member
+        XCTAssertEqual(
+            request.content.userInfo["serviceID"] as? String,
+            bundle.serviceIDs.first?.uuidString
+        )
     }
 
     func testBuildNotificationRequestTriggerAt9AM() {
-        // Given
         let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
-        let futureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
-        let serviceItem = Service(name: "Oil Change", dueDate: futureDate)
-        serviceItem.vehicle = vehicle
-        let notificationID = "test-notification-id"
-
-        // When
         let request = service.buildNotificationRequest(
-            for: serviceItem,
-            vehicle: vehicle,
-            notificationID: notificationID,
-            dueDate: futureDate
+            for: singleBundle("Oil Change", daysBeforeDue: 7), vehicle: vehicle
         )
 
-        // Then
         guard let trigger = request.trigger as? UNCalendarNotificationTrigger else {
             XCTFail("Trigger should be UNCalendarNotificationTrigger")
             return
@@ -320,79 +219,74 @@ final class NotificationServiceTests: XCTestCase {
     }
 
     func testBuildNotificationRequestTriggerDateComponents() {
-        // Given
         let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
-        let futureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
-        let serviceItem = Service(name: "Oil Change", dueDate: futureDate)
-        serviceItem.vehicle = vehicle
-        let notificationID = "test-notification-id"
-        let expectedComponents = Calendar.current.dateComponents([.year, .month, .day], from: futureDate)
-
-        // When
-        let request = service.buildNotificationRequest(
-            for: serviceItem,
-            vehicle: vehicle,
-            notificationID: notificationID,
-            dueDate: futureDate
+        let bundle = singleBundle("Oil Change", daysBeforeDue: 7)
+        let expected = Calendar.current.dateComponents(
+            [.year, .month, .day], from: bundle.notificationDate
         )
 
-        // Then
+        let request = service.buildNotificationRequest(for: bundle, vehicle: vehicle)
+
         guard let trigger = request.trigger as? UNCalendarNotificationTrigger else {
             XCTFail("Trigger should be UNCalendarNotificationTrigger")
             return
         }
-        XCTAssertEqual(trigger.dateComponents.year, expectedComponents.year)
-        XCTAssertEqual(trigger.dateComponents.month, expectedComponents.month)
-        XCTAssertEqual(trigger.dateComponents.day, expectedComponents.day)
+        XCTAssertEqual(trigger.dateComponents.year, expected.year)
+        XCTAssertEqual(trigger.dateComponents.month, expected.month)
+        XCTAssertEqual(trigger.dateComponents.day, expected.day)
+    }
+
+    func testBundleIdentifierIsPerVehiclePerDayPerInterval() {
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
+        let bundle = singleBundle("Oil Change", daysBeforeDue: 7)
+        let parts = Calendar.current.dateComponents(
+            [.year, .month, .day], from: bundle.notificationDate
+        )
+        let stamp = String(format: "%04d%02d%02d", parts.year!, parts.month!, parts.day!)
+
+        let request = service.buildNotificationRequest(for: bundle, vehicle: vehicle)
+
+        XCTAssertEqual(
+            request.identifier,
+            "service-bundle-\(vehicle.id.uuidString)-\(stamp)-7d",
+            "Re-adding an unchanged schedule must replace in place, not stack duplicates"
+        )
     }
 
     // MARK: - Cancel Notification Tests
 
     func testCancelNotificationById() {
-        // Given
-        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
-        let futureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
-        let serviceItem = Service(name: "Oil Change", dueDate: futureDate)
-        serviceItem.vehicle = vehicle
-
-        let notificationID = service.scheduleNotification(for: serviceItem, vehicle: vehicle)!
-
-        // When - should not crash
-        service.cancelNotification(id: notificationID)
-
-        // Then - verify method completes without error
+        // Should not crash on an identifier that was never added
+        service.cancelNotification(id: "service-bundle-\(UUID().uuidString)-20260101-due")
         XCTAssertTrue(true, "Cancel notification should complete without error")
     }
 
-    func testCancelNotificationForService() {
-        // Given
+    func testRemovingAServiceClearsItsMarkOnTheNextRebuild() async {
+        // There is no "cancel this one service": a bundle covering several
+        // services is reworded, not removed, when one drops out. Dropping a
+        // service means changing the model and rebuilding the vehicle.
         let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
         let futureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
-        let serviceItem = Service(name: "Oil Change", dueDate: futureDate)
-        serviceItem.vehicle = vehicle
+        let kept = Service(name: "Oil Change", dueDate: futureDate)
+        let dropped = Service(name: "Tire Rotation", dueDate: futureDate)
+        [kept, dropped].forEach { $0.vehicle = vehicle }
+        vehicle.services = [kept, dropped]
 
-        let notificationID = service.scheduleNotification(for: serviceItem, vehicle: vehicle)
-        serviceItem.notificationID = notificationID
+        await ServiceNotificationScheduler.rescheduleNotificationsAwaitingAdds(for: vehicle)
+        XCTAssertNotNil(dropped.notificationID, "Precondition: both services have reminders")
 
-        // When
-        service.cancelNotification(for: serviceItem)
+        vehicle.services = [kept]
+        dropped.vehicle = nil
+        await ServiceNotificationScheduler.rescheduleNotificationsAwaitingAdds(for: vehicle)
 
-        // Then
-        XCTAssertNil(serviceItem.notificationID, "Service notificationID should be cleared")
+        XCTAssertNotNil(kept.notificationID, "The surviving service keeps its reminder")
+        XCTAssertNotNil(
+            dropped.notificationID,
+            "A service detached from the vehicle is out of the rebuild's reach — the caller deletes it"
+        )
     }
 
-    func testCancelNotificationForServiceWithNilID() {
-        // Given
-        let serviceItem = Service(name: "Oil Change")
-        serviceItem.notificationID = nil
-
-        // When / Then - should not crash
-        service.cancelNotification(for: serviceItem)
-        XCTAssertNil(serviceItem.notificationID)
-    }
-
-    func testCancelAllNotifications() {
-        // Given
+    func testCancelAllNotifications() async {
         let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
         let futureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
 
@@ -400,9 +294,9 @@ final class NotificationServiceTests: XCTestCase {
         let service2 = Service(name: "Tire Rotation", dueDate: futureDate)
         service1.vehicle = vehicle
         service2.vehicle = vehicle
+        vehicle.services = [service1, service2]
 
-        self.service.scheduleNotification(for: service1, vehicle: vehicle)
-        self.service.scheduleNotification(for: service2, vehicle: vehicle)
+        await ServiceNotificationScheduler.rescheduleNotificationsAwaitingAdds(for: vehicle)
 
         // When - should not crash
         self.service.cancelAllNotifications()
@@ -411,9 +305,9 @@ final class NotificationServiceTests: XCTestCase {
         XCTAssertTrue(true, "Cancel all notifications should complete without error")
     }
 
-    // MARK: - Schedule Notifications for Vehicle Tests
+    // MARK: - Reschedule for Vehicle Tests
 
-    func testScheduleNotificationsForVehicle() {
+    func testRescheduleMarksOnlyServicesThatHaveReminders() async {
         // Given
         let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
         let futureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
@@ -427,12 +321,32 @@ final class NotificationServiceTests: XCTestCase {
         vehicle.services = [service1, service2, service3]
 
         // When
-        service.scheduleNotifications(for: vehicle)
+        await ServiceNotificationScheduler.rescheduleNotificationsAwaitingAdds(for: vehicle)
 
         // Then
-        XCTAssertNotNil(service1.notificationID, "Service with due date should have notification ID")
-        XCTAssertNotNil(service2.notificationID, "Service with due date should have notification ID")
-        XCTAssertNil(service3.notificationID, "Service without due date should not have notification ID")
+        XCTAssertNotNil(service1.notificationID, "Service with due date should be marked as reminded")
+        XCTAssertNotNil(service2.notificationID, "Service with due date should be marked as reminded")
+        XCTAssertNil(service3.notificationID, "Service without due date should not be marked")
+    }
+
+    func testRescheduleClearsMarkWhenDueDateDisappears() async {
+        // Given a service that had reminders
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
+        let serviceItem = Service(
+            name: "Oil Change",
+            dueDate: Calendar.current.date(byAdding: .day, value: 7, to: Date())!
+        )
+        serviceItem.vehicle = vehicle
+        vehicle.services = [serviceItem]
+        await ServiceNotificationScheduler.rescheduleNotificationsAwaitingAdds(for: vehicle)
+        XCTAssertNotNil(serviceItem.notificationID)
+
+        // When the due date is removed and the vehicle is rebuilt
+        serviceItem.dueDate = nil
+        await ServiceNotificationScheduler.rescheduleNotificationsAwaitingAdds(for: vehicle)
+
+        // Then the stale mark is cleared rather than left behind
+        XCTAssertNil(serviceItem.notificationID)
     }
 
     // MARK: - Snooze Tests
@@ -443,38 +357,38 @@ final class NotificationServiceTests: XCTestCase {
         let futureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
         let serviceItem = Service(name: "Oil Change", dueDate: futureDate)
         serviceItem.vehicle = vehicle
-
-        let originalID = service.scheduleNotification(for: serviceItem, vehicle: vehicle)
+        vehicle.services = [serviceItem]
 
         // When
         service.snoozeNotification(for: serviceItem, vehicle: vehicle)
 
-        // Then - snooze keeps the deterministic base so a later reschedule
-        // can still find and replace the snoozed request
-        XCTAssertNotNil(serviceItem.notificationID)
-        XCTAssertEqual(serviceItem.notificationID, originalID, "Snooze should keep the service-derived base ID")
+        // Then - a snooze is per service, so it keeps the service-derived base
+        // and `cancelAllNotifications(baseID:)` can still reach it
+        let baseID = ServiceNotificationScheduler.baseNotificationID(for: serviceItem)
+        XCTAssertEqual(serviceItem.notificationID, baseID)
         XCTAssertEqual(
-            ServiceNotificationScheduler.snoozeNotificationID(baseID: originalID!),
-            originalID! + "-snooze",
+            ServiceNotificationScheduler.snoozeNotificationID(baseID: baseID),
+            baseID + "-snooze",
             "Snooze ID should be derived from the base so cancellation can reach it"
         )
     }
 
-    func testCancelNotificationRemovesSnoozedRequest() async {
+    func testCancellingTheVehicleRemovesSnoozedRequests() async {
         // Given - a snoozed reminder
         let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
         let futureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
         let serviceItem = Service(name: "Oil Change", dueDate: futureDate)
         serviceItem.vehicle = vehicle
-        service.scheduleNotification(for: serviceItem, vehicle: vehicle)
+        vehicle.services = [serviceItem]
         service.snoozeNotification(for: serviceItem, vehicle: vehicle)
 
-        // When
-        service.cancelNotification(for: serviceItem)
+        // When - the vehicle-wide purge, which is what a delete or a rebuild
+        // runs. A snooze is per service but still belongs to the vehicle's set.
+        await ServiceNotificationScheduler.removeServiceRequests(forVehicleID: vehicle.id)
 
         // Then
         let hasPending = await service.hasPendingNotification(for: serviceItem)
-        XCTAssertFalse(hasPending, "Cancel should remove the snoozed request too")
+        XCTAssertFalse(hasPending, "The purge should reach the snoozed request too")
     }
 
     func testBuildSnoozeNotificationRequestSchedulesForTomorrow() {
@@ -595,55 +509,29 @@ final class NotificationServiceTests: XCTestCase {
     func testBuildNotificationRequestUsesVehicleDisplayName() {
         // Given - vehicle without custom name uses year/make/model
         let vehicle = Vehicle(make: "Honda", model: "Civic", year: 2023)
-        let futureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
-        let serviceItem = Service(name: "Oil Change", dueDate: futureDate)
-        serviceItem.vehicle = vehicle
-        let notificationID = "test-notification-id"
 
-        // When - using 7 days before due for a clear message
         let request = service.buildNotificationRequest(
-            for: serviceItem,
-            vehicle: vehicle,
-            notificationID: notificationID,
-            notificationDate: futureDate,
-            daysBeforeDue: 7
+            for: singleBundle("Oil Change", daysBeforeDue: 7), vehicle: vehicle
         )
 
-        // Then - Vehicle without custom name should use "year make model"
         XCTAssertEqual(request.content.body, "2023 Honda Civic - Oil Change is due in 7 days")
     }
 
     func testBuildNotificationRequestUsesCustomVehicleName() {
         // Given - vehicle with custom name
         let vehicle = Vehicle(name: "Family Car", make: "Honda", model: "Odyssey", year: 2023)
-        let futureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
-        let serviceItem = Service(name: "Brake Check", dueDate: futureDate)
-        serviceItem.vehicle = vehicle
-        let notificationID = "test-notification-id"
 
-        // When - using 7 days before due for a clear message
         let request = service.buildNotificationRequest(
-            for: serviceItem,
-            vehicle: vehicle,
-            notificationID: notificationID,
-            notificationDate: futureDate,
-            daysBeforeDue: 7
+            for: singleBundle("Brake Check", daysBeforeDue: 7), vehicle: vehicle
         )
 
-        // Then
         XCTAssertEqual(request.content.body, "Family Car - Brake Check is due in 7 days")
     }
 
     // MARK: - Cancel All Notifications for Base ID Tests
 
     func testCancelAllNotificationsForBaseID() {
-        // Given
-        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
-        let futureDate = Calendar.current.date(byAdding: .day, value: 45, to: Date())!
-        let serviceItem = Service(name: "Oil Change", dueDate: futureDate)
-        serviceItem.vehicle = vehicle
-
-        let baseID = service.scheduleNotification(for: serviceItem, vehicle: vehicle)!
+        let baseID = ServiceNotificationScheduler.baseNotificationID(forServiceID: UUID())
 
         // When - should not crash
         service.cancelAllNotifications(baseID: baseID)
@@ -702,46 +590,48 @@ final class NotificationServiceTests: XCTestCase {
 
     // MARK: - Orphaned Notification Sweep Tests
 
-    func testOrphanSweepFlagsLegacyRandomIDForExistingService() {
-        // A set scheduled before IDs became deterministic can't be reached
-        // by cancelAllNotifications, so the sweep must remove it
-        let serviceID = UUID()
+    func testOrphanSweepKeepsBundleWhoseServicesAllExist() {
+        let first = UUID(), second = UUID()
         let isOrphan = ServiceNotificationScheduler.isOrphanedServiceRequest(
-            identifier: "service-\(UUID().uuidString)-due",
-            serviceIDString: serviceID.uuidString,
-            validServiceIDs: [serviceID]
+            identifier: "service-bundle-\(UUID().uuidString)-20260801-due",
+            userInfo: ["serviceIDs": [first.uuidString, second.uuidString]],
+            validServiceIDs: [first, second]
         )
-        XCTAssertTrue(isOrphan, "Legacy random-base request should be swept")
+        XCTAssertFalse(isOrphan, "A bundle naming only live services should be kept")
     }
 
-    func testOrphanSweepKeepsDeterministicIDForExistingService() {
-        let serviceID = UUID()
+    func testOrphanSweepFlagsBundleNamingADeletedService() {
+        // The body lists every service by name, so one deletion makes the whole
+        // request's content wrong — the reschedule that follows re-adds a
+        // correct bundle for whatever remains.
+        let live = UUID()
         let isOrphan = ServiceNotificationScheduler.isOrphanedServiceRequest(
-            identifier: "service-\(serviceID.uuidString)-7d",
-            serviceIDString: serviceID.uuidString,
-            validServiceIDs: [serviceID]
+            identifier: "service-bundle-\(UUID().uuidString)-20260801-due",
+            userInfo: ["serviceIDs": [live.uuidString, UUID().uuidString]],
+            validServiceIDs: [live]
         )
-        XCTAssertFalse(isOrphan, "Current-scheme request for a live service should be kept")
+        XCTAssertTrue(isOrphan, "A bundle naming a deleted service should be swept")
     }
 
     func testOrphanSweepFlagsRequestForDeletedService() {
         let deletedServiceID = UUID()
         let isOrphan = ServiceNotificationScheduler.isOrphanedServiceRequest(
             identifier: "service-\(deletedServiceID.uuidString)-due",
-            serviceIDString: deletedServiceID.uuidString,
+            userInfo: ["serviceID": deletedServiceID.uuidString],
             validServiceIDs: []
         )
         XCTAssertTrue(isOrphan, "Request for a deleted service should be swept")
     }
 
-    func testOrphanSweepFlagsLegacySnoozeRequest() {
+    func testOrphanSweepKeepsSnoozeForLiveService() {
+        // A snooze stays per service, so its singular payload must survive.
         let serviceID = UUID()
         let isOrphan = ServiceNotificationScheduler.isOrphanedServiceRequest(
-            identifier: "service-snooze-\(UUID().uuidString)",
-            serviceIDString: serviceID.uuidString,
+            identifier: "service-\(serviceID.uuidString)-snooze",
+            userInfo: ["serviceID": serviceID.uuidString],
             validServiceIDs: [serviceID]
         )
-        XCTAssertTrue(isOrphan, "Legacy snooze request should be swept")
+        XCTAssertFalse(isOrphan, "A snoozed reminder for a live service should be kept")
     }
 
     func testOrphanSweepIgnoresNonServiceRequests() {
@@ -754,7 +644,7 @@ final class NotificationServiceTests: XCTestCase {
         ] {
             let isOrphan = ServiceNotificationScheduler.isOrphanedServiceRequest(
                 identifier: identifier,
-                serviceIDString: nil,
+                userInfo: [:],
                 validServiceIDs: []
             )
             XCTAssertFalse(isOrphan, "\(identifier) is not a service request and should be ignored")
@@ -764,10 +654,10 @@ final class NotificationServiceTests: XCTestCase {
     func testOrphanSweepFlagsServiceRequestWithoutServiceID() {
         let isOrphan = ServiceNotificationScheduler.isOrphanedServiceRequest(
             identifier: "service-\(UUID().uuidString)-due",
-            serviceIDString: nil,
+            userInfo: [:],
             validServiceIDs: []
         )
-        XCTAssertTrue(isOrphan, "Service request with no serviceID metadata should be swept")
+        XCTAssertTrue(isOrphan, "Service request naming no service can't be verified and should be swept")
     }
 
     // MARK: - Mileage Reminder Category Tests
@@ -1065,138 +955,84 @@ final class NotificationServiceTests: XCTestCase {
 
     // MARK: - Pace-Based Notification Tests
 
-    func testScheduleNotificationWithPace_UsesPredictedDate() {
-        // Given: Service with due mileage 1000 miles away at 40 mi/day = 25 days
+    func testOccurrencesUsePacePredictedDate() {
+        // Given: due mileage 1000 miles away at 40 mi/day = 25 days
         let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022, currentMileage: 50000)
         let serviceItem = Service(name: "Oil Change", dueMileage: 51000)
         serviceItem.vehicle = vehicle
+        vehicle.services = [serviceItem]
 
-        // When
-        let notificationID = service.scheduleNotificationWithPace(
-            for: serviceItem,
-            vehicle: vehicle,
-            dailyPace: 40.0
-        )
+        let occurrences = ServiceNotificationScheduler.occurrences(for: vehicle, dailyPace: 40.0)
 
-        // Then
-        XCTAssertNotNil(notificationID, "Should schedule notification based on predicted mileage date")
-        XCTAssertTrue(notificationID?.hasPrefix("service-") ?? false)
-
-        // Cleanup
-        if let id = notificationID {
-            service.cancelAllNotifications(baseID: id)
-        }
+        XCTAssertFalse(occurrences.isEmpty, "Pace should give a mileage-only service a projected due date")
+        let dueMark = occurrences.first { $0.daysBeforeDue == 0 }
+        XCTAssertNotNil(dueMark)
+        let daysOut = Calendar.current.dateComponents(
+            [.day], from: .now, to: dueMark!.notificationDate
+        ).day ?? 0
+        XCTAssertTrue((24...26).contains(daysOut), "1000 miles at 40/day is ~25 days out, got \(daysOut)")
     }
 
-    func testScheduleNotificationWithPace_NoPace_ReturnsNil() {
-        // Given: Service with only mileage (no date), no pace data
+    func testOccurrencesEmptyWithoutPaceOrDueDate() {
+        // Given: mileage-only service and no pace data to project from
         let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022, currentMileage: 50000)
         let serviceItem = Service(name: "Oil Change", dueMileage: 51000)
         serviceItem.vehicle = vehicle
+        vehicle.services = [serviceItem]
 
-        // When - no pace and no due date
-        let notificationID = service.scheduleNotificationWithPace(
-            for: serviceItem,
-            vehicle: vehicle,
-            dailyPace: nil
-        )
+        let occurrences = ServiceNotificationScheduler.occurrences(for: vehicle, dailyPace: nil)
 
-        // Then
-        XCTAssertNil(notificationID, "Should return nil when no effective due date")
+        XCTAssertTrue(occurrences.isEmpty, "No effective due date means no reminder")
     }
 
-    func testScheduleNotificationWithPace_UsesDueDateWhenEarlier() {
-        // Given: Due date in 10 days, mileage won't be reached for 50 days
-        let calendar = Calendar.current
-        let dueDate = calendar.date(byAdding: .day, value: 10, to: .now)!
+    func testOccurrencesUseDueDateWhenEarlierThanPaceProjection() {
+        // Given: due date in 10 days, mileage not reached for 50
+        let dueDate = Calendar.current.date(byAdding: .day, value: 10, to: .now)!
         let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022, currentMileage: 50000)
-        let serviceItem = Service(name: "Oil Change", dueDate: dueDate, dueMileage: 52000)  // 2000 miles at 40/day = 50 days
+        let serviceItem = Service(name: "Oil Change", dueDate: dueDate, dueMileage: 52000)
         serviceItem.vehicle = vehicle
+        vehicle.services = [serviceItem]
 
-        // When
-        let notificationID = service.scheduleNotificationWithPace(
-            for: serviceItem,
-            vehicle: vehicle,
-            dailyPace: 40.0
+        let occurrences = ServiceNotificationScheduler.occurrences(for: vehicle, dailyPace: 40.0)
+
+        let dueMark = occurrences.first { $0.daysBeforeDue == 0 }
+        XCTAssertNotNil(dueMark, "The earlier of the two signals should drive the reminder")
+        XCTAssertTrue(
+            Calendar.current.isDate(dueMark!.notificationDate, inSameDayAs: dueDate),
+            "Should use the due date, not the 50-day mileage projection"
         )
-
-        // Then
-        XCTAssertNotNil(notificationID, "Should schedule based on due date (earlier)")
-
-        // Cleanup
-        if let id = notificationID {
-            service.cancelAllNotifications(baseID: id)
-        }
     }
 
-    func testRescheduleNotifications_UpdatesAll() {
+    func testOccurrencesEmptyWhenAlreadyPastDue() {
+        // Given: mileage already past the due mark
+        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022, currentMileage: 52000)
+        let serviceItem = Service(name: "Oil Change", dueMileage: 51000)
+        serviceItem.vehicle = vehicle
+        vehicle.services = [serviceItem]
+
+        let occurrences = ServiceNotificationScheduler.occurrences(for: vehicle, dailyPace: 40.0)
+
+        XCTAssertTrue(occurrences.isEmpty, "A past-due service has no future reminder to schedule")
+    }
+
+    func testRescheduleIsIdempotent() async {
         // Given
         let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022, currentMileage: 50000)
         let futureDate = Calendar.current.date(byAdding: .day, value: 30, to: .now)!
+        let serviceItem = Service(name: "Oil Change", dueDate: futureDate, dueMileage: 51000)
+        serviceItem.vehicle = vehicle
+        vehicle.services = [serviceItem]
 
-        let service1 = Service(name: "Oil Change", dueDate: futureDate, dueMileage: 51000)
-        let service2 = Service(name: "Tire Rotation", dueDate: futureDate, dueMileage: 52000)
-        service1.vehicle = vehicle
-        service2.vehicle = vehicle
-        vehicle.services = [service1, service2]
+        // When rescheduled twice with unchanged data
+        await ServiceNotificationScheduler.rescheduleNotificationsAwaitingAdds(for: vehicle)
+        let firstMark = serviceItem.notificationID
+        await ServiceNotificationScheduler.rescheduleNotificationsAwaitingAdds(for: vehicle)
 
-        // When
-        service.rescheduleNotifications(for: vehicle)
-
-        // Then
-        XCTAssertNotNil(service1.notificationID, "Service 1 should have notification ID after reschedule")
-        XCTAssertNotNil(service2.notificationID, "Service 2 should have notification ID after reschedule")
+        // Then the mark is stable — a same-value write would dirty the record
+        // for CloudKit on every reschedule
+        XCTAssertEqual(firstMark, serviceItem.notificationID)
 
         // Cleanup
         service.cancelNotifications(for: vehicle)
-    }
-
-    func testScheduleNotificationWithPace_ReplacesInPlace() {
-        // Given
-        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022, currentMileage: 50000)
-        let serviceItem = Service(name: "Oil Change", dueMileage: 51000)
-        serviceItem.vehicle = vehicle
-
-        // First schedule
-        let firstID = service.scheduleNotificationWithPace(
-            for: serviceItem,
-            vehicle: vehicle,
-            dailyPace: 40.0
-        )
-        serviceItem.notificationID = firstID
-
-        // When - schedule again
-        let secondID = service.scheduleNotificationWithPace(
-            for: serviceItem,
-            vehicle: vehicle,
-            dailyPace: 40.0
-        )
-
-        // Then — identifiers are deterministic per service, so a reschedule
-        // replaces the pending request in place rather than minting a new ID.
-        XCTAssertEqual(firstID, secondID, "Reschedule should reuse the deterministic notification ID")
-        XCTAssertNotNil(secondID)
-
-        // Cleanup
-        if let id = secondID {
-            service.cancelAllNotifications(baseID: id)
-        }
-    }
-
-    func testScheduleNotificationWithPace_AlreadyPastDue_ReturnsNil() {
-        // Given: Service already past due
-        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022, currentMileage: 52000)
-        let serviceItem = Service(name: "Oil Change", dueMileage: 51000)  // Already past
-        serviceItem.vehicle = vehicle
-
-        // When
-        let notificationID = service.scheduleNotificationWithPace(
-            for: serviceItem,
-            vehicle: vehicle,
-            dailyPace: 40.0
-        )
-
-        // Then
-        XCTAssertNil(notificationID, "Should not schedule for past-due service")
     }
 }

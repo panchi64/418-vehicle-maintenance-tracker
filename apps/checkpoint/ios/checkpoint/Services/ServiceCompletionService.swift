@@ -27,8 +27,6 @@ struct ServiceCompletionService {
         mileage: Int,
         in context: ModelContext
     ) -> Service? {
-        ServiceNotificationScheduler.cancelNotification(for: service)
-
         let wasRecurring = service.isRecurring
         let hasPolicy = service.hasIntervalPolicy
         let name = service.name
@@ -45,6 +43,14 @@ struct ServiceCompletionService {
         service.intervalMiles = nil
 
         guard wasRecurring, hasPolicy, let vehicle else {
+            // Still rebuild: clearing the due date above means the completed
+            // service must drop out of its bundles. The old code cancelled the
+            // service's own requests up front instead, which left this path
+            // — a non-recurring completion — with nothing to remove them from
+            // the pending set until the next launch sweep.
+            if let vehicle = service.vehicle {
+                ServiceNotificationScheduler.rescheduleNotifications(for: vehicle)
+            }
             return nil
         }
 
@@ -59,7 +65,10 @@ struct ServiceCompletionService {
         next.deriveDueFromIntervals(anchorDate: performedDate, anchorMileage: mileage)
         context.insert(next)
 
-        ServiceNotificationScheduler.scheduleNotification(for: next, vehicle: vehicle)
+        // Reschedule the vehicle, not just `next`: reminders are bundled per
+        // day, so the completed service has to leave its bundle in the same
+        // pass that the follow-up occurrence joins one.
+        ServiceNotificationScheduler.rescheduleNotifications(for: vehicle)
 
         return next
     }

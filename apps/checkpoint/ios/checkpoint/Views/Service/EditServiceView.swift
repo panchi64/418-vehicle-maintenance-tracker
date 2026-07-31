@@ -277,7 +277,9 @@ struct EditServiceView: View {
         )
         service.notes = notes.isEmpty ? nil : notes
 
-        ServiceNotificationScheduler.cancelNotification(for: service)
+        // The rebuild is the whole operation — it purges the vehicle's pending
+        // set before re-adding, so a preceding per-service cancel was already
+        // redundant and is now not expressible.
         ServiceNotificationScheduler.rescheduleNotifications(for: vehicle)
 
         updateAppIcon()
@@ -299,6 +301,11 @@ struct EditServiceView: View {
         // those so they don't linger in external storage with no owner.
         // Documents that are linked to a vehicle survive in the library.
         Document.purgeOrphans(in: modelContext)
+        // Rebuild the vehicle's reminders around what's left. Deleting a
+        // service used to leave its notifications pending until the next
+        // launch sweep; now that reminders are bundled, a stale request would
+        // also name the deleted service in a banner listing its neighbours.
+        ServiceNotificationScheduler.rescheduleNotifications(for: vehicle)
         updateAppIcon()
         updateWidgetData()
         dismiss()

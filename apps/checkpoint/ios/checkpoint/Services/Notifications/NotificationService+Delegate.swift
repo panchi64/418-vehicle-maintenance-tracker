@@ -144,33 +144,44 @@ extension NotificationService: UNUserNotificationCenterDelegate {
         }
     }
 
+    /// A service reminder covers every service that came due at the same lead
+    /// time on the same day, so the payload is a *set*. `serviceIDs` is always
+    /// present and always complete; `serviceID` is carried only when the set
+    /// has one member, so a handler that acts on a single service can tell the
+    /// difference instead of picking an arbitrary member of a bundle.
     private func handleServiceDueResponse(
         _ response: UNNotificationResponse,
         userInfo: [AnyHashable: Any]
     ) async {
-        guard let serviceIDString = userInfo["serviceID"] as? String,
-              let _ = userInfo["vehicleID"] as? String else { return }
+        let serviceIDs = ServiceNotificationScheduler.referencedServiceIDs(in: userInfo)
+        guard !serviceIDs.isEmpty,
+              let vehicleIDString = userInfo["vehicleID"] as? String else { return }
+
+        var payload: [String: Any] = ["serviceIDs": serviceIDs, "vehicleID": vehicleIDString]
+        if serviceIDs.count == 1 {
+            payload["serviceID"] = serviceIDs[0]
+        }
 
         switch response.actionIdentifier {
         case Self.markDoneActionID:
             NotificationCenter.default.post(
                 name: .serviceMarkedDoneFromNotification,
                 object: nil,
-                userInfo: ["serviceID": serviceIDString]
+                userInfo: payload
             )
 
         case Self.snoozeActionID:
             NotificationCenter.default.post(
                 name: .serviceSnoozedFromNotification,
                 object: nil,
-                userInfo: ["serviceID": serviceIDString]
+                userInfo: payload
             )
 
         case UNNotificationDefaultActionIdentifier:
             NotificationCenter.default.post(
                 name: .navigateToServiceFromNotification,
                 object: nil,
-                userInfo: ["serviceID": serviceIDString]
+                userInfo: payload
             )
 
         default:

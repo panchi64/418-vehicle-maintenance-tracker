@@ -16,26 +16,12 @@ extension NotificationService {
     // MARK: - Build Requests
 
     func buildNotificationRequest(
-        for service: Service,
+        for bundle: ServiceReminderBundle,
         vehicle: Vehicle,
-        notificationID: String,
-        notificationDate: Date,
-        daysBeforeDue: Int = 0
+        trigger: UNNotificationTrigger? = nil
     ) -> UNNotificationRequest {
         ServiceNotificationScheduler.buildNotificationRequest(
-            for: service, vehicle: vehicle, notificationID: notificationID,
-            notificationDate: notificationDate, daysBeforeDue: daysBeforeDue
-        )
-    }
-
-    func buildNotificationRequest(
-        for service: Service,
-        vehicle: Vehicle,
-        notificationID: String,
-        dueDate: Date
-    ) -> UNNotificationRequest {
-        ServiceNotificationScheduler.buildNotificationRequest(
-            for: service, vehicle: vehicle, notificationID: notificationID, dueDate: dueDate
+            for: bundle, vehicle: vehicle, trigger: trigger
         )
     }
 
@@ -52,20 +38,6 @@ extension NotificationService {
 
     // MARK: - Schedule/Cancel/Snooze
 
-    @discardableResult
-    func scheduleNotification(for service: Service, vehicle: Vehicle) -> String? {
-        ServiceNotificationScheduler.scheduleNotification(for: service, vehicle: vehicle)
-    }
-
-    func scheduleNotifications(for vehicle: Vehicle) {
-        ServiceNotificationScheduler.scheduleNotifications(for: vehicle)
-    }
-
-    @discardableResult
-    func scheduleNotificationWithPace(for service: Service, vehicle: Vehicle, dailyPace: Double? = nil) -> String? {
-        ServiceNotificationScheduler.scheduleNotificationWithPace(for: service, vehicle: vehicle, dailyPace: dailyPace)
-    }
-
     func rescheduleNotifications(for vehicle: Vehicle) {
         ServiceNotificationScheduler.rescheduleNotifications(for: vehicle)
     }
@@ -76,10 +48,6 @@ extension NotificationService {
 
     func cancelAllNotifications(baseID: String) {
         ServiceNotificationScheduler.cancelAllNotifications(baseID: baseID)
-    }
-
-    func cancelNotification(for service: Service) {
-        ServiceNotificationScheduler.cancelNotification(for: service)
     }
 
     func cancelNotifications(for vehicle: Vehicle) {

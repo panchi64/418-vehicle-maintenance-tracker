@@ -250,6 +250,15 @@ State machine in `OnboardingState` (`@Observable @MainActor`):
   - `MarbeteNotificationScheduler` — PR vehicle registration expiration
   - `YearlyRoundupScheduler` — Annual cost summary (January 2nd)
 - **Categories:** `SERVICE_DUE`, `MILEAGE_REMINDER`, `MARBETE_DUE`, `YEARLY_ROUNDUP`
+- **Service reminders are bundled and vehicle-scoped.** `ServiceReminderBundle`
+  groups a vehicle's reminders by (fire day, lead time), so services coming due
+  together deliver one notification naming all of them rather than one apiece.
+  A service therefore does not own a request: `rescheduleNotifications(for:)` is
+  the only entry point, and it rebuilds the vehicle's whole pending set by
+  reading the notification center back (a bundle's identifier encodes the day it
+  fires, so a moved due date leaves a request no re-add would replace).
+  `Service.notificationID` survives only as the "this has a reminder" flag and
+  as the snooze handle — snoozing stays per service.
 
 ### OCR/
 - `OdometerOCRService` — Vision framework OCR for odometer displays (preprocessing → VNRecognizeTextRequest → number extraction)
