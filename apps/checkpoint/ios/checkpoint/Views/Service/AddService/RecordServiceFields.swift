@@ -136,12 +136,12 @@ struct RecordServiceFields: View {
                             .foregroundStyle(Theme.textTertiary)
                             .frame(maxWidth: .infinity, alignment: .leading)
 
-                        ChipRow(items: ServiceFormChips.monthIntervalChips, label: \.label) { chip in
+                        ScrollingChipRow(items: ServiceFormChips.monthIntervalChips, label: \.label) { chip in
                             model.intervalMonths = chip.months
                             HapticService.shared.selectionChanged()
                         }
 
-                        ChipRow(items: ServiceFormChips.mileageIntervalChips, label: \.label) { chip in
+                        ScrollingChipRow(items: ServiceFormChips.mileageIntervalChips, label: \.label) { chip in
                             model.intervalMiles = chip.miles
                             HapticService.shared.selectionChanged()
                         }

@@ -434,7 +434,7 @@ private struct DocumentReviewForm: View {
                     label: "File Name",
                     text: $fileName,
                     placeholder: "document.pdf",
-                    isRequired: true
+                    requirement: .required(reason: L10n.documentsFileNameRequired)
                 )
 
                 VStack(alignment: .leading, spacing: 6) {

@@ -39,7 +39,7 @@ struct VehicleBasicsStep: View {
                             label: L10n.vehicleMake,
                             text: $formState.make,
                             placeholder: L10n.vehicleMakePlaceholder,
-                            isRequired: true
+                            requirement: .required(reason: L10n.formVehicleBasicsRequired)
                         )
                         .overlay(
                             Rectangle()
@@ -52,7 +52,7 @@ struct VehicleBasicsStep: View {
                             label: L10n.vehicleModel,
                             text: $formState.model,
                             placeholder: L10n.vehicleModelPlaceholder,
-                            isRequired: true
+                            requirement: .required(reason: L10n.formVehicleBasicsRequired)
                         )
                         .overlay(
                             Rectangle()
@@ -65,7 +65,7 @@ struct VehicleBasicsStep: View {
                             label: L10n.vehicleYear,
                             value: $formState.year,
                             placeholder: L10n.vehicleYearPlaceholder,
-                            isRequired: true
+                            requirement: .required(reason: L10n.formVehicleBasicsRequired)
                         )
                         .overlay(
                             Rectangle()

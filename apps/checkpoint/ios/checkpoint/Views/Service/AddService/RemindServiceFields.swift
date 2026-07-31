@@ -30,7 +30,7 @@ struct RemindServiceFields: View {
             InstrumentSectionHeader(title: L10n.formNextDue)
 
             VStack(spacing: Spacing.md) {
-                ChipRow(items: ServiceFormChips.fuzzyDateChips, label: \.label) { chip in
+                ScrollingChipRow(items: ServiceFormChips.fuzzyDateChips, label: \.label) { chip in
                     model.hasCustomDate = true
                     model.dueDate = chip.date
                     HapticService.shared.selectionChanged()
@@ -53,7 +53,7 @@ struct RemindServiceFields: View {
                     suffix: DistanceSettings.shared.unit.abbreviation
                 )
 
-                ChipRow(items: ServiceFormChips.mileageOffsetChips, label: \.label) { chip in
+                ScrollingChipRow(items: ServiceFormChips.mileageOffsetChips, label: \.label) { chip in
                     model.nextDueMileage = model.vehicle.currentMileage + chip.miles
                     HapticService.shared.selectionChanged()
                 }
@@ -104,7 +104,7 @@ struct RemindServiceFields: View {
                         )
 
                         if model.isRecurring {
-                            ChipRow(items: ServiceFormChips.monthIntervalChips, label: \.label) { chip in
+                            ScrollingChipRow(items: ServiceFormChips.monthIntervalChips, label: \.label) { chip in
                                 model.intervalMonths = chip.months
                                 HapticService.shared.selectionChanged()
                             }
@@ -116,7 +116,7 @@ struct RemindServiceFields: View {
                                 }
                             }
 
-                            ChipRow(items: ServiceFormChips.mileageIntervalChips, label: \.label) { chip in
+                            ScrollingChipRow(items: ServiceFormChips.mileageIntervalChips, label: \.label) { chip in
                                 model.intervalMiles = chip.miles
                                 HapticService.shared.selectionChanged()
                             }

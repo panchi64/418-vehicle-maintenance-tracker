@@ -110,21 +110,21 @@ struct EditVehicleView: View {
                                     label: L10n.vehicleMake,
                                     text: $make,
                                     placeholder: L10n.vehicleMakePlaceholder,
-                                    isRequired: true
+                                    requirement: .required(reason: L10n.formVehicleBasicsRequired)
                                 )
 
                                 InstrumentTextField(
                                     label: L10n.vehicleModel,
                                     text: $model,
                                     placeholder: L10n.vehicleModelPlaceholder,
-                                    isRequired: true
+                                    requirement: .required(reason: L10n.formVehicleBasicsRequired)
                                 )
 
                                 InstrumentNumberField(
                                     label: L10n.vehicleYear,
                                     value: $year,
                                     placeholder: L10n.vehicleYearPlaceholder,
-                                    isRequired: true
+                                    requirement: .required(reason: L10n.formVehicleBasicsRequired)
                                 )
                             }
                         }

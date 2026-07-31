@@ -76,7 +76,7 @@ struct EditServiceView: View {
                                         label: L10n.serviceNameLabel,
                                         text: $serviceName,
                                         placeholder: L10n.serviceNamePlaceholder,
-                                        isRequired: true
+                                        requirement: .required(reason: L10n.formServiceTypeRequired)
                                     )
 
                                     if serviceName != loadedServiceName {

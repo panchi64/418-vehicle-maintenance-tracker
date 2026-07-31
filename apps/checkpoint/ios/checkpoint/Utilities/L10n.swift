@@ -62,6 +62,15 @@ enum L10n {
     static var rowNoDueDate: String { localized("row.noDueDate") }
     static var rowViewDetailsHint: String { localized("row.viewDetailsHint") }
     static var rowServiceFallback: String { localized("row.serviceFallback") }
+    // MARK: - Filter chrome
+
+    static func filterDimension(_ name: String) -> String {
+        String(format: localized("filter.dimension"), name)
+    }
+    static func filterClear(_ name: String) -> String {
+        String(format: localized("filter.clear"), name)
+    }
+
     static var headerSpecs: String { localized("header.specs") }
     static var headerSpecsAccessibility: String { localized("header.specsAccessibility") }
     static var headerSpecsExpanded: String { localized("header.specsExpanded") }
@@ -475,6 +484,7 @@ enum L10n {
     static var documentsNotesLabel: String { localized("documents.notes.label") }
     static var documentsNotesPlaceholder: String { localized("documents.notes.placeholder") }
     static var documentsTypeLabel: String { localized("documents.type.label") }
+    static var documentsFileNameRequired: String { localized("documents.fileNameRequired") }
     static var documentsLinkedVehiclesLabel: String { localized("documents.linked_vehicles.label") }
     static var documentsLinkedVehiclesEdit: String { localized("documents.linked_vehicles.edit") }
     static var documentsFromServiceLog: String { localized("documents.from_service_log") }

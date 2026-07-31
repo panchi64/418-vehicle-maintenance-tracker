@@ -2241,6 +2241,24 @@
         }
       }
     },
+    "documents.fileNameRequired" : {
+      "comment" : "Shown when a document is saved without a file name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A file name is needed to find this document later."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se necesita un nombre de archivo para encontrar este documento después."
+          }
+        }
+      }
+    },
     "documents.from_service_log" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3250,6 +3268,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Añadir adjuntos"
+          }
+        }
+      }
+    },
+    "filter.clear" : {
+      "comment" : "VoiceOver label for the button that clears an active filter. %@ is the dimension, e.g. Status.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear %@ filter"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quitar filtro de %@"
+          }
+        }
+      }
+    },
+    "filter.dimension" : {
+      "comment" : "VoiceOver label for a filter trigger. %@ is the dimension, e.g. Status.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ filter"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtro de %@"
           }
         }
       }

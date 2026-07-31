@@ -2,52 +2,112 @@
 //  InstrumentTextField.swift
 //  checkpoint
 //
-//  Custom dark instrument-panel styled text input
+//  Text, number, and date inputs. A single rule under the value, not a box.
+//
+//  ENCLOSURE IS A BUDGET. The service form used to render every control as an
+//  outlined rectangle — eight quick-service chips, seven timing chips, six
+//  category chips, three boxed fields. Twenty-four identical enclosures, so none
+//  of them read as the decision the screen existed to capture. Spending the
+//  budget means most controls give theirs up.
+//
+//  A field gives up its box and keeps a bottom rule. The value sits ON the line,
+//  which is the same idiom the readouts already use, and the rule goes accent on
+//  focus — a stronger affordance than the static border ever was, since a box
+//  that is always drawn says nothing about where you are.
+//
+//  `InstrumentTextEditor` deliberately keeps its box: an editor has to
+//  communicate its HEIGHT, and a single rule under 100pt of empty space reads as
+//  a rendering fault rather than as an input.
 //
 
 import SwiftUI
 
 struct InstrumentTextField: View {
-    let label: String
+    /// Omit when the enclosing `FormSection` header already names this field.
+    /// Stacking two identical labels on one input is worse than none.
+    var label: String?
     @Binding var text: String
     var placeholder: String = ""
     var keyboardType: UIKeyboardType = .default
     var textContentType: UITextContentType?
     var autocapitalization: TextInputAutocapitalization = .sentences
-    var isRequired: Bool = false
+    var requirement: FieldRequirement = .optional
 
     @FocusState private var isFocused: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            // Label with optional required indicator
-            HStack(spacing: 2) {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            FieldLabel(label: label, requirement: requirement)
+
+            FieldLine(isFocused: isFocused) {
+                TextField(placeholder, text: $text)
+                    .font(.brutalistBody)
+                    .foregroundStyle(Theme.textPrimary)
+                    .keyboardType(keyboardType)
+                    .textContentType(textContentType)
+                    .textInputAutocapitalization(autocapitalization)
+                    .focused($isFocused)
+            }
+
+            FieldEffectNote(requirement: requirement)
+        }
+    }
+}
+
+// MARK: - Shared field furniture
+
+/// The label row: name, plus the one required marker (F5). Renders nothing when
+/// the field is unlabeled.
+private struct FieldLabel: View {
+    let label: String?
+    let requirement: FieldRequirement
+
+    var body: some View {
+        if let label {
+            HStack(alignment: .firstTextBaseline, spacing: Spacing.sm) {
                 Text(label.uppercased())
                     .font(.brutalistLabel)
                     .foregroundStyle(Theme.textTertiary)
                     .tracking(1.5)
 
-                if isRequired {
-                    Text("*")
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.statusOverdue)
+                if requirement.isRequired {
+                    RequiredFieldMarker()
                 }
             }
+        }
+    }
+}
 
-            // Input field
-            TextField(placeholder, text: $text)
-                .font(.brutalistBody)
-                .foregroundStyle(Theme.textPrimary)
-                .keyboardType(keyboardType)
-                .textContentType(textContentType)
-                .textInputAutocapitalization(autocapitalization)
-                .focused($isFocused)
-                .padding(Spacing.md)
-                .background(Theme.surfaceInstrument)
-                .clipShape(Rectangle())
-                .brutalistBorder(color: isFocused ? Theme.accent : Theme.gridLine)
-                .focusGlow(isActive: isFocused)
-                .animation(.easeOut(duration: Theme.animationFast), value: isFocused)
+/// The rule the value sits on. Accent while focused, so the affordance is
+/// carried by state rather than by a permanent border.
+private struct FieldLine<Content: View>: View {
+    let isFocused: Bool
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        content
+            .frame(minHeight: 40)
+            .overlay(alignment: .bottom) {
+                Rectangle()
+                    .fill(isFocused ? Theme.accent : Theme.borderSubtle)
+                    .frame(height: Theme.borderWidth)
+            }
+            .focusGlow(isActive: isFocused)
+            .animation(.easeOut(duration: Theme.animationFast), value: isFocused)
+    }
+}
+
+/// States the consequence of filling an `.optionalWithEffect` field, so the user
+/// learns it before committing rather than after.
+private struct FieldEffectNote: View {
+    let requirement: FieldRequirement
+
+    var body: some View {
+        if let effect = requirement.effectNote {
+            Text(effect)
+                .font(.brutalistSecondary)
+                .foregroundStyle(Theme.textTertiary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }
@@ -55,11 +115,11 @@ struct InstrumentTextField: View {
 // MARK: - Instrument Number Field
 
 struct InstrumentNumberField: View {
-    let label: String
+    var label: String?
     @Binding var value: Int?
     var placeholder: String = ""
     var suffix: String = ""
-    var isRequired: Bool = false
+    var requirement: FieldRequirement = .optional
 
     /// Show camera button accessory
     var showCameraButton: Bool = false
@@ -71,59 +131,49 @@ struct InstrumentNumberField: View {
     @FocusState private var isFocused: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            // Label with optional required indicator
-            HStack(spacing: 2) {
-                Text(label.uppercased())
-                    .font(.brutalistLabel)
-                    .foregroundStyle(Theme.textTertiary)
-                    .tracking(1.5)
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            FieldLabel(label: label, requirement: requirement)
 
-                if isRequired {
-                    Text("*")
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.statusOverdue)
-                }
-            }
+            HStack(spacing: Spacing.sm) {
+                FieldLine(isFocused: isFocused) {
+                    HStack(spacing: Spacing.sm) {
+                        TextField(placeholder, text: $textValue)
+                            .font(.brutalistBody)
+                            .foregroundStyle(Theme.textPrimary)
+                            .keyboardType(.numberPad)
+                            .focused($isFocused)
+                            .onChange(of: textValue) { _, newValue in
+                                let filtered = newValue.filter { $0.isNumber }
+                                if filtered != newValue {
+                                    textValue = filtered
+                                }
+                                value = Int(filtered)
+                            }
+                            .onAppear {
+                                if let value = value {
+                                    textValue = String(value)
+                                }
+                            }
+                            .onChange(of: value) { _, newValue in
+                                let newText = newValue.map { String($0) } ?? ""
+                                if newText != textValue {
+                                    textValue = newText
+                                }
+                            }
 
-            // Input field with optional camera accessory
-            HStack(spacing: 0) {
-                // Main input area
-                HStack(spacing: 8) {
-                    TextField(placeholder, text: $textValue)
-                        .font(.brutalistBody)
-                        .foregroundStyle(Theme.textPrimary)
-                        .keyboardType(.numberPad)
-                        .focused($isFocused)
-                        .onChange(of: textValue) { _, newValue in
-                            let filtered = newValue.filter { $0.isNumber }
-                            if filtered != newValue {
-                                textValue = filtered
-                            }
-                            value = Int(filtered)
+                        // 13pt, not the label's 11pt caps and not the value's
+                        // 15pt. A unit annotation set as large as the value it
+                        // annotates competes with it — "mi" is not as important
+                        // as "33,417" — and set as a tracked cap it reads as a
+                        // second field label.
+                        if !suffix.isEmpty {
+                            Text(suffix)
+                                .font(.brutalistSecondary)
+                                .foregroundStyle(Theme.textTertiary)
                         }
-                        .onAppear {
-                            if let value = value {
-                                textValue = String(value)
-                            }
-                        }
-                        .onChange(of: value) { _, newValue in
-                            let newText = newValue.map { String($0) } ?? ""
-                            if newText != textValue {
-                                textValue = newText
-                            }
-                        }
-
-                    if !suffix.isEmpty {
-                        Text(suffix)
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.textTertiary)
                     }
                 }
-                .padding(Spacing.md)
-                .background(Theme.surfaceInstrument)
 
-                // Camera button accessory
                 if showCameraButton, let onCameraTap = onCameraTap {
                     Button {
                         onCameraTap()
@@ -131,17 +181,15 @@ struct InstrumentNumberField: View {
                         Image(systemName: "camera.fill")
                             .font(.system(size: 18, weight: .medium))
                             .foregroundStyle(Theme.accent)
-                            .frame(width: 52, height: 52)
-                            .background(Theme.surfaceInstrument)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
+                    .buttonStyle(.plain)
                     .accessibilityLabel("Scan with camera")
-                    .brutalistBorder(color: isFocused ? Theme.accent : Theme.gridLine)
                 }
             }
-            .clipShape(Rectangle())
-            .brutalistBorder(color: isFocused ? Theme.accent : Theme.gridLine)
-            .focusGlow(isActive: isFocused)
-            .animation(.easeOut(duration: Theme.animationFast), value: isFocused)
+
+            FieldEffectNote(requirement: requirement)
         }
     }
 }
@@ -149,56 +197,26 @@ struct InstrumentNumberField: View {
 // MARK: - Instrument Date Picker
 
 struct InstrumentDatePicker: View {
-    let label: String
+    var label: String?
     @Binding var date: Date
     var displayedComponents: DatePicker<Label>.Components = .date
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            // Label
-            Text(label.uppercased())
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1.5)
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            FieldLabel(label: label, requirement: .optional)
 
-            // Date picker container
             DatePicker("", selection: $date, displayedComponents: displayedComponents)
                 .labelsHidden()
                 .datePickerStyle(.compact)
                 .tint(Theme.accent)
-                .accessibilityLabel(label)
-                .padding(Spacing.listItem)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Theme.surfaceInstrument)
-                .clipShape(Rectangle())
-                .brutalistBorder()
+                .accessibilityLabel(label ?? "")
+                .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
+                .overlay(alignment: .bottom) {
+                    Rectangle()
+                        .fill(Theme.borderSubtle)
+                        .frame(height: Theme.borderWidth)
+                }
         }
-    }
-}
-
-// MARK: - Instrument Toggle
-
-struct InstrumentToggle: View {
-    let label: String
-    @Binding var isOn: Bool
-
-    var body: some View {
-        HStack {
-            Text(label)
-                .font(.brutalistBody)
-                .foregroundStyle(Theme.textPrimary)
-
-            Spacer()
-
-            Toggle(label, isOn: $isOn)
-                .labelsHidden()
-                .tint(Theme.accent)
-                .accessibilityLabel(label)
-        }
-        .padding(Spacing.md)
-        .background(Theme.surfaceInstrument)
-        .clipShape(Rectangle())
-        .brutalistBorder()
     }
 }
 
@@ -233,8 +251,10 @@ extension View {
 
 // MARK: - Instrument Text Editor
 
+/// The one input that keeps its enclosure. An editor must communicate how much
+/// room it offers, and a bare rule under an empty 100pt area does not.
 struct InstrumentTextEditor: View {
-    let label: String
+    var label: String?
     @Binding var text: String
     var placeholder: String = ""
     var minHeight: CGFloat = 100
@@ -242,14 +262,9 @@ struct InstrumentTextEditor: View {
     @FocusState private var isFocused: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            // Label
-            Text(label.uppercased())
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1.5)
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            FieldLabel(label: label, requirement: .optional)
 
-            // Text editor
             ZStack(alignment: .topLeading) {
                 if text.isEmpty && !isFocused {
                     Text(placeholder)
@@ -281,28 +296,33 @@ struct InstrumentTextEditor: View {
         AtmosphericBackground()
 
         ScrollView {
-            VStack(spacing: Spacing.lg) {
+            VStack(alignment: .leading, spacing: Spacing.md) {
                 InstrumentTextField(
-                    label: "Vehicle Name",
+                    label: "Vehicle name",
                     text: .constant("Daily Driver"),
                     placeholder: "Enter name..."
                 )
 
                 InstrumentNumberField(
-                    label: "Mileage",
+                    label: "Odometer",
                     value: .constant(32500),
                     placeholder: "0",
-                    suffix: "mi"
+                    suffix: "mi",
+                    requirement: .required(reason: "Mileage reminders are measured from it.")
+                )
+
+                InstrumentTextField(
+                    label: "Marbete month",
+                    text: .constant(""),
+                    placeholder: "November",
+                    requirement: .optionalWithEffect(
+                        effect: "Set it and you will be reminded a month before it expires."
+                    )
                 )
 
                 InstrumentDatePicker(
-                    label: "Due Date",
+                    label: "Due date",
                     date: .constant(Date())
-                )
-
-                InstrumentToggle(
-                    label: "Enable Notifications",
-                    isOn: .constant(true)
                 )
 
                 InstrumentTextEditor(
