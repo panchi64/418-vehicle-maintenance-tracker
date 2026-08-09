@@ -53,10 +53,15 @@ struct NextUpCard: View {
             if let miles = milesUntilDue {
                 VStack(alignment: .leading, spacing: Spacing.xs) {
                     HStack(alignment: .lastTextBaseline, spacing: 4) {
-                        Text(Formatters.mileageNumber(abs(miles)))
+                        // Keyed to the service so switching vehicles replaces
+                        // the reading instead of rolling one car's countdown
+                        // into another's.
+                        RollingNumberText(
+                            Formatters.mileageNumber(abs(miles)),
+                            resetToken: service.id
+                        )
                             .font(.brutalistHero)
                             .foregroundStyle(status.color)
-                            .contentTransition(.numericText())
 
                         Text(DistanceSettings.shared.unit.uppercaseAbbreviation)
                             .font(.brutalistHeading)
@@ -107,7 +112,10 @@ struct NextUpCard: View {
                         Spacer()
 
                         HStack(spacing: 4) {
-                            Text(Formatters.mileageDisplay(currentMileage))
+                            RollingNumberText(
+                                Formatters.mileageDisplay(currentMileage),
+                                resetToken: service.id
+                            )
                                 .font(.brutalistBody)
                                 .foregroundStyle(Theme.accent)
 

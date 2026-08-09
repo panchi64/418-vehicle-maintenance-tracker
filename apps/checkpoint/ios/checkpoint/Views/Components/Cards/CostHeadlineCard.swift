@@ -11,17 +11,25 @@ struct CostHeadlineCard: View {
     let discretionaryShare: Int
     let projection: Decimal?
     let shareSummary: String
+    /// Whose spending this is. The Costs tab is reused across vehicles, so
+    /// without it the hero would roll one car's total into another's as though
+    /// a single figure had moved. A period change still rolls.
+    var subjectID: AnyHashable? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             topRow
 
-            Text(formattedTotal)
+            // Rolls when the period selector changes the total. The scale
+            // factor is a parameter rather than a modifier because each digit
+            // is its own Text — see RollingNumberText.
+            RollingNumberText(
+                formattedTotal,
+                minimumScaleFactor: 0.5,
+                resetToken: subjectID
+            )
                 .font(.brutalistHero)
                 .foregroundStyle(Theme.accent)
-                .contentTransition(.numericText())
-                .minimumScaleFactor(0.5)
-                .lineLimit(1)
 
             Text(periodLabel)
                 .font(.brutalistSecondary)

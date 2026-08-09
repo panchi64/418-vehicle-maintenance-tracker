@@ -94,6 +94,8 @@ For readouts and forms, the usable range is:
 
 `animationFast` 0.1 · `animationMedium` 0.2 · `animationSlow` 0.3 · `revealStagger` 0.05 · `pulseAnimationDuration` 1.5
 
+Odometer roll (see `RollingNumberText`): `odometerRollDuration` 0.65 · `odometerRollStagger` 0.06 · `odometerRollMaxDelay` 0.24
+
 Glow: `glowRadius` 8 / `glowOpacity` 0.3 · `statusGlowRadius` 12 / `statusGlowOpacity` 0.4 · `focusGlowRadius` 6 / `focusGlowOpacity` 0.5
 
 ## View modifiers
@@ -107,6 +109,25 @@ Glow: `glowRadius` 8 / `glowOpacity` 0.3 · `statusGlowRadius` 12 / `statusGlowO
 **Buttons** — `.buttonStyle(.primary)` (filled), `.buttonStyle(.secondary)` (outlined), `.buttonStyle(.instrument)`, `.toolbarButtonStyle(isDisabled:)`
 
 **Structural components** — `InstrumentSection`, `InstrumentSectionHeader`, `BrutalistDataRow`, `AtmosphericBackground`
+
+## `RollingNumberText`
+
+Drop-in replacement for `Text` on a **numeric readout that changes in place**. Its digits roll like odometer wheels, passing through the intermediate digits rather than cutting to the new one. Takes the environment font and foreground style, so adopting it is a one-word change:
+
+```swift
+RollingNumberText(Formatters.mileage(vehicle.currentMileage))
+    .font(.brutalistBody)
+    .foregroundStyle(Theme.accent)
+```
+
+Already adopted by the header odometer, `QuickMileageUpdateCard`, `CostHeadlineCard`, `NextUpCard`, and `StatsCard`. **Don't add another hand-rolled digit animation** — extend this one.
+
+- **Formatting stays the caller's job.** It takes a finished string, so `Formatters` and locale rules remain the only place a number's appearance is decided.
+- **`.minimumScaleFactor` is a parameter, not a modifier** — each digit is its own `Text`, so the modifier would scale neighbours independently. Passing it also makes the view width-greedy; it has to know the width to pick a scale.
+- **`.tracking()` does not carry across cells.** Readouts don't track; labels do, and labels don't roll.
+- **Use it only for quantities.** Identifiers that happen to contain digits — a plate, `0W-20`, a VIN — must stay plain `Text`. `VehicleHeader.HeaderCell` gates this behind `rollsDigits:` for exactly that reason.
+- **Pass `resetToken:` wherever one readout is reused across subjects.** Rolling asserts *this number moved*. The header and both tabs are reused across vehicles, so without a token, selecting a different car spins the odometer 120,000 → 8,000 as though it had un-driven 112,000 miles. When the token changes the next value is set, not rolled; a same-subject change still rolls. Every adopter passes one (`vehicle.id`, `service.id`, or a `subjectID:` parameter threaded from `CostsTab`).
+- Reduce Motion falls back to `.contentTransition(.numericText())`, as does any value with no ASCII digits in it; the first appearance sets rather than rolls.
 
 ## Rules
 

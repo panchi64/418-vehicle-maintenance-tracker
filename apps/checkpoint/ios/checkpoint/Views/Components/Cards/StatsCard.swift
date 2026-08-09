@@ -13,19 +13,26 @@ struct StatsCard: View {
     let valueColor: Color
     let subvalue: String?
     let subvalueColor: Color
+    /// What the stat describes. The Costs tab is reused across vehicles, so
+    /// without this the value would roll from one car's figure to another's as
+    /// though a single number had changed. A period change on the same vehicle
+    /// still rolls, which is the case the effect is for.
+    let subjectID: AnyHashable?
 
     init(
         label: String,
         value: String,
         valueColor: Color = Theme.textPrimary,
         subvalue: String? = nil,
-        subvalueColor: Color = Theme.textTertiary
+        subvalueColor: Color = Theme.textTertiary,
+        subjectID: AnyHashable? = nil
     ) {
         self.label = label
         self.value = value
         self.valueColor = valueColor
         self.subvalue = subvalue
         self.subvalueColor = subvalueColor
+        self.subjectID = subjectID
     }
 
     var body: some View {
@@ -41,11 +48,11 @@ struct StatsCard: View {
                 .textCase(.uppercase)
                 .tracking(1)
 
-            Text(value)
+            // These recompute whenever the Costs period changes, so all three
+            // cards in a row roll together.
+            RollingNumberText(value, minimumScaleFactor: 0.7, resetToken: subjectID)
                 .font(.brutalistHeading)
                 .foregroundStyle(valueColor)
-                .minimumScaleFactor(0.7)
-                .lineLimit(1)
 
             if let subvalue {
                 Text(subvalue)

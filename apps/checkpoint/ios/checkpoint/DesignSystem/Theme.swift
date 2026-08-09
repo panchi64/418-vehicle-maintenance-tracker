@@ -57,6 +57,17 @@ enum Theme {
     static let revealStagger: Double = 0.05
     static let pulseAnimationDuration: Double = 1.5
 
+    // MARK: - Odometer Roll (see RollingNumberText)
+    /// How long one digit wheel takes to settle on its new glyph.
+    static let odometerRollDuration: Double = 0.65
+    /// Per-place delay. The ones wheel leads; each higher place lags behind it,
+    /// which is what makes a carry read as one wheel dragging the next rather
+    /// than every digit changing at once.
+    static let odometerRollStagger: Double = 0.06
+    /// Ceiling on the accumulated stagger, so a seven-figure value doesn't take
+    /// half a second before its leading digit starts to move.
+    static let odometerRollMaxDelay: Double = 0.24
+
     // MARK: - Glow Effects (Re-enabled for glass accents)
     static let glowRadius: CGFloat = 8
     static let glowOpacity: Double = 0.3

@@ -204,6 +204,10 @@ struct VehicleHeader: View {
                     label: L10n.headerOdometer,
                     value: Formatters.mileage(vehicle.currentMileage),
                     valueColor: Theme.accent,
+                    // The literal odometer. If any readout in the app rolls,
+                    // it's this one.
+                    rollsDigits: true,
+                    subjectID: vehicle.id,
                     glyph: "chevron.right",
                     isFlagged: vehicle.shouldDisplayMileageUpdatePrompt(
                         isInteractive: onMileageTap != nil
@@ -256,6 +260,15 @@ private struct HeaderCell: View {
     let label: String
     let value: String
     var valueColor: Color = Theme.textSecondary
+    /// Opt-in per cell rather than inferred from the string: the specs cell
+    /// carries a plate and an oil grade, and rolling the digits inside
+    /// "IWK-482 · 0W-20" would animate an identifier as though it were a
+    /// quantity.
+    var rollsDigits: Bool = false
+    /// Which vehicle the value describes. The header is persistent chrome, so
+    /// without this a rolling cell would animate between two cars' readings as
+    /// though one reading had changed.
+    var subjectID: AnyHashable?
     let glyph: String
     var isGlyphRotated: Bool = false
     /// Small status square beside the label, e.g. a stale odometer reading.
@@ -292,12 +305,18 @@ private struct HeaderCell: View {
                         .rotationEffect(.degrees(isGlyphRotated ? 180 : 0))
                 }
 
-                Text(value)
-                    .font(.brutalistBody)
-                    .foregroundStyle(valueColor)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    .frame(maxWidth: growsToFill ? .infinity : nil, alignment: .leading)
+                Group {
+                    if rollsDigits {
+                        RollingNumberText(value, resetToken: subjectID)
+                    } else {
+                        Text(value)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    }
+                }
+                .font(.brutalistBody)
+                .foregroundStyle(valueColor)
+                .frame(maxWidth: growsToFill ? .infinity : nil, alignment: .leading)
             }
             .frame(maxWidth: growsToFill ? .infinity : nil, alignment: .leading)
             .padding(.horizontal, Spacing.screenHorizontal)

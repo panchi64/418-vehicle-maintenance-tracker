@@ -56,7 +56,7 @@ struct QuickMileageUpdateCard: View {
                     // Mileage display
                     VStack(alignment: .leading, spacing: 2) {
                         HStack(alignment: .firstTextBaseline, spacing: 4) {
-                            Text(formattedMileage)
+                            RollingNumberText(formattedMileage, resetToken: vehicle.id)
                                 .font(.brutalistTitle)
                                 .foregroundStyle(Theme.accent)
 

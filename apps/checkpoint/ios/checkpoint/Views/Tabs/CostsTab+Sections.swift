@@ -70,21 +70,31 @@ extension CostsTab {
                 preventiveShare: Int(preventiveShare.rounded()),
                 discretionaryShare: Int(discretionaryShare.rounded()),
                 projection: yearEndProjection,
-                shareSummary: costShareSummary
+                shareSummary: costShareSummary,
+                subjectID: vehicle?.id
             )
             .tourTarget(.costsHeadline, active: onboardingState.currentPhase.isTour)
             .revealAnimation(delay: 0.15)
 
             let cpm = cpmDelta
             StatsCardRow {
-                StatsCard(label: L10n.costsStatServices, value: "\(serviceCount)")
-                StatsCard(label: L10n.costsStatAvgCost, value: formattedAverageCost)
+                StatsCard(
+                    label: L10n.costsStatServices,
+                    value: "\(serviceCount)",
+                    subjectID: vehicle?.id
+                )
+                StatsCard(
+                    label: L10n.costsStatAvgCost,
+                    value: formattedAverageCost,
+                    subjectID: vehicle?.id
+                )
                 StatsCard(
                     label: L10n.costsStatPerMile,
                     value: formattedCostPerMile,
                     valueColor: Theme.accent,
                     subvalue: cpm?.label,
-                    subvalueColor: cpm?.color ?? Theme.textTertiary
+                    subvalueColor: cpm?.color ?? Theme.textTertiary,
+                    subjectID: vehicle?.id
                 )
             }
             .revealAnimation(delay: 0.2)
