@@ -47,6 +47,13 @@ struct InstrumentTextField: View {
                     .textContentType(textContentType)
                     .textInputAutocapitalization(autocapitalization)
                     .focused($isFocused)
+                    // Return means "done" on a single-line field — there is
+                    // nothing to submit to and no next field to advance to, so
+                    // the only reading of Return a user could intend is that
+                    // they have finished. Without this the key is inert and the
+                    // keyboard has to be dismissed some other way.
+                    .submitLabel(.done)
+                    .onSubmit { isFocused = false }
             }
 
             FieldEffectNote(requirement: requirement)
@@ -58,7 +65,10 @@ struct InstrumentTextField: View {
 
 /// The label row: name, plus the one required marker (F5). Renders nothing when
 /// the field is unlabeled.
-private struct FieldLabel: View {
+///
+/// Not private — `RichNotesEditor` renders the same label row, and two copies of
+/// it drift.
+struct FieldLabel: View {
     let label: String?
     let requirement: FieldRequirement
 
@@ -209,7 +219,10 @@ struct InstrumentDatePicker: View {
                 .labelsHidden()
                 .datePickerStyle(.compact)
                 .tint(Theme.accent)
-                .accessibilityLabel(label ?? "")
+                // Only override when there IS a label — `accessibilityLabel("")`
+                // strips the DatePicker's own description and leaves VoiceOver
+                // announcing a bare date with no idea what it sets.
+                .accessibilityLabel(label ?? "Date")
                 .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
                 .overlay(alignment: .bottom) {
                     Rectangle()
@@ -220,11 +233,21 @@ struct InstrumentDatePicker: View {
     }
 }
 
-// MARK: - Number Pad Done Button
+// MARK: - Keyboard Dismissal
 
-/// Apply once to a parent container (ScrollView, Form, NavigationStack)
-/// to add a single "DONE" button to the keyboard toolbar for all number pad fields.
-struct NumberPadDoneButton: ViewModifier {
+/// Apply once to a parent container (ScrollView, Form, NavigationStack) to give
+/// every field on that screen a way out of the keyboard.
+///
+/// WHY BOTH HALVES. Return covers the single-line fields (`InstrumentTextField`
+/// sets `.submitLabel(.done)`), but a number pad has no return key and a text
+/// editor's return key means "newline" — so those two need a button that is not
+/// on the keyboard itself. `ToolbarItemGroup(placement: .keyboard)` is the
+/// system's own accessory slot; it appears for whatever field is focused.
+///
+/// Was `numberPadDoneButton`. The name claimed a scope it never had — the
+/// toolbar has always been shown for every keyboard type — and three screens
+/// with only text fields skipped it on the strength of that name.
+struct KeyboardDismissToolbar: ViewModifier {
     func body(content: Content) -> some View {
         content
             .toolbar {
@@ -240,12 +263,15 @@ struct NumberPadDoneButton: ViewModifier {
                     .foregroundStyle(Theme.accent)
                 }
             }
+            // The system's own drag-to-dismiss, the same gesture Messages and
+            // Mail use. Costs one modifier and needs no affordance of its own.
+            .scrollDismissesKeyboard(.interactively)
     }
 }
 
 extension View {
-    func numberPadDoneButton() -> some View {
-        modifier(NumberPadDoneButton())
+    func keyboardDismissToolbar() -> some View {
+        modifier(KeyboardDismissToolbar())
     }
 }
 

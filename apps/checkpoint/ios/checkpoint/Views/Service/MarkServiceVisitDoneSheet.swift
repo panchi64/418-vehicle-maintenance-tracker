@@ -117,7 +117,7 @@ struct MarkServiceVisitDoneSheet: View {
                     .padding(.vertical, Spacing.lg)
                 }
             }
-            .numberPadDoneButton()
+            .keyboardDismissToolbar()
             .navigationTitle(navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

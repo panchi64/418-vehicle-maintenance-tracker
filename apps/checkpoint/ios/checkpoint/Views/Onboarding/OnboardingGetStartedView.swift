@@ -24,6 +24,8 @@ struct OnboardingGetStartedView: View {
     @State private var vinResult: VINDecodeResult?
     @State private var showVINCamera = false
 
+    @FocusState private var isVINFieldFocused: Bool
+
     private var isVINValid: Bool {
         let trimmed = vin.trimmingCharacters(in: .whitespaces)
         guard trimmed.count == 17 else { return false }
@@ -90,6 +92,9 @@ struct OnboardingGetStartedView: View {
                                         .foregroundStyle(Theme.textPrimary)
                                         .textInputAutocapitalization(.characters)
                                         .autocorrectionDisabled()
+                                        .focused($isVINFieldFocused)
+                                        .submitLabel(.done)
+                                        .onSubmit { isVINFieldFocused = false }
                                         .padding(16)
                                         .background(Theme.surfaceInstrument)
                                         .onChange(of: vin) {
@@ -280,6 +285,7 @@ struct OnboardingGetStartedView: View {
                 }
             }
         }
+        .keyboardDismissToolbar()
         .preferredColorScheme(.dark)
         .fullScreenCover(isPresented: $showVINCamera) {
             OdometerCameraSheet(

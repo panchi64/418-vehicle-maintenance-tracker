@@ -111,7 +111,7 @@ struct OCRConfirmationView: View {
                 .padding(Spacing.screenHorizontal)
                 .padding(.top, Spacing.lg)
             }
-            .numberPadDoneButton()
+            .keyboardDismissToolbar()
             .navigationTitle("Extracted Mileage")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

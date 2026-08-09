@@ -265,36 +265,20 @@ struct DocumentsView: View {
             .padding(.horizontal, Spacing.screenHorizontal)
             .padding(.vertical, Spacing.lg)
         }
+        // Search filters as you type, so the keyboard is in the way of the
+        // results the moment you stop typing. Return dismisses it; so does
+        // dragging the list, which is what a reader reaches for first.
+        .scrollDismissesKeyboard(.interactively)
     }
 
+    /// Was a byte-for-byte copy of `BrutalistSearchField` differing only in its
+    /// placeholder — so the Return-key behavior would have had to be written
+    /// twice, and the two copies would have drifted from there.
     private var searchField: some View {
-        HStack(spacing: Spacing.sm) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 16, weight: .medium))
-                .foregroundStyle(Theme.textTertiary)
-
-            TextField(L10n.documentsSearchPlaceholder, text: $searchText)
-                .font(.brutalistBody)
-                .foregroundStyle(Theme.textPrimary)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-
-            if !searchText.isEmpty {
-                Button {
-                    searchText = ""
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 16))
-                        .foregroundStyle(Theme.textTertiary)
-                        .frame(minWidth: 44, minHeight: 44)
-                        .contentShape(Rectangle())
-                }
-                .accessibilityLabel("Clear search")
-            }
-        }
-        .padding(Spacing.md)
-        .background(Theme.surfaceInstrument)
-        .brutalistBorder()
+        BrutalistSearchField(
+            text: $searchText,
+            placeholder: L10n.documentsSearchPlaceholder
+        )
     }
 
     private var filteredEmptyState: some View {

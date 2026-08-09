@@ -105,6 +105,7 @@ struct PrimaryButtonStyle: ButtonStyle {
             .textCase(.uppercase)
             .tracking(1)
             .foregroundStyle(Theme.surfaceInstrument)
+            .buttonLabelFit()
             .frame(maxWidth: .infinity)
             .frame(height: Theme.buttonHeight)
             .background(Theme.accent)
@@ -122,12 +123,31 @@ struct SecondaryButtonStyle: ButtonStyle {
             .textCase(.uppercase)
             .tracking(1)
             .foregroundStyle(Theme.textPrimary)
+            .buttonLabelFit()
             .frame(maxWidth: .infinity)
             .frame(height: Theme.buttonHeight)
             .background(Theme.surfaceInstrument)
             .brutalistBorder()
             .opacity(configuration.isPressed ? 0.7 : 1.0)
             .animation(.easeOut(duration: Theme.animationFast), value: configuration.isPressed)
+    }
+}
+
+private extension View {
+    /// Keeps a button label off its own border.
+    ///
+    /// Both styles are `maxWidth: .infinity`, so a long label in a shared row —
+    /// "SAVE & LOG ANOTHER" next to "SAVE" in `FormActionBar` — got exactly the
+    /// half-width it was given and ran edge to edge inside a 2pt border. The
+    /// gutter is stated first so it is never the thing that gets sacrificed;
+    /// the label scales into what is left, and a long word breaks rather than
+    /// truncating to an ellipsis on a control whose whole job is to say what it
+    /// does.
+    func buttonLabelFit() -> some View {
+        multilineTextAlignment(.center)
+            .lineLimit(2)
+            .minimumScaleFactor(0.75)
+            .padding(.horizontal, Spacing.listItem)
     }
 }
 

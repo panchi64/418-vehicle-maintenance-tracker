@@ -53,7 +53,7 @@ struct AddVehicleFlowView: View {
                         .padding(.bottom, Spacing.xxl)
                     }
                 }
-                .numberPadDoneButton()
+                .keyboardDismissToolbar()
                 .trackScreen(.addVehicleBasics)
                 .navigationTitle(L10n.vehicleAdd)
                 .navigationBarTitleDisplayMode(.inline)

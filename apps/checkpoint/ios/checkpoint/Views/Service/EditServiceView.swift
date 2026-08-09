@@ -161,8 +161,11 @@ struct EditServiceView: View {
                             }
 
                             InstrumentSection(title: L10n.formNotes, chrome: .plain) {
+                                // No field label: the section header above is
+                                // already the word NOTES, and repeating it
+                                // reads as a rendering fault.
                                 RichNotesEditor(
-                                    label: L10n.formNotes,
+                                    label: nil,
                                     text: $notes,
                                     placeholder: L10n.formNotesPlaceholder,
                                     minHeight: 100
@@ -193,7 +196,7 @@ struct EditServiceView: View {
                         .padding(.bottom, Spacing.xxl)
                     }
                 }
-                .numberPadDoneButton()
+                .keyboardDismissToolbar()
                 .navigationTitle(L10n.serviceEditTitle)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)

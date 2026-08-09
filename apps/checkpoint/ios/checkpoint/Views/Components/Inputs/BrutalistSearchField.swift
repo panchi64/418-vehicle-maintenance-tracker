@@ -1,19 +1,25 @@
 //
-//  ServiceSearchField.swift
+//  BrutalistSearchField.swift
 //  checkpoint
 //
-//  Search field used at the top of the Services tab. Tour-target annotation
-//  is applied at the call site (ServicesTab) so this component stays
-//  onboarding-agnostic and can be reused safely elsewhere without
-//  publishing a duplicate `.servicesSearch` anchor.
+//  The search field at the top of the Services tab and the Documents library.
+//  Tour-target annotation is applied at the call site (ServicesTab) so this
+//  component stays onboarding-agnostic and can be reused without publishing a
+//  duplicate `.servicesSearch` anchor.
+//
+//  Was `ServiceSearchField`, despite the doc comment inviting reuse — so
+//  Documents grew its own identical copy rather than import a type named after
+//  another feature. The name is the reason the duplicate existed.
 //
 
 import SwiftUI
 
-struct ServiceSearchField: View {
+struct BrutalistSearchField: View {
     @Binding var text: String
     var placeholder: String = "Search services, notes, receipts..."
     var onSearchStarted: () -> Void = {}
+
+    @FocusState private var isFocused: Bool
 
     var body: some View {
         HStack(spacing: Spacing.sm) {
@@ -26,6 +32,11 @@ struct ServiceSearchField: View {
                 .foregroundStyle(Theme.textPrimary)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
+                .focused($isFocused)
+                // Results filter as you type, so Return has nothing left to do
+                // but get the keyboard out of the way of them.
+                .submitLabel(.search)
+                .onSubmit { isFocused = false }
                 .onChange(of: text) { oldValue, _ in
                     if oldValue.isEmpty {
                         onSearchStarted()
@@ -56,8 +67,8 @@ struct ServiceSearchField: View {
         AtmosphericBackground()
 
         VStack(spacing: Spacing.lg) {
-            ServiceSearchField(text: .constant(""))
-            ServiceSearchField(text: .constant("oil"))
+            BrutalistSearchField(text: .constant(""))
+            BrutalistSearchField(text: .constant("oil"))
         }
         .padding(Spacing.screenHorizontal)
     }

@@ -200,7 +200,7 @@ struct EditVehicleView: View {
                                     InstrumentSectionHeader(title: L10n.vehicleNotes)
 
                                     InstrumentTextEditor(
-                                        label: L10n.vehicleNotes,
+                                        label: nil,
                                         text: $notes,
                                         placeholder: L10n.vehicleNotesPlaceholder
                                     )
@@ -232,7 +232,7 @@ struct EditVehicleView: View {
                     .padding(.bottom, Spacing.xxl)
                 }
             }
-            .numberPadDoneButton()
+            .keyboardDismissToolbar()
             .navigationTitle(L10n.vehicleEditTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)

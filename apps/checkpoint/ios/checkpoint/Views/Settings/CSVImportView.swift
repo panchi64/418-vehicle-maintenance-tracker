@@ -96,6 +96,7 @@ struct CSVImportView: View {
                     .padding(.bottom, Spacing.xxl)
                 }
             }
+            .keyboardDismissToolbar()
             .navigationTitle("Import")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

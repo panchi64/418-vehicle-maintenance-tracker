@@ -124,7 +124,7 @@ struct EditServiceLogView: View {
 
                         VStack(alignment: .leading, spacing: Spacing.sm) {
                             InstrumentSectionHeader(title: L10n.formDatePerformed)
-                            InstrumentDatePicker(label: L10n.formDatePerformed, date: $performedDate)
+                            InstrumentDatePicker(label: nil, date: $performedDate)
 
                             if performedDate != loadedPerformedDate {
                                 OriginalValueHint(text: L10n.editWas(Formatters.shortDate.string(from: loadedPerformedDate)))
@@ -152,7 +152,7 @@ struct EditServiceLogView: View {
 
                         VStack(alignment: .leading, spacing: Spacing.sm) {
                             InstrumentSectionHeader(title: L10n.formNotes)
-                            RichNotesEditor(label: L10n.formNotes, text: $notes, placeholder: L10n.formNotesPlaceholder, minHeight: 100)
+                            RichNotesEditor(label: nil, text: $notes, placeholder: L10n.formNotesPlaceholder, minHeight: 100)
                         }
 
                         if !(log.attachments ?? []).isEmpty {
@@ -171,7 +171,7 @@ struct EditServiceLogView: View {
                     .padding(.bottom, Spacing.xxl)
                 }
             }
-            .numberPadDoneButton()
+            .keyboardDismissToolbar()
             .navigationTitle(L10n.serviceEditTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
@@ -280,7 +280,7 @@ struct EditServiceLogView: View {
             InstrumentSectionHeader(title: L10n.formMileage)
 
             InstrumentNumberField(
-                label: L10n.formMileage,
+                label: nil,
                 value: $mileageAtService,
                 placeholder: L10n.formOptionalTag,
                 suffix: DistanceSettings.shared.unit.abbreviation

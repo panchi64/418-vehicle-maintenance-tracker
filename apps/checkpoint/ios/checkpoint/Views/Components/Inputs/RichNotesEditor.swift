@@ -4,7 +4,10 @@ import UIKit
 /// Markdown-aware notes editor with a brutalist formatting toolbar
 /// (BOLD · • · 1.). Drop-in replacement for `InstrumentTextEditor`.
 struct RichNotesEditor: View {
-    let label: String
+    /// Omit when the enclosing section header already names this field — same
+    /// rule as `InstrumentTextField`. Every caller but one was passing the
+    /// section's own title here, so the screens read "NOTES / NOTES".
+    var label: String?
     @Binding var text: String
     var placeholder: String = ""
     var minHeight: CGFloat = 100
@@ -14,10 +17,7 @@ struct RichNotesEditor: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(label.uppercased())
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1.5)
+            FieldLabel(label: label, requirement: .optional)
 
             VStack(spacing: 0) {
                 toolbar
@@ -112,6 +112,12 @@ private struct MarkdownTextView: UIViewRepresentable {
         view.autocapitalizationType = .sentences
         view.autocorrectionType = .yes
         view.textContainerInset = UIEdgeInsets(top: 8, left: 4, bottom: 8, right: 4)
+        // Return inserts a newline here — it always will, in a notes field — so
+        // the only way out is a button off the keyboard. SwiftUI's
+        // `.toolbar(placement: .keyboard)` does not reach a first responder
+        // living inside a UIViewRepresentable, so this view supplies UIKit's
+        // equivalent itself.
+        view.inputAccessoryView = context.coordinator.makeDoneAccessory()
         return view
     }
 
@@ -138,8 +144,69 @@ private struct MarkdownTextView: UIViewRepresentable {
         func textViewDidChangeSelection(_ textView: UITextView) {
             parent.selection = textView.selectedRange
         }
-        func textViewDidBeginEditing(_ textView: UITextView) { parent.isFocused = true }
+
+        func textViewDidBeginEditing(_ textView: UITextView) {
+            parent.isFocused = true
+            textView.scrollIntoViewOnceKeyboardIsUp()
+        }
+
         func textViewDidEndEditing(_ textView: UITextView) { parent.isFocused = false }
+
+        func makeDoneAccessory() -> UIToolbar {
+            let bar = UIToolbar()
+            bar.sizeToFit()
+            bar.barTintColor = UIColor(Theme.surfaceInstrument)
+            bar.tintColor = UIColor(Theme.accent)
+            bar.items = [
+                UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil),
+                // .plain, not .done — `.done` is deprecated as of iOS 26, and
+                // the emphasis it used to add is carried by the accent tint.
+                UIBarButtonItem(title: "DONE", style: .plain, target: self, action: #selector(dismissKeyboard))
+            ]
+            return bar
+        }
+
+        @objc private func dismissKeyboard() {
+            UIApplication.shared.sendAction(
+                #selector(UIResponder.resignFirstResponder),
+                to: nil, from: nil, for: nil
+            )
+        }
+    }
+}
+
+// MARK: - Scroll-into-view
+
+private extension UIView {
+    /// SwiftUI scrolls a focused field clear of the keyboard on its own, but
+    /// only for its OWN controls — a `UITextView` inside a
+    /// `UIViewRepresentable` is invisible to that, so tapping the notes editor
+    /// left it sitting under the keyboard with the caret unreachable.
+    ///
+    /// `scrollRectToVisible` is the system answer to exactly this; the only
+    /// thing missing is the timing. It measures against the scroll view's
+    /// visible area, and that area does not shrink until the keyboard is up —
+    /// run it immediately and the rect is already "visible", so it scrolls
+    /// nowhere. One delayed call also covers the case where the keyboard is
+    /// ALREADY up because focus moved here from another field.
+    func scrollIntoViewOnceKeyboardIsUp() {
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(0.35))
+            guard let scrollView = enclosingScrollView() else { return }
+            // Expanded so the editor doesn't land flush against the keyboard,
+            // and so its formatting toolbar comes along with it.
+            let target = convert(bounds, to: scrollView).insetBy(dx: 0, dy: -Spacing.xl)
+            scrollView.scrollRectToVisible(target, animated: true)
+        }
+    }
+
+    func enclosingScrollView() -> UIScrollView? {
+        var candidate = superview
+        while let view = candidate {
+            if let scrollView = view as? UIScrollView { return scrollView }
+            candidate = view.superview
+        }
+        return nil
     }
 }
 

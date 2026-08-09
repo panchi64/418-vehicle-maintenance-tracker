@@ -14,7 +14,7 @@ import SwiftUI
 enum TourTargetID: Hashable {
     case dashboardSpecs    // Step 0 — Home: QuickSpecsCard
     case vehicleHeader     // Step 1 — Home: VehicleHeader
-    case servicesSearch    // Step 2 — Services: ServiceSearchField
+    case servicesSearch    // Step 2 — Services: BrutalistSearchField
     case costsHeadline     // Step 3 — Costs: CostHeadlineCard
 }
 

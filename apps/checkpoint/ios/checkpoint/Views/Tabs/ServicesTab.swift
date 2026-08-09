@@ -187,7 +187,7 @@ struct ServicesTab: View {
         @Bindable var appState = appState
         return ScrollView {
             VStack(spacing: Spacing.xl) {
-                ServiceSearchField(
+                BrutalistSearchField(
                     text: $appState.servicesTab.searchText,
                     onSearchStarted: {
                         AnalyticsService.shared.capture(.servicesSearchUsed)

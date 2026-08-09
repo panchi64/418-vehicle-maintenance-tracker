@@ -167,7 +167,7 @@ struct AddServiceView: View {
                         .padding(.bottom, Spacing.xxl)
                     }
                 }
-                .numberPadDoneButton()
+                .keyboardDismissToolbar()
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
                 .toolbarBackground(.visible, for: .navigationBar)

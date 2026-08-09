@@ -17,6 +17,8 @@ struct CSVImportPreviewStep: View {
     @Binding var errorMessage: String?
     let onImport: (CSVImportPreview) -> Void
 
+    @FocusState private var isVehicleNameFocused: Bool
+
     private var canImport: Bool {
         if createNewVehicle {
             return !newVehicleName.trimmingCharacters(in: .whitespaces).isEmpty
@@ -144,6 +146,9 @@ struct CSVImportPreviewStep: View {
                             .font(.brutalistBody)
                             .foregroundStyle(Theme.textPrimary)
                             .textFieldStyle(.plain)
+                            .focused($isVehicleNameFocused)
+                            .submitLabel(.done)
+                            .onSubmit { isVehicleNameFocused = false }
                     }
                     .padding(Spacing.md)
                 }
