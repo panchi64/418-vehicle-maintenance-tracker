@@ -50,13 +50,24 @@ struct BrutalistSearchField: View {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 16))
                         .foregroundStyle(Theme.textTertiary)
-                        .frame(minWidth: 44, minHeight: 44)
+                        .frame(minWidth: Theme.tapTarget, minHeight: Theme.tapTarget)
                         .contentShape(Rectangle())
                 }
                 .accessibilityLabel("Clear search")
             }
         }
-        .padding(Spacing.md)
+        // The row reserves the tap target whether or not the clear button is
+        // there. Without this the button's own 44pt minimum was the tallest
+        // thing in the HStack, so the field grew by ~24pt on the first
+        // keystroke and shrank again when the query was cleared — the search
+        // box changing size underneath the list it filters.
+        //
+        // Vertical padding is the one step, not the standard 16, because the
+        // 44pt floor now supplies the height that padding used to. Same
+        // resting height as before, just no longer dependent on the button.
+        .frame(minHeight: Theme.tapTarget)
+        .padding(.horizontal, Spacing.md)
+        .padding(.vertical, Spacing.xs)
         .background(Theme.surfaceInstrument)
         .brutalistBorder()
     }
