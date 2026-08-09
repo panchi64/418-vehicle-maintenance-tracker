@@ -84,58 +84,39 @@ enum CostsInsightsCore {
     }
 }
 
-// MARK: - Insights Extension
+// MARK: - Presentation
 
-extension CostsTab {
+/// Everything here reads values `CostsMetrics` already stored — arithmetic,
+/// comparisons, and formatting. Nothing in this extension iterates the event
+/// list, which is what keeps these safe to read repeatedly from a view body.
+extension CostsMetrics {
 
-    // MARK: - Prior-Period Window
+    // MARK: - Counts and Money
 
-    var priorPeriodRange: (start: Date, end: Date)? {
-        let now = Date.now
-        let calendar = Calendar.current
+    /// Number of distinct money events (visits + standalone logs with cost).
+    /// Not a service count: each log of an un-itemized visit is not its own
+    /// expense.
+    var serviceCount: Int { events.count }
 
-        switch periodFilter {
-        case .month:
-            guard let priorEnd = calendar.date(byAdding: .month, value: -1, to: now),
-                  let priorStart = calendar.date(byAdding: .month, value: -2, to: now)
-            else { return nil }
-            return (priorStart, priorEnd)
-        case .ytd:
-            // Same DOY range one year earlier.
-            guard let priorEnd = calendar.date(byAdding: .year, value: -1, to: now),
-                  let priorStart = calendar.date(from: calendar.dateComponents([.year], from: priorEnd))
-            else { return nil }
-            return (priorStart, priorEnd)
-        case .year:
-            guard let priorEnd = calendar.date(byAdding: .year, value: -1, to: now),
-                  let priorStart = calendar.date(byAdding: .year, value: -2, to: now)
-            else { return nil }
-            return (priorStart, priorEnd)
-        case .all:
-            return nil
-        }
+    var isEmpty: Bool { events.isEmpty }
+
+    var formattedTotalSpent: String { Formatters.currencyWhole(totalSpent) }
+
+    var formattedAverageCost: String {
+        guard let averageCost else { return "-" }
+        return Formatters.currencyWhole(averageCost)
     }
 
-    /// Applies the active category filter so a "repair-only" delta compares
-    /// repair-to-repair, not repair-to-everything.
-    var priorPeriodEvents: [ExpenseEvent] {
-        guard let range = priorPeriodRange else { return [] }
-
-        var events = vehicleEvents.filter { $0.date >= range.start && $0.date < range.end }
-        if let category = categoryFilter.costCategory {
-            events = events.filter { $0.category == category }
-        }
-        return events.filter { $0.hasCost }
-    }
-
-    var priorPeriodTotal: Decimal {
-        priorPeriodEvents.map(\.amount).reduce(0, +)
+    var formattedCostPerMile: String {
+        guard let costPerMile else { return "-" }
+        let unitAbbr = DistanceSettings.shared.unit.abbreviation
+        return String(format: "$%.2f/\(unitAbbr)", costPerMile)
     }
 
     // MARK: - Period Delta
 
     var periodDeltaAmount: Decimal? {
-        guard priorPeriodRange != nil, priorPeriodTotal > 0 else { return nil }
+        guard hasPriorPeriod, priorPeriodTotal > 0 else { return nil }
         return totalSpent - priorPeriodTotal
     }
 
@@ -146,83 +127,17 @@ extension CostsTab {
         return .flat
     }
 
-    var priorPeriodLabel: String {
-        switch periodFilter {
-        case .month: return L10n.costsHeadlinePriorMonth
-        case .ytd:
-            let priorYear = Calendar.current.component(.year, from: Date.now) - 1
-            return L10n.costsHeadlinePriorYTD(priorYear)
-        case .year: return L10n.costsHeadlinePriorYear
-        case .all: return ""
-        }
-    }
-
     // MARK: - Preventive / Reactive / Discretionary Split
 
-    var preventiveShare: Double { categoryShare(.maintenance) }
-    var reactiveShare: Double { categoryShare(.repair) }
-    var discretionaryShare: Double { categoryShare(.upgrade) }
-
-    private func categoryShare(_ category: CostCategory) -> Double {
-        guard totalSpent > 0 else { return 0 }
-        let amount = eventsWithCosts
-            .filter { $0.category == category }
-            .map(\.amount)
-            .reduce(0, +)
-        let ratio = (amount as NSDecimalNumber).doubleValue / (totalSpent as NSDecimalNumber).doubleValue
-        return ratio * 100
-    }
-
-    // MARK: - Year-End Projection
-
-    /// Returns nil unless `periodFilter == .ytd` — see `CostsInsightsCore`
-    /// for the projection math (early-January gated to avoid noise).
-    var yearEndProjection: Decimal? {
-        guard periodFilter == .ytd else { return nil }
-        return CostsInsightsCore.projectYearEnd(totalSpent: totalSpent, now: .now)
-    }
-
-    // MARK: - Repair Cluster Detection
-
-    /// Operates on all vehicle events (not the filtered set) so the warning
-    /// shows even when the user has narrowed to a single category.
-    var repairCluster: RepairClusterSignal? {
-        CostsInsightsCore.detectRepairCluster(events: vehicleEvents)
-    }
-
-    // MARK: - Top Expenses
-
-    var topExpenses: [ExpenseEvent] {
-        CostsInsightsCore.topExpenses(events: eventsWithCosts)
-    }
-
-    // MARK: - Anomaly Detection
-
-    var anomalyEventIDs: Set<UUID> {
-        CostsInsightsCore.detectAnomalies(events: eventsWithCosts)
-    }
+    var preventiveShare: Double { categoryShares[.maintenance] ?? 0 }
+    var reactiveShare: Double { categoryShares[.repair] ?? 0 }
+    var discretionaryShare: Double { categoryShares[.upgrade] ?? 0 }
 
     // MARK: - Cost-Per-Mile Trend
 
-    var priorCostPerMile: Double? {
-        let prior = priorPeriodEvents
-        guard prior.count >= 2 else { return nil }
-
-        let sorted = prior.sorted { $0.date < $1.date }
-        guard let oldest = sorted.first,
-              let newest = sorted.last,
-              newest.mileage > oldest.mileage else { return nil }
-
-        let milesDriven = newest.mileage - oldest.mileage
-        guard milesDriven > 0 else { return nil }
-
-        let total = prior.map(\.amount).reduce(0, +)
-        return NSDecimalNumber(decimal: total).doubleValue / Double(milesDriven)
-    }
-
     var costPerMileDelta: Double? {
-        guard let current = costPerMile, let prior = priorCostPerMile else { return nil }
-        return current - prior
+        guard let costPerMile, let priorCostPerMile else { return nil }
+        return costPerMile - priorCostPerMile
     }
 
     var costPerMileDeltaDirection: TrendDirection {
@@ -232,12 +147,38 @@ extension CostsTab {
         return .flat
     }
 
+    // MARK: - Labels
+
+    var periodLabel: String {
+        switch period {
+        case .month: return "Last 30 days"
+        case .ytd: return "Year to date"
+        case .year: return "Last 12 months"
+        case .all: return "All time"
+        }
+    }
+
+    var priorPeriodLabel: String {
+        switch period {
+        case .month: return L10n.costsHeadlinePriorMonth
+        case .ytd:
+            let priorYear = Calendar.current.component(.year, from: Date.now) - 1
+            return L10n.costsHeadlinePriorYTD(priorYear)
+        case .year: return L10n.costsHeadlinePriorYear
+        case .all: return ""
+        }
+    }
+
+    var shouldShowYearlyRoundup: Bool {
+        (period == .year || period == .all) && !events.isEmpty
+    }
+
     // MARK: - Share Summary
 
-    var costShareSummary: String {
+    func costShareSummary(vehicle: Vehicle?) -> String {
         var lines: [String] = []
 
-        if let vehicle = vehicle {
+        if let vehicle {
             lines.append("\(vehicle.year) \(vehicle.make) \(vehicle.model)")
         }
         lines.append("\(periodLabel.uppercased()) · \(formattedTotalSpent)")

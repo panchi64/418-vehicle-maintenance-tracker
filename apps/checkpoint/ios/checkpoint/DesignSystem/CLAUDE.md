@@ -8,11 +8,21 @@ This file describes *what is available*. It deliberately does not describe when 
 
 ## Colors are theme-driven
 
-Every color token is a computed property resolving through `ThemeManager.shared.current`, not a literal:
+Every color token is a computed property resolving through the active theme's
+**resolved palette**, not a literal:
 
 ```swift
-static var accent: Color { ThemeManager.shared.current.accentColor }
+static var accent: Color { ThemeManager.shared.palette.accent }
 ```
+
+`ThemeDefinition` stores hex *strings*; `ThemePalette` parses all sixteen into
+`Color`s once, and `ThemeManager` rebuilds it only in `activateTheme(_:)`. Read
+colors through `Theme.*`. Do not reach for `ThemeManager.shared.current.<x>Color`
+in a view body — those accessors run a `Scanner` per call, and a screenful of
+rows touches tokens hundreds of times.
+
+`ThemeManager.current` is `private(set)`: change themes with `activateTheme(_:)`
+so the palette can't go stale.
 
 Themes are `ThemeDefinition` values loaded from `Resources/Themes.json`. **Eight ship today** — `default`, `clean_slate`, `red_line`, `blueprint`, `terra`, `midnight_oil`, `garage_day`, `stealth` — some unlocked via tips. Each defines every token, so **never assume a specific hue**. Write against the token, verify against more than one theme.
 

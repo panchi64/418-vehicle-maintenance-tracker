@@ -32,7 +32,13 @@ struct HomeTab: View {
         _recallAcknowledgments = Query()
         if let vehicleID = vehicle?.id {
             _services = Query(filter: #Predicate<Service> { $0.vehicle?.id == vehicleID })
-            _serviceLogs = Query(filter: #Predicate<ServiceLog> { $0.vehicle?.id == vehicleID })
+            // Sorted in the store, so Recent Activity doesn't re-sort the whole
+            // history to show three rows.
+            _serviceLogs = Query(
+                filter: #Predicate<ServiceLog> { $0.vehicle?.id == vehicleID },
+                sort: \.performedDate,
+                order: .reverse
+            )
         } else {
             _services = Query(filter: #Predicate<Service> { _ in false })
             _serviceLogs = Query(filter: #Predicate<ServiceLog> { _ in false })
@@ -47,30 +53,11 @@ struct HomeTab: View {
         appState.selectedVehicle
     }
 
+    /// Used by cluster detection, which runs on an event rather than in `body`.
+    /// Anything the body needs comes from `Content` instead.
     var vehicleServices: [Service] {
         guard let vehicle = vehicle else { return [] }
-        return services.forVehicle(vehicle)
-    }
-
-    /// The most urgent upcoming item (service or marbete)
-    private var nextUpItem: (any UpcomingItem)? {
-        vehicle?.nextUpItem
-    }
-
-    private var remainingServices: [Service] {
-        let tracked = vehicleServices.filter { $0.hasDueTracking }
-        guard let nextUp = nextUpItem else { return tracked }
-        // If marbete is the most urgent, don't drop a service from remaining
-        if nextUp.itemType == .marbete {
-            return tracked
-        }
-        // Filter out the service matching the displayed Next Up by ID
-        return tracked.filter { $0.id != nextUp.id }
-    }
-
-    private var vehicleServiceLogs: [ServiceLog] {
-        guard let vehicle = vehicle else { return [] }
-        return serviceLogs.filter { $0.vehicle?.id == vehicle.id }
+        return services.sortedByUrgency(vehicle.mileageEstimate)
     }
 
     /// Recalls that should appear on Home: drops resolved + actively snoozed,
@@ -83,8 +70,67 @@ struct HomeTab: View {
         )
     }
 
+    /// What this screen shows, derived in a single pass.
+    ///
+    /// The pieces below were computed properties that SwiftUI read repeatedly per
+    /// body evaluation — `remainingServices` alone was read four times, and each
+    /// read re-ran an urgency sort plus `nextUpItem`, which walks every mileage
+    /// snapshot to re-derive the driving pace. Now: one sort, one pace.
+    private struct Content {
+        let nextUp: (any UpcomingItem)?
+        /// Due-tracking services minus whatever Next Up is already showing.
+        let remaining: [Service]
+        let hasAnyService: Bool
+        let recentLogs: [ServiceLog]
+        let logCount: Int
+        let mileageTrackedCount: Int
+        let mileage: MileageEstimate
+    }
+
+    private func makeContent() -> Content {
+        guard let vehicle else {
+            return Content(
+                nextUp: nil,
+                remaining: [],
+                hasAnyService: false,
+                recentLogs: [],
+                logCount: 0,
+                mileageTrackedCount: 0,
+                mileage: MileageEstimate(pace: nil, effective: 0, isEstimated: false)
+            )
+        }
+
+        let mileage = vehicle.mileageEstimate
+        let sorted = services.sortedByUrgency(mileage)
+        let tracked = sorted.filter { $0.hasDueTracking }
+
+        // Next Up is the most urgent tracked service unless the marbete beats it.
+        let nextUp = vehicle.mostUrgentUpcomingItem(mileage: mileage, tracked: tracked)
+
+        // Drop the service Next Up is already showing — but if the marbete won,
+        // no service was consumed.
+        let remaining: [Service]
+        if let nextUp, nextUp.itemType == .service {
+            remaining = tracked.filter { $0.id != nextUp.id }
+        } else {
+            remaining = tracked
+        }
+
+        return Content(
+            nextUp: nextUp,
+            remaining: remaining,
+            hasAnyService: !sorted.isEmpty,
+            // Already newest-first from the query.
+            recentLogs: Array(serviceLogs.prefix(3)),
+            logCount: serviceLogs.count,
+            mileageTrackedCount: sorted.filter { $0.dueMileage != nil }.count,
+            mileage: mileage
+        )
+    }
+
     var body: some View {
         @Bindable var appState = appState
+        let content = makeContent()
         ScrollView {
             VStack(spacing: Spacing.xl) {
                 // Recall alert is safety-critical and outranks everything else,
@@ -106,7 +152,7 @@ struct HomeTab: View {
                 }
 
                 // Next Up hero card (service or marbete, whichever is more urgent)
-                if let nextUp = nextUpItem, let vehicle = vehicle {
+                if let nextUp = content.nextUp, let vehicle = vehicle {
                     VStack(alignment: .leading, spacing: Spacing.sm) {
                         InstrumentSectionHeader(title: "Next Up")
 
@@ -116,10 +162,10 @@ struct HomeTab: View {
                             if let service = nextUp as? Service {
                                 NextUpCard(
                                     service: service,
-                                    currentMileage: vehicle.effectiveMileage,
+                                    currentMileage: content.mileage.effective,
                                     vehicleName: vehicle.displayName,
-                                    dailyMilesPace: vehicle.dailyMilesPace,
-                                    isEstimatedMileage: vehicle.isUsingEstimatedMileage
+                                    dailyMilesPace: content.mileage.pace,
+                                    isEstimatedMileage: content.mileage.isEstimated
                                 ) {
                                     appState.selectedService = service
                                 }
@@ -143,7 +189,7 @@ struct HomeTab: View {
                 if let vehicle = vehicle, vehicle.shouldPromptMileageUpdate {
                     QuickMileageUpdateCard(
                         vehicle: vehicle,
-                        mileageTrackedServiceCount: vehicleServices.filter { $0.dueMileage != nil }.count
+                        mileageTrackedServiceCount: content.mileageTrackedCount
                     ) { newMileage in
                         AnalyticsService.shared.capture(.mileageUpdated(source: .quickUpdate))
                         updateMileage(newMileage, for: vehicle)
@@ -192,26 +238,26 @@ struct HomeTab: View {
                 // grouping before borders do — and the box put a second
                 // enclosure inside a screen whose hero cards are already boxed,
                 // so the list competed with the thing it sits beneath.
-                if !remainingServices.isEmpty, let vehicle = vehicle {
+                if !content.remaining.isEmpty {
                     ReadoutSection(title: L10n.homeUpcoming) {
                         VStack(spacing: 0) {
-                            ForEach(Array(remainingServices.prefix(3).enumerated()), id: \.element.id) { index, service in
+                            ForEach(Array(content.remaining.prefix(3).enumerated()), id: \.element.id) { index, service in
                                 ServiceRow(
                                     service: service,
-                                    currentMileage: vehicle.effectiveMileage,
-                                    isEstimatedMileage: vehicle.isUsingEstimatedMileage
+                                    currentMileage: content.mileage.effective,
+                                    isEstimatedMileage: content.mileage.isEstimated
                                 ) {
                                     appState.selectedService = service
                                 }
                                 .staggeredReveal(index: index, baseDelay: 0.25)
 
-                                if index < min(remainingServices.count, 3) - 1 {
+                                if index < min(content.remaining.count, 3) - 1 {
                                     ListDivider()
                                 }
                             }
                         }
                     } action: {
-                        if remainingServices.count > 3 {
+                        if content.remaining.count > 3 {
                             ReadoutSectionAction(label: L10n.commonViewAll) {
                                 appState.selectedTab = .services
                             }
@@ -220,24 +266,20 @@ struct HomeTab: View {
                 }
 
                 // Recent Activity Feed (max 3, with View All)
-                if !vehicleServiceLogs.isEmpty {
+                if !content.recentLogs.isEmpty {
                     ReadoutSection(title: L10n.homeRecentActivity) {
                         VStack(spacing: 0) {
-                            let recentLogs = vehicleServiceLogs
-                                .sorted { $0.performedDate > $1.performedDate }
-                                .prefix(3)
-
-                            ForEach(Array(recentLogs.enumerated()), id: \.element.id) { index, log in
+                            ForEach(Array(content.recentLogs.enumerated()), id: \.element.id) { index, log in
                                 // ServiceEventRow owns its own tap target.
                                 activityRow(log: log)
 
-                                if index < recentLogs.count - 1 {
+                                if index < content.recentLogs.count - 1 {
                                     ListDivider()
                                 }
                             }
                         }
                     } action: {
-                        if vehicleServiceLogs.count > 3 {
+                        if content.logCount > 3 {
                             // Services, not Costs. This sent a maintenance
                             // history list to a financial view — the rule is
                             // that "View All" lands on a list containing the
@@ -259,7 +301,7 @@ struct HomeTab: View {
                         emptyVehicleState
                             .revealAnimation(delay: 0.2)
                     }
-                } else if vehicleServices.isEmpty && vehicle != nil {
+                } else if !content.hasAnyService && vehicle != nil {
                     noServicesState
                         .revealAnimation(delay: 0.2)
                 }
@@ -272,13 +314,18 @@ struct HomeTab: View {
             detectClusters()
             refreshSeasonalReminders()
         }
-        .onChange(of: vehicleServices.count) { _, _ in
+        // `services` is already scoped to this vehicle by the query, so the count
+        // is the same one `vehicleServices` would report — without paying for an
+        // urgency sort on every body evaluation just to read it.
+        .onChange(of: services.count) { _, _ in
             detectClusters()
         }
         .trackScreen(.home)
+        // No `refreshSeasonalReminders()` here — the `.task` above already runs it
+        // on every appearance, and doing it twice meant two extra `@State` writes,
+        // each triggering another pass over this whole body.
         .onAppear {
             loadDismissedClusters()
-            refreshSeasonalReminders()
         }
         .sheet(item: $appState.selectedCluster) { cluster in
             ServiceClusterDetailSheet(

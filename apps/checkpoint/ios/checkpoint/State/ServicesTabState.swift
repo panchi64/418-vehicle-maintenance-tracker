@@ -30,6 +30,16 @@ struct ServicesTabState {
             case .good: return ServiceStatus.good.label
             }
         }
+
+        /// The status this filter selects, or nil for `all`.
+        var serviceStatus: ServiceStatus? {
+            switch self {
+            case .all: return nil
+            case .overdue: return .overdue
+            case .dueSoon: return .dueSoon
+            case .good: return .good
+            }
+        }
     }
 
     /// `documents` is deliberately absent. It was a third view mode that then

@@ -14,7 +14,17 @@ final class ThemeManager {
     static let shared = ThemeManager()
 
     private(set) var allThemes: [ThemeDefinition] = []
-    var current: ThemeDefinition
+    /// Settable only through `activateTheme(_:)`, which keeps `palette` in step.
+    /// A `didSet` here would be the obvious way to do that, but property
+    /// observers on an `@Observable` stored property can cost it its observation
+    /// tracking — and `current` is what `Typography` and the app's color scheme
+    /// read.
+    private(set) var current: ThemeDefinition
+
+    /// `current`'s colors, already parsed. Every `Theme.*` token reads this
+    /// rather than re-parsing hex on each access — see `ThemePalette`.
+    private(set) var palette: ThemePalette
+
     var ownedThemeIDs: Set<String>
 
     private let defaults = UserDefaults.standard
@@ -31,7 +41,9 @@ final class ThemeManager {
 
         // Load active theme
         let activeID = UserDefaults.standard.string(forKey: Keys.activeThemeID) ?? "default"
-        self.current = themes.first(where: { $0.id == activeID }) ?? themes[0]
+        let active = themes.first(where: { $0.id == activeID }) ?? themes[0]
+        self.current = active
+        self.palette = ThemePalette(active)
 
         // Load owned theme IDs
         let ownedArray = UserDefaults.standard.stringArray(forKey: Keys.ownedThemeIDs) ?? ["default"]
@@ -41,6 +53,7 @@ final class ThemeManager {
     func activateTheme(_ id: String) {
         guard let theme = allThemes.first(where: { $0.id == id }) else { return }
         current = theme
+        palette = ThemePalette(theme)
         defaults.set(id, forKey: Keys.activeThemeID)
         themeLogger.info("Theme activated: \(id)")
     }

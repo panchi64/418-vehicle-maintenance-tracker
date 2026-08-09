@@ -10,33 +10,39 @@ import SwiftUI
 @_exported import DesignKit
 
 enum Theme {
+    /// Colors come from the active theme's **resolved** palette, not from its hex
+    /// strings. Token accessors are read hundreds of times per screen, and
+    /// `Color(hex:)` runs a `Scanner` each time; the palette is parsed once per
+    /// theme change instead. See `ThemePalette`.
+    private static var palette: ThemePalette { ThemeManager.shared.palette }
+
     // MARK: - Backgrounds
-    static var backgroundPrimary: Color { ThemeManager.shared.current.backgroundPrimaryColor }
-    static var backgroundElevated: Color { ThemeManager.shared.current.backgroundElevatedColor }
-    static var backgroundSubtle: Color { ThemeManager.shared.current.backgroundSubtleColor }
+    static var backgroundPrimary: Color { palette.backgroundPrimary }
+    static var backgroundElevated: Color { palette.backgroundElevated }
+    static var backgroundSubtle: Color { palette.backgroundSubtle }
 
     // MARK: - Surfaces
-    static var surfaceInstrument: Color { ThemeManager.shared.current.surfaceInstrumentColor }
-    static var glow: Color { ThemeManager.shared.current.glowColor }
-    static var gridLine: Color { ThemeManager.shared.current.gridLineColor }
+    static var surfaceInstrument: Color { palette.surfaceInstrument }
+    static var glow: Color { palette.glow }
+    static var gridLine: Color { palette.gridLine }
 
     // MARK: - Text
-    static var textPrimary: Color { ThemeManager.shared.current.textPrimaryColor }
-    static var textSecondary: Color { ThemeManager.shared.current.textSecondaryColor }
-    static var textTertiary: Color { ThemeManager.shared.current.textTertiaryColor }
+    static var textPrimary: Color { palette.textPrimary }
+    static var textSecondary: Color { palette.textSecondary }
+    static var textTertiary: Color { palette.textTertiary }
 
     // MARK: - Borders
-    static var borderSubtle: Color { ThemeManager.shared.current.borderSubtleColor }
+    static var borderSubtle: Color { palette.borderSubtle }
 
     // MARK: - Accent
-    static var accent: Color { ThemeManager.shared.current.accentColor }
-    static var accentMuted: Color { ThemeManager.shared.current.accentMutedColor }
+    static var accent: Color { palette.accent }
+    static var accentMuted: Color { palette.accentMuted }
 
     // MARK: - Status
-    static var statusOverdue: Color { ThemeManager.shared.current.statusOverdueColor }
-    static var statusDueSoon: Color { ThemeManager.shared.current.statusDueSoonColor }
-    static var statusGood: Color { ThemeManager.shared.current.statusGoodColor }
-    static var statusNeutral: Color { ThemeManager.shared.current.statusNeutralColor }
+    static var statusOverdue: Color { palette.statusOverdue }
+    static var statusDueSoon: Color { palette.statusDueSoon }
+    static var statusGood: Color { palette.statusGood }
+    static var statusNeutral: Color { palette.statusNeutral }
 
     // MARK: - Brutalist Layout Constants
     static let screenHorizontalPadding: CGFloat = 16

@@ -8,6 +8,16 @@
 import Foundation
 import SwiftData
 
+/// A vehicle's mileage state, resolved once. See `Vehicle.mileageEstimate`.
+struct MileageEstimate: Equatable {
+    /// Recency-weighted miles per day, or nil when there isn't enough history.
+    let pace: Double?
+    /// Estimated mileage where available, otherwise the last recorded odometer.
+    let effective: Int
+    /// Whether `effective` is a projection rather than a reading.
+    let isEstimated: Bool
+}
+
 extension Vehicle {
     /// Commit a new odometer reading: update `currentMileage` / `mileageUpdatedAt`
     /// and insert a `MileageSnapshot` (throttled to one per day) into `context`.
@@ -76,7 +86,13 @@ extension Vehicle {
     /// Estimated current mileage based on driving pace (in miles)
     /// Returns nil if insufficient pace data or stale data (>60 days)
     var estimatedMileage: Int? {
-        guard let pace = dailyMilesPace,
+        estimatedMileage(dailyPace: dailyMilesPace)
+    }
+
+    /// Pace-injected form, so a caller that already computed the pace doesn't
+    /// pay for a second EWMA walk over every snapshot. See `mileageEstimate`.
+    func estimatedMileage(dailyPace: Double?) -> Int? {
+        guard let pace = dailyPace,
               let daysSince = daysSinceMileageUpdate,
               daysSince <= Self.maxEstimationDays,
               daysSince > 0 else { return nil }
@@ -93,6 +109,24 @@ extension Vehicle {
     /// Whether the mileage displayed is estimated (vs actual)
     var isUsingEstimatedMileage: Bool {
         estimatedMileage != nil
+    }
+
+    /// Everything the UI needs about this vehicle's mileage, derived in **one**
+    /// pass over the snapshots.
+    ///
+    /// `dailyMilesPace`, `effectiveMileage`, and `isUsingEstimatedMileage` each
+    /// recompute the recency-weighted pace across every snapshot, so a view that
+    /// reads two or three of them — and a list that reads them once per row —
+    /// pays for the same walk over and over. Compute this once per render and
+    /// pass the values down.
+    var mileageEstimate: MileageEstimate {
+        let pace = dailyMilesPace
+        let estimated = estimatedMileage(dailyPace: pace)
+        return MileageEstimate(
+            pace: pace,
+            effective: estimated ?? currentMileage,
+            isEstimated: estimated != nil
+        )
     }
 
     /// Days since mileage was last updated

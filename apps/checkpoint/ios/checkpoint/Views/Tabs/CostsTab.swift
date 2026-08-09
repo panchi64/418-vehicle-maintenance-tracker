@@ -21,12 +21,19 @@ struct CostsTab: View {
     @State var categoryFilter: CategoryFilter = .all
     @State var highlightedEventID: UUID? = nil
 
-    /// Scopes the log fetch to `vehicle` at the database level. `appState`
-    /// arrives through the environment.
+    /// Scopes the log fetch to `vehicle` at the database level and lets the store
+    /// return them newest-first. `appState` arrives through the environment.
+    ///
+    /// Nothing downstream re-filters by vehicle: the predicate already did it,
+    /// and re-checking `$0.vehicle?.id` faults the relationship once per log.
     init(vehicle: Vehicle?, onboardingState: OnboardingState) {
         self.onboardingState = onboardingState
         if let vehicleID = vehicle?.id {
-            _serviceLogs = Query(filter: #Predicate<ServiceLog> { $0.vehicle?.id == vehicleID })
+            _serviceLogs = Query(
+                filter: #Predicate<ServiceLog> { $0.vehicle?.id == vehicleID },
+                sort: \.performedDate,
+                order: .reverse
+            )
         } else {
             _serviceLogs = Query(filter: #Predicate<ServiceLog> { _ in false })
         }
@@ -55,14 +62,19 @@ struct CostsTab: View {
         }
 
         var startDate: Date? {
-            let calendar = Calendar.current
+            startDate(now: .now, calendar: .current)
+        }
+
+        /// Clock-injected form, so a derivation that takes a fixed `now` — and the
+        /// tests around it — window the same events it reports on.
+        func startDate(now: Date, calendar: Calendar) -> Date? {
             switch self {
             case .month:
-                return calendar.date(byAdding: .month, value: -1, to: .now)
+                return calendar.date(byAdding: .month, value: -1, to: now)
             case .ytd:
-                return calendar.date(from: calendar.dateComponents([.year], from: .now))
+                return calendar.date(from: calendar.dateComponents([.year], from: now))
             case .year:
-                return calendar.date(byAdding: .year, value: -1, to: .now)
+                return calendar.date(byAdding: .year, value: -1, to: now)
             case .all:
                 return nil
             }
@@ -93,20 +105,41 @@ struct CostsTab: View {
         }
     }
 
+    var vehicle: Vehicle? {
+        appState.selectedVehicle
+    }
+
+    /// The vehicle's cost picture for the active filters, derived once per body
+    /// evaluation and handed to every section.
+    ///
+    /// Each section used to reach for its own numbers through computed
+    /// properties, and every one of those rebuilt the deduped expense list from
+    /// the raw logs. See `CostsMetrics`.
+    private var metrics: CostsMetrics {
+        CostsMetrics(
+            logs: serviceLogs,
+            hasVehicle: vehicle != nil,
+            period: periodFilter,
+            category: categoryFilter
+        )
+    }
+
     var body: some View {
+        let metrics = self.metrics
+
         // The control row is pinned above the scroll area, so the cards scroll
         // under it rather than pushing the only means of changing them
         // off-screen.
         VStack(spacing: 0) {
-            filtersSection
+            filtersSection(metrics)
 
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(spacing: Spacing.xl) {
-                        summaryCardsSection
-                        breakdownSections
-                        expenseListSection(scrollProxy: proxy)
-                        emptyStates
+                        summaryCardsSection(metrics)
+                        breakdownSections(metrics)
+                        expenseListSection(metrics, scrollProxy: proxy)
+                        emptyStates(metrics)
                     }
                     .padding(.horizontal, Spacing.screenHorizontal)
                     .padding(.top, Spacing.md)

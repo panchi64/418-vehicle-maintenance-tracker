@@ -40,6 +40,31 @@ For component inventories, see [`docs/ARCHITECTURE.md`](../../../../../docs/ARCH
 - `@Query` for declarative SwiftData fetching — scope it to the vehicle in `init` with a `#Predicate` rather than filtering in a computed property
 - `@Environment(\.modelContext)` for mutations
 
+### Derive a screen's data once per body, not per mention
+
+**A computed property re-runs every time the body mentions it.** `if !rows.isEmpty`,
+a count in the section title, the `ForEach`, and a `count - 1` divider test are
+four full re-derivations of the same list — and anything reading a SwiftData
+relationship (`log.vehicle`, `log.visit`, `vehicle.services`) faults it again on
+each pass. This was the cause of the pause when switching tabs.
+
+Each tab resolves its data in **one** value up front and passes it down:
+`HomeTab.Content`, `ServicesTab.Content`, `CostsMetrics`. Follow that shape for
+any new screen with derived collections:
+
+- Compute it once at the top of `body` (`let content = makeContent()`), hand it to
+  sections as a parameter.
+- **Store** anything that iterates; leave computed only arithmetic and formatting
+  over already-stored values.
+- Don't re-filter what the `@Query` predicate already scoped — that's a
+  relationship fault per row for an answer the store gave you.
+- Mileage: take `vehicle.mileageEstimate` once and pass
+  `.effective` / `.isEstimated` / `.pace` down. `vehicle.effectiveMileage` and
+  friends each recompute the driving pace across every snapshot, so reading them
+  per row is the same walk repeated.
+- Sorting by urgency or status: score once and sort on that
+  (`[Service].sortedByUrgency(_:)`), never inside the comparator.
+
 ## Form conventions
 
 These are enforced invariants, not style suggestions. Each is defined in `SURFACE_DOCTRINE.md` Part 3.

@@ -68,7 +68,12 @@ struct ThemeDefinition: Identifiable, Codable, Equatable {
     let statusGood: String
     let statusNeutral: String
 
-    // Computed Color accessors
+    // Computed Color accessors.
+    //
+    // Each one parses a hex string through a `Scanner`, so they are *not* free
+    // to read in a view body — a screenful of rows touches theme tokens
+    // hundreds of times. `ThemePalette` resolves all sixteen once per theme
+    // change; read colors through `Theme.*`, which goes to the palette.
     var backgroundPrimaryColor: Color { Color(hex: backgroundPrimary) }
     var backgroundElevatedColor: Color { Color(hex: backgroundElevated) }
     var backgroundSubtleColor: Color { Color(hex: backgroundSubtle) }
@@ -85,4 +90,51 @@ struct ThemeDefinition: Identifiable, Codable, Equatable {
     var statusDueSoonColor: Color { Color(hex: statusDueSoon) }
     var statusGoodColor: Color { Color(hex: statusGood) }
     var statusNeutralColor: Color { Color(hex: statusNeutral) }
+}
+
+// MARK: - Resolved Palette
+
+/// A theme's sixteen colors, parsed once.
+///
+/// `ThemeDefinition` stores hex *strings*, and turning one into a `Color` runs a
+/// `Scanner` over it. Since every token in `Theme` resolves through the active
+/// theme, a body that reads a dozen tokens per row was re-parsing the same
+/// strings thousands of times per screen. `ThemeManager` holds one of these and
+/// rebuilds it only when the active theme changes.
+struct ThemePalette: Equatable {
+    let backgroundPrimary: Color
+    let backgroundElevated: Color
+    let backgroundSubtle: Color
+    let surfaceInstrument: Color
+    let glow: Color
+    let gridLine: Color
+    let textPrimary: Color
+    let textSecondary: Color
+    let textTertiary: Color
+    let borderSubtle: Color
+    let accent: Color
+    let accentMuted: Color
+    let statusOverdue: Color
+    let statusDueSoon: Color
+    let statusGood: Color
+    let statusNeutral: Color
+
+    init(_ theme: ThemeDefinition) {
+        backgroundPrimary = theme.backgroundPrimaryColor
+        backgroundElevated = theme.backgroundElevatedColor
+        backgroundSubtle = theme.backgroundSubtleColor
+        surfaceInstrument = theme.surfaceInstrumentColor
+        glow = theme.glowColor
+        gridLine = theme.gridLineColor
+        textPrimary = theme.textPrimaryColor
+        textSecondary = theme.textSecondaryColor
+        textTertiary = theme.textTertiaryColor
+        borderSubtle = theme.borderSubtleColor
+        accent = theme.accentColor
+        accentMuted = theme.accentMutedColor
+        statusOverdue = theme.statusOverdueColor
+        statusDueSoon = theme.statusDueSoonColor
+        statusGood = theme.statusGoodColor
+        statusNeutral = theme.statusNeutralColor
+    }
 }

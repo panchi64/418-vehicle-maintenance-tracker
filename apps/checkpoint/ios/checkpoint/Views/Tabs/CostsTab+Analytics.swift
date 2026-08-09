@@ -2,7 +2,7 @@
 //  CostsTab+Analytics.swift
 //  checkpoint
 //
-//  Analytics computed properties for CostsTab.
+//  The Costs tab's numbers, derived in one pass.
 //
 //  All money metrics flow from `ExpenseEvent`s, not raw `ServiceLog`s.
 //  An ExpenseEvent is one of:
@@ -62,199 +62,193 @@ enum ExpenseEvent: Identifiable {
     var hasCost: Bool { amount > 0 }
 }
 
-// MARK: - Analytics Extension
+// MARK: - Costs Metrics
 
-extension CostsTab {
+/// Every number the Costs tab displays, computed once from the vehicle's logs
+/// and the active filters.
+///
+/// This used to be ~40 computed properties in an extension on `CostsTab`, each
+/// re-deriving the one below it. Because SwiftUI reads a property every time the
+/// body mentions it, a single render of this tab rebuilt the deduped event list
+/// dozens of times — and rebuilding it walks `log.visit` and `log.vehicle` for
+/// every log, faulting SwiftData relationships each time. That was the bulk of
+/// the pause when switching to this tab.
+///
+/// Rules for anything added here:
+/// - **Stored, not computed**, if it iterates the events.
+/// - Computed is fine for arithmetic or formatting over already-stored values.
+struct CostsMetrics {
+    /// Every event for the vehicle, newest first, ignoring both filters. Signals
+    /// that should survive narrowing (the repair-cluster warning, the category
+    /// option counts) read this.
+    let allEvents: [ExpenseEvent]
 
-    // MARK: - Filtered Data
+    /// Period- and category-filtered events that carry a cost. The expense list
+    /// and nearly every metric below are built from these.
+    let events: [ExpenseEvent]
 
-    var vehicle: Vehicle? {
-        appState.selectedVehicle
-    }
+    /// The vehicle's full service history, newest first.
+    let logs: [ServiceLog]
 
-    var vehicleServiceLogs: [ServiceLog] {
-        guard let vehicle = vehicle else { return [] }
-        return serviceLogs
-            .filter { $0.vehicle?.id == vehicle.id }
-            .sorted { $0.performedDate > $1.performedDate }
-    }
+    let totalSpent: Decimal
+    let averageCost: Decimal?
+    let costPerMile: Double?
 
-    /// Build the deduped event list for the selected vehicle.
-    /// Visits are inserted once; logs that belong to a visit are absorbed.
-    var vehicleEvents: [ExpenseEvent] {
-        let logs = vehicleServiceLogs
+    let hasPriorPeriod: Bool
+    let priorPeriodTotal: Decimal
+    let priorCostPerMile: Double?
+
+    let categoryBreakdown: [(category: CostCategory, amount: Decimal, percentage: Double)]
+    /// Percentage of `totalSpent` per category, 0 when nothing was spent.
+    let categoryShares: [CostCategory: Double]
+
+    /// Newest month first — the reading order of a list.
+    let monthlyBreakdown: [(month: Date, amount: Decimal)]
+    /// Oldest month first — the reading order of a chart's x-axis.
+    let monthlyBreakdownChronological: [(month: Date, amount: Decimal)]
+    let monthlyBreakdownByCategory: [(month: Date, category: CostCategory, amount: Decimal)]
+    let cumulativeCostOverTime: [(date: Date, cumulativeAmount: Decimal)]
+
+    let repairCluster: RepairClusterSignal?
+    let topExpenses: [ExpenseEvent]
+    let anomalyEventIDs: Set<UUID>
+    let yearEndProjection: Decimal?
+
+    let currentYear: Int
+    let previousYearLogs: [ServiceLog]
+
+    let period: CostsTab.PeriodFilter
+    let category: CostsTab.CategoryFilter
+
+    // MARK: - Derivation
+
+    /// - Parameter logs: the vehicle's logs, newest first. Already scoped to the
+    ///   vehicle by the caller's query, so this does not re-filter them.
+    init(
+        logs: [ServiceLog],
+        hasVehicle: Bool,
+        period: CostsTab.PeriodFilter,
+        category: CostsTab.CategoryFilter,
+        calendar: Calendar = .current,
+        now: Date = .now
+    ) {
+        self.logs = logs
+        self.period = period
+        self.category = category
+
+        // Build the deduped event list: visits are inserted once, and logs that
+        // belong to a visit are absorbed into it.
         var seenVisitIDs: Set<UUID> = []
-        var events: [ExpenseEvent] = []
-
+        var built: [ExpenseEvent] = []
+        built.reserveCapacity(logs.count)
         for log in logs {
             if let visit = log.visit {
                 guard !seenVisitIDs.contains(visit.id) else { continue }
                 seenVisitIDs.insert(visit.id)
-                events.append(.visit(visit))
+                built.append(.visit(visit))
             } else {
-                events.append(.standalone(log))
+                built.append(.standalone(log))
             }
         }
+        // A visit's date can differ from the log that pulled it in, so the order
+        // logs arrived in doesn't guarantee the events are sorted.
+        let allEvents = built.sorted { $0.date > $1.date }
+        self.allEvents = allEvents
 
-        return events.sorted { $0.date > $1.date }
-    }
+        var filtered = allEvents
+        if let startDate = period.startDate(now: now, calendar: calendar) {
+            filtered = filtered.filter { $0.date >= startDate }
+        }
+        if let wanted = category.costCategory {
+            filtered = filtered.filter { $0.category == wanted }
+        }
+        // Events without a cost stay out of financial summaries — they still
+        // appear in service history.
+        let events = filtered.filter { $0.hasCost }
+        self.events = events
 
-    var filteredEvents: [ExpenseEvent] {
-        var events = vehicleEvents
+        let totalSpent = events.reduce(Decimal(0)) { $0 + $1.amount }
+        self.totalSpent = totalSpent
+        self.averageCost = events.isEmpty ? nil : totalSpent / Decimal(events.count)
 
-        if let startDate = periodFilter.startDate {
-            events = events.filter { $0.date >= startDate }
+        // Numerator and denominator come from the same event population so the
+        // math reads consistently across visit-heavy and standalone-heavy data.
+        self.costPerMile = hasVehicle
+            ? Self.costPerMile(events: events, total: totalSpent)
+            : nil
+
+        // MARK: Prior-period comparison
+
+        let priorRange = Self.priorPeriodRange(period: period, now: now, calendar: calendar)
+        self.hasPriorPeriod = priorRange != nil
+
+        // The active category filter applies, so a "repair-only" delta compares
+        // repair to repair rather than repair to everything.
+        let priorEvents: [ExpenseEvent]
+        if let priorRange {
+            priorEvents = allEvents.filter {
+                $0.date >= priorRange.start && $0.date < priorRange.end && $0.hasCost
+                    && (category.costCategory == nil || $0.category == category.costCategory)
+            }
+        } else {
+            priorEvents = []
+        }
+        let priorTotal = priorEvents.reduce(Decimal(0)) { $0 + $1.amount }
+        self.priorPeriodTotal = priorTotal
+        self.priorCostPerMile = Self.costPerMile(events: priorEvents, total: priorTotal)
+
+        // MARK: Category split
+
+        // Only events that state a category count toward the breakdown and the
+        // share split — an uncategorised expense is not evidence of preventive
+        // spending. The stacked monthly chart below does assume `.maintenance`
+        // for them, because a stacked bar has to put every dollar somewhere.
+        var amountByCategory: [CostCategory: Decimal] = [:]
+        for event in events {
+            guard let eventCategory = event.category else { continue }
+            amountByCategory[eventCategory, default: 0] += event.amount
         }
 
-        if let category = categoryFilter.costCategory {
-            events = events.filter { $0.category == category }
-        }
-
-        return events
-    }
-
-    /// Events with at least some cost. The expense list and most metrics use
-    /// this — events without a cost (e.g. a visit logged without a total) are
-    /// excluded from financial summaries but still appear in service history.
-    var eventsWithCosts: [ExpenseEvent] {
-        filteredEvents.filter { $0.hasCost }
-    }
-
-    /// Backwards-compatible accessor: exposed because CostsTab uses it for
-    /// empty-state checks. Returns standalone logs that have a real cost,
-    /// dropping every visit-bound log (those are surfaced through visits).
-    var logsWithCosts: [ServiceLog] {
-        eventsWithCosts.compactMap { event in
-            if case .standalone(let log) = event { return log }
-            return nil
-        }
-    }
-
-    // MARK: - Cost Metrics
-
-    var totalSpent: Decimal {
-        eventsWithCosts.map(\.amount).reduce(0, +)
-    }
-
-    var formattedTotalSpent: String {
-        Formatters.currencyWhole(totalSpent)
-    }
-
-    /// Number of distinct money events (visits + standalone logs with cost).
-    /// Replaces the previous "service count" which counted each log of an
-    /// un-itemized cluster as a separate service.
-    var serviceCount: Int {
-        eventsWithCosts.count
-    }
-
-    /// Average cost per money event — per visit when bundled, per standalone
-    /// log otherwise. Reads as "AVG COST" in the UI.
-    var averageCostPerService: Decimal? {
-        guard !eventsWithCosts.isEmpty else { return nil }
-        return totalSpent / Decimal(eventsWithCosts.count)
-    }
-
-    var formattedAverageCost: String {
-        guard let avg = averageCostPerService else { return "-" }
-        return Formatters.currencyWhole(avg)
-    }
-
-    // MARK: - Cost Per Mile
-
-    /// Calculate cost per mile for the filtered period.
-    /// Numerator and denominator come from the same event population so the
-    /// math reads consistently across visit-heavy and standalone-heavy data.
-    var costPerMile: Double? {
-        guard vehicle != nil,
-              eventsWithCosts.count >= 2 else { return nil }
-
-        let sortedEvents = eventsWithCosts.sorted { $0.date < $1.date }
-        guard let oldest = sortedEvents.first,
-              let newest = sortedEvents.last,
-              newest.mileage > oldest.mileage else { return nil }
-
-        let milesDriven = newest.mileage - oldest.mileage
-        guard milesDriven > 0 else { return nil }
-
-        return NSDecimalNumber(decimal: totalSpent).doubleValue / Double(milesDriven)
-    }
-
-    var formattedCostPerMile: String {
-        guard let cpm = costPerMile else { return "-" }
-        let unitAbbr = DistanceSettings.shared.unit.abbreviation
-        return String(format: "$%.2f/\(unitAbbr)", cpm)
-    }
-
-    // MARK: - Category Breakdown
-
-    var categoryBreakdown: [(category: CostCategory, amount: Decimal, percentage: Double)] {
-        guard totalSpent > 0 else { return [] }
-
-        var breakdown: [(CostCategory, Decimal, Double)] = []
-
-        for category in CostCategory.allCases {
-            let categoryEvents = eventsWithCosts.filter { $0.category == category }
-            let amount = categoryEvents.map(\.amount).reduce(0, +)
-            if amount > 0 {
-                let percentage = NSDecimalNumber(decimal: amount).doubleValue
-                    / NSDecimalNumber(decimal: totalSpent).doubleValue * 100
-                breakdown.append((category, amount, percentage))
+        let totalDouble = NSDecimalNumber(decimal: totalSpent).doubleValue
+        var breakdown: [(category: CostCategory, amount: Decimal, percentage: Double)] = []
+        var shares: [CostCategory: Double] = [:]
+        if totalDouble > 0 {
+            for costCategory in CostCategory.allCases {
+                let amount = amountByCategory[costCategory] ?? 0
+                let percentage = NSDecimalNumber(decimal: amount).doubleValue / totalDouble * 100
+                shares[costCategory] = percentage
+                if amount > 0 {
+                    breakdown.append((costCategory, amount, percentage))
+                }
             }
         }
+        self.categoryBreakdown = breakdown.sorted { $0.amount > $1.amount }
+        self.categoryShares = shares
 
-        return breakdown.sorted { $0.1 > $1.1 }
-    }
+        // MARK: Time series
 
-    // MARK: - Monthly Breakdown
-
-    var monthlyBreakdown: [(month: Date, amount: Decimal)] {
-        let calendar = Calendar.current
         var monthlyTotals: [Date: Decimal] = [:]
-
-        for event in eventsWithCosts {
+        var monthlyByCategory: [Date: [CostCategory: Decimal]] = [:]
+        for event in events {
             let components = calendar.dateComponents([.year, .month], from: event.date)
-            if let monthStart = calendar.date(from: components) {
-                monthlyTotals[monthStart, default: 0] += event.amount
-            }
+            guard let monthStart = calendar.date(from: components) else { continue }
+            monthlyTotals[monthStart, default: 0] += event.amount
+            monthlyByCategory[monthStart, default: [:]][event.category ?? .maintenance, default: 0] += event.amount
         }
 
-        return monthlyTotals.map { ($0.key, $0.value) }.sorted { $0.0 > $1.0 }
-    }
-
-    var monthlyBreakdownChronological: [(month: Date, amount: Decimal)] {
-        monthlyBreakdown.sorted { $0.month < $1.month }
-    }
-
-    var monthlyBreakdownByCategory: [(month: Date, category: CostCategory, amount: Decimal)] {
-        let calendar = Calendar.current
-        var grouped: [Date: [CostCategory: Decimal]] = [:]
-
-        for event in eventsWithCosts {
-            let components = calendar.dateComponents([.year, .month], from: event.date)
-            if let monthStart = calendar.date(from: components) {
-                let category = event.category ?? .maintenance
-                grouped[monthStart, default: [:]][category, default: 0] += event.amount
+        let monthly = monthlyTotals
+            .map { (month: $0.key, amount: $0.value) }
+            .sorted { $0.month > $1.month }
+        self.monthlyBreakdown = monthly
+        self.monthlyBreakdownChronological = Array(monthly.reversed())
+        self.monthlyBreakdownByCategory = monthlyByCategory
+            .flatMap { month, categories in
+                categories.map { (month: month, category: $0.key, amount: $0.value) }
             }
-        }
-
-        var result: [(month: Date, category: CostCategory, amount: Decimal)] = []
-        for (month, categories) in grouped {
-            for (category, amount) in categories {
-                result.append((month: month, category: category, amount: amount))
-            }
-        }
-
-        return result.sorted { $0.month < $1.month }
-    }
-
-    // MARK: - Cumulative Cost Over Time
-
-    var cumulativeCostOverTime: [(date: Date, cumulativeAmount: Decimal)] {
-        let calendar = Calendar.current
-        let sorted = eventsWithCosts.sorted { $0.date < $1.date }
+            .sorted { $0.month < $1.month }
 
         var dailyTotals: [(date: Date, amount: Decimal)] = []
-        for event in sorted {
+        for event in events.reversed() {  // oldest first
             let dayComponents = calendar.dateComponents([.year, .month, .day], from: event.date)
             let dayDate = calendar.date(from: dayComponents) ?? event.date
 
@@ -264,49 +258,79 @@ extension CostsTab {
                 dailyTotals.append((date: dayDate, amount: event.amount))
             }
         }
+        var running: Decimal = 0
+        self.cumulativeCostOverTime = dailyTotals.map { entry in
+            running += entry.amount
+            return (date: entry.date, cumulativeAmount: running)
+        }
 
-        var cumulative: Decimal = 0
-        return dailyTotals.map { entry in
-            cumulative += entry.amount
-            return (date: entry.date, cumulativeAmount: cumulative)
+        // MARK: Signals
+
+        // Operates on all events, not the filtered set, so the warning still
+        // shows when the user has narrowed to a single category.
+        self.repairCluster = CostsInsightsCore.detectRepairCluster(events: allEvents, calendar: calendar)
+        self.topExpenses = CostsInsightsCore.topExpenses(events: events)
+        self.anomalyEventIDs = CostsInsightsCore.detectAnomalies(events: events)
+        self.yearEndProjection = period == .ytd
+            ? CostsInsightsCore.projectYearEnd(totalSpent: totalSpent, now: now, calendar: calendar)
+            : nil
+
+        // MARK: Yearly roundup
+
+        let year: Int
+        if period == .year, let newest = events.first {
+            year = calendar.component(.year, from: newest.date)
+        } else {
+            year = calendar.component(.year, from: now)
+        }
+        self.currentYear = year
+        self.previousYearLogs = logs.filter {
+            calendar.component(.year, from: $0.performedDate) == year - 1
         }
     }
 
-    // MARK: - Yearly Roundup
+    /// Spend per mile across an event set: total cost over the distance between
+    /// its oldest and newest odometer readings. Needs two events and forward
+    /// motion between them.
+    private static func costPerMile(events: [ExpenseEvent], total: Decimal) -> Double? {
+        guard events.count >= 2 else { return nil }
 
-    var currentYear: Int {
-        if periodFilter == .year, let newest = eventsWithCosts.first {
-            return Calendar.current.component(.year, from: newest.date)
-        }
-        return Calendar.current.component(.year, from: Date.now)
+        let sorted = events.sorted { $0.date < $1.date }
+        guard let oldest = sorted.first,
+              let newest = sorted.last,
+              newest.mileage > oldest.mileage else { return nil }
+
+        let milesDriven = newest.mileage - oldest.mileage
+        guard milesDriven > 0 else { return nil }
+
+        return NSDecimalNumber(decimal: total).doubleValue / Double(milesDriven)
     }
 
-    var previousYearLogs: [ServiceLog] {
-        guard let vehicle = vehicle else { return [] }
-        let calendar = Calendar.current
-        let previousYear = currentYear - 1
-
-        return serviceLogs
-            .filter { $0.vehicle?.id == vehicle.id }
-            .filter { calendar.component(.year, from: $0.performedDate) == previousYear }
-    }
-
-    var shouldShowYearlyRoundup: Bool {
-        (periodFilter == .year || periodFilter == .all) && !eventsWithCosts.isEmpty
-    }
-
-    // MARK: - Period Label
-
-    var periodLabel: String {
-        switch periodFilter {
+    /// The window the current period is compared against. `all` has no prior.
+    private static func priorPeriodRange(
+        period: CostsTab.PeriodFilter,
+        now: Date,
+        calendar: Calendar
+    ) -> (start: Date, end: Date)? {
+        switch period {
         case .month:
-            return "Last 30 days"
+            guard let priorEnd = calendar.date(byAdding: .month, value: -1, to: now),
+                  let priorStart = calendar.date(byAdding: .month, value: -2, to: now)
+            else { return nil }
+            return (priorStart, priorEnd)
         case .ytd:
-            return "Year to date"
+            // Same DOY range one year earlier.
+            guard let priorEnd = calendar.date(byAdding: .year, value: -1, to: now),
+                  let priorStart = calendar.date(from: calendar.dateComponents([.year], from: priorEnd))
+            else { return nil }
+            return (priorStart, priorEnd)
         case .year:
-            return "Last 12 months"
+            guard let priorEnd = calendar.date(byAdding: .year, value: -1, to: now),
+                  let priorStart = calendar.date(byAdding: .year, value: -2, to: now)
+            else { return nil }
+            return (priorStart, priorEnd)
         case .all:
-            return "All time"
+            return nil
         }
     }
 }

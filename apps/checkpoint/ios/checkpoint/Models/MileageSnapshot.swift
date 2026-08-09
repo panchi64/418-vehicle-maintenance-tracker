@@ -89,7 +89,11 @@ extension MileageSnapshot {
         guard let oldest = sorted.first,
               let newest = sorted.last else { return nil }
 
-        let totalDaysBetween = Calendar.current.dateComponents(
+        // Hoisted: `Calendar.current` builds a fresh autoupdating calendar on
+        // every access, and the loop below asks for one twice per snapshot pair.
+        let calendar = Calendar.current
+
+        let totalDaysBetween = calendar.dateComponents(
             [.day],
             from: oldest.recordedAt,
             to: newest.recordedAt
@@ -108,7 +112,7 @@ extension MileageSnapshot {
             let later = sorted[i + 1]
 
             // Calculate pace for this pair
-            let daysBetweenPair = Calendar.current.dateComponents(
+            let daysBetweenPair = calendar.dateComponents(
                 [.day],
                 from: earlier.recordedAt,
                 to: later.recordedAt
@@ -129,7 +133,7 @@ extension MileageSnapshot {
             let midpointDate = earlier.recordedAt.addingTimeInterval(
                 later.recordedAt.timeIntervalSince(earlier.recordedAt) / 2
             )
-            let daysAgo = Calendar.current.dateComponents(
+            let daysAgo = calendar.dateComponents(
                 [.day],
                 from: midpointDate,
                 to: now
