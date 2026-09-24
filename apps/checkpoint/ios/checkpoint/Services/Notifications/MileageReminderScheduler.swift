@@ -30,8 +30,8 @@ struct MileageReminderScheduler {
         reminderDate: Date
     ) -> UNNotificationRequest {
         let content = UNMutableNotificationContent()
-        content.title = "Odometer Sync Requested"
-        content.body = "\(vehicleName) here. It's been 14 days. How far have we gone?"
+        content.title = L10n.notificationMileageTitle
+        content.body = L10n.notificationMileageBody(vehicleName, NotificationService.mileageReminderIntervalDays)
         content.sound = .default
         content.categoryIdentifier = NotificationService.mileageReminderCategoryID
         content.userInfo = [

@@ -841,6 +841,42 @@ enum L10n {
     static func notificationSnoozeBody(_ vehicleName: String, _ serviceName: String) -> String {
         String(format: localized("notification.snooze.body"), vehicleName, serviceName)
     }
+    static var notificationMileageTitle: String { localized("notification.mileage.title") }
+    static func notificationMileageBody(_ vehicleName: String, _ days: Int) -> String {
+        String(format: localized("notification.mileage.body"), vehicleName, days)
+    }
+
+    static func notificationMarbeteTitleDays(_ days: Int) -> String {
+        String(format: localized("notification.marbete.title.days"), days)
+    }
+    static var notificationMarbeteTitleUrgent: String { localized("notification.marbete.title.urgent") }
+    static var notificationMarbeteTitleFinal: String { localized("notification.marbete.title.final") }
+    static func notificationMarbeteBody60(_ vehicleName: String) -> String {
+        String(format: localized("notification.marbete.body.60"), vehicleName)
+    }
+    static func notificationMarbeteBody30(_ vehicleName: String) -> String {
+        String(format: localized("notification.marbete.body.30"), vehicleName)
+    }
+    static func notificationMarbeteBody7(_ vehicleName: String) -> String {
+        String(format: localized("notification.marbete.body.7"), vehicleName)
+    }
+    static func notificationMarbeteBody1(_ vehicleName: String) -> String {
+        String(format: localized("notification.marbete.body.1"), vehicleName)
+    }
+    static func notificationMarbeteBodyFinal(_ vehicleName: String) -> String {
+        String(format: localized("notification.marbete.body.final"), vehicleName)
+    }
+    static func notificationMarbeteBodyGeneric(_ vehicleName: String, _ days: Int) -> String {
+        String(format: localized("notification.marbete.body.generic"), vehicleName, days)
+    }
+
+    static func notificationRoundupTitle(_ year: Int) -> String {
+        String(format: localized("notification.roundup.title"), year)
+    }
+    static func notificationRoundupBody(_ vehicleName: String, _ formattedCost: String) -> String {
+        String(format: localized("notification.roundup.body"), vehicleName, formattedCost)
+    }
+
     static var notificationActionMarkDone: String { localized("notification.action.markDone") }
     static var notificationActionRemindTomorrow: String { localized("notification.action.remindTomorrow") }
     static var notificationActionUpdateNow: String { localized("notification.action.updateNow") }

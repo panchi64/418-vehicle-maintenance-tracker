@@ -103,22 +103,6 @@
         }
       }
     },
-    "%@ is out of time. Renew the marbete today." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ is out of time. Renew the marbete today."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A %@ se le acabó el tiempo. Renueva el marbete hoy."
-          }
-        }
-      }
-    },
     "%@ LAUNCH PRICE" : {
 
     },
@@ -5140,22 +5124,6 @@
     "Marbete status: %@" : {
 
     },
-    "Marbete Status: FINAL NOTICE" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Marbete Status: FINAL NOTICE"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Estado del Marbete: AVISO FINAL"
-          }
-        }
-      }
-    },
     "MARK ALL DONE" : {
 
     },
@@ -5397,6 +5365,227 @@
     },
     "NOTES" : {
 
+    },
+    "notification.marbete.body.1" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ expires tomorrow. Legally speaking."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ vence mañana. Legalmente hablando."
+          }
+        }
+      }
+    },
+    "notification.marbete.body.7" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is starting to worry about that marbete."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ya se está preocupando por ese marbete."
+          }
+        }
+      }
+    },
+    "notification.marbete.body.30" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ would prefer not to be impounded."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ preferiría que no se lo llevara la grúa."
+          }
+        }
+      }
+    },
+    "notification.marbete.body.60" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ requesting registration renewal. No rush. Yet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ solicita la renovación del marbete. Sin prisa. Todavía."
+          }
+        }
+      }
+    },
+    "notification.marbete.body.final" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is out of time. Renew the marbete today."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A %@ se le acabó el tiempo. Renueva el marbete hoy."
+          }
+        }
+      }
+    },
+    "notification.marbete.body.generic" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ - Marbete expires in %2$lld days."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ - El marbete vence en %2$lld días."
+          }
+        }
+      }
+    },
+    "notification.marbete.title.days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marbete Status: %lld Days"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estado del Marbete: %lld días"
+          }
+        }
+      }
+    },
+    "notification.marbete.title.final" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marbete Status: FINAL NOTICE"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estado del Marbete: AVISO FINAL"
+          }
+        }
+      }
+    },
+    "notification.marbete.title.urgent" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marbete Status: URGENT"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estado del Marbete: URGENTE"
+          }
+        }
+      }
+    },
+    "notification.mileage.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ here. It's been %2$lld days. How far have we gone?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aquí %1$@. Han pasado %2$lld días. ¿Cuánto hemos recorrido?"
+          }
+        }
+      }
+    },
+    "notification.mileage.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odometer Sync Requested"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronización de odómetro solicitada"
+          }
+        }
+      }
+    },
+    "notification.roundup.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ cost you %2$@ last year. You're welcome."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ te costó %2$@ el año pasado. De nada."
+          }
+        }
+      }
+    },
+    "notification.roundup.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Expense Report"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informe de gastos %lld"
+          }
+        }
+      }
     },
     "notification.action.markDone" : {
       "extractionState" : "manual",

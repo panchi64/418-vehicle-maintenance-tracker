@@ -49,23 +49,23 @@ struct MarbeteNotificationScheduler {
         // Vary message based on urgency (tone escalates as deadline approaches)
         switch daysBeforeDue {
         case 60:
-            content.title = "Marbete Status: 60 Days"
-            content.body = "\(vehicleName) requesting registration renewal. No rush. Yet."
+            content.title = L10n.notificationMarbeteTitleDays(daysBeforeDue)
+            content.body = L10n.notificationMarbeteBody60(vehicleName)
         case 30:
-            content.title = "Marbete Status: 30 Days"
-            content.body = "\(vehicleName) would prefer not to be impounded."
+            content.title = L10n.notificationMarbeteTitleDays(daysBeforeDue)
+            content.body = L10n.notificationMarbeteBody30(vehicleName)
         case 7:
-            content.title = "Marbete Status: 7 Days"
-            content.body = "\(vehicleName) is starting to worry about that marbete."
+            content.title = L10n.notificationMarbeteTitleDays(daysBeforeDue)
+            content.body = L10n.notificationMarbeteBody7(vehicleName)
         case 1:
-            content.title = "Marbete Status: URGENT"
-            content.body = "\(vehicleName) expires tomorrow. Legally speaking."
+            content.title = L10n.notificationMarbeteTitleUrgent
+            content.body = L10n.notificationMarbeteBody1(vehicleName)
         case snoozeDaysBeforeDue:
-            content.title = String(localized: "Marbete Status: FINAL NOTICE")
-            content.body = String(localized: "\(vehicleName) is out of time. Renew the marbete today.")
+            content.title = L10n.notificationMarbeteTitleFinal
+            content.body = L10n.notificationMarbeteBodyFinal(vehicleName)
         default:
-            content.title = "Marbete Status: \(daysBeforeDue) Days"
-            content.body = "\(vehicleName) - Marbete expires in \(daysBeforeDue) days."
+            content.title = L10n.notificationMarbeteTitleDays(daysBeforeDue)
+            content.body = L10n.notificationMarbeteBodyGeneric(vehicleName, daysBeforeDue)
         }
 
         content.sound = .default

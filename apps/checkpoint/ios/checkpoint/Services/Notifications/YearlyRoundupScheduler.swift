@@ -57,8 +57,8 @@ struct YearlyRoundupScheduler {
         let formattedCost = formatter.string(from: totalCost as NSDecimalNumber) ?? "$0"
 
         let content = UNMutableNotificationContent()
-        content.title = "\(year) Expense Report"
-        content.body = "\(vehicleName) cost you \(formattedCost) last year. You're welcome."
+        content.title = L10n.notificationRoundupTitle(year)
+        content.body = L10n.notificationRoundupBody(vehicleName, formattedCost)
         content.sound = .default
         content.categoryIdentifier = NotificationService.yearlyRoundupCategoryID
         content.userInfo = [
