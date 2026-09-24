@@ -208,6 +208,78 @@ final class ServiceReminderBundleTests: XCTestCase {
         )
     }
 
+    // MARK: - Due-together grouping
+
+    private let window = DueTogetherWindow(mileage: 1000, days: 30)
+
+    private func vehicle(servicesDueInDays days: [Int]) -> (Vehicle, [Service]) {
+        let vehicle = Vehicle(name: "My Car", make: "Toyota", model: "Camry", year: 2022)
+        let services = days.enumerated().map { index, offset in
+            Service(
+                name: "Service \(index)",
+                dueDate: Calendar.current.date(byAdding: .day, value: offset, to: Date())!
+            )
+        }
+        services.forEach { $0.vehicle = vehicle }
+        vehicle.services = services
+        return (vehicle, services)
+    }
+
+    func testServicesDueWithinWindowShareOneNotificationPerLeadTime() {
+        // The app suggests doing these in one visit; they must not each ping.
+        let (vehicle, services) = vehicle(servicesDueInDays: [40, 52, 65])
+
+        let bundles = ServiceReminderBundle.bundles(
+            from: ServiceNotificationScheduler.occurrences(for: vehicle, dailyPace: nil, window: window)
+        )
+
+        XCTAssertEqual(bundles.count, NotificationService.defaultReminderIntervals.count)
+        XCTAssertTrue(bundles.allSatisfy { $0.count == 3 })
+        let dueDay = bundles.first { $0.daysBeforeDue == 0 }!
+        XCTAssertTrue(
+            Calendar.current.isDate(dueDay.notificationDate, inSameDayAs: services[0].dueDate!),
+            "A group is reminded on its earliest member's due date"
+        )
+    }
+
+    func testServicesOutsideWindowStaySeparate() {
+        let (vehicle, _) = vehicle(servicesDueInDays: [40, 100])
+
+        let bundles = ServiceReminderBundle.bundles(
+            from: ServiceNotificationScheduler.occurrences(for: vehicle, dailyPace: nil, window: window)
+        )
+
+        XCTAssertEqual(bundles.count, 2 * NotificationService.defaultReminderIntervals.count)
+        XCTAssertTrue(bundles.allSatisfy { $0.count == 1 })
+    }
+
+    func testClusteringOffSchedulesEachServiceOnItsOwnDate() {
+        let (vehicle, _) = vehicle(servicesDueInDays: [40, 52])
+
+        let bundles = ServiceReminderBundle.bundles(
+            from: ServiceNotificationScheduler.occurrences(for: vehicle, dailyPace: nil, window: nil)
+        )
+
+        XCTAssertTrue(bundles.allSatisfy { $0.count == 1 })
+    }
+
+    func testServicesDueWithinMileageWindowShareNotifications() {
+        // 800 miles apart at 20 mi/day is 40 days — outside the day window,
+        // inside the mileage window. Mileage is how a shop visit lines up.
+        let vehicle = Vehicle(name: "My Car", make: "Toyota", model: "Camry", year: 2022, currentMileage: 50000)
+        let oil = Service(name: "Oil Change", dueMileage: 51000)
+        let rotation = Service(name: "Tire Rotation", dueMileage: 51800)
+        [oil, rotation].forEach { $0.vehicle = vehicle }
+        vehicle.services = [oil, rotation]
+
+        let bundles = ServiceReminderBundle.bundles(
+            from: ServiceNotificationScheduler.occurrences(for: vehicle, dailyPace: 20, window: window)
+        )
+
+        XCTAssertFalse(bundles.isEmpty)
+        XCTAssertTrue(bundles.allSatisfy { $0.count == 2 })
+    }
+
     func testReminderPlanResolvesEverythingSynchronously() {
         // Scheduling hands the notification center an already-built plan and
         // never reads the model again. An earlier version deferred the whole

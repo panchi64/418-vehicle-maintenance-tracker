@@ -138,15 +138,33 @@ struct ServiceNotificationScheduler {
     /// Occurrences whose snapped fire time has already passed are dropped here
     /// rather than at add time: a "due today" reminder set after 9 AM would
     /// otherwise produce a past, non-repeating trigger the OS never delivers.
+    ///
+    /// With a `window`, services due together share their group's earliest due
+    /// date (see `ServiceClusteringService.reminderDueDates`), so the bundler
+    /// folds them into one notification per lead time. nil schedules each
+    /// service on its own due date. `reminderPlan` passes the user's
+    /// clustering preference.
     static func occurrences(
-        for vehicle: Vehicle, dailyPace: Double?, now: Date = Date()
+        for vehicle: Vehicle,
+        dailyPace: Double?,
+        window: DueTogetherWindow? = nil,
+        now: Date = Date()
     ) -> [ServiceReminderOccurrence] {
         var occurrences: [ServiceReminderOccurrence] = []
-
-        for service in vehicle.services ?? [] {
-            let effectiveDate = service.effectiveDueDate(
-                currentMileage: vehicle.currentMileage, dailyPace: dailyPace
+        let services = vehicle.services ?? []
+        let groupedDueDates = window.map {
+            ServiceClusteringService.reminderDueDates(
+                for: services, currentMileage: vehicle.currentMileage, dailyPace: dailyPace, window: $0, now: now
             )
+        }
+
+        for service in services {
+            let effectiveDate: Date?
+            if let groupedDueDates {
+                effectiveDate = groupedDueDates[service.id]
+            } else {
+                effectiveDate = service.effectiveDueDate(currentMileage: vehicle.currentMileage, dailyPace: dailyPace)
+            }
             guard let dueDate = effectiveDate, dueDate > now else { continue }
 
             for daysBeforeDue in NotificationService.defaultReminderIntervals {
@@ -184,7 +202,7 @@ struct ServiceNotificationScheduler {
     /// Synchronous and model-touching; everything after it is plain I/O.
     static func reminderPlan(for vehicle: Vehicle) -> ReminderPlan {
         let bundles = ServiceReminderBundle.bundles(
-            from: occurrences(for: vehicle, dailyPace: vehicle.dailyMilesPace)
+            from: occurrences(for: vehicle, dailyPace: vehicle.dailyMilesPace, window: .current)
         )
 
         let requests = bundles.compactMap { bundle -> UNNotificationRequest? in

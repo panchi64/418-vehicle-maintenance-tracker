@@ -72,3 +72,37 @@ extension ServiceVisit {
     /// Number of child service logs in this visit.
     var serviceCount: Int { (logs ?? []).count }
 }
+
+extension ServiceLog {
+    /// Every log performed on the same occasion as this one: all the logs of
+    /// its visit, or just itself when standalone.
+    var occasionLogs: [ServiceLog] {
+        guard let logs = visit?.logs, !logs.isEmpty else { return [self] }
+        return logs
+    }
+
+    /// Moves this log to a new date and mileage. A visit is one trip to the
+    /// shop, so the visit and every service in it move together — otherwise
+    /// the Costs tab (which dates the visit) and the service history (which
+    /// dates each log) disagree about when it happened.
+    ///
+    /// - Parameter mileage: nil keeps the stored mileage.
+    func applyEditedOccasion(performedDate: Date, mileage: Int?) {
+        if let visit {
+            visit.performedDate = performedDate
+            if let mileage { visit.mileageAtVisit = mileage }
+        }
+        for log in occasionLogs {
+            log.performedDate = performedDate
+            if let mileage { log.mileageAtService = mileage }
+        }
+    }
+
+    /// Whether this log anchors its service's next reminder: the service
+    /// recurs and this is its most recent log. Earlier logs are history.
+    var anchorsNextReminder: Bool {
+        guard let service, service.hasIntervalPolicy else { return false }
+        let newest = (service.logs ?? []).max { $0.performedDate < $1.performedDate }
+        return newest?.id == id
+    }
+}

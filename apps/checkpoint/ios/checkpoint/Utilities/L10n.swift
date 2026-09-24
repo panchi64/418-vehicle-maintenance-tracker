@@ -756,6 +756,9 @@ enum L10n {
     static func editVisitTotalHint(_ count: Int) -> String {
         String(format: localized("edit.visitTotalHint"), count)
     }
+    static func editVisitOccasionHint(_ count: Int) -> String {
+        String(format: localized("edit.visitOccasionHint"), count)
+    }
     static var impactNextReminder: String { localized("impact.nextReminder") }
     static var impactNone: String { localized("impact.none") }
     static var editAlsoMoveReminder: String { localized("edit.alsoMoveReminder") }

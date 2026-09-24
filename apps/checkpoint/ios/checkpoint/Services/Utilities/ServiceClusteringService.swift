@@ -7,6 +7,20 @@
 
 import Foundation
 
+/// How close two services' due points must be to count as "due together".
+struct DueTogetherWindow: Equatable {
+    let mileage: Int
+    let days: Int
+
+    /// The user's clustering preference, or nil when they turned clustering off.
+    @MainActor
+    static var current: DueTogetherWindow? {
+        let settings = ClusteringSettings.shared
+        guard settings.isEnabled else { return nil }
+        return DueTogetherWindow(mileage: settings.mileageWindow, days: settings.daysWindow)
+    }
+}
+
 /// Service for detecting clusters of services that can be bundled together
 struct ServiceClusteringService {
 
@@ -140,6 +154,53 @@ struct ServiceClusteringService {
         settings: ClusteringSettings
     ) -> ServiceCluster? {
         detectClusters(for: vehicle, services: services, settings: settings).first
+    }
+
+    // MARK: - Reminder Grouping
+
+    /// The due date each upcoming service's reminders should target.
+    ///
+    /// Services within the clustering window of one another are the ones the
+    /// app suggests doing in one visit, so they share one reminder schedule:
+    /// every member targets its group's earliest due date. Reminders bundle by
+    /// fire day, so a shared date is what folds a group into one notification
+    /// per lead time instead of one per service. Greedy from the earliest due
+    /// date, mirroring `detectClusters` — but over every upcoming service, not
+    /// just the due-soon ones, because reminders are scheduled weeks ahead.
+    ///
+    /// Services with no future due date are omitted.
+    static func reminderDueDates(
+        for services: [Service],
+        currentMileage: Int,
+        dailyPace: Double?,
+        window: DueTogetherWindow,
+        now: Date = .now
+    ) -> [UUID: Date] {
+        let upcoming = services
+            .compactMap { service -> (service: Service, dueDate: Date)? in
+                guard let dueDate = service.effectiveDueDate(currentMileage: currentMileage, dailyPace: dailyPace),
+                      dueDate > now else { return nil }
+                return (service, dueDate)
+            }
+            .sorted { ($0.dueDate, $0.service.id.uuidString) < ($1.dueDate, $1.service.id.uuidString) }
+
+        var dueDates: [UUID: Date] = [:]
+        for anchor in upcoming where dueDates[anchor.service.id] == nil {
+            dueDates[anchor.service.id] = anchor.dueDate
+            for candidate in upcoming where dueDates[candidate.service.id] == nil {
+                if isWithinWindow(
+                    anchor: anchor.service,
+                    candidate: candidate.service,
+                    currentMileage: currentMileage,
+                    dailyPace: dailyPace,
+                    mileageWindow: window.mileage,
+                    daysWindow: window.days
+                ) {
+                    dueDates[candidate.service.id] = anchor.dueDate
+                }
+            }
+        }
+        return dueDates
     }
 
     // MARK: - Convenience Overloads (use shared settings)

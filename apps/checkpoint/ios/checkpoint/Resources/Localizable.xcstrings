@@ -2932,6 +2932,23 @@
         }
       }
     },
+    "edit.visitOccasionHint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date and mileage apply to all %d services from this visit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La fecha y el millaje se aplican a los %d servicios de esta visita"
+          }
+        }
+      }
+    },
     "edit.visitTotalHint" : {
       "extractionState" : "manual",
       "localizations" : {

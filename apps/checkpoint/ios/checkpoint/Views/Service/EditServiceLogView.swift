@@ -30,7 +30,10 @@ struct EditServiceLogView: View {
     // Fixed for the sheet's lifetime — computed once in loadFromLog().
     @State private var adjacentBefore: ServiceLog?
     @State private var adjacentAfter: ServiceLog?
-    @State private var isMostRecentLogOfRecurringService = false
+    /// Logs on this occasion (this one, or its whole visit) that anchor their
+    /// service's next reminder. This log first when it is one of them.
+    @State private var reminderAnchorLogs: [ServiceLog] = []
+    @State private var occasionServiceCount = 1
 
     private var serviceName: String { log.service?.name ?? "" }
 
@@ -89,17 +92,21 @@ struct EditServiceLogView: View {
     }
 
     private var showAlsoMoveReminderToggle: Bool {
-        dateOrMileageChanged && isMostRecentLogOfRecurringService
+        dateOrMileageChanged && !reminderAnchorLogs.isEmpty
     }
 
+    /// The service whose reminder the impact preview shows — this log's own
+    /// when it anchors one, else the first visit sibling that does.
+    private var previewService: Service? { reminderAnchorLogs.first?.service }
+
     private var currentServiceSchedule: ReminderImpactCalculator.Schedule {
-        ReminderImpactCalculator.Schedule(dueDate: log.service?.dueDate, dueMileage: log.service?.dueMileage)
+        ReminderImpactCalculator.Schedule(dueDate: previewService?.dueDate, dueMileage: previewService?.dueMileage)
     }
 
     /// Mirrors `Service.recalculateDueDates`: always interval-derived from
     /// this log's (edited) date/mileage, no explicit override.
     private var proposedServiceSchedule: ReminderImpactCalculator.Schedule {
-        guard let service = log.service, let mileage = effectiveMileage else { return currentServiceSchedule }
+        guard let service = previewService, let mileage = effectiveMileage else { return currentServiceSchedule }
         return ReminderImpactCalculator.projected(
             intervalMonths: service.intervalMonths,
             intervalMiles: service.intervalMiles,
@@ -138,6 +145,10 @@ struct EditServiceLogView: View {
                         costSection
 
                         mileageSection
+
+                        if dateOrMileageChanged, occasionServiceCount > 1 {
+                            FormAdvisory.info(L10n.editVisitOccasionHint(occasionServiceCount))
+                        }
 
                         if showAlsoMoveReminderToggle {
                             VStack(alignment: .leading, spacing: Spacing.sm) {
@@ -249,18 +260,10 @@ struct EditServiceLogView: View {
                 // note on what the number covers.
                 if let visit = sharedCostVisit {
                     if visit.serviceCount > 1 {
-                        Text(L10n.editVisitTotalHint(visit.serviceCount))
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.textTertiary)
-                            .tracking(1)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                        FormAdvisory.info(L10n.editVisitTotalHint(visit.serviceCount))
                     }
                 } else if let hint = anchors?.priorCostHint {
-                    Text(hint)
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
-                        .tracking(1)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    FormAdvisory.info(hint)
                 }
 
                 if sharedCostVisit == nil, let warning = anchors?.costWarning {
@@ -329,12 +332,12 @@ struct EditServiceLogView: View {
             }
         }
 
-        // Only the most recent log of a recurring service can move that
-        // service's next reminder — earlier logs are historical record-keeping.
-        if let service = log.service, service.hasIntervalPolicy {
-            let newest = (service.logs ?? []).max { $0.performedDate < $1.performedDate }
-            isMostRecentLogOfRecurringService = newest?.id == log.id
-        }
+        // A date/mileage edit moves every service of a visit, so any of them
+        // that anchors its service's next reminder can have that reminder moved.
+        let occasionLogs = log.occasionLogs
+        occasionServiceCount = occasionLogs.count
+        let anchors = occasionLogs.filter(\.anchorsNextReminder)
+        reminderAnchorLogs = anchors.filter { $0.id == log.id } + anchors.filter { $0.id != log.id }
     }
 
     private func saveChanges() {
@@ -348,16 +351,14 @@ struct EditServiceLogView: View {
             attachmentsAdded: pendingAttachments.count
         ))
 
-        log.performedDate = performedDate
-        if let mileage = mileageAtService {
-            log.mileageAtService = mileage
-        }
+        log.applyEditedOccasion(performedDate: performedDate, mileage: mileageAtService)
         log.applyEditedCost(Decimal(string: cost), category: costCategory)
         log.notes = newNotes
 
-        if alsoMoveNextReminder, showAlsoMoveReminderToggle,
-           let service = log.service, let mileage = effectiveMileage {
-            service.recalculateDueDates(performedDate: performedDate, mileage: mileage)
+        if alsoMoveNextReminder, showAlsoMoveReminderToggle, let mileage = effectiveMileage {
+            for anchor in reminderAnchorLogs {
+                anchor.service?.recalculateDueDates(performedDate: performedDate, mileage: mileage)
+            }
             if let vehicle = log.vehicle {
                 ServiceNotificationScheduler.rescheduleNotifications(for: vehicle)
             }

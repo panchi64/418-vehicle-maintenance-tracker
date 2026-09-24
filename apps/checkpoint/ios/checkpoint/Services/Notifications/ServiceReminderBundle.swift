@@ -21,6 +21,12 @@
 //  banners on a morning where one item is due and another is a month out is
 //  the correct outcome; five banners for five items due today is not.
 //
+//  Exact-day grouping alone still split the services the app suggests doing
+//  together — those only need to fall within the clustering window, and
+//  mileage-projected due dates rarely land on the same day. So before
+//  bundling, `ServiceClusteringService.reminderDueDates` moves each such group
+//  onto its earliest member's due date; this file then sees them as one day.
+//
 
 import Foundation
 
