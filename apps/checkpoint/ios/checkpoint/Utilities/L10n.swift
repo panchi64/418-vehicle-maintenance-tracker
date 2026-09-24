@@ -841,6 +841,9 @@ enum L10n {
     static func notificationSnoozeBody(_ vehicleName: String, _ serviceName: String) -> String {
         String(format: localized("notification.snooze.body"), vehicleName, serviceName)
     }
+    static func notificationSnoozeBundleTitle(_ count: Int) -> String {
+        String(format: localized("notification.snooze.bundleTitle"), count)
+    }
 
     // MARK: - Helper
 

@@ -12,7 +12,6 @@ import Foundation
 extension Notification.Name {
     // Service notifications
     static let serviceMarkedDoneFromNotification = Notification.Name("serviceMarkedDoneFromNotification")
-    static let serviceSnoozedFromNotification = Notification.Name("serviceSnoozedFromNotification")
     static let navigateToServiceFromNotification = Notification.Name("navigateToServiceFromNotification")
 
     // Mileage reminder notifications
@@ -23,7 +22,6 @@ extension Notification.Name {
     static let navigateToCostsFromNotification = Notification.Name("navigateToCostsFromNotification")
 
     // Marbete reminder notifications
-    static let marbeteReminderSnoozedFromNotification = Notification.Name("marbeteReminderSnoozedFromNotification")
     static let navigateToEditVehicleFromNotification = Notification.Name("navigateToEditVehicleFromNotification")
 
     // Onboarding sync

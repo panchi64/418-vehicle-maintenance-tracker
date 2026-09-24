@@ -131,6 +131,22 @@ enum ServiceReminderCopy {
         return bundledBody(vehicleName: vehicleName, serviceNames: bundle.serviceNames)
     }
 
+    // MARK: Snooze
+
+    /// No lead time: a snooze arrives a day after the banner it replays, so
+    /// "due today" or "in 7 days" would no longer be true.
+    static func snoozeTitle(serviceNames: [String]) -> String {
+        guard serviceNames.count > 1 else { return L10n.notificationSnoozeTitle(serviceNames.first ?? "") }
+        return L10n.notificationSnoozeBundleTitle(serviceNames.count)
+    }
+
+    static func snoozeBody(serviceNames: [String], vehicleName: String) -> String {
+        guard serviceNames.count > 1 else {
+            return L10n.notificationSnoozeBody(vehicleName, serviceNames.first ?? "")
+        }
+        return bundledBody(vehicleName: vehicleName, serviceNames: serviceNames)
+    }
+
     // MARK: Single service
 
     private static func singleTitle(serviceName: String, daysBeforeDue: Int) -> String {

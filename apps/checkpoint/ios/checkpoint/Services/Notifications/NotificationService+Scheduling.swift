@@ -25,17 +25,6 @@ extension NotificationService {
         )
     }
 
-    func buildSnoozeNotificationRequest(
-        for service: Service,
-        vehicle: Vehicle,
-        notificationID: String,
-        snoozeDate: Date
-    ) -> UNNotificationRequest {
-        ServiceNotificationScheduler.buildSnoozeNotificationRequest(
-            for: service, vehicle: vehicle, notificationID: notificationID, snoozeDate: snoozeDate
-        )
-    }
-
     // MARK: - Schedule/Cancel/Snooze
 
     func rescheduleNotifications(for vehicle: Vehicle) {
@@ -65,10 +54,6 @@ extension NotificationService {
         let currentYear = Calendar.current.component(.year, from: .now)
         YearlyRoundupScheduler.cancelYearlyRoundup(for: vehicle, year: currentYear - 1)
         YearlyRoundupScheduler.cancelYearlyRoundup(for: vehicle, year: currentYear)
-    }
-
-    func snoozeNotification(for service: Service, vehicle: Vehicle) {
-        ServiceNotificationScheduler.snoozeNotification(for: service, vehicle: vehicle)
     }
 
     func getPendingNotifications() async -> [UNNotificationRequest] {
@@ -157,11 +142,5 @@ extension NotificationService {
 
     func cancelMarbeteNotifications(for vehicle: Vehicle) {
         MarbeteNotificationScheduler.cancelMarbeteNotifications(for: vehicle)
-    }
-
-    func snoozeMarbeteReminder(for vehicle: Vehicle) {
-        Task {
-            await MarbeteNotificationScheduler.snoozeMarbeteReminder(for: vehicle)
-        }
     }
 }

@@ -73,7 +73,9 @@ struct MarbeteNotificationScheduler {
         content.userInfo = [
             "vehicleID": vehicleID.uuidString,
             "type": "marbeteReminder",
-            "daysBeforeDue": daysBeforeDue
+            "daysBeforeDue": daysBeforeDue,
+            // Carried so Remind Tomorrow can reword the banner without the model.
+            "vehicleName": vehicleName
         ]
 
         let resolvedTrigger = trigger ?? NotificationHelpers.calendarTrigger(for: notificationDate)
@@ -158,26 +160,33 @@ struct MarbeteNotificationScheduler {
 
     // MARK: - Snooze
 
-    /// Snooze marbete reminder for 1 day. Async so callers (and tests) can
-    /// observe the request once it's actually registered with the center.
-    static func snoozeMarbeteReminder(for vehicle: Vehicle) async {
-        cancelMarbeteNotifications(for: vehicle)
+    /// What "Remind Tomorrow" on a marbete reminder schedules: the same banner
+    /// at 9 AM tomorrow, under the snooze ID every cancel path already reaches.
+    ///
+    /// The vehicle's later reminders stay scheduled — snoozing the 60-day
+    /// notice is not a reason to drop the 7- and 1-day ones. A banner that
+    /// said "expires tomorrow" would be wrong a day later, so snoozing the
+    /// 1-day notice delivers the final notice instead.
+    static func snoozeRequest(for original: UNNotificationRequest, now: Date = Date()) -> UNNotificationRequest? {
+        let userInfo = original.content.userInfo
+        guard let vehicleIDString = userInfo["vehicleID"] as? String,
+              let vehicleID = UUID(uuidString: vehicleIDString) else { return nil }
 
-        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
-
-        let request = buildMarbeteNotificationRequest(
-            vehicleName: vehicle.displayName,
-            vehicleID: vehicle.id,
-            notificationDate: tomorrow,
-            daysBeforeDue: snoozeDaysBeforeDue
-        )
-
-        do {
-            try await UNUserNotificationCenter.current().add(request)
-        } catch {
-            marbeteNotificationLogger.error("Failed to snooze marbete reminder: \(error.localizedDescription)")
+        var content = original.content
+        if let vehicleName = userInfo["vehicleName"] as? String,
+           let daysBeforeDue = userInfo["daysBeforeDue"] as? Int, daysBeforeDue <= 1 {
+            content = buildMarbeteNotificationRequest(
+                vehicleName: vehicleName,
+                vehicleID: vehicleID,
+                notificationDate: now,
+                daysBeforeDue: snoozeDaysBeforeDue
+            ).content
         }
 
-        NotificationService.shared.scheduleBudgetEnforcement()
+        return NotificationHelpers.snoozeRequest(
+            identifier: marbeteReminderID(for: vehicleID, daysBeforeDue: snoozeDaysBeforeDue),
+            content: content,
+            now: now
+        )
     }
 }

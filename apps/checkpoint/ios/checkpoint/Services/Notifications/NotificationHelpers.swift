@@ -25,6 +25,19 @@ enum NotificationHelpers {
     /// reschedule so a nearer reminder is never dropped for a farther one.
     nonisolated static let pendingRequestBudget = 60
 
+    /// The request "Remind Tomorrow" leaves behind: `content` delivered again at
+    /// the notification hour tomorrow.
+    ///
+    /// Snoozes are built from the delivered notification alone, never from the
+    /// model. The action runs without opening the app, so there may be no
+    /// scene — and no SwiftUI observer — to hand it to.
+    static func snoozeRequest(
+        identifier: String, content: UNNotificationContent, now: Date = Date()
+    ) -> UNNotificationRequest {
+        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: now) ?? now
+        return UNNotificationRequest(identifier: identifier, content: content, trigger: calendarTrigger(for: tomorrow))
+    }
+
     /// Build a calendar trigger for a given date at the default notification time
     static func calendarTrigger(for date: Date, hour: Int = defaultHour, minute: Int = defaultMinute) -> UNCalendarNotificationTrigger {
         var components = Calendar.current.dateComponents([.year, .month, .day], from: date)

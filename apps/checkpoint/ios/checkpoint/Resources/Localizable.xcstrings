@@ -5704,6 +5704,23 @@
         }
       }
     },
+    "notification.snooze.bundleTitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reminder: %lld services"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recordatorio: %lld servicios"
+          }
+        }
+      }
+    },
     "notification.snooze.body" : {
       "comment" : "Body of a snoozed service reminder. %1$@ vehicle, %2$@ service.",
       "extractionState" : "manual",

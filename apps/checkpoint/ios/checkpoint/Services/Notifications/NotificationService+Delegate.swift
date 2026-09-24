@@ -7,6 +7,9 @@
 
 import Foundation
 import UserNotifications
+import os
+
+private let notificationDelegateLogger = Logger(category: "Notifications.Delegate")
 
 // MARK: - UNUserNotificationCenterDelegate
 
@@ -53,6 +56,22 @@ extension NotificationService: UNUserNotificationCenterDelegate {
 
         // Handle service due notifications (default)
         await handleServiceDueResponse(response, userInfo: userInfo)
+    }
+
+    // MARK: - Snooze
+
+    /// Register a Remind Tomorrow request here, in the delegate, rather than
+    /// posting for the UI to handle. The action runs without opening the app,
+    /// so there may be no scene to receive a post — which is how both snooze
+    /// buttons came to do nothing.
+    private func addSnooze(_ request: UNNotificationRequest?) async {
+        guard let request else { return }
+        do {
+            try await UNUserNotificationCenter.current().add(request)
+        } catch {
+            notificationDelegateLogger.error("Failed to snooze notification: \(error.localizedDescription)")
+        }
+        scheduleBudgetEnforcement()
     }
 
     // MARK: - Response Handlers
@@ -126,11 +145,7 @@ extension NotificationService: UNUserNotificationCenterDelegate {
 
         switch response.actionIdentifier {
         case Self.marbeteSnoozeActionID:
-            NotificationCenter.default.post(
-                name: .marbeteReminderSnoozedFromNotification,
-                object: nil,
-                userInfo: ["vehicleID": vehicleIDString]
-            )
+            await addSnooze(MarbeteNotificationScheduler.snoozeRequest(for: response.notification.request))
 
         case UNNotificationDefaultActionIdentifier:
             NotificationCenter.default.post(
@@ -171,11 +186,7 @@ extension NotificationService: UNUserNotificationCenterDelegate {
             )
 
         case Self.snoozeActionID:
-            NotificationCenter.default.post(
-                name: .serviceSnoozedFromNotification,
-                object: nil,
-                userInfo: payload
-            )
+            await addSnooze(ServiceNotificationScheduler.snoozeRequest(for: response.notification.request))
 
         case UNNotificationDefaultActionIdentifier:
             NotificationCenter.default.post(

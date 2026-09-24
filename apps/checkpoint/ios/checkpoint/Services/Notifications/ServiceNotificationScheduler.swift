@@ -36,9 +36,8 @@ struct ServiceNotificationScheduler {
     /// Deterministic base ID for a service.
     ///
     /// No longer identifies a pending request — bundles are keyed by vehicle
-    /// and day. It remains the service's stable handle for the snooze request
-    /// (a snooze is genuinely about one service) and for clearing sets left by
-    /// builds that scheduled per service.
+    /// and day. It remains the service's "has a reminder" flag value and the
+    /// handle for clearing sets left by builds that scheduled per service.
     static func baseNotificationID(forServiceID serviceID: UUID) -> String {
         requestPrefix + serviceID.uuidString
     }
@@ -47,10 +46,16 @@ struct ServiceNotificationScheduler {
         baseNotificationID(forServiceID: service.id)
     }
 
-    /// Identifier for a snoozed reminder, derived from the same base so
-    /// `cancelAllNotifications(baseID:)` can always reach it.
+    private static let snoozeSuffix = "-snooze"
+
+    /// Identifier for a snoozed reminder: the snoozed request's own ID plus a
+    /// suffix, so it stays under `requestPrefix` and the vehicle purge reaches it.
     static func snoozeNotificationID(baseID: String) -> String {
-        baseID + "-snooze"
+        isSnoozeID(baseID) ? baseID : baseID + snoozeSuffix
+    }
+
+    static func isSnoozeID(_ identifier: String) -> Bool {
+        identifier.hasSuffix(snoozeSuffix)
     }
 
     /// Identifier for one bundle: one vehicle, one day, one lead time.
@@ -91,7 +96,10 @@ struct ServiceNotificationScheduler {
         var userInfo: [String: Any] = [
             "serviceIDs": bundle.serviceIDs.map(\.uuidString),
             "vehicleID": vehicle.id.uuidString,
-            "daysBeforeDue": bundle.daysBeforeDue
+            "daysBeforeDue": bundle.daysBeforeDue,
+            // Carried so Remind Tomorrow can reword the banner without the model.
+            "serviceNames": bundle.serviceNames,
+            "vehicleName": vehicle.displayName
         ]
         // Only when the bundle is one service. Naming an arbitrary member as
         // "the" service would send Mark as Done and tap-through to whichever
@@ -111,24 +119,36 @@ struct ServiceNotificationScheduler {
         return UNNotificationRequest(identifier: identifier, content: content, trigger: resolvedTrigger)
     }
 
-    /// Build a snoozed notification request for a service
-    static func buildSnoozeNotificationRequest(
-        for service: Service, vehicle: Vehicle, notificationID: String, snoozeDate: Date
-    ) -> UNNotificationRequest {
+    /// What "Remind Tomorrow" on a service reminder schedules: the same set of
+    /// services, delivered again at 9 AM tomorrow.
+    ///
+    /// The whole banner snoozes, not one member — the button sits on the
+    /// banner, so the banner's set is what the user answered. Lead-time words
+    /// ("due today") would be stale a day later, so the copy is reworded;
+    /// requests scheduled before the payload carried names are re-delivered
+    /// as they were.
+    static func snoozeRequest(for original: UNNotificationRequest, now: Date = Date()) -> UNNotificationRequest? {
+        let userInfo = original.content.userInfo
+        let serviceIDs = referencedServiceIDs(in: userInfo)
+        guard !serviceIDs.isEmpty else { return nil }
+
         let content = UNMutableNotificationContent()
-        content.title = L10n.notificationSnoozeTitle(service.name)
-        content.body = L10n.notificationSnoozeBody(vehicle.displayName, service.name)
+        content.userInfo = userInfo
         content.sound = .default
         content.categoryIdentifier = NotificationService.serviceDueCategoryID
-        content.userInfo = [
-            "serviceID": service.id.uuidString,
-            "serviceIDs": [service.id.uuidString],
-            "vehicleID": vehicle.id.uuidString
-        ]
 
-        let trigger = NotificationHelpers.calendarTrigger(for: snoozeDate)
+        let names = userInfo["serviceNames"] as? [String] ?? []
+        if let vehicleName = userInfo["vehicleName"] as? String, !names.isEmpty, names.count == serviceIDs.count {
+            content.title = ServiceReminderCopy.snoozeTitle(serviceNames: names)
+            content.body = ServiceReminderCopy.snoozeBody(serviceNames: names, vehicleName: vehicleName)
+        } else {
+            content.title = original.content.title
+            content.body = original.content.body
+        }
 
-        return UNNotificationRequest(identifier: notificationID, content: content, trigger: trigger)
+        return NotificationHelpers.snoozeRequest(
+            identifier: snoozeNotificationID(baseID: original.identifier), content: content, now: now
+        )
     }
 
     // MARK: - Occurrences
@@ -196,30 +216,53 @@ struct ServiceNotificationScheduler {
     struct ReminderPlan {
         let vehicleID: UUID
         let requests: [UNNotificationRequest]
+        /// Services still worth a snoozed reminder (see `snoozeWorthyServiceIDs`).
+        /// A pending snooze naming any of them survives the rebuild.
+        let snoozeWorthyServiceIDs: Set<String>
     }
 
     /// Resolve a vehicle's reminders and record which services they cover.
     /// Synchronous and model-touching; everything after it is plain I/O.
-    static func reminderPlan(for vehicle: Vehicle) -> ReminderPlan {
+    static func reminderPlan(for vehicle: Vehicle, now: Date = Date()) -> ReminderPlan {
         let bundles = ServiceReminderBundle.bundles(
-            from: occurrences(for: vehicle, dailyPace: vehicle.dailyMilesPace, window: .current)
+            from: occurrences(for: vehicle, dailyPace: vehicle.dailyMilesPace, window: .current, now: now)
         )
 
         let requests = bundles.compactMap { bundle -> UNNotificationRequest? in
-            guard let trigger = NotificationHelpers.reminderTrigger(for: bundle.notificationDate) else { return nil }
+            guard let trigger = NotificationHelpers.reminderTrigger(for: bundle.notificationDate, now: now) else { return nil }
             return buildNotificationRequest(for: bundle, vehicle: vehicle, trigger: trigger)
         }
 
         recordScheduledServices(Set(bundles.flatMap(\.serviceIDs)), in: vehicle)
-        return ReminderPlan(vehicleID: vehicle.id, requests: requests)
+        return ReminderPlan(
+            vehicleID: vehicle.id,
+            requests: requests,
+            snoozeWorthyServiceIDs: snoozeWorthyServiceIDs(for: vehicle, now: now)
+        )
+    }
+
+    /// Services a snooze may still remind about: overdue, or due within the
+    /// longest lead time. Completing a service moves its due date out past
+    /// that, and deleting one drops it, so either retires its snooze.
+    static func snoozeWorthyServiceIDs(for vehicle: Vehicle, now: Date = Date()) -> Set<String> {
+        let longestLead = NotificationService.defaultReminderIntervals.max() ?? 0
+        guard let horizon = Calendar.current.date(byAdding: .day, value: longestLead, to: now) else { return [] }
+        let dailyPace = vehicle.dailyMilesPace
+        return Set((vehicle.services ?? []).compactMap { service in
+            guard let dueDate = service.effectiveDueDate(currentMileage: vehicle.currentMileage, dailyPace: dailyPace),
+                  dueDate <= horizon else { return nil }
+            return service.id.uuidString
+        })
     }
 
     /// Replace a vehicle's pending requests with the plan's.
     ///
     /// Purge first, then add. Bundle identifiers encode the day they fire, so a
-    /// moved due date leaves behind a request no re-add would replace.
+    /// moved due date leaves behind a request no re-add would replace. Snoozes
+    /// are the exception: the user asked for them, and every edit and every
+    /// launch rebuilds, so they stay while their services are still due.
     static func apply(_ plan: ReminderPlan) async {
-        await removeServiceRequests(forVehicleID: plan.vehicleID)
+        await removeServiceRequests(forVehicleID: plan.vehicleID, keepingSnoozesFor: plan.snoozeWorthyServiceIDs)
 
         let center = UNUserNotificationCenter.current()
         for request in plan.requests {
@@ -314,13 +357,17 @@ struct ServiceNotificationScheduler {
     }
 
     /// Remove every pending service request belonging to a vehicle — bundled,
-    /// snoozed, or left by a build that scheduled per service.
-    static func removeServiceRequests(forVehicleID vehicleID: UUID) async {
+    /// snoozed, or left by a build that scheduled per service — except snoozes
+    /// that name one of `keptServiceIDs`.
+    static func removeServiceRequests(
+        forVehicleID vehicleID: UUID, keepingSnoozesFor keptServiceIDs: Set<String> = []
+    ) async {
         let center = UNUserNotificationCenter.current()
         let identifiers = await center.pendingNotificationRequests()
             .filter {
                 $0.identifier.hasPrefix(requestPrefix)
                     && $0.content.userInfo["vehicleID"] as? String == vehicleID.uuidString
+                    && !isKeptSnooze($0, keptServiceIDs: keptServiceIDs)
             }
             .map(\.identifier)
 
@@ -330,21 +377,11 @@ struct ServiceNotificationScheduler {
 
     // MARK: - Snooze
 
-    /// Reschedule notification for tomorrow at 9 AM.
-    ///
-    /// Deliberately per service even though reminders bundle: snoozing is an
-    /// answer to one item ("not this one, not today"), and applying it to
-    /// everything that shared the banner would silence items the user never
-    /// acted on.
-    static func snoozeNotification(for service: Service, vehicle: Vehicle) {
-        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
-        let baseID = baseNotificationID(for: service)
-        let request = buildSnoozeNotificationRequest(for: service, vehicle: vehicle,
-                                                     notificationID: snoozeNotificationID(baseID: baseID),
-                                                     snoozeDate: tomorrow)
-        UNUserNotificationCenter.current().add(request)
-        service.notificationID = baseID
-        NotificationService.shared.scheduleBudgetEnforcement()
+    /// Whether a rebuild should leave this pending request alone: it is a
+    /// snooze, and at least one service it names is still worth reminding about.
+    static func isKeptSnooze(_ request: UNNotificationRequest, keptServiceIDs: Set<String>) -> Bool {
+        guard isSnoozeID(request.identifier) else { return false }
+        return !keptServiceIDs.isDisjoint(with: referencedServiceIDs(in: request.content.userInfo))
     }
 
     // MARK: - Pending Notifications

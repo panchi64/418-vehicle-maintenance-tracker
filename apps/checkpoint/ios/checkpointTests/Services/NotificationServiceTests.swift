@@ -349,100 +349,6 @@ final class NotificationServiceTests: XCTestCase {
         XCTAssertNil(serviceItem.notificationID)
     }
 
-    // MARK: - Snooze Tests
-
-    func testSnoozeNotificationKeepsDerivedBaseID() {
-        // Given
-        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
-        let futureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
-        let serviceItem = Service(name: "Oil Change", dueDate: futureDate)
-        serviceItem.vehicle = vehicle
-        vehicle.services = [serviceItem]
-
-        // When
-        service.snoozeNotification(for: serviceItem, vehicle: vehicle)
-
-        // Then - a snooze is per service, so it keeps the service-derived base
-        // and `cancelAllNotifications(baseID:)` can still reach it
-        let baseID = ServiceNotificationScheduler.baseNotificationID(for: serviceItem)
-        XCTAssertEqual(serviceItem.notificationID, baseID)
-        XCTAssertEqual(
-            ServiceNotificationScheduler.snoozeNotificationID(baseID: baseID),
-            baseID + "-snooze",
-            "Snooze ID should be derived from the base so cancellation can reach it"
-        )
-    }
-
-    func testCancellingTheVehicleRemovesSnoozedRequests() async {
-        // Given - a snoozed reminder
-        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
-        let futureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
-        let serviceItem = Service(name: "Oil Change", dueDate: futureDate)
-        serviceItem.vehicle = vehicle
-        vehicle.services = [serviceItem]
-        service.snoozeNotification(for: serviceItem, vehicle: vehicle)
-
-        // When - the vehicle-wide purge, which is what a delete or a rebuild
-        // runs. A snooze is per service but still belongs to the vehicle's set.
-        await ServiceNotificationScheduler.removeServiceRequests(forVehicleID: vehicle.id)
-
-        // Then
-        let hasPending = await service.hasPendingNotification(for: serviceItem)
-        XCTAssertFalse(hasPending, "The purge should reach the snoozed request too")
-    }
-
-    func testBuildSnoozeNotificationRequestSchedulesForTomorrow() {
-        // Given
-        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
-        let serviceItem = Service(name: "Oil Change")
-        serviceItem.vehicle = vehicle
-        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
-        let notificationID = "test-snooze-id"
-
-        // When
-        let request = service.buildSnoozeNotificationRequest(
-            for: serviceItem,
-            vehicle: vehicle,
-            notificationID: notificationID,
-            snoozeDate: tomorrow
-        )
-
-        // Then
-        guard let trigger = request.trigger as? UNCalendarNotificationTrigger else {
-            XCTFail("Trigger should be UNCalendarNotificationTrigger")
-            return
-        }
-        let expectedComponents = Calendar.current.dateComponents([.year, .month, .day], from: tomorrow)
-
-        XCTAssertEqual(trigger.dateComponents.year, expectedComponents.year)
-        XCTAssertEqual(trigger.dateComponents.month, expectedComponents.month)
-        XCTAssertEqual(trigger.dateComponents.day, expectedComponents.day)
-        XCTAssertEqual(trigger.dateComponents.hour, 9)
-        XCTAssertEqual(trigger.dateComponents.minute, 0)
-    }
-
-    func testBuildSnoozeNotificationRequestContent() {
-        // Given
-        let vehicle = Vehicle(name: "My Car", make: "Toyota", model: "Camry", year: 2022)
-        let serviceItem = Service(name: "Oil Change")
-        serviceItem.vehicle = vehicle
-        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
-        let notificationID = "test-snooze-id"
-
-        // When
-        let request = service.buildSnoozeNotificationRequest(
-            for: serviceItem,
-            vehicle: vehicle,
-            notificationID: notificationID,
-            snoozeDate: tomorrow
-        )
-
-        // Then
-        XCTAssertEqual(request.content.title, "Oil Change Reminder")
-        XCTAssertEqual(request.content.body, "My Car - Oil Change is due for maintenance")
-        XCTAssertEqual(request.content.categoryIdentifier, NotificationService.serviceDueCategoryID)
-    }
-
     // MARK: - Has Pending Notification Tests
 
     func testHasPendingNotificationReturnsFalseWhenNotScheduled() async {
@@ -475,13 +381,6 @@ final class NotificationServiceTests: XCTestCase {
         XCTAssertEqual(
             Notification.Name.serviceMarkedDoneFromNotification.rawValue,
             "serviceMarkedDoneFromNotification"
-        )
-    }
-
-    func testServiceSnoozedNotificationName() {
-        XCTAssertEqual(
-            Notification.Name.serviceSnoozedFromNotification.rawValue,
-            "serviceSnoozedFromNotification"
         )
     }
 
