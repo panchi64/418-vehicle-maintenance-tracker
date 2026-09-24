@@ -107,6 +107,31 @@ final class CostsMetricsTests: XCTestCase {
         )
     }
 
+    // MARK: - Retroactive Costs
+
+    /// A cluster marked done without a cost, then priced later by editing one of
+    /// its services, must reach the Costs tab.
+    @MainActor
+    func test_costAddedLaterToVisitService_countsInTotals() {
+        let v = visit(daysAgo: 10, mileage: 29000, total: nil, category: nil)
+        let oil = log(daysAgo: 10, mileage: 29000, cost: nil, category: nil, visit: v)
+        let filter = log(daysAgo: 10, mileage: 29000, cost: nil, category: nil, visit: v)
+        XCTAssertEqual(metrics([oil, filter]).totalSpent, 0)
+
+        oil.applyEditedCost(120, category: .maintenance)
+
+        let result = metrics([oil, filter])
+        XCTAssertEqual(result.totalSpent, 120)
+        XCTAssertEqual(result.events.count, 1)
+    }
+
+    @MainActor
+    func test_costAddedLaterToStandaloneService_countsInTotals() {
+        let oil = log(daysAgo: 10, mileage: 29000, cost: nil, category: nil)
+        oil.applyEditedCost(60, category: .maintenance)
+        XCTAssertEqual(metrics([oil]).totalSpent, 60)
+    }
+
     // MARK: - Totals
 
     @MainActor

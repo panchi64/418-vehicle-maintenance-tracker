@@ -23,6 +23,42 @@ struct ServiceMigrationService {
     static func runPostLaunchBackfills(in context: ModelContext) {
         backfillIsRecurring(in: context)
         backfillDocumentVehicles(in: context)
+        backfillStrandedVisitCosts(in: context)
+    }
+
+    /// Move costs stranded on the child logs of an un-itemized visit onto the
+    /// visit's total. Editing one of those logs used to write the cost to the
+    /// log itself, where the Costs tab never counts it — only the visit's
+    /// `totalCost` is. Only visits without a total are touched, so a total the
+    /// user entered is never overwritten.
+    ///
+    /// Runs on every launch for the same CloudKit reason as
+    /// `backfillDocumentVehicles`: another device on an older build can sync a
+    /// stranded cost in at any time.
+    @MainActor
+    static func backfillStrandedVisitCosts(in context: ModelContext) {
+        do {
+            let predicate = #Predicate<ServiceVisit> { !$0.isItemized }
+            let visits = try context.fetch(FetchDescriptor<ServiceVisit>(predicate: predicate))
+            var repaired = 0
+            for visit in visits where visit.totalCost == nil {
+                let pricedLogs = (visit.logs ?? []).filter { $0.cost != nil }
+                guard !pricedLogs.isEmpty else { continue }
+                visit.totalCost = pricedLogs.compactMap(\.cost).reduce(Decimal.zero, +)
+                visit.costCategory = pricedLogs.compactMap(\.costCategory).first ?? .maintenance
+                for log in pricedLogs {
+                    log.cost = nil
+                    log.costCategory = nil
+                }
+                repaired += 1
+            }
+            if repaired > 0 {
+                try context.save()
+                migrationLogger.info("Stranded visit-cost backfill repaired \(repaired) visits")
+            }
+        } catch {
+            migrationLogger.error("Stranded visit-cost backfill failed: \(error.localizedDescription)")
+        }
     }
 
     /// Flip `isRecurring = true` for any Service that has a non-zero interval.

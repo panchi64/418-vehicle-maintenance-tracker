@@ -82,7 +82,7 @@ struct ServiceLogDetailView: View {
     private var serviceHeader: some View {
         VStack(spacing: Spacing.sm) {
             // Category icon
-            if let category = log.costCategory {
+            if let category = log.editableCostCategory {
                 Image(systemName: category.icon)
                     .font(.system(size: 28, weight: .medium))
                     .foregroundStyle(category.color)
@@ -112,12 +112,12 @@ struct ServiceLogDetailView: View {
     private var detailsSection: some View {
         InstrumentSection(title: "Details") {
             VStack(spacing: 0) {
-                if let cost = log.formattedCost {
-                    BrutalistDataRow(label: "Cost", value: cost, padding: Spacing.md)
+                if let cost = log.editableCost.flatMap({ Formatters.currency.string(from: $0 as NSDecimalNumber) }) {
+                    BrutalistDataRow(label: log.sharedCostVisit != nil ? L10n.editVisitTotal : "Cost", value: cost, padding: Spacing.md)
                     ListDivider(leadingPadding: 0)
                 }
 
-                if let category = log.costCategory {
+                if let category = log.editableCostCategory {
                     BrutalistDataRow(label: "Category", value: category.displayName, padding: Spacing.md)
                     ListDivider(leadingPadding: 0)
                 }

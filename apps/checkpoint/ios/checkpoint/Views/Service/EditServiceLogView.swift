@@ -34,6 +34,10 @@ struct EditServiceLogView: View {
 
     private var serviceName: String { log.service?.name ?? "" }
 
+    /// Set when this log was completed as part of an un-itemized visit — the
+    /// cost field then edits the visit's shared total.
+    private var sharedCostVisit: ServiceVisit? { log.sharedCostVisit }
+
     private var anchors: ServiceFormAnchors? {
         guard let vehicle = log.vehicle else { return nil }
         return ServiceFormAnchors(
@@ -230,7 +234,7 @@ struct EditServiceLogView: View {
 
             VStack(spacing: Spacing.md) {
                 InstrumentTextField(
-                    label: L10n.formAmount,
+                    label: sharedCostVisit != nil ? L10n.editVisitTotal : L10n.formAmount,
                     text: $cost,
                     placeholder: "0.00",
                     keyboardType: .decimalPad
@@ -240,7 +244,18 @@ struct EditServiceLogView: View {
                     costError = CostValidation.validate(cost)
                 }
 
-                if let hint = anchors?.priorCostHint {
+                // A visit total isn't comparable to this service's past
+                // single-service costs, so the price anchors give way to a
+                // note on what the number covers.
+                if let visit = sharedCostVisit {
+                    if visit.serviceCount > 1 {
+                        Text(L10n.editVisitTotalHint(visit.serviceCount))
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.textTertiary)
+                            .tracking(1)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                } else if let hint = anchors?.priorCostHint {
                     Text(hint)
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
@@ -248,7 +263,7 @@ struct EditServiceLogView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                if let warning = anchors?.costWarning {
+                if sharedCostVisit == nil, let warning = anchors?.costWarning {
                     SanityWarningRow(message: warning)
                 }
 
@@ -299,8 +314,8 @@ struct EditServiceLogView: View {
     private func loadFromLog() {
         performedDate = log.performedDate
         mileageAtService = log.mileageAtService
-        cost = log.cost.map { NSDecimalNumber(decimal: $0).stringValue } ?? ""
-        costCategory = log.costCategory ?? .maintenance
+        cost = log.editableCost.map { NSDecimalNumber(decimal: $0).stringValue } ?? ""
+        costCategory = log.editableCostCategory ?? .maintenance
         notes = log.notes ?? ""
 
         loadedPerformedDate = log.performedDate
@@ -337,9 +352,7 @@ struct EditServiceLogView: View {
         if let mileage = mileageAtService {
             log.mileageAtService = mileage
         }
-        let costDecimal = Decimal(string: cost)
-        log.cost = costDecimal
-        log.costCategory = costDecimal != nil ? costCategory : nil
+        log.applyEditedCost(Decimal(string: cost), category: costCategory)
         log.notes = newNotes
 
         if alsoMoveNextReminder, showAlsoMoveReminderToggle,

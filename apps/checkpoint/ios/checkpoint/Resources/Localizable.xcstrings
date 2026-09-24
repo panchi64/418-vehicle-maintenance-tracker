@@ -2915,6 +2915,40 @@
         }
       }
     },
+    "edit.visitTotal" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visit total"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total de la visita"
+          }
+        }
+      }
+    },
+    "edit.visitTotalHint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visit total, shared by the %d services done together"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total de la visita, compartido por los %d servicios hechos juntos"
+          }
+        }
+      }
+    },
     "Empty" : {
 
     },
