@@ -133,24 +133,20 @@ struct CostsTab: View {
         VStack(spacing: 0) {
             filtersSection(metrics)
 
-            ScrollViewReader { proxy in
-                ScrollView {
-                    VStack(spacing: Spacing.xl) {
-                        summaryCardsSection(metrics)
-                        breakdownSections(metrics)
-                        expenseListSection(metrics, scrollProxy: proxy)
-                        emptyStates(metrics)
-                    }
-                    .padding(.horizontal, Spacing.screenHorizontal)
-                    .padding(.top, Spacing.md)
-                    .padding(.bottom, Spacing.xxl + Spacing.tabBarOffset)
+            // Chart scrubbing highlights the matching expense row but never
+            // scrolls to it. The charts live inside this scroll view, so each
+            // scroll moved the chart under the finger, picked a new point, and
+            // scrolled again — the page lurched vertically on a sideways drag.
+            ScrollView {
+                VStack(spacing: Spacing.xl) {
+                    summaryCardsSection(metrics)
+                    breakdownSections(metrics)
+                    expenseListSection(metrics)
+                    emptyStates(metrics)
                 }
-                .onChange(of: highlightedEventID) { _, newID in
-                    guard let newID else { return }
-                    withAnimation(.easeInOut(duration: Theme.animationMedium)) {
-                        proxy.scrollTo(newID, anchor: .center)
-                    }
-                }
+                .padding(.horizontal, Spacing.screenHorizontal)
+                .padding(.top, Spacing.md)
+                .padding(.bottom, Spacing.xxl + Spacing.tabBarOffset)
             }
         }
         .trackScreen(.costs)

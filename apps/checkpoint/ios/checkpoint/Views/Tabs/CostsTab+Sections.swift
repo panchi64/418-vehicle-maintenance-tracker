@@ -195,7 +195,7 @@ extension CostsTab {
     // MARK: - Expense List
 
     @ViewBuilder
-    func expenseListSection(_ metrics: CostsMetrics, scrollProxy: ScrollViewProxy) -> some View {
+    func expenseListSection(_ metrics: CostsMetrics) -> some View {
         if !metrics.isEmpty {
             let anomalies = metrics.anomalyEventIDs
             let events = metrics.events
@@ -207,7 +207,6 @@ extension CostsTab {
                 VStack(spacing: 0) {
                     ForEach(Array(events.enumerated()), id: \.element.id) { index, event in
                         expenseRow(for: event, isAnomalous: anomalies.contains(event.id))
-                            .id(event.id)
                             .staggeredReveal(index: index, baseDelay: 0.25)
 
                         if index < events.count - 1 {
