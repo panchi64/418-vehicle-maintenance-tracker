@@ -20,6 +20,10 @@ final class NotificationService: NSObject {
 
     var isAuthorized = false
 
+    /// Navigation a notification response asked for, waiting for `ContentView`
+    /// to act on it and clear it. See `NotificationRoute`.
+    var pendingRoute: NotificationRoute?
+
     private let notificationCenter = UNUserNotificationCenter.current()
 
     /// Pending debounce task for a coalesced budget enforcement. Replaced
@@ -105,8 +109,8 @@ final class NotificationService: NSObject {
         let serviceDueCategory = UNNotificationCategory(
             identifier: Self.serviceDueCategoryID,
             actions: [
-                UNNotificationAction(identifier: Self.markDoneActionID, title: "Mark as Done", options: [.foreground]),
-                UNNotificationAction(identifier: Self.snoozeActionID, title: "Remind Tomorrow", options: [])
+                UNNotificationAction(identifier: Self.markDoneActionID, title: L10n.notificationActionMarkDone, options: [.foreground]),
+                UNNotificationAction(identifier: Self.snoozeActionID, title: L10n.notificationActionRemindTomorrow, options: [])
             ],
             intentIdentifiers: [],
             options: []
@@ -116,8 +120,8 @@ final class NotificationService: NSObject {
         let mileageReminderCategory = UNNotificationCategory(
             identifier: Self.mileageReminderCategoryID,
             actions: [
-                UNNotificationAction(identifier: Self.updateMileageActionID, title: "Update Now", options: [.foreground]),
-                UNNotificationAction(identifier: Self.remindLaterActionID, title: "Remind Tomorrow", options: [])
+                UNNotificationAction(identifier: Self.updateMileageActionID, title: L10n.notificationActionUpdateNow, options: [.foreground]),
+                UNNotificationAction(identifier: Self.remindLaterActionID, title: L10n.notificationActionRemindTomorrow, options: [])
             ],
             intentIdentifiers: [],
             options: []
@@ -127,7 +131,7 @@ final class NotificationService: NSObject {
         let yearlyRoundupCategory = UNNotificationCategory(
             identifier: Self.yearlyRoundupCategoryID,
             actions: [
-                UNNotificationAction(identifier: Self.viewCostsActionID, title: "View Costs", options: [.foreground])
+                UNNotificationAction(identifier: Self.viewCostsActionID, title: L10n.notificationActionViewCosts, options: [.foreground])
             ],
             intentIdentifiers: [],
             options: []
@@ -137,7 +141,7 @@ final class NotificationService: NSObject {
         let marbeteDueCategory = UNNotificationCategory(
             identifier: Self.marbeteDueCategoryID,
             actions: [
-                UNNotificationAction(identifier: Self.marbeteSnoozeActionID, title: "Remind Tomorrow", options: [])
+                UNNotificationAction(identifier: Self.marbeteSnoozeActionID, title: L10n.notificationActionRemindTomorrow, options: [])
             ],
             intentIdentifiers: [],
             options: []

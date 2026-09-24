@@ -2,7 +2,10 @@
 //  NotificationNames.swift
 //  checkpoint
 //
-//  Notification.Name extensions for notification-related events
+//  Notification.Name extensions for app-wide events.
+//
+//  Notification *responses* don't go through here: they are stored as a
+//  `NotificationRoute` so a cold launch can't drop them. See NotificationRoute.swift.
 //
 
 import Foundation
@@ -10,20 +13,6 @@ import Foundation
 // MARK: - Notification Names
 
 extension Notification.Name {
-    // Service notifications
-    static let serviceMarkedDoneFromNotification = Notification.Name("serviceMarkedDoneFromNotification")
-    static let navigateToServiceFromNotification = Notification.Name("navigateToServiceFromNotification")
-
-    // Mileage reminder notifications
-    static let navigateToMileageUpdateFromNotification = Notification.Name("navigateToMileageUpdateFromNotification")
-    static let mileageReminderSnoozedFromNotification = Notification.Name("mileageReminderSnoozedFromNotification")
-
-    // Yearly roundup notifications
-    static let navigateToCostsFromNotification = Notification.Name("navigateToCostsFromNotification")
-
-    // Marbete reminder notifications
-    static let navigateToEditVehicleFromNotification = Notification.Name("navigateToEditVehicleFromNotification")
-
     // Onboarding sync
     static let enableCloudSyncAfterOnboarding = Notification.Name("enableCloudSyncAfterOnboarding")
 }

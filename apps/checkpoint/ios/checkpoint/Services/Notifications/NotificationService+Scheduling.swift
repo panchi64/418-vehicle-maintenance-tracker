@@ -84,10 +84,6 @@ extension NotificationService {
     func cancelMileageReminder(for vehicle: Vehicle) {
         MileageReminderScheduler.cancelMileageReminder(for: vehicle)
     }
-
-    func snoozeMileageReminder(for vehicle: Vehicle) {
-        MileageReminderScheduler.snoozeMileageReminder(for: vehicle)
-    }
 }
 
 // MARK: - Yearly Roundup Scheduling (Backwards Compatibility)

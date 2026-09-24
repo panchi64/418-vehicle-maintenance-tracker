@@ -112,7 +112,7 @@ final class RemindTomorrowTests: XCTestCase {
         vehicle.services = [oil]
         let snooze = ServiceNotificationScheduler.snoozeRequest(for: delivered([oil], vehicle: vehicle), now: now)!
 
-        let kept = ServiceNotificationScheduler.snoozeWorthyServiceIDs(for: vehicle, now: now)
+        let kept = ServiceNotificationScheduler.stillDueServiceIDs(for: vehicle, now: now)
 
         XCTAssertTrue(ServiceNotificationScheduler.isKeptSnooze(snooze, keptServiceIDs: kept))
     }
@@ -123,7 +123,7 @@ final class RemindTomorrowTests: XCTestCase {
         oil.vehicle = vehicle
         vehicle.services = [oil]
 
-        XCTAssertTrue(ServiceNotificationScheduler.snoozeWorthyServiceIDs(for: vehicle, now: now).contains(oil.id.uuidString))
+        XCTAssertTrue(ServiceNotificationScheduler.stillDueServiceIDs(for: vehicle, now: now).contains(oil.id.uuidString))
     }
 
     func testCompletingTheServiceRetiresItsSnooze() {
@@ -135,7 +135,7 @@ final class RemindTomorrowTests: XCTestCase {
         let snooze = ServiceNotificationScheduler.snoozeRequest(for: delivered([oil], vehicle: vehicle), now: now)!
 
         oil.dueDate = dueIn(180)
-        let kept = ServiceNotificationScheduler.snoozeWorthyServiceIDs(for: vehicle, now: now)
+        let kept = ServiceNotificationScheduler.stillDueServiceIDs(for: vehicle, now: now)
 
         XCTAssertFalse(ServiceNotificationScheduler.isKeptSnooze(snooze, keptServiceIDs: kept))
     }

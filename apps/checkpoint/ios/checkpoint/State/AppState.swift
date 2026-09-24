@@ -43,6 +43,10 @@ final class AppState {
     var selectedCluster: ServiceCluster?
     var clusterToMarkDone: ServiceCluster?
 
+    /// Services a notification's "Mark as Done" asked to complete. Presented
+    /// from `ContentView` rather than a tab, so it opens whichever tab is up.
+    var markDoneRequest: MarkDoneRequest?
+
     // MARK: - Seasonal Reminder Pre-fill
 
     var seasonalPrefill: SeasonalPrefill?
@@ -78,6 +82,7 @@ final class AppState {
         selectedDocument = nil
         selectedCluster = nil
         clusterToMarkDone = nil
+        markDoneRequest = nil
     }
 
     // MARK: - Recall Convenience
@@ -130,4 +135,13 @@ final class AppState {
 
         tipPromptQueued = true
     }
+}
+
+/// One or more services to complete together, from a notification's
+/// "Mark as Done". One service completes on its own; several complete as a
+/// Service Visit, the same as marking a suggested cluster done.
+struct MarkDoneRequest: Identifiable {
+    let id = UUID()
+    let services: [Service]
+    let vehicle: Vehicle
 }

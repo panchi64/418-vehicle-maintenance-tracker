@@ -216,9 +216,9 @@ struct ServiceNotificationScheduler {
     struct ReminderPlan {
         let vehicleID: UUID
         let requests: [UNNotificationRequest]
-        /// Services still worth a snoozed reminder (see `snoozeWorthyServiceIDs`).
+        /// Services still due (see `stillDueServiceIDs`).
         /// A pending snooze naming any of them survives the rebuild.
-        let snoozeWorthyServiceIDs: Set<String>
+        let stillDueServiceIDs: Set<String>
     }
 
     /// Resolve a vehicle's reminders and record which services they cover.
@@ -237,14 +237,15 @@ struct ServiceNotificationScheduler {
         return ReminderPlan(
             vehicleID: vehicle.id,
             requests: requests,
-            snoozeWorthyServiceIDs: snoozeWorthyServiceIDs(for: vehicle, now: now)
+            stillDueServiceIDs: stillDueServiceIDs(for: vehicle, now: now)
         )
     }
 
-    /// Services a snooze may still remind about: overdue, or due within the
-    /// longest lead time. Completing a service moves its due date out past
-    /// that, and deleting one drops it, so either retires its snooze.
-    static func snoozeWorthyServiceIDs(for vehicle: Vehicle, now: Date = Date()) -> Set<String> {
+    /// Services a reminder is still about: overdue, or due within the longest
+    /// lead time. Completing a service moves its due date out past that, and
+    /// deleting one drops it — so a snooze naming only those is dropped on the
+    /// next rebuild, and a stale "Mark as Done" can't log a service twice.
+    static func stillDueServiceIDs(for vehicle: Vehicle, now: Date = Date()) -> Set<String> {
         let longestLead = NotificationService.defaultReminderIntervals.max() ?? 0
         guard let horizon = Calendar.current.date(byAdding: .day, value: longestLead, to: now) else { return [] }
         let dailyPace = vehicle.dailyMilesPace
@@ -262,7 +263,7 @@ struct ServiceNotificationScheduler {
     /// are the exception: the user asked for them, and every edit and every
     /// launch rebuilds, so they stay while their services are still due.
     static func apply(_ plan: ReminderPlan) async {
-        await removeServiceRequests(forVehicleID: plan.vehicleID, keepingSnoozesFor: plan.snoozeWorthyServiceIDs)
+        await removeServiceRequests(forVehicleID: plan.vehicleID, keepingSnoozesFor: plan.stillDueServiceIDs)
 
         let center = UNUserNotificationCenter.current()
         for request in plan.requests {

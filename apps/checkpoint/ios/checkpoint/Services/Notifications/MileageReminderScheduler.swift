@@ -95,24 +95,15 @@ struct MileageReminderScheduler {
 
     // MARK: - Snooze
 
-    /// Snooze mileage reminder for 1 day
-    static func snoozeMileageReminder(for vehicle: Vehicle) {
-        cancelMileageReminder(for: vehicle)
-
-        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
-
-        let request = buildMileageReminderRequest(
-            vehicleName: vehicle.displayName,
-            vehicleID: vehicle.id,
-            reminderDate: tomorrow
+    /// What "Remind Tomorrow" on a mileage reminder schedules: the same banner
+    /// at 9 AM tomorrow, built from the delivered notification alone.
+    static func snoozeRequest(for original: UNNotificationRequest, now: Date = Date()) -> UNNotificationRequest? {
+        guard let vehicleIDString = original.content.userInfo["vehicleID"] as? String,
+              let vehicleID = UUID(uuidString: vehicleIDString) else { return nil }
+        // The vehicle's one mileage-reminder ID: a mileage update reschedules
+        // under it, which retires the snooze along with the old reminder.
+        return NotificationHelpers.snoozeRequest(
+            identifier: mileageReminderID(for: vehicleID), content: original.content, now: now
         )
-
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                mileageNotificationLogger.error("Failed to snooze mileage reminder: \(error.localizedDescription)")
-            }
-        }
-
-        NotificationService.shared.scheduleBudgetEnforcement()
     }
 }

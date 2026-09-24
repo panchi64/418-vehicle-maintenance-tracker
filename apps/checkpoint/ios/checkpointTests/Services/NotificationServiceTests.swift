@@ -375,22 +375,6 @@ final class NotificationServiceTests: XCTestCase {
         XCTAssertFalse(hasPending, "Should return false for invalid notification ID")
     }
 
-    // MARK: - Notification Names Tests
-
-    func testServiceMarkedDoneNotificationName() {
-        XCTAssertEqual(
-            Notification.Name.serviceMarkedDoneFromNotification.rawValue,
-            "serviceMarkedDoneFromNotification"
-        )
-    }
-
-    func testNavigateToServiceNotificationName() {
-        XCTAssertEqual(
-            Notification.Name.navigateToServiceFromNotification.rawValue,
-            "navigateToServiceFromNotification"
-        )
-    }
-
     // MARK: - Authorization Tests
 
     func testIsAuthorizedInitiallyFalse() {
@@ -676,21 +660,6 @@ final class NotificationServiceTests: XCTestCase {
         XCTAssertTrue(true, "Cancel mileage reminder should complete without error")
     }
 
-    func testSnoozeMileageReminder() {
-        // Given
-        let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)
-        service.scheduleMileageReminder(for: vehicle)
-
-        // When - should not crash
-        service.snoozeMileageReminder(for: vehicle)
-
-        // Then - verify method completes
-        XCTAssertTrue(true, "Snooze mileage reminder should complete without error")
-
-        // Cleanup
-        service.cancelMileageReminder(for: vehicle)
-    }
-
     // MARK: - Yearly Roundup Category Tests
 
     func testYearlyRoundupCategoryIdentifier() {
@@ -827,29 +796,6 @@ final class NotificationServiceTests: XCTestCase {
         // Cleanup - reset the UserDefaults
         let key = "lastYearlyRoundupYear-\(vehicleID.uuidString)"
         UserDefaults.standard.removeObject(forKey: key)
-    }
-
-    // MARK: - New Notification Names Tests
-
-    func testMileageUpdateNotificationName() {
-        XCTAssertEqual(
-            Notification.Name.navigateToMileageUpdateFromNotification.rawValue,
-            "navigateToMileageUpdateFromNotification"
-        )
-    }
-
-    func testMileageReminderSnoozedNotificationName() {
-        XCTAssertEqual(
-            Notification.Name.mileageReminderSnoozedFromNotification.rawValue,
-            "mileageReminderSnoozedFromNotification"
-        )
-    }
-
-    func testNavigateToCostsNotificationName() {
-        XCTAssertEqual(
-            Notification.Name.navigateToCostsFromNotification.rawValue,
-            "navigateToCostsFromNotification"
-        )
     }
 
     // MARK: - Pace-Based Notification Tests

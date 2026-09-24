@@ -256,26 +256,16 @@ extension ContentView {
 
     func notificationHandlers(_ content: some View) -> some View {
         content
-            // Handle mileage update notification navigation
-            .onReceive(NotificationCenter.default.publisher(for: .navigateToMileageUpdateFromNotification)) { notification in
-                guard selectVehicleFromNotification(notification.userInfo) else { return }
-                // Navigate to home and show mileage update
-                appState.selectedTab = .home
-                appState.showMileageUpdate = true
+            // `initial: true` picks up a route stored while the app was still
+            // launching from the notification tap.
+            .onChange(of: NotificationService.shared.pendingRoute, initial: true) { _, route in
+                guard let route else { return }
+                NotificationService.shared.pendingRoute = nil
+                appState.apply(route, vehicles: vehicles)
             }
-            // Handle snooze mileage reminder
-            .onReceive(NotificationCenter.default.publisher(for: .mileageReminderSnoozedFromNotification)) { notification in
-                if let vehicleIDString = notification.userInfo?["vehicleID"] as? String,
-                   let vehicleID = UUID(uuidString: vehicleIDString),
-                   let vehicle = vehicles.first(where: { $0.id == vehicleID }) {
-                    NotificationService.shared.snoozeMileageReminder(for: vehicle)
-                }
-            }
-            // Handle yearly roundup navigation to costs
-            .onReceive(NotificationCenter.default.publisher(for: .navigateToCostsFromNotification)) { notification in
-                guard selectVehicleFromNotification(notification.userInfo) else { return }
-                // Navigate to costs tab
-                appState.selectedTab = .costs
+            .sheet(item: $appState.markDoneRequest) { request in
+                MarkServiceVisitDoneSheet(origin: markDoneOrigin(for: request))
+                    .environment(appState)
             }
             // Clear AppState's retained SwiftData references before the App swaps
             // the ModelContainer on this notification (onboarding → CloudKit).
@@ -307,24 +297,5 @@ extension ContentView {
             guard !Task.isCancelled else { return }
             appState.showAddVehicle = true
         }
-    }
-
-    // MARK: - Notification Helpers
-
-    /// Decodes a `vehicleID` from a notification payload and selects that vehicle
-    /// when it isn't already current. Returns `true` when the payload carried a
-    /// valid vehicle ID (the caller then performs its navigation), `false`
-    /// otherwise.
-    private func selectVehicleFromNotification(_ userInfo: [AnyHashable: Any]?) -> Bool {
-        guard let vehicleIDString = userInfo?["vehicleID"] as? String,
-              let vehicleID = UUID(uuidString: vehicleIDString) else {
-            return false
-        }
-        // Select the vehicle if it matches, otherwise find it
-        if currentVehicle?.id != vehicleID,
-           let vehicle = vehicles.first(where: { $0.id == vehicleID }) {
-            appState.selectedVehicle = vehicle
-        }
-        return true
     }
 }

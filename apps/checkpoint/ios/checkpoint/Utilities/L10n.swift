@@ -841,6 +841,10 @@ enum L10n {
     static func notificationSnoozeBody(_ vehicleName: String, _ serviceName: String) -> String {
         String(format: localized("notification.snooze.body"), vehicleName, serviceName)
     }
+    static var notificationActionMarkDone: String { localized("notification.action.markDone") }
+    static var notificationActionRemindTomorrow: String { localized("notification.action.remindTomorrow") }
+    static var notificationActionUpdateNow: String { localized("notification.action.updateNow") }
+    static var notificationActionViewCosts: String { localized("notification.action.viewCosts") }
     static func notificationSnoozeBundleTitle(_ count: Int) -> String {
         String(format: localized("notification.snooze.bundleTitle"), count)
     }

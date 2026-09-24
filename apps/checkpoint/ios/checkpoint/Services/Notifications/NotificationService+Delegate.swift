@@ -80,22 +80,14 @@ extension NotificationService: UNUserNotificationCenterDelegate {
         _ response: UNNotificationResponse,
         userInfo: [AnyHashable: Any]
     ) async {
-        guard let vehicleIDString = userInfo["vehicleID"] as? String else { return }
+        guard let vehicleID = Self.vehicleID(in: userInfo) else { return }
 
         switch response.actionIdentifier {
         case Self.updateMileageActionID, UNNotificationDefaultActionIdentifier:
-            NotificationCenter.default.post(
-                name: .navigateToMileageUpdateFromNotification,
-                object: nil,
-                userInfo: ["vehicleID": vehicleIDString]
-            )
+            pendingRoute = .updateMileage(vehicleID: vehicleID)
 
         case Self.remindLaterActionID:
-            NotificationCenter.default.post(
-                name: .mileageReminderSnoozedFromNotification,
-                object: nil,
-                userInfo: ["vehicleID": vehicleIDString]
-            )
+            await addSnooze(MileageReminderScheduler.snoozeRequest(for: response.notification.request))
 
         default:
             break
@@ -106,19 +98,14 @@ extension NotificationService: UNUserNotificationCenterDelegate {
         _ response: UNNotificationResponse,
         userInfo: [AnyHashable: Any]
     ) async {
-        guard let vehicleIDString = userInfo["vehicleID"] as? String,
-              let year = userInfo["year"] as? Int else { return }
+        guard let vehicleID = Self.vehicleID(in: userInfo) else { return }
 
         // The roundup reached the user; record it so it isn't scheduled again.
         markYearlyRoundupShownIfNeeded(userInfo)
 
         switch response.actionIdentifier {
         case Self.viewCostsActionID, UNNotificationDefaultActionIdentifier:
-            NotificationCenter.default.post(
-                name: .navigateToCostsFromNotification,
-                object: nil,
-                userInfo: ["vehicleID": vehicleIDString, "year": year]
-            )
+            pendingRoute = .costs(vehicleID: vehicleID)
 
         default:
             break
@@ -141,18 +128,14 @@ extension NotificationService: UNUserNotificationCenterDelegate {
         _ response: UNNotificationResponse,
         userInfo: [AnyHashable: Any]
     ) async {
-        guard let vehicleIDString = userInfo["vehicleID"] as? String else { return }
+        guard let vehicleID = Self.vehicleID(in: userInfo) else { return }
 
         switch response.actionIdentifier {
         case Self.marbeteSnoozeActionID:
             await addSnooze(MarbeteNotificationScheduler.snoozeRequest(for: response.notification.request))
 
         case UNNotificationDefaultActionIdentifier:
-            NotificationCenter.default.post(
-                name: .navigateToEditVehicleFromNotification,
-                object: nil,
-                userInfo: ["vehicleID": vehicleIDString]
-            )
+            pendingRoute = .editVehicle(vehicleID: vehicleID)
 
         default:
             break
@@ -168,35 +151,25 @@ extension NotificationService: UNUserNotificationCenterDelegate {
         _ response: UNNotificationResponse,
         userInfo: [AnyHashable: Any]
     ) async {
-        let serviceIDs = ServiceNotificationScheduler.referencedServiceIDs(in: userInfo)
-        guard !serviceIDs.isEmpty,
-              let vehicleIDString = userInfo["vehicleID"] as? String else { return }
-
-        var payload: [String: Any] = ["serviceIDs": serviceIDs, "vehicleID": vehicleIDString]
-        if serviceIDs.count == 1 {
-            payload["serviceID"] = serviceIDs[0]
-        }
+        let serviceIDs = NotificationRoute.serviceIDs(from: ServiceNotificationScheduler.referencedServiceIDs(in: userInfo))
+        guard !serviceIDs.isEmpty, let vehicleID = Self.vehicleID(in: userInfo) else { return }
 
         switch response.actionIdentifier {
         case Self.markDoneActionID:
-            NotificationCenter.default.post(
-                name: .serviceMarkedDoneFromNotification,
-                object: nil,
-                userInfo: payload
-            )
+            pendingRoute = .markDone(vehicleID: vehicleID, serviceIDs: serviceIDs)
 
         case Self.snoozeActionID:
             await addSnooze(ServiceNotificationScheduler.snoozeRequest(for: response.notification.request))
 
         case UNNotificationDefaultActionIdentifier:
-            NotificationCenter.default.post(
-                name: .navigateToServiceFromNotification,
-                object: nil,
-                userInfo: payload
-            )
+            pendingRoute = .services(vehicleID: vehicleID, serviceIDs: serviceIDs)
 
         default:
             break
         }
+    }
+
+    private static func vehicleID(in userInfo: [AnyHashable: Any]) -> UUID? {
+        (userInfo["vehicleID"] as? String).flatMap(UUID.init(uuidString:))
     }
 }
