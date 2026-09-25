@@ -240,6 +240,10 @@ Content rules:
 3. `UIApplication.canOpenURL` check → deep link or App Store fallback.
 4. No App Group until a concrete reason emerges.
 
+### Launch checklist
+
+- [ ] **Reinstate Checkpoint's "Find Gas Prices" Settings row.** It was built, then commented out while Biombo is unreleased (a tap had nowhere to go). In `apps/checkpoint/ios/checkpoint/Views/Settings/SettingsView.swift`, uncomment the block marked `TODO(biombo-launch)`, and set `CompanionAppLauncher.biomboAppStoreURL` to the live App Store URL so users without Biombo land on its listing. The strings (`settingsFindGasPrices*`) and `CompanionAppLauncher` were kept for this.
+
 ---
 
 ## Files to create (canonical)

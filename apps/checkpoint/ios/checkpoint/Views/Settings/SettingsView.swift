@@ -314,16 +314,22 @@ struct SettingsView: View {
                 Task { await RestorePurchasesAction.run() }
             }
 
-            SettingsRowDivider()
-
-            SettingsActionRow(
-                title: L10n.settingsFindGasPrices,
-                subtitle: L10n.settingsFindGasPricesDesc,
-                systemImage: "fuelpump",
-                iconColor: Theme.textTertiary
-            ) {
-                CompanionAppLauncher.openBiombo()
-            }
+            // TODO(biombo-launch): reinstate this row when Biombo ships on the
+            // App Store — and set `CompanionAppLauncher.biomboAppStoreURL` at
+            // the same time. Hidden until then: with Biombo unreleased the tap
+            // had nowhere to go. Tracked in docs/BIOMBO_IMPLEMENTATION_PLAN.md
+            // (Launch checklist).
+            //
+            // SettingsRowDivider()
+            //
+            // SettingsActionRow(
+            //     title: L10n.settingsFindGasPrices,
+            //     subtitle: L10n.settingsFindGasPricesDesc,
+            //     systemImage: "fuelpump",
+            //     iconColor: Theme.textTertiary
+            // ) {
+            //     CompanionAppLauncher.openBiombo()
+            // }
         }
     }
 }
