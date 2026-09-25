@@ -1,144 +1,218 @@
 /*
- * Services.
+ * Services — Readout. "What's due, and what have I done?"
  *
- * The problem being solved: up to four rows of chrome before any content —
- * search, view-mode segmented, status-filter segmented, and a filter indicator.
- * Plus "Documents" was a third view mode that then offered "OPEN LIBRARY" to
- * leave for the real documents screen: a content type masquerading as a view.
+ * ONE SCROLL, NO MODE SWITCH. The previous version kept a Scheduled/History
+ * segmented control plus a status FilterControl — one row of chrome, but it
+ * still hid half the tab behind a mode, and the status filter re-derived what
+ * grouping by status gives for free. Now the tab opens on what matters first
+ * and continues into history:
  *
- * The fix modelled here: exactly ONE control row. Mode is the segmented control
- * because it changes what the screen *is*; status is a FilterControl because
- * filtering is refinement. The status filter only exists in Scheduled mode —
- * history entries have no status, and a control that does nothing is worse than
- * an absent one. Documents is a destination, not a mode.
+ *   [search]                  system `.searchable` (stand-in)
+ *   Overdue            1      status groups, most urgent first — each a
+ *   Due Soon           2      ReadoutSection whose header IS the status word
+ *   On Track           2
+ *   July 2026                 History, by month (no month totals — money
+ *   June 2026                 is Costs' question; rows keep their amounts)
+ *   …
+ *   Reference                 Document library › (a destination, not a mode)
+ *
+ * A status group with no items is omitted — it is a GROUP, not a section of
+ * fixed position, and "Overdue: nothing" would be an apology line on the
+ * happiest possible screen. The order of the groups that remain never changes.
+ *
+ * ROW ACTIONS (swipe + context menu; the "Reveal row actions" harness switch
+ * draws them):
+ *   service:  Edit · Mark Done      (full swipe = Mark Done; Delete in the
+ *                                    context menu only — deleting a schedule
+ *                                    is rarer and heavier than editing one)
+ *   log:      Duplicate · Edit · Delete   (full swipe = Delete, with undo)
+ *
+ * EDIT MODE. `Select` in the toolbar; rows grow a leading square; a bottom
+ * toolbar replaces the tab bar with the bulk actions and their counts.
  */
 import { createSignal, For, Show } from 'solid-js'
-import { SegmentedControl } from '../ui/Controls'
-import { ActiveFilterBar, ControlRow, FilterControl } from '../ui/FilterControl'
-import { ExpenseRow, ListDivider, ServiceRow } from '../components/Rows'
+import { ExpenseRow, RowList, ServiceRow } from '../components/Rows'
+import { NavBar } from '../components/TabBar'
 import { ReadoutSection } from '../ui/ReadoutSection'
-import { Label, Secondary } from '../ui/Text'
+import { Body, Emphasis, Label, Secondary } from '../ui/Text'
 import { Screen } from './Screen'
-import { serviceLogs, services, type ServiceStatus } from '../data/fixtures'
+import { groupByMonth, sortedByUrgency, useScenario } from '../data/scenario'
+import type { ServiceStatus } from '../data/fixtures'
 
-type Mode = 'scheduled' | 'history'
-type StatusFilter = 'all' | ServiceStatus
+const GROUPS: ServiceStatus[] = ['overdue', 'dueSoon', 'good', 'neutral']
 
-export function ServicesTab() {
-  const [mode, setMode] = createSignal<Mode>('scheduled')
-  const [status, setStatus] = createSignal<StatusFilter>('all')
+/** Group headers are headers, so they take title case; the words match STATUS_LABEL. */
+const GROUP_TITLE: Record<ServiceStatus, string> = {
+  overdue: 'Overdue',
+  dueSoon: 'Due Soon',
+  good: 'On Track',
+  neutral: 'No Schedule',
+}
 
-  const filtered = () =>
-    status() === 'all' ? services : services.filter((s) => s.status === status())
+export function ServicesTab(props: {
+  title: string
+  onAdd: () => void
+  revealActions: boolean
+}) {
+  const data = useScenario()
+  const [selecting, setSelecting] = createSignal(false)
+  const [selected, setSelected] = createSignal<Set<string>>(new Set())
 
-  const countOf = (s: ServiceStatus) => services.filter((x) => x.status === s).length
+  const toggle = (id: string) => {
+    const next = new Set(selected())
+    next.has(id) ? next.delete(id) : next.add(id)
+    setSelected(next)
+  }
 
-  const statusFilters = () => [
-    { value: 'all' as StatusFilter, label: 'All', count: services.length },
-    { value: 'overdue' as StatusFilter, label: 'Overdue', count: countOf('overdue') },
-    { value: 'dueSoon' as StatusFilter, label: 'Due soon', count: countOf('dueSoon') },
-    { value: 'good' as StatusFilter, label: 'On track', count: countOf('good') },
-  ]
+  const sorted = () => sortedByUrgency(data().services, data().vehicle!)
+  const groups = () =>
+    GROUPS.map((status) => ({ status, items: sorted().filter((s) => s.status === status) })).filter(
+      (g) => g.items.length,
+    )
+  const months = () => groupByMonth(data().logs)
+  const isEmpty = () => !data().services.length && !data().logs.length
+
+  const chrome = (id: string) => ({
+    selecting: selecting(),
+    selected: selected().has(id),
+    onToggleSelect: () => toggle(id),
+    revealActions: props.revealActions,
+  })
 
   return (
-    <div style={{ display: 'flex', 'flex-direction': 'column', flex: '1 1 auto', 'min-height': '0' }}>
-      {/* One control row, pinned above the scroll area so the list scrolls
-          under it rather than pushing it away. */}
-      <ControlRow>
-        <div style={{ flex: '1 1 auto', 'min-width': '0' }}>
-          <SegmentedControl
-            options={[
-              { value: 'scheduled', label: 'Scheduled' },
-              { value: 'history', label: 'History' },
-            ]}
-            value={mode()}
-            onChange={setMode}
-          />
-        </div>
-
-        {/* Status only exists for scheduled items, so the filter only exists
-            there too. A no-op control in History mode costs a target and
-            answers nothing. */}
-        <Show when={mode() === 'scheduled'}>
-          <FilterControl
-            name="Status"
-            options={statusFilters()}
-            value={status()}
-            onChange={setStatus}
-            defaultValue="all"
-          />
-        </Show>
-      </ControlRow>
-
-      <Show when={mode() === 'scheduled'}>
-        <ActiveFilterBar
-          name="Status"
-          options={statusFilters()}
-          value={status()}
-          defaultValue="all"
-          onClear={() => setStatus('all')}
-        />
-      </Show>
-
-      <Screen>
-        <Show
-          when={mode() === 'scheduled'}
-          fallback={
-            <ReadoutSection
-              title={`${serviceLogs.length} entries`}
-              action={{ label: 'Documents' }}
-              primary={
-                <div style={{ display: 'flex', 'flex-direction': 'column' }}>
-                  <For each={serviceLogs}>
-                    {(log, i) => (
-                      <>
-                        <Show when={i() > 0}>
-                          <ListDivider />
-                        </Show>
-                        <ExpenseRow log={log} />
-                      </>
-                    )}
-                  </For>
-                </div>
+    <>
+      <NavBar
+        title={props.title}
+        onAdd={props.onAdd}
+        search="Search services"
+        extra={
+          isEmpty()
+            ? undefined
+            : {
+                label: selecting() ? 'Done' : 'Select',
+                onClick: () => {
+                  setSelecting(!selecting())
+                  setSelected(new Set<string>())
+                },
               }
-            />
-          }
-        >
-          <Show
-            when={filtered().length}
-            fallback={<Secondary color="tertiary">Nothing matches this filter.</Secondary>}
-          >
-            <ReadoutSection
-              title={`${filtered().length} scheduled`}
-              primary={
-                <div style={{ display: 'flex', 'flex-direction': 'column' }}>
-                  <For each={filtered()}>
-                    {(service, i) => (
-                      <>
-                        <Show when={i() > 0}>
-                          <ListDivider />
-                        </Show>
-                        <ServiceRow service={service} />
-                      </>
-                    )}
-                  </For>
-                </div>
-              }
-            />
-          </Show>
-        </Show>
+        }
+      />
 
-        <div style={{ 'padding-top': 'var(--space-sm)' }}>
-          <Label>Reference</Label>
-          <div style={{ display: 'flex', 'flex-direction': 'column', 'padding-top': 'var(--space-xs)' }}>
+      <Show when={!isEmpty()} fallback={<ServicesEmpty onAdd={props.onAdd} />}>
+        <Screen>
+          <For each={groups()}>
+            {(g) => (
+              <ReadoutSection
+                title={GROUP_TITLE[g.status]}
+                trailing={String(g.items.length)}
+                primary={
+                  <RowList each={g.items}>
+                    {(s) => (
+                      <ServiceRow
+                        service={s}
+                        vehicle={data().vehicle!}
+                        actions={['Edit', 'Mark Done']}
+                        groupedByStatus
+                        {...chrome(s.id)}
+                      />
+                    )}
+                  </RowList>
+                }
+              />
+            )}
+          </For>
+
+          <For each={months()}>
+            {(m) => (
+              <ReadoutSection
+                title={m.label}
+                primary={
+                  <RowList each={m.logs}>
+                    {(log) => (
+                      <ExpenseRow
+                        log={log}
+                        dateStyle="day"
+                        actions={['Duplicate', 'Edit', 'Delete']}
+                        {...chrome(log.id)}
+                      />
+                    )}
+                  </RowList>
+                }
+              />
+            )}
+          </For>
+
+          <div>
+            <Label>Reference</Label>
             <button style={{ 'min-height': 'var(--touch-target)', display: 'flex', 'align-items': 'center' }}>
               <Label color="accent" tracking={1}>
                 [Document library]
               </Label>
             </button>
           </div>
+        </Screen>
+      </Show>
+
+      {/* Edit-mode bottom toolbar — replaces the tab bar while selecting. */}
+      <Show when={selecting()}>
+        <div
+          style={{
+            display: 'flex',
+            'justify-content': 'space-between',
+            'align-items': 'center',
+            height: '83px',
+            'padding-bottom': '34px',
+            'padding-left': 'var(--space-screen-h)',
+            'padding-right': 'var(--space-screen-h)',
+            'border-top': '1px solid var(--grid-line)',
+            background: 'var(--background-elevated)',
+            position: 'relative',
+            'z-index': '1',
+            'margin-bottom': '-83px',
+          }}
+        >
+          <button style={{ 'min-height': 'var(--touch-target)' }} aria-disabled={!selected().size}>
+            <Body color={selected().size ? 'accent' : 'tertiary'}>Mark Done ({selected().size})</Body>
+          </button>
+          <button style={{ 'min-height': 'var(--touch-target)' }} aria-disabled={!selected().size}>
+            <Body color={selected().size ? 'overdue' : 'tertiary'}>Delete ({selected().size})</Body>
+          </button>
         </div>
-      </Screen>
-    </div>
+      </Show>
+    </>
+  )
+}
+
+/** First run: one message, one action. */
+function ServicesEmpty(props: { onAdd: () => void }) {
+  return (
+    <Screen center>
+      <div
+        style={{
+          display: 'flex',
+          'flex-direction': 'column',
+          'align-items': 'center',
+          gap: 'var(--space-sm)',
+          'text-align': 'center',
+        }}
+      >
+        <Emphasis>No services yet</Emphasis>
+        <Secondary color="tertiary">
+          Log one you've already done, or schedule the next one. Either starts your reminders.
+        </Secondary>
+        <button
+          onClick={props.onAdd}
+          data-rank="primary"
+          style={{
+            'margin-top': 'var(--space-sm)',
+            'min-height': 'var(--button-height)',
+            padding: '0 var(--space-lg)',
+            background: 'var(--accent)',
+          }}
+        >
+          <Emphasis style={{ color: 'var(--background-primary)' }}>Add a Service</Emphasis>
+        </button>
+      </div>
+    </Screen>
   )
 }

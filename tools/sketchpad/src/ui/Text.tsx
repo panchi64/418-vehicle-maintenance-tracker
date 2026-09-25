@@ -13,7 +13,7 @@
  * the harness audits it — see harness/Inspector.tsx.
  */
 import type { JSX } from 'solid-js'
-import { splitProps } from 'solid-js'
+import { mergeProps, splitProps } from 'solid-js'
 
 export type Rank = 'primary' | 'secondary' | 'tertiary'
 
@@ -42,7 +42,7 @@ const COLOR_VARS: Record<ColorToken, string> = {
   inherit: 'inherit',
 }
 
-interface TextProps extends JSX.HTMLAttributes<HTMLSpanElement> {
+export interface TextProps extends JSX.HTMLAttributes<HTMLSpanElement> {
   color?: ColorToken
   /** Declared hierarchy rank. Audited by the inspector, not styled directly. */
   rank?: Rank
@@ -94,8 +94,26 @@ function make(styleVar: string, defaults: Partial<TextProps> = {}) {
   }
 }
 
-/** 56 Light — a single dominant number. Never a substitute for hierarchy below it. */
-export const Hero = make('--font-hero')
+/**
+ * 56 Light — a single dominant number. Never a substitute for hierarchy below it.
+ * Shrinks to fit the screen's width the way
+ * `.minimumScaleFactor(0.5).lineLimit(1)` does in SwiftUI — at 2x on 375pt,
+ * "$2,308" was 403pt wide in a 315pt column. A number must never wrap.
+ */
+const HeroBase = make('--font-hero')
+export const Hero = (props: TextProps) =>
+  HeroBase(
+    mergeProps(
+      {
+        style: {
+          // `cqi` resolves against Screen, which is an inline-size container.
+          'font-size': 'min(calc(56px * var(--type-scale)), 22cqi)',
+          'white-space': 'nowrap',
+        } as JSX.CSSProperties,
+      },
+      props,
+    ),
+  )
 /** 32 Medium — primary headings. Uppercased, matching BrutalistTitleStyle. */
 export const Title = make('--font-title', { uppercase: true })
 /** 20 Medium — section titles, service names. */
@@ -112,9 +130,26 @@ export const Label = make('--font-label', {
   uppercase: true,
   tracking: 1.5,
 })
-/** 11 Bold caps — emphasized labels. */
-export const LabelBold = make('--font-label-bold', {
-  color: 'tertiary',
-  uppercase: true,
-  tracking: 1.5,
-})
+/**
+ * The section-tier header. Case, size, and tracking come from the harness's
+ * "Section headers" switch (base.css `--section-*`), so ReadoutSection,
+ * FormSection, and list group headers all flip together — the comparison is
+ * only fair if every section header on the screen changes at once.
+ */
+export function SectionTitle(props: { children: JSX.Element; style?: JSX.CSSProperties }) {
+  return (
+    <span
+      role="heading"
+      aria-level={2}
+      style={{
+        font: 'var(--section-font)',
+        'text-transform': 'var(--section-transform)',
+        'letter-spacing': 'var(--section-tracking)',
+        color: 'var(--section-color)',
+        ...props.style,
+      }}
+    >
+      {props.children}
+    </span>
+  )
+}

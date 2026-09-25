@@ -17,12 +17,15 @@
  * - A vehicle is creatable from VIN + odometer alone.
  *
  * - The nine-state VIN block collapses into the FormAdvisory ladder.
+ *
+ * - SAVE IS IN THE TOOLBAR (FormToolbar), like every form. A tap on the dim
+ *   Save scrolls to whichever field blocks it and states why, there (F2).
  */
 import { createMemo, createSignal, Show } from 'solid-js'
 import { Field } from '../ui/Controls'
 import { FormAdvisory } from '../ui/FormAdvisory'
-import { FormActionBar } from '../ui/FormActionBar'
-import { Emphasis, Heading, Label, Secondary } from '../ui/Text'
+import { FormToolbar, revealBlocker } from '../ui/FormToolbar'
+import { Emphasis, Secondary } from '../ui/Text'
 import { FormSection } from '../ui/FormSection'
 
 type VinState = 'empty' | 'tooShort' | 'invalid' | 'looking' | 'resolved'
@@ -55,40 +58,42 @@ export function AddVehicle(props: { onClose?: () => void }) {
   const effectiveMake = () => make() || decoded()?.make || ''
   const effectiveModel = () => model() || decoded()?.model || ''
 
-  const blockingReason = createMemo(() => {
+  const blocker = createMemo<{ key: 'odometer' | 'vehicle'; message: string } | undefined>(() => {
     if (!odometer().trim()) {
-      return 'Enter the current odometer reading — mileage reminders depend on it.'
+      return { key: 'odometer', message: 'Enter the current odometer — mileage reminders depend on it.' }
     }
     if (!effectiveMake() || !effectiveModel()) {
-      return 'Scan or enter a VIN, or fill in the make and model.'
+      return { key: 'vehicle', message: 'Scan or enter a VIN, or fill in the make and model.' }
     }
     return undefined
   })
 
+  /* Set by a tap on the dim Save; the reason renders at the field, not in a bar. */
+  const [showBlocker, setShowBlocker] = createSignal(false)
+  const blockerAt = (key: 'odometer' | 'vehicle') => (
+    <Show when={showBlocker() && blocker()?.key === key}>
+      <div data-blocker={key}>
+        <FormAdvisory severity="blocking" message={blocker()!.message} />
+      </div>
+    </Show>
+  )
+  let scrollRef: HTMLDivElement | undefined
+
   return (
     <div style={{ display: 'flex', 'flex-direction': 'column', flex: '1 1 auto', 'min-height': '0' }}>
-      <div
-        style={{
-          display: 'flex',
-          'align-items': 'center',
-          'justify-content': 'space-between',
-          padding: 'var(--space-md) var(--space-screen-h)',
-          'border-bottom': 'var(--border-width) solid var(--grid-line)',
+      <FormToolbar
+        title="Add Vehicle"
+        canSave={blocker() == null}
+        onCancel={props.onClose}
+        onSave={props.onClose}
+        onBlocked={() => {
+          setShowBlocker(true)
+          revealBlocker(scrollRef, blocker()!.key)
         }}
-      >
-        {/* 20pt, matching the service form. A sheet title at body size has no
-            title tier. */}
-        <Heading rank="primary" uppercase tracking={1}>
-          Add vehicle
-        </Heading>
-        <button onClick={props.onClose} style={{ 'min-height': 'var(--touch-target)' }}>
-          <Label color="accent" tracking={1}>
-            [Cancel]
-          </Label>
-        </button>
-      </div>
+      />
 
       <div
+        ref={scrollRef}
         style={{
           flex: '1 1 auto',
           'min-height': '0',
@@ -153,6 +158,7 @@ export function AddVehicle(props: { onClose?: () => void }) {
 
         {/* ---------- 2. THE ONE THING THE APP CANNOT INFER ---------- */}
         <FormSection title="Current odometer" trailing="Required">
+          {blockerAt('odometer')}
           <Field
             value={odometer()}
             onInput={setOdometer}
@@ -170,6 +176,7 @@ export function AddVehicle(props: { onClose?: () => void }) {
 
         {/* ---------- 3. WHAT THE VIN WOULD HAVE FILLED ---------- */}
         <FormSection title="Vehicle" trailing="Required">
+          {blockerAt('vehicle')}
           {/* Two columns at normal type, stacked at large type.
               The flex bases are multiplied by --type-scale so the wrap point
               tracks Dynamic Type: at 375pt and 1.5x these no longer fit side by
@@ -235,13 +242,6 @@ export function AddVehicle(props: { onClose?: () => void }) {
           />
         </FormSection>
       </div>
-
-      <FormActionBar
-        label="Add vehicle"
-        enabled={blockingReason() == null}
-        disabledReason={blockingReason()}
-        onSave={props.onClose}
-      />
     </div>
   )
 }

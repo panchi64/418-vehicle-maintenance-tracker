@@ -5,7 +5,7 @@
 import type { JSX } from 'solid-js'
 import { createSignal, For, Show } from 'solid-js'
 import { Dynamic } from 'solid-js/web'
-import { Body, Emphasis, Label, LabelBold, Secondary } from './Text'
+import { Body, Emphasis, Label, Secondary } from './Text'
 import { Backdrop, OptionList, type Option } from './OptionList'
 
 // --- Segmented control (InstrumentSegmentedControl) -----------------------
@@ -73,7 +73,10 @@ interface ChipProps {
    * `decision` (default) — the choice a surface exists to capture. Outlined, and
    *   set in **15 Medium sentence case**: `brutalistBodyEmphasis`, which the type
    *   scale defines as "the one primary datum". A timing chip IS that datum.
-   * `plain` — a shortcut. No enclosure, 11 Medium caps, selection by weight.
+   * `plain` — a shortcut. No enclosure, 13 sentence case, selection by weight.
+   *   Was 11 Medium tracked caps; suggestions like shop names wrapped into
+   *   rows of shouted metadata ("TOYOTA DE PUERTO RICO"). An offer is
+   *   sentence case, for the same reason "Pick a date…" is.
    *
    * Two faults are being corrected here.
    *
@@ -99,7 +102,7 @@ export function Chip(props: ChipProps) {
      the input and the suggestions beneath it read as the same kind of control,
      and since tapping a chip copies its text into the field, the same words
      appeared twice in the same treatment. */
-  const Type = () => (plain() ? (props.selected ? LabelBold : Label) : Emphasis)
+  const Type = () => (plain() ? Secondary : Emphasis)
 
   return (
     <button
@@ -109,6 +112,7 @@ export function Chip(props: ChipProps) {
         display: 'inline-flex',
         'align-items': 'center',
         gap: 'var(--space-xs)',
+        'max-width': '100%',
         'min-height': 'var(--touch-target)',
         padding: plain() ? '0 var(--space-xs)' : '0 var(--space-md)',
         border: plain()
@@ -130,7 +134,11 @@ export function Chip(props: ChipProps) {
             : props.selected
               ? 'var(--background-primary)'
               : 'var(--text-primary)',
-          'white-space': 'nowrap',
+          // Wraps rather than overflowing at large type ("In 6 mo / 5,000 mi" was
+          // 360pt in a 315pt column at 2x).
+          'white-space': 'normal',
+          'text-align': 'left',
+          'font-weight': plain() && props.selected ? '600' : undefined,
         }}
       >
         {props.label}
@@ -176,7 +184,12 @@ interface FieldProps {
   placeholder?: string
   requirement?: Requirement
   suffix?: string
+  /** Leading unit, e.g. the currency symbol — "$" reads before the amount. */
+  prefix?: string
   numeric?: boolean
+  /** F6: the saved value, shown only while the current value differs. */
+  original?: string
+  onFocus?: () => void
   /** Advisory or helper content rendered adjacent to the control that resolves it. */
   below?: JSX.Element
   autofocus?: boolean
@@ -227,8 +240,12 @@ export function Field(props: FieldProps) {
           'border-bottom': 'var(--border-width) solid var(--border-subtle)',
         }}
       >
+        <Show when={props.prefix}>
+          <Body color="secondary">{props.prefix}</Body>
+        </Show>
         <input
           value={props.value}
+          onFocus={props.onFocus}
           placeholder={props.placeholder}
           inputMode={props.numeric ? 'numeric' : undefined}
           autofocus={props.autofocus}
@@ -253,6 +270,10 @@ export function Field(props: FieldProps) {
         </Secondary>
       </Show>
 
+      <Show when={props.original != null && props.original !== props.value}>
+        <Secondary color="tertiary">Was {props.original || 'empty'}</Secondary>
+      </Show>
+
       {props.below}
     </div>
   )
@@ -269,9 +290,9 @@ export function Field(props: FieldProps) {
  * answer, looked exactly the same. Shaped like `Field` (label, value, rule) so a
  * form reads as one column of lines rather than a mix of lines and boxes.
  *
- * Unlike `FilterControl`, the trigger shows the VALUE: this sets a value rather
- * than narrowing a list, and it is not sharing a row with another control, so a
- * value-dependent width is safe here.
+ * The trigger shows the VALUE: this sets a value rather than narrowing a list,
+ * and it does not share a row with another control, so a value-dependent width
+ * is safe here.
  */
 export function InlinePicker<T extends string>(props: {
   label: string

@@ -275,10 +275,9 @@
 
 /* --- Header title shrink-to-fit ---------------------------------------- */
 /*
- * Emulates SwiftUI's `.minimumScaleFactor(0.7)` on the vehicle name, which the
- * real VehicleHeader already has. Without it the name clipped to "DAILY…" at
- * 375pt, which is a constraint the app does not actually have — designing
- * against it would have produced a fix for a problem that isn't there.
+ * Emulates shrink-to-fit on the vehicle name in the large-title stand-in
+ * (NavBar). iOS large titles scale down before truncating; without this the
+ * name clipped to "DAILY…" at 375pt, a constraint the app does not have.
  *
  * A container query is the closest CSS equivalent: it responds to the space the
  * name actually has, not to the viewport.

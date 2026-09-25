@@ -145,3 +145,29 @@ select:focus-visible {
 input::placeholder {
   color: var(--text-tertiary);
 }
+
+/* --- Section headers: the one harness-switchable typographic decision ----
+   Two candidates for the header that names a readout section or form section.
+   Uppercase stays for status tags and metadata labels in BOTH modes — this
+   switches only the section tier.
+
+     caps   11 Bold caps, tracked 1.5, secondary     (current app)
+     title  15 Bold title case, no tracking, primary  (iOS 26 HIG list headers)
+
+   `title` reuses the body-emphasis size rather than adding a step to the
+   scale; weight (700 vs 500), position, and the rule are what separate it from
+   a 15 Medium primary datum. */
+:root,
+:root[data-headers='caps'] {
+  --section-font: 700 calc(11px * var(--type-scale)) / 1.2 var(--font-family);
+  --section-transform: uppercase;
+  --section-tracking: 1.5px;
+  --section-color: var(--text-secondary);
+}
+
+:root[data-headers='title'] {
+  --section-font: 700 calc(15px * var(--type-scale)) / 1.25 var(--font-family);
+  --section-transform: none;
+  --section-tracking: 0;
+  --section-color: var(--text-primary);
+}

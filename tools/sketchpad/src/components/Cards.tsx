@@ -1,213 +1,118 @@
 /*
- * The hero cards. These are the parts of Checkpoint that already work — they
- * commit to a single dominant datum — so the sketchpad reproduces them faithfully
- * rather than reinterpreting them. They are the reference for what "one primary"
- * looks like when done right; the rest of the app is being brought up to them.
- */
-import { For, Show } from 'solid-js'
-import { Body, Emphasis, Heading, Hero, Label, Secondary, Title } from '../ui/Text'
-import { ReadoutSection } from '../ui/ReadoutSection'
-import {
-  daysUntil,
-  fmtCurrencyWhole,
-  fmtMileage,
-  fmtMileageBare,
-  type Service,
-  type ServiceStatus,
-  type Vehicle,
-} from '../data/fixtures'
-
-const STATUS_COLOR: Record<ServiceStatus, string> = {
-  overdue: 'var(--status-overdue)',
-  dueSoon: 'var(--status-due-soon)',
-  good: 'var(--status-good)',
-  neutral: 'var(--status-neutral)',
-}
-
-const STATUS_LABEL: Record<ServiceStatus, string> = {
-  overdue: 'Overdue',
-  dueSoon: 'Due soon',
-  good: 'On track',
-  neutral: 'No schedule',
-}
-
-/**
- * Extracted from two byte-identical blocks in NextUpCard.swift.
+ * The hero card and the specs panel.
  *
- * The status square is baseline-aligned to the label rather than centered — as
- * centered geometry it read as misaligned against the text beside it.
+ * NEXT UP NOW ENDS IN AN ACTION. The card used to be a readout you tapped
+ * through to a detail screen, then found Mark Done on, then confirmed in a
+ * sheet — four taps to close the loop on the one thing the whole Home tab
+ * exists to surface. It now carries a primary MARK DONE button, which opens
+ * the unified service form pre-filled for completion, so the loop is two taps
+ * (Mark Done → Save).
+ *
+ *   ┌───────────────────────────────────────────┐
+ *   │ ■ OVERDUE                        NEXT UP  │  status: word + shape
+ *   │ Oil & Filter Change                       │  20 Medium
+ *   │ 917 mi  over                              │  56 Light hero (the primary)
+ *   │ Due 32,500 mi or Jul 4                    │  13 support — ONE line;
+ *   │                                           │  the interval is detail
+ *   │ [ Mark Done ]                             │  48pt, filled accent
+ *   └───────────────────────────────────────────┘
+ *
+ * THE HERO SHOWS WHICHEVER TRIGGER IS CLOSER. Oil is due by miles OR by date,
+ * whichever first; the card used to always print days, so an oil change 917 mi
+ * past due read "21 days" — true, and the less urgent of the two facts. Miles
+ * are converted to days at the vehicle's pace to decide which leads
+ * (`remaining()` in data/scenario.ts), and that figure becomes the hero.
+ *
+ * THE MARBETE TAKES THE HERO WHEN IT IS THE MOST URGENT ITEM. It has no
+ * odometer relationship, so its hero is always days, and the unit is days
+ * even at 1 ("1 day") — the number is the thing to be unmissable. Its action
+ * reads "Mark Renewed": the sticker is renewed, not serviced. Same component;
+ * the differences are props, not a fork.
+ *
+ * The card is no longer itself a <button>. A button inside a button is
+ * invalid and, on device, makes the inner target ambiguous. The card body
+ * still pushes the detail view; Mark Done is a separate target.
  */
-export function UpcomingItemHeader(props: { status: ServiceStatus; pulse?: boolean }) {
-  return (
-    <div style={{ display: 'flex', 'align-items': 'baseline', gap: 'var(--space-sm)' }}>
-      <div
-        aria-hidden="true"
-        class={props.pulse ? 'pulse' : undefined}
-        style={{
-          width: '8px',
-          height: '8px',
-          flex: '0 0 auto',
-          background: STATUS_COLOR[props.status],
-          'box-shadow': `0 0 12px ${STATUS_COLOR[props.status]}`,
-          // Sits on the text baseline instead of the line box's centre.
-          transform: 'translateY(-1px)',
-        }}
-      />
-      <Label style={{ color: STATUS_COLOR[props.status] }} tracking={1.5}>
-        {STATUS_LABEL[props.status]}
-      </Label>
-    </div>
-  )
-}
+import { For } from 'solid-js'
+import { Body, Emphasis, Heading, Hero, Label, Secondary } from '../ui/Text'
+import { dueLine, STATUS_COLOR, StatusTag } from './status'
+import { fmtMileageBare, type Service, type Vehicle } from '../data/fixtures'
+import { isMarbete, remaining } from '../data/scenario'
 
-/** The 56pt number that makes this card work. */
-function DuePeriodHero(props: { value: string; unit: string; label?: string }) {
-  return (
-    <div style={{ display: 'flex', 'flex-direction': 'column' }}>
-      <div style={{ display: 'flex', 'align-items': 'baseline', gap: 'var(--space-sm)' }}>
-        <Hero rank="primary">{props.value}</Hero>
-        <Title color="secondary" style={{ font: 'var(--font-heading)' }}>
-          {props.unit}
-        </Title>
-      </div>
-      {/* Optional: the marbete card omits it because its footer already says
-          EXPIRES, and printing it twice was the bug. */}
-      <Show when={props.label}>
-        <Label>{props.label}</Label>
-      </Show>
-    </div>
-  )
-}
-
-export function NextUpCard(props: { service: Service; vehicle: Vehicle; onClick?: () => void }) {
+export function NextUpCard(props: {
+  service: Service
+  vehicle: Vehicle
+  onOpen?: () => void
+  onMarkDone?: () => void
+}) {
   const s = () => props.service
-  const days = () => daysUntil(s().dueDate ?? new Date())
+  const marbete = () => isMarbete(s())
+  const r = () => remaining(s(), props.vehicle)
+  const leadMiles = () => !marbete() && r().lead === 'miles' && r().miles != null
 
-  const heroValue = () => String(Math.abs(days()))
-  const heroUnit = () => (Math.abs(days()) === 1 ? 'day' : 'days')
-  const heroLabel = () => (days() < 0 ? 'Overdue' : 'Until due')
+  const heroValue = () =>
+    leadMiles() ? fmtMileageBare(Math.abs(r().miles!)) : String(Math.abs(r().days ?? 0))
+  const heroUnit = () =>
+    leadMiles() ? 'mi' : Math.abs(r().days ?? 0) === 1 ? 'day' : 'days'
+  const past = () => (leadMiles() ? r().miles! < 0 : (r().days ?? 0) < 0)
+  const heroQualifier = () => (past() ? 'over' : marbete() ? 'to expiry' : 'left')
 
-  const milesRemaining = () =>
-    s().dueMileage != null ? s().dueMileage! - props.vehicle.currentMileage : undefined
+  const color = () => STATUS_COLOR[s().status]
 
   return (
-    <button
+    <div
       data-section="Next up"
-      onClick={props.onClick}
       style={{
         display: 'flex',
         'flex-direction': 'column',
-        gap: 'var(--space-md)',
+        gap: 'var(--space-sm)',
         width: '100%',
         padding: 'var(--card-padding)',
-        border: `var(--border-width) solid ${STATUS_COLOR[s().status]}`,
-        background: `color-mix(in srgb, ${STATUS_COLOR[s().status]} 10%, var(--surface-instrument))`,
+        border: `var(--border-width) solid ${color()}`,
+        background: `color-mix(in srgb, ${color()} 8%, var(--surface-instrument))`,
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          'align-items': 'baseline',
-          'justify-content': 'space-between',
-          width: '100%',
-        }}
+      <button
+        onClick={props.onOpen}
+        style={{ display: 'flex', 'flex-direction': 'column', gap: 'var(--space-sm)', width: '100%' }}
       >
-        <UpcomingItemHeader status={s().status} pulse={s().status !== 'good'} />
-        <Label>Next up</Label>
-      </div>
+        <div style={{ display: 'flex', 'align-items': 'center', 'justify-content': 'space-between', width: '100%' }}>
+          <StatusTag status={s().status} />
+          <Label>Next up</Label>
+        </div>
 
-      <Heading as="div" lines={2} style={{ 'text-align': 'left', width: '100%' }}>
-        {s().name}
-      </Heading>
+        <Heading as="div" lines={2} style={{ 'text-align': 'left', width: '100%' }}>
+          {s().name}
+        </Heading>
 
-      <DuePeriodHero value={heroValue()} unit={heroUnit()} label={heroLabel()} />
+        <div style={{ display: 'flex', 'align-items': 'baseline', gap: 'var(--space-sm)', 'flex-wrap': 'wrap' }}>
+          <Hero rank="primary">{heroValue()}</Hero>
+          <Heading color="secondary">{heroUnit()}</Heading>
+          <Body color="secondary">{heroQualifier()}</Body>
+        </div>
 
-      <div
-        style={{
-          display: 'flex',
-          gap: 'var(--space-md)',
-          width: '100%',
-          'padding-top': 'var(--space-sm)',
-          'border-top': '1px solid var(--grid-line)',
-        }}
-      >
-        <Show when={milesRemaining() != null}>
-          <Secondary color="tertiary">
-            {milesRemaining()! < 0
-              ? `${fmtMileageBare(Math.abs(milesRemaining()!))} mi past`
-              : `${fmtMileageBare(milesRemaining()!)} mi to go`}
-          </Secondary>
-        </Show>
-        <Show when={s().intervalMonths || s().intervalMiles}>
-          <Secondary color="tertiary" style={{ 'margin-left': 'auto' }}>
-            Every{' '}
-            {[
-              s().intervalMonths ? `${s().intervalMonths} mo` : null,
-              s().intervalMiles ? `${fmtMileageBare(s().intervalMiles!)} mi` : null,
-            ]
-              .filter(Boolean)
-              .join(' / ')}
-          </Secondary>
-        </Show>
-      </div>
-    </button>
-  )
-}
-
-// --- Cost hero ------------------------------------------------------------
-
-export function CostHeadlineCard(props: { total: number; periodLabel: string; delta?: number }) {
-  return (
-    <div
-      data-section="Cost headline"
-      style={{
-        display: 'flex',
-        'flex-direction': 'column',
-        padding: 'var(--card-padding)',
-        border: 'var(--border-width) solid var(--border-subtle)',
-        background: 'var(--surface-instrument)',
-      }}
-    >
-      <Label>{props.periodLabel}</Label>
-      <Hero rank="primary">{fmtCurrencyWhole(props.total)}</Hero>
-      <Show when={props.delta != null}>
-        <Secondary style={{ color: props.delta! > 0 ? 'var(--status-overdue)' : 'var(--status-good)' }}>
-          {props.delta! > 0 ? '▲' : '▼'} {Math.abs(props.delta!)}% vs prior period
+        <Secondary color="tertiary" as="div" style={{ 'text-align': 'left', width: '100%' }}>
+          {marbete() ? dueLine(s()).replace('Due', 'Expires') : dueLine(s())}
         </Secondary>
-      </Show>
-    </div>
-  )
-}
+      </button>
 
-/** StatsCard — a grid of small readouts, each with its own single value. */
-export function StatsGrid(props: { stats: { label: string; value: string }[] }) {
-  return (
-    <div
-      style={{
-        display: 'grid',
-        'grid-template-columns': 'repeat(2, 1fr)',
-        gap: '1px',
-        background: 'var(--grid-line)',
-        border: 'var(--border-width) solid var(--border-subtle)',
-      }}
-    >
-      <For each={props.stats}>
-        {(stat) => (
-          <div
-            data-section={`Stat: ${stat.label}`}
-            style={{
-              display: 'flex',
-              'flex-direction': 'column',
-              gap: '2px',
-              padding: 'var(--space-md)',
-              background: 'var(--surface-instrument)',
-            }}
-          >
-            <Label>{stat.label}</Label>
-            <Heading rank="primary">{stat.value}</Heading>
-          </div>
-        )}
-      </For>
+      <button
+        onClick={props.onMarkDone}
+        data-action="mark-done"
+        style={{
+          'margin-top': 'var(--space-xs)',
+          'min-height': 'var(--button-height)',
+          display: 'flex',
+          'align-items': 'center',
+          'justify-content': 'center',
+          background: 'var(--accent)',
+          border: 'var(--border-width) solid var(--accent)',
+        }}
+      >
+        <Emphasis style={{ color: 'var(--background-primary)' }}>
+          {marbete() ? 'Mark Renewed' : 'Mark Done'}
+        </Emphasis>
+      </button>
     </div>
   )
 }
@@ -221,7 +126,7 @@ const MONTHS = [
 
 /**
  * QuickSpecsCard, as a panel rather than a card. It lost its own header and
- * border when the trigger moved into VehicleHeader: it now hangs off the header
+ * border when the trigger moved into the header band: it now hangs off the band
  * and the header owns the disclosure, so a second frame around it was one
  * enclosure too many.
  *
@@ -286,46 +191,3 @@ export function QuickSpecsPanel(props: { vehicle: Vehicle; onEdit?: () => void }
   )
 }
 
-// --- Mileage-driven readout (Phase 3 target for the removed YTD subline) ---
-
-export function MileageReadout(props: { vehicle: Vehicle }) {
-  const v = () => props.vehicle
-  const delta = () => {
-    const prior = v().milesDrivenSamePeriodLastYear
-    if (!prior) return undefined
-    return Math.round(((v().milesDrivenYearToDate - prior) / prior) * 100)
-  }
-
-  return (
-    <ReadoutSection
-      title="Miles this year"
-      // No `rank` prop on the Title below: ReadoutSection's primary slot already
-      // declares the primary, and declaring it twice is how a section ends up
-      // claiming two.
-      primary={
-        <div style={{ display: 'flex', 'align-items': 'baseline', gap: 'var(--space-sm)' }}>
-          <Title>{fmtMileageBare(v().milesDrivenYearToDate)}</Title>
-          <Body color="tertiary">mi</Body>
-        </div>
-      }
-      supporting={
-        <Show when={delta() != null}>
-          <Secondary color="tertiary">
-            {delta()! > 0 ? '▲' : '▼'} {Math.abs(delta()!)}% vs the same period last year (
-            {fmtMileageBare(v().milesDrivenSamePeriodLastYear)} mi)
-          </Secondary>
-        </Show>
-      }
-    />
-  )
-}
-
-export function OdometerReadout(props: { vehicle: Vehicle; onUpdate?: () => void }) {
-  return (
-    <ReadoutSection
-      title="Odometer"
-      action={{ label: 'Update', onClick: props.onUpdate }}
-      primary={<Emphasis>{fmtMileage(props.vehicle.currentMileage)}</Emphasis>}
-    />
-  )
-}

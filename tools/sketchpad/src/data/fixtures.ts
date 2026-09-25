@@ -205,10 +205,10 @@ export const serviceLogs: ServiceLog[] = [
   },
   {
     id: 'l3',
-    name: 'Marbete Renewal',
+    name: 'AutoExpreso Toll Reload',
     performedAt: ago(31),
     cost: 40.0,
-    category: 'registration',
+    category: 'other',
   },
   {
     id: 'l4',
@@ -234,18 +234,17 @@ export const serviceLogs: ServiceLog[] = [
     cost: 32.99,
     category: 'maintenance',
   },
-]
-
-/** Quick-pick service types, mirroring QuickServiceChipsRow. */
-export const quickServiceTypes = [
-  'Oil Change',
-  'Tire Rotation',
-  'Brake Service',
-  'Air Filter',
-  'Battery',
-  'Alignment',
-  'Transmission Fluid',
-  'Coolant Flush',
+  // Older history, so Costs has a real trend, a YTD-vs-last-year comparison,
+  // and more than one month group — and so Services' history spans months.
+  { id: 'l7', name: 'Battery Replacement', performedAt: new Date('2026-02-03T10:00:00'), mileage: 24_880, cost: 189.0, category: 'repair', vendor: 'AutoZone' },
+  { id: 'l8', name: 'Oil & Filter Change', performedAt: new Date('2026-01-14T10:00:00'), mileage: 24_410, cost: 72.1, category: 'maintenance', vendor: 'Toyota de Puerto Rico' },
+  { id: 'l9', name: 'Oil & Filter Change', performedAt: new Date('2025-12-12T10:00:00'), mileage: 22_500, cost: 72.0, category: 'maintenance', vendor: 'Toyota de Puerto Rico' },
+  { id: 'l10', name: 'Marbete Renewal', performedAt: new Date('2025-11-03T10:00:00'), cost: 118.0, category: 'registration' },
+  { id: 'l11', name: 'Wheel Alignment', performedAt: new Date('2025-09-15T10:00:00'), mileage: 20_120, cost: 95.0, category: 'maintenance', vendor: 'Costco Tire Center' },
+  { id: 'l12', name: 'Oil & Filter Change', performedAt: new Date('2025-07-21T10:00:00'), mileage: 17_500, cost: 74.2, category: 'maintenance', vendor: 'Toyota de Puerto Rico' },
+  { id: 'l13', name: 'Four New Tires', performedAt: new Date('2025-05-12T10:00:00'), mileage: 15_900, cost: 684.0, category: 'repair', vendor: 'Costco Tire Center' },
+  { id: 'l14', name: 'Annual Policy Renewal', performedAt: new Date('2025-03-28T10:00:00'), cost: 1_190.0, category: 'insurance' },
+  { id: 'l15', name: 'Oil & Filter Change', performedAt: new Date('2025-01-20T10:00:00'), mileage: 12_500, cost: 69.5, category: 'maintenance', vendor: 'Toyota de Puerto Rico' },
 ]
 
 // --- Formatting -----------------------------------------------------------
@@ -284,3 +283,10 @@ export function daysUntil(d: Date, from: Date = now): number {
 }
 
 export const today = now
+export { ago, ahead }
+
+/** Driving pace used for estimates and for comparing mile- vs date-urgency. */
+export const MILES_PER_DAY = 31
+
+export const fmtMonthYear = (d: Date) =>
+  d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })

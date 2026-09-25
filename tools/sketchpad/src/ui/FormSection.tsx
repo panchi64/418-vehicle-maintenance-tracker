@@ -13,7 +13,9 @@
  *
  * The three levels now differ on at least two channels each:
  *
- *   section   11 Bold caps, secondary, + a full-width rule    FormSection
+ *   section   SectionTitle + a full-width rule                FormSection
+ *             (15 Bold title case — or 11 Bold caps under the
+ *             harness's UPPERCASE switch; see base.css)
  *   field     11 Medium caps, tertiary, no rule               Field / InlinePicker
  *   subgroup  13 Regular sentence case, tertiary              plain Secondary
  *
@@ -32,7 +34,7 @@
  */
 import type { JSX } from 'solid-js'
 import { Show } from 'solid-js'
-import { Label, LabelBold } from './Text'
+import { Label, SectionTitle } from './Text'
 
 /*
  * SPACING. Three distinct steps, not two similar ones:
@@ -69,9 +71,7 @@ export function FormSection(props: {
           'margin-bottom': 'var(--space-sm)',
         }}
       >
-        <LabelBold color="secondary" tracking={1.5}>
-          {props.title}
-        </LabelBold>
+        <SectionTitle>{props.title}</SectionTitle>
 
         {/* 2px, not 1. The section title is 11pt Bold caps and a field label is
             11pt Medium caps — the same size, so the RULE is what actually marks a

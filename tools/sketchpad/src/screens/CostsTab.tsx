@@ -1,215 +1,341 @@
 /*
- * Costs.
+ * Costs — Readout. "How much is this car costing me, and is that changing?"
  *
- * The problem being solved: two stacked segmented controls (4 periods × 4
- * categories = 16 states) above nine independently-gated cards.
+ * FIXED ORDER:
  *
- * The fix modelled here: period is the segmented control because it changes the
- * scope of every number on the screen; category is a FilterControl, which scales
- * to six categories where neither a segmented control nor a scrolling chip row
- * does — the chip row hid three of the six off the right edge. Then a FIXED card
- * order. "Not enough data yet" is one quiet line, never a full card whose only
- * content is absence.
+ *   [ 30D | YTD | 12M | All ]     the one control; scopes every number below
+ *   Year to Date                  hero: the period total (56 Light)
+ *     $330 per month on average   the secondary figure (20, secondary)
+ *   Per Month, USD  Trend·Category ONE chart section — Trend ↔ Category —
+ *     [chart]                     always with a written summary line, so the
+ *     Highest: March — $1,317…    chart is never the only carrier of its point
+ *   2026 vs 2025                  one comparison row, same calendar span
+ *   July 2026         $730.40     expenses, by month; rows drill in
+ *   …
+ *
+ * What was removed, and why:
+ *   - The Category FilterControl. The Category chart answers "where does it
+ *     go" at a glance; filtering a list by category was the slow way to ask.
+ *   - The four-cell StatsGrid (entries, average, cost/mile, pace). Four equal
+ *     numbers in equal boxes is the wall this doctrine exists to prevent —
+ *     each was a primary, so none was. The one that mattered (monthly
+ *     average) is now the hero's secondary.
+ *   - Top Expenses, and the separate Yearly roundup hero. Top Expenses
+ *     re-listed rows already in the month groups; the roundup was a second
+ *     hero. "2026 vs 2025" is what the roundup was for, as one row.
+ *   - 90D. Replaced by 12M, which is the period that actually smooths the
+ *     annual insurance and marbete spikes out of the average.
+ *
+ * SPARSE DATA: the hero always renders (a total of one expense is still a
+ * total). The chart and the comparison each collapse to ONE quiet line saying
+ * what will make them appear — never a card whose only content is absence.
  */
-import { createSignal, For, Show } from 'solid-js'
-import { SegmentedControl } from '../ui/Controls'
-import { ActiveFilterBar, ControlRow, FilterControl } from '../ui/FilterControl'
-import { CostHeadlineCard, StatsGrid } from '../components/Cards'
-import { ExpenseRow, ListDivider } from '../components/Rows'
+import { createMemo, createSignal, For, Show } from 'solid-js'
+import { Chip, ChipRow, SegmentedControl } from '../ui/Controls'
+import { ExpenseRow, RowList } from '../components/Rows'
+import { NavBar } from '../components/TabBar'
 import { ReadoutSection } from '../ui/ReadoutSection'
 import { InsufficientDataNote } from '../ui/FormAdvisory'
-import { Body } from '../ui/Text'
+import { Body, Emphasis, Heading, Hero, Label, SectionTitle, Secondary } from '../ui/Text'
 import { Screen } from './Screen'
+import { groupByMonth, useScenario } from '../data/scenario'
 import {
   categoryLabels,
+  fmtCurrency,
   fmtCurrencyWhole,
-  serviceLogs,
+  today,
   type CostCategory,
+  type ServiceLog,
 } from '../data/fixtures'
 
-type Period = '30d' | '90d' | 'ytd' | 'all'
-type CategoryFilter = 'all' | CostCategory
+type Period = '30d' | 'ytd' | '12m' | 'all'
+type ChartMode = 'trend' | 'category'
 
 const PERIOD_LABEL: Record<Period, string> = {
-  '30d': 'Last 30 days',
-  '90d': 'Last 90 days',
-  ytd: 'Year to date',
-  all: 'All time',
+  '30d': 'Last 30 Days',
+  ytd: 'Year to Date',
+  '12m': 'Last 12 Months',
+  all: 'All Time',
 }
 
-export function CostsTab() {
+const DAY = 24 * 60 * 60 * 1000
+
+function periodStart(p: Period): Date {
+  if (p === '30d') return new Date(today.getTime() - 30 * DAY)
+  if (p === 'ytd') return new Date(today.getFullYear(), 0, 1)
+  if (p === '12m') return new Date(today.getFullYear() - 1, today.getMonth(), today.getDate())
+  return new Date(0)
+}
+
+const sum = (logs: ServiceLog[]) => logs.reduce((t, l) => t + (l.cost ?? 0), 0)
+const monthShort = (d: Date) => d.toLocaleDateString('en-US', { month: 'short' })
+
+export function CostsTab(props: { title: string; onAdd: () => void }) {
+  const data = useScenario()
   const [period, setPeriod] = createSignal<Period>('ytd')
-  const [category, setCategory] = createSignal<CategoryFilter>('all')
+  const [chart, setChart] = createSignal<ChartMode>('trend')
 
-  const filtered = () =>
-    category() === 'all' ? serviceLogs : serviceLogs.filter((l) => l.category === category())
+  // Derived once per render pass and passed down.
+  const inPeriod = createMemo(() =>
+    data().logs.filter((l) => l.performedAt >= periodStart(period()) && l.performedAt <= today),
+  )
+  const total = () => sum(inPeriod())
 
-  const total = () => filtered().reduce((sum, l) => sum + (l.cost ?? 0), 0)
-
-  const byCategory = () => {
-    const map = new Map<CostCategory, number>()
-    for (const log of filtered()) {
-      map.set(log.category, (map.get(log.category) ?? 0) + (log.cost ?? 0))
-    }
-    return [...map.entries()].sort((a, b) => b[1] - a[1])
+  /** Months from the later of the period start and the first expense — a
+      July-only history averaged over seven YTD months read "$10 a month". */
+  const monthsSpanned = () => {
+    const logs = inPeriod()
+    if (!logs.length) return 1
+    const first = logs.reduce((m, l) => (l.performedAt < m ? l.performedAt : m), today)
+    const start = first > periodStart(period()) ? first : periodStart(period())
+    return Math.max(1, (today.getFullYear() - start.getFullYear()) * 12 + today.getMonth() - start.getMonth() + 1)
   }
 
-  /* Every category the vehicle actually has an entry for, plus All. Offering a
-     category with zero entries is offering a route to an empty screen. */
-  const categoryFilters = () => {
-    const present = new Set(serviceLogs.map((l) => l.category))
-    return [
-      { value: 'all' as CategoryFilter, label: 'All', count: serviceLogs.length },
-      ...([...present] as CostCategory[])
-        .map((c) => ({
-          value: c as CategoryFilter,
-          label: categoryLabels[c],
-          count: serviceLogs.filter((l) => l.category === c).length,
-        }))
-        .sort((a, b) => b.count - a.count),
-    ]
+  /** Last 12 months' average, the yardstick for the 30-day view. */
+  const twelveMonthAvg = () =>
+    sum(data().logs.filter((l) => l.performedAt >= periodStart('12m'))) / 12
+
+  const months = createMemo(() => groupByMonth(inPeriod()))
+
+  // Trend: one bar per calendar month in the period, oldest first, zeros kept.
+  const trend = createMemo(() => {
+    const n = period() === '30d' ? 2 : Math.min(monthsSpanned(), 24)
+    return Array.from({ length: n }, (_, i) => {
+      const d = new Date(today.getFullYear(), today.getMonth() - (n - 1 - i), 1)
+      const logs = inPeriod().filter(
+        (l) => l.performedAt.getFullYear() === d.getFullYear() && l.performedAt.getMonth() === d.getMonth(),
+      )
+      const top = [...logs].sort((a, b) => (b.cost ?? 0) - (a.cost ?? 0))[0]
+      return { date: d, total: sum(logs), top }
+    })
+  })
+
+  const byCategory = createMemo(() => {
+    const map = new Map<CostCategory, number>()
+    for (const l of inPeriod()) map.set(l.category, (map.get(l.category) ?? 0) + (l.cost ?? 0))
+    return [...map.entries()].sort((a, b) => b[1] - a[1])
+  })
+
+  const monthsWithSpend = () => trend().filter((m) => m.total > 0).length
+  const trendReady = () => period() === '30d' ? inPeriod().length >= 2 : monthsWithSpend() >= 3
+  const categoryReady = () => byCategory().length >= 2
+
+  const summary = () => {
+    if (chart() === 'trend') {
+      const peak = [...trend()].sort((a, b) => b.total - a.total)[0]
+      if (!peak) return ''
+      const quiet = trend().filter((m) => m.total < 100).length
+      return `Highest: ${peak.date.toLocaleDateString('en-US', { month: 'long' })} — ${fmtCurrencyWhole(peak.total)}${
+        peak.top ? ` (${peak.top.name})` : ''
+      }. ${quiet} of ${trend().length} months under $100.`
+    }
+    const [cat, amt] = byCategory()[0] ?? []
+    return cat ? `${categoryLabels[cat]} is ${Math.round((amt! / total()) * 100)}% of spending.` : ''
+  }
+
+  // Comparison: this year so far vs the same calendar span last year.
+  const comparison = () => {
+    const y = today.getFullYear()
+    const cut = (yr: number) => new Date(yr, today.getMonth(), today.getDate())
+    const thisYear = sum(data().logs.filter((l) => l.performedAt >= new Date(y, 0, 1) && l.performedAt <= today))
+    const lastLogs = data().logs.filter((l) => l.performedAt >= new Date(y - 1, 0, 1) && l.performedAt <= cut(y - 1))
+    if (!lastLogs.length) return undefined
+    const last = sum(lastLogs)
+    return { y, thisYear, last, pct: Math.round(((thisYear - last) / last) * 100) }
   }
 
   return (
-    <div style={{ display: 'flex', 'flex-direction': 'column', flex: '1 1 auto', 'min-height': '0' }}>
-      <ControlRow>
-        <div style={{ flex: '1 1 auto', 'min-width': '0' }}>
-          <SegmentedControl
-            options={[
-              { value: '30d', label: '30D' },
-              { value: '90d', label: '90D' },
-              { value: 'ytd', label: 'YTD' },
-              { value: 'all', label: 'All' },
-            ]}
-            value={period()}
-            onChange={setPeriod}
-          />
-        </div>
-
-        <FilterControl
-          name="Category"
-          options={categoryFilters()}
-          value={category()}
-          onChange={setCategory}
-          defaultValue="all"
-        />
-      </ControlRow>
-
-      <ActiveFilterBar
-        name="Category"
-        options={categoryFilters()}
-        value={category()}
-        defaultValue="all"
-        onClear={() => setCategory('all')}
-      />
-
+    <>
+      <NavBar title={props.title} onAdd={props.onAdd} />
       <Screen>
-        {/* 1. The hero. */}
-        <CostHeadlineCard total={total()} periodLabel={PERIOD_LABEL[period()]} delta={12} />
-
-        {/* 2. Stats, fixed position. */}
-        <StatsGrid
-          stats={[
-            { label: 'Entries', value: String(filtered().length) },
-            {
-              label: 'Average',
-              value: fmtCurrencyWhole(filtered().length ? total() / filtered().length : 0),
-            },
-            { label: 'Cost / mile', value: '$0.16' },
-            { label: 'Monthly pace', value: fmtCurrencyWhole(total() / 7) },
+        <SegmentedControl
+          options={[
+            { value: '30d', label: '30D' },
+            { value: 'ytd', label: 'YTD' },
+            { value: '12m', label: '12M' },
+            { value: 'all', label: 'All' },
           ]}
+          value={period()}
+          onChange={setPeriod}
         />
 
-        {/* 3. Spending pace. When there isn't enough data this is ONE LINE, not
-               a full-size card whose only content is "3+ expenses to show
-               spending pace". */}
+        {/* 1. Hero: the period total. */}
         <ReadoutSection
-          title="Spending pace"
-          primary={
+          title={PERIOD_LABEL[period()]}
+          primary={<Hero>{fmtCurrencyWhole(total())}</Hero>}
+          supporting={
+            <div style={{ display: 'flex', 'align-items': 'baseline', gap: 'var(--space-sm)', 'flex-wrap': 'wrap' }}>
+              <Show
+                when={period() !== '30d'}
+                fallback={
+                  <>
+                    <Heading color="secondary">{fmtCurrencyWhole(twelveMonthAvg())}</Heading>
+                    <Secondary color="tertiary">a month, on average, over 12 months</Secondary>
+                  </>
+                }
+              >
+                <Heading color="secondary">{fmtCurrencyWhole(total() / monthsSpanned())}</Heading>
+                <Secondary color="tertiary">a month, on average</Secondary>
+              </Show>
+            </div>
+          }
+        />
+
+        {/* 2. ONE chart section. Units in the title; a written summary always. */}
+        <section
+          data-section="Chart"
+          style={{ display: 'flex', 'flex-direction': 'column', gap: 'var(--space-sm)' }}
+        >
+          <div style={{ display: 'flex', 'align-items': 'center', gap: 'var(--space-sm)' }}>
+            <span style={{ flex: '1 1 auto', 'min-width': '0' }}>
+              <SectionTitle>
+                {chart() === 'trend' ? 'Per Month, USD' : 'By Category, USD'}
+              </SectionTitle>
+            </span>
+            {/* Plain chips, not a second segmented control. Two filled accent
+                slabs (period + chart) competed at the top of the screen — the
+                same fault the old FilterControl row had. The period changes
+                every number; this only changes one picture, so it is quieter. */}
+            <ChipRow wrap={false}>
+              <Chip variant="plain" label="Trend" selected={chart() === 'trend'} onClick={() => setChart('trend')} />
+              <Chip variant="plain" label="Category" selected={chart() === 'category'} onClick={() => setChart('category')} />
+            </ChipRow>
+          </div>
+
+          <div data-slot="primary">
             <Show
-              when={filtered().length >= 3}
+              when={chart() === 'trend' ? trendReady() : categoryReady()}
               fallback={
-                <InsufficientDataNote message="Two more entries and a spending pace appears here." />
+                <InsufficientDataNote
+                  message={
+                    chart() === 'trend'
+                      ? 'A trend appears once three months have expenses.'
+                      : 'A breakdown appears once expenses span two categories.'
+                  }
+                />
               }
             >
-              <PaceBars logs={filtered()} />
+              <Show when={chart() === 'trend'} fallback={<CategoryBars rows={byCategory()} total={total()} />}>
+                <TrendBars months={trend()} />
+              </Show>
+              <Secondary color="secondary" as="div" style={{ 'padding-top': 'var(--space-sm)' }}>
+                {summary()}
+              </Secondary>
+            </Show>
+          </div>
+        </section>
+
+        {/* 3. Comparison row. */}
+        <ReadoutSection
+          title={`${today.getFullYear()} vs ${today.getFullYear() - 1}`}
+          primary={
+            <Show
+              when={comparison()}
+              fallback={<InsufficientDataNote message="Appears once there's a year of history to compare." />}
+            >
+              {(c) => (
+                <div style={{ display: 'flex', 'flex-direction': 'column', gap: '2px' }}>
+                  <div style={{ display: 'flex', 'align-items': 'baseline', gap: 'var(--space-sm)', 'flex-wrap': 'wrap' }}>
+                    <Emphasis>
+                      {c().pct >= 0 ? '▲' : '▼'} {Math.abs(c().pct)}% {c().pct >= 0 ? 'more' : 'less'}
+                    </Emphasis>
+                    <Secondary color="tertiary">than the same stretch last year</Secondary>
+                  </div>
+                  <Secondary color="tertiary" as="div">
+                    {fmtCurrencyWhole(c().thisYear)} Jan–{monthShort(today)} {c().y} // {fmtCurrencyWhole(c().last)} in {c().y - 1}
+                  </Secondary>
+                </div>
+              )}
             </Show>
           }
         />
 
-        {/* 4. Breakdown, fixed position. */}
-        <ReadoutSection
-          title="By category"
-          primary={
-            <div style={{ display: 'flex', 'flex-direction': 'column', gap: 'var(--space-sm)' }}>
-              <For each={byCategory()}>
-                {([cat, amount]) => (
-                  <div style={{ display: 'flex', 'flex-direction': 'column', gap: '2px' }}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        'justify-content': 'space-between',
-                        'align-items': 'baseline',
-                      }}
-                    >
-                      <Body>{categoryLabels[cat]}</Body>
-                      <Body>{fmtCurrencyWhole(amount)}</Body>
-                    </div>
-                    <div style={{ height: '2px', background: 'var(--grid-line)' }}>
-                      <div
-                        style={{
-                          height: '100%',
-                          width: `${total() ? (amount / total()) * 100 : 0}%`,
-                          background: 'var(--accent)',
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-              </For>
-            </div>
+        {/* 4. Expenses by month. */}
+        <Show
+          when={months().length}
+          fallback={
+            <ReadoutSection
+              title="Expenses"
+              primary={<InsufficientDataNote message="Nothing spent in this period." />}
+            />
           }
-        />
-
-        {/* 5. Top expenses, fixed position. */}
-        <ReadoutSection
-          title="Largest expenses"
-          primary={
-            <div style={{ display: 'flex', 'flex-direction': 'column' }}>
-              <For each={[...filtered()].sort((a, b) => (b.cost ?? 0) - (a.cost ?? 0)).slice(0, 3)}>
-                {(log, i) => (
-                  <>
-                    <Show when={i() > 0}>
-                      <ListDivider />
-                    </Show>
-                    <ExpenseRow log={log} />
-                  </>
-                )}
-              </For>
-            </div>
-          }
-        />
+        >
+          <For each={months()}>
+            {(m) => (
+              <ReadoutSection
+                title={m.label}
+                trailing={fmtCurrency(m.total)}
+                primary={
+                  <RowList each={m.logs}>
+                    {(log) => <ExpenseRow log={log} dateStyle="day" />}
+                  </RowList>
+                }
+              />
+            )}
+          </For>
+        </Show>
       </Screen>
+    </>
+  )
+}
+
+function TrendBars(props: { months: { date: Date; total: number }[] }) {
+  const max = () => Math.max(...props.months.map((m) => m.total), 1)
+  const peak = () => props.months.reduce((p, m) => (m.total > p.total ? m : p), props.months[0])
+  const labelEvery = () => (props.months.length > 12 ? 3 : props.months.length > 7 ? 2 : 1)
+  return (
+    <div
+      role="img"
+      aria-label="Monthly spending bar chart"
+      style={{ display: 'flex', 'align-items': 'flex-end', gap: '3px', height: '112px' }}
+    >
+      <For each={props.months}>
+        {(m, i) => (
+          <div style={{ flex: '1 1 0', display: 'flex', 'flex-direction': 'column', 'align-items': 'center', gap: '4px', height: '100%', 'justify-content': 'flex-end', 'min-width': '0' }}>
+            <div
+              style={{
+                width: '100%',
+                height: `${(m.total / max()) * 88}px`,
+                'min-height': m.total > 0 ? '2px' : '1px',
+                background: m === peak() ? 'var(--accent)' : 'var(--accent-muted)',
+              }}
+            />
+            <Label tracking={0} style={{ visibility: i() % labelEvery() === (props.months.length - 1) % labelEvery() ? 'visible' : 'hidden' }}>
+              {m.date.toLocaleDateString('en-US', { month: 'narrow' })}
+            </Label>
+          </div>
+        )}
+      </For>
     </div>
   )
 }
 
-/** A minimal bar chart, enough to judge how the section reads at this size. */
-function PaceBars(props: { logs: { cost?: number; name: string }[] }) {
-  const max = () => Math.max(...props.logs.map((l) => l.cost ?? 0), 1)
+function CategoryBars(props: { rows: [CostCategory, number][]; total: number }) {
   return (
-    <div style={{ display: 'flex', 'align-items': 'flex-end', gap: 'var(--space-xs)', height: '72px' }}>
-      <For each={props.logs.slice(0, 8)}>
-        {(log) => (
-          <div
-            title={log.name}
-            style={{
-              flex: '1 1 0',
-              height: `${((log.cost ?? 0) / max()) * 100}%`,
-              'min-height': '2px',
-              background: 'var(--accent-muted)',
-            }}
-          />
+    <div
+      role="img"
+      aria-label="Spending by category"
+      style={{ display: 'flex', 'flex-direction': 'column', gap: 'var(--space-sm)' }}
+    >
+      <For each={props.rows}>
+        {([cat, amount], i) => (
+          <div style={{ display: 'flex', 'flex-direction': 'column', gap: '4px' }}>
+            <div style={{ display: 'flex', 'justify-content': 'space-between', 'align-items': 'baseline', gap: 'var(--space-sm)' }}>
+              <Body>{categoryLabels[cat]}</Body>
+              <Secondary color="secondary">
+                {fmtCurrencyWhole(amount)}  ·  {Math.round((amount / props.total) * 100)}%
+              </Secondary>
+            </div>
+            <div style={{ height: '6px', background: 'var(--grid-line)' }}>
+              <div
+                style={{
+                  height: '100%',
+                  width: `${(amount / props.total) * 100}%`,
+                  background: i() === 0 ? 'var(--accent)' : 'var(--accent-muted)',
+                }}
+              />
+            </div>
+          </div>
         )}
       </For>
     </div>

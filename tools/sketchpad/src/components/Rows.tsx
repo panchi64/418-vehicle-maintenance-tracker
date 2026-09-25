@@ -1,116 +1,204 @@
 /*
  * ServiceRow and ServiceEventRow — the two list shells that repeat everywhere.
  *
- * Mirrors Views/Components/Lists/ServiceRow.swift and ServiceEventRow.swift
- * after Phase 2. Between them they replaced six drifted implementations, so a
- * change here is the highest-leverage change available to a readout screen.
+ * Mirrors Views/Components/Lists/ServiceRow.swift and ServiceEventRow.swift.
+ * Between them they replaced six drifted implementations, so a change here is
+ * the highest-leverage change available to a readout screen.
+ *
+ * DENSITY. ServiceRow was three lines — an 11pt urgency eyebrow, a 20pt name,
+ * a support line — about 84pt a row, so Services showed four items above the
+ * fold and Home's Upcoming alone ate a third of the screen. It is two lines
+ * now (~62pt):
+ *
+ *   Oil & Filter Change                     917 mi over
+ *   ■ OVERDUE  Due 32,500 mi or Jul 4
+ *
+ * The name is the row's primary (15 Medium, primary color); the status tag is
+ * word + shape + color on the second line; the remaining figure trails the
+ * name, where a scanning eye lands after reading it. The 20pt name is gone
+ * because a list of 20pt names is a list of headings — nothing in it is
+ * subordinate to anything.
+ *
+ * ROW ACTIONS. Rows take `actions` (the swipe / context-menu set) and render
+ * them as a trailing strip when `revealActions` is on — a stand-in for the
+ * swipe, so the port knows which actions each row carries and in what order.
+ * Leading-to-trailing order = trailing swipe order; the LAST one is the full
+ * swipe. Destructive last.
  */
-import { Show } from 'solid-js'
-import { Body, Emphasis, Heading, Label, Secondary } from '../ui/Text'
+import type { JSX } from 'solid-js'
+import { For, Show } from 'solid-js'
+import { Body, Emphasis, Label, Secondary } from '../ui/Text'
+import { dueLine, remainingText, StatusMark, StatusTag, STATUS_COLOR } from './status'
 import {
-  daysUntil,
   fmtCurrency,
   fmtMileageBare,
   timeSince,
   type Service,
   type ServiceLog,
-  type ServiceStatus,
+  type Vehicle,
 } from '../data/fixtures'
 
-const STATUS_COLOR: Record<ServiceStatus, string> = {
-  overdue: 'var(--status-overdue)',
-  dueSoon: 'var(--status-due-soon)',
-  good: 'var(--status-good)',
-  neutral: 'var(--status-neutral)',
+// --- Shared shell: selection + revealed actions ---------------------------
+
+export interface RowChrome {
+  /** Swipe / context-menu actions, in trailing-swipe order. */
+  actions?: string[]
+  revealActions?: boolean
+  /** Edit mode: a leading selection square replaces the chevron. */
+  selecting?: boolean
+  selected?: boolean
+  onToggleSelect?: () => void
+  onClick?: () => void
+}
+
+function RowShell(props: RowChrome & { section: string; children: JSX.Element }) {
+  return (
+    <div style={{ display: 'flex', 'align-items': 'stretch', width: '100%', overflow: 'hidden' }}>
+      <button
+        data-section={props.section}
+        onClick={() => (props.selecting ? props.onToggleSelect?.() : props.onClick?.())}
+        aria-pressed={props.selecting ? !!props.selected : undefined}
+        style={{
+          display: 'flex',
+          'align-items': 'center',
+          gap: 'var(--space-md)',
+          flex: '1 1 auto',
+          'min-width': '0',
+          padding: 'var(--space-list-item) 0',
+        }}
+      >
+        <Show when={props.selecting}>
+          <div
+            aria-hidden="true"
+            style={{
+              flex: '0 0 auto',
+              width: '22px',
+              height: '22px',
+              border: `var(--border-width) solid ${props.selected ? 'var(--accent)' : 'var(--border-subtle)'}`,
+              background: props.selected ? 'var(--accent)' : 'transparent',
+              display: 'flex',
+              'align-items': 'center',
+              'justify-content': 'center',
+              color: 'var(--background-primary)',
+              font: 'var(--font-label-bold)',
+            }}
+          >
+            {props.selected ? '✓' : ''}
+          </div>
+        </Show>
+        {props.children}
+      </button>
+
+      <Show when={props.revealActions && props.actions?.length && !props.selecting}>
+        <div style={{ display: 'flex', flex: '0 0 auto' }}>
+          <For each={props.actions}>
+            {(a) => (
+              <div
+                style={{
+                  display: 'flex',
+                  'align-items': 'center',
+                  'justify-content': 'center',
+                  padding: '0 var(--space-sm)',
+                  'min-width': '64px',
+                  background:
+                    a === 'Delete'
+                      ? 'var(--status-overdue)'
+                      : a === 'Mark Done'
+                        ? 'var(--status-good)'
+                        : 'var(--background-subtle)',
+                }}
+              >
+                <Label
+                  tracking={0.5}
+                  style={{
+                    color:
+                      a === 'Delete' || a === 'Mark Done'
+                        ? 'var(--background-primary)'
+                        : 'var(--text-primary)',
+                  }}
+                >
+                  {a}
+                </Label>
+              </div>
+            )}
+          </For>
+        </div>
+      </Show>
+    </div>
+  )
 }
 
 // --- ServiceRow -----------------------------------------------------------
 
-/**
- * The urgency eyebrow. This is the row's primary element: urgency is why the row
- * exists, so it leads.
- *
- * It differs from the service name on four channels — size (11 vs 20), weight
- * (Medium vs Medium at larger size), case (caps vs sentence), and color (status
- * vs textPrimary). An earlier attempt used 15 Medium against 15 Regular, which
- * is nearly invisible in JetBrains Mono and violated the two-channel rule.
- */
-function urgencyText(service: Service): string | undefined {
-  if (service.status === 'overdue') {
-    const days = Math.abs(daysUntil(service.dueDate ?? new Date()))
-    return `Overdue by ${days} days`
-  }
-  if (service.status === 'dueSoon') {
-    const days = daysUntil(service.dueDate ?? new Date())
-    return `Due in ${days} days`
-  }
-  return undefined
-}
-
-export function ServiceRow(props: { service: Service; onClick?: () => void }) {
+export function ServiceRow(
+  props: RowChrome & {
+    service: Service
+    vehicle: Vehicle
+    /** Inside a status-grouped list the group header carries the WORD, so the
+        row keeps only the shape — "Overdue" above "■ OVERDUE" was a stutter. */
+    groupedByStatus?: boolean
+  },
+) {
   const s = () => props.service
-  const urgency = () => urgencyText(s())
-  const color = () => STATUS_COLOR[s().status]
-
-  const supportLine = () => {
-    const parts: string[] = []
-    if (s().dueMileage) parts.push(`At ${fmtMileageBare(s().dueMileage!)} mi`)
-    if (s().lastPerformedAt) parts.push(`Last done ${timeSince(s().lastPerformedAt!).toLowerCase()}`)
-    return parts.join('  //  ')
-  }
+  const urgent = () => s().status === 'overdue' || s().status === 'dueSoon'
+  const showStatus = () => urgent() && !props.groupedByStatus
 
   return (
-    <button
-      data-section={`Service: ${s().name}`}
-      onClick={props.onClick}
-      style={{
-        display: 'flex',
-        'align-items': 'stretch',
-        gap: 'var(--space-md)',
-        width: '100%',
-        padding: 'var(--space-list-item) 0',
-      }}
-    >
-      {/* Full-height rule, not an 8×8 dot in a 32×32 tint. Width encodes urgency
-          as a second channel alongside color. */}
+    <RowShell {...props} section={`Service: ${s().name}`}>
+      {/* A thin full-height rule carries the status color as a THIRD channel;
+          the tag on line two carries the word and the shape. */}
       <div
         aria-hidden="true"
         style={{
+          'align-self': 'stretch',
           flex: '0 0 auto',
           width: s().status === 'overdue' ? '4px' : '2px',
-          background: color(),
+          background: STATUS_COLOR[s().status],
         }}
       />
 
-      <div style={{ flex: '1 1 auto', 'min-width': '0', display: 'flex', 'flex-direction': 'column' }}>
-        <Show when={urgency()}>
-          <Label
-            rank="primary"
-            style={{ color: color() }}
-            uppercase
-            tracking={1.5}
-            as="div"
+      <div style={{ flex: '1 1 auto', 'min-width': '0', display: 'flex', 'flex-direction': 'column', gap: '2px' }}>
+        <div style={{ display: 'flex', 'align-items': 'baseline', gap: 'var(--space-sm)' }}>
+          <Emphasis rank="primary" lines={2} as="div" style={{ flex: '1 1 auto', 'min-width': '0', 'text-align': 'left' }}>
+            {s().name}
+          </Emphasis>
+          <Secondary
+            style={{
+              flex: '0 0 auto',
+              color: urgent() ? STATUS_COLOR[s().status] : 'var(--text-tertiary)',
+            }}
           >
-            {urgency()}
-          </Label>
-        </Show>
+            {remainingText(s(), props.vehicle)}
+          </Secondary>
+        </div>
 
-        {/* When there is no urgency to lead with — a healthy item — the name is
-            the primary. Without this a on-track row had NO primary at all, so
-            the list lost its reading order exactly where nothing was wrong. */}
-        <Heading lines={2} as="div" rank={urgency() ? undefined : 'primary'}>
-          {s().name}
-        </Heading>
-
-        <Secondary color="tertiary" as="div" style={{ 'padding-top': 'var(--space-xs)' }}>
-          {supportLine()}
-        </Secondary>
+        <div
+          style={{
+            display: 'flex',
+            'align-items': 'center',
+            gap: 'var(--space-sm)',
+            'white-space': 'nowrap',
+            overflow: 'hidden',
+          }}
+        >
+          <Show
+            when={showStatus()}
+            fallback={<StatusMark status={s().status} />}
+          >
+            <StatusTag status={s().status} />
+          </Show>
+          <Secondary color="tertiary" style={{ overflow: 'hidden', 'text-overflow': 'ellipsis' }}>
+            {dueLine(s())}
+          </Secondary>
+        </div>
       </div>
 
-      <div style={{ flex: '0 0 auto', display: 'flex', 'align-items': 'center' }}>
-        <Body color="tertiary">›</Body>
-      </div>
-    </button>
+      <Show when={!props.selecting}>
+        <Body color="tertiary" style={{ flex: '0 0 auto' }}>
+          ›
+        </Body>
+      </Show>
+    </RowShell>
   )
 }
 
@@ -119,110 +207,76 @@ export function ServiceRow(props: { service: Service; onClick?: () => void }) {
 export type Indicator =
   | { kind: 'completed' }
   | { kind: 'bundledVisit'; count: number }
-  | { kind: 'category'; symbol: string }
 
-interface ServiceEventRowProps {
+interface ServiceEventRowProps extends RowChrome {
   title: string
   indicator?: Indicator
   /**
    * Support facts, joined with `//` on ONE line that truncates.
    *
    * Was a wrapping flex row of separate items, which on a 375pt screen shattered
-   * into "3 / days / ago" and "Toyota / de / Puerto / Rico" — every item shrank
-   * to its minimum content width and wrapped internally. A support line must
+   * into "3 / days / ago" and "Toyota / de / Puerto / Rico". A support line must
    * degrade by truncating, never by breaking phrases apart.
    */
   metadata?: string[]
   amount?: number
-  onClick?: () => void
 }
 
 /**
  * One row for every "this happened" list: service history, recent activity,
- * expenses, visit expenses.
- *
- * Hierarchy: the amount is primary when present, otherwise the title. That
- * settles a prior inconsistency where cost rendered at body weight in two
- * places and heading weight in a third.
+ * expenses. The amount is primary when present, otherwise the title.
  */
 export function ServiceEventRow(props: ServiceEventRowProps) {
   const hasAmount = () => props.amount != null
 
   return (
-    <button
-      data-section={`Event: ${props.title}`}
-      onClick={props.onClick}
-      style={{
-        display: 'flex',
-        'align-items': 'center',
-        gap: 'var(--space-md)',
-        width: '100%',
-        padding: 'var(--space-list-item) 0',
-      }}
-    >
-      <Show when={props.indicator}>
-        {(ind) => (
-          <div
-            aria-hidden="true"
-            style={{
-              flex: '0 0 auto',
-              width: '20px',
-              display: 'flex',
-              'align-items': 'center',
-              'justify-content': 'center',
-            }}
-          >
-            <Show when={ind().kind === 'completed'}>
-              <Body color="good">✓</Body>
-            </Show>
-            <Show when={ind().kind === 'bundledVisit'}>
-              <Label color="accent" tracking={0}>
-                {(ind() as { kind: 'bundledVisit'; count: number }).count}×
-              </Label>
-            </Show>
-            <Show when={ind().kind === 'category'}>
-              <Body color="tertiary">
-                {(ind() as { kind: 'category'; symbol: string }).symbol}
-              </Body>
-            </Show>
-          </div>
-        )}
-      </Show>
-
-      <div style={{ flex: '1 1 auto', 'min-width': '0', display: 'flex', 'flex-direction': 'column' }}>
-        {/* Title and amount share a line, baseline-aligned. The amount used to
-            be a sibling of this whole column, vertically centred across both
-            lines — so it stole width from the metadata line as well as the
-            title, on a row where the metadata needed it most. */}
+    <RowShell {...props} section={`Event: ${props.title}`}>
+      <Show when={props.indicator && !props.selecting}>
         <div
+          aria-hidden="true"
           style={{
+            flex: '0 0 auto',
+            'min-width': '20px',
             display: 'flex',
-            'align-items': 'baseline',
-            gap: 'var(--space-sm)',
-            width: '100%',
+            'align-items': 'center',
+            'justify-content': 'center',
           }}
         >
           <Show
+            when={props.indicator!.kind === 'bundledVisit'}
+            fallback={<Body color="good">✓</Body>}
+          >
+            <Label color="accent" tracking={0}>
+              {(props.indicator as { kind: 'bundledVisit'; count: number }).count}×
+            </Label>
+          </Show>
+        </div>
+      </Show>
+
+      <div style={{ flex: '1 1 auto', 'min-width': '0', display: 'flex', 'flex-direction': 'column' }}>
+        {/* Title and amount share a line, baseline-aligned, so the amount does
+            not steal width from the metadata line below. */}
+        <div style={{ display: 'flex', 'align-items': 'baseline', gap: 'var(--space-sm)', width: '100%' }}>
+          <Show
             when={hasAmount()}
             fallback={
-              <Emphasis rank="primary" lines={2} as="div" style={{ flex: '1 1 auto', 'min-width': '0' }}>
+              <Emphasis rank="primary" lines={2} as="div" style={{ flex: '1 1 auto', 'min-width': '0', 'text-align': 'left' }}>
                 {props.title}
               </Emphasis>
             }
           >
-            <Body lines={2} as="div" style={{ flex: '1 1 auto', 'min-width': '0' }}>
+            <Body lines={2} as="div" style={{ flex: '1 1 auto', 'min-width': '0', 'text-align': 'left' }}>
               {props.title}
             </Body>
-          </Show>
-
-          <Show when={hasAmount()}>
-            <Heading rank="primary" style={{ flex: '0 0 auto' }}>
+            {/* 15 Medium, not 20. The amount leads the row by weight and
+                position; at heading size a list of amounts was a list of
+                headings. */}
+            <Emphasis rank="primary" style={{ flex: '0 0 auto' }}>
               {fmtCurrency(props.amount!)}
-            </Heading>
+            </Emphasis>
           </Show>
         </div>
 
-        {/* One line, nowrap, ellipsis — and now the full row width. */}
         <Show when={props.metadata?.length}>
           <Secondary
             color="tertiary"
@@ -240,16 +294,21 @@ export function ServiceEventRow(props: ServiceEventRowProps) {
           </Secondary>
         </Show>
       </div>
-    </button>
+    </RowShell>
   )
 }
 
 /** Thin model-to-row adapter, mirroring ExpenseRow.swift. */
-export function ExpenseRow(props: { log: ServiceLog; onClick?: () => void }) {
+export function ExpenseRow(props: RowChrome & { log: ServiceLog; dateStyle?: 'relative' | 'day' }) {
   /* Ordered by how reliably it is wanted, because this line truncates: when
      it does, the vendor is what should fall off the end, not the date. */
   const metadata = (): string[] => {
-    const out = [timeSince(props.log.performedAt)]
+    const d = props.log.performedAt
+    const out = [
+      props.dateStyle === 'day'
+        ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        : timeSince(d),
+    ]
     if (props.log.mileage) out.push(`${fmtMileageBare(props.log.mileage)} mi`)
     if (props.log.vendor) out.push(props.log.vendor)
     return out
@@ -257,6 +316,7 @@ export function ExpenseRow(props: { log: ServiceLog; onClick?: () => void }) {
 
   return (
     <ServiceEventRow
+      {...props}
       title={props.log.name}
       indicator={
         props.log.bundledCount
@@ -265,11 +325,28 @@ export function ExpenseRow(props: { log: ServiceLog; onClick?: () => void }) {
       }
       metadata={metadata()}
       amount={props.log.cost}
-      onClick={props.onClick}
     />
   )
 }
 
 export function ListDivider() {
   return <div style={{ height: '1px', background: 'var(--grid-line)' }} />
+}
+
+/** Rows separated by hairlines — the list body every section repeats. */
+export function RowList<T>(props: { each: T[]; children: (item: T) => JSX.Element }) {
+  return (
+    <div style={{ display: 'flex', 'flex-direction': 'column' }}>
+      <For each={props.each}>
+        {(item, i) => (
+          <>
+            <Show when={i() > 0}>
+              <ListDivider />
+            </Show>
+            {props.children(item)}
+          </>
+        )}
+      </For>
+    </div>
+  )
 }
