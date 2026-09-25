@@ -13,7 +13,6 @@ import SwiftUI
 struct SettingsToggleRow: View {
     let title: String
     var subtitle: String?
-    var subtitleColor: Color = Theme.textTertiary
     @Binding var isOn: Bool
 
     var body: some View {
@@ -26,7 +25,7 @@ struct SettingsToggleRow: View {
                 if let subtitle {
                     Text(subtitle)
                         .font(.brutalistSecondary)
-                        .foregroundStyle(subtitleColor)
+                        .foregroundStyle(Theme.textTertiary)
                 }
             }
         }

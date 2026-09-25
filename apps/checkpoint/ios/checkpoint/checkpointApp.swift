@@ -17,16 +17,25 @@ private let appLogger = Logger(category: "App")
 @main
 struct checkpointApp: App {
 
-    // CloudKit container identifier for iCloud sync
-    private static let cloudKitContainerID = "iCloud.com.418-studio.checkpoint"
-
     @State private var modelContainer: ModelContainer
+
+    /// Create the ModelContainer and record whether it syncs: sync status is
+    /// observed only for a store that is actually CloudKit-backed (a CloudKit
+    /// store that failed to open falls back to local and reports sync as off).
+    static func makeContainer(syncEnabled: Bool) -> ModelContainer {
+        let (container, isCloudKit) = createContainer(syncEnabled: syncEnabled)
+        SyncSettings.shared.isSyncActiveThisLaunch = isCloudKit
+        if isCloudKit {
+            SyncStatusService.shared.startMonitoring()
+        }
+        return container
+    }
 
     /// Create a ModelContainer with or without CloudKit sync.
     /// During onboarding, sync is deferred to prevent iCloud data from interfering
     /// with the sample-data tour. Once onboarding completes, a notification triggers
     /// re-creation with CloudKit enabled.
-    static func createContainer(syncEnabled: Bool) -> ModelContainer {
+    private static func createContainer(syncEnabled: Bool) -> (ModelContainer, isCloudKit: Bool) {
         // Built from the versioned schema so schema changes ship as staged
         // migrations via CheckpointMigrationPlan rather than implicit
         // lightweight migration. See CheckpointSchema.swift.
@@ -42,19 +51,20 @@ struct checkpointApp: App {
                     cloudConfig = ModelConfiguration(
                         schema: schema,
                         url: storeURL,
-                        cloudKitDatabase: .private(cloudKitContainerID)
+                        cloudKitDatabase: .private(SyncSettings.cloudKitContainerID)
                     )
                 } else {
                     cloudConfig = ModelConfiguration(
                         schema: schema,
-                        cloudKitDatabase: .private(cloudKitContainerID)
+                        cloudKitDatabase: .private(SyncSettings.cloudKitContainerID)
                     )
                 }
-                return try ModelContainer(
+                let container = try ModelContainer(
                     for: schema,
                     migrationPlan: CheckpointMigrationPlan.self,
                     configurations: [cloudConfig]
                 )
+                return (container, true)
             } catch {
                 // CloudKit failed - fall back to local storage
                 appLogger.error("CloudKit initialization failed: \(error.localizedDescription). Falling back to local storage.")
@@ -71,11 +81,12 @@ struct checkpointApp: App {
         }
 
         do {
-            return try ModelContainer(
+            let container = try ModelContainer(
                 for: schema,
                 migrationPlan: CheckpointMigrationPlan.self,
                 configurations: [localConfig]
             )
+            return (container, false)
         } catch {
             appLogger.fault("Could not create ModelContainer: \(error.localizedDescription)")
             fatalError("Could not create ModelContainer: \(error)")
@@ -102,9 +113,7 @@ struct checkpointApp: App {
         // Defer sync during onboarding so iCloud data doesn't interfere with the tour.
         let hasCompleted = OnboardingState.hasCompletedOnboarding
         let userSyncPref = SyncSettings.shared.iCloudSyncEnabled
-        let syncEnabled = hasCompleted && userSyncPref
-        let container = Self.createContainer(syncEnabled: syncEnabled)
-        SyncSettings.shared.isSyncActiveThisLaunch = syncEnabled
+        let container = Self.makeContainer(syncEnabled: hasCompleted && userSyncPref)
         _modelContainer = State(initialValue: container)
 
         // Run post-launch backfills off the blocking launch path: dispatch as
@@ -158,8 +167,7 @@ struct checkpointApp: App {
                     let userSyncPref = SyncSettings.shared.iCloudSyncEnabled
                     guard userSyncPref else { return }
                     appLogger.info("Onboarding complete — enabling CloudKit sync")
-                    let newContainer = Self.createContainer(syncEnabled: true)
-                    SyncSettings.shared.isSyncActiveThisLaunch = true
+                    let newContainer = Self.makeContainer(syncEnabled: true)
                     modelContainer = newContainer
                     WatchSessionService.shared.modelContainer = newContainer
                     WidgetDataService.shared.modelContainer = newContainer

@@ -285,6 +285,7 @@ v1.0 features are tracked throughout this document. Future versions are outlined
 | ------------------------ | -------- | ------ | -------------------------------------------------------- |
 | Service history PDF      | High     | ✅   | Complete maintenance history for resale, warranty claims; shareable via iOS share sheet |
 | iCloud Sync              | High     | ✅     | Free native sync across iOS devices via CloudKit         |
+| iCloud sync status       | High     | ✅     | Settings readout under the sync toggle: Syncing…, Last synced (relative, survives relaunch), Couldn't sync — will retry (with "iCloud storage is full" / "No connection"), or iCloud unavailable with Open Settings. Driven by CloudKit container events and account status. Tests: `SyncStatusTests` |
 | Maintenance cost reports | Medium   | ✅   | Monthly trend and category breakdown charts, each with a written summary |
 | CSV import               | Medium   | ✅     | Import from Fuelly, Drivvo, Simply Auto — reduces switching cost |
 
