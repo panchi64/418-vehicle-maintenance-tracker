@@ -58,25 +58,8 @@ extension L10n {
 
     static var readoutMileageUpdateDue: String { readout("readout.mileageUpdateDue") }
 
-    // MARK: - Next Up
+    // MARK: - Distances
 
-    /// Mileage-tracked service. Args: status, distance phrase ("1,200 miles
-    /// left"), due-at distance.
-    static func readoutNextUpMileage(_ status: String, _ distance: String, _ dueAt: String) -> String {
-        String(format: readout("readout.nextUpMileage"), status, distance, dueAt)
-    }
-    /// As above, plus the projected due period ("mid June").
-    static func readoutNextUpMileageEstimate(_ status: String, _ distance: String, _ dueAt: String, _ period: String) -> String {
-        String(format: readout("readout.nextUpMileageEstimate"), status, distance, dueAt, period)
-    }
-    /// Date-only service. Args: status, full due date.
-    static func readoutNextUpDate(_ status: String, _ date: String) -> String {
-        String(format: readout("readout.nextUpDate"), status, date)
-    }
-    /// Marbete renewal. Args: status, full expiration date.
-    static func readoutMarbeteExpires(_ status: String, _ date: String) -> String {
-        String(format: readout("readout.marbeteExpires"), status, date)
-    }
     static func readoutDistanceLeft(_ distance: String) -> String {
         String(format: readout("readout.distanceLeft"), distance)
     }
@@ -103,13 +86,6 @@ extension L10n {
         String(format: readout("readout.categoryShare"), category, amount, percent)
     }
     static var readoutShareCostSummary: String { readout("readout.shareCostSummary") }
-    static func readoutOdometer(_ distance: String) -> String {
-        String(format: readout("readout.odometer"), distance)
-    }
-    static func readoutOdometerEstimated(_ distance: String) -> String {
-        String(format: readout("readout.odometerEstimated"), distance)
-    }
-    static var readoutDismissVisitSuggestion: String { readout("readout.dismissVisitSuggestion") }
     static var readoutDismissHint: String { readout("readout.dismissHint") }
     static var readoutClose: String { readout("readout.close") }
 
