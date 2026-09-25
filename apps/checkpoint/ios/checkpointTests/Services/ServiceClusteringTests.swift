@@ -792,62 +792,6 @@ final class ServiceClusterTests: XCTestCase {
     }
 }
 
-// MARK: - Cluster Dismissal Tests
-
-final class ClusterDismissalTests: XCTestCase {
-
-    func test_dismissedCluster_hashPersistence() {
-        // Given: A content hash
-        let hash = "abc-123-def-456"
-        var dismissedHashes = Set<String>()
-
-        // When: Hash is added to dismissed set
-        dismissedHashes.insert(hash)
-
-        // Then
-        XCTAssertTrue(dismissedHashes.contains(hash), "Dismissed hash should be tracked")
-    }
-
-    func test_dismissedCluster_reappearsWhenServicesChange() {
-        // Given: Original cluster hash
-        let originalHash = "service1-service2-service3"
-        var dismissedHashes = Set<String>([originalHash])
-
-        // When: New cluster with different services (new hash)
-        let newHash = "service1-service2-service4"
-
-        // Then
-        XCTAssertFalse(dismissedHashes.contains(newHash), "New cluster hash should not be dismissed")
-    }
-
-    func test_dismissedCluster_sameServicesStillDismissed() {
-        // Given: Original cluster dismissed
-        let hash = "service1-service2-service3"
-        var dismissedHashes = Set<String>([hash])
-
-        // When: Same hash checked again
-        let isStillDismissed = dismissedHashes.contains(hash)
-
-        // Then
-        XCTAssertTrue(isStillDismissed, "Same cluster hash should remain dismissed")
-    }
-
-    func test_multipleDismissals_allTracked() {
-        // Given: Multiple dismissed clusters
-        var dismissedHashes = Set<String>()
-        let hashes = ["hash1", "hash2", "hash3"]
-
-        // When: All are dismissed
-        hashes.forEach { dismissedHashes.insert($0) }
-
-        // Then
-        XCTAssertEqual(dismissedHashes.count, 3, "All hashes should be tracked")
-        hashes.forEach {
-            XCTAssertTrue(dismissedHashes.contains($0), "Hash \($0) should be tracked")
-        }
-    }
-}
-
 // MARK: - ClusteringSettings Tests
 
 final class ClusteringSettingsTests: XCTestCase {

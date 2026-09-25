@@ -827,7 +827,3 @@ final class CacheEntryPruneTests: XCTestCase {
         XCTAssertEqual(Set(pruned.keys), ["a", "b"], "Entries under the cap should all be retained")
     }
 }
-
-// MARK: - NHTSAError Equatable
-
-extension NHTSAError: Equatable {}

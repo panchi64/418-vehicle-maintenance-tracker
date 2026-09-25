@@ -92,6 +92,7 @@ final class OCRConfirmationViewTests: XCTestCase {
 
     // MARK: - Confidence Level Color Tests
 
+    @MainActor
     func testHighConfidenceLevelColor() {
         // Given
         let level = ConfidenceLevel.high
@@ -100,6 +101,7 @@ final class OCRConfirmationViewTests: XCTestCase {
         XCTAssertEqual(level.color, Theme.statusGood)
     }
 
+    @MainActor
     func testMediumConfidenceLevelColor() {
         // Given
         let level = ConfidenceLevel.medium
@@ -108,6 +110,7 @@ final class OCRConfirmationViewTests: XCTestCase {
         XCTAssertEqual(level.color, Theme.statusDueSoon)
     }
 
+    @MainActor
     func testLowConfidenceLevelColor() {
         // Given
         let level = ConfidenceLevel.low
@@ -122,43 +125,32 @@ final class OCRConfirmationViewTests: XCTestCase {
         // Given
         let bar = ConfidenceBar(confidence: 0.5, level: .medium)
 
-        // Then - verify it has 10 segments (by testing calculated filled segments)
-        // At 50% confidence, 5 of 10 segments should be filled
-        let filledSegments = Int(ceil(0.5 * 10))
-        XCTAssertEqual(filledSegments, 5)
+        // Then - at 50% confidence, 5 of 10 segments are filled
+        XCTAssertEqual(bar.filledSegments, 5)
     }
 
     func testConfidenceBarFullConfidence() {
         // Given
-        let confidence: Float = 1.0
-
-        // When
-        let filledSegments = Int(ceil(confidence * 10))
+        let bar = ConfidenceBar(confidence: 1.0, level: .high)
 
         // Then
-        XCTAssertEqual(filledSegments, 10)
+        XCTAssertEqual(bar.filledSegments, 10)
     }
 
     func testConfidenceBarZeroConfidence() {
         // Given
-        let confidence: Float = 0.0
-
-        // When
-        let filledSegments = Int(ceil(confidence * 10))
+        let bar = ConfidenceBar(confidence: 0.0, level: .low)
 
         // Then
-        XCTAssertEqual(filledSegments, 0)
+        XCTAssertEqual(bar.filledSegments, 0)
     }
 
     func testConfidenceBarPartialConfidence() {
         // Given
-        let confidence: Float = 0.82
+        let bar = ConfidenceBar(confidence: 0.82, level: .high)
 
-        // When - ceil rounds up, so 8.2 becomes 9
-        let filledSegments = Int(ceil(confidence * 10))
-
-        // Then
-        XCTAssertEqual(filledSegments, 9)
+        // Then - ceil rounds up, so 8.2 becomes 9
+        XCTAssertEqual(bar.filledSegments, 9)
     }
 
     // MARK: - OCR Confirmation View Creation Tests
@@ -217,7 +209,6 @@ final class OCRConfirmationViewTests: XCTestCase {
 
     func testDirectMileageEditing() {
         // Given
-        let extractedMileage = 50000
         var confirmedMileage: Int?
 
         // When - simulate direct edit and confirmation

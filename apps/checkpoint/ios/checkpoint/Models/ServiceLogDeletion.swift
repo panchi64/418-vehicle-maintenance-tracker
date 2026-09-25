@@ -164,7 +164,7 @@ struct ServiceLogDeletion {
         if let parent, !touched.contains(where: { $0.id == parent.id }) {
             touched.append(parent)
         }
-        let priorSchedules = touched.map(ScheduleState.init)
+        let priorSchedules = touched.map { ScheduleState($0) }
 
         let visit = log.visit
         let visitIsEmptied = visit.map { remaining($0.logs, excluding: log).isEmpty } ?? false
@@ -181,7 +181,7 @@ struct ServiceLogDeletion {
             createdAt: log.createdAt,
             attachments: attachments,
             survivingVisit: visitIsEmptied ? nil : visit,
-            deletedVisit: visitIsEmptied ? visit.map(VisitSnapshot.init) : nil,
+            deletedVisit: visitIsEmptied ? visit.map { VisitSnapshot($0) } : nil,
             priorSchedules: priorSchedules
         )
 

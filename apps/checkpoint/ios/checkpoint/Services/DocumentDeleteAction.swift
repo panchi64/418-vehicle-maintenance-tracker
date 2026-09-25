@@ -70,7 +70,7 @@ enum DocumentDeleteAction {
     /// Deletes the documents now and offers Undo.
     static func perform(_ documents: [Document], in context: ModelContext) {
         guard !documents.isEmpty else { return }
-        let snapshots = documents.map(DocumentSnapshot.init)
+        let snapshots = documents.map { DocumentSnapshot($0) }
         for document in documents {
             context.delete(document)
         }

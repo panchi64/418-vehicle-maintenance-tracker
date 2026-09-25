@@ -48,6 +48,7 @@ final class AddServiceViewTests: XCTestCase {
         XCTAssertEqual(ServiceTiming.earlier.performedDate(explicit: explicit, now: now), explicit)
     }
 
+    @MainActor
     func testTiming_DisplayNamesAreLocalized() {
         XCTAssertEqual(ServiceTiming.today.displayName, L10n.timingToday)
         XCTAssertEqual(ServiceTiming.earlier.displayName, L10n.timingOnDate)
@@ -328,18 +329,15 @@ final class AddServiceViewTests: XCTestCase {
         XCTAssertEqual(newMileage, 32500)
     }
 
+    @MainActor
     func testServiceCreation_DoesNotDowngradeVehicleMileage() {
-        // Given: Vehicle at 35000 miles, service at 32500 miles (historical service)
-        let vehicleMileage = 35000
-        let serviceMileage = 32500
+        // Given: Vehicle at 35000 miles, entry logged today at 32500 miles
+        let model = makeModel(currentMileage: 35_000)
+        model.timing = .today
+        model.mileageAtService = 32_500
 
-        // When: Checking if vehicle mileage should update
-        let shouldUpdate = serviceMileage > vehicleMileage
-        let newMileage = shouldUpdate ? serviceMileage : vehicleMileage
-
-        // Then: Should not update (keep higher mileage)
-        XCTAssertFalse(shouldUpdate)
-        XCTAssertEqual(newMileage, 35000)
+        // Then: The lower reading is not adopted (keep higher mileage)
+        XCTAssertFalse(model.wouldAdoptMileage)
     }
 
     // MARK: - Cost Parsing Tests
@@ -480,58 +478,37 @@ final class AddServiceViewTests: XCTestCase {
         XCTAssertFalse(hasIntervals)
     }
 
+    @MainActor
     func testScheduleRecurring_Off_SkipsIntervalAndDueCalculation() {
         // Given: Service performed today with intervals but recurring OFF
-        let scheduleRecurring = false
-        let intervalMonths = 6
-        let intervalMiles = 5000
-        let performedDate = Date()
-        let mileageAtService = 32500
+        let model = makeModel(currentMileage: 32_500)
+        model.customServiceName = "Oil change"
+        model.timing = .today
+        model.intervalMonths = 6
+        model.intervalMiles = 5_000
+        model.isRecurring = false
 
-        // When: Creating service with recurring off
-        let effectiveIntervalMonths: Int? = scheduleRecurring ? intervalMonths : nil
-        let effectiveIntervalMiles: Int? = scheduleRecurring ? intervalMiles : nil
-
-        // Then: Intervals should be nil
-        XCTAssertNil(effectiveIntervalMonths)
-        XCTAssertNil(effectiveIntervalMiles)
-
-        // And: No due date/mileage should be calculated
-        var dueDate: Date? = nil
-        var dueMileage: Int? = nil
-        if scheduleRecurring {
-            dueDate = Calendar.current.date(byAdding: .month, value: intervalMonths, to: performedDate)
-            dueMileage = mileageAtService + intervalMiles
-        }
-        XCTAssertNil(dueDate)
-        XCTAssertNil(dueMileage)
+        // Then: Nothing is scheduled from the intervals
+        XCTAssertFalse(model.isRecurringSchedule)
+        XCTAssertNil(model.nextReminderAfterLog)
     }
 
-    func testScheduleRecurring_On_CalculatesIntervalAndDue() {
+    @MainActor
+    func testScheduleRecurring_On_CalculatesIntervalAndDue() throws {
         // Given: Service performed today with intervals and recurring ON
-        let scheduleRecurring = true
-        let intervalMonths = 6
-        let intervalMiles = 5000
-        let performedDate = Date()
-        let mileageAtService = 32500
+        let model = makeModel(currentMileage: 32_500)
+        model.customServiceName = "Oil change"
+        model.timing = .today
+        model.mileageAtService = 32_500
+        model.intervalMonths = 6
+        model.intervalMiles = 5_000
+        model.isRecurring = true
 
-        // When: Creating service with recurring on
-        let effectiveIntervalMonths: Int? = scheduleRecurring ? intervalMonths : nil
-        let effectiveIntervalMiles: Int? = scheduleRecurring ? intervalMiles : nil
-
-        // Then: Intervals should be set
-        XCTAssertEqual(effectiveIntervalMonths, 6)
-        XCTAssertEqual(effectiveIntervalMiles, 5000)
-
-        // And: Due date/mileage should be calculated
-        var dueDate: Date? = nil
-        var dueMileage: Int? = nil
-        if scheduleRecurring {
-            dueDate = Calendar.current.date(byAdding: .month, value: intervalMonths, to: performedDate)
-            dueMileage = mileageAtService + intervalMiles
-        }
-        XCTAssertNotNil(dueDate)
-        XCTAssertEqual(dueMileage, 37500)
+        // Then: The next reminder projects from the entry
+        XCTAssertTrue(model.isRecurringSchedule)
+        let next = try XCTUnwrap(model.nextReminderAfterLog)
+        XCTAssertNotNil(next.dueDate)
+        XCTAssertEqual(next.dueMileage, 37_500)
     }
 
     func testScheduleRecurring_AnalyticsFlag_RespectsToggle() {

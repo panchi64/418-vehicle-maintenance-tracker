@@ -11,11 +11,12 @@ import SwiftUI
 // MARK: - Confidence Level
 
 /// Shared confidence level enum for various quality indicators
-enum ConfidenceLevel {
+nonisolated enum ConfidenceLevel {
     case high
     case medium
     case low
 
+    @MainActor
     var color: Color {
         switch self {
         case .high: return Theme.statusGood
@@ -24,6 +25,7 @@ enum ConfidenceLevel {
         }
     }
 
+    @MainActor
     var label: String {
         switch self {
         case .high: return L10n.cameraConfidenceHigh
@@ -34,6 +36,7 @@ enum ConfidenceLevel {
 
     /// What VoiceOver hears. The bar's color and fill carry the level visually;
     /// this carries it in words.
+    @MainActor
     var accessibilityLabel: String {
         switch self {
         case .high: return L10n.a11yConfidenceHigh
@@ -54,7 +57,7 @@ struct ConfidenceBar: View {
     private let segmentCount = 10
 
     /// How many segments should be filled
-    private var filledSegments: Int {
+    var filledSegments: Int {
         Int(ceil(confidence * Float(segmentCount)))
     }
 

@@ -31,8 +31,8 @@ final class ServiceTypePickerTests: XCTestCase {
 
     func testInitialState_NoSelection() {
         // Given
-        var selectedPreset: PresetData? = nil
-        var customServiceName = ""
+        let selectedPreset: PresetData? = nil
+        let customServiceName = ""
 
         // When - component is created with no selection
         // Then - selectedPreset should be nil and customServiceName should be empty
@@ -43,8 +43,8 @@ final class ServiceTypePickerTests: XCTestCase {
     func testInitialState_WithPreset() {
         // Given
         let preset = createTestPreset()
-        var selectedPreset: PresetData? = preset
-        var customServiceName = ""
+        let selectedPreset: PresetData? = preset
+        let customServiceName = ""
 
         // When - component is created with a preset
         // Then - selectedPreset should contain the preset
@@ -56,8 +56,8 @@ final class ServiceTypePickerTests: XCTestCase {
 
     func testInitialState_WithCustomName() {
         // Given
-        var selectedPreset: PresetData? = nil
-        var customServiceName = "My Custom Service"
+        let selectedPreset: PresetData? = nil
+        let customServiceName = "My Custom Service"
 
         // When - component is created with custom service name
         // Then - customServiceName should be set and no preset
@@ -214,7 +214,7 @@ final class ServiceTypePickerTests: XCTestCase {
 
     func testCategoryFilter_InitialCategory() {
         // Given
-        var selectedCategory: ServiceCategory = .engine
+        let selectedCategory: ServiceCategory = .engine
 
         // When - component is initialized
         // Then - default category should be engine
@@ -247,7 +247,7 @@ final class ServiceTypePickerTests: XCTestCase {
     func testFullWorkflow_SelectPresetAfterTypingCustomName() {
         // Given
         var selectedPreset: PresetData? = nil
-        var customServiceName = "My Custom Service"
+        let customServiceName = "My Custom Service"
 
         // When - user types custom name then selects a preset
         XCTAssertEqual(customServiceName, "My Custom Service")

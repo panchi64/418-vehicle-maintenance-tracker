@@ -572,13 +572,17 @@ final class ServiceDetailViewTests: XCTestCase {
 
     func testDismissChaining_CancelDoesNotDismissParent() {
         // Given: A didCompleteMark flag that was never set (simulating cancel)
-        let didCompleteMark = false
+        var didCompleteMark = false
         var parentDismissCalled = false
+        let onDismiss: () -> Void = {
+            if didCompleteMark {
+                didCompleteMark = false
+                parentDismissCalled = true
+            }
+        }
 
         // When: onDismiss fires without onSaved being called (cancel scenario)
-        if didCompleteMark {
-            parentDismissCalled = true
-        }
+        onDismiss()
 
         // Then: Parent dismiss should NOT be triggered
         XCTAssertFalse(parentDismissCalled, "Parent view should not dismiss when user cancels")

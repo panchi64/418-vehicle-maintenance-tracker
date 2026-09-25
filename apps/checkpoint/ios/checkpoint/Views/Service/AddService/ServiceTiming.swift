@@ -18,12 +18,12 @@
 import Foundation
 
 /// What the form will do on save. Derived from `ServiceTiming`, never chosen.
-enum ServiceIntent: Equatable {
+nonisolated enum ServiceIntent: Equatable {
     case log
     case schedule
 }
 
-enum ServiceTiming: String, CaseIterable, Hashable, Codable {
+nonisolated enum ServiceTiming: String, CaseIterable, Hashable, Codable {
     // Already done
     case today
     case yesterday
@@ -46,6 +46,7 @@ enum ServiceTiming: String, CaseIterable, Hashable, Codable {
     /// Whether the user still has to supply the performed date.
     var needsExplicitDate: Bool { self == .earlier }
 
+    @MainActor
     var displayName: String {
         switch self {
         case .today: return L10n.timingToday
@@ -68,7 +69,7 @@ enum ServiceTiming: String, CaseIterable, Hashable, Codable {
 }
 
 /// When a "Not done yet" reminder fires.
-enum ServiceDueKind: String, CaseIterable, Hashable, Codable {
+nonisolated enum ServiceDueKind: String, CaseIterable, Hashable, Codable {
     /// The service's own cadence, counted from today and the current odometer.
     /// The default whenever the service has one, so scheduling is saveable
     /// without typing anything.

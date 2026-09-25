@@ -14,7 +14,7 @@ final class OdometerOCRServiceTests: XCTestCase {
     // MARK: - Singleton Tests
 
     func testSharedInstanceExists() async {
-        let service = await OdometerOCRService.shared
+        let service = OdometerOCRService.shared
         XCTAssertNotNil(service, "Shared instance should exist")
     }
 
@@ -92,7 +92,7 @@ final class OdometerOCRServiceTests: XCTestCase {
     // MARK: - OCR Recognition Tests
 
     func testRecognizeMileageThrowsForInvalidImage() async {
-        let service = await OdometerOCRService.shared
+        let service = OdometerOCRService.shared
 
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: 1, height: 1))
         let blankImage = renderer.image { context in
@@ -109,7 +109,7 @@ final class OdometerOCRServiceTests: XCTestCase {
     }
 
     func testRecognizeMileageWithValidOdometerImage() async {
-        let service = await OdometerOCRService.shared
+        let service = OdometerOCRService.shared
         let testImage = createTestImageWithText("32500")
 
         do {
@@ -338,7 +338,7 @@ final class OdometerOCRServiceTests: XCTestCase {
     func testPipeline_RecognizesWithoutROI() async {
         // The simplified pipeline should recognize text from a full-frame image
         // without needing ROI detection (viewfinder crop handles framing)
-        let service = await OdometerOCRService.shared
+        let service = OdometerOCRService.shared
         let testImage = createTestImageWithText("87654")
 
         do {
@@ -385,7 +385,7 @@ final class OdometerOCRServiceTests: XCTestCase {
 
     func testPipeline_RecognizesWithCurrentMileagePrior() async {
         // The pipeline should accept currentMileage parameter for prior-based scoring
-        let service = await OdometerOCRService.shared
+        let service = OdometerOCRService.shared
         let testImage = createTestImageWithText("51234")
 
         do {
