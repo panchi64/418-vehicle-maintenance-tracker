@@ -89,6 +89,16 @@ final class VehicleFormState {
         return nil
     }
 
+    /// Whether anything has been entered — what Cancel would throw away.
+    var isDirty: Bool {
+        let texts = [name, make, model, vin, licensePlate, tireSize, oilType, notes]
+        return texts.contains { !$0.isEmpty }
+            || year != nil
+            || currentMileage != nil
+            || marbeteExpirationMonth != nil
+            || marbeteExpirationYear != nil
+    }
+
     /// VIN is valid when it's 17 alphanumeric characters (excluding I, O, Q)
     var isVINValid: Bool {
         Vehicle.isValidVIN(vin)

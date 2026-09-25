@@ -3,8 +3,8 @@
 //  checkpoint
 //
 //  The destructive action at the bottom of an edit form or detail screen
-//  (Delete Vehicle, Delete Entry). Lives at the end of the scroll, never in
-//  `FormActionBar` — Save and Delete must not sit side by side (F1).
+//  (Delete Vehicle, Delete Entry). Lives last in the scroll, never in the
+//  toolbar beside Save — Save and Delete must not sit side by side (F1).
 //
 
 import SwiftUI

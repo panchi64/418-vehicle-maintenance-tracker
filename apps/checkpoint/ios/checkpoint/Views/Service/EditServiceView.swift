@@ -10,35 +10,48 @@ import SwiftUI
 import SwiftData
 
 struct EditServiceView: View {
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext
-    @Query private var services: [Service]
+    @Environment(\.dismiss) var dismiss
+    @Environment(\.modelContext) var modelContext
+    @Query var services: [Service]
 
     @Bindable var service: Service
     let vehicle: Vehicle
 
     // Service details
-    @State private var serviceName: String = ""
-    @State private var dueDate: Date = Date()
-    @State private var hasDueDate: Bool = false
-    @State private var dueMileage: Int? = nil
-    @State private var intervalMonths: Int? = nil
-    @State private var intervalMiles: Int? = nil
-    @State private var isRecurring: Bool = false
-    @State private var notes: String = ""
+    @State var serviceName: String = ""
+    @State var dueDate: Date = Date()
+    @State var hasDueDate: Bool = false
+    @State var dueMileage: Int? = nil
+    @State var intervalMonths: Int? = nil
+    @State var intervalMiles: Int? = nil
+    @State var isRecurring: Bool = false
+    @State var notes: String = ""
 
     // Loaded originals, for change-transparency hints (F6) and the impact preview (F9)
-    @State private var loadedServiceName: String = ""
-    @State private var loadedSchedule = ReminderImpactCalculator.Schedule(dueDate: nil, dueMileage: nil)
-    @State private var loadedIntervalMonths: Int? = nil
-    @State private var loadedIntervalMiles: Int? = nil
+    @State var loadedServiceName: String = ""
+    @State var loadedSchedule = ReminderImpactCalculator.Schedule(dueDate: nil, dueMileage: nil)
+    @State var loadedIntervalMonths: Int? = nil
+    @State var loadedIntervalMiles: Int? = nil
+    @State var loadedIsRecurring = false
+    @State var loadedNotes = ""
 
-    @State private var reminderImpact: ReminderImpactCalculator.ReminderImpact?
-    @State private var showNameError = false
-    @State private var showDeleteConfirmation = false
+    @State var reminderImpact: ReminderImpactCalculator.ReminderImpact?
+    @State var showNameError = false
+    @State var showDeleteConfirmation = false
 
     var isFormValid: Bool {
         !serviceName.isEmpty
+    }
+
+    /// Whether Save would write anything. Mirrors `loadServiceData()`.
+    private var isDirty: Bool {
+        serviceName != loadedServiceName
+            || (hasDueDate ? dueDate : nil) != loadedSchedule.dueDate
+            || dueMileage != loadedSchedule.dueMileage
+            || intervalMonths != loadedIntervalMonths
+            || intervalMiles != loadedIntervalMiles
+            || isRecurring != loadedIsRecurring
+            || notes != loadedNotes
     }
 
     /// Explicit values always win; an interval is only allowed to re-derive a
@@ -47,7 +60,7 @@ struct EditServiceView: View {
     /// `.now` — otherwise a notes-only save would silently shift the schedule,
     /// and clearing a due date/mileage would be impossible on a recurring
     /// service (the interval would immediately re-populate it).
-    private var proposedSchedule: ReminderImpactCalculator.Schedule {
+    var proposedSchedule: ReminderImpactCalculator.Schedule {
         let effectiveMonths = isRecurring ? intervalMonths : nil
         let effectiveMiles = isRecurring ? intervalMiles : nil
         let monthsChanged = effectiveMonths != loadedIntervalMonths
@@ -84,9 +97,7 @@ struct EditServiceView: View {
                                     }
 
                                     if showNameError, serviceName.isEmpty {
-                                        ErrorMessageRow(message: L10n.formServiceTypeRequired) {
-                                            showNameError = false
-                                        }
+                                        FormAdvisory.blocking(L10n.formServiceTypeRequired)
                                     }
                                 }
                             }
@@ -183,25 +194,17 @@ struct EditServiceView: View {
                     }
                 }
                 .keyboardDismissToolbar()
-                .navigationTitle(L10n.serviceEditTitle)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button(L10n.commonCancel) { dismiss() }
-                            .toolbarButtonStyle()
+                .formToolbar(
+                    title: L10n.serviceEditTitle,
+                    subtitle: vehicle.displayName,
+                    canSave: isFormValid,
+                    isDirty: isDirty,
+                    onSave: saveChanges,
+                    onBlocked: {
+                        showNameError = true
+                        withAnimation { proxy.scrollTo("serviceName", anchor: .center) }
                     }
-                }
-                .safeAreaInset(edge: .bottom) {
-                    FormActionBar(
-                        primaryTitle: L10n.commonSave,
-                        isPrimaryEnabled: isFormValid,
-                        onPrimary: { saveChanges() },
-                        onDisabledPrimaryTap: {
-                            showNameError = true
-                            withAnimation { proxy.scrollTo("serviceName", anchor: .top) }
-                        }
-                    )
-                }
+                )
                 .onChange(of: serviceName) { _, newValue in
                     if !newValue.isEmpty { showNameError = false }
                 }
@@ -226,88 +229,6 @@ struct EditServiceView: View {
                 }
             }
         }
-    }
-
-    // MARK: - Data Loading
-
-    private func loadServiceData() {
-        serviceName = service.name
-        hasDueDate = service.dueDate != nil
-        dueDate = service.dueDate ?? Date()
-        dueMileage = service.dueMileage
-        intervalMonths = service.intervalMonths
-        intervalMiles = service.intervalMiles
-        isRecurring = service.isRecurring
-        notes = service.notes ?? ""
-
-        loadedServiceName = service.name
-        loadedSchedule = ReminderImpactCalculator.Schedule(dueDate: service.dueDate, dueMileage: service.dueMileage)
-        loadedIntervalMonths = service.intervalMonths
-        loadedIntervalMiles = service.intervalMiles
-    }
-
-    // MARK: - Save Logic
-
-    private func saveChanges() {
-        HapticService.shared.success()
-        AnalyticsService.shared.capture(.serviceEdited)
-
-        service.name = serviceName
-        let schedule = proposedSchedule
-        service.dueDate = schedule.dueDate
-        service.dueMileage = schedule.dueMileage
-        service.intervalMonths = isRecurring ? intervalMonths : nil
-        service.intervalMiles = isRecurring ? intervalMiles : nil
-        service.isRecurring = isRecurring && Service.hasIntervalPolicy(
-            intervalMonths: intervalMonths,
-            intervalMiles: intervalMiles
-        )
-        service.notes = notes.isEmpty ? nil : notes
-
-        // The rebuild is the whole operation — it purges the vehicle's pending
-        // set before re-adding, so a preceding per-service cancel was already
-        // redundant and is now not expressible.
-        ServiceNotificationScheduler.rescheduleNotifications(for: vehicle)
-
-        updateAppIcon()
-        updateWidgetData()
-
-        ToastService.shared.show(L10n.toastServiceUpdated, icon: "checkmark", style: .success)
-        dismiss()
-    }
-
-    // MARK: - Delete Logic
-
-    private func deleteService() {
-        AnalyticsService.shared.capture(.serviceDeleted)
-        modelContext.delete(service)
-        // Deleting the service cascades to its logs, which now .nullify their
-        // attachments rather than deleting them. Any attachment that had no
-        // vehicle link (e.g. a receipt saved before the Documents library and
-        // never backfilled) is left with neither a log nor a vehicle — sweep
-        // those so they don't linger in external storage with no owner.
-        // Documents that are linked to a vehicle survive in the library.
-        Document.purgeOrphans(in: modelContext)
-        // Rebuild the vehicle's reminders around what's left. Deleting a
-        // service used to leave its notifications pending until the next
-        // launch sweep; now that reminders are bundled, a stale request would
-        // also name the deleted service in a banner listing its neighbours.
-        ServiceNotificationScheduler.rescheduleNotifications(for: vehicle)
-        updateAppIcon()
-        updateWidgetData()
-        dismiss()
-    }
-
-    // MARK: - App Icon
-
-    private func updateAppIcon() {
-        AppIconService.shared.updateIcon(for: vehicle, services: services)
-    }
-
-    // MARK: - Widget Data
-
-    private func updateWidgetData() {
-        WidgetDataService.shared.updateWidget(for: vehicle)
     }
 }
 

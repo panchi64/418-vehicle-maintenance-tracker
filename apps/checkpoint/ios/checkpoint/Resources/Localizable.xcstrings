@@ -640,91 +640,6 @@
         }
       }
     },
-    "a11y.serviceType" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Service type"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tipo de servicio"
-          }
-        }
-      }
-    },
-    "a11y.serviceType.browsePresets" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Browse all service presets"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ver todos los servicios predefinidos"
-          }
-        }
-      }
-    },
-    "a11y.serviceType.changeHint" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens the list of service presets"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abre la lista de servicios predefinidos"
-          }
-        }
-      }
-    },
-    "a11y.serviceType.clear" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clear service type"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quitar tipo de servicio"
-          }
-        }
-      }
-    },
-    "a11y.serviceType.useCustomHint" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clears the selected preset so you can type any service name"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quita el servicio predefinido para que escribas cualquier nombre"
-          }
-        }
-      }
-    },
     "a11y.vehicleOptions" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -742,23 +657,6 @@
         }
       }
     },
-    "a11y.warning" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Warning: %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Advertencia: %@"
-          }
-        }
-      }
-    },
     "Add new vehicle" : {
 
     },
@@ -770,96 +668,6 @@
     },
     "Add vehicle specs" : {
 
-    },
-    "addservice.saveLog" : {
-      "comment" : "Save button once a past timing is chosen.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Log it"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Registrarlo"
-          }
-        }
-      }
-    },
-    "addservice.saveSchedule" : {
-      "comment" : "Save button once a future timing is chosen.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Schedule it"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Programarlo"
-          }
-        }
-      }
-    },
-    "addservice.titleLog" : {
-      "comment" : "Sheet subtitle once a past timing is chosen.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New entry"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nuevo registro"
-          }
-        }
-      }
-    },
-    "addservice.titleNeutral" : {
-      "comment" : "Sheet subtitle before a timing is chosen, when the intent is not yet known.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add service"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Añadir servicio"
-          }
-        }
-      }
-    },
-    "addservice.titleSchedule" : {
-      "comment" : "Sheet subtitle once a future timing is chosen.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New reminder"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nuevo recordatorio"
-          }
-        }
-      }
     },
     "addvehicle.basics" : {
       "extractionState" : "manual",
@@ -1351,142 +1159,6 @@
     },
     "CHECKPOINT PRO" : {
 
-    },
-    "chip.months1Approx" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "~1 mo"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "~1 mes"
-          }
-        }
-      }
-    },
-    "chip.months3" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "3 mo"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "3 meses"
-          }
-        }
-      }
-    },
-    "chip.months3Approx" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "~3 mo"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "~3 meses"
-          }
-        }
-      }
-    },
-    "chip.months6" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "6 mo"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "6 meses"
-          }
-        }
-      }
-    },
-    "chip.months6Approx" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "~6 mo"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "~6 meses"
-          }
-        }
-      }
-    },
-    "chip.nextWeek" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Next Week"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Próxima semana"
-          }
-        }
-      }
-    },
-    "chip.years1" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 yr"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 año"
-          }
-        }
-      }
-    },
-    "chip.years2" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "2 yr"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "2 años"
-          }
-        }
-      }
     },
     "Choose the climate zone that best matches where you drive most often." : {
 
@@ -4083,41 +3755,6 @@
         }
       }
     },
-    "form.alreadyDone" : {
-      "comment" : "Subgroup heading over the past-timing chips.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Already done"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ya realizado"
-          }
-        }
-      }
-    },
-    "form.amount" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Amount"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Monto"
-          }
-        }
-      }
-    },
     "form.atMileage" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4152,6 +3789,23 @@
         }
       }
     },
+    "form.browseAll" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Browse all services"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver todos los servicios"
+          }
+        }
+      }
+    },
     "form.category" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4169,38 +3823,172 @@
         }
       }
     },
-    "form.comingUp" : {
-      "comment" : "Subgroup heading over the future-timing chips.",
+    "form.categoryBody" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Coming up"
+            "value" : "Body"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Próximamente"
+            "value" : "Carrocería"
           }
         }
       }
     },
-    "form.common" : {
-      "comment" : "Label over the quick service-type shortcut chips.",
+    "form.categoryBrakes" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Common"
+            "value" : "Brakes"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Frecuentes"
+            "value" : "Frenos"
+          }
+        }
+      }
+    },
+    "form.categoryElectrical" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Electrical"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eléctrico"
+          }
+        }
+      }
+    },
+    "form.categoryEngine" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Engine"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motor"
+          }
+        }
+      }
+    },
+    "form.categoryFluids" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fluids"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fluidos"
+          }
+        }
+      }
+    },
+    "form.categoryOther" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otros"
+          }
+        }
+      }
+    },
+    "form.categoryTires" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tires"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neumáticos"
+          }
+        }
+      }
+    },
+    "form.categoryTransmission" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transmission"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transmisión"
+          }
+        }
+      }
+    },
+    "form.change" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambiar"
+          }
+        }
+      }
+    },
+    "form.changeService" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change service, %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambiar servicio, %@"
           }
         }
       }
@@ -4276,6 +4064,23 @@
         }
       }
     },
+    "form.dateOrMileage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ or at %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ o a los %2$@"
+          }
+        }
+      }
+    },
     "form.datePastWarning" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4344,20 +4149,36 @@
         }
       }
     },
-    "form.depthContents" : {
-      "comment" : "Names what is inside the collapsed details section.",
+    "form.depthSummary" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Notes, receipt"
+            "value" : "%@ · repeat · notes · receipt"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Notas, recibo"
+            "value" : "%@ · repetición · notas · recibo"
+          }
+        }
+      }
+    },
+    "form.depthSummarySchedule" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repeat interval · notes"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intervalo de repetición · notas"
           }
         }
       }
@@ -4392,6 +4213,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Detalles · %d"
+          }
+        }
+      }
+    },
+    "form.discard" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discard"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descartar"
+          }
+        }
+      }
+    },
+    "form.discardTitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discard changes?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Descartar los cambios?"
           }
         }
       }
@@ -4481,6 +4336,23 @@
         }
       }
     },
+    "form.dueInInterval" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En %@"
+          }
+        }
+      }
+    },
     "form.dueMileage" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4498,19 +4370,36 @@
         }
       }
     },
-    "form.editingTag" : {
+    "form.dueNow" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Editing"
+            "value" : "Due now"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Editando"
+            "value" : "Pendientes ahora"
+          }
+        }
+      }
+    },
+    "form.enterReading" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter the odometer reading."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingresa la lectura del odómetro."
           }
         }
       }
@@ -4528,6 +4417,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cada"
+          }
+        }
+      }
+    },
+    "form.everyInterval" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada %@"
+          }
+        }
+      }
+    },
+    "form.everyIntervalWhicheverFirst" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every %@, whichever comes first."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada %@, lo que ocurra primero."
           }
         }
       }
@@ -4688,6 +4611,23 @@
         }
       }
     },
+    "form.keepEditing" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep Editing"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguir editando"
+          }
+        }
+      }
+    },
     "form.keepMyOdometer" : {
       "comment" : "Outcome button: leave the vehicle's odometer untouched.",
       "extractionState" : "manual",
@@ -4702,6 +4642,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mantener mi odómetro"
+          }
+        }
+      }
+    },
+    "form.logSummary" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ (%2$@)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ (%2$@)"
           }
         }
       }
@@ -4740,23 +4697,6 @@
         }
       }
     },
-    "form.mileageBlankHint" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "If left blank, current vehicle mileage will be used."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Si lo dejas en blanco, se usará el millaje actual del vehículo."
-          }
-        }
-      }
-    },
     "form.mileagePast" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4770,23 +4710,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ de más"
-          }
-        }
-      }
-    },
-    "form.milesSuffix" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "miles"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "millas"
           }
         }
       }
@@ -4859,56 +4782,36 @@
         }
       }
     },
-    "form.nextReminderDate" : {
-      "comment" : "Info advisory on the log path: the reminder saving will create. %@ is a date.",
+    "form.nextReminderTitle" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Next reminder %@"
+            "value" : "Next Reminder"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Próximo recordatorio el %@"
+            "value" : "Próximo recordatorio"
           }
         }
       }
     },
-    "form.nextReminderDateOrMileage" : {
-      "comment" : "Info advisory on the log path: the reminder saving will create. %1$@ is a date, %2$@ a distance with its unit.",
+    "form.noReminder" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Next reminder %1$@ or at %2$@, whichever comes first"
+            "value" : "No reminder"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Próximo recordatorio el %1$@ o a los %2$@, lo que ocurra primero"
-          }
-        }
-      }
-    },
-    "form.nextReminderMileage" : {
-      "comment" : "Info advisory on the log path: the reminder saving will create. %@ is a distance with its unit.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Next reminder at %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Próximo recordatorio a los %@"
+            "value" : "Sin recordatorio"
           }
         }
       }
@@ -4943,6 +4846,91 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Añade notas…"
+          }
+        }
+      }
+    },
+    "form.ocrBelowPrevious" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Below your previous reading (%@)."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menor que tu lectura anterior (%@)."
+          }
+        }
+      }
+    },
+    "form.ocrDetectedValue" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detected value"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valor detectado"
+          }
+        }
+      }
+    },
+    "form.ocrLowConfidence" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Low confidence — check the number before using it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confianza baja: revisa el número antes de usarlo."
+          }
+        }
+      }
+    },
+    "form.ocrTapToEdit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to edit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca para editar"
+          }
+        }
+      }
+    },
+    "form.ocrTitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scanned Reading"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lectura escaneada"
           }
         }
       }
@@ -5052,6 +5040,23 @@
         }
       }
     },
+    "form.recent" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recent"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recientes"
+          }
+        }
+      }
+    },
     "form.reminder" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5117,23 +5122,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recuérdame la próxima vez"
-          }
-        }
-      }
-    },
-    "form.remindsOnceThenStops" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This will remind you once, then stop."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Te avisará una vez y luego parará."
           }
         }
       }
@@ -5225,53 +5213,87 @@
         }
       }
     },
-    "form.saveAndAddAnother" : {
+    "form.saving" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Save & Add Another"
+            "value" : "Saving…"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Guardar y añadir otro"
+            "value" : "Guardando…"
           }
         }
       }
     },
-    "form.savedAddNext" : {
+    "form.sectionDue" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Saved ✓ — add next"
+            "value" : "Due"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Guardado ✓ — añade el siguiente"
+            "value" : "Vence"
           }
         }
       }
     },
-    "form.serviceType" : {
+    "form.sectionService" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Service Type"
+            "value" : "Service"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tipo de servicio"
+            "value" : "Servicio"
+          }
+        }
+      }
+    },
+    "form.servicesCount" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Services (%lld)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servicios (%lld)"
+          }
+        }
+      }
+    },
+    "form.serviceSearchPlaceholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type a service name"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escribe el nombre del servicio"
           }
         }
       }
@@ -5310,89 +5332,138 @@
         }
       }
     },
-    "form.suggestMonths" : {
+    "form.setIntervalInDetails" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Suggest %d months"
+            "value" : "Set an interval under More details."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sugerir %d meses"
+            "value" : "Define un intervalo en Más detalles."
           }
         }
       }
     },
-    "form.suggestValue" : {
+    "form.timingNotYet" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Suggest %@"
+            "value" : "Not done yet"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sugerir %@"
+            "value" : "Aún no"
           }
         }
       }
     },
-    "form.theReminder" : {
-      "comment" : "Section title over the future branch.",
+    "form.titleComplete" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The reminder"
+            "value" : "Complete Service"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El recordatorio"
+            "value" : "Completar servicio"
           }
         }
       }
     },
-    "form.theVisit" : {
-      "comment" : "Section title over the past branch.",
+    "form.titleCompleteVisit" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The visit"
+            "value" : "Complete Visit"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La visita"
+            "value" : "Completar visita"
           }
         }
       }
     },
-    "form.timingRequired" : {
+    "form.titleEdit" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choose when it happened, or when it is due."
+            "value" : "Edit Entry"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elige cuándo ocurrió, o cuándo vence."
+            "value" : "Editar registro"
+          }
+        }
+      }
+    },
+    "form.titleLog" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log Service"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrar servicio"
+          }
+        }
+      }
+    },
+    "form.titleSchedule" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schedule Service"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programar servicio"
+          }
+        }
+      }
+    },
+    "form.totalCost" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total cost"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Costo total"
           }
         }
       }
@@ -5414,19 +5485,19 @@
         }
       }
     },
-    "form.useSuggestedValue" : {
+    "form.useEstimate" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Use suggested value: %@"
+            "value" : "Use the estimate, %@"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Usar valor sugerido: %@"
+            "value" : "Usar el estimado, %@"
           }
         }
       }
@@ -5483,19 +5554,19 @@
         }
       }
     },
-    "form.whicheverFirstFromCompletion" : {
+    "form.wontComeBack" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Whichever comes first, counted from the day you mark it done."
+            "value" : "%@ won't come back on its own."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lo que ocurra primero, contado desde el día que lo marques hecho."
+            "value" : "%@ no volverá a aparecer por sí solo."
           }
         }
       }
@@ -5866,23 +5937,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Estimado actual"
-          }
-        }
-      }
-    },
-    "mileage.dismiss_error" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dismiss error"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Descartar error"
           }
         }
       }
@@ -8989,57 +9043,6 @@
     "RECEIPT" : {
 
     },
-    "record.setIntervalHint" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Set an interval to get reminded"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Define un intervalo para recibir avisos"
-          }
-        }
-      }
-    },
-    "refCard.last" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Last %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Último %@"
-          }
-        }
-      }
-    },
-    "refCard.useValues" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Use these values"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Usar estos valores"
-          }
-        }
-      }
-    },
     "REGISTRATION TAG" : {
 
     },
@@ -10650,57 +10653,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A cierto millaje…"
-          }
-        }
-      }
-    },
-    "timing.earlier" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Earlier…"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Antes…"
-          }
-        }
-      }
-    },
-    "timing.inSixMonths" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "In 6 months"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "En 6 meses"
-          }
-        }
-      }
-    },
-    "timing.inThreeMonths" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "In 3 months"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "En 3 meses"
           }
         }
       }

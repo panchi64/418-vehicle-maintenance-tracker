@@ -2,38 +2,56 @@
 //  ServiceDepthSection.swift
 //  checkpoint
 //
-//  What makes an entry *complete*, as opposed to what makes it *work*: notes
-//  and receipts. The repeat interval is deliberately not here — it lives on the
-//  default path in `ServiceReminderFields`, because a reminder that does not
-//  recur is a different feature, not a less complete one.
+//  "More details" — what makes an entry *complete*, as opposed to what makes it
+//  *work*: category, cadence, notes and receipts.
 //
-//  THE TRIGGER GOT REAL PRESENCE. As an 11pt bracket label at the end of a long
-//  form it was invisible — the cheapest control on screen guarding the only
-//  content still hidden. It now gets the same treatment as the header's specs
-//  strip: a full-width row with a rule, naming its contents so you can tell
-//  whether it is worth opening.
+//  Each has a working default or is genuinely optional: category defaults to
+//  Maintenance, and a preset or tracked service brings its own cadence (shown
+//  on the default path as the Next Reminder / Repeat readout). The cadence
+//  fields here are for services with none, or to change it.
+//
+//  The collapsed row NAMES its contents, including the category's current
+//  value, so the user can tell whether it is worth opening. Category is one
+//  control everywhere — this `InlinePicker`.
 //
 
 import SwiftUI
 
 struct ServiceDepthSection: View {
-    @Bindable var model: AddServiceFormModel
+    @Bindable var model: ServiceLogFormModel
+    /// Edit: opens an existing receipt.
+    var onSelectAttachment: (Document) -> Void = { _ in }
 
     @State private var isExpanded = false
 
-    private var filledCount: Int {
-        var count = 0
-        if !model.notes.isEmpty { count += 1 }
-        if !model.pendingAttachments.isEmpty { count += 1 }
-        return count
+    private var existingAttachments: [ServiceAttachment] {
+        model.mode.editing?.attachments ?? []
+    }
+
+    private var summary: String {
+        model.isLogging
+            ? L10n.formDepthSummary(model.costCategory.displayName)
+            : L10n.formDepthSummarySchedule
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
+        VStack(alignment: .leading, spacing: Spacing.md) {
             trigger
 
             if isExpanded {
                 VStack(alignment: .leading, spacing: Spacing.md) {
+                    if model.isLogging {
+                        InlinePicker(
+                            label: L10n.formCategory,
+                            options: CostCategory.allCases.map { PickerOption(value: $0, label: $0.displayName) },
+                            selection: $model.costCategory
+                        )
+                    }
+
+                    if !model.mode.isEdit {
+                        cadenceFields
+                    }
+
                     RichNotesEditor(
                         label: L10n.formNotes,
                         text: $model.notes,
@@ -41,11 +59,14 @@ struct ServiceDepthSection: View {
                         minHeight: 100
                     )
 
-                    // Attachments only make sense for something that already
-                    // happened — there is no receipt for a future service.
+                    // No receipt for something that hasn't happened.
                     if model.isLogging {
+                        if !existingAttachments.isEmpty {
+                            AttachmentSection(attachments: existingAttachments, onSelect: onSelectAttachment)
+                        }
+
                         VStack(alignment: .leading, spacing: Spacing.xs) {
-                            Text(L10n.formAttachments.uppercased())
+                            Text((existingAttachments.isEmpty ? L10n.formAttachments : L10n.formAddAttachments).uppercased())
                                 .font(.brutalistLabel)
                                 .foregroundStyle(Theme.textTertiary)
                                 .tracking(1.5)
@@ -60,6 +81,39 @@ struct ServiceDepthSection: View {
         }
     }
 
+    /// Wraps to two rows at large type: a fixed two-column split cannot
+    /// survive Dynamic Type on a 375pt screen.
+    private var cadenceFields: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .top, spacing: Spacing.sm) {
+                monthsField
+                milesField
+            }
+            VStack(alignment: .leading, spacing: Spacing.md) {
+                monthsField
+                milesField
+            }
+        }
+    }
+
+    private var monthsField: some View {
+        InstrumentNumberField(
+            label: L10n.formEvery,
+            value: $model.intervalMonths,
+            placeholder: "6",
+            suffix: L10n.formMonthsSuffix
+        )
+    }
+
+    private var milesField: some View {
+        InstrumentNumberField(
+            label: L10n.formOrEvery,
+            value: $model.intervalMiles,
+            placeholder: "5000",
+            suffix: DistanceSettings.shared.unit.abbreviation
+        )
+    }
+
     private var trigger: some View {
         Button {
             withAnimation(.easeOut(duration: Theme.animationMedium)) {
@@ -68,31 +122,26 @@ struct ServiceDepthSection: View {
         } label: {
             HStack(spacing: Spacing.sm) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text((isExpanded ? L10n.formFewerDetails : L10n.formMoreDetails).uppercased())
-                        .font(.brutalistLabel)
+                    Text(isExpanded ? L10n.formFewerDetails : L10n.formMoreDetails)
+                        .font(.brutalistBody)
                         .foregroundStyle(Theme.accent)
-                        .tracking(1.5)
 
                     if !isExpanded {
-                        // Names what is inside, and how much of it is already
-                        // filled, so the user can tell whether to bother.
-                        Text(filledCount == 0
-                             ? L10n.formDepthContents
-                             : L10n.formDetailsCount(filledCount))
+                        Text(summary)
                             .font(.brutalistSecondary)
                             .foregroundStyle(Theme.textTertiary)
+                            .lineLimit(2)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
                 Image(systemName: "chevron.down")
-                    .font(.caption2.weight(.semibold))
+                    .font(.caption.weight(.semibold))
                     .foregroundStyle(Theme.accent)
                     .rotationEffect(.degrees(isExpanded ? 180 : 0))
+                    .accessibilityHidden(true)
             }
             .frame(minHeight: 54)
-            // Bottom rule only. A top rule sat a few pixels under the field
-            // above's own underline and read as a doubled line.
             .overlay(alignment: .bottom) {
                 Rectangle()
                     .fill(Theme.gridLine)
@@ -102,7 +151,7 @@ struct ServiceDepthSection: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(L10n.formMoreDetails)
-        .accessibilityValue(filledCount == 0 ? "" : L10n.formDetailsCount(filledCount))
+        .accessibilityValue(isExpanded ? "" : summary)
         .accessibilityAddTraits(isExpanded ? [.isButton, .isSelected] : .isButton)
     }
 }

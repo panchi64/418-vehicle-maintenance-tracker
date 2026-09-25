@@ -44,7 +44,7 @@ struct AttachmentSection: View {
     var body: some View {
         if !attachments.isEmpty {
             VStack(alignment: .leading, spacing: Spacing.sm) {
-                InstrumentSectionHeader(title: "Attachments")
+                InstrumentSectionHeader(title: L10n.formAttachments)
 
                 VStack(alignment: .leading, spacing: Spacing.sm) {
                     HStack(spacing: Spacing.xs) {

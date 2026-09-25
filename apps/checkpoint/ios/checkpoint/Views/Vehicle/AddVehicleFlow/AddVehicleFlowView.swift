@@ -37,14 +37,25 @@ struct AddVehicleFlowView: View {
                             VehicleVINSection(formState: formState)
                                 .id("top")
 
-                            VehicleOdometerSection(formState: formState)
-                                .id("odometer")
-
-                            VehicleIdentitySection(formState: formState)
-
-                            if showBlockingReason, let reason = formState.blockingReason {
-                                FormAdvisory.blocking(reason)
+                            // F2: the blocking advisory sits at the field that
+                            // resolves it — the odometer first, then identity.
+                            VStack(alignment: .leading, spacing: Spacing.md) {
+                                VehicleOdometerSection(formState: formState)
+                                if showBlockingReason, formState.currentMileage == nil,
+                                   let reason = formState.blockingReason {
+                                    FormAdvisory.blocking(reason)
+                                }
                             }
+                            .id("odometer")
+
+                            VStack(alignment: .leading, spacing: Spacing.md) {
+                                VehicleIdentitySection(formState: formState)
+                                if showBlockingReason, formState.currentMileage != nil,
+                                   let reason = formState.blockingReason {
+                                    FormAdvisory.blocking(reason)
+                                }
+                            }
+                            .id("identity")
 
                             VehicleDetailsSection(formState: formState)
                         }
@@ -55,34 +66,24 @@ struct AddVehicleFlowView: View {
                 }
                 .keyboardDismissToolbar()
                 .trackScreen(.addVehicleBasics)
-                .navigationTitle(L10n.vehicleAdd)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button(L10n.commonCancel) {
-                            dismiss()
+                .formToolbar(
+                    title: L10n.vehicleAdd,
+                    saveTitle: L10n.vehicleSave,
+                    canSave: formState.blockingReason == nil,
+                    isDirty: formState.isDirty,
+                    onSave: saveVehicle,
+                    onBlocked: {
+                        showBlockingReason = true
+                        withAnimation {
+                            proxy.scrollTo(
+                                formState.currentMileage == nil ? "odometer" : "identity",
+                                anchor: .center
+                            )
                         }
-                        .toolbarButtonStyle()
                     }
-                }
+                )
                 .onChange(of: formState.blockingReason) { _, newValue in
                     if newValue == nil { showBlockingReason = false }
-                }
-                .safeAreaInset(edge: .bottom) {
-                    FormActionBar(
-                        primaryTitle: L10n.vehicleSave,
-                        isPrimaryEnabled: formState.blockingReason == nil,
-                        onPrimary: { saveVehicle() },
-                        onDisabledPrimaryTap: {
-                            showBlockingReason = true
-                            withAnimation {
-                                proxy.scrollTo(
-                                    formState.currentMileage == nil ? "odometer" : "top",
-                                    anchor: .top
-                                )
-                            }
-                        }
-                    )
                 }
             .onAppear {
                 // Apply onboarding marbete prefill if set
