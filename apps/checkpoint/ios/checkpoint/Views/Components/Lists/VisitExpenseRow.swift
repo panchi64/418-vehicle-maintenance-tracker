@@ -18,18 +18,15 @@ struct VisitExpenseRow: View {
     let visit: ServiceVisit
     let onTap: (() -> Void)?
     let isAnomalous: Bool
-    let isHighlighted: Bool
 
     init(
         visit: ServiceVisit,
         isAnomalous: Bool = false,
-        isHighlighted: Bool = false,
         onTap: (() -> Void)? = nil
     ) {
         self.visit = visit
         self.onTap = onTap
         self.isAnomalous = isAnomalous
-        self.isHighlighted = isHighlighted
     }
 
     private var tint: Color {
@@ -69,7 +66,6 @@ struct VisitExpenseRow: View {
             title: title,
             metadata: metadata,
             amount: visit.formattedTotalCost.map { .init(text: $0, color: tint) },
-            isHighlighted: isHighlighted,
             accessibilityValueText: visit.formattedTotalCost ?? L10n.rowNoTotalRecorded,
             accessibilityLabelText: L10n.rowVisitAccessibility(formattedDate, visit.serviceCount),
             onTap: onTap

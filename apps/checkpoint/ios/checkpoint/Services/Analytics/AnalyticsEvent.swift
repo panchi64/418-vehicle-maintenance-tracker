@@ -101,7 +101,6 @@ enum AnalyticsEvent {
     // MARK: - Costs Tab
 
     case costsPeriodChanged(period: String)
-    case costsCategoryChanged(category: String)
 
     // MARK: - Services Tab
 
@@ -185,7 +184,6 @@ enum AnalyticsEvent {
         case .ocrFailed: return "ocr_failed"
         case .ocrConfirmed: return "ocr_confirmed"
         case .costsPeriodChanged: return "costs_period_changed"
-        case .costsCategoryChanged: return "costs_category_changed"
         case .servicesFilterChanged: return "services_filter_changed"
         case .servicesViewModeChanged: return "services_view_mode_changed"
         case .servicesSearchUsed: return "services_search_used"
@@ -267,8 +265,6 @@ enum AnalyticsEvent {
             return ["ocr_type": ocrType.rawValue, "value_edited": valueEdited]
         case .costsPeriodChanged(let period):
             return ["period": period]
-        case .costsCategoryChanged(let category):
-            return ["category": category]
         case .servicesFilterChanged(let filter):
             return ["filter": filter]
         case .servicesViewModeChanged(let mode):

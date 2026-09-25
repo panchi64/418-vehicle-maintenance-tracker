@@ -2,216 +2,178 @@ import SwiftUI
 
 extension CostsTab {
 
-    // MARK: - Filters
+    // MARK: - Period
 
-    /// Category options for the period currently in view, plus All.
-    ///
-    /// Only categories the vehicle actually has an entry for are offered:
-    /// listing a category with zero entries is offering a route to an empty
-    /// screen. Counts sit beside each option so the choice is informed.
-    ///
-    /// Deliberately reads `allEvents` rather than the filtered set — narrowing to
-    /// one category must not remove the others from the picker.
-    func categoryOptions(_ metrics: CostsMetrics) -> [PickerOption<CategoryFilter>] {
-        let inPeriod: [ExpenseEvent] = {
-            guard let startDate = periodFilter.startDate else { return metrics.allEvents }
-            return metrics.allEvents.filter { $0.date >= startDate }
-        }()
-
-        var countByCategory: [CostCategory: Int] = [:]
-        for event in inPeriod {
-            guard let category = event.category else { continue }
-            countByCategory[category, default: 0] += 1
-        }
-
-        return [PickerOption(value: .all, label: CategoryFilter.all.displayName, count: inPeriod.count)]
-            + CategoryFilter.allCases
-                .compactMap { filter -> PickerOption<CategoryFilter>? in
-                    guard let category = filter.costCategory,
-                          let count = countByCategory[category], count > 0 else { return nil }
-                    return PickerOption(value: filter, label: filter.displayName, count: count)
-                }
-                .sorted { ($0.count ?? 0) > ($1.count ?? 0) }
-    }
-
-    /// ONE row of chrome, not two. Period is the segmented control because it
-    /// changes the scope of every number on the screen; category is a
-    /// FilterControl, which scales to six categories where neither a segmented
-    /// control nor a scrolling chip row does — the chip row hid three of the six
-    /// off the right edge, and 4 periods × 4 categories was 16 states stacked
-    /// above nine independently-gated cards.
-    func filtersSection(_ metrics: CostsMetrics) -> some View {
-        FilterControlRow(
-            name: L10n.costsCategoryDimension,
-            options: categoryOptions(metrics),
-            selection: $categoryFilter,
-            defaultValue: .all
-        ) {
-            InstrumentSegmentedControl(
-                options: PeriodFilter.allCases,
-                selection: $periodFilter
-            ) { filter in
-                filter.displayName
+    /// The one control. A system segmented picker: short segment labels, the
+    /// full period name spoken.
+    var periodPicker: some View {
+        Picker(L10n.costsPeriodPickerLabel, selection: $periodFilter) {
+            ForEach(PeriodFilter.allCases) { period in
+                Text(period.shortName)
+                    .accessibilityLabel(period.fullName)
+                    .tag(period)
             }
         }
+        .pickerStyle(.segmented)
+        .sensoryFeedback(.selection, trigger: periodFilter)
     }
 
-    // MARK: - Headline + Stats
+    // MARK: - Hero
 
-    @ViewBuilder
-    func summaryCardsSection(_ metrics: CostsMetrics) -> some View {
-        VStack(spacing: Spacing.md) {
-            CostHeadlineCard(
-                formattedTotal: metrics.formattedTotalSpent,
-                periodLabel: metrics.periodLabel,
-                deltaAmount: metrics.periodDeltaAmount,
-                deltaDirection: metrics.periodDeltaDirection,
-                priorPeriodLabel: metrics.priorPeriodLabel,
-                reactiveShare: Int(metrics.reactiveShare.rounded()),
-                preventiveShare: Int(metrics.preventiveShare.rounded()),
-                discretionaryShare: Int(metrics.discretionaryShare.rounded()),
-                projection: metrics.yearEndProjection,
-                shareSummary: metrics.costShareSummary(vehicle: vehicle),
-                subjectID: vehicle?.id
+    /// The period total, and the monthly average as its one secondary figure.
+    func heroSection(_ metrics: CostsMetrics) -> some View {
+        ReadoutSection(title: periodFilter.fullName) {
+            RollingNumberText(
+                metrics.formattedTotalSpent,
+                minimumScaleFactor: 0.5,
+                resetToken: vehicle?.id
             )
+            .font(.brutalistHero)
+            .foregroundStyle(Theme.accent)
+            .lineLimit(1)
+            .accessibilityLabel(L10n.costsLabeledValue(periodFilter.fullName, metrics.formattedTotalSpent))
             .tourTarget(.costsHeadline, active: onboardingState.currentPhase.isTour)
-            .revealAnimation(delay: 0.15)
-
-            let cpm = cpmDelta(metrics)
-            StatsCardRow {
-                StatsCard(
-                    label: L10n.costsStatServices,
-                    value: "\(metrics.serviceCount)",
-                    subjectID: vehicle?.id
-                )
-                StatsCard(
-                    label: L10n.costsStatAvgCost,
-                    value: metrics.formattedAverageCost,
-                    subjectID: vehicle?.id
-                )
-                StatsCard(
-                    label: L10n.costsStatPerMile,
-                    value: metrics.formattedCostPerMile,
-                    valueColor: Theme.accent,
-                    subvalue: cpm?.label,
-                    subvalueColor: cpm?.color ?? Theme.textTertiary,
-                    subjectID: vehicle?.id
-                )
+        } supporting: {
+            if let line = metrics.averageLine, let amount = metrics.formattedMonthlyAverage {
+                averageText(line, amount: amount)
             }
-            .revealAnimation(delay: 0.2)
+        } action: {
+            ShareLink(
+                item: metrics.shareSummary(vehicle: vehicle),
+                subject: Text(L10n.costsShareSubject)
+            ) {
+                Text(L10n.costsShareAction)
+                    .font(.brutalistSecondary)
+                    .foregroundStyle(Theme.accent)
+                    .frame(minHeight: TouchTarget.minimum)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(L10n.readoutShareCostSummary)
+        }
+    }
 
-            if metrics.costPerMile == nil && !metrics.isEmpty {
-                Text(L10n.emptyCostPerMileHint.uppercased())
-                    .font(.brutalistLabel)
+    /// One localized sentence with its amount set in the heavier face — so the
+    /// figure reads as a figure without splitting the sentence in two.
+    private func averageText(_ line: String, amount: String) -> Text {
+        var attributed = AttributedString(line)
+        attributed.font = .brutalistSecondary
+        attributed.foregroundColor = Theme.textTertiary
+        if let range = attributed.range(of: amount) {
+            attributed[range].font = .brutalistHeading
+            attributed[range].foregroundColor = Theme.textSecondary
+        }
+        return Text(attributed)
+    }
+
+    // MARK: - Chart
+
+    /// ONE chart section. Units in the title; a written summary always, so the
+    /// chart is never the only carrier of its point.
+    func chartSection(_ metrics: CostsMetrics) -> some View {
+        let title = metrics.chartTitle(chartMode)
+        let summary = metrics.chartSummary(chartMode)
+
+        return ReadoutSection(title: title) {
+            if metrics.chartIsReady(chartMode) {
+                switch chartMode {
+                case .trend:
+                    CostTrendChart(
+                        months: metrics.trend,
+                        title: title,
+                        summary: summary,
+                        selectionLabel: { metrics.trendSelectionLine($0) }
+                    )
+                case .category:
+                    CostCategoryBars(shares: metrics.bucketShares, title: title, summary: summary)
+                }
+            } else {
+                InsufficientDataNote(message: metrics.chartNote(chartMode))
+            }
+        } supporting: {
+            if metrics.chartIsReady(chartMode) {
+                Text(summary)
+                    .font(.brutalistSecondary)
+                    .foregroundStyle(Theme.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        } action: {
+            HStack(spacing: Spacing.sm) {
+                ForEach(ChartMode.allCases) { mode in
+                    Chip(label: mode.label, variant: .plain, isSelected: chartMode == mode) {
+                        chartMode = mode
+                    }
+                }
+            }
+            .sensoryFeedback(.selection, trigger: chartMode)
+        }
+    }
+
+    // MARK: - Comparison
+
+    /// This year so far against the same stretch of last year. Independent of
+    /// the period: it is always a calendar comparison.
+    func comparisonSection(_ metrics: CostsMetrics) -> some View {
+        ReadoutSection(title: metrics.comparisonTitle) {
+            if let comparison = metrics.comparison {
+                HStack(alignment: .firstTextBaseline, spacing: Spacing.sm) {
+                    // Direction on a shape as well as in the words.
+                    Image(systemName: comparisonSymbol(comparison))
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(Theme.textPrimary)
+                        .accessibilityHidden(true)
+                    Text(metrics.comparisonHeadline(comparison))
+                        .font(.brutalistBodyEmphasis)
+                        .foregroundStyle(Theme.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            } else {
+                InsufficientDataNote(message: L10n.costsNoteCompare)
+            }
+        } supporting: {
+            if let comparison = metrics.comparison {
+                Text(metrics.comparisonDetail(comparison))
+                    .font(.brutalistSecondary)
                     .foregroundStyle(Theme.textTertiary)
-                    .tracking(1.5)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
     }
 
-    // MARK: - Breakdown / Insights
-
-    @ViewBuilder
-    func breakdownSections(_ metrics: CostsMetrics) -> some View {
-        if let cluster = metrics.repairCluster {
-            RepairClusterWarningCard(
-                count: cluster.count,
-                formattedTotal: Formatters.currencyWhole(cluster.totalAmount)
-            )
-            .revealAnimation(delay: 0.21)
-        }
-
-        if metrics.cumulativeCostOverTime.count >= 3 {
-            CumulativeCostChartCard(
-                data: metrics.cumulativeCostOverTime,
-                onSelectionChange: { date in
-                    handleChartSelection(nearestTo: date, in: metrics)
-                }
-            )
-            .revealAnimation(delay: 0.22)
-        } else if !metrics.isEmpty {
-            ChartPlaceholderCard(message: "3+ expenses to show spending pace")
-                .revealAnimation(delay: 0.22)
-        }
-
-        if categoryFilter == .all && !metrics.categoryBreakdown.isEmpty {
-            CategoryBreakdownCard(breakdown: metrics.categoryBreakdown)
-                .revealAnimation(delay: 0.24)
-        }
-
-        if metrics.shouldShowYearlyRoundup {
-            VStack(alignment: .leading, spacing: Spacing.sm) {
-                InstrumentSectionHeader(title: "Yearly Summary")
-                YearlyCostRoundupCard(
-                    year: metrics.currentYear,
-                    serviceLogs: metrics.logs,
-                    previousYearLogs: metrics.previousYearLogs
-                )
-            }
-            .revealAnimation(delay: 0.26)
-        }
-
-        if metrics.monthlyBreakdown.count > 1 && periodFilter != .month {
-            MonthlyTrendChartCard(
-                breakdown: metrics.monthlyBreakdownChronological,
-                breakdownByCategory: categoryFilter == .all ? metrics.monthlyBreakdownByCategory : nil,
-                isStacked: categoryFilter == .all,
-                onSelectionChange: { month in
-                    handleMonthSelection(month: month, in: metrics)
-                }
-            )
-            .revealAnimation(delay: 0.28)
-        } else if metrics.serviceCount == 1 && periodFilter != .month {
-            ChartPlaceholderCard(message: "Expenses in 2+ months to show trends")
-                .revealAnimation(delay: 0.28)
-        }
-
-        if metrics.topExpenses.count >= 2 {
-            TopExpensesCard(
-                events: metrics.topExpenses,
-                onSelectLog: { log in appState.push(.serviceLog(log)) },
-                onSelectVisit: { visit in appState.push(.visit(visit)) }
-            )
-            .revealAnimation(delay: 0.30)
-        }
-
-        if let upcoming = upcomingTeaser {
-            UpcomingServicesLinkCard(
-                nextServiceName: upcoming.nextName,
-                additionalCount: upcoming.additional,
-                // Services, not Home. Home shows at most three upcoming items;
-                // this card names one and counts the rest, so it has to land on
-                // the list that actually contains them. Sending it to Home also
-                // completed a loop — Home's Recent Activity used to point back
-                // here.
-                onTap: { appState.selectedTab = .services }
-            )
-            .revealAnimation(delay: 0.32)
-        }
+    private func comparisonSymbol(_ comparison: CostYearComparison) -> String {
+        if comparison.percentChange > 0 { return "arrowtriangle.up.fill" }
+        if comparison.percentChange < 0 { return "arrowtriangle.down.fill" }
+        return "equal"
     }
 
-    // MARK: - Expense List
+    // MARK: - Expenses by month
 
     @ViewBuilder
-    func expenseListSection(_ metrics: CostsMetrics) -> some View {
-        if !metrics.isEmpty {
-            let anomalies = metrics.anomalyEventIDs
-            let events = metrics.events
-            // Unboxed, matching Home and Services: a titled section of
-            // divider-separated rows is already one group, and this tab's
-            // headline and stat cards are boxed, so a bordered list here
-            // competed with them.
+    func expenseSections(_ metrics: CostsMetrics) -> some View {
+        if metrics.monthGroups.isEmpty {
             ReadoutSection(title: L10n.costsExpenses) {
-                VStack(spacing: 0) {
-                    ForEach(Array(events.enumerated()), id: \.element.id) { index, event in
-                        expenseRow(for: event, isAnomalous: anomalies.contains(event.id))
-                            .staggeredReveal(index: index, baseDelay: 0.25)
+                InsufficientDataNote(message: L10n.costsNoteEmptyPeriod)
+            }
+            .costsListRow()
+        } else {
+            let anomalies = metrics.anomalyEventIDs
+            ForEach(metrics.monthGroups) { group in
+                Section {
+                    InstrumentSectionHeader(title: group.month.formatted(.dateTime.month(.wide).year())) {
+                        Text(Formatters.currency.string(from: group.total as NSDecimalNumber) ?? "")
+                            .font(.brutalistBodyEmphasis)
+                            .foregroundStyle(Theme.textPrimary)
+                    }
+                    .costsListRow(top: Spacing.lg, bottom: Spacing.xs)
 
-                        if index < events.count - 1 {
-                            ListDivider()
-                        }
+                    ForEach(Array(group.events.enumerated()), id: \.element.id) { index, event in
+                        expenseRow(event, isAnomalous: anomalies.contains(event.id))
+                            .overlay(alignment: .bottom) {
+                                if index < group.events.count - 1 {
+                                    ListDivider()
+                                }
+                            }
+                            .costsListRow(top: 0, bottom: 0)
                     }
                 }
             }
@@ -219,136 +181,43 @@ extension CostsTab {
     }
 
     @ViewBuilder
-    private func expenseRow(for event: ExpenseEvent, isAnomalous: Bool) -> some View {
-        let isHighlighted = highlightedEventID == event.id
-
+    private func expenseRow(_ event: ExpenseEvent, isAnomalous: Bool) -> some View {
         switch event {
         case .standalone(let log):
-            ExpenseRow(
-                log: log,
-                isAnomalous: isAnomalous,
-                isHighlighted: isHighlighted
-            ) {
+            ExpenseRow(log: log, isAnomalous: isAnomalous) {
                 appState.push(.serviceLog(log))
+            }
+            // Swipe and long-press reach the same Delete (with undo).
+            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                Button(role: .destructive) {
+                    ServiceLogDeleteAction.perform(log, offerUndo: true)
+                } label: {
+                    Label(L10n.logDeleteAction, systemImage: "trash")
+                }
             }
             .serviceLogDeleteMenu { ServiceLogDeleteAction.perform(log, offerUndo: true) }
         case .visit(let visit):
-            VisitExpenseRow(
-                visit: visit,
-                isAnomalous: isAnomalous,
-                isHighlighted: isHighlighted
-            ) {
+            VisitExpenseRow(visit: visit, isAnomalous: isAnomalous) {
                 appState.push(.visit(visit))
             }
         }
     }
+}
 
-    // MARK: - Empty States
+// MARK: - Row chrome
 
-    @ViewBuilder
-    func emptyStates(_ metrics: CostsMetrics) -> some View {
-        if vehicle != nil && metrics.isEmpty {
-            CostsEmptyStateView(hasLoggedAny: !metrics.logs.isEmpty)
-                .revealAnimation(delay: 0.2)
-        }
-
-        if vehicle == nil {
-            EmptyStateView(
-                icon: "car.side.fill",
-                title: "No Vehicle",
-                message: "Select or add a vehicle\nto view costs"
-            )
-            .revealAnimation(delay: 0.2)
-        }
-    }
-
-    // MARK: - Helpers
-
-    struct CPMDelta {
-        let label: String
-        let color: Color
-    }
-
-    func cpmDelta(_ metrics: CostsMetrics) -> CPMDelta? {
-        guard let delta = metrics.costPerMileDelta else { return nil }
-
-        let unitAbbr = DistanceSettings.shared.unit.abbreviation
-        let absStr = String(format: "$%.2f/%@", abs(delta), unitAbbr)
-
-        let label: String
-        let color: Color
-        switch metrics.costPerMileDeltaDirection {
-        case .up:
-            label = L10n.costsCPMDeltaUp(absStr)
-            color = Theme.statusOverdue
-        case .down:
-            label = L10n.costsCPMDeltaDown(absStr)
-            color = Theme.statusGood
-        case .flat:
-            label = L10n.costsCPMDeltaFlat
-            color = Theme.textTertiary
-        }
-        return CPMDelta(label: label, color: color)
-    }
-
-    var upcomingTeaser: (nextName: String, additional: Int)? {
-        guard let vehicle = vehicle else { return nil }
-        let items = vehicle.allUpcomingItems
-        guard let first = items.first else { return nil }
-        return (first.itemName, max(0, items.count - 1))
-    }
-
-    /// Resolve the event whose `date` is closest to `target` (within ±3 days)
-    /// and pulse-highlight it in the list.
-    func handleChartSelection(nearestTo target: Date?, in metrics: CostsMetrics) {
-        guard let target else {
-            clearHighlight()
-            return
-        }
-        let nearest = metrics.events.min(by: {
-            abs($0.date.timeIntervalSince(target)) < abs($1.date.timeIntervalSince(target))
-        })
-        guard let nearest,
-              abs(nearest.date.timeIntervalSince(target)) <= 60 * 60 * 24 * 3 else {
-            clearHighlight()
-            return
-        }
-        applyHighlight(nearest.id)
-    }
-
-    func handleMonthSelection(month: Date?, in metrics: CostsMetrics) {
-        guard let month else {
-            clearHighlight()
-            return
-        }
-        let calendar = Calendar.current
-        let inMonth = metrics.events.filter {
-            calendar.isDate($0.date, equalTo: month, toGranularity: .month)
-        }
-        guard let pick = inMonth.max(by: { $0.amount < $1.amount }) else {
-            clearHighlight()
-            return
-        }
-        applyHighlight(pick.id)
-    }
-
-    private func clearHighlight() {
-        guard highlightedEventID != nil else { return }
-        highlightedEventID = nil
-    }
-
-    private func applyHighlight(_ id: UUID) {
-        guard highlightedEventID != id else { return }
-        withAnimation(.easeOut(duration: Theme.animationMedium)) {
-            highlightedEventID = id
-        }
-        Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(1500))
-            if highlightedEventID == id {
-                withAnimation(.easeOut(duration: Theme.animationMedium)) {
-                    highlightedEventID = nil
-                }
-            }
-        }
+extension View {
+    /// The brutalist row: screen-edge insets, no system background or
+    /// separator (rows draw their own 1pt rule).
+    func costsListRow(top: CGFloat = Spacing.md, bottom: CGFloat = Spacing.md) -> some View {
+        self
+            .listRowInsets(EdgeInsets(
+                top: top,
+                leading: Spacing.screenHorizontal,
+                bottom: bottom,
+                trailing: Spacing.screenHorizontal
+            ))
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
     }
 }

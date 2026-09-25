@@ -123,11 +123,7 @@ enum L10n {
 
     static var servicesViewList: String { localized("servicesTab.viewList") }
     static var servicesViewTimeline: String { localized("servicesTab.viewTimeline") }
-    static var costsCategoryDimension: String { localized("costs.categoryDimension") }
     static var costsExpenses: String { localized("costs.expenses") }
-    static var costsStatServices: String { localized("costs.statServices") }
-    static var costsStatAvgCost: String { localized("costs.statAvgCost") }
-    static var costsStatPerMile: String { localized("costs.statPerMile") }
     static var homeUpcoming: String { localized("home.upcoming") }
     static var homeRecentActivity: String { localized("home.recentActivity") }
     static var servicesStatusDimension: String { localized("servicesTab.statusDimension") }
@@ -141,14 +137,7 @@ enum L10n {
         String(format: localized("servicesTab.historyCount"), count)
     }
 
-    static var costsPeriodMonth: String { localized("costs.periodMonth") }
-    static var costsPeriodYTD: String { localized("costs.periodYTD") }
-    static var costsPeriodYear: String { localized("costs.periodYear") }
-    static var costsPeriodAll: String { localized("costs.periodAll") }
-
     static var categoryMaintenance: String { localized("category.maintenance") }
-    /// Abbreviated form for the width-constrained segmented filter.
-    static var categoryMaintenanceShort: String { localized("category.maintenanceShort") }
     static var categoryRepair: String { localized("category.repair") }
     static var categoryUpgrade: String { localized("category.upgrade") }
 
@@ -419,65 +408,18 @@ enum L10n {
 
     // MARK: - Costs Tab
 
-    static var costsHeadlineTotal: String { localized("costs.headline.total") }
-    static func costsHeadlineDeltaUp(_ amount: String, _ priorLabel: String) -> String {
-        String(format: localized("costs.headline.delta_up"), amount, priorLabel)
-    }
-    static func costsHeadlineDeltaDown(_ amount: String, _ priorLabel: String) -> String {
-        String(format: localized("costs.headline.delta_down"), amount, priorLabel)
-    }
-    static func costsHeadlineDeltaFlat(_ priorLabel: String) -> String {
-        String(format: localized("costs.headline.delta_flat"), priorLabel)
-    }
-    static var costsHeadlinePriorMonth: String { localized("costs.headline.prior_month") }
-    static func costsHeadlinePriorYTD(_ year: Int) -> String {
-        String(format: localized("costs.headline.prior_ytd"), year)
-    }
-    static var costsHeadlinePriorYear: String { localized("costs.headline.prior_year") }
-    static func costsHeadlineSplit(_ reactive: Int, _ preventive: Int, _ discretionary: Int) -> String {
-        String(format: localized("costs.headline.split"), reactive, preventive, discretionary)
-    }
-    static func costsHeadlineProjection(_ amount: String) -> String {
-        String(format: localized("costs.headline.projection"), amount)
-    }
-    static var costsHeadlineShare: String { localized("costs.headline.share") }
-
-    static var costsClusterTitle: String { localized("costs.cluster.title") }
-    static func costsClusterBody(_ count: Int, _ total: String) -> String {
-        String(format: localized("costs.cluster.body"), count, total)
-    }
-
-    static var costsTopTitle: String { localized("costs.top.title") }
     static var costsRowOutlier: String { localized("costs.row.outlier") }
-
-    static func costsCPMDeltaUp(_ amount: String) -> String {
-        String(format: localized("costs.cpm.delta_up"), amount)
-    }
-    static func costsCPMDeltaDown(_ amount: String) -> String {
-        String(format: localized("costs.cpm.delta_down"), amount)
-    }
-    static var costsCPMDeltaFlat: String { localized("costs.cpm.delta_flat") }
 
     static var costsEmptyStartTitle: String { localized("costs.empty.start.title") }
     static var costsEmptyStartMessage: String { localized("costs.empty.start.message") }
     static var costsEmptyNoneTitle: String { localized("costs.empty.none.title") }
     static var costsEmptyNoneMessage: String { localized("costs.empty.none.message") }
 
-    static var costsUpcomingTitle: String { localized("costs.upcoming.title") }
-    static func costsUpcomingBodySingular(_ name: String) -> String {
-        String(format: localized("costs.upcoming.body_singular"), name)
-    }
-    static func costsUpcomingBodyPlural(_ name: String, _ more: Int) -> String {
-        String(format: localized("costs.upcoming.body_plural"), name, more)
-    }
-
     static var costsShareSubject: String { localized("costs.share.subject") }
 
     // MARK: - Empty States
 
-    static var emptyCostPerMileHint: String { localized("empty.cost_per_mile_hint") }
     static var emptyPaceHint: String { localized("empty.pace_hint") }
-    static var emptyChartPlaceholder: String { localized("empty.chart_placeholder") }
     static var emptyNoServicesTitle: String { localized("empty.noServicesTitle") }
     static var emptyNoServicesMessage: String { localized("empty.noServicesMessage") }
     static var emptyNoResultsTitle: String { localized("empty.noResultsTitle") }

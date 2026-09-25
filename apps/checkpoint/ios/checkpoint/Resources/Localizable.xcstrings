@@ -1282,24 +1282,6 @@
         }
       }
     },
-    "category.maintenanceShort" : {
-      "comment" : "Abbreviated cost category for the width-constrained segmented filter.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maint."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mant."
-          }
-        }
-      }
-    },
     "category.repair" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1733,8 +1715,44 @@
     "Copy marbete expiration" : {
 
     },
-    "costs.categoryDimension" : {
-      "comment" : "Names the category filter dimension on the Costs tab.",
+    "costs.category.amountShare" : {
+      "comment" : "Costs tab, By Category row: amount and its share of the period total. %1$@ = amount, %2$lld = percent.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$lld%%"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$lld%%"
+          }
+        }
+      }
+    },
+    "costs.category.uncategorized" : {
+      "comment" : "Costs tab: the bucket for expenses with no cost category.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uncategorized"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin categoría"
+          }
+        }
+      }
+    },
+    "costs.chart.category" : {
+      "comment" : "Costs tab chart chip: show spending by category.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1751,87 +1769,200 @@
         }
       }
     },
-    "costs.cluster.body" : {
+    "costs.chart.categorySummary" : {
+      "comment" : "Costs tab, category chart summary line. %1$@ = category name, %2$lld = percent.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$lld repairs in the last 90 days totaling %2$@"
+            "value" : "%1$@ is %2$lld%% of spending."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$lld reparaciones en los últimos 90 días por un total de %2$@"
+            "value" : "%1$@ representa el %2$lld%% del gasto."
           }
         }
       }
     },
-    "costs.cluster.title" : {
+    "costs.chart.categoryTitle" : {
+      "comment" : "Costs tab chart section title with its unit. %@ = currency code, e.g. USD.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "REPAIR CLUSTER"
+            "value" : "By Category, %@"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "GRUPO DE REPARACIONES"
+            "value" : "Por categoría, %@"
           }
         }
       }
     },
-    "costs.cpm.delta_down" : {
+    "costs.chart.selection" : {
+      "comment" : "Costs tab trend chart scrub callout. %1$@ = month and year, %2$@ = amount.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "↓ %@"
+            "value" : "%1$@ — %2$@"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "↓ %@"
+            "value" : "%1$@ — %2$@"
           }
         }
       }
     },
-    "costs.cpm.delta_flat" : {
+    "costs.chart.trend" : {
+      "comment" : "Costs tab chart chip: show spending per month.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "—"
+            "value" : "Trend"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "—"
+            "value" : "Tendencia"
           }
         }
       }
     },
-    "costs.cpm.delta_up" : {
+    "costs.chart.trendSummary" : {
+      "comment" : "Costs tab, trend chart summary line. %1$@ = monthly average, %2$@ = highest month's name, %3$@ = that month's amount.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "↑ %@"
+            "value" : "Averages %1$@ a month; highest %2$@, %3$@."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "↑ %@"
+            "value" : "Promedio de %1$@ al mes; el más alto, %2$@ con %3$@."
+          }
+        }
+      }
+    },
+    "costs.chart.trendTitle" : {
+      "comment" : "Costs tab chart section title with its unit. %@ = currency code, e.g. USD.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per Month, %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por mes, %@"
+          }
+        }
+      }
+    },
+    "costs.compare.detail" : {
+      "comment" : "Costs tab, year comparison detail. %1$@ = this year's total so far, %2$@ = last year's total by the same date, %3$@ = last year.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ so far this year, %2$@ by this date in %3$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ en lo que va del año, %2$@ a esta fecha en %3$@"
+          }
+        }
+      }
+    },
+    "costs.compare.less" : {
+      "comment" : "Costs tab, year comparison headline. %lld = percent.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld%% less than this point last year"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld%% menos que a estas alturas el año pasado"
+          }
+        }
+      }
+    },
+    "costs.compare.more" : {
+      "comment" : "Costs tab, year comparison headline. %lld = percent.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld%% more than this point last year"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld%% más que a estas alturas el año pasado"
+          }
+        }
+      }
+    },
+    "costs.compare.same" : {
+      "comment" : "Costs tab, year comparison headline when spending matches last year.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Same as this point last year"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Igual que a estas alturas el año pasado"
+          }
+        }
+      }
+    },
+    "costs.compare.title" : {
+      "comment" : "Costs tab, year comparison section title. %1$@ = this year, %2$@ = last year.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ vs %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ vs. %2$@"
           }
         }
       }
@@ -1921,177 +2052,260 @@
         }
       }
     },
-    "costs.headline.delta_down" : {
+    "costs.hero.average" : {
+      "comment" : "Costs tab hero's secondary figure. %@ = monthly average amount.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "↓ %1$@ %2$@"
+            "value" : "%@ a month on average"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "↓ %1$@ %2$@"
+            "value" : "%@ al mes en promedio"
           }
         }
       }
     },
-    "costs.headline.delta_flat" : {
+    "costs.hero.average12Months" : {
+      "comment" : "Costs tab hero's secondary figure for the 30-day period, which averages the last 12 months. %@ = monthly average amount.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "— %@"
+            "value" : "%@ a month on average over the last 12 months"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "— %@"
+            "value" : "%@ al mes en promedio en los últimos 12 meses"
           }
         }
       }
     },
-    "costs.headline.delta_up" : {
+    "costs.labeledValue" : {
+      "comment" : "Costs tab: a label and its value, e.g. \"Year to Date: $1,234\". Used for VoiceOver and the shared summary.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "↑ %1$@ %2$@"
+            "value" : "%1$@: %2$@"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "↑ %1$@ %2$@"
+            "value" : "%1$@: %2$@"
           }
         }
       }
     },
-    "costs.headline.prior_month" : {
+    "costs.note.category" : {
+      "comment" : "Costs tab: shown instead of the category chart until it has enough data.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "vs prior 30 d"
+            "value" : "A breakdown appears once expenses span two categories."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "vs 30 d anteriores"
+            "value" : "El desglose aparece cuando los gastos abarcan dos categorías."
           }
         }
       }
     },
-    "costs.headline.prior_year" : {
+    "costs.note.compare" : {
+      "comment" : "Costs tab: shown instead of the year comparison until last year has expenses by today's date.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "vs prior 12 mo"
+            "value" : "Appears once last year has expenses by this date."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "vs 12 meses anteriores"
+            "value" : "Aparece cuando el año pasado tenga gastos a esta fecha."
           }
         }
       }
     },
-    "costs.headline.prior_ytd" : {
+    "costs.note.emptyPeriod" : {
+      "comment" : "Costs tab: the expense list when the selected period has no expenses.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "vs YTD %lld"
+            "value" : "Nothing spent in this period."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "vs YTD %lld"
+            "value" : "Sin gastos en este período."
           }
         }
       }
     },
-    "costs.headline.projection" : {
+    "costs.note.trend" : {
+      "comment" : "Costs tab: shown instead of the monthly trend chart until it has enough data.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ON PACE FOR %@ BY DEC 31"
+            "value" : "A trend appears once three months have expenses."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "EN RITMO PARA %@ AL 31 DIC"
+            "value" : "La tendencia aparece cuando haya gastos en tres meses."
           }
         }
       }
     },
-    "costs.headline.share" : {
+    "costs.note.trend30Days" : {
+      "comment" : "Costs tab, 30-day period: shown instead of the trend chart until the period has two expenses.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SHARE"
+            "value" : "A trend appears once this period has two expenses."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "COMPARTIR"
+            "value" : "La tendencia aparece cuando este período tenga dos gastos."
           }
         }
       }
     },
-    "costs.headline.split" : {
+    "costs.period.12m" : {
+      "comment" : "Costs period, full name: the last 12 months (rolling).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$lld%% REACTIVE · %2$lld%% PREVENTIVE · %3$lld%% DISCRETIONARY"
+            "value" : "Last 12 Months"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$lld%% REACTIVO · %2$lld%% PREVENTIVO · %3$lld%% DISCRECIONAL"
+            "value" : "Últimos 12 meses"
           }
         }
       }
     },
-    "costs.headline.total" : {
+    "costs.period.30d" : {
+      "comment" : "Costs period, full name: the last 30 days (rolling).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Total Spent"
+            "value" : "Last 30 Days"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Total gastado"
+            "value" : "Últimos 30 días"
           }
         }
       }
     },
-    "costs.periodAll" : {
+    "costs.period.all" : {
+      "comment" : "Costs period, full name: all recorded history.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All Time"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo el historial"
+          }
+        }
+      }
+    },
+    "costs.period.picker" : {
+      "comment" : "Costs tab: accessibility name of the period picker.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Period"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Período"
+          }
+        }
+      }
+    },
+    "costs.period.short.12m" : {
+      "comment" : "Costs period segment label: last 12 months. Keep very short.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12M"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12 m"
+          }
+        }
+      }
+    },
+    "costs.period.short.30d" : {
+      "comment" : "Costs period segment label: last 30 days. Keep very short.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30D"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30 d"
+          }
+        }
+      }
+    },
+    "costs.period.short.all" : {
+      "comment" : "Costs period segment label: all history. Keep very short.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -2108,32 +2322,14 @@
         }
       }
     },
-    "costs.periodMonth" : {
-      "comment" : "Costs period filter: the last 30 days (a rolling window, not the calendar month).",
+    "costs.period.short.ytd" : {
+      "comment" : "Costs period segment label: since January 1. Keep very short.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Month"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mes"
-          }
-        }
-      }
-    },
-    "costs.periodYear" : {
-      "comment" : "Costs period filter: the last 12 months (a rolling window, not the calendar year).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Year"
+            "value" : "YTD"
           }
         },
         "es" : {
@@ -2144,20 +2340,20 @@
         }
       }
     },
-    "costs.periodYTD" : {
-      "comment" : "Costs period filter: since January 1 of the current year.",
+    "costs.period.ytd" : {
+      "comment" : "Costs period, full name: since January 1 of this year.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "YTD"
+            "value" : "Year to Date"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "YTD"
+            "value" : "En lo que va del año"
           }
         }
       }
@@ -2179,6 +2375,24 @@
         }
       }
     },
+    "costs.share.action" : {
+      "comment" : "Costs tab hero: share the cost summary.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartir"
+          }
+        }
+      }
+    },
     "costs.share.subject" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2192,125 +2406,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Costos del vehículo"
-          }
-        }
-      }
-    },
-    "costs.statAvgCost" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avg cost"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Costo prom."
-          }
-        }
-      }
-    },
-    "costs.statPerMile" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Per mile"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Por milla"
-          }
-        }
-      }
-    },
-    "costs.statServices" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Services"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Servicios"
-          }
-        }
-      }
-    },
-    "costs.top.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Biggest Expenses"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gastos mayores"
-          }
-        }
-      }
-    },
-    "costs.upcoming.body_plural" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ and %2$lld more upcoming"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ y %2$lld más próximos"
-          }
-        }
-      }
-    },
-    "costs.upcoming.body_singular" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ — plan ahead"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ — planifica"
-          }
-        }
-      }
-    },
-    "costs.upcoming.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Coming Up"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Próximamente"
           }
         }
       }
@@ -3618,40 +3713,6 @@
     },
     "Empty" : {
 
-    },
-    "empty.chart_placeholder" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "3+ entries needed"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Se necesitan 3+ entradas"
-          }
-        }
-      }
-    },
-    "empty.cost_per_mile_hint" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Log 2+ services with mileage to calculate"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Registra 2+ servicios con kilometraje para calcular"
-          }
-        }
-      }
     },
     "empty.filter_clear" : {
       "extractionState" : "manual",
@@ -7737,24 +7798,6 @@
         }
       }
     },
-    "readout.chartAxisDate" : {
-      "comment" : "Audio Graph x-axis title.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Date"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fecha"
-          }
-        }
-      }
-    },
     "readout.chartAxisMonth" : {
       "comment" : "Audio Graph x-axis title.",
       "extractionState" : "manual",
@@ -7769,96 +7812,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mes"
-          }
-        }
-      }
-    },
-    "readout.chartAxisTotal" : {
-      "comment" : "Audio Graph y-axis and series title for the running total.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Total spent"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Total gastado"
-          }
-        }
-      }
-    },
-    "readout.chartMonthlySummary" : {
-      "comment" : "Audio Graph summary. %1$@ total, %2$d months, %3$@ highest month, %4$@ its amount.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ across %2$d months. Highest: %3$@, %4$@."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ en %2$d meses. Mes más alto: %3$@, %4$@."
-          }
-        }
-      }
-    },
-    "readout.chartMonthlyTitle" : {
-      "comment" : "Title of the monthly spending chart.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Monthly Trend"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tendencia mensual"
-          }
-        }
-      }
-    },
-    "readout.chartPaceSummary" : {
-      "comment" : "Audio Graph summary. %1$@ running total, %2$@ date reached, %3$d expense count.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ spent by %2$@, across %3$d expenses."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ gastados hasta el %2$@, en %3$d gastos."
-          }
-        }
-      }
-    },
-    "readout.chartPaceTitle" : {
-      "comment" : "Title of the cumulative spending chart.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spending Pace"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ritmo de gasto"
           }
         }
       }
@@ -8435,60 +8388,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Notas del vehículo"
-          }
-        }
-      }
-    },
-    "readout.yearChange" : {
-      "comment" : "Year-over-year change on the yearly roundup. %1$d percent, %2$@ prior year.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$d%% from %2$@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$d%% respecto a %2$@"
-          }
-        }
-      }
-    },
-    "readout.yearChangeDown" : {
-      "comment" : "VoiceOver: spending fell. %1$d percent, %2$@ prior year.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Down %1$d percent from %2$@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$d por ciento menos que en %2$@"
-          }
-        }
-      }
-    },
-    "readout.yearChangeUp" : {
-      "comment" : "VoiceOver: spending rose. %1$d percent, %2$@ prior year.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Up %1$d percent from %2$@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$d por ciento más que en %2$@"
           }
         }
       }

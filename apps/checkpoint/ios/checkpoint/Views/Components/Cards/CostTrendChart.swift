@@ -1,363 +1,148 @@
 //
-//  MonthlyTrendChartCard.swift
+//  CostTrendChart.swift
 //  checkpoint
 //
-//  Vertical bar chart showing monthly spending trends
-//  Supports stacked bars by category when "All" filter is active
+//  The Costs tab's Trend picture: one bar per calendar month, oldest first,
+//  empty months kept. The highest month is the accent bar; the rest recede.
+//
+//  Scrubbing shows the month under the finger as a callout inside the chart,
+//  above its bar. It used to highlight the matching expense row instead, which
+//  was usually off-screen — the answer to "what was that bar?" appeared
+//  somewhere the user wasn't looking.
+//
+//  Bare chart, no card: the section header and the written summary belong to
+//  the caller's section, not to the picture.
 //
 
 import SwiftUI
 import Charts
 
-struct MonthlyTrendChartCard: View {
-    let breakdown: [(month: Date, amount: Decimal)]
-    let breakdownByCategory: [(month: Date, category: CostCategory, amount: Decimal)]?
-    let isStacked: Bool
-    var onSelectionChange: ((Date?) -> Void)? = nil
+struct CostTrendChart: View {
+    let months: [CostMonth]
+    /// Chart title and written summary, reused for the Audio Graph.
+    let title: String
+    let summary: String
+    /// The scrub callout's text for one month ("June 2026 — $320").
+    let selectionLabel: @MainActor (CostMonth) -> String
 
-    @State private var selectedMonth: Date?
+    @State private var selectedDate: Date?
 
-    private static let monthFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.setLocalizedDateFormatFromTemplate("MMM")
-        return f
-    }()
-
-    private static let monthYearFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.setLocalizedDateFormatFromTemplate("MMMyyyy")
-        return f
-    }()
-
-    /// Spoken month for VoiceOver: "June 2026", not "Jun 2026" or "6/26".
-    private static func spokenMonth(_ date: Date) -> String {
-        date.formatted(.dateTime.month(.wide).year())
-    }
-
-    /// Audio Graph description: every month's amount (per category when
-    /// stacked), plus the total and the highest month as a summary.
-    private var chartDescriptor: CostChartDescriptor {
-        let months = breakdown.map { Self.spokenMonth($0.month) }
-        let series: [SpokenChartSeries]
-        if isStacked, let byCategory = breakdownByCategory {
-            let categories = Array(Set(byCategory.map(\.category))).sorted { $0.displayName < $1.displayName }
-            series = categories.map { category in
-                SpokenChartSeries(
-                    name: category.displayName,
-                    points: byCategory
-                        .filter { $0.category == category }
-                        .map { SpokenChartPoint(label: Self.spokenMonth($0.month), amount: $0.amount) }
-                )
-            }
-        } else {
-            series = [SpokenChartSeries(
-                name: L10n.readoutChartSeriesSpending,
-                points: breakdown.map { SpokenChartPoint(label: Self.spokenMonth($0.month), amount: $0.amount) }
-            )]
-        }
-
-        let total = breakdown.map(\.amount).reduce(0, +)
-        let summary: String
-        if let peak = breakdown.max(by: { $0.amount < $1.amount }) {
-            summary = L10n.readoutChartMonthlySummary(
-                Formatters.currencyWhole(total),
-                breakdown.count,
-                Self.spokenMonth(peak.month),
-                Formatters.currencyWhole(peak.amount)
-            )
-        } else {
-            summary = ""
-        }
-
-        return CostChartDescriptor(
-            title: L10n.readoutChartMonthlyTitle,
-            summary: summary,
-            xAxisTitle: L10n.readoutChartAxisMonth,
-            yAxisTitle: L10n.readoutChartAxisAmount,
-            categories: months,
-            series: series,
-            currencyCode: Formatters.currencyWhole.currencyCode ?? "USD"
-        )
-    }
-
-    /// Month stride count for x-axis labels based on data span
-    private var xAxisMonthStride: Int {
-        breakdown.count > 8 ? 3 : 1
-    }
-
-    /// Find the breakdown entry matching the selected month
-    private var selectedBreakdownEntry: (month: Date, amount: Decimal)? {
-        guard let selectedMonth else { return nil }
+    private var selected: CostMonth? {
+        guard let selectedDate else { return nil }
         let calendar = Calendar.current
-        return breakdown.first { entry in
-            calendar.isDate(entry.month, equalTo: selectedMonth, toGranularity: .month)
-        }
+        return months.first { calendar.isDate($0.month, equalTo: selectedDate, toGranularity: .month) }
+    }
+
+    private var peakMonth: Date? {
+        months.max(by: { $0.amount < $1.amount })?.month
+    }
+
+    /// Past a year of bars, label every third month so labels don't collide.
+    private var labelStride: Int {
+        months.count > 12 ? 3 : (months.count > 7 ? 2 : 1)
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: L10n.readoutChartMonthlyTitle)
+        let selected = self.selected
 
-            VStack(spacing: 0) {
-                ZStack(alignment: .topLeading) {
-                    chart
-                        .brutalistChartStyle()
-                        .accessibilityChartDescriptor(chartDescriptor)
-
-                    if let entry = selectedBreakdownEntry {
-                        selectionOverlay(month: entry.month, amount: entry.amount)
+        Chart {
+            // Declared first so the rule sits behind the bars; the callout
+            // still draws above everything.
+            if let selected {
+                RuleMark(x: .value(L10n.readoutChartAxisMonth, selected.month, unit: .month))
+                    .foregroundStyle(Theme.gridLine)
+                    .lineStyle(StrokeStyle(lineWidth: Theme.borderWidth))
+                    .annotation(
+                        position: .top,
+                        spacing: Spacing.xs,
+                        overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))
+                    ) {
+                        Text(selectionLabel(selected))
+                            .font(.brutalistBodyEmphasis)
+                            .foregroundStyle(Theme.textPrimary)
+                            .padding(.horizontal, Spacing.sm)
+                            .padding(.vertical, Spacing.xs)
+                            .background(Theme.backgroundElevated)
+                            .brutalistBorder()
                     }
-                }
-                .padding(Spacing.md)
-
-                if isStacked, let byCategory = breakdownByCategory {
-                    legend(for: byCategory)
-                }
             }
-            .background(Theme.surfaceInstrument)
-            .brutalistBorder()
 
-            textRows
-        }
-        .accessibilityElement(children: .contain)
-        .onChange(of: selectedBreakdownEntry?.month) { _, newMonth in
-            onSelectionChange?(newMonth)
-        }
-    }
-
-    private func selectionOverlay(month: Date, amount: Decimal) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(Self.monthYearFormatter.string(from: month).uppercased())
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1)
-
-            Text(Formatters.currencyWhole(amount))
-                .font(.brutalistHeading)
-                .foregroundStyle(Theme.accent)
-        }
-        .padding(.horizontal, Spacing.sm)
-        .padding(.vertical, Spacing.xs)
-        .background(Theme.surfaceInstrument)
-        .brutalistBorder()
-    }
-
-    // MARK: - Chart
-
-    @ViewBuilder
-    private var chart: some View {
-        if isStacked, let byCategory = breakdownByCategory {
-            Chart {
-                ForEach(Array(byCategory.enumerated()), id: \.offset) { _, entry in
-                    BarMark(
-                        x: .value("Month", entry.month, unit: .month),
-                        y: .value("Amount", NSDecimalNumber(decimal: entry.amount).doubleValue)
-                    )
-                    .foregroundStyle(by: .value("Category", entry.category.displayName))
-                    .cornerRadius(0)
-                }
-            }
-            .chartXSelection(value: $selectedMonth)
-            .chartForegroundStyleScale(categoryColorMapping(from: byCategory))
-            .chartLegend(.hidden)
-            .chartXAxis {
-                AxisMarks(values: .stride(by: .month, count: xAxisMonthStride)) { value in
-                    AxisValueLabel {
-                        if let date = value.as(Date.self) {
-                            Text(xAxisLabel(for: date))
-                                .font(.brutalistLabel)
-                                .foregroundStyle(Theme.textTertiary)
-                        }
-                    }
-                }
-            }
-            .chartYAxis {
-                AxisMarks { value in
-                    AxisGridLine(stroke: StrokeStyle(lineWidth: ChartConstants.chartGridLineWidth))
-                        .foregroundStyle(Theme.gridLine)
-                    AxisValueLabel {
-                        if let doubleValue = value.as(Double.self) {
-                            Text(ChartFormatting.abbreviatedCurrency(doubleValue))
-                                .font(.brutalistLabel)
-                                .foregroundStyle(Theme.textTertiary)
-                        }
-                    }
-                }
-            }
-        } else {
-            Chart(breakdown, id: \.month) { entry in
+            ForEach(months) { entry in
                 BarMark(
-                    x: .value("Month", entry.month, unit: .month),
-                    y: .value("Amount", NSDecimalNumber(decimal: entry.amount).doubleValue)
+                    x: .value(L10n.readoutChartAxisMonth, entry.month, unit: .month),
+                    y: .value(L10n.readoutChartAxisAmount, NSDecimalNumber(decimal: entry.amount).doubleValue)
                 )
-                .foregroundStyle(Theme.accent)
+                .foregroundStyle(entry.month == (selected?.month ?? peakMonth) ? Theme.accent : Theme.accentMuted)
                 .cornerRadius(0)
             }
-            .chartXSelection(value: $selectedMonth)
-            .chartXAxis {
-                AxisMarks(values: .stride(by: .month, count: xAxisMonthStride)) { value in
-                    AxisValueLabel {
-                        if let date = value.as(Date.self) {
-                            Text(xAxisLabel(for: date))
-                                .font(.brutalistLabel)
-                                .foregroundStyle(Theme.textTertiary)
-                        }
-                    }
-                }
-            }
-            .chartYAxis {
-                AxisMarks { value in
-                    AxisGridLine(stroke: StrokeStyle(lineWidth: ChartConstants.chartGridLineWidth))
-                        .foregroundStyle(Theme.gridLine)
-                    AxisValueLabel {
-                        if let doubleValue = value.as(Double.self) {
-                            Text(ChartFormatting.abbreviatedCurrency(doubleValue))
-                                .font(.brutalistLabel)
-                                .foregroundStyle(Theme.textTertiary)
-                        }
+        }
+        .chartXSelection(value: $selectedDate)
+        .chartXAxis {
+            AxisMarks(values: .stride(by: .month, count: labelStride)) { value in
+                AxisValueLabel {
+                    if let date = value.as(Date.self) {
+                        Text(date, format: .dateTime.month(.narrow))
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.textTertiary)
                     }
                 }
             }
         }
-    }
-
-    // MARK: - Legend
-
-    private func legend(for data: [(month: Date, category: CostCategory, amount: Decimal)]) -> some View {
-        let categories = Array(Set(data.map(\.category))).sorted { $0.displayName < $1.displayName }
-
-        return AdaptiveStack(spacing: Spacing.md) {
-            ForEach(categories, id: \.self) { category in
-                HStack(spacing: Spacing.xs) {
-                    Rectangle()
-                        .fill(category.color)
-                        .frame(width: 10, height: 10)
-                        .accessibilityHidden(true)
-                    Text(category.displayName.uppercased())
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
+        .chartYAxis {
+            AxisMarks(values: .automatic(desiredCount: 3)) { value in
+                AxisGridLine(stroke: StrokeStyle(lineWidth: ChartConstants.chartGridLineWidth))
+                    .foregroundStyle(Theme.gridLine)
+                AxisValueLabel {
+                    if let amount = value.as(Double.self) {
+                        Text(ChartFormatting.abbreviatedCurrency(amount))
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.textTertiary)
+                    }
                 }
             }
         }
-        .padding(.horizontal, Spacing.md)
-        .padding(.bottom, Spacing.sm)
-    }
-
-    // MARK: - Text Rows
-
-    /// Text rows sorted chronologically to match the chart's left-to-right ordering
-    private var textRows: some View {
-        VStack(spacing: 0) {
-            ForEach(Array(breakdown.enumerated()), id: \.element.month) { index, item in
-                AdaptiveStack(spacing: Spacing.sm) {
-                    Text(formatMonthYear(item.month))
-                        .font(.brutalistBody)
-                        .foregroundStyle(Theme.textPrimary)
-
-                    Spacer()
-
-                    Text(formatCurrency(item.amount))
-                        .font(.brutalistBody)
-                        .foregroundStyle(Theme.accent)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                        .frame(minWidth: 60, alignment: .trailing)
-                }
-                .padding(Spacing.md)
-
-                if index < breakdown.count - 1 {
-                    Rectangle()
-                        .fill(Theme.gridLine)
-                        .frame(height: 1)
-                        .padding(.leading, Spacing.md)
-                }
-            }
-        }
-        .background(Theme.surfaceInstrument)
-        .brutalistBorder()
-    }
-
-    // MARK: - Helpers
-
-    /// Format x-axis label: "MMM" normally, "MMM 'YY" for January
-    private func xAxisLabel(for date: Date) -> String {
-        let calendar = Calendar.current
-        let month = calendar.component(.month, from: date)
-        let monthStr = Self.monthFormatter.string(from: date).uppercased()
-
-        if month == 1 {
-            let year = calendar.component(.year, from: date)
-            return "\(monthStr)\n'\(String(year).suffix(2))"
-        }
-        return monthStr
-    }
-
-    private func categoryColorMapping(from data: [(month: Date, category: CostCategory, amount: Decimal)]) -> KeyValuePairs<String, Color> {
-        let categories = Array(Set(data.map(\.category))).sorted { $0.displayName < $1.displayName }
-        // KeyValuePairs must be a literal, so we build conditionally
-        switch categories.count {
-        case 1:
-            return [categories[0].displayName: categories[0].color]
-        case 2:
-            return [
-                categories[0].displayName: categories[0].color,
-                categories[1].displayName: categories[1].color
-            ]
-        default:
-            return [
-                categories[0].displayName: categories[0].color,
-                categories[1].displayName: categories[1].color,
-                categories[2].displayName: categories[2].color
-            ]
+        .frame(height: ChartConstants.chartHeight)
+        .accessibilityChartDescriptor(descriptor)
+        .onChange(of: months) { _, _ in
+            selectedDate = nil
         }
     }
 
-    private func formatMonthYear(_ date: Date) -> String {
-        Self.monthYearFormatter.string(from: date)
-    }
-
-    private func formatCurrency(_ amount: Decimal) -> String {
-        Formatters.currencyWhole(amount)
+    private var descriptor: CostChartDescriptor {
+        let points = months.map {
+            SpokenChartPoint(label: $0.month.formatted(.dateTime.month(.wide).year()), amount: $0.amount)
+        }
+        return CostChartDescriptor(
+            title: title,
+            summary: summary,
+            xAxisTitle: L10n.readoutChartAxisMonth,
+            yAxisTitle: L10n.readoutChartAxisAmount,
+            categories: points.map(\.label),
+            series: [SpokenChartSeries(name: L10n.readoutChartSeriesSpending, points: points)],
+            currencyCode: Formatters.currencyWhole.currencyCode ?? "USD"
+        )
     }
 }
 
 #Preview {
     let calendar = Calendar.current
-
-    let months: [(Date, Decimal)] = (0..<6).reversed().map { i in
-        let date = calendar.date(byAdding: .month, value: -i, to: .now)!
-        let components = calendar.dateComponents([.year, .month], from: date)
-        let monthStart = calendar.date(from: components)!
-        return (monthStart, Decimal(Int.random(in: 80...500)))
-    }
-
-    let byCategory: [(Date, CostCategory, Decimal)] = months.flatMap { month, _ in
-        [
-            (month, CostCategory.maintenance, Decimal(Int.random(in: 30...200))),
-            (month, CostCategory.repair, Decimal(Int.random(in: 0...150))),
-            (month, CostCategory.upgrade, Decimal(Int.random(in: 0...100)))
-        ]
+    let thisMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: .now))!
+    let amounts: [Decimal] = [120, 0, 540, 80, 1317, 60, 210, 0, 95]
+    let months = amounts.enumerated().map { index, amount in
+        CostMonth(
+            month: calendar.date(byAdding: .month, value: index - (amounts.count - 1), to: thisMonth)!,
+            amount: amount
+        )
     }
 
     return ZStack {
-        AtmosphericBackground()
-
-        ScrollView {
-            VStack(spacing: Spacing.lg) {
-                MonthlyTrendChartCard(
-                    breakdown: months,
-                    breakdownByCategory: byCategory,
-                    isStacked: true
-                )
-
-                MonthlyTrendChartCard(
-                    breakdown: months,
-                    breakdownByCategory: nil,
-                    isStacked: false
-                )
-            }
-            .padding(Spacing.screenHorizontal)
-        }
+        Theme.backgroundPrimary.ignoresSafeArea()
+        CostTrendChart(
+            months: months,
+            title: "Per Month, USD",
+            summary: "",
+            selectionLabel: { Formatters.currencyWhole($0.amount) }
+        )
+        .padding(Spacing.screenHorizontal)
     }
-    .preferredColorScheme(.dark)
 }
