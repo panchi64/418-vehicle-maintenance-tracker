@@ -2,17 +2,16 @@
 //  ServiceLogDeleteMenu.swift
 //  checkpoint
 //
-//  Row-level delete for a service log. The log rows (Home activity, Services
-//  history and timeline, Costs expenses, Service Detail history) live in
-//  scroll stacks rather than a `List`, so there is no swipe action to hang it
-//  on — a long-press context menu is the row affordance everywhere.
+//  Row-level delete for a service log in a scroll stack (Home activity, Costs
+//  expenses, Service Detail history), where there is no `List` swipe action
+//  to hang it on — a long-press context menu is the row affordance. The
+//  Services tab is a `List` and carries the full swipe + menu set itself.
 //
 
 import SwiftUI
 
 extension View {
-    /// nil attaches no menu, for rows that are only sometimes logs (the
-    /// timeline mixes completed logs with upcoming services).
+    /// nil attaches no menu, for rows that are only sometimes logs.
     @ViewBuilder
     func serviceLogDeleteMenu(_ onDelete: (() -> Void)?) -> some View {
         if let onDelete {

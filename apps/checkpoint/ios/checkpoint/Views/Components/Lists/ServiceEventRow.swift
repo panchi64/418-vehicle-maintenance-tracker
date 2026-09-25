@@ -19,10 +19,8 @@
 //    - Without an amount, the title is primary.
 //  This settles the previous inconsistency rather than preserving both.
 //
-//  `MaintenanceTimeline`'s row is deliberately NOT folded in: its connector
-//  geometry (node + vertical rule spanning between rows) is structural rather
-//  than cosmetic, and forcing it through this shell would mean a prop that
-//  changes the layout rather than its appearance.
+//  The amount is 15 Medium, not 20: it leads the row by weight and position.
+//  At heading size a list of amounts was a list of headings.
 //
 
 import SwiftUI
@@ -131,7 +129,7 @@ struct ServiceEventRow: View {
 
                 if let amount {
                     Text(amount.text)
-                        .font(.brutalistHeading)
+                        .font(.brutalistBodyEmphasis)
                         .foregroundStyle(amount.color)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)

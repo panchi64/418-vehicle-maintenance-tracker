@@ -57,9 +57,6 @@ enum L10n {
     static func rowDaysOverdue(_ days: Int) -> String {
         String(format: localized("row.daysOverdue"), days)
     }
-    static func rowLastPerformed(_ relativeTime: String) -> String {
-        String(format: localized("row.lastPerformed"), relativeTime)
-    }
     static var rowNoDueDate: String { localized("row.noDueDate") }
     static var rowViewDetailsHint: String { localized("row.viewDetailsHint") }
     static var rowServiceFallback: String { localized("row.serviceFallback") }
@@ -121,8 +118,6 @@ enum L10n {
     /// Shared across every "no filter applied" control.
     static var filterAll: String { localized("filter.all") }
 
-    static var servicesViewList: String { localized("servicesTab.viewList") }
-    static var servicesViewTimeline: String { localized("servicesTab.viewTimeline") }
     static var costsCategoryDimension: String { localized("costs.categoryDimension") }
     static var costsExpenses: String { localized("costs.expenses") }
     static var costsStatServices: String { localized("costs.statServices") }
@@ -130,16 +125,9 @@ enum L10n {
     static var costsStatPerMile: String { localized("costs.statPerMile") }
     static var homeUpcoming: String { localized("home.upcoming") }
     static var homeRecentActivity: String { localized("home.recentActivity") }
-    static var servicesStatusDimension: String { localized("servicesTab.statusDimension") }
     static var servicesExport: String { localized("servicesTab.export") }
     static var servicesReference: String { localized("servicesTab.reference") }
     static var servicesDocumentLibrary: String { localized("servicesTab.documentLibrary") }
-    static func servicesScheduledCount(_ count: Int) -> String {
-        String(format: localized("servicesTab.scheduledCount"), count)
-    }
-    static func servicesHistoryCount(_ count: Int) -> String {
-        String(format: localized("servicesTab.historyCount"), count)
-    }
 
     static var costsPeriodMonth: String { localized("costs.periodMonth") }
     static var costsPeriodYTD: String { localized("costs.periodYTD") }
@@ -478,14 +466,10 @@ enum L10n {
     static var emptyCostPerMileHint: String { localized("empty.cost_per_mile_hint") }
     static var emptyPaceHint: String { localized("empty.pace_hint") }
     static var emptyChartPlaceholder: String { localized("empty.chart_placeholder") }
-    static var emptyNoServicesTitle: String { localized("empty.noServicesTitle") }
-    static var emptyNoServicesMessage: String { localized("empty.noServicesMessage") }
     static var emptyNoResultsTitle: String { localized("empty.noResultsTitle") }
     static var emptyNoResultsMessage: String { localized("empty.noResultsMessage") }
     static var emptyNoVehicleTitle: String { localized("empty.noVehicleTitle") }
     static var emptyNoVehicleMessage: String { localized("empty.noVehicleMessage") }
-    static var emptyTimelineTitle: String { localized("empty.timeline_title") }
-    static var emptyTimelineMessage: String { localized("empty.timeline_message") }
     static func emptyFilterShowing(_ shown: Int, _ total: Int) -> String {
         String(format: localized("empty.filter_showing"), shown, total)
     }

@@ -3721,40 +3721,6 @@
         }
       }
     },
-    "empty.noServicesMessage" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add your first service to\nstart tracking maintenance"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Añade tu primer servicio para\nempezar a dar seguimiento"
-          }
-        }
-      }
-    },
-    "empty.noServicesTitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No services"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sin servicios"
-          }
-        }
-      }
-    },
     "empty.noVehicleMessage" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3802,40 +3768,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Actualiza el kilometraje para habilitar estimaciones de ritmo"
-          }
-        }
-      }
-    },
-    "empty.timeline_message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Complete a service to see your maintenance timeline"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Completa un servicio para ver tu cronología de mantenimiento"
-          }
-        }
-      }
-    },
-    "empty.timeline_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No History"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sin historial"
           }
         }
       }
@@ -9265,24 +9197,6 @@
         }
       }
     },
-    "row.lastPerformed" : {
-      "comment" : "Supporting line on a service row. %@ is a relative time such as 'Today' or '3 mo ago'.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Last done %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Última vez %@"
-          }
-        }
-      }
-    },
     "row.noCostRecorded" : {
       "comment" : "VoiceOver value when a row has no amount.",
       "extractionState" : "manual",
@@ -9690,6 +9604,654 @@
     "Services within this mileage range of each other will be suggested for bundling." : {
 
     },
+    "services.action.deleteCount" : {
+      "comment" : "Bulk delete in multi-select. %lld is the number of selected items.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete (%lld)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar (%lld)"
+          }
+        }
+      }
+    },
+    "services.action.duplicate" : {
+      "comment" : "Row action that starts a new log entry prefilled from an existing one.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duplicate"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duplicar"
+          }
+        }
+      }
+    },
+    "services.action.edit" : {
+      "comment" : "Row / toolbar action that edits a service or entry.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar"
+          }
+        }
+      }
+    },
+    "services.action.markDone" : {
+      "comment" : "Row action that records a scheduled service as done.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mark Done"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcar hecho"
+          }
+        }
+      }
+    },
+    "services.action.markDoneCount" : {
+      "comment" : "Bulk action in multi-select. %lld is the number of selected services.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mark Done (%lld)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcar hecho (%lld)"
+          }
+        }
+      }
+    },
+    "services.action.select" : {
+      "comment" : "Toolbar button that enters multi-select on the Services list.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seleccionar"
+          }
+        }
+      }
+    },
+    "services.action.stopTracking" : {
+      "comment" : "Takes a service off the schedule without recording it as done. Its history stays.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop Tracking"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dejar de seguir"
+          }
+        }
+      }
+    },
+    "services.bulkDelete.message" : {
+      "comment" : "Confirmation message for bulk delete.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deleted services take their history with them. This can't be undone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los servicios eliminados se llevan su historial. Esto no se puede deshacer."
+          }
+        }
+      }
+    },
+    "services.bulkDelete.title" : {
+      "comment" : "Confirmation title for deleting the selected items. %lld is the count.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete %lld Items?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eliminar %lld elementos?"
+          }
+        }
+      }
+    },
+    "services.detail.averageCost" : {
+      "comment" : "Service Detail row label.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Average Cost"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Costo promedio"
+          }
+        }
+      }
+    },
+    "services.detail.distanceSinceLast" : {
+      "comment" : "Service Detail row label: distance driven since the service was last done.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Distance Since Last"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Distancia desde la última"
+          }
+        }
+      }
+    },
+    "services.detail.history" : {
+      "comment" : "Service Detail section title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "History"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Historial"
+          }
+        }
+      }
+    },
+    "services.detail.insights" : {
+      "comment" : "Service Detail section title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insights"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estadísticas"
+          }
+        }
+      }
+    },
+    "services.detail.partOfVisit" : {
+      "comment" : "Tag on a history row whose cost belongs to a Service Visit.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Part of visit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parte de una visita"
+          }
+        }
+      }
+    },
+    "services.detail.repeats" : {
+      "comment" : "Service Detail row label for the repeat interval.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repeats Every"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se repite cada"
+          }
+        }
+      }
+    },
+    "services.detail.schedule" : {
+      "comment" : "Service Detail section title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schedule"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programación"
+          }
+        }
+      }
+    },
+    "services.detail.setUpReminder" : {
+      "comment" : "Primary action on a service with no schedule.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set Up Reminder"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurar recordatorio"
+          }
+        }
+      }
+    },
+    "services.detail.stopTrackingHint" : {
+      "comment" : "VoiceOver hint for Stop Tracking.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Removes the reminder without recording the service as done."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quita el recordatorio sin registrar el servicio como hecho."
+          }
+        }
+      }
+    },
+    "services.detail.timeSinceLast" : {
+      "comment" : "Service Detail row label.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time Since Last"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desde la última vez"
+          }
+        }
+      }
+    },
+    "services.detail.timesServiced" : {
+      "comment" : "Service Detail row label.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Times Serviced"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veces realizado"
+          }
+        }
+      }
+    },
+    "services.detail.visitCount" : {
+      "comment" : "Service Detail row label: how many Service Visits included this service.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appears in Visits"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aparece en visitas"
+          }
+        }
+      }
+    },
+    "services.empty.add" : {
+      "comment" : "Services tab empty state action.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a Service"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agregar servicio"
+          }
+        }
+      }
+    },
+    "services.empty.message" : {
+      "comment" : "Services tab empty state message.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log one you've already done, or schedule the next one. Either starts your reminders."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra uno que ya hiciste o programa el próximo. Cualquiera de los dos activa tus recordatorios."
+          }
+        }
+      }
+    },
+    "services.empty.title" : {
+      "comment" : "Services tab empty state title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No services yet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay servicios"
+          }
+        }
+      }
+    },
+    "services.group.dueSoon" : {
+      "comment" : "Services tab section header over services due soon. Title Case.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Due Soon"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximos"
+          }
+        }
+      }
+    },
+    "services.group.onTrack" : {
+      "comment" : "Services tab section header over services that are not yet due. Title Case.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On Track"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Al día"
+          }
+        }
+      }
+    },
+    "services.group.overdue" : {
+      "comment" : "Services tab section header over overdue services. Title Case.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overdue"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vencidos"
+          }
+        }
+      }
+    },
+    "services.log.title" : {
+      "comment" : "Navigation title of a single service log entry.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Service Log"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registro de servicio"
+          }
+        }
+      }
+    },
+    "services.row.due" : {
+      "comment" : "Service row due line with one trigger. %@ is a distance with unit or a short date.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Due %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence %@"
+          }
+        }
+      }
+    },
+    "services.row.dueEither" : {
+      "comment" : "Service row due line with both triggers. %1$@ is a distance with unit, %2$@ a short date.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Due %1$@ or %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence %1$@ o %2$@"
+          }
+        }
+      }
+    },
+    "services.toast.stoppedTracking" : {
+      "comment" : "Toast after a service is taken off the schedule. %@ is the service name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stopped tracking %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ya no se sigue %@"
+          }
+        }
+      }
+    },
+    "services.visit.included" : {
+      "comment" : "Tag on an itemized visit's service with no own amount.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Included"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluido"
+          }
+        }
+      }
+    },
+    "services.visit.includedInTotal" : {
+      "comment" : "Tag on a service whose cost is in the visit total.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In visit total"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En el total de la visita"
+          }
+        }
+      }
+    },
+    "services.visit.servicesPerformed" : {
+      "comment" : "Service Visit section title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Services Performed"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servicios realizados"
+          }
+        }
+      }
+    },
+    "services.visit.shop" : {
+      "comment" : "Service Visit row label for the shop name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shop"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taller"
+          }
+        }
+      }
+    },
+    "services.visit.total" : {
+      "comment" : "Service Visit row label for the visit total.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total"
+          }
+        }
+      }
+    },
     "servicesTab.documentLibrary" : {
       "comment" : "Destination link at the bottom of the Services tab.",
       "extractionState" : "manual",
@@ -9725,24 +10287,6 @@
         }
       }
     },
-    "servicesTab.historyCount" : {
-      "comment" : "Section title over the service-history list. %lld is the number of entries.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld entries"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld registros"
-          }
-        }
-      }
-    },
     "servicesTab.reference" : {
       "comment" : "Heading over destination links that are not maintenance state.",
       "extractionState" : "manual",
@@ -9761,24 +10305,6 @@
         }
       }
     },
-    "servicesTab.scheduledCount" : {
-      "comment" : "Section title over the upcoming-services list. %lld is the number shown.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld scheduled"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld programados"
-          }
-        }
-      }
-    },
     "servicesTab.searchPrompt" : {
       "comment" : "Placeholder of the Services tab's system search field. States what the search covers.",
       "extractionState" : "manual",
@@ -9793,58 +10319,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Servicios, notas, recibos"
-          }
-        }
-      }
-    },
-    "servicesTab.statusDimension" : {
-      "comment" : "Names the status filter dimension on the Services tab.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Status"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Estado"
-          }
-        }
-      }
-    },
-    "servicesTab.viewList" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "List"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lista"
-          }
-        }
-      }
-    },
-    "servicesTab.viewTimeline" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Timeline"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cronología"
           }
         }
       }

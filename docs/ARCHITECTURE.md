@@ -471,7 +471,6 @@ struct WidgetColors {
 |-----------|---------|
 | `ExpenseRow.swift` | Service log expense item |
 | `ListDivider.swift` | Consistent list divider |
-| `MaintenanceTimeline.swift` | Chronological service history |
 | `RecentActivityFeed.swift` | Recent actions list |
 | `ServiceRow.swift` | Service list item with status |
 
@@ -555,7 +554,6 @@ ContentView
 - **AppStateTests** / **NotificationRouteTests** — Per-tab paths, the sheet router's queue, notification routing
 
 ### Component Tests
-- **MaintenanceTimelineTests** — Timeline rendering
 - **OdometerCaptureViewTests** — OCR capture flow
 - **YearlyCostRoundupCardTests** — Annual summary card
 - **OCRConfirmationViewTests** — OCR result confirmation

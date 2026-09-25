@@ -2,7 +2,16 @@
 //  ServiceRow.swift
 //  checkpoint
 //
-//  Compact row for service list with instrument cluster aesthetic
+//  One scheduled service, in two lines:
+//
+//    Oil & Filter Change                  917 mi overdue
+//    ■ OVERDUE  Due 32,500 mi or Jul 4
+//
+//  The name is the row's primary (15 Medium, primary ink). The remaining
+//  figure trails it, where a scanning eye lands after reading the name. Status
+//  is word + shape on line two — never color alone. It was three lines with a
+//  20pt name (~84pt a row), so a list of names was a list of headings and the
+//  Services tab showed four items above the fold.
 //
 
 import SwiftUI
@@ -11,7 +20,14 @@ struct ServiceRow: View {
     let service: Service
     let currentMileage: Int
     var isEstimatedMileage: Bool = false
-    let onTap: () -> Void
+    /// Inside a status-grouped list the group header carries the WORD, so the
+    /// row keeps only the shape — "Overdue" above "■ OVERDUE" was a stutter.
+    var groupedByStatus: Bool = false
+    /// nil renders the row without its own tap target or chevron, for a
+    /// `List` row wrapped in a `NavigationLink` that supplies both.
+    var onTap: (() -> Void)? = nil
+
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private var status: ServiceStatus {
         service.status(currentMileage: currentMileage)
@@ -21,148 +37,85 @@ struct ServiceRow: View {
         status == .overdue || status == .dueSoon
     }
 
-    private var progressValue: Double {
-        guard let dueMileage = service.dueMileage,
-              let lastMileage = service.lastMileage,
-              dueMileage > lastMileage else { return 0 }
-        let total = Double(dueMileage - lastMileage)
-        let elapsed = Double(currentMileage - lastMileage)
-        return min(max(elapsed / total, 0), 1)
-    }
-
-    /// The row's reason for existing: how urgent is this.
-    private var urgencyText: String? {
-        service.urgencyText(currentMileage: currentMileage)
-    }
-
-    /// Two channels, not one: urgent rows differ from healthy rows in both
-    /// weight (via `urgencyColor`) and the width of the status bar, so the
-    /// distinction survives color blindness and sunlight.
-    private var urgencyColor: Color {
-        switch status {
-        case .overdue, .dueSoon: return status.color
-        default: return Theme.textSecondary
+    var body: some View {
+        if let onTap {
+            content(showsChevron: true)
+                .tappableCard(action: onTap)
+                .accessibilityHint(L10n.rowViewDetailsHint)
+                .accessibilityAddTraits(.isButton)
+        } else {
+            content(showsChevron: false)
         }
     }
 
-    var body: some View {
-        HStack(spacing: Spacing.md) {
-            statusBar
+    private func content(showsChevron: Bool) -> some View {
+        // Computed once per render; each reads the status.
+        let status = self.status
+        let urgency = service.urgencyText(currentMileage: currentMileage)
 
-            VStack(alignment: .leading, spacing: Spacing.xs) {
-                // Urgency as a status eyebrow: small, uppercase, tracked, in
-                // the status color. Mirrors NextUpCard, which is the pattern
-                // in this app that already reads correctly.
-                //
-                // It is deliberately NOT the largest element. Scanning a list
-                // of upcoming work, the user is looking for *which service*;
-                // urgency qualifies it. Position plus color make the qualifier
-                // unmissable without it competing for the same rank.
-                // "Due soon" and "good" both read "N MI LEFT"; only the tint
-                // told them apart. The word carries it for color-blind users
-                // and in sunlight. (Overdue already says so in the text.)
-                if status == .dueSoon || urgencyText != nil {
-                    AdaptiveStack(spacing: Spacing.sm) {
-                        if status == .dueSoon {
-                            Text(status.label)
-                                .font(.brutalistLabelBold)
-                                .foregroundStyle(status.color)
-                                .tracking(1.5)
-                        }
-                        if let urgencyText {
-                            Text(urgencyText.uppercased())
-                                .font(.brutalistLabel)
-                                .foregroundStyle(urgencyColor)
-                                .tracking(1.5)
-                        }
+        return HStack(spacing: Spacing.md) {
+            // A full-height rule carries the status color as a third channel;
+            // the tag on line two carries the word and the shape.
+            Rectangle()
+                .fill(status.color)
+                .frame(width: status == .overdue ? 4 : 2)
+                .frame(maxHeight: .infinity)
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 2) {
+                AdaptiveStack(
+                    verticalAlignment: .firstTextBaseline,
+                    horizontalSpacing: Spacing.sm,
+                    verticalSpacing: 2
+                ) {
+                    Text(service.name)
+                        .font(.brutalistBodyEmphasis)
+                        .foregroundStyle(Theme.textPrimary)
+                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
+                        .multilineTextAlignment(.leading)
+
+                    AdaptiveSpacer()
+
+                    if let urgency {
+                        Text(urgency)
+                            .font(.brutalistSecondary)
+                            .foregroundStyle(isUrgent ? status.color : Theme.textTertiary)
+                            .lineLimit(1)
                     }
                 }
 
-                // Primary: which service this is. Differs from the eyebrow on
-                // four channels — size (20 vs 11), weight, case, and color —
-                // so the ranking survives monospace's narrow weight contrast.
-                // Sentence case: long names ("Transmission fluid change") lose
-                // scannability in caps.
-                Text(service.name)
-                    .font(.brutalistHeading)
-                    .foregroundStyle(Theme.textPrimary)
-
-                // Supporting: progress + history, at the quietest level.
                 HStack(spacing: Spacing.sm) {
-                    if service.dueMileage != nil {
-                        miniProgressBar
+                    if isUrgent && !groupedByStatus {
+                        StatusTag(status: status)
+                    } else {
+                        StatusMark(status: status)
                     }
-
-                    if let lastPerformed = service.lastPerformed {
-                        Text(L10n.rowLastPerformed(TimeSinceFormatter.abbreviated(from: lastPerformed)))
-                            .font(.brutalistSecondary)
-                            .foregroundStyle(Theme.textTertiary)
-                    }
+                    Text(service.dueLine)
+                        .font(.brutalistSecondary)
+                        .foregroundStyle(Theme.textTertiary)
+                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
-            Spacer(minLength: Spacing.sm)
-
-            Image(systemName: "chevron.right")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(Theme.textTertiary.opacity(0.5))
-                .accessibilityHidden(true)
+            if showsChevron {
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.textTertiary.opacity(0.5))
+                    .accessibilityHidden(true)
+            }
         }
-        // Vertical padding only. The 16pt horizontal inset existed because this
-        // row lived inside a bordered card that needed interior padding — with
-        // the card gone it just indented every row 16pt past the section header
-        // above it, so the list read as hanging off the screen's left edge.
         .padding(.vertical, Spacing.listItem)
-        .tappableCard(action: onTap)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(service.name)
-        // VoiceOver gets the urgency as the value, matching the visual
-        // hierarchy — weight and color don't survive a screen reader.
-        .accessibilityValue(accessibilityValue)
-        .accessibilityHint(L10n.rowViewDetailsHint)
-        .accessibilityAddTraits(.isButton)
+        .accessibilityValue(accessibilityValue(status: status, urgency: urgency))
     }
 
-    /// Urgency, led by the status word wherever the text alone doesn't
-    /// carry it ("300 mi left" is due soon or good depending on thresholds).
-    private var accessibilityValue: String {
-        guard let urgencyText else { return L10n.rowNoDueDate }
-        switch status {
-        case .dueSoon, .good:
-            return L10n.readoutValueWithStatus(urgencyText, L10n.readoutStatus(status))
-        case .overdue, .neutral:
-            return urgencyText
-        }
-    }
-
-    /// Replaces the 8×8 dot inside a 32×32 tint. A vertical bar the height of
-    /// the row's content gives status real presence and lets urgency read from
-    /// the row's left edge before any text is parsed.
-    private var statusBar: some View {
-        Rectangle()
-            .fill(status.color)
-            .frame(width: isUrgent ? 4 : 2)
-            .frame(maxHeight: .infinity)
-            .statusGlow(color: status.color, isActive: isUrgent)
-            .pulseAnimation(isActive: isUrgent)
-            .accessibilityHidden(true)
-    }
-
-    // MARK: - Subviews
-
-    private var miniProgressBar: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .leading) {
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: 2)
-
-                Rectangle()
-                    .fill(status.color)
-                    .frame(width: geo.size.width * progressValue, height: 2)
-            }
-        }
-        .frame(width: 40, height: 2)
+    /// Status word first — weight, color and shape don't survive a screen
+    /// reader — then the remaining figure and the due line.
+    private func accessibilityValue(status: ServiceStatus, urgency: String?) -> String {
+        let parts = [status == .neutral ? nil : L10n.readoutStatus(status), urgency, service.dueLine]
+        return parts.compactMap { $0 }.joined(separator: ", ")
     }
 }
 
@@ -189,23 +142,14 @@ struct ServiceRowButtonStyle: ButtonStyle {
 
         VStack(spacing: 0) {
             ForEach(services, id: \.name) { service in
-                ServiceRow(
-                    service: service,
-                    currentMileage: vehicle.currentMileage
-                ) {
-                    print("Tapped \(service.name)")
-                }
-
-                if service.name != services.last?.name {
-                    Rectangle()
-                        .fill(Theme.gridLine)
-                        .frame(height: 1)
-                        .padding(.leading, 56)
-                }
+                ServiceRow(service: service, currentMileage: vehicle.currentMileage) {}
+                ListDivider()
+            }
+            ForEach(services, id: \.name) { service in
+                ServiceRow(service: service, currentMileage: vehicle.currentMileage, groupedByStatus: true)
+                ListDivider()
             }
         }
-        .background(Theme.surfaceInstrument)
-        .brutalistBorder()
         .screenPadding()
     }
     .preferredColorScheme(.dark)
