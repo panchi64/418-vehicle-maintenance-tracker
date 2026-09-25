@@ -88,12 +88,15 @@ struct TipModalView: View {
         )
     }
 
-    private var promptContent: TipPromptContent {
-        TipPromptContent.select(from: stats)
-    }
+    /// Picked once per presentation. Selection is random, so re-deriving it
+    /// on every body pass (the reveal animation alone triggers one) could
+    /// swap the message mid-read — or pair one candidate's headline with
+    /// another's body.
+    @State private var chosenContent: TipPromptContent?
 
     var body: some View {
-        NavigationStack {
+        let promptContent = chosenContent ?? TipPromptContent.select(from: stats)
+        return NavigationStack {
             ZStack {
                 Theme.backgroundPrimary.ignoresSafeArea()
 
@@ -103,11 +106,12 @@ struct TipModalView: View {
                     // Stats-driven header — mirrors ThemeRevealView pattern:
                     // small label on top, large stat headline, body below
                     VStack(spacing: Spacing.md) {
-                        Text("SUPPORT CHECKPOINT")
+                        Text(L10n.tipSupportCheckpoint)
                             .font(.brutalistLabel)
                             .foregroundStyle(Theme.accent)
                             .textCase(.uppercase)
                             .tracking(2)
+                            .accessibilityAddTraits(.isHeader)
 
                         Text(promptContent.headline)
                             .font(.brutalistTitle)
@@ -151,27 +155,31 @@ struct TipModalView: View {
                     Button {
                         dismiss()
                     } label: {
-                        Text("Not now")
+                        Text(L10n.tipNotNow)
                             .font(.brutalistSecondary)
                             .foregroundStyle(Theme.textTertiary)
+                            .minimumTouchTarget()
                     }
 
                     Spacer()
-                    .opacity(isRevealed ? 1 : 0)
                 }
+                .scrollingWhenTooTall()
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") {
+                    Button(L10n.commonClose) {
                         dismiss()
                     }
                     .toolbarButtonStyle()
                 }
             }
         }
-        .presentationDetents([.fraction(0.65)])
+        .presentationDetents([.fraction(0.65), .large])
         .onAppear {
+            if chosenContent == nil {
+                chosenContent = promptContent
+            }
             withAnimation(.easeOut(duration: 0.4)) {
                 isRevealed = true
             }

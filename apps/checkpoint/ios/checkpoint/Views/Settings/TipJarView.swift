@@ -24,12 +24,14 @@ struct TipJarView: View {
                 VStack(alignment: .leading, spacing: Spacing.lg) {
                     // Header
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text("SUPPORT CHECKPOINT")
+                        Text(L10n.tipSupportCheckpoint)
                             .font(.brutalistLabel)
                             .foregroundStyle(Theme.accent)
+                            .textCase(.uppercase)
                             .tracking(2)
+                            .accessibilityAddTraits(.isHeader)
 
-                        Text("Help keep Checkpoint free and actively developed. Every tip unlocks an exclusive rare theme.")
+                        Text(L10n.tipJarBody)
                             .font(.brutalistSecondary)
                             .foregroundStyle(Theme.textSecondary)
                     }
@@ -38,81 +40,56 @@ struct TipJarView: View {
                     VStack(spacing: Spacing.md) {
                         #if DEBUG
                         if storeManager.tipProducts().isEmpty {
-                            ForEach(debugTipOptions, id: \.id) { option in
-                                DebugTipCard(option: option) {
+                            ForEach(TipTier.debugOptions, id: \.productID) { option in
+                                TipCard(name: option.label, description: nil, price: option.price) {
                                     await debugPurchaseTip(option.productID)
                                 }
                             }
                         } else {
-                            ForEach(storeManager.tipProducts(), id: \.id) { product in
-                                TipCard(product: product) {
-                                    await purchaseTip(product)
-                                }
-                            }
+                            productCards
                         }
                         #else
-                        ForEach(storeManager.tipProducts(), id: \.id) { product in
-                            TipCard(product: product) {
-                                await purchaseTip(product)
-                            }
-                        }
+                        productCards
                         #endif
                     }
 
                     // Collection progress
-                    let rareThemes = ThemeManager.shared.allThemes.filter { $0.tier == .rare }
-                    let ownedRare = rareThemes.filter { ThemeManager.shared.isOwned($0) }
-                    if rareThemes.count > 0 {
-                        HStack {
-                            if ownedRare.count == rareThemes.count {
-                                Image(systemName: "checkmark.seal.fill")
-                                    .foregroundStyle(Theme.accent)
-                                Text("ALL RARE THEMES COLLECTED")
-                                    .font(.brutalistLabel)
-                                    .foregroundStyle(Theme.textSecondary)
-                                    .tracking(1)
-                            } else {
-                                Image(systemName: "square.grid.2x2")
-                                    .foregroundStyle(Theme.accent)
-                                Text("\(ownedRare.count)/\(rareThemes.count) RARE THEMES COLLECTED")
-                                    .font(.brutalistLabel)
-                                    .foregroundStyle(Theme.textSecondary)
-                                    .tracking(1)
-                            }
+                    let progress = RareThemeProgress.current
+                    if progress.total > 0 {
+                        HStack(spacing: Spacing.sm) {
+                            Image(systemName: progress.isComplete ? "checkmark.seal.fill" : "square.grid.2x2")
+                                .font(.caption2)
+                                .foregroundStyle(Theme.accent)
+                                .accessibilityHidden(true)
+                            Text(progress.text)
+                                .font(.brutalistLabel)
+                                .foregroundStyle(Theme.textSecondary)
+                                .textCase(.uppercase)
+                                .tracking(1)
                         }
                         .padding(.top, Spacing.sm)
                     }
-
-                    Spacer()
                 }
                 .padding(Spacing.screenHorizontal)
                 .padding(.top, Spacing.lg)
             }
         }
-        .navigationTitle("Tip Jar")
+        .navigationTitle(L10n.tipJarTitle)
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $unlockedTheme) { theme in
             ThemeRevealView(theme: theme)
         }
     }
 
+    private var productCards: some View {
+        ForEach(storeManager.tipProducts(), id: \.id) { product in
+            TipCard(name: TipTier.label(for: product), description: product.description, price: product.displayPrice) {
+                await purchaseTip(product)
+            }
+        }
+    }
+
     #if DEBUG
-    struct DebugTipOption {
-        let id: String
-        let name: String
-        let price: String
-        let description: String
-        let productID: StoreManager.ProductID
-    }
-
-    private var debugTipOptions: [DebugTipOption] {
-        [
-            .init(id: "tip.small", name: "Snack", price: "$1.99", description: "A small tip to support development.", productID: .tipSmall),
-            .init(id: "tip.medium", name: "Coffee Run", price: "$4.99", description: "A medium tip to support development.", productID: .tipMedium),
-            .init(id: "tip.large", name: "Lunch", price: "$9.99", description: "A generous tip to support development.", productID: .tipLarge),
-        ]
-    }
-
     private func debugPurchaseTip(_ productID: StoreManager.ProductID) async {
         await storeManager.simulatePurchase(productID)
         PurchaseSettings.shared.recordTip()
@@ -146,85 +123,39 @@ struct TipJarView: View {
     }
 }
 
-// MARK: - Debug Tip Card
-
-#if DEBUG
-private struct DebugTipCard: View {
-    let option: TipJarView.DebugTipOption
-    let onPurchase: () async -> Void
-
-    @State private var isPurchasing = false
-
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(option.name)
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textPrimary)
-
-                Text(option.description)
-                    .font(.brutalistSecondary)
-                    .foregroundStyle(Theme.textTertiary)
-            }
-
-            Spacer()
-
-            Button {
-                isPurchasing = true
-                Task {
-                    await onPurchase()
-                    isPurchasing = false
-                }
-            } label: {
-                if isPurchasing {
-                    ProgressView()
-                        .tint(Theme.surfaceInstrument)
-                        .frame(width: 70)
-                } else {
-                    Text(option.price)
-                        .font(.brutalistBody)
-                        .foregroundStyle(Theme.surfaceInstrument)
-                        .frame(width: 70)
-                }
-            }
-            .buttonStyle(.primary)
-            .frame(width: 90, height: 40)
-            .disabled(isPurchasing)
-        }
-        .padding(Spacing.md)
-        .background(Theme.surfaceInstrument)
-        .brutalistBorder()
-    }
-}
-#endif
-
 // MARK: - Tip Card
 
 private struct TipCard: View {
-    let product: Product
+    let name: String
+    let description: String?
+    let price: String
     let onPurchase: () async -> Void
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var isPurchasing = false
 
-    private static let tipLabels: [String: String] = [
-        "tip.small": "Snack",
-        "tip.medium": "Coffee Run",
-        "tip.large": "Lunch",
-    ]
+    /// Name beside price at standard sizes; stacked at accessibility sizes so
+    /// the price button gets the full width instead of clipping.
+    private var layout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: Spacing.md))
+            : AnyLayout(HStackLayout(spacing: Spacing.md))
+    }
 
     var body: some View {
-        HStack {
+        layout {
             VStack(alignment: .leading, spacing: 4) {
-                Text(Self.tipLabels[product.id] ?? product.displayName)
+                Text(name)
                     .font(.brutalistBody)
                     .foregroundStyle(Theme.textPrimary)
 
-                Text(product.description)
-                    .font(.brutalistSecondary)
-                    .foregroundStyle(Theme.textTertiary)
+                if let description {
+                    Text(description)
+                        .font(.brutalistSecondary)
+                        .foregroundStyle(Theme.textTertiary)
+                }
             }
-
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             Button {
                 isPurchasing = true
@@ -236,17 +167,15 @@ private struct TipCard: View {
                 if isPurchasing {
                     ProgressView()
                         .tint(Theme.surfaceInstrument)
-                        .frame(width: 70)
                 } else {
-                    Text(product.displayPrice)
-                        .font(.brutalistBody)
-                        .foregroundStyle(Theme.surfaceInstrument)
-                        .frame(width: 70)
+                    Text(price)
                 }
             }
             .buttonStyle(.primary)
-            .frame(width: 90, height: 40)
+            .frame(minWidth: 90)
+            .fixedSize(horizontal: !dynamicTypeSize.isAccessibilitySize, vertical: false)
             .disabled(isPurchasing)
+            .accessibilityLabel(isPurchasing ? L10n.tipPurchasing : L10n.tipPurchaseLabel(name: name, price: price))
         }
         .padding(Spacing.md)
         .background(Theme.surfaceInstrument)

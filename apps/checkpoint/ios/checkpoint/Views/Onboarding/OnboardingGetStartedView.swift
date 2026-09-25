@@ -48,6 +48,7 @@ struct OnboardingGetStartedView: View {
                     } label: {
                         Text(L10n.onboardingSkip)
                             .brutalistLabelStyle(color: Theme.textTertiary)
+                            .minimumTouchTarget()
                     }
                 }
                 .padding(.horizontal, Spacing.screenHorizontal)
@@ -72,12 +73,14 @@ struct OnboardingGetStartedView: View {
                             VStack(alignment: .leading, spacing: Spacing.sm) {
                                 HStack(spacing: Spacing.sm) {
                                     Image(systemName: "barcode.viewfinder")
-                                        .font(.system(size: 16, weight: .medium))
+                                        .font(.caption2.weight(.medium))
                                         .foregroundStyle(Theme.accent)
+                                        .accessibilityHidden(true)
 
                                     Text(L10n.onboardingGetStartedVINLabel)
                                         .brutalistLabelStyle(color: Theme.accent)
                                 }
+                                .accessibilityAddTraits(.isHeader)
 
                                 Text(L10n.onboardingGetStartedVINHelp)
                                     .font(.brutalistSecondary)
@@ -107,12 +110,14 @@ struct OnboardingGetStartedView: View {
                                             showVINCamera = true
                                         } label: {
                                             Image(systemName: "camera.fill")
-                                                .font(.system(size: 18, weight: .medium))
+                                                .font(.body.weight(.medium))
                                                 .foregroundStyle(Theme.accent)
-                                                .frame(width: 52, height: 52)
+                                                .frame(minWidth: 52, minHeight: 52)
                                                 .background(Theme.surfaceInstrument)
+                                                .contentShape(Rectangle())
                                         }
                                         .brutalistBorder()
+                                        .accessibilityLabel(L10n.addVehicleScanVIN)
                                     }
                                 }
                                 .brutalistBorder()
@@ -136,10 +141,10 @@ struct OnboardingGetStartedView: View {
                             // VIN lookup results
                             if let result = vinResult {
                                 VStack(alignment: .leading, spacing: Spacing.sm) {
-                                    vinResultRow(label: "MAKE", value: result.make)
-                                    vinResultRow(label: "MODEL", value: result.model)
+                                    vinResultRow(label: L10n.vehicleMake, value: result.make)
+                                    vinResultRow(label: L10n.vehicleModel, value: result.model)
                                     if let year = result.modelYear {
-                                        vinResultRow(label: "YEAR", value: String(year))
+                                        vinResultRow(label: L10n.vehicleYear, value: String(year))
                                     }
                                 }
                                 .padding(Spacing.md)
@@ -160,32 +165,38 @@ struct OnboardingGetStartedView: View {
                                 } label: {
                                     HStack(spacing: Spacing.sm) {
                                         Image(systemName: "calendar.badge.clock")
-                                            .font(.system(size: 16, weight: .medium))
+                                            .font(.caption2.weight(.medium))
                                             .foregroundStyle(Theme.accent)
+                                            .accessibilityHidden(true)
 
                                         VStack(alignment: .leading, spacing: 2) {
-                                            Text("REGISTRATION TAG")
+                                            Text(L10n.onboardingGetStartedRegistrationTag)
                                                 .brutalistLabelStyle(color: Theme.accent)
-                                            Text("MARBETE")
+                                            Text(L10n.vehicleMarbete)
                                                 .font(.brutalistLabel)
                                                 .foregroundStyle(Theme.textTertiary)
+                                                .textCase(.uppercase)
                                                 .tracking(1.5)
                                         }
 
                                         Spacer()
 
                                         Image(systemName: "chevron.down")
-                                            .font(.system(size: 12, weight: .semibold))
+                                            .font(.caption2.weight(.semibold))
                                             .foregroundStyle(Theme.accent)
                                             .rotationEffect(.degrees(showMarbeteSection ? 180 : 0))
+                                            .accessibilityHidden(true)
                                     }
+                                    .frame(minHeight: TouchTarget.minimum)
                                     .contentShape(Rectangle())
                                 }
                                 .buttonStyle(.plain)
+                                .accessibilityElement(children: .combine)
+                                .accessibilityValue(showMarbeteSection ? L10n.disclosureExpanded : L10n.disclosureCollapsed)
 
                                 if showMarbeteSection {
                                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                                        Text("Track your yearly vehicle registration expiration and get reminders before it lapses.")
+                                        Text(L10n.onboardingGetStartedMarbeteHelp)
                                             .font(.brutalistSecondary)
                                             .foregroundStyle(Theme.textSecondary)
 
@@ -245,7 +256,8 @@ struct OnboardingGetStartedView: View {
                                     } label: {
                                         HStack(spacing: Spacing.sm) {
                                             Image(systemName: "icloud.fill")
-                                                .font(.system(size: 16, weight: .medium))
+                                                .font(.body.weight(.medium))
+                                                .accessibilityHidden(true)
                                             Text(L10n.onboardingGetStartedUseICloud)
                                         }
                                     }
@@ -274,6 +286,8 @@ struct OnboardingGetStartedView: View {
                                 } label: {
                                     Text(L10n.onboardingGetStartedSkip)
                                         .brutalistLabelStyle(color: Theme.textTertiary)
+                                        .multilineTextAlignment(.center)
+                                        .minimumTouchTarget()
                                 }
                                 Spacer()
                             }
@@ -301,22 +315,26 @@ struct OnboardingGetStartedView: View {
     // MARK: - VIN Result Row
 
     private func vinResultRow(label: String, value: String) -> some View {
-        HStack {
+        HStack(alignment: .firstTextBaseline) {
             Image(systemName: "checkmark")
-                .font(.system(size: 12, weight: .bold))
+                .font(.caption2.weight(.bold))
                 .foregroundStyle(Theme.statusGood)
+                .accessibilityHidden(true)
 
             Text(label)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
+                .textCase(.uppercase)
                 .tracking(1.5)
 
-            Spacer()
+            Spacer(minLength: Spacing.sm)
 
             Text(value)
                 .font(.brutalistBody)
                 .foregroundStyle(Theme.textPrimary)
+                .multilineTextAlignment(.trailing)
         }
+        .accessibilityElement(children: .combine)
     }
 
     // MARK: - VIN Lookup

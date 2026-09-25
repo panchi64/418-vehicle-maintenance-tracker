@@ -15,102 +15,72 @@ struct SyncSettingsSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            // Section header
-            Text("ICLOUD SYNC")
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(2)
-
-            VStack(spacing: 0) {
-                // iCloud Sync toggle
+            SettingsGroup(title: L10n.syncSectionTitle) {
                 syncToggleRow
 
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
+                SettingsRowDivider()
 
-                // Sync status row with detailed icons and actions
                 syncStatusRow
             }
-            .background(Theme.surfaceInstrument)
-            .brutalistBorder()
 
-            // Info text
-            Text("Syncs your vehicles and maintenance data across your Apple devices via iCloud.")
+            Text(L10n.syncFooter)
                 .font(.brutalistSecondary)
                 .foregroundStyle(Theme.textTertiary)
                 .padding(.top, Spacing.xs)
         }
-        .alert("Restart Required", isPresented: $showRestartAlert) {
-            Button("OK", role: .cancel) {}
+        .alert(L10n.syncRestartTitle, isPresented: $showRestartAlert) {
+            Button(L10n.syncRestartOK, role: .cancel) {}
         } message: {
-            Text("Please restart the app for sync changes to take effect.")
+            Text(L10n.syncRestartMessage)
         }
     }
 
     // MARK: - Sync Toggle Row
 
     private var syncToggleRow: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("iCloud Sync")
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textPrimary)
+        let needsAccount = !syncService.hasICloudAccount && isEnabled
 
-                if !syncService.hasICloudAccount && isEnabled {
-                    Text("Sign in to iCloud in Settings")
-                        .font(.brutalistSecondary)
-                        .foregroundStyle(Theme.statusOverdue)
-                } else {
-                    Text("Free • No account required")
-                        .font(.brutalistSecondary)
-                        .foregroundStyle(Theme.textTertiary)
-                }
-            }
-
-            Spacer()
-
-            Toggle("", isOn: $isEnabled)
-                .labelsHidden()
-                .tint(Theme.accent)
-                .accessibilityLabel("iCloud Sync")
-        }
-        .padding(Spacing.md)
-        .accessibilityElement(children: .combine)
+        return SettingsToggleRow(
+            title: L10n.syncToggleTitle,
+            subtitle: needsAccount ? L10n.syncSignInPrompt : L10n.syncToggleSubtitle,
+            subtitleColor: needsAccount ? Theme.statusOverdue : Theme.textTertiary,
+            isOn: $isEnabled
+        )
         .onChange(of: isEnabled) { _, newValue in
-            Task { @MainActor in
-                SyncSettings.shared.iCloudSyncEnabled = newValue
-                syncService.syncSettingChanged(enabled: newValue)
-                showRestartAlert = true
-            }
+            SyncSettings.shared.iCloudSyncEnabled = newValue
+            syncService.syncSettingChanged(enabled: newValue)
+            showRestartAlert = true
         }
     }
 
     // MARK: - Sync Status Row
 
     private var syncStatusRow: some View {
-        HStack {
+        HStack(spacing: Spacing.sm) {
             VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: Spacing.sm) {
-                    // Status icon
+                HStack(alignment: .firstTextBaseline, spacing: Spacing.sm) {
+                    // The symbol differs per state; the text beside it says
+                    // the same thing in words, so color is never alone.
                     statusIcon
+                        .font(.body)
+                        .accessibilityHidden(true)
 
                     Text(statusDisplayText)
                         .font(.brutalistBody)
                         .foregroundStyle(Theme.textPrimary)
                 }
 
-                // Last sync time
                 if let lastSync = syncService.lastSyncDate {
-                    Text("Last synced \(lastSync.formatted(.relative(presentation: .named)))")
+                    Text(L10n.syncLastSynced(lastSync.formatted(.relative(presentation: .named))))
                         .font(.brutalistSecondary)
                         .foregroundStyle(Theme.textTertiary)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityElement(children: .combine)
 
-            Spacer()
-
-            // Action button for errors
+            // Action button for errors — kept out of the combined status
+            // element so VoiceOver can reach and activate it.
             if let error = syncService.currentError, let actionLabel = error.actionLabel, isEnabled {
                 Button {
                     handleErrorAction(error)
@@ -119,14 +89,12 @@ struct SyncSettingsSection: View {
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.accent)
                         .tracking(1)
-                        .frame(minHeight: 44)
-                        .contentShape(Rectangle())
+                        .minimumTouchTarget()
                 }
             }
         }
         .padding(Spacing.md)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Sync status: \(statusDisplayText)")
+        .frame(minHeight: TouchTarget.minimum)
     }
 
     // MARK: - Status Icon
@@ -134,7 +102,6 @@ struct SyncSettingsSection: View {
     @ViewBuilder
     private var statusIcon: some View {
         if !isEnabled {
-            // Sync disabled
             Image(systemName: "icloud.slash")
                 .foregroundStyle(Theme.textTertiary)
         } else {
@@ -159,10 +126,7 @@ struct SyncSettingsSection: View {
     // MARK: - Status Display Text
 
     private var statusDisplayText: String {
-        if !isEnabled {
-            return "Sync disabled"
-        }
-        return syncService.syncState.displayText
+        isEnabled ? syncService.syncState.displayText : L10n.syncDisabled
     }
 
     // MARK: - Error Actions

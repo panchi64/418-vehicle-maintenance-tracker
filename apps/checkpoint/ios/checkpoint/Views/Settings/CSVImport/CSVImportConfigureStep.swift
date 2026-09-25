@@ -13,55 +13,30 @@ struct CSVImportConfigureStep: View {
     @Binding var currentStep: CSVImportStep
     @Binding var errorMessage: String?
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.lg) {
             // Source detection
             InstrumentSectionHeader(title: "Source Format")
 
-            VStack(spacing: 0) {
-                ForEach(CSVImportSource.allCases) { source in
-                    Button {
-                        selectedSource = source
-                        importService.detectedSource = source
-                        importService.columnMapping = importService.autoMapColumns(
-                            headers: importService.headers,
-                            source: source
-                        )
-                    } label: {
-                        HStack {
-                            Text(source.rawValue)
-                                .font(.brutalistBody)
-                                .foregroundStyle(Theme.textPrimary)
-
-                            Spacer()
-
-                            if selectedSource == source {
-                                Image(systemName: "checkmark")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundStyle(Theme.accent)
-                            }
-
-                            if source == importService.detectedSource && source != .custom {
-                                Text("DETECTED")
-                                    .font(.brutalistLabel)
-                                    .foregroundStyle(Theme.statusGood)
-                                    .tracking(1)
-                            }
-                        }
-                        .padding(Spacing.md)
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-
-                    if source != CSVImportSource.allCases.last {
-                        Rectangle()
-                            .fill(Theme.gridLine)
-                            .frame(height: Theme.borderWidth)
-                    }
+            // The detected format is named in words beside it, not only
+            // tinted.
+            SettingsOptionList(
+                options: CSVImportSource.allCases,
+                selection: selectedSource,
+                title: { $0.rawValue },
+                subtitle: { source in
+                    source == importService.detectedSource && source != .custom ? "Detected" : nil
                 }
+            ) { source in
+                selectedSource = source
+                importService.detectedSource = source
+                importService.columnMapping = importService.autoMapColumns(
+                    headers: importService.headers,
+                    source: source
+                )
             }
-            .background(Theme.surfaceInstrument)
-            .brutalistBorder()
 
             // Column mapping
             InstrumentSectionHeader(title: "Column Mapping")
@@ -75,9 +50,7 @@ struct CSVImportConfigureStep: View {
                     )
                 )
 
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
+                SettingsRowDivider()
 
                 columnMappingRow(
                     label: "SERVICE NAME",
@@ -87,9 +60,7 @@ struct CSVImportConfigureStep: View {
                     )
                 )
 
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
+                SettingsRowDivider()
 
                 columnMappingRow(
                     label: "ODOMETER",
@@ -99,9 +70,7 @@ struct CSVImportConfigureStep: View {
                     )
                 )
 
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
+                SettingsRowDivider()
 
                 columnMappingRow(
                     label: "COST",
@@ -111,9 +80,7 @@ struct CSVImportConfigureStep: View {
                     )
                 )
 
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
+                SettingsRowDivider()
 
                 columnMappingRow(
                     label: "NOTES",
@@ -217,16 +184,23 @@ struct CSVImportConfigureStep: View {
         label: String,
         selectedColumn: Binding<Int?>
     ) -> some View {
-        HStack {
+        // Label over the menu at accessibility sizes; a fixed-width label
+        // column wrapped "SERVICE NAME" one letter group per line.
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: Spacing.xs))
+            : AnyLayout(HStackLayout(spacing: Spacing.sm))
+
+        return layout {
             Text(label)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1)
-                .frame(width: 120, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityHidden(true)
 
-            Spacer()
-
-            Picker("", selection: selectedColumn) {
+            // The picker carries the field name itself so VoiceOver says
+            // which column it maps.
+            Picker(label, selection: selectedColumn) {
                 Text("None")
                     .tag(nil as Int?)
                 ForEach(Array(importService.headers.enumerated()), id: \.offset) { index, header in
@@ -234,9 +208,12 @@ struct CSVImportConfigureStep: View {
                         .tag(index as Int?)
                 }
             }
+            .labelsHidden()
             .pickerStyle(.menu)
             .tint(Theme.accent)
+            .frame(minHeight: TouchTarget.minimum)
         }
-        .padding(Spacing.md)
+        .padding(.horizontal, Spacing.md)
+        .padding(.vertical, Spacing.xs)
     }
 }

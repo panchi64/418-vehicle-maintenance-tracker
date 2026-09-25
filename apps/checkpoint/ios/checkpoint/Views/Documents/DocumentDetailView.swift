@@ -77,10 +77,10 @@ struct DocumentDetailView: View {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(.subheadline.weight(.semibold))
                             .foregroundStyle(Theme.textSecondary)
                     }
-                    .accessibilityLabel("Close")
+                    .accessibilityLabel(L10n.commonClose)
                 }
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
@@ -99,6 +99,7 @@ struct DocumentDetailView: View {
                         Image(systemName: "ellipsis.circle")
                     }
                     .toolbarButtonStyle()
+                    .accessibilityLabel(L10n.documentsMoreActions)
                 }
             }
             .quickLookPreview($previewURL)
@@ -120,7 +121,7 @@ struct DocumentDetailView: View {
                 titleVisibility: .visible
             ) {
                 Button(L10n.documentsDeleteAction, role: .destructive) { deleteDocument() }
-                Button("Cancel", role: .cancel) { }
+                Button(L10n.commonCancel, role: .cancel) { }
             } message: {
                 Text(L10n.documentsDeleteConfirmMessage)
             }
@@ -134,7 +135,7 @@ struct DocumentDetailView: View {
                     }
                     pendingRemovalSelection = nil
                 }
-                Button("Cancel", role: .cancel) {
+                Button(L10n.commonCancel, role: .cancel) {
                     pendingRemovalSelection = nil
                 }
             } message: {
@@ -169,25 +170,30 @@ struct DocumentDetailView: View {
                 } else {
                     VStack(spacing: Spacing.sm) {
                         Image(systemName: document.documentType.icon)
-                            .font(.system(size: 40, weight: .light))
+                            .font(.largeTitle.weight(.light))
                             .foregroundStyle(document.documentType.accentColor)
 
                         Text(document.documentType.displayName.uppercased())
                             .font(.brutalistLabel)
                             .foregroundStyle(Theme.textTertiary)
                             .tracking(1.5)
+                            .multilineTextAlignment(.center)
                     }
+                    .padding(Spacing.sm)
                 }
             }
+            // A preview image, not a text container — its fixed height is
+            // the frame the thumbnail scales into.
             .frame(height: 320)
             .frame(maxWidth: .infinity)
             .brutalistBorder()
             .overlay(alignment: .bottomTrailing) {
                 HStack(spacing: 6) {
                     Image(systemName: "arrow.up.left.and.arrow.down.right")
-                        .font(.system(size: 12, weight: .semibold))
-                    Text("OPEN")
+                        .font(.caption2.weight(.semibold))
+                    Text(L10n.documentsOpenBadge)
                         .font(.brutalistLabel)
+                        .textCase(.uppercase)
                         .tracking(1)
                 }
                 .foregroundStyle(Theme.surfaceInstrument)
@@ -199,47 +205,12 @@ struct DocumentDetailView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Open full document")
-        .accessibilityHint("Opens the document in the system viewer")
+        .accessibilityLabel(L10n.documentsOpenFullLabel)
+        .accessibilityHint(L10n.documentsOpenFullHint)
     }
 
     private var typeSection: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(L10n.documentsTypeLabel.uppercased())
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1.5)
-
-            Menu {
-                ForEach(DocumentType.listOrder) { type in
-                    Button {
-                        document.documentType = type
-                    } label: {
-                        Label(type.displayName, systemImage: type.icon)
-                    }
-                }
-            } label: {
-                HStack(spacing: Spacing.sm) {
-                    Image(systemName: document.documentType.icon)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(document.documentType.accentColor)
-
-                    Text(document.documentType.displayName.uppercased())
-                        .font(.brutalistBody)
-                        .tracking(1)
-                        .foregroundStyle(Theme.textPrimary)
-
-                    Spacer()
-
-                    Image(systemName: "chevron.up.chevron.down")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(Theme.textTertiary)
-                }
-                .padding(Spacing.md)
-                .background(Theme.surfaceInstrument)
-                .brutalistBorder()
-            }
-        }
+        DocumentTypeMenu(selection: $document.documentType)
     }
 
     private var notesSection: some View {
@@ -260,7 +231,7 @@ struct DocumentDetailView: View {
             } label: {
                 HStack(spacing: Spacing.sm) {
                     Image(systemName: "text.viewfinder")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(.caption2.weight(.medium))
                         .foregroundStyle(Theme.textSecondary)
 
                     Text(L10n.documentsExtractedTextLabel.uppercased())
@@ -271,21 +242,20 @@ struct DocumentDetailView: View {
                     Spacer()
 
                     Image(systemName: "chevron.down")
-                        .font(.system(size: 11, weight: .bold))
+                        .font(.caption2.weight(.bold))
                         .foregroundStyle(Theme.textTertiary)
                         .rotationEffect(.degrees(isExtractedTextExpanded ? 180 : 0))
                 }
                 .padding(Spacing.md)
+                .frame(minHeight: TouchTarget.minimum)
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel(L10n.documentsExtractedTextLabel)
-            .accessibilityHint(isExtractedTextExpanded ? "Double tap to collapse" : "Double tap to expand")
+            .accessibilityValue(isExtractedTextExpanded ? L10n.disclosureExpanded : L10n.disclosureCollapsed)
 
             if isExtractedTextExpanded {
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: 1)
+                ListDivider()
 
                 Text(text)
                     .font(.brutalistSecondary)
@@ -303,17 +273,20 @@ struct DocumentDetailView: View {
     private var linkedVehiclesSection: some View {
         let linked = document.vehicles ?? []
         return InstrumentSection(title: L10n.documentsLinkedVehiclesLabel, trailing: {
-            Button(L10n.documentsLinkedVehiclesEdit.uppercased()) {
+            Button {
                 pendingVehicleSelection = Set(linked.map { $0.id })
                 showVehiclePicker = true
+            } label: {
+                Text(L10n.documentsLinkedVehiclesEdit.uppercased())
+                    .font(.brutalistLabel)
+                    .tracking(1)
+                    .foregroundStyle(Theme.accent)
+                    .minimumTouchTarget()
             }
-            .font(.brutalistLabel)
-            .tracking(1)
-            .foregroundStyle(Theme.accent)
         }) {
             VStack(spacing: 0) {
                 if linked.isEmpty {
-                    Text("No linked vehicles")
+                    Text(L10n.documentsNoLinkedVehicles)
                         .font(.brutalistBody)
                         .foregroundStyle(Theme.textTertiary)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -322,8 +295,9 @@ struct DocumentDetailView: View {
                     ForEach(Array(linked.enumerated()), id: \.element.id) { index, vehicle in
                         HStack(spacing: Spacing.sm) {
                             Image(systemName: "car.fill")
-                                .font(.system(size: 14, weight: .medium))
+                                .font(.subheadline.weight(.medium))
                                 .foregroundStyle(Theme.textTertiary)
+                                .accessibilityHidden(true)
 
                             Text(vehicle.displayName)
                                 .font(.brutalistBody)
@@ -334,9 +308,7 @@ struct DocumentDetailView: View {
                         .padding(Spacing.md)
 
                         if index < linked.count - 1 {
-                            Rectangle()
-                                .fill(Theme.gridLine)
-                                .frame(height: 1)
+                            ListDivider()
                         }
                     }
                 }
@@ -356,8 +328,9 @@ struct DocumentDetailView: View {
         } label: {
             HStack(spacing: Spacing.sm) {
                 Image(systemName: "wrench.and.screwdriver")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.subheadline.weight(.medium))
                     .foregroundStyle(Theme.accent)
+                    .accessibilityHidden(true)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(L10n.documentsFromServiceLog.uppercased())
@@ -373,20 +346,23 @@ struct DocumentDetailView: View {
                 Spacer()
 
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Theme.textTertiary)
+                    .accessibilityHidden(true)
             }
             .padding(Spacing.md)
             .background(Theme.surfaceInstrument)
             .brutalistBorder()
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
     }
 
     private func serviceLogSummary(for log: ServiceLog) -> String {
-        let name = log.service?.name ?? "Service"
+        let name = log.service?.name ?? L10n.documentsServiceFallback
         let date = Formatters.mediumDate.string(from: log.performedDate)
-        return "\(name) \u{2022} \(date)"
+        return L10n.documentsServiceLogSummary(name, date)
     }
 
     // MARK: - Preview

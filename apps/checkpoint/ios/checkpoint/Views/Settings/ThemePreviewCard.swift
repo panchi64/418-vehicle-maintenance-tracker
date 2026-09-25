@@ -12,43 +12,56 @@ struct ThemePreviewCard: View {
     let isActive: Bool
     let isOwned: Bool
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     var body: some View {
-        HStack(spacing: Spacing.md) {
-            // Color swatches
-            HStack(spacing: 4) {
-                ForEach(theme.previewColors, id: \.self) { hex in
-                    Rectangle()
-                        .fill(Color(hex: hex))
-                        .frame(width: 24, height: 24)
+        // Swatches sit above the name at accessibility sizes so the name
+        // keeps the full row width.
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: Spacing.sm))
+            : AnyLayout(HStackLayout(spacing: Spacing.md))
+
+        HStack(spacing: Spacing.sm) {
+            layout {
+                HStack(spacing: 4) {
+                    ForEach(theme.previewColors, id: \.self) { hex in
+                        Rectangle()
+                            .fill(Color(hex: hex))
+                            .frame(width: 24, height: 24)
+                    }
                 }
+                .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(theme.displayName)
+                        .font(.brutalistBody)
+                        .foregroundStyle(Theme.textPrimary)
+
+                    Text(tierName)
+                        .font(.brutalistLabel)
+                        .foregroundStyle(tierColor)
+                        .textCase(.uppercase)
+                        .tracking(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
 
-            // Theme info
-            VStack(alignment: .leading, spacing: 2) {
-                Text(theme.displayName)
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textPrimary)
-
-                Text(theme.tier.rawValue.uppercased())
-                    .font(.brutalistLabel)
-                    .foregroundStyle(tierColor)
-                    .tracking(1)
-            }
-
-            Spacer()
-
-            // Status indicator
+            // Status indicator — the symbol differs (check vs lock), and
+            // VoiceOver hears the same state through the traits and value.
             if isActive {
                 Image(systemName: "checkmark")
-                    .font(.system(size: 14, weight: .bold))
+                    .font(.subheadline.weight(.bold))
                     .foregroundStyle(Theme.accent)
+                    .accessibilityHidden(true)
             } else if !isOwned {
                 Image(systemName: "lock.fill")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Theme.textTertiary)
+                    .accessibilityHidden(true)
             }
         }
         .padding(Spacing.md)
+        .frame(minHeight: TouchTarget.minimum)
         .background(Theme.surfaceInstrument)
         .overlay(
             Rectangle()
@@ -57,6 +70,18 @@ struct ThemePreviewCard: View {
                     lineWidth: Theme.borderWidth
                 )
         )
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(isActive ? .isSelected : [])
+        .accessibilityValue(isOwned ? "" : L10n.settingsThemeLocked)
+    }
+
+    private var tierName: String {
+        switch theme.tier {
+        case .free: return L10n.settingsThemeTierFree
+        case .pro: return L10n.settingsThemeTierPro
+        case .rare: return L10n.settingsThemeTierRare
+        }
     }
 
     private var tierColor: Color {

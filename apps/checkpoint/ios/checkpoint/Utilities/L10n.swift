@@ -265,6 +265,64 @@ enum L10n {
     static var settingsMileageDisplay: String { localized("settings.mileage_display") }
     static var settingsMileageWindow: String { localized("settings.mileage_window") }
     static var settingsDaysWindow: String { localized("settings.days_window") }
+    static var settingsDaysWindowDesc: String { localized("settings.days_window_desc") }
+    static var settingsMileageWindowDesc: String { localized("settings.mileage_window_desc") }
+    static var settingsTheme: String { localized("settings.theme") }
+    static var settingsThemeRareHint: String { localized("settings.theme_rare_hint") }
+    static var settingsThemeUnlockInTipJar: String { localized("settings.theme_unlock_in_tip_jar") }
+    static var settingsThemeLocked: String { localized("settings.theme_locked") }
+    static var settingsThemeTierFree: String { localized("settings.theme_tier_free") }
+    static var settingsThemeTierPro: String { localized("settings.theme_tier_pro") }
+    static var settingsThemeTierRare: String { localized("settings.theme_tier_rare") }
+    static var settingsClimateZone: String { localized("settings.climate_zone") }
+    static var settingsClimateZoneDesc: String { localized("settings.climate_zone_desc") }
+    static var settingsNotSet: String { localized("settings.not_set") }
+    static var settingsSeasonalAlerts: String { localized("settings.seasonal_alerts") }
+    static var settingsSeasonalAlertsDesc: String { localized("settings.seasonal_alerts_desc") }
+    static var settingsDataSync: String { localized("settings.data_sync") }
+    static var settingsImportHistory: String { localized("settings.import_history") }
+    static var settingsSupport: String { localized("settings.support") }
+    static var settingsReplayTour: String { localized("settings.replay_tour") }
+    static var settingsReplayTourDesc: String { localized("settings.replay_tour_desc") }
+    static var settingsRestorePurchases: String { localized("settings.restore_purchases") }
+    static var settingsFindGasPrices: String { localized("settings.find_gas_prices") }
+    static var settingsFindGasPricesDesc: String { localized("settings.find_gas_prices_desc") }
+    static var settingsUsageAnalytics: String { localized("settings.usage_analytics") }
+    static var settingsUsageAnalyticsDesc: String { localized("settings.usage_analytics_desc") }
+    /// "30 days" — a threshold or window measured in days.
+    static func settingsDaysCount(_ days: Int) -> String {
+        String(format: localized("settings.days_count"), days)
+    }
+    /// "1,000 mi" — a threshold or window in the user's distance unit.
+    static func settingsDistanceValue(_ value: Int) -> String {
+        String(
+            format: localized("settings.distance_value"),
+            Formatters.mileageNumber(value),
+            DistanceSettings.shared.unit.abbreviation
+        )
+    }
+
+    // MARK: - iCloud Sync (Settings)
+
+    static var syncSectionTitle: String { localized("sync.section_title") }
+    static var syncToggleTitle: String { localized("sync.toggle_title") }
+    static var syncToggleSubtitle: String { localized("sync.toggle_subtitle") }
+    static var syncSignInPrompt: String { localized("sync.sign_in_prompt") }
+    static var syncFooter: String { localized("sync.footer") }
+    static var syncDisabled: String { localized("sync.disabled") }
+    static var syncRestartTitle: String { localized("sync.restart_title") }
+    static var syncRestartMessage: String { localized("sync.restart_message") }
+    static var syncRestartOK: String { localized("sync.restart_ok") }
+    static func syncLastSynced(_ relative: String) -> String {
+        String(format: localized("sync.last_synced"), relative)
+    }
+
+    // MARK: - Accessibility (shared)
+
+    static var commonClose: String { localized("common.close") }
+    /// VoiceOver value for a disclosure control's state.
+    static var disclosureExpanded: String { localized("disclosure.expanded") }
+    static var disclosureCollapsed: String { localized("disclosure.collapsed") }
 
     // MARK: - Distance Unit Picker
 
@@ -495,9 +553,6 @@ enum L10n {
     static var onboardingTourRecapBody: String { localized("onboarding.tour.recap.body") }
     static var onboardingTourRecapDone: String { localized("onboarding.tour.recap.done") }
 
-    static var onboardingTourSkipConfirmTitle: String { localized("onboarding.tour.skip_confirm_title") }
-    static var onboardingTourSkipConfirmMessage: String { localized("onboarding.tour.skip_confirm_message") }
-    static var onboardingTourSkipConfirmCancel: String { localized("onboarding.tour.skip_confirm_cancel") }
 
     static var onboardingGetStartedTitle: String { localized("onboarding.getstarted.title") }
     static var onboardingGetStartedVINLabel: String { localized("onboarding.getstarted.vin_label") }
@@ -514,6 +569,8 @@ enum L10n {
     static var onboardingGetStartedUseICloud: String { localized("onboarding.getstarted.use_icloud") }
     static var onboardingGetStartedICloudHelp: String { localized("onboarding.getstarted.icloud_help") }
     static var onboardingGetStartedSkip: String { localized("onboarding.getstarted.skip") }
+    static var onboardingGetStartedRegistrationTag: String { localized("onboarding.getstarted.registration_tag") }
+    static var onboardingGetStartedMarbeteHelp: String { localized("onboarding.getstarted.marbete_help") }
 
     // MARK: - Documents
 
@@ -557,6 +614,26 @@ enum L10n {
     static var documentsSourcePhotos: String { localized("documents.source.photos") }
     static var documentsSourceFiles: String { localized("documents.source.files") }
     static var documentsExtractedTextLabel: String { localized("documents.extracted_text.label") }
+    static var documentsMoreActions: String { localized("documents.more_actions") }
+    static var documentsNoLinkedVehicles: String { localized("documents.no_linked_vehicles") }
+    static var documentsNoResultsTitle: String { localized("documents.no_results.title") }
+    static var documentsNoResultsMessage: String { localized("documents.no_results.message") }
+    static var documentsOpenBadge: String { localized("documents.open_badge") }
+    static var documentsOpenFullLabel: String { localized("documents.open_full.label") }
+    static var documentsOpenFullHint: String { localized("documents.open_full.hint") }
+    static var documentsServiceFallback: String { localized("documents.service_fallback") }
+    static func documentsServiceLogSummary(_ serviceName: String, _ date: String) -> String {
+        String(format: localized("documents.service_log_summary"), serviceName, date)
+    }
+    static func documentsSectionTitle(_ typeName: String, _ count: Int) -> String {
+        String(format: localized("documents.section_title"), typeName, count)
+    }
+    static func documentsSelectedCount(_ count: Int) -> String {
+        String(format: localized("documents.selected_count"), count)
+    }
+    static func documentsDeleteCount(_ count: Int) -> String {
+        String(format: localized("documents.delete_count"), count)
+    }
 
     // MARK: - Service
 
@@ -809,6 +886,23 @@ enum L10n {
     // MARK: - Tip jar
 
     static var tipPurchaseFailed: String { localized("tip.purchase_failed") }
+    static var tipSupportCheckpoint: String { localized("tip.support_checkpoint") }
+    static var tipEveryTipUnlocks: String { localized("tip.every_tip_unlocks") }
+    static var tipJarTitle: String { localized("tip.jar_title") }
+    static var tipJarBody: String { localized("tip.jar_body") }
+    static var tipNotNow: String { localized("tip.not_now") }
+    static var tipPurchasing: String { localized("tip.purchasing") }
+    static var tipAllRareCollected: String { localized("tip.all_rare_collected") }
+    static var tipTierSmall: String { localized("tip.tier.small") }
+    static var tipTierMedium: String { localized("tip.tier.medium") }
+    static var tipTierLarge: String { localized("tip.tier.large") }
+    static func tipRareProgress(owned: Int, total: Int) -> String {
+        String(format: localized("tip.rare_progress"), owned, total)
+    }
+    /// VoiceOver label for a tip button: tier name, then price.
+    static func tipPurchaseLabel(name: String, price: String) -> String {
+        String(format: localized("tip.purchase_label"), name, price)
+    }
     static var remindNoScheduleWarning: String { localized("remind.noScheduleWarning") }
     static var recordSetIntervalHint: String { localized("record.setIntervalHint") }
 

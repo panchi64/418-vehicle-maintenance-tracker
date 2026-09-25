@@ -18,6 +18,7 @@ struct CSVImportPreviewStep: View {
     let onImport: (CSVImportPreview) -> Void
 
     @FocusState private var isVehicleNameFocused: Bool
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private var canImport: Bool {
         if createNewVehicle {
@@ -31,20 +32,11 @@ struct CSVImportPreviewStep: View {
             InstrumentSectionHeader(title: "Import Summary")
 
             // Stats row
-            HStack(spacing: Spacing.md) {
-                statCard(
-                    value: "\(preview.serviceCount)",
-                    label: "SERVICES"
-                )
-                statCard(
-                    value: "\(preview.logCount)",
-                    label: "LOGS"
-                )
-                statCard(
-                    value: Formatters.currencyWhole(preview.totalCost),
-                    label: "TOTAL COST"
-                )
-            }
+            CSVImportStatTiles(stats: [
+                .init(value: "\(preview.serviceCount)", label: "SERVICES"),
+                .init(value: "\(preview.logCount)", label: "LOGS"),
+                .init(value: Formatters.currencyWhole(preview.totalCost), label: "TOTAL COST"),
+            ])
 
             // Service names
             InstrumentSectionHeader(title: "Services to Create")
@@ -53,12 +45,12 @@ struct CSVImportPreviewStep: View {
                 ForEach(Array(preview.serviceNames.enumerated()), id: \.offset) { index, name in
                     let count = preview.parsedRows.filter { $0.serviceName == name }.count
 
-                    HStack {
+                    HStack(alignment: .firstTextBaseline) {
                         Text(name)
                             .font(.brutalistBody)
                             .foregroundStyle(Theme.textPrimary)
 
-                        Spacer()
+                        Spacer(minLength: Spacing.sm)
 
                         Text("\(count) LOGS")
                             .font(.brutalistLabel)
@@ -66,11 +58,10 @@ struct CSVImportPreviewStep: View {
                             .tracking(1)
                     }
                     .padding(Spacing.md)
+                    .accessibilityElement(children: .combine)
 
                     if index < preview.serviceNames.count - 1 {
-                        Rectangle()
-                            .fill(Theme.gridLine)
-                            .frame(height: Theme.borderWidth)
+                        SettingsRowDivider()
                     }
                 }
             }
@@ -82,64 +73,28 @@ struct CSVImportPreviewStep: View {
 
             VStack(spacing: 0) {
                 ForEach(vehicles) { vehicle in
-                    Button {
+                    SettingsOptionRow(
+                        title: vehicle.displayName,
+                        isSelected: selectedVehicle?.id == vehicle.id && !createNewVehicle
+                    ) {
                         selectedVehicle = vehicle
                         createNewVehicle = false
-                    } label: {
-                        HStack {
-                            Text(vehicle.displayName)
-                                .font(.brutalistBody)
-                                .foregroundStyle(Theme.textPrimary)
-
-                            Spacer()
-
-                            if selectedVehicle?.id == vehicle.id && !createNewVehicle {
-                                Image(systemName: "checkmark")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundStyle(Theme.accent)
-                            }
-                        }
-                        .padding(Spacing.md)
-                        .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
 
-                    Rectangle()
-                        .fill(Theme.gridLine)
-                        .frame(height: Theme.borderWidth)
+                    SettingsRowDivider()
                 }
 
                 // Create new vehicle option
-                Button {
+                SettingsOptionRow(
+                    title: "Create New Vehicle",
+                    isSelected: createNewVehicle
+                ) {
                     createNewVehicle = true
                     selectedVehicle = nil
-                } label: {
-                    HStack {
-                        Image(systemName: "plus")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundStyle(Theme.accent)
-
-                        Text("Create New Vehicle")
-                            .font(.brutalistBody)
-                            .foregroundStyle(Theme.textPrimary)
-
-                        Spacer()
-
-                        if createNewVehicle {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundStyle(Theme.accent)
-                        }
-                    }
-                    .padding(Spacing.md)
-                    .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
 
                 if createNewVehicle {
-                    Rectangle()
-                        .fill(Theme.gridLine)
-                        .frame(height: Theme.borderWidth)
+                    SettingsRowDivider()
 
                     HStack {
                         TextField("Vehicle Name", text: $newVehicleName)
@@ -180,8 +135,13 @@ struct CSVImportPreviewStep: View {
                 .brutalistBorder()
             }
 
-            // Buttons
-            HStack(spacing: Spacing.md) {
+            // Buttons — stacked at accessibility sizes so each label gets
+            // the full width.
+            let buttonLayout = dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(spacing: Spacing.sm))
+                : AnyLayout(HStackLayout(spacing: Spacing.md))
+
+            buttonLayout {
                 Button {
                     currentStep = .configure
                 } label: {
@@ -205,22 +165,5 @@ struct CSVImportPreviewStep: View {
                     .foregroundStyle(Theme.statusOverdue)
             }
         }
-    }
-
-    private func statCard(value: String, label: String) -> some View {
-        VStack(spacing: Spacing.xs) {
-            Text(value)
-                .font(.brutalistBody)
-                .foregroundStyle(Theme.textPrimary)
-
-            Text(label)
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(Spacing.md)
-        .background(Theme.surfaceInstrument)
-        .brutalistBorder()
     }
 }

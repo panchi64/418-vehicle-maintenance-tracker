@@ -166,21 +166,17 @@ final class OnboardingStateTests: XCTestCase {
     func testReplayTour_resetsCompletedFlagAndGoesToTourStep0() {
         UserDefaults.standard.set(true, forKey: completedKey)
         let state = OnboardingState()
-        state.seenTourSteps = [0, 1, 2, 3]
         state.replayTour()
         XCTAssertEqual(state.currentPhase, .tour(step: 0))
         XCTAssertFalse(OnboardingState.hasCompletedOnboarding)
-        XCTAssertTrue(state.seenTourSteps.isEmpty)
     }
 
     func testReplayOnboarding_resetsCompletedFlagAndGoesToIntro() {
         UserDefaults.standard.set(true, forKey: completedKey)
         let state = OnboardingState()
-        state.seenTourSteps = [0, 1]
         state.replayOnboarding()
         XCTAssertEqual(state.currentPhase, .intro)
         XCTAssertFalse(OnboardingState.hasCompletedOnboarding)
-        XCTAssertTrue(state.seenTourSteps.isEmpty)
     }
 
     // MARK: - Phase Properties
@@ -245,12 +241,5 @@ final class OnboardingStateTests: XCTestCase {
     func testSampleVehicleIDs_defaultEmpty() {
         let state = OnboardingState()
         XCTAssertTrue(state.sampleVehicleIDs.isEmpty)
-    }
-
-    // MARK: - Seen Tour Steps
-
-    func testSeenTourSteps_defaultEmpty() {
-        let state = OnboardingState()
-        XCTAssertTrue(state.seenTourSteps.isEmpty)
     }
 }

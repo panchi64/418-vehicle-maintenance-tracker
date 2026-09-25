@@ -11,72 +11,21 @@ struct ClimateZonePickerView: View {
     @State private var selectedZone: ClimateZone? = SeasonalSettings.shared.climateZone
 
     var body: some View {
-        ZStack {
-            Theme.backgroundPrimary
-                .ignoresSafeArea()
-
-            VStack(alignment: .leading, spacing: Spacing.lg) {
-                Text("Choose the climate zone that best matches where you drive most often.")
-                    .font(.brutalistSecondary)
-                    .foregroundStyle(Theme.textSecondary)
-                    .padding(.horizontal, Spacing.screenHorizontal)
-
-                VStack(spacing: 0) {
-                    ForEach(ClimateZone.allCases, id: \.self) { zone in
-                        zoneRow(for: zone)
-
-                        if zone != ClimateZone.allCases.last {
-                            Rectangle()
-                                .fill(Theme.gridLine)
-                                .frame(height: Theme.borderWidth)
-                        }
-                    }
-                }
-                .background(Theme.surfaceInstrument)
-                .brutalistBorder()
-                .padding(.horizontal, Spacing.screenHorizontal)
-
-                Spacer()
-            }
-            .padding(.top, Spacing.lg)
-        }
-        .navigationTitle("Climate Zone")
-        .navigationBarTitleDisplayMode(.inline)
-        .onChange(of: selectedZone) { _, newZone in
-            Task { @MainActor in
+        SettingsPickerScreen(
+            title: L10n.settingsClimateZone,
+            caption: L10n.settingsClimateZoneDesc
+        ) {
+            SettingsOptionList(
+                options: ClimateZone.allCases,
+                selection: selectedZone,
+                title: { $0.displayName },
+                subtitle: { $0.description }
+            ) { zone in
                 HapticService.shared.selectionChanged()
-                SeasonalSettings.shared.climateZone = newZone
+                selectedZone = zone
+                SeasonalSettings.shared.climateZone = zone
             }
         }
-    }
-
-    private func zoneRow(for zone: ClimateZone) -> some View {
-        Button {
-            selectedZone = zone
-        } label: {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(zone.displayName)
-                        .font(.brutalistBody)
-                        .foregroundStyle(Theme.textPrimary)
-
-                    Text(zone.description)
-                        .font(.brutalistSecondary)
-                        .foregroundStyle(Theme.textTertiary)
-                }
-
-                Spacer()
-
-                if selectedZone == zone {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(Theme.accent)
-                }
-            }
-            .padding(Spacing.md)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
     }
 }
 
