@@ -20,6 +20,8 @@ final class PurchaseSettings {
         static let lastTipDate = "purchaseLastTipDate"
         static let tipPromptDismissCount = "purchaseTipPromptDismissCount"
         static let completedActionCount = "purchaseCompletedActionCount"
+        static let lastTipPromptDate = "purchaseLastTipPromptDate"
+        static let tipPromptShownCount = "purchaseTipPromptShownCount"
     }
 
     var isPro: Bool {
@@ -40,7 +42,7 @@ final class PurchaseSettings {
         set { defaults.set(newValue, forKey: Keys.ownedThemeIDs) }
     }
 
-    /// When the user last tipped — used for 30-day cooldown
+    /// When the user last tipped — used for the post-tip cooldown
     var lastTipDate: Date? {
         get { defaults.object(forKey: Keys.lastTipDate) as? Date }
         set { defaults.set(newValue, forKey: Keys.lastTipDate) }
@@ -58,45 +60,44 @@ final class PurchaseSettings {
         set { defaults.set(newValue, forKey: Keys.completedActionCount) }
     }
 
+    /// When the app last prompted for a tip — drives the 30-day spacing.
+    var lastTipPromptDate: Date? {
+        get { defaults.object(forKey: Keys.lastTipPromptDate) as? Date }
+        set { defaults.set(newValue, forKey: Keys.lastTipPromptDate) }
+    }
+
+    /// Lifetime count of app-initiated tip prompts — drives the cap.
+    var tipPromptShownCount: Int {
+        get { defaults.integer(forKey: Keys.tipPromptShownCount) }
+        set { defaults.set(newValue, forKey: Keys.tipPromptShownCount) }
+    }
+
     // MARK: - Tip Prompt Gating
 
-    /// Number of days to suppress prompts after a tip
-    nonisolated static let tipCooldownDays = 30
-
-    /// Base number of actions before first prompt
-    nonisolated static let baseActionThreshold = 3
-
-    /// Additional actions required per previous dismiss (progressive backoff)
-    nonisolated static let dismissBackoffIncrement = 3
-
-    /// Maximum action threshold (caps the backoff)
-    nonisolated static let maxActionThreshold = 15
-
-    /// The current action threshold based on how many times the user has dismissed
-    var currentActionThreshold: Int {
-        min(
-            Self.baseActionThreshold + (tipPromptDismissCount * Self.dismissBackoffIncrement),
-            Self.maxActionThreshold
+    /// The stored counters, as the policy that decides whether to prompt.
+    /// The rules and their values live in `TipPromptPolicy`.
+    var tipPromptPolicy: TipPromptPolicy {
+        TipPromptPolicy(
+            completedActionCount: completedActionCount,
+            dismissCount: tipPromptDismissCount,
+            promptsShown: tipPromptShownCount,
+            hasTipped: totalTipCount > 0,
+            lastTipDate: lastTipDate,
+            lastPromptDate: lastTipPromptDate,
+            shownThisSession: hasShownTipModalThisSession
         )
     }
 
-    /// Whether the tip cooldown period has elapsed since the last tip
-    var isTipCooldownExpired: Bool {
-        guard let lastTip = lastTipDate else { return true }
-        let daysSinceTip = Calendar.current.dateComponents([.day], from: lastTip, to: Date()).day ?? 0
-        return daysSinceTip >= Self.tipCooldownDays
-    }
-
-    /// Whether enough actions have been completed to show a prompt
-    var hasReachedActionThreshold: Bool {
-        completedActionCount >= currentActionThreshold
-    }
-
-    /// Whether the tip prompt should be shown (all conditions met)
     var shouldShowTipPrompt: Bool {
-        !hasShownTipModalThisSession
-        && isTipCooldownExpired
-        && hasReachedActionThreshold
+        tipPromptPolicy.shouldShow()
+    }
+
+    /// Record that the app prompted — starts the spacing window and counts
+    /// toward the lifetime cap.
+    func recordTipPromptShown(at date: Date = .now) {
+        hasShownTipModalThisSession = true
+        lastTipPromptDate = date
+        tipPromptShownCount += 1
     }
 
     /// Record that a tip was made — resets counters and starts cooldown
@@ -126,7 +127,8 @@ final class PurchaseSettings {
             Keys.totalTipCount: 0,
             Keys.ownedThemeIDs: [String](),
             Keys.tipPromptDismissCount: 0,
-            Keys.completedActionCount: 0
+            Keys.completedActionCount: 0,
+            Keys.tipPromptShownCount: 0
         ])
     }
 }

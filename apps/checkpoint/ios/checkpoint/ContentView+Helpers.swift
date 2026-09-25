@@ -364,7 +364,8 @@ extension ContentView {
         updateWidgetData()
         // Reschedule mileage reminder for 14 days from now
         NotificationService.shared.scheduleMileageReminder(for: vehicle, lastUpdateDate: .now)
-        appState.recordCompletedAction()
+        // Not a tip-prompt action: an odometer update is upkeep the app asks
+        // of the user, not something it did for them (see TipPromptPolicy).
     }
 
     /// Presents the tip modal a beat after AppState queues it. The delay and
@@ -375,7 +376,7 @@ extension ContentView {
             guard appState.tipPromptQueued else { return }
             appState.tipPromptQueued = false
             appState.showTipModal = true
-            PurchaseSettings.shared.hasShownTipModalThisSession = true
+            PurchaseSettings.shared.recordTipPromptShown()
             AnalyticsService.shared.capture(.tipModalShown(
                 actionCount: PurchaseSettings.shared.completedActionCount,
                 dismissCount: PurchaseSettings.shared.tipPromptDismissCount

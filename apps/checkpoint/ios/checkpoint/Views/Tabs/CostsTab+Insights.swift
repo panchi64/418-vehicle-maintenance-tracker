@@ -179,7 +179,7 @@ extension CostsMetrics {
         var lines: [String] = []
 
         if let vehicle {
-            lines.append("\(vehicle.year) \(vehicle.make) \(vehicle.model)")
+            lines.append(vehicle.identityLine)
         }
         lines.append("\(periodLabel.uppercased()) · \(formattedTotalSpent)")
 

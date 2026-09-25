@@ -57,8 +57,7 @@ final class VehicleFormState {
     /// Year is valid when between 1900 and two years from now
     var isYearValid: Bool {
         guard let year else { return false }
-        let maxYear = Calendar.current.component(.year, from: Date()) + 2
-        return (1900...maxYear).contains(year)
+        return Vehicle.isPlausibleModelYear(year)
     }
 
     /// Whether the vehicle is identified well enough to be useful. Year is

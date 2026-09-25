@@ -288,6 +288,26 @@ final class VehicleTests: XCTestCase {
         XCTAssertEqual(vehicle.displayName, "2022 Toyota Camry")
     }
 
+    @MainActor
+    func testDisplayName_UnknownYear_OmitsYear() {
+        // Year is optional on the vehicle forms and stored as 0 when skipped.
+        let vehicle = Vehicle(name: "", make: "Toyota", model: "Camry", year: 0)
+
+        XCTAssertFalse(vehicle.hasModelYear)
+        XCTAssertEqual(vehicle.displayName, "Toyota Camry")
+        XCTAssertEqual(vehicle.identityLine, "Toyota Camry")
+    }
+
+    @MainActor
+    func testIsPlausibleModelYear_AcceptsRangeRejectsOutliers() {
+        let now = Calendar.current.date(from: DateComponents(year: 2026, month: 6, day: 1))!
+
+        XCTAssertTrue(Vehicle.isPlausibleModelYear(1900, now: now))
+        XCTAssertTrue(Vehicle.isPlausibleModelYear(2028, now: now))
+        XCTAssertFalse(Vehicle.isPlausibleModelYear(1899, now: now))
+        XCTAssertFalse(Vehicle.isPlausibleModelYear(2029, now: now))
+    }
+
     // MARK: - Truncated VIN Tests
 
     func testTruncatedVIN_WithFullVIN() {

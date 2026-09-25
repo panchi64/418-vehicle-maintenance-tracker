@@ -55,9 +55,29 @@ final class Vehicle: Identifiable {
 
     var displayName: String {
         if name.isEmpty {
-            return "\(year) \(make) \(model)"
+            return identityLine
         }
         return name
+    }
+
+    /// "2022 Toyota Camry", or "Toyota Camry" when the year is unknown. Year is
+    /// optional on the vehicle forms and stored as 0 when skipped, which must
+    /// never render as "0 Toyota Camry".
+    var identityLine: String {
+        let parts = [hasModelYear ? String(year) : nil, make, model]
+            .compactMap { $0 }
+            .filter { !$0.isEmpty }
+        return parts.joined(separator: " ")
+    }
+
+    /// Whether a model year was entered. 0 is the stored "unknown".
+    var hasModelYear: Bool { year > 0 }
+
+    /// A plausible model year: 1900 through two years from now. Shared by the
+    /// add and edit forms so they accept the same values.
+    static func isPlausibleModelYear(_ year: Int, now: Date = .now) -> Bool {
+        let maxYear = Calendar.current.component(.year, from: now) + 2
+        return (1900...maxYear).contains(year)
     }
 
     init(
