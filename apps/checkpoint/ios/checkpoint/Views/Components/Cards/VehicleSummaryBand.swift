@@ -192,39 +192,63 @@ private struct SummaryCell: View {
     var growsToFill: Bool = false
     var action: (() -> Void)?
 
+    private var labelText: some View {
+        Text(label.uppercased())
+            .font(.brutalistLabel)
+            .foregroundStyle(Theme.textTertiary)
+            .tracking(1.5)
+            .lineLimit(1)
+    }
+
+    @ViewBuilder
+    private var flagTag: some View {
+        if let flag {
+            HStack(spacing: 3) {
+                StatusMark(status: .dueSoon)
+                Text(flag.uppercased())
+                    .font(.brutalistLabelBold)
+                    .tracking(1)
+                    .foregroundStyle(Theme.statusDueSoon)
+                    .lineLimit(1)
+            }
+            .fixedSize()
+        }
+    }
+
+    /// The trailing glyph, pushed to the edge on the cell that fills the row.
+    @ViewBuilder
+    private var glyphRow: some View {
+        if growsToFill {
+            Spacer(minLength: Spacing.xs)
+        }
+        Image(systemName: glyph)
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(Theme.accent)
+            .rotationEffect(.degrees(isGlyphRotated ? 180 : 0))
+            .accessibilityHidden(true)
+    }
+
     var body: some View {
         Button {
             action?()
         } label: {
             VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: Spacing.xs) {
-                    Text(label.uppercased())
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
-                        .tracking(1.5)
-                        .lineLimit(1)
-
-                    if let flag {
-                        HStack(spacing: 3) {
-                            StatusMark(status: .dueSoon)
-                            Text(flag.uppercased())
-                                .font(.brutalistLabelBold)
-                                .tracking(1)
-                                .foregroundStyle(Theme.statusDueSoon)
-                                .lineLimit(1)
+                // Label and flag on one line when they fit; otherwise the flag
+                // drops beneath, rather than truncating the label ("ODÓMET…"
+                // beside "ACTUALIZAR" in Spanish, or at large type).
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: Spacing.xs) {
+                        labelText
+                        flagTag
+                        glyphRow
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: Spacing.xs) {
+                            labelText
+                            glyphRow
                         }
-                        .fixedSize()
+                        flagTag
                     }
-
-                    if growsToFill {
-                        Spacer(minLength: Spacing.xs)
-                    }
-
-                    Image(systemName: glyph)
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(Theme.accent)
-                        .rotationEffect(.degrees(isGlyphRotated ? 180 : 0))
-                        .accessibilityHidden(true)
                 }
 
                 Group {

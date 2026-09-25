@@ -74,15 +74,27 @@ struct NextUpCard: View {
         status == .neutral ? Theme.gridLine : status.color
     }
 
+    private var nextUpLabel: some View {
+        Text(L10n.homeNextUp.uppercased())
+            .font(.brutalistLabel)
+            .tracking(1.5)
+            .foregroundStyle(Theme.textTertiary)
+    }
+
     private var readoutBody: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            HStack(alignment: .firstTextBaseline) {
-                StatusTag(status: status)
-                Spacer(minLength: Spacing.sm)
-                Text(L10n.homeNextUp.uppercased())
-                    .font(.brutalistLabel)
-                    .tracking(1.5)
-                    .foregroundStyle(Theme.textTertiary)
+            // Stacked at large type: side by side, each tag wrapped mid-phrase
+            // ("ON / TRACK" beside "NEXT / UP") and the mark lost its word.
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .firstTextBaseline) {
+                    StatusTag(status: status).fixedSize()
+                    Spacer(minLength: Spacing.sm)
+                    nextUpLabel.fixedSize()
+                }
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    nextUpLabel
+                    StatusTag(status: status)
+                }
             }
 
             Text(title)

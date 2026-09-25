@@ -58,8 +58,13 @@ struct ToastView: View {
         }
         .padding(.horizontal, Spacing.md)
         .padding(.vertical, Spacing.sm)
+        // The instrument surface is translucent; over a list it let the rows
+        // beneath read through the message. The page color under it makes the
+        // toast opaque, and the shadow lifts it off the content it covers.
         .background(Theme.surfaceInstrument)
+        .background(Theme.backgroundPrimary)
         .brutalistBorder()
+        .shadow(color: .black.opacity(0.12), radius: 12, y: 4)
         .gesture(
             DragGesture(minimumDistance: 20)
                 .onEnded { value in

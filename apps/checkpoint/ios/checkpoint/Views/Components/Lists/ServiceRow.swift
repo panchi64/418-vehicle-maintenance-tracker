@@ -73,6 +73,9 @@ struct ServiceRow: View {
                         .foregroundStyle(Theme.textPrimary)
                         .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
                         .multilineTextAlignment(.leading)
+                        // Without this, List row sizing truncated at large
+                        // type ("Tire Rotat…") despite the open line limit.
+                        .fixedSize(horizontal: false, vertical: true)
 
                     AdaptiveSpacer()
 
@@ -80,11 +83,14 @@ struct ServiceRow: View {
                         Text(urgency)
                             .font(.brutalistSecondary)
                             .foregroundStyle(isUrgent ? status.color : Theme.textTertiary)
-                            .lineLimit(1)
+                            .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
 
-                HStack(spacing: Spacing.sm) {
+                // First-baseline, so the mark sits with the due line's first
+                // line when it wraps rather than centering on the block.
+                HStack(alignment: .firstTextBaseline, spacing: Spacing.sm) {
                     if isUrgent && !groupedByStatus {
                         StatusTag(status: status)
                     } else {
@@ -94,6 +100,7 @@ struct ServiceRow: View {
                         .font(.brutalistSecondary)
                         .foregroundStyle(Theme.textTertiary)
                         .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

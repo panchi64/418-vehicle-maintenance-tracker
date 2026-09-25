@@ -9,17 +9,21 @@
 import Foundation
 
 enum Formatters {
-    /// Short date format: "Jan 5"
+    // Display dates use templates, not fixed formats: a fixed "MMM d, yyyy"
+    // kept English order in Spanish ("mar 25, 2027"). The template lets each
+    // locale order the parts ("Mar 25, 2027" / "25 mar 2027").
+
+    /// Short date: "Jan 5" / "5 ene"
     static let shortDate: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d"
+        formatter.setLocalizedDateFormatFromTemplate("MMMd")
         return formatter
     }()
 
-    /// Medium date format: "Jan 5, 2024"
+    /// Medium date: "Jan 5, 2024" / "5 ene 2024"
     static let mediumDate: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d, yyyy"
+        formatter.setLocalizedDateFormatFromTemplate("yMMMd")
         return formatter
     }()
 

@@ -77,12 +77,14 @@ enum FieldRequirement: Equatable {
 
 /// The one visual mark for a required field, rendered beside its label.
 /// Deliberately not a bare asterisk: an asterisk is a convention the user has
-/// to already know, and it reads as nothing at all to VoiceOver.
+/// to already know, and it reads as nothing at all to VoiceOver. Tertiary,
+/// like `FormSection`'s trailing tag: status color here read as an error on a
+/// field that was already filled, and status owns color.
 struct RequiredFieldMarker: View {
     var body: some View {
         Text(L10n.formRequiredTag)
             .font(.brutalistLabel)
-            .foregroundStyle(Theme.statusOverdue)
+            .foregroundStyle(Theme.textTertiary)
             .tracking(1.5)
             .accessibilityLabel(L10n.formRequiredAccessibility)
     }
