@@ -73,18 +73,9 @@ enum L10n {
     }
 
     static var headerOdometer: String { localized("header.odometer") }
-    /// Rule 11: the make/model/year support line was built by concatenation,
-    /// which does not survive translation. Three positional args.
-    static func headerMakeModelYear(_ make: String, _ model: String, _ year: String) -> String {
-        String(format: localized("header.makeModelYear"), make, model, year)
-    }
     static var headerSpecs: String { localized("header.specs") }
-    static var headerSpecsAccessibility: String { localized("header.specsAccessibility") }
-    static var headerSpecsExpanded: String { localized("header.specsExpanded") }
-    static var headerSpecsCollapsed: String { localized("header.specsCollapsed") }
-    static var headerSelectVehicle: String { localized("header.selectVehicle") }
+    /// Navigation title when no vehicle is selected.
     static var headerSelectVehicleAccessibility: String { localized("header.selectVehicleAccessibility") }
-    static var headerSelectVehicleHint: String { localized("header.selectVehicleHint") }
     static var rowNoCostRecorded: String { localized("row.noCostRecorded") }
     static var rowNoTotalRecorded: String { localized("row.noTotalRecorded") }
     static var rowVisitTitle: String { localized("row.visitTitle") }
@@ -822,7 +813,6 @@ enum L10n {
     static var tabServices: String { localized("tab.services") }
     static var tabCosts: String { localized("tab.costs") }
     static var navManageVehicles: String { localized("nav.manageVehicles") }
-    static var navSwitchVehicleHint: String { localized("nav.switchVehicleHint") }
     static var servicesSearchPrompt: String { localized("servicesTab.searchPrompt") }
     static func toastReminderSetFor(_ date: String) -> String {
         String(format: localized("toast.reminderSetFor"), date)

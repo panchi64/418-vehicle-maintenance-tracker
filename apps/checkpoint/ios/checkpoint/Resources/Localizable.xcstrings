@@ -385,23 +385,6 @@
         }
       }
     },
-    "a11y.close" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Close"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cerrar"
-          }
-        }
-      }
-    },
     "a11y.collapsed" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5545,26 +5528,8 @@
     "Handling multiple services in one visit reduces trips and may lower labor costs." : {
 
     },
-    "header.makeModelYear" : {
-      "comment" : "Support line under the vehicle nickname. Args: make, model, year.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ %2$@ · %3$@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ %2$@ · %3$@"
-          }
-        }
-      }
-    },
     "header.odometer" : {
-      "comment" : "Label on the header's odometer cell.",
+      "comment" : "Label on Home's odometer cell.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -5581,25 +5546,8 @@
         }
       }
     },
-    "header.selectVehicle" : {
-      "comment" : "Vehicle header placeholder when no vehicle is selected. Displayed uppercase.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SELECT VEHICLE"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ELEGIR VEHÍCULO"
-          }
-        }
-      }
-    },
     "header.selectVehicleAccessibility" : {
+      "comment" : "Navigation title when no vehicle is selected.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -5616,25 +5564,8 @@
         }
       }
     },
-    "header.selectVehicleHint" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Double tap to choose a vehicle"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toca dos veces para elegir un vehículo"
-          }
-        }
-      }
-    },
     "header.specs" : {
-      "comment" : "Disclosure trigger beneath the vehicle name that reveals reference data (plate, VIN, tires, oil).",
+      "comment" : "Label on Home's specs cell, which expands reference data (plate, VIN, tires, oil).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -5647,57 +5578,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "FICHA"
-          }
-        }
-      }
-    },
-    "header.specsAccessibility" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vehicle specs"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ficha del vehículo"
-          }
-        }
-      }
-    },
-    "header.specsCollapsed" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Collapsed"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Contraído"
-          }
-        }
-      }
-    },
-    "header.specsExpanded" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Expanded"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Expandido"
           }
         }
       }
@@ -6171,24 +6051,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gestionar vehículos…"
-          }
-        }
-      }
-    },
-    "nav.switchVehicleHint" : {
-      "comment" : "VoiceOver hint on the navigation title, which opens the vehicle menu.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens a menu to switch vehicles"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abre un menú para cambiar de vehículo"
           }
         }
       }
@@ -8375,24 +8237,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Odómetro, aproximadamente %@, estimado"
-          }
-        }
-      }
-    },
-    "readout.opensSettingsHint" : {
-      "comment" : "VoiceOver hint: activating this opens Settings.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens Settings"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abre Ajustes"
           }
         }
       }

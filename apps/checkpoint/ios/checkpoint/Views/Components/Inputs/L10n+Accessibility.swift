@@ -17,7 +17,6 @@ extension L10n {
 
     // MARK: - Generic
 
-    static var a11yClose: String { a11y("a11y.close") }
     static var a11yDate: String { a11y("a11y.date") }
     static var a11yExpanded: String { a11y("a11y.expanded") }
     static var a11yCollapsed: String { a11y("a11y.collapsed") }
