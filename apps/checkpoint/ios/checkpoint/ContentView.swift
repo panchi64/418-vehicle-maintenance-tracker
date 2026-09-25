@@ -30,6 +30,14 @@ struct ContentView: View {
     /// `.active` re-runs it.
     @State var isForegroundActive = false
 
+    /// Actions requested from inside a root sheet that must wait for the
+    /// sheet to finish dismissing: presenting a second sheet in the same tick
+    /// as dismissing the first can drop it, and a log deleted while its detail
+    /// sheet is still animating away can be read after deletion. Each is
+    /// consumed in that sheet's `onDismiss`.
+    @State var addVehicleAfterPickerDismiss = false
+    @State var logPendingDeletion: ServiceLog?
+
     // MARK: - Vehicle Selection Persistence
 
     static let selectedVehicleIDKey = AppGroupConstants.appSelectedVehicleIDKey

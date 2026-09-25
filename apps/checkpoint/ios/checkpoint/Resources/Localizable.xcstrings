@@ -2848,6 +2848,94 @@
         }
       }
     },
+    "edit.logMileageRequired" : {
+      "comment" : "Shown when the odometer field on a service log edit is cleared. The reading anchors mileage-based reminders, so the log cannot be saved without it.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mileage reminders are measured from this reading. Enter the odometer at the time of service."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los recordatorios por millaje se miden desde esta lectura. Ingresa el odómetro al momento del servicio."
+          }
+        }
+      }
+    },
+    "log.delete.action" : {
+      "comment" : "Destructive action that deletes a completed service log entry.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete Entry"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar registro"
+          }
+        }
+      }
+    },
+    "log.delete.confirm_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The service's history and next reminder are recalculated from the remaining entries. Attachments stay in your documents. This can't be undone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El historial del servicio y su próximo recordatorio se recalculan con los registros restantes. Los adjuntos se quedan en tus documentos. Esto no se puede deshacer."
+          }
+        }
+      }
+    },
+    "log.delete.confirm_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this entry?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eliminar este registro?"
+          }
+        }
+      }
+    },
+    "tip.purchase_failed" : {
+      "comment" : "Shown in the tip jar when a purchase throws. States that nothing was charged and what to do next.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The purchase didn't go through, and you weren't charged. Check your connection, then tap a tip to try again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La compra no se completó y no se te cobró. Revisa tu conexión y toca una propina para intentarlo de nuevo."
+          }
+        }
+      }
+    },
     "edit.betweenLogs" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4681,13 +4769,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Make, model, and year are required"
+            "value" : "Make and model are required"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Marca, modelo y año son obligatorios"
+            "value" : "Marca y modelo son obligatorios"
           }
         }
       }
@@ -9352,6 +9440,23 @@
         }
       }
     },
+    "toast.service_log_deleted" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Service entry deleted"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registro de servicio eliminado"
+          }
+        }
+      }
+    },
     "toast.service_logged" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9635,6 +9740,24 @@
         }
       }
     },
+    "vehicle.delete.confirm_message_last" : {
+      "comment" : "Delete confirmation when the vehicle is the user's only one.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is your only vehicle. Deleting it also deletes all its services and history, and you'll need to add a vehicle to keep using Checkpoint. This action cannot be undone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este es tu único vehículo. Al eliminarlo también se eliminan todos sus servicios e historial, y tendrás que añadir un vehículo para seguir usando Checkpoint. Esta acción no se puede deshacer."
+          }
+        }
+      }
+    },
     "vehicle.delete.confirm_title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9836,6 +9959,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vencimiento del marbete de Puerto Rico"
+          }
+        }
+      }
+    },
+    "vehicle.marbete_effect" : {
+      "comment" : "States the side effect of filling the optional marbete field (FieldRequirement.optionalWithEffect).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Setting this schedules renewal reminders before it expires."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Al configurarlo se programan recordatorios de renovación antes de que venza."
           }
         }
       }

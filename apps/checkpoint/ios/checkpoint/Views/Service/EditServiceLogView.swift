@@ -12,6 +12,10 @@ struct EditServiceLogView: View {
 
     @Bindable var log: ServiceLog
 
+    /// Asks the presenter to delete this log once the form has dismissed. nil
+    /// hides Delete.
+    var onDelete: (() -> Void)? = nil
+
     @State private var performedDate: Date = Date()
     @State private var mileageAtService: Int? = nil
     @State private var cost: String = ""
@@ -26,6 +30,9 @@ struct EditServiceLogView: View {
     // "also move next reminder" toggle to real date/mileage edits.
     @State private var loadedPerformedDate: Date = Date()
     @State private var loadedMileageAtService: Int? = nil
+
+    /// The form's values as loaded. Save is enabled only once they change.
+    @State private var loadedValues: ServiceLogEditValues?
 
     // Fixed for the sheet's lifetime — computed once in loadFromLog().
     @State private var adjacentBefore: ServiceLog?
@@ -80,15 +87,41 @@ struct EditServiceLogView: View {
         }
     }
 
-    /// A cleared mileage field keeps the log's stored mileage at save, so it
-    /// counts as "unchanged" for the toggle, the impact preview, and the
-    /// reminder recalculation alike.
-    private var effectiveMileage: Int? {
-        mileageAtService ?? loadedMileageAtService
+    /// The odometer at service is required on a log: every log stores one
+    /// (a new log without a reading takes the vehicle's), and a recurring
+    /// service's mileage reminder is measured from it. Clearing the field used
+    /// to silently keep the old value at save — a field that looks clearable
+    /// but isn't. Now clearing it blocks Save and says why.
+    private var mileageRequirement: FieldRequirement {
+        .required(reason: L10n.editLogMileageRequired)
+    }
+
+    private var currentValues: ServiceLogEditValues {
+        ServiceLogEditValues(
+            performedDate: performedDate,
+            mileage: mileageAtService,
+            costText: cost,
+            costCategory: costCategory,
+            notes: notes
+        )
+    }
+
+    private var hasChanges: Bool {
+        currentValues != loadedValues || !pendingAttachments.isEmpty
+    }
+
+    private var canSave: Bool {
+        hasChanges && mileageAtService != nil
+    }
+
+    /// A cleared mileage field is a blocked save, not a change to preview.
+    private var mileageChanged: Bool {
+        guard let mileageAtService else { return false }
+        return mileageAtService != loadedMileageAtService
     }
 
     private var dateOrMileageChanged: Bool {
-        performedDate != loadedPerformedDate || effectiveMileage != loadedMileageAtService
+        performedDate != loadedPerformedDate || mileageChanged
     }
 
     private var showAlsoMoveReminderToggle: Bool {
@@ -106,7 +139,7 @@ struct EditServiceLogView: View {
     /// Mirrors `Service.recalculateDueDates`: always interval-derived from
     /// this log's (edited) date/mileage, no explicit override.
     private var proposedServiceSchedule: ReminderImpactCalculator.Schedule {
-        guard let service = previewService, let mileage = effectiveMileage else { return currentServiceSchedule }
+        guard let service = previewService, let mileage = mileageAtService else { return currentServiceSchedule }
         return ReminderImpactCalculator.projected(
             intervalMonths: service.intervalMonths,
             intervalMiles: service.intervalMiles,
@@ -119,6 +152,7 @@ struct EditServiceLogView: View {
 
     var body: some View {
         NavigationStack {
+            ScrollViewReader { proxy in
             ZStack {
                 AtmosphericBackground()
 
@@ -181,6 +215,14 @@ struct EditServiceLogView: View {
                             InstrumentSectionHeader(title: L10n.formAddAttachments)
                             AttachmentPicker(attachments: $pendingAttachments)
                         }
+
+                        if let onDelete {
+                            DestructiveFormButton(title: L10n.logDeleteAction) {
+                                onDelete()
+                                dismiss()
+                            }
+                            .padding(.top, Spacing.lg)
+                        }
                     }
                     .padding(Spacing.screenHorizontal)
                     .padding(.bottom, Spacing.xxl)
@@ -200,8 +242,15 @@ struct EditServiceLogView: View {
             .safeAreaInset(edge: .bottom) {
                 FormActionBar(
                     primaryTitle: L10n.commonSave,
-                    isPrimaryEnabled: true,
-                    onPrimary: { saveChanges() }
+                    isPrimaryEnabled: canSave,
+                    onPrimary: { saveChanges() },
+                    onDisabledPrimaryTap: {
+                        // F2: only a cleared odometer blocks; an untouched
+                        // form has nothing to point at.
+                        if mileageAtService == nil {
+                            withAnimation { proxy.scrollTo(Self.mileageAnchor, anchor: .center) }
+                        }
+                    }
                 )
             }
             .trackScreen(.editServiceLog)
@@ -210,8 +259,11 @@ struct EditServiceLogView: View {
                 DocumentDetailView(document: document)
                     .environment(appState)
             }
+            }
         }
     }
+
+    private static let mileageAnchor = "editLogMileage"
 
     private var contextHeader: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
@@ -295,16 +347,23 @@ struct EditServiceLogView: View {
     @ViewBuilder
     private var mileageSection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: L10n.formMileage)
+            // The field is unlabeled (the header names it), so the required
+            // marker sits in the header rather than on a label that isn't drawn.
+            InstrumentSectionHeader(title: L10n.formMileage) {
+                RequiredFieldMarker()
+            }
 
             InstrumentNumberField(
                 label: nil,
                 value: $mileageAtService,
-                placeholder: L10n.formOptionalTag,
-                suffix: DistanceSettings.shared.unit.abbreviation
+                placeholder: L10n.vehicleMileagePlaceholder,
+                suffix: DistanceSettings.shared.unit.abbreviation,
+                requirement: mileageRequirement
             )
 
-            if mileageAtService != loadedMileageAtService {
+            if mileageAtService == nil, let reason = mileageRequirement.unmetReason {
+                FormAdvisory.blocking(reason)
+            } else if mileageAtService != loadedMileageAtService {
                 OriginalValueHint(text: L10n.editWas(OriginalValueHint.value(forMileage: loadedMileageAtService)))
             }
 
@@ -312,17 +371,29 @@ struct EditServiceLogView: View {
                 SanityWarningRow(message: warning)
             }
         }
+        .id(Self.mileageAnchor)
     }
 
     private func loadFromLog() {
+        let loadedCost = log.editableCost.map { NSDecimalNumber(decimal: $0).stringValue } ?? ""
+        let loadedCategory = log.editableCostCategory ?? .maintenance
+        let loadedNotes = log.notes ?? ""
+
         performedDate = log.performedDate
         mileageAtService = log.mileageAtService
-        cost = log.editableCost.map { NSDecimalNumber(decimal: $0).stringValue } ?? ""
-        costCategory = log.editableCostCategory ?? .maintenance
-        notes = log.notes ?? ""
+        cost = loadedCost
+        costCategory = loadedCategory
+        notes = loadedNotes
 
         loadedPerformedDate = log.performedDate
         loadedMileageAtService = log.mileageAtService
+        loadedValues = ServiceLogEditValues(
+            performedDate: log.performedDate,
+            mileage: log.mileageAtService,
+            costText: loadedCost,
+            costCategory: loadedCategory,
+            notes: loadedNotes
+        )
 
         if let vehicle = log.vehicle {
             let vehicleLogs: [ServiceLog] = allServiceLogs.forVehicleNewestFirst(vehicle).reversed()
@@ -341,6 +412,7 @@ struct EditServiceLogView: View {
     }
 
     private func saveChanges() {
+        guard let mileage = mileageAtService else { return }
         let originalNotes = log.notes ?? ""
         let newNotes = notes.isEmpty ? nil : notes
         let notesChanged = (newNotes ?? "") != originalNotes
@@ -351,11 +423,11 @@ struct EditServiceLogView: View {
             attachmentsAdded: pendingAttachments.count
         ))
 
-        log.applyEditedOccasion(performedDate: performedDate, mileage: mileageAtService)
+        log.applyEditedOccasion(performedDate: performedDate, mileage: mileage)
         log.applyEditedCost(Decimal(string: cost), category: costCategory)
         log.notes = newNotes
 
-        if alsoMoveNextReminder, showAlsoMoveReminderToggle, let mileage = effectiveMileage {
+        if alsoMoveNextReminder, showAlsoMoveReminderToggle {
             for anchor in reminderAnchorLogs {
                 anchor.service?.recalculateDueDates(performedDate: performedDate, mileage: mileage)
             }

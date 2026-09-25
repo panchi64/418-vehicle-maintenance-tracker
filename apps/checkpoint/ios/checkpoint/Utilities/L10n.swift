@@ -213,12 +213,14 @@ enum L10n {
     static var vehicleLicensePlate: String { localized("vehicle.license_plate") }
     static var vehicleMarbeteHelp: String { localized("vehicle.marbete_help") }
     static var vehicleMarbeteHelpLong: String { localized("vehicle.marbete_help_long") }
+    static var vehicleMarbeteEffect: String { localized("vehicle.marbete_effect") }
     static var vehicleTireSizePlaceholderOptional: String { localized("vehicle.tire_size_placeholder_optional") }
     static var vehicleOilTypePlaceholderOptional: String { localized("vehicle.oil_type_placeholder_optional") }
     static var vehicleEditTitle: String { localized("vehicle.edit.title") }
     static var vehicleDeleteAction: String { localized("vehicle.delete.action") }
     static var vehicleDeleteConfirmTitle: String { localized("vehicle.delete.confirm_title") }
     static var vehicleDeleteConfirmMessage: String { localized("vehicle.delete.confirm_message") }
+    static var vehicleDeleteConfirmMessageLast: String { localized("vehicle.delete.confirm_message_last") }
     static func vehicleVINCharacterCount(_ count: Int) -> String {
         String(format: localized("vehicle.vin_character_count"), count)
     }
@@ -296,6 +298,7 @@ enum L10n {
     static var toastSyncError: String { localized("toast.sync_error") }
     static var toastReadingCaptured: String { localized("toast.reading_captured") }
     static var toastServiceLogUpdated: String { localized("toast.service_log_updated") }
+    static var toastServiceLogDeleted: String { localized("toast.service_log_deleted") }
     static var toastServiceUpdated: String { localized("toast.service_updated") }
     static func toastCopied(_ fieldLabel: String) -> String {
         String(format: localized("toast.copied"), fieldLabel)
@@ -771,6 +774,17 @@ enum L10n {
     static func editBeforeLog(_ value: String) -> String {
         String(format: localized("edit.beforeLog"), value)
     }
+    static var editLogMileageRequired: String { localized("edit.logMileageRequired") }
+
+    // MARK: - Deleting a service log
+
+    static var logDeleteAction: String { localized("log.delete.action") }
+    static var logDeleteConfirmTitle: String { localized("log.delete.confirm_title") }
+    static var logDeleteConfirmMessage: String { localized("log.delete.confirm_message") }
+
+    // MARK: - Tip jar
+
+    static var tipPurchaseFailed: String { localized("tip.purchase_failed") }
     static var remindNoScheduleWarning: String { localized("remind.noScheduleWarning") }
     static var recordSetIntervalHint: String { localized("record.setIntervalHint") }
 
