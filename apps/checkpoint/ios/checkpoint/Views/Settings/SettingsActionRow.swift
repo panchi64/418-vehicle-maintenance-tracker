@@ -65,10 +65,12 @@ struct SettingsActionRow: View {
 }
 
 /// Title with the setting's current value and a disclosure chevron — the
-/// label of a row that pushes a picker.
+/// label of a row that pushes a picker. `swatch` shows the value's colors
+/// beside its name (the theme row), so the choice is recognized, not recalled.
 struct SettingsValueRow: View {
     let title: String
     let value: String
+    var swatch: [Color] = []
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -87,10 +89,15 @@ struct SettingsValueRow: View {
                     .foregroundStyle(Theme.textPrimary)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                Text(value)
-                    .font(.brutalistSecondary)
-                    .foregroundStyle(Theme.textTertiary)
-                    .multilineTextAlignment(dynamicTypeSize.isAccessibilitySize ? .leading : .trailing)
+                HStack(spacing: Spacing.xs) {
+                    if !swatch.isEmpty {
+                        swatchView
+                    }
+                    Text(value)
+                        .font(.brutalistSecondary)
+                        .foregroundStyle(Theme.textTertiary)
+                        .multilineTextAlignment(dynamicTypeSize.isAccessibilitySize ? .leading : .trailing)
+                }
             }
 
             Image(systemName: "chevron.right")
@@ -102,5 +109,18 @@ struct SettingsValueRow: View {
         .frame(minHeight: TouchTarget.minimum)
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
+    }
+
+    /// Sharp squares, like the theme picker's cards.
+    private var swatchView: some View {
+        HStack(spacing: 2) {
+            ForEach(Array(swatch.enumerated()), id: \.offset) { _, color in
+                Rectangle()
+                    .fill(color)
+                    .frame(width: 12, height: 12)
+                    .brutalistBorder(color: Theme.borderSubtle)
+            }
+        }
+        .accessibilityHidden(true)
     }
 }

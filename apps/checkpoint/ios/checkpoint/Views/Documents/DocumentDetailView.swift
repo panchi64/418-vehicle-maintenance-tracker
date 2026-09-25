@@ -30,12 +30,14 @@ struct DocumentDetailView: View {
     @State private var previewURL: URL?
     @State private var shareURL: URL?
     @State private var showShareSheet = false
-    @State private var showDeleteConfirmation = false
     @State private var showVehiclePicker = false
     @State private var pendingVehicleSelection: Set<UUID> = []
     @State private var showRemoveLastVehicleConfirmation = false
     @State private var pendingRemovalSelection: Set<UUID>?
     @State private var isExtractedTextExpanded = false
+    /// Set once the document is gone, so leaving the screen doesn't write
+    /// the notes draft into a deleted model.
+    @State private var isDeleted = false
 
     var body: some View {
         ZStack {
@@ -80,8 +82,10 @@ struct DocumentDetailView: View {
                         Label(L10n.documentsShareAction, systemImage: "square.and.arrow.up")
                     }
 
+                    // At once, with Undo — the same as the library's swipe
+                    // and long-press (`DocumentDeleteAction`).
                     Button(role: .destructive) {
-                        showDeleteConfirmation = true
+                        deleteDocument()
                     } label: {
                         Label(L10n.documentsDeleteAction, systemImage: "trash")
                     }
@@ -104,16 +108,6 @@ struct DocumentDetailView: View {
                 selection: $pendingVehicleSelection,
                 lockedVehicleIDs: serviceLogVehicleLock
             )
-        }
-        .confirmationDialog(
-            L10n.documentsDeleteConfirmTitle,
-            isPresented: $showDeleteConfirmation,
-            titleVisibility: .visible
-        ) {
-            Button(L10n.documentsDeleteAction, role: .destructive) { deleteDocument() }
-            Button(L10n.commonCancel, role: .cancel) { }
-        } message: {
-            Text(L10n.documentsDeleteConfirmMessage)
         }
         .alert(
             L10n.documentsRemoveLastVehicleConfirmTitle,
@@ -142,7 +136,7 @@ struct DocumentDetailView: View {
         // Back, or a push on top, both leave this screen with the draft
         // saved — there is no close button to hang the save on.
         .onDisappear {
-            commitNotesIfChanged()
+            if !isDeleted { commitNotesIfChanged() }
             cleanupTempFiles()
         }
     }
@@ -426,10 +420,11 @@ struct DocumentDetailView: View {
     // MARK: - Delete
 
     private func deleteDocument() {
-        HapticService.shared.warning()
-        modelContext.delete(document)
-        try? modelContext.save()
-        Document.purgeOrphans(in: modelContext)
+        // Save the notes draft first so Undo brings back what was on screen;
+        // after the delete, onDisappear must not write to a deleted model.
+        commitNotesIfChanged()
+        isDeleted = true
+        DocumentDeleteAction.perform([document], in: modelContext)
         dismiss()
     }
 
@@ -471,28 +466,9 @@ struct DocumentDetailView: View {
         try? modelContext.save()
 
         if nextVehicles.isEmpty && document.serviceLog == nil {
+            isDeleted = true
             Document.purgeOrphans(in: modelContext)
             dismiss()
-        }
-    }
-}
-
-// MARK: - Sheet host
-
-/// `DocumentDetailView` presented from inside a form sheet, where there is no
-/// navigation stack to push onto. Everywhere else the detail is pushed.
-struct DocumentDetailSheet: View {
-    let document: Document
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            DocumentDetailView(document: document, showsServiceLogLink: false)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button(role: .close) { dismiss() }
-                    }
-                }
         }
     }
 }

@@ -20,6 +20,10 @@ final class NotificationService: NSObject {
 
     var isAuthorized = false
 
+    /// The user's answer as Settings words it. Refreshed by
+    /// `checkAuthorizationStatus()` and `requestAuthorization()`.
+    private(set) var permission: NotificationPermission = .notAsked
+
     /// Navigation a notification response asked for, waiting for `ContentView`
     /// to act on it and clear it. See `NotificationRoute`.
     var pendingRoute: NotificationRoute?
@@ -89,9 +93,11 @@ final class NotificationService: NSObject {
             let options: UNAuthorizationOptions = [.alert, .sound]
             let granted = try await notificationCenter.requestAuthorization(options: options)
             self.isAuthorized = granted
+            self.permission = granted ? .allowed : .off
             return granted
         } catch {
             notificationLogger.error("Notification authorization error: \(error.localizedDescription)")
+            await checkAuthorizationStatus()
             return false
         }
     }
@@ -100,6 +106,7 @@ final class NotificationService: NSObject {
     func checkAuthorizationStatus() async {
         let settings = await notificationCenter.notificationSettings()
         self.isAuthorized = settings.authorizationStatus == .authorized
+        self.permission = NotificationPermission(settings.authorizationStatus)
     }
 
     // MARK: - Notification Categories & Actions

@@ -2,8 +2,9 @@
 //  VehicleFormSections.swift
 //  checkpoint
 //
-//  The sections of the single-scroll add-vehicle form, in the order the app
-//  needs them rather than the order the data model lists them.
+//  The sections of the vehicle forms, in the order the app needs them rather
+//  than the order the data model lists them. Add Vehicle uses all of them;
+//  Edit Vehicle reuses VIN, odometer, identity and the spec fields.
 //
 //  WHAT CHANGED, AND WHY
 //
@@ -13,6 +14,9 @@
 //  - VIN IS FIRST, above the fields it fills. It used to sit below them, so it
 //    only helped users who scrolled past fields they had just been told were
 //    required. A fast path placed after the slow path is not a fast path.
+//
+//  - THE VIN DECODES ITSELF once it is 17 valid characters. The button stays
+//    for a retry after a failed or offline lookup.
 //
 //  - THE ODOMETER IS REQUIRED. The wizard made its step unconditionally valid,
 //    so `currentMileage ?? 0` shipped vehicles at zero miles and every
@@ -48,8 +52,7 @@ struct VehicleVINSection: View {
                 )
                 .autocorrectionDisabled()
                 .onChange(of: formState.vin) {
-                    formState.clearVINErrors()
-                    formState.clearAutoFillFeedback()
+                    formState.vinDidChange()
                 }
 
                 if formState.isCameraAvailable {
@@ -66,12 +69,16 @@ struct VehicleVINSection: View {
                     .accessibilityLabel(L10n.addVehicleScanVIN)
                 }
             }
+            .autoDecodesVIN(formState)
 
             // The nine hand-rolled states collapse into the severity ladder, so
             // "we're looking it up" and "that VIN is wrong" stop looking alike.
             vinAdvisory
 
-            if formState.isVINValid, !formState.vinLookupSucceeded {
+            // The retry door (and, while in flight, the visible wait). Hidden
+            // during the debounce and after a result, so a working auto-decode
+            // never shows a button for what it is about to do or already did.
+            if formState.isVINValid, formState.vinLookupOutcome == nil, !formState.shouldAutoDecodeVIN {
                 VINLookupButton(formState: formState)
             }
 
@@ -107,8 +114,14 @@ struct VehicleVINSection: View {
             }
         }
 
-        if formState.vinLookupSucceeded {
+        // The system says what it did — and says so when it did nothing.
+        switch formState.vinLookupOutcome {
+        case .filled:
             FormAdvisory.info(L10n.addVehicleVINDetailsFilled)
+        case .nothingNew:
+            FormAdvisory.info(L10n.vehicleVINNothingNew)
+        case nil:
+            EmptyView()
         }
     }
 }
@@ -152,14 +165,17 @@ struct VehicleOdometerSection: View {
 
 struct VehicleIdentitySection: View {
     @Bindable var formState: VehicleFormState
+    /// Edit Vehicle keeps the nickname with the identity it names; Add
+    /// Vehicle defers it to the optional section.
+    var includesNickname = false
 
     /// Marks a field the VIN lookup just populated, so the user can see what
     /// the scan actually did rather than having to compare against memory.
-    private func autoFilled(_ key: String) -> some View {
+    private func autoFilled(_ field: VehicleFormState.Field) -> some View {
         Rectangle()
             .strokeBorder(Theme.accent, lineWidth: Theme.borderWidth)
-            .opacity(formState.autoFilledFields.contains(key) ? 1 : 0)
-            .animation(.easeOut(duration: Theme.animationMedium), value: formState.autoFilledFields)
+            .opacity(formState.isAutoFilled(field) ? 1 : 0)
+            .animation(.easeOut(duration: Theme.animationMedium), value: formState.vinLookupOutcome)
             .allowsHitTesting(false)
     }
 
@@ -172,6 +188,14 @@ struct VehicleIdentitySection: View {
 
     var body: some View {
         FormSection(title: L10n.vehicleDetails) {
+            if includesNickname {
+                InstrumentTextField(
+                    label: L10n.vehicleNickname,
+                    text: $formState.name,
+                    placeholder: L10n.vehicleNicknamePlaceholder
+                )
+            }
+
             // Two columns at normal type, stacked at large type. A fixed
             // two-column split cannot survive Dynamic Type on a 375pt screen —
             // forcing it crushed "MAKE" to 28pt against a 46pt word.
@@ -192,7 +216,7 @@ struct VehicleIdentitySection: View {
                 placeholder: L10n.vehicleModelPlaceholder,
                 requirement: identityRequirement
             )
-            .overlay(autoFilled("model"))
+            .overlay(autoFilled(.model))
         }
     }
 
@@ -202,7 +226,7 @@ struct VehicleIdentitySection: View {
             value: $formState.year,
             placeholder: L10n.vehicleYearPlaceholder
         )
-        .overlay(autoFilled("year"))
+        .overlay(autoFilled(.year))
     }
 
     private var makeField: some View {
@@ -212,7 +236,7 @@ struct VehicleIdentitySection: View {
             placeholder: L10n.vehicleMakePlaceholder,
             requirement: identityRequirement
         )
-        .overlay(autoFilled("make"))
+        .overlay(autoFilled(.make))
     }
 }
 
@@ -237,23 +261,7 @@ struct VehicleDetailsSection: View {
                 .foregroundStyle(Theme.textTertiary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            InstrumentTextField(
-                label: L10n.vehicleLicensePlate,
-                text: $formState.licensePlate,
-                placeholder: "ABC-1234"
-            )
-
-            InstrumentTextField(
-                label: L10n.vehicleTireSize,
-                text: $formState.tireSize,
-                placeholder: L10n.vehicleTireSizePlaceholder
-            )
-
-            InstrumentTextField(
-                label: L10n.vehicleOilType,
-                text: $formState.oilType,
-                placeholder: L10n.vehicleOilTypePlaceholder
-            )
+            VehicleSpecFields(formState: formState)
 
             // Marbete explains the term AND states that filling it schedules a
             // notification. An optional field must not quietly create one — see
@@ -264,19 +272,7 @@ struct VehicleDetailsSection: View {
                     .foregroundStyle(Theme.textTertiary)
                     .tracking(1.5)
 
-                MarbetePicker(
-                    month: $formState.marbeteExpirationMonth,
-                    year: $formState.marbeteExpirationYear
-                )
-
-                Text(L10n.vehicleMarbeteHelp)
-                    .font(.brutalistSecondary)
-                    .foregroundStyle(Theme.textTertiary)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                if let effect = FieldRequirement.marbete.effectNote {
-                    FormAdvisory.info(effect)
-                }
+                VehicleMarbeteFields(formState: formState, help: L10n.vehicleMarbeteHelp)
             }
 
             InstrumentTextEditor(
@@ -288,65 +284,51 @@ struct VehicleDetailsSection: View {
     }
 }
 
-// MARK: - VIN lookup
+// MARK: - Shared field groups
 
-struct VINLookupButton: View {
+/// Plate, tires, oil — reference values nothing computes from.
+struct VehicleSpecFields: View {
     @Bindable var formState: VehicleFormState
 
     var body: some View {
-        Button {
-            lookUpVIN()
-        } label: {
-            HStack(spacing: Spacing.sm) {
-                if formState.isDecodingVIN {
-                    ProgressView()
-                        .tint(Theme.surfaceInstrument)
-                }
-                Text(formState.isDecodingVIN ? L10n.addVehicleVINLookupLoading : L10n.addVehicleVINLookup)
-            }
-        }
-        .buttonStyle(.secondary)
-        .disabled(formState.isDecodingVIN)
+        InstrumentTextField(
+            label: L10n.vehicleLicensePlate,
+            text: $formState.licensePlate,
+            placeholder: "ABC-1234"
+        )
+
+        InstrumentTextField(
+            label: L10n.vehicleTireSize,
+            text: $formState.tireSize,
+            placeholder: L10n.vehicleTireSizePlaceholder
+        )
+
+        InstrumentTextField(
+            label: L10n.vehicleOilType,
+            text: $formState.oilType,
+            placeholder: L10n.vehicleOilTypePlaceholder
+        )
     }
+}
 
-    private func lookUpVIN() {
-        formState.isDecodingVIN = true
-        formState.vinLookupError = nil
+/// The marbete picker, what the term means, and what filling it does.
+struct VehicleMarbeteFields: View {
+    @Bindable var formState: VehicleFormState
+    let help: String
 
-        Task {
-            do {
-                let result = try await NHTSAService.shared.decodeVIN(formState.vin)
+    var body: some View {
+        MarbetePicker(
+            month: $formState.marbeteExpirationMonth,
+            year: $formState.marbeteExpirationYear
+        )
 
-                formState.isDecodingVIN = false
-                formState.usedVINLookup = true
+        Text(help)
+            .font(.brutalistSecondary)
+            .foregroundStyle(Theme.textTertiary)
+            .fixedSize(horizontal: false, vertical: true)
 
-                var filled: Set<String> = []
-                if formState.make.isEmpty {
-                    formState.make = result.make
-                    filled.insert("make")
-                }
-                if formState.model.isEmpty {
-                    formState.model = result.model
-                    filled.insert("model")
-                }
-                if formState.year == nil {
-                    formState.year = result.modelYear
-                    filled.insert("year")
-                }
-
-                if !filled.isEmpty {
-                    formState.autoFilledFields = filled
-                    formState.vinLookupSucceeded = true
-
-                    Task {
-                        try? await Task.sleep(for: .seconds(3))
-                        formState.clearAutoFillFeedback()
-                    }
-                }
-            } catch {
-                formState.isDecodingVIN = false
-                formState.vinLookupError = error.localizedDescription
-            }
+        if let effect = FieldRequirement.marbete.effectNote {
+            FormAdvisory.info(effect)
         }
     }
 }

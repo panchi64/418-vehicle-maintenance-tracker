@@ -2,7 +2,10 @@
 //  EditVehicleView.swift
 //  checkpoint
 //
-//  Form to edit existing vehicles with delete option and instrument cluster aesthetic
+//  Edit an existing vehicle. Shares `VehicleFormState` and the section views
+//  with Add Vehicle, so validation, VIN decoding and OCR behave identically;
+//  only the arrangement differs — identity and odometer first, the marbete on
+//  the default path (it schedules reminders), reference fields in Details.
 //
 
 import SwiftUI
@@ -13,347 +16,92 @@ struct EditVehicleView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var services: [Service]
 
-    @Bindable var vehicle: Vehicle
+    let vehicle: Vehicle
 
+    @State private var formState: VehicleFormState
+    @State private var showBlockingReason = false
     @State private var showDeleteConfirmation = false
-    @State private var showBasicsError = false
-
-    // Form state (initialize from vehicle)
-    @State private var name: String
-    @State private var make: String
-    @State private var model: String
-    @State private var year: Int?
-    @State private var currentMileage: Int?
-    @State private var vin: String
-    @State private var licensePlate: String
-    @State private var tireSize: String
-    @State private var oilType: String
-    @State private var notes: String
-
-    // VIN lookup state
-    @State private var isDecodingVIN = false
-    @State private var vinLookupError: String?
-
-    // VIN scan state
-    @State private var showVINCamera = false
-    @State private var isProcessingVINOCR = false
-    @State private var vinOCRError: String?
-    @State private var vinOCROriginal: String?
-
-    // Odometer scan state
-    @State private var showOdometerCamera = false
-    @State private var showOCRConfirmation = false
-    @State private var ocrResult: OdometerOCRService.OCRResult?
-    @State private var ocrDebugImage: UIImage?
-    @State private var isProcessingOdometerOCR = false
-    @State private var odometerOCRError: String?
-
-    // Marbete state
-    @State private var marbeteExpirationMonth: Int?
-    @State private var marbeteExpirationYear: Int?
 
     init(vehicle: Vehicle) {
         self.vehicle = vehicle
-        _name = State(initialValue: vehicle.name)
-        _make = State(initialValue: vehicle.make)
-        _model = State(initialValue: vehicle.model)
-        _year = State(initialValue: vehicle.hasModelYear ? vehicle.year : nil)
-        _currentMileage = State(initialValue: vehicle.currentMileage)
-        _vin = State(initialValue: vehicle.vin ?? "")
-        _licensePlate = State(initialValue: vehicle.licensePlate ?? "")
-        _tireSize = State(initialValue: vehicle.tireSize ?? "")
-        _oilType = State(initialValue: vehicle.oilType ?? "")
-        _notes = State(initialValue: vehicle.notes ?? "")
-        _marbeteExpirationMonth = State(initialValue: vehicle.marbeteExpirationMonth)
-        _marbeteExpirationYear = State(initialValue: vehicle.marbeteExpirationYear)
-    }
-
-    /// Same rule as Add Vehicle (`VehicleFormState.blockingReason`): make and
-    /// model identify the vehicle; year is optional because nothing computes
-    /// from it (recall lookups skip a vehicle without one), but one that is
-    /// entered must be plausible.
-    private var isFormValid: Bool {
-        !make.trimmingCharacters(in: .whitespaces).isEmpty
-            && !model.trimmingCharacters(in: .whitespaces).isEmpty
-            && isYearAcceptable
-    }
-
-    /// Whether any field differs from the vehicle — what Cancel would discard.
-    private var isDirty: Bool {
-        name != vehicle.name
-            || make != vehicle.make
-            || model != vehicle.model
-            || year != (vehicle.hasModelYear ? vehicle.year : nil)
-            || currentMileage != vehicle.currentMileage
-            || vin != (vehicle.vin ?? "")
-            || licensePlate != (vehicle.licensePlate ?? "")
-            || tireSize != (vehicle.tireSize ?? "")
-            || oilType != (vehicle.oilType ?? "")
-            || notes != (vehicle.notes ?? "")
-            || marbeteExpirationMonth != vehicle.marbeteExpirationMonth
-            || marbeteExpirationYear != vehicle.marbeteExpirationYear
-    }
-
-    private var isYearAcceptable: Bool {
-        year.map { Vehicle.isPlausibleModelYear($0) } ?? true
-    }
-
-    private var marbeteRequirement: FieldRequirement { .marbete }
-
-    private var detailsFilledCount: Int {
-        [vin, licensePlate, tireSize, oilType, notes].filter { !$0.isEmpty }.count
-    }
-
-    /// Check if camera is available (requires physical device)
-    private var isCameraAvailable: Bool {
-        UIImagePickerController.isSourceTypeAvailable(.camera)
+        _formState = State(initialValue: VehicleFormState(vehicle: vehicle))
     }
 
     var body: some View {
         NavigationStack {
             ScrollViewReader { proxy in
-            ZStack {
-                AtmosphericBackground()
+                ZStack {
+                    AtmosphericBackground()
 
-                ScrollView {
-                    VStack(spacing: Spacing.lg) {
-                        // Vehicle Details Section
-                        VStack(alignment: .leading, spacing: Spacing.sm) {
-                            InstrumentSectionHeader(title: L10n.vehicleDetails)
-
-                            if showBasicsError, !isFormValid {
-                                FormAdvisory.blocking(isYearAcceptable ? L10n.formVehicleBasicsRequired : L10n.vehicleYearOutOfRange)
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: Spacing.xl) {
+                            // F2: the blocking advisory sits at the field that
+                            // resolves it — identity first, then the odometer.
+                            VStack(alignment: .leading, spacing: Spacing.md) {
+                                VehicleIdentitySection(formState: formState, includesNickname: true)
+                                if showBlockingReason, formState.currentMileage != nil,
+                                   let reason = formState.blockingReason {
+                                    FormAdvisory.blocking(reason)
+                                }
                             }
+                            .id("identity")
 
-                            VStack(spacing: Spacing.md) {
-                                InstrumentTextField(
-                                    label: L10n.vehicleNickname,
-                                    text: $name,
-                                    placeholder: L10n.vehicleNicknamePlaceholder
-                                )
-
-                                InstrumentTextField(
-                                    label: L10n.vehicleMake,
-                                    text: $make,
-                                    placeholder: L10n.vehicleMakePlaceholder,
-                                    requirement: .required(reason: L10n.formVehicleBasicsRequired)
-                                )
-
-                                InstrumentTextField(
-                                    label: L10n.vehicleModel,
-                                    text: $model,
-                                    placeholder: L10n.vehicleModelPlaceholder,
-                                    requirement: .required(reason: L10n.formVehicleBasicsRequired)
-                                )
-
-                                InstrumentNumberField(
-                                    label: L10n.vehicleYear,
-                                    value: $year,
-                                    placeholder: L10n.vehicleYearPlaceholder
-                                )
+                            VStack(alignment: .leading, spacing: Spacing.md) {
+                                VehicleOdometerSection(formState: formState)
+                                if showBlockingReason, formState.currentMileage == nil,
+                                   let reason = formState.blockingReason {
+                                    FormAdvisory.blocking(reason)
+                                }
                             }
+                            .id("odometer")
+
+                            EditVehicleMarbeteSection(formState: formState)
+
+                            EditVehicleDetailsSection(formState: formState)
+
+                            deleteButton
                         }
-                        .id("vehicleDetails")
-
-                        // Odometer Section
-                        EditVehicleOdometerSection(
-                            currentMileage: $currentMileage,
-                            showOdometerCamera: $showOdometerCamera,
-                            isProcessingOdometerOCR: $isProcessingOdometerOCR,
-                            odometerOCRError: $odometerOCRError,
-                            isCameraAvailable: isCameraAvailable
-                        )
-
-                        // Marbete Section (PR vehicle registration tag). Optional,
-                        // but filling it schedules renewal reminders — so the tag
-                        // comes with the stated effect ("[OPTIONAL] is a promise").
-                        InstrumentSection(title: L10n.vehicleMarbete, tag: marbeteRequirement.sectionTag, chrome: .plain) {
-                            MarbetePicker(
-                                month: $marbeteExpirationMonth,
-                                year: $marbeteExpirationYear
+                        .padding(.horizontal, Spacing.screenHorizontal)
+                        .padding(.top, Spacing.md)
+                        .padding(.bottom, Spacing.xxl)
+                    }
+                }
+                .keyboardDismissToolbar()
+                .formToolbar(
+                    title: L10n.vehicleEditTitle,
+                    subtitle: vehicle.displayName,
+                    canSave: formState.blockingReason == nil,
+                    isDirty: formState.isDirty,
+                    onSave: saveChanges,
+                    onBlocked: {
+                        showBlockingReason = true
+                        withAnimation {
+                            proxy.scrollTo(
+                                formState.currentMileage == nil ? "odometer" : "identity",
+                                anchor: .center
                             )
-
-                            Text(L10n.vehicleMarbeteHelpLong)
-                                .textCase(.uppercase)
-                                .font(.brutalistLabel)
-                                .foregroundStyle(Theme.textTertiary)
-                                .tracking(1)
-                                .padding(.leading, 4)
-
-                            if let effect = marbeteRequirement.effectNote {
-                                FormAdvisory.info(effect)
-                            }
-                        }
-
-                        CollapsibleDetailsSection(
-                            storageKey: "formDetailsEditVehicle",
-                            filledCount: detailsFilledCount,
-                            autoExpandWhenFilled: true
-                        ) {
-                            VStack(alignment: .leading, spacing: Spacing.lg) {
-                                // VIN Section
-                                EditVehicleVINSection(
-                                    vin: $vin,
-                                    licensePlate: $licensePlate,
-                                    make: $make,
-                                    model: $model,
-                                    year: $year,
-                                    isDecodingVIN: $isDecodingVIN,
-                                    vinLookupError: $vinLookupError,
-                                    showVINCamera: $showVINCamera,
-                                    isProcessingVINOCR: $isProcessingVINOCR,
-                                    vinOCRError: $vinOCRError,
-                                    vinOCROriginal: $vinOCROriginal,
-                                    isCameraAvailable: isCameraAvailable
-                                )
-
-                                // Specifications Section
-                                VStack(alignment: .leading, spacing: Spacing.sm) {
-                                    InstrumentSectionHeader(title: L10n.vehicleSpecifications)
-
-                                    VStack(spacing: Spacing.md) {
-                                        InstrumentTextField(
-                                            label: L10n.vehicleTireSize,
-                                            text: $tireSize,
-                                            placeholder: L10n.vehicleTireSizePlaceholderOptional
-                                        )
-
-                                        InstrumentTextField(
-                                            label: L10n.vehicleOilType,
-                                            text: $oilType,
-                                            placeholder: L10n.vehicleOilTypePlaceholderOptional
-                                        )
-                                    }
-                                }
-
-                                // Notes Section
-                                VStack(alignment: .leading, spacing: Spacing.sm) {
-                                    InstrumentSectionHeader(title: L10n.vehicleNotes)
-
-                                    InstrumentTextEditor(
-                                        label: nil,
-                                        text: $notes,
-                                        placeholder: L10n.vehicleNotesPlaceholder
-                                    )
-                                }
-                            }
-                        }
-
-                        DestructiveFormButton(title: L10n.vehicleDeleteAction) {
-                            showDeleteConfirmation = true
                         }
                     }
-                    .padding(Spacing.screenHorizontal)
-                    .padding(.bottom, Spacing.xxl)
-                }
-            }
-            .keyboardDismissToolbar()
-            .formToolbar(
-                title: L10n.vehicleEditTitle,
-                subtitle: vehicle.displayName,
-                canSave: isFormValid,
-                isDirty: isDirty,
-                onSave: saveChanges,
-                onBlocked: {
-                    showBasicsError = true
-                    withAnimation { proxy.scrollTo("vehicleDetails", anchor: .top) }
-                }
-            )
-            .onChange(of: isFormValid) { _, valid in
-                if valid { showBasicsError = false }
-            }
-            .trackScreen(.editVehicle)
-            .confirmationDialog(
-                L10n.vehicleDeleteConfirmTitle,
-                isPresented: $showDeleteConfirmation,
-                titleVisibility: .visible
-            ) {
-                Button(L10n.commonDelete, role: .destructive) { deleteVehicle() }
-                Button(L10n.commonCancel, role: .cancel) { }
-            } message: {
-                Text(L10n.vehicleDeleteConfirmMessage)
-            }
-            .fullScreenCover(isPresented: $showVINCamera) {
-                OdometerCameraSheet(
-                    onImageCaptured: { image in
-                        processVINOCR(image: image)
-                    },
-                    guideText: L10n.addVehicleVINAlignGuide,
-                    viewfinderAspectRatio: 5.0
                 )
-            }
-            .fullScreenCover(isPresented: $showOdometerCamera) {
-                OdometerCameraSheet { image in
-                    processOdometerOCR(image: image)
+                .onChange(of: formState.blockingReason) { _, newValue in
+                    if newValue == nil { showBlockingReason = false }
                 }
-            }
-            .sheet(isPresented: $showOCRConfirmation) {
-                if let result = ocrResult {
-                    OCRConfirmationView(
-                        extractedMileage: result.mileage,
-                        confidence: result.confidence,
-                        onConfirm: { mileage in
-                            currentMileage = mileage
-                        },
-                        currentMileage: currentMileage ?? 0,
-                        detectedUnit: result.detectedUnit,
-                        rawText: result.rawText,
-                        debugImage: ocrDebugImage
-                    )
-                    .presentationDetents([.medium])
-                }
-            }
+                .trackScreen(.editVehicle)
+                .vehicleCapture(formState)
             }
         }
     }
 
-    // MARK: - VIN OCR
-
-    private func processVINOCR(image: UIImage) {
-        AnalyticsService.shared.capture(.ocrAttempted(ocrType: .vin))
-        isProcessingVINOCR = true
-        vinOCRError = nil
-
-        Task {
-            do {
-                let result = try await VINOCRService.shared.recognizeVIN(from: image)
-
-                isProcessingVINOCR = false
-                vin = result.vin
-                vinOCROriginal = result.vin
-                AnalyticsService.shared.capture(.ocrSucceeded(ocrType: .vin))
-            } catch {
-                isProcessingVINOCR = false
-                vinOCRError = error.localizedDescription
-                AnalyticsService.shared.capture(.ocrFailed(ocrType: .vin))
-            }
+    /// Destructive, so last in the scroll and never beside Save (F1).
+    private var deleteButton: some View {
+        DestructiveFormButton(title: L10n.vehicleDeleteAction) {
+            showDeleteConfirmation = true
         }
-    }
-
-    // MARK: - Odometer OCR
-
-    private func processOdometerOCR(image: UIImage) {
-        AnalyticsService.shared.capture(.ocrAttempted(ocrType: .odometer))
-        isProcessingOdometerOCR = true
-        odometerOCRError = nil
-        ocrDebugImage = image
-
-        Task {
-            do {
-                let result = try await OdometerOCRService.shared.recognizeMileage(
-                    from: image,
-                    currentMileage: currentMileage
-                )
-
-                isProcessingOdometerOCR = false
-                ocrResult = result
-                showOCRConfirmation = true
-                AnalyticsService.shared.capture(.ocrSucceeded(ocrType: .odometer))
-            } catch {
-                isProcessingOdometerOCR = false
-                odometerOCRError = error.localizedDescription
-                AnalyticsService.shared.capture(.ocrFailed(ocrType: .odometer))
-            }
+        .alert(L10n.vehicleDeleteConfirmTitle, isPresented: $showDeleteConfirmation) {
+            Button(L10n.commonDelete, role: .destructive) { deleteVehicle() }
+            Button(L10n.commonCancel, role: .cancel) {}
+        } message: {
+            Text(L10n.vehicleDeleteConfirmMessage)
         }
     }
 
@@ -361,40 +109,32 @@ struct EditVehicleView: View {
 
     private func saveChanges() {
         HapticService.shared.success()
-        // Analytics: track VIN OCR confirmation at save time (VIN has no separate confirmation dialog)
-        if let vinOCROriginal {
-            AnalyticsService.shared.capture(.ocrConfirmed(
-                ocrType: .vin,
-                valueEdited: vin != vinOCROriginal
-            ))
-        }
-
+        VehicleCapture.recordVINScanConfirmation(formState)
         AnalyticsService.shared.capture(.vehicleEdited)
-        vehicle.name = name
-        vehicle.make = make
-        vehicle.model = model
-        vehicle.year = year ?? 0
+
+        let fields = formState.fields
+        vehicle.name = fields.name
+        vehicle.make = fields.make
+        vehicle.model = fields.model
+        vehicle.year = fields.year ?? 0
         // F11: an edited odometer is a manual reading — record it (timestamp +
         // snapshot) rather than overwrite the number and leave the estimate
         // engine measuring from a stale date. Unchanged means no new reading.
-        if let currentMileage, currentMileage != vehicle.currentMileage {
-            vehicle.recordMileage(currentMileage, source: .manual, in: modelContext)
+        if let mileage = fields.currentMileage, mileage != vehicle.currentMileage {
+            vehicle.recordMileage(mileage, source: .manual, in: modelContext)
         }
-        vehicle.vin = vin.isEmpty ? nil : vin
-        vehicle.licensePlate = licensePlate.isEmpty ? nil : licensePlate
-        vehicle.tireSize = tireSize.isEmpty ? nil : tireSize
-        vehicle.oilType = oilType.isEmpty ? nil : oilType
-        vehicle.notes = notes.isEmpty ? nil : notes
+        vehicle.vin = fields.vin.isEmpty ? nil : fields.vin
+        vehicle.licensePlate = fields.licensePlate.isEmpty ? nil : fields.licensePlate
+        vehicle.tireSize = fields.tireSize.isEmpty ? nil : fields.tireSize
+        vehicle.oilType = fields.oilType.isEmpty ? nil : fields.oilType
+        vehicle.notes = fields.notes.isEmpty ? nil : fields.notes
 
-        // Update marbete
-        let oldHasMarbete = vehicle.hasMarbeteExpiration
-        vehicle.marbeteExpirationMonth = marbeteExpirationMonth
-        vehicle.marbeteExpirationYear = marbeteExpirationYear
-
-        // Schedule/cancel marbete notifications
+        let hadMarbete = vehicle.hasMarbeteExpiration
+        vehicle.marbeteExpirationMonth = fields.marbeteExpirationMonth
+        vehicle.marbeteExpirationYear = fields.marbeteExpirationYear
         if vehicle.hasMarbeteExpiration {
             NotificationService.shared.scheduleMarbeteNotifications(for: vehicle)
-        } else if oldHasMarbete {
+        } else if hadMarbete {
             NotificationService.shared.cancelMarbeteNotifications(for: vehicle)
         }
 
@@ -402,8 +142,8 @@ struct EditVehicleView: View {
         // (name, mileage) instead of firing with stale content
         NotificationService.shared.rescheduleNotifications(for: vehicle)
 
-        updateAppIcon()
-        updateWidgetData()
+        AppIconService.shared.updateIcon(for: vehicle, services: services)
+        WidgetDataService.shared.updateWidget(for: vehicle)
         ToastService.shared.show(L10n.toastVehicleUpdated, icon: "checkmark", style: .success)
         dismiss()
     }
@@ -417,21 +157,9 @@ struct EditVehicleView: View {
         // service log — Vehicle.documents uses .nullify, not .cascade, so
         // they'd otherwise persist forever with no owner.
         Document.purgeOrphans(in: modelContext)
-        updateAppIcon()
+        AppIconService.shared.updateIcon(for: vehicle, services: services)
         WidgetDataService.shared.clearWidgetData()
         dismiss()
-    }
-
-    // MARK: - App Icon
-
-    private func updateAppIcon() {
-        AppIconService.shared.updateIcon(for: vehicle, services: services)
-    }
-
-    // MARK: - Widget Data
-
-    private func updateWidgetData() {
-        WidgetDataService.shared.updateWidget(for: vehicle)
     }
 }
 

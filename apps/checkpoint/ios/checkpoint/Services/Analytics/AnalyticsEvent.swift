@@ -147,7 +147,6 @@ enum AnalyticsEvent {
     case onboardingTourStarted
     case onboardingTourSkipped(atStep: Int)
     case onboardingTourCompleted
-    case onboardingVINLookupUsed
     case onboardingManualEntry
     case onboardingSkippedGetStarted
     case onboardingICloudSync
@@ -213,7 +212,6 @@ enum AnalyticsEvent {
         case .onboardingTourStarted: return "onboarding_tour_started"
         case .onboardingTourSkipped: return "onboarding_tour_skipped"
         case .onboardingTourCompleted: return "onboarding_tour_completed"
-        case .onboardingVINLookupUsed: return "onboarding_vin_lookup_used"
         case .onboardingManualEntry: return "onboarding_manual_entry"
         case .onboardingSkippedGetStarted: return "onboarding_skipped_get_started"
         case .onboardingICloudSync: return "onboarding_icloud_sync"

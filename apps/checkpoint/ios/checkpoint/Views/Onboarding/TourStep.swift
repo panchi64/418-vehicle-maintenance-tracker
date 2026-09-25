@@ -3,11 +3,14 @@
 //  checkpoint
 //
 //  Single source of truth for the onboarding tour. Each step bundles the
-//  spotlight target, the tab it lives on, the localized title/body, and
-//  (when entering this step requires a tab change) the transition card's
-//  section label. OnboardingState, ContentView, OnboardingTourOverlay, and
-//  OnboardingTourTransitionCard all read from this table — adding a step
-//  is a single append.
+//  spotlight target, the tab it lives on, and the localized title/body.
+//  OnboardingState, ContentView and OnboardingTourOverlay all read from this
+//  table — adding a step is a single append.
+//
+//  One step per tab. The tour used to spend seven screens (four spotlights,
+//  two between-tab cards, a recap) saying what three do; with the welcome
+//  page the whole thing is four short steps. The card's `Next: Services`
+//  label already narrates a tab change, so no interstitial is needed.
 //
 
 import Foundation
@@ -17,31 +20,16 @@ struct TourStep {
     let tab: Tab
     let title: () -> String
     let body: () -> String
-    /// Section label shown on the interstitial card when this step lives on
-    /// a different tab than its predecessor. Nil for steps that don't need
-    /// a transition (the first step, and any step on the same tab as the
-    /// previous one).
-    let transitionLabel: (() -> String)?
 
     static let all: [TourStep] = [
         TourStep(
-            // "The most urgent item surfaces first" — which is Next Up. This
-            // spotlighted the specs panel, which was collapsed by default.
+            // "The most urgent item surfaces first" — which is Next Up. The
+            // body also points at the title menu (vehicle switcher), which is
+            // system chrome with no frame to spotlight.
             target: .homeNextUp,
             tab: .home,
             title: { L10n.onboardingTourDashboardTitle },
-            body: { L10n.onboardingTourDashboardBody },
-            transitionLabel: nil
-        ),
-        TourStep(
-            // The switcher is the navigation title's menu, which exposes no
-            // frame; the step spotlights the odometer band and its copy points
-            // at the title.
-            target: .vehicleSummary,
-            tab: .home,
-            title: { L10n.onboardingTourVehicleTitle },
-            body: { L10n.onboardingTourVehicleBody },
-            transitionLabel: nil
+            body: { L10n.onboardingTourDashboardBody }
         ),
         TourStep(
             // Search is the system field, which exposes no frame; the first
@@ -49,15 +37,13 @@ struct TourStep {
             target: .servicesStatusGroup,
             tab: .services,
             title: { L10n.onboardingTourServicesTitle },
-            body: { L10n.onboardingTourServicesBody },
-            transitionLabel: { L10n.onboardingTransitionServices }
+            body: { L10n.onboardingTourServicesBody }
         ),
         TourStep(
             target: .costsHeadline,
             tab: .costs,
             title: { L10n.onboardingTourCostsTitle },
-            body: { L10n.onboardingTourCostsBody },
-            transitionLabel: { L10n.onboardingTransitionCosts }
+            body: { L10n.onboardingTourCostsBody }
         )
     ]
 

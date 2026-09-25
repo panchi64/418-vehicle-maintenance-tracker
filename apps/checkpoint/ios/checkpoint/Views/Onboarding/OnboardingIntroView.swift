@@ -2,25 +2,26 @@
 //  OnboardingIntroView.swift
 //  checkpoint
 //
-//  Phase 1: Full-screen intro pages — Welcome and Preferences (Distance Unit + Climate Zone)
+//  Step 1 of 4: one welcome page. What the app does, the one preference the
+//  app can't infer and every number depends on (distance unit), and the way
+//  into the tour. Skip is always in the corner.
+//
+//  The second page (unit + climate zone) is gone: the climate zone only
+//  tunes seasonal reminders, is in Settings, and a scrolling list of zones is
+//  not a "short step".
 //
 
 import SwiftUI
 
 struct OnboardingIntroView: View {
-    @Bindable var onboardingState: OnboardingState
     let onStartTour: () -> Void
     let onSkip: () -> Void
-
-    @State private var currentPage = 0
-    @State private var selectedClimateZone: ClimateZone? = SeasonalSettings.shared.climateZone
 
     var body: some View {
         ZStack {
             AtmosphericBackground()
 
             VStack(spacing: 0) {
-                // Skip button — top right
                 HStack {
                     Spacer()
                     Button {
@@ -34,52 +35,14 @@ struct OnboardingIntroView: View {
                 .padding(.horizontal, Spacing.screenHorizontal)
                 .padding(.top, Spacing.md)
 
-                // Paged content
-                TabView(selection: $currentPage) {
-                    welcomePageContent
-                        .tag(0)
+                welcomeContent
 
-                    preferencesPageContent
-                        .tag(1)
+                Button {
+                    onStartTour()
+                } label: {
+                    Text(L10n.onboardingLetsLook)
                 }
-                .tabViewStyle(.page(indexDisplayMode: .never))
-
-                // Fixed bottom area — step indicator always in same position
-                VStack(spacing: Spacing.md) {
-                    if currentPage == 0 {
-                        // The swipe cue doubles as a button: VoiceOver and
-                        // Switch Control users can't swipe a page view, and
-                        // a tap is a fine way to advance for anyone.
-                        Button {
-                            withAnimation { currentPage = 1 }
-                        } label: {
-                            HStack(spacing: Spacing.xs) {
-                                Text(L10n.onboardingSwipeNext)
-                                    .font(.brutalistLabel)
-                                    .tracking(1.5)
-                                    .textCase(.uppercase)
-
-                                Image(systemName: "chevron.right")
-                                    .font(.caption2.weight(.bold))
-                                    .accessibilityHidden(true)
-                            }
-                            .foregroundStyle(Theme.textTertiary)
-                            .minimumTouchTarget()
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel(L10n.commonNext)
-                    } else {
-                        Button {
-                            onStartTour()
-                        } label: {
-                            Text(L10n.onboardingLetsLook)
-                        }
-                        .buttonStyle(.primary)
-                    }
-
-                    StepIndicator(currentStep: currentPage + 1, totalSteps: 2)
-                }
-                .animation(.easeOut(duration: Theme.animationMedium), value: currentPage)
+                .buttonStyle(.primary)
                 .padding(.horizontal, Spacing.screenHorizontal)
                 .padding(.bottom, Spacing.xxl)
             }
@@ -87,13 +50,10 @@ struct OnboardingIntroView: View {
         .preferredColorScheme(.dark)
     }
 
-    // MARK: - Page 1: Welcome + Features
-
-    private var welcomePageContent: some View {
+    private var welcomeContent: some View {
         VStack(spacing: Spacing.lg) {
-            Spacer()
+            Spacer(minLength: Spacing.lg)
 
-            // Title block
             VStack(spacing: Spacing.sm) {
                 Text(L10n.onboardingWelcomeTitle)
                     .brutalistTitleStyle()
@@ -112,86 +72,37 @@ struct OnboardingIntroView: View {
                 .padding(.vertical, Spacing.xs)
                 .revealAnimation(delay: 0.4)
 
-            // Feature list
             VStack(alignment: .leading, spacing: Spacing.lg) {
-                featureRow(
-                    number: "01",
-                    title: L10n.onboardingFeature1Title,
-                    body: L10n.onboardingFeature1Body,
-                    index: 0
-                )
-
-                featureRow(
-                    number: "02",
-                    title: L10n.onboardingFeature2Title,
-                    body: L10n.onboardingFeature2Body,
-                    index: 1
-                )
-
-                featureRow(
-                    number: "03",
-                    title: L10n.onboardingFeature3Title,
-                    body: L10n.onboardingFeature3Body,
-                    index: 2
-                )
+                featureRow(number: "01", title: L10n.onboardingFeature1Title, body: L10n.onboardingFeature1Body, index: 0)
+                featureRow(number: "02", title: L10n.onboardingFeature2Title, body: L10n.onboardingFeature2Body, index: 1)
+                featureRow(number: "03", title: L10n.onboardingFeature3Title, body: L10n.onboardingFeature3Body, index: 2)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            Spacer()
+            // Every mileage, interval and cost-per-distance reads in this
+            // unit, and the locale can't settle it (a US-built car in PR).
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                Text(L10n.onboardingDistanceUnit.uppercased())
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.textTertiary)
+                    .tracking(1.5)
+
+                InstrumentSegmentedControl(
+                    options: DistanceUnit.allCases,
+                    selection: Binding(
+                        get: { DistanceSettings.shared.unit },
+                        set: { DistanceSettings.shared.unit = $0 }
+                    ),
+                    labelFor: { $0.displayName }
+                )
+            }
+            .staggeredReveal(index: 3, baseDelay: 0.1)
+
+            Spacer(minLength: Spacing.lg)
         }
         .padding(.horizontal, Spacing.screenHorizontal)
         .scrollingWhenTooTall()
     }
-
-    // MARK: - Page 2: Preferences (Distance Unit + Climate Zone)
-
-    private var preferencesPageContent: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: Spacing.xl) {
-                // Distance Unit
-                VStack(alignment: .leading, spacing: Spacing.sm) {
-                    InstrumentSectionHeader(title: L10n.onboardingDistanceUnit)
-
-                    Text(L10n.onboardingDistanceUnitExplanation)
-                        .font(.brutalistSecondary)
-                        .foregroundStyle(Theme.textSecondary)
-
-                    InstrumentSegmentedControl(
-                        options: DistanceUnit.allCases,
-                        selection: Binding(
-                            get: { DistanceSettings.shared.unit },
-                            set: { DistanceSettings.shared.unit = $0 }
-                        ),
-                        labelFor: { $0.displayName }
-                    )
-                }
-
-                // Climate Zone
-                VStack(alignment: .leading, spacing: Spacing.sm) {
-                    InstrumentSectionHeader(title: L10n.onboardingClimateZone)
-
-                    Text(L10n.onboardingClimateZoneExplanation)
-                        .font(.brutalistSecondary)
-                        .foregroundStyle(Theme.textSecondary)
-
-                    SettingsOptionList(
-                        options: ClimateZone.allCases,
-                        selection: selectedClimateZone,
-                        title: { $0.displayName },
-                        subtitle: { $0.description }
-                    ) { zone in
-                        selectedClimateZone = zone
-                        SeasonalSettings.shared.climateZone = zone
-                        HapticService.shared.selectionChanged()
-                    }
-                }
-            }
-            .padding(.horizontal, Spacing.screenHorizontal)
-            .padding(.vertical, Spacing.xl)
-        }
-    }
-
-    // MARK: - Feature Row
 
     private func featureRow(number: String, title: String, body: String, index: Int) -> some View {
         HStack(alignment: .top, spacing: Spacing.md) {
@@ -217,10 +128,6 @@ struct OnboardingIntroView: View {
 }
 
 #Preview {
-    OnboardingIntroView(
-        onboardingState: OnboardingState(),
-        onStartTour: {},
-        onSkip: {}
-    )
-    .preferredColorScheme(.dark)
+    OnboardingIntroView(onStartTour: {}, onSkip: {})
+        .preferredColorScheme(.dark)
 }

@@ -29,6 +29,12 @@ final class SyncSettings {
         set { defaults.set(newValue, forKey: Keys.iCloudSyncEnabled) }
     }
 
+    /// Whether the running `ModelContainer` was built with CloudKit. The
+    /// container is created at launch (and once more when onboarding ends),
+    /// never swapped mid-session — open sheets and pushed screens hold models
+    /// from it — so a toggle that disagrees with this takes effect next launch.
+    var isSyncActiveThisLaunch = false
+
     /// Last successful sync date
     var lastSyncDate: Date? {
         get { defaults.object(forKey: Keys.lastSyncDate) as? Date }

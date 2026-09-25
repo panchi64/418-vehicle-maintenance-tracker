@@ -3,8 +3,8 @@
 //  checkpoint
 //
 //  The single-choice list behind every Settings picker (distance unit,
-//  climate zone, due-soon thresholds, bundling windows) and the onboarding
-//  climate-zone step. One component so selection reads the same everywhere:
+//  climate zone, due-soon thresholds, bundling windows). One component so
+//  selection reads the same everywhere:
 //  a checkmark for sight, the `.isSelected` trait for VoiceOver.
 //
 
@@ -118,26 +118,34 @@ struct SettingsRowDivider: View {
     }
 }
 
-/// A Settings section: tracked caps title over a bordered group of rows.
+/// A Settings section, shaped like the system's grouped list: a Title Case
+/// header, the rows in one bordered group, and an optional footer that says
+/// what the group's settings do. Every group looks the same — a Switchboard's
+/// rows are equal and independent, so no group may out-rank another.
 struct SettingsGroup<Content: View>: View {
     let title: String
-    var titleColor: Color = Theme.textTertiary
-    var borderColor: Color?
+    var footer: String?
     @ViewBuilder let content: Content
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             Text(title)
-                .font(.brutalistLabel)
-                .foregroundStyle(titleColor)
-                .tracking(2)
+                .font(.brutalistSectionTitle)
+                .foregroundStyle(Theme.textPrimary)
                 .accessibilityAddTraits(.isHeader)
 
             VStack(spacing: 0) {
                 content
             }
             .background(Theme.surfaceInstrument)
-            .brutalistBorder(color: borderColor ?? Theme.gridLine)
+            .brutalistBorder()
+
+            if let footer {
+                Text(footer)
+                    .font(.brutalistSecondary)
+                    .foregroundStyle(Theme.textTertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 }
