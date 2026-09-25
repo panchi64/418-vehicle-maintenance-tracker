@@ -113,34 +113,9 @@ extension L10n {
         String(format: readout("readout.advisory"), severity, message)
     }
 
-    /// Visible year-over-year line: "12% from 2025". Year is a string so it
-    /// never picks up a grouping separator.
-    static func readoutYearChange(_ percent: Int, _ year: String) -> String {
-        String(format: readout("readout.yearChange"), percent, year)
-    }
-    static func readoutYearChangeUp(_ percent: Int, _ year: String) -> String {
-        String(format: readout("readout.yearChangeUp"), percent, year)
-    }
-    static func readoutYearChangeDown(_ percent: Int, _ year: String) -> String {
-        String(format: readout("readout.yearChangeDown"), percent, year)
-    }
-
     // MARK: - Charts
 
-    static var readoutChartMonthlyTitle: String { readout("readout.chartMonthlyTitle") }
-    static var readoutChartPaceTitle: String { readout("readout.chartPaceTitle") }
     static var readoutChartAxisMonth: String { readout("readout.chartAxisMonth") }
-    static var readoutChartAxisDate: String { readout("readout.chartAxisDate") }
     static var readoutChartAxisAmount: String { readout("readout.chartAxisAmount") }
-    static var readoutChartAxisTotal: String { readout("readout.chartAxisTotal") }
     static var readoutChartSeriesSpending: String { readout("readout.chartSeriesSpending") }
-
-    /// Args: total, month count, highest month, highest amount.
-    static func readoutChartMonthlySummary(_ total: String, _ months: Int, _ peakMonth: String, _ peakAmount: String) -> String {
-        String(format: readout("readout.chartMonthlySummary"), total, months, peakMonth, peakAmount)
-    }
-    /// Args: running total, date reached, expense count.
-    static func readoutChartPaceSummary(_ total: String, _ date: String, _ count: Int) -> String {
-        String(format: readout("readout.chartPaceSummary"), total, date, count)
-    }
 }

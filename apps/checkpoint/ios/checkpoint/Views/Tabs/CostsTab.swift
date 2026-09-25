@@ -2,24 +2,35 @@
 //  CostsTab.swift
 //  checkpoint
 //
-//  Costs tab — analytics-style answers to "how is this car doing financially?"
-//  The view itself is a thin orchestrator. Sections live in
-//  `CostsTab+Sections.swift`; analytics in `CostsTab+Analytics.swift`;
-//  derived insights in `CostsTab+Insights.swift`.
+//  Costs — a Readout. "How much is this car costing me, and is that changing?"
+//
+//  Fixed order (tools/sketchpad/src/screens/CostsTab.tsx):
+//
+//    [ 30D | YTD | 12M | All ]   the one control; scopes every number below
+//    Year to Date                hero: the period total
+//      $330 a month on average   the secondary figure
+//    Per Month, USD  Trend·Category   ONE chart section, with a written summary
+//    2026 vs 2025                one comparison row, same calendar span
+//    July 2026        $730.40    expenses by month; rows push their detail
+//
+//  Sparse data never renders a card of absence: the hero always renders, and
+//  the chart and comparison each collapse to one `InsufficientDataNote`.
+//
+//  The view is a thin orchestrator. Period/chart state lives in
+//  `CostsTab+Period.swift`, sections in `CostsTab+Sections.swift`, numbers in
+//  `CostsTab+Analytics.swift`, and their wording in `CostsTab+Insights.swift`.
 //
 
 import SwiftUI
 import SwiftData
-import Charts
 
 struct CostsTab: View {
     @Environment(AppState.self) var appState
     let onboardingState: OnboardingState
     @Query var serviceLogs: [ServiceLog]
 
-    @State var periodFilter: PeriodFilter = .year
-    @State var categoryFilter: CategoryFilter = .all
-    @State var highlightedEventID: UUID? = nil
+    @State var periodFilter: PeriodFilter = .yearToDate
+    @State var chartMode: ChartMode = .trend
 
     /// Scopes the log fetch to `vehicle` at the database level and lets the store
     /// return them newest-first. `appState` arrives through the environment.
@@ -39,122 +50,50 @@ struct CostsTab: View {
         }
     }
 
-    /// Raw values are **storage** — they persist in analytics events and must
-    /// stay stable. `displayName` is what reaches the screen (rule 10).
-    ///
-    /// Note for Phase 3: these labels mix rolling windows (`month` = last 30
-    /// days, `year` = last 12 months) with a calendar-anchored one (`ytd` =
-    /// since Jan 1), which is genuinely ambiguous to a reader. Relabeling is a
-    /// Costs-tab layout decision, so it is deferred rather than changed here.
-    enum PeriodFilter: String, CaseIterable {
-        case month = "Month"
-        case ytd = "YTD"
-        case year = "Year"
-        case all = "All"
-
-        var displayName: String {
-            switch self {
-            case .month: return L10n.costsPeriodMonth
-            case .ytd: return L10n.costsPeriodYTD
-            case .year: return L10n.costsPeriodYear
-            case .all: return L10n.costsPeriodAll
-            }
-        }
-
-        var startDate: Date? {
-            startDate(now: .now, calendar: .current)
-        }
-
-        /// Clock-injected form, so a derivation that takes a fixed `now` — and the
-        /// tests around it — window the same events it reports on.
-        func startDate(now: Date, calendar: Calendar) -> Date? {
-            switch self {
-            case .month:
-                return calendar.date(byAdding: .month, value: -1, to: now)
-            case .ytd:
-                return calendar.date(from: calendar.dateComponents([.year], from: now))
-            case .year:
-                return calendar.date(byAdding: .year, value: -1, to: now)
-            case .all:
-                return nil
-            }
-        }
-    }
-
-    enum CategoryFilter: String, CaseIterable {
-        case all = "All"
-        case maintenance = "Maint."
-        case repair = "Repair"
-        case upgrade = "Upgrade"
-
-        /// Defers to `CostCategory.shortDisplayName` rather than carrying its
-        /// own copy of the category names — the filter and the category badge
-        /// on an expense row must always read the same.
-        var displayName: String {
-            guard let costCategory else { return L10n.filterAll }
-            return costCategory.shortDisplayName
-        }
-
-        var costCategory: CostCategory? {
-            switch self {
-            case .all: return nil
-            case .maintenance: return .maintenance
-            case .repair: return .repair
-            case .upgrade: return .upgrade
-            }
-        }
-    }
-
     var vehicle: Vehicle? {
         appState.selectedVehicle
     }
 
-    /// The vehicle's cost picture for the active filters, derived once per body
-    /// evaluation and handed to every section.
-    ///
-    /// Each section used to reach for its own numbers through computed
-    /// properties, and every one of those rebuilt the deduped expense list from
-    /// the raw logs. See `CostsMetrics`.
-    private var metrics: CostsMetrics {
-        CostsMetrics(
-            logs: serviceLogs,
-            hasVehicle: vehicle != nil,
-            period: periodFilter,
-            category: categoryFilter
-        )
-    }
-
     var body: some View {
-        let metrics = self.metrics
+        // Derived once per body evaluation and handed to every section.
+        let metrics = CostsMetrics(logs: serviceLogs, period: periodFilter)
 
-        // The control row is pinned above the scroll area, so the cards scroll
-        // under it rather than pushing the only means of changing them
-        // off-screen.
-        VStack(spacing: 0) {
-            filtersSection(metrics)
+        Group {
+            if vehicle == nil {
+                ContentUnavailableView(
+                    L10n.emptyNoVehicleTitle,
+                    systemImage: "car.side",
+                    description: Text(L10n.emptyNoVehicleMessage)
+                )
+            } else if !metrics.hasAnyExpense {
+                ContentUnavailableView(
+                    metrics.hasAnyLog ? L10n.costsEmptyStartTitle : L10n.costsEmptyNoneTitle,
+                    systemImage: "dollarsign.circle",
+                    description: Text(metrics.hasAnyLog ? L10n.costsEmptyStartMessage : L10n.costsEmptyNoneMessage)
+                )
+            } else {
+                // A system List so expense rows get swipe actions and a context
+                // menu. Nothing in it drags sideways except those rows — the
+                // chart row carries no swipe action, so its scrub never fights
+                // one.
+                List {
+                    Group {
+                        periodPicker
+                        heroSection(metrics)
+                        chartSection(metrics)
+                        comparisonSection(metrics)
+                    }
+                    .costsListRow()
 
-            // Chart scrubbing highlights the matching expense row but never
-            // scrolls to it. The charts live inside this scroll view, so each
-            // scroll moved the chart under the finger, picked a new point, and
-            // scrolled again — the page lurched vertically on a sideways drag.
-            ScrollView {
-                VStack(spacing: Spacing.xl) {
-                    summaryCardsSection(metrics)
-                    breakdownSections(metrics)
-                    expenseListSection(metrics)
-                    emptyStates(metrics)
+                    expenseSections(metrics)
                 }
-                .padding(.horizontal, Spacing.screenHorizontal)
-                .padding(.top, Spacing.md)
-                .padding(.bottom, Spacing.xxl)
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
             }
         }
         .trackScreen(.costs)
         .onChange(of: periodFilter) { _, newValue in
             AnalyticsService.shared.capture(.costsPeriodChanged(period: newValue.rawValue))
-        }
-        .onChange(of: categoryFilter) { _, newValue in
-            AnalyticsService.shared.capture(.costsCategoryChanged(category: newValue.rawValue))
         }
     }
 }
@@ -163,11 +102,10 @@ struct CostsTab: View {
     let appState = AppState()
     appState.selectedVehicle = Vehicle.sampleVehicle
 
-    return ZStack {
-        AtmosphericBackground()
+    return NavigationStack {
         CostsTab(vehicle: appState.selectedVehicle, onboardingState: OnboardingState())
+            .background { AtmosphericBackground() }
     }
     .environment(appState)
     .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self], inMemory: true)
-    .preferredColorScheme(.dark)
 }

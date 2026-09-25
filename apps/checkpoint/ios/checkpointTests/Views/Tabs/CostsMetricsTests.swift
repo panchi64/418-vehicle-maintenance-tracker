@@ -2,10 +2,9 @@
 //  CostsMetricsTests.swift
 //  checkpointTests
 //
-//  Covers the Costs tab's one-pass derivation. These assertions are the contract
-//  that the derivation moved out of `CostsTab`'s computed properties without
-//  changing any number on the screen: visit dedup, filter scoping, the category
-//  split, and the time series.
+//  Covers the Costs tab's one-pass derivation: visit dedup, period scoping,
+//  the hero's monthly average, the trend's month span, the one rule for
+//  uncategorized spend, the year comparison, and the month groups.
 //
 
 import XCTest
@@ -55,7 +54,6 @@ final class CostsMetricsTests: XCTestCase {
     @MainActor
     private func log(
         daysAgo: Int,
-        mileage: Int,
         cost: Decimal?,
         category: CostCategory? = .maintenance,
         visit: ServiceVisit? = nil
@@ -63,7 +61,7 @@ final class CostsMetricsTests: XCTestCase {
         let log = ServiceLog(
             vehicle: vehicle,
             performedDate: calendar.date(byAdding: .day, value: -daysAgo, to: now)!,
-            mileageAtService: mileage,
+            mileageAtService: 30000 - daysAgo,
             cost: cost,
             costCategory: category
         )
@@ -73,16 +71,11 @@ final class CostsMetricsTests: XCTestCase {
     }
 
     @MainActor
-    private func visit(
-        daysAgo: Int,
-        mileage: Int,
-        total: Decimal?,
-        category: CostCategory? = .repair
-    ) -> ServiceVisit {
+    private func visit(daysAgo: Int, total: Decimal?, category: CostCategory? = .repair) -> ServiceVisit {
         let visit = ServiceVisit(
             vehicle: vehicle,
             performedDate: calendar.date(byAdding: .day, value: -daysAgo, to: now)!,
-            mileageAtVisit: mileage,
+            mileageAtVisit: 30000 - daysAgo,
             totalCost: total,
             costCategory: category
         )
@@ -92,19 +85,17 @@ final class CostsMetricsTests: XCTestCase {
 
     /// Logs are handed to `CostsMetrics` newest-first, matching the query.
     @MainActor
-    private func metrics(
-        _ logs: [ServiceLog],
-        period: CostsTab.PeriodFilter = .all,
-        category: CostsTab.CategoryFilter = .all
-    ) -> CostsMetrics {
+    private func metrics(_ logs: [ServiceLog], period: CostsTab.PeriodFilter = .allTime) -> CostsMetrics {
         CostsMetrics(
             logs: logs.sorted { $0.performedDate > $1.performedDate },
-            hasVehicle: true,
             period: period,
-            category: category,
             calendar: calendar,
             now: now
         )
+    }
+
+    private func month(_ year: Int, _ month: Int) -> Date {
+        calendar.date(from: DateComponents(year: year, month: month, day: 1))!
     }
 
     // MARK: - Retroactive Costs
@@ -113,9 +104,9 @@ final class CostsMetricsTests: XCTestCase {
     /// its services, must reach the Costs tab.
     @MainActor
     func test_costAddedLaterToVisitService_countsInTotals() {
-        let v = visit(daysAgo: 10, mileage: 29000, total: nil, category: nil)
-        let oil = log(daysAgo: 10, mileage: 29000, cost: nil, category: nil, visit: v)
-        let filter = log(daysAgo: 10, mileage: 29000, cost: nil, category: nil, visit: v)
+        let v = visit(daysAgo: 10, total: nil, category: nil)
+        let oil = log(daysAgo: 10, cost: nil, category: nil, visit: v)
+        let filter = log(daysAgo: 10, cost: nil, category: nil, visit: v)
         XCTAssertEqual(metrics([oil, filter]).totalSpent, 0)
 
         oil.applyEditedCost(120, category: .maintenance)
@@ -127,328 +118,244 @@ final class CostsMetricsTests: XCTestCase {
 
     @MainActor
     func test_costAddedLaterToStandaloneService_countsInTotals() {
-        let oil = log(daysAgo: 10, mileage: 29000, cost: nil, category: nil)
+        let oil = log(daysAgo: 10, cost: nil, category: nil)
         oil.applyEditedCost(60, category: .maintenance)
         XCTAssertEqual(metrics([oil]).totalSpent, 60)
     }
 
-    // MARK: - Totals
+    // MARK: - Totals and dedup
 
     @MainActor
-    func testTotalSpent_SumsCostedEventsOnly() {
+    func test_totalSpent_sumsCostedEventsOnly() {
+        let result = metrics([
+            log(daysAgo: 5, cost: 50),
+            log(daysAgo: 10, cost: Decimal(string: "75.50")!),
+            log(daysAgo: 15, cost: nil),
+            log(daysAgo: 20, cost: 0)
+        ])
+
+        XCTAssertEqual(result.totalSpent, Decimal(string: "125.50")!)
+        XCTAssertEqual(result.events.count, 2)
+    }
+
+    @MainActor
+    func test_visit_countsOnceRegardlessOfChildLogCount() {
+        let shopVisit = visit(daysAgo: 7, total: 400)
+        let result = metrics([
+            log(daysAgo: 7, cost: nil, visit: shopVisit),
+            log(daysAgo: 7, cost: nil, visit: shopVisit),
+            log(daysAgo: 7, cost: nil, visit: shopVisit),
+            log(daysAgo: 30, cost: 100)
+        ])
+
+        XCTAssertEqual(result.events.count, 2)
+        XCTAssertEqual(result.totalSpent, 500)
+    }
+
+    @MainActor
+    func test_noCostedEvents_isEmptyStateNotZeroes() {
+        let shopVisit = visit(daysAgo: 7, total: nil)
+        let result = metrics([log(daysAgo: 7, cost: nil, visit: shopVisit)])
+
+        XCTAssertFalse(result.hasAnyExpense)
+        XCTAssertTrue(result.hasAnyLog)
+        XCTAssertTrue(result.isEmpty)
+    }
+
+    // MARK: - Period
+
+    @MainActor
+    func test_periodFilter_rawValuesStayStableForAnalytics() {
+        XCTAssertEqual(CostsTab.PeriodFilter.allCases.map(\.rawValue), ["Month", "YTD", "Year", "All"])
+    }
+
+    @MainActor
+    func test_periodFilter_scopesEvents() {
         let logs = [
-            log(daysAgo: 5, mileage: 30000, cost: Decimal(50)),
-            log(daysAgo: 10, mileage: 29500, cost: Decimal(75.50)),
-            log(daysAgo: 15, mileage: 29000, cost: nil),
-            log(daysAgo: 20, mileage: 28500, cost: Decimal(0))
+            log(daysAgo: 5, cost: 100),     // Jun 10
+            log(daysAgo: 40, cost: 200),    // May
+            log(daysAgo: 200, cost: 400),   // Nov 2024
+            log(daysAgo: 500, cost: 800)    // 2024
         ]
 
-        let result = metrics(logs)
-
-        XCTAssertEqual(result.totalSpent, Decimal(125.50))
-        XCTAssertEqual(result.serviceCount, 2)
-        XCTAssertEqual(result.averageCost, Decimal(125.50) / 2)
+        XCTAssertEqual(metrics(logs, period: .last30Days).totalSpent, 100)
+        XCTAssertEqual(metrics(logs, period: .yearToDate).totalSpent, 300)
+        XCTAssertEqual(metrics(logs, period: .last12Months).totalSpent, 700)
+        XCTAssertEqual(metrics(logs, period: .allTime).totalSpent, 1500)
     }
 
     @MainActor
-    func testAverageCost_IsNilWithoutCostedEvents() {
-        let result = metrics([log(daysAgo: 1, mileage: 30000, cost: nil)])
+    func test_emptyPeriod_keepsVehicleOutOfEmptyState() {
+        let result = metrics([log(daysAgo: 200, cost: 100)], period: .last30Days)
 
-        XCTAssertNil(result.averageCost)
-        XCTAssertTrue(result.isEmpty)
-        XCTAssertEqual(result.formattedAverageCost, "-")
-    }
-
-    // MARK: - Visit Dedup
-
-    @MainActor
-    func testVisit_CountsOnceRegardlessOfChildLogCount() {
-        let shopVisit = visit(daysAgo: 7, mileage: 29800, total: Decimal(400))
-        let logs = [
-            log(daysAgo: 7, mileage: 29800, cost: nil, visit: shopVisit),
-            log(daysAgo: 7, mileage: 29800, cost: nil, visit: shopVisit),
-            log(daysAgo: 7, mileage: 29800, cost: nil, visit: shopVisit),
-            log(daysAgo: 30, mileage: 29000, cost: Decimal(100))
-        ]
-
-        let result = metrics(logs)
-
-        // One visit event + one standalone, not four events.
-        XCTAssertEqual(result.serviceCount, 2)
-        XCTAssertEqual(result.totalSpent, Decimal(500))
-        XCTAssertEqual(result.events.filter { if case .visit = $0 { return true } else { return false } }.count, 1)
-    }
-
-    @MainActor
-    func testVisitWithoutTotal_StaysOutOfMoneyMetrics() {
-        let shopVisit = visit(daysAgo: 7, mileage: 29800, total: nil)
-        let logs = [log(daysAgo: 7, mileage: 29800, cost: nil, visit: shopVisit)]
-
-        let result = metrics(logs)
-
-        XCTAssertTrue(result.isEmpty)
+        XCTAssertTrue(result.hasAnyExpense)
+        XCTAssertTrue(result.monthGroups.isEmpty)
         XCTAssertEqual(result.totalSpent, 0)
-        // Still present in the unfiltered event list.
-        XCTAssertEqual(result.allEvents.count, 1)
     }
 
-    // MARK: - Filters
+    // MARK: - Monthly average
 
+    /// Averaged from the first expense, not Jan 1: March→June is four months.
     @MainActor
-    func testPeriodFilter_ExcludesOlderEvents() {
-        let logs = [
-            log(daysAgo: 5, mileage: 30000, cost: Decimal(100)),
-            log(daysAgo: 200, mileage: 25000, cost: Decimal(900))
-        ]
+    func test_monthlyAverage_spansFromFirstExpenseInPeriod() {
+        let result = metrics([
+            log(daysAgo: 5, cost: 100),   // Jun 10
+            log(daysAgo: 95, cost: 200)   // Mar 12
+        ], period: .yearToDate)
 
-        XCTAssertEqual(metrics(logs, period: .month).totalSpent, Decimal(100))
-        XCTAssertEqual(metrics(logs, period: .year).totalSpent, Decimal(1000))
-        XCTAssertEqual(metrics(logs, period: .all).totalSpent, Decimal(1000))
+        XCTAssertEqual(result.monthlyAverage, 75)
+        XCTAssertFalse(result.averageIsTwelveMonth)
     }
 
+    /// Thirty days is too short to average: 30D reports the 12-month average.
     @MainActor
-    func testCategoryFilter_NarrowsToOneCategory() {
-        let logs = [
-            log(daysAgo: 5, mileage: 30000, cost: Decimal(100), category: .maintenance),
-            log(daysAgo: 6, mileage: 29900, cost: Decimal(300), category: .repair),
-            log(daysAgo: 7, mileage: 29800, cost: Decimal(50), category: .upgrade)
-        ]
+    func test_monthlyAverage_thirtyDaysUsesTwelveMonthAverage() {
+        let result = metrics([
+            log(daysAgo: 5, cost: 120),
+            log(daysAgo: 200, cost: 240),
+            log(daysAgo: 400, cost: 999)   // older than 12 months
+        ], period: .last30Days)
 
-        let repairs = metrics(logs, category: .repair)
-
-        XCTAssertEqual(repairs.serviceCount, 1)
-        XCTAssertEqual(repairs.totalSpent, Decimal(300))
-        // The unfiltered list stays whole, so the category picker keeps its counts.
-        XCTAssertEqual(repairs.allEvents.count, 3)
-    }
-
-    // MARK: - Category Split
-
-    @MainActor
-    func testCategoryBreakdown_IsSortedByAmountWithPercentages() {
-        let logs = [
-            log(daysAgo: 5, mileage: 30000, cost: Decimal(250), category: .maintenance),
-            log(daysAgo: 6, mileage: 29900, cost: Decimal(750), category: .repair)
-        ]
-
-        let result = metrics(logs)
-
-        XCTAssertEqual(result.categoryBreakdown.count, 2)
-        XCTAssertEqual(result.categoryBreakdown.first?.category, .repair)
-        XCTAssertEqual(result.categoryBreakdown.first?.percentage ?? 0, 75, accuracy: 0.001)
-        XCTAssertEqual(result.reactiveShare, 75, accuracy: 0.001)
-        XCTAssertEqual(result.preventiveShare, 25, accuracy: 0.001)
-        XCTAssertEqual(result.discretionaryShare, 0, accuracy: 0.001)
+        XCTAssertEqual(result.monthlyAverage, 30)
+        XCTAssertTrue(result.averageIsTwelveMonth)
     }
 
     @MainActor
-    func testUncategorisedSpend_IsExcludedFromShares() {
-        let logs = [
-            log(daysAgo: 5, mileage: 30000, cost: Decimal(500), category: .maintenance),
-            log(daysAgo: 6, mileage: 29900, cost: Decimal(500), category: nil)
-        ]
+    func test_monthlyAverage_nilWithoutEvents() {
+        XCTAssertNil(metrics([log(daysAgo: 200, cost: 100)], period: .yearToDate).monthlyAverage)
+    }
 
-        let result = metrics(logs)
+    // MARK: - Trend
 
-        // The uncategorised half counts toward the total but claims no category,
-        // so preventive is 50% of spend rather than 100%.
-        XCTAssertEqual(result.totalSpent, Decimal(1000))
-        XCTAssertEqual(result.preventiveShare, 50, accuracy: 0.001)
-        XCTAssertEqual(result.categoryBreakdown.count, 1)
+    @MainActor
+    func test_trend_isOneBarPerMonthOldestFirstWithGapsKept() {
+        let result = metrics([
+            log(daysAgo: 5, cost: 100),    // Jun
+            log(daysAgo: 70, cost: 200),   // Apr
+            log(daysAgo: 130, cost: 300)   // Feb
+        ])
+
+        XCTAssertEqual(result.trend.map(\.month), [
+            month(2025, 2), month(2025, 3), month(2025, 4), month(2025, 5), month(2025, 6)
+        ])
+        XCTAssertEqual(result.trend.map(\.amount), [300, 0, 200, 0, 100])
+        XCTAssertTrue(result.trendIsReady)
     }
 
     @MainActor
-    func testShares_AreZeroWithoutSpend() {
-        let result = metrics([log(daysAgo: 1, mileage: 30000, cost: nil)])
-
-        XCTAssertEqual(result.preventiveShare, 0)
-        XCTAssertEqual(result.reactiveShare, 0)
-        XCTAssertTrue(result.categoryBreakdown.isEmpty)
-    }
-
-    // MARK: - Cost Per Mile
-
-    @MainActor
-    func testCostPerMile_UsesDistanceBetweenOldestAndNewestEvent() {
-        let logs = [
-            log(daysAgo: 5, mileage: 30000, cost: Decimal(200)),
-            log(daysAgo: 100, mileage: 28000, cost: Decimal(300))
-        ]
-
-        let result = metrics(logs)
-
-        // $500 across 2,000 miles.
-        XCTAssertEqual(result.costPerMile ?? 0, 0.25, accuracy: 0.0001)
+    func test_trend_needsThreeMonthsWithSpend() {
+        let result = metrics([log(daysAgo: 5, cost: 100), log(daysAgo: 70, cost: 200)])
+        XCTAssertFalse(result.trendIsReady)
     }
 
     @MainActor
-    func testCostPerMile_IsNilWithoutForwardMotion() {
-        let logs = [
-            log(daysAgo: 5, mileage: 30000, cost: Decimal(200)),
-            log(daysAgo: 100, mileage: 30000, cost: Decimal(300))
-        ]
+    func test_trend_thirtyDaysIsTwoBarsReadyWithTwoExpenses() {
+        let one = metrics([log(daysAgo: 3, cost: 100)], period: .last30Days)
+        XCTAssertEqual(one.trend.count, 2)
+        XCTAssertFalse(one.trendIsReady)
 
-        XCTAssertNil(metrics(logs).costPerMile)
-        XCTAssertEqual(metrics(logs).formattedCostPerMile, "-")
+        let two = metrics([log(daysAgo: 3, cost: 100), log(daysAgo: 20, cost: 50)], period: .last30Days)
+        XCTAssertTrue(two.trendIsReady)
     }
 
     @MainActor
-    func testCostPerMile_IsNilWithASingleEvent() {
-        XCTAssertNil(metrics([log(daysAgo: 5, mileage: 30000, cost: Decimal(200))]).costPerMile)
+    func test_trend_isCappedAtTwentyFourBars() {
+        let result = metrics([log(daysAgo: 5, cost: 100), log(daysAgo: 1000, cost: 100)])
+        XCTAssertEqual(result.trend.count, 24)
+        XCTAssertEqual(result.trend.last?.month, month(2025, 6))
     }
 
-    // MARK: - Time Series
+    // MARK: - Category buckets
 
+    /// One rule: uncategorized spend is its own bucket, so the buckets always
+    /// sum to the hero's total.
     @MainActor
-    func testMonthlyBreakdown_GroupsByMonthNewestFirst() {
-        let logs = [
-            log(daysAgo: 5, mileage: 30000, cost: Decimal(100)),
-            log(daysAgo: 8, mileage: 29900, cost: Decimal(50)),
-            log(daysAgo: 45, mileage: 29000, cost: Decimal(200))
-        ]
+    func test_uncategorizedSpend_isItsOwnBucket() {
+        let result = metrics([
+            log(daysAgo: 5, cost: 100, category: .maintenance),
+            log(daysAgo: 6, cost: 50, category: .repair),
+            log(daysAgo: 7, cost: 50, category: nil)
+        ])
 
-        let result = metrics(logs)
-
-        XCTAssertEqual(result.monthlyBreakdown.count, 2)
-        XCTAssertEqual(result.monthlyBreakdown.first?.amount, Decimal(150))
-        // Chronological is the same data reversed, for a chart's x-axis.
-        XCTAssertEqual(
-            result.monthlyBreakdownChronological.map(\.amount),
-            result.monthlyBreakdown.map(\.amount).reversed()
-        )
-        XCTAssertEqual(result.monthlyBreakdownChronological.first?.amount, Decimal(200))
-    }
-
-    @MainActor
-    func testCumulativeCost_AccumulatesAndMergesSameDay() {
-        let logs = [
-            log(daysAgo: 30, mileage: 29000, cost: Decimal(100)),
-            log(daysAgo: 30, mileage: 29000, cost: Decimal(50)),
-            log(daysAgo: 10, mileage: 29800, cost: Decimal(25))
-        ]
-
-        let series = metrics(logs).cumulativeCostOverTime
-
-        XCTAssertEqual(series.count, 2)
-        XCTAssertEqual(series.first?.cumulativeAmount, Decimal(150))
-        XCTAssertEqual(series.last?.cumulativeAmount, Decimal(175))
-        // Strictly increasing dates.
-        XCTAssertLessThan(series[0].date, series[1].date)
+        XCTAssertEqual(Set(result.bucketShares.map(\.bucket)), [.category(.maintenance), .category(.repair), .uncategorized])
+        XCTAssertEqual(result.bucketShares.first?.bucket, .category(.maintenance))
+        XCTAssertEqual(result.bucketShares.map(\.amount).reduce(0, +), result.totalSpent)
+        XCTAssertEqual(result.bucketShares.first { $0.bucket == .uncategorized }?.fraction ?? 0, 0.25, accuracy: 0.0001)
+        XCTAssertTrue(result.categoryIsReady)
     }
 
     @MainActor
-    func testMonthlyBreakdownByCategory_AssignsUncategorisedToMaintenance() {
-        let logs = [log(daysAgo: 5, mileage: 30000, cost: Decimal(80), category: nil)]
-
-        let byCategory = metrics(logs).monthlyBreakdownByCategory
-
-        // A stacked bar has to place every dollar, unlike the share split.
-        XCTAssertEqual(byCategory.count, 1)
-        XCTAssertEqual(byCategory.first?.category, .maintenance)
-        XCTAssertEqual(byCategory.first?.amount, Decimal(80))
+    func test_categoryChart_needsTwoBuckets() {
+        let result = metrics([log(daysAgo: 5, cost: 100), log(daysAgo: 6, cost: 50)])
+        XCTAssertFalse(result.categoryIsReady)
     }
 
-    // MARK: - Prior Period
+    // MARK: - Year comparison
 
     @MainActor
-    func testPeriodDelta_ComparesAgainstThePriorWindow() {
-        let logs = [
-            log(daysAgo: 10, mileage: 30000, cost: Decimal(300)),   // this month
-            log(daysAgo: 45, mileage: 29000, cost: Decimal(100))    // prior month
-        ]
+    func test_comparison_isThisYearAgainstSameSpanLastYear() {
+        let result = metrics([
+            log(daysAgo: 10, cost: 300),    // 2025
+            log(daysAgo: 380, cost: 200),   // May 2024 — inside last year's span
+            log(daysAgo: 250, cost: 999)    // Oct 2024 — after this date last year
+        ], period: .last30Days)  // independent of the period
 
-        let result = metrics(logs, period: .month)
-
-        XCTAssertTrue(result.hasPriorPeriod)
-        XCTAssertEqual(result.priorPeriodTotal, Decimal(100))
-        XCTAssertEqual(result.periodDeltaAmount, Decimal(200))
-        XCTAssertEqual(result.periodDeltaDirection, .up)
+        XCTAssertEqual(result.comparison, CostYearComparison(
+            year: 2025,
+            thisYearTotal: 300,
+            lastYearTotal: 200,
+            percentChange: 50
+        ))
+        XCTAssertEqual(result.currentYear, 2025)
     }
 
     @MainActor
-    func testPeriodDelta_IsNilForAllTime() {
-        let result = metrics([log(daysAgo: 10, mileage: 30000, cost: Decimal(300))], period: .all)
-
-        XCTAssertFalse(result.hasPriorPeriod)
-        XCTAssertNil(result.periodDeltaAmount)
-        XCTAssertEqual(result.periodDeltaDirection, .flat)
+    func test_comparison_nilWithoutLastYearSpendByThisDate() {
+        let result = metrics([log(daysAgo: 10, cost: 300), log(daysAgo: 250, cost: 999)])
+        XCTAssertNil(result.comparison)
     }
 
-    // MARK: - Yearly Roundup
+    // MARK: - Month groups
 
     @MainActor
-    func testPreviousYearLogs_AreScopedToTheYearBeforeTheRoundup() {
-        let logs = [
-            log(daysAgo: 10, mileage: 30000, cost: Decimal(300)),
-            log(daysAgo: 400, mileage: 25000, cost: Decimal(100))
-        ]
+    func test_monthGroups_newestFirstWithTotals() {
+        let result = metrics([
+            log(daysAgo: 5, cost: 100),    // Jun
+            log(daysAgo: 8, cost: 25),     // Jun
+            log(daysAgo: 70, cost: 200)    // Apr
+        ])
 
-        let result = metrics(logs, period: .all)
-
-        XCTAssertEqual(result.currentYear, calendar.component(.year, from: now))
-        XCTAssertEqual(result.previousYearLogs.count, 1)
-        XCTAssertTrue(result.shouldShowYearlyRoundup)
-    }
-
-    @MainActor
-    func testYearlyRoundup_HiddenForShortPeriods() {
-        let result = metrics([log(daysAgo: 5, mileage: 30000, cost: Decimal(300))], period: .month)
-
-        XCTAssertFalse(result.shouldShowYearlyRoundup)
+        XCTAssertEqual(result.monthGroups.map(\.month), [month(2025, 6), month(2025, 4)])
+        XCTAssertEqual(result.monthGroups.map(\.total), [125, 200])
+        XCTAssertEqual(result.monthGroups.first?.events.count, 2)
     }
 
     // MARK: - Signals
 
     @MainActor
-    func testAnomaliesAndTopExpenses_ComeFromTheFilteredEvents() {
-        let logs = [
-            log(daysAgo: 5, mileage: 30000, cost: Decimal(1000)),
-            log(daysAgo: 6, mileage: 29900, cost: Decimal(50)),
-            log(daysAgo: 7, mileage: 29800, cost: Decimal(50))
-        ]
+    func test_anomalies_comeFromThePeriodEvents() {
+        let huge = log(daysAgo: 400, cost: 5000)
+        let recent = [log(daysAgo: 1, cost: 50), log(daysAgo: 2, cost: 50), log(daysAgo: 3, cost: 50)]
 
-        let result = metrics(logs)
+        let yearToDate = metrics(recent + [huge], period: .yearToDate)
+        XCTAssertTrue(yearToDate.anomalyEventIDs.isEmpty)
 
-        XCTAssertEqual(result.topExpenses.count, 3)
-        XCTAssertEqual(result.topExpenses.first?.amount, Decimal(1000))
-        XCTAssertEqual(result.anomalyEventIDs.count, 1)
-        XCTAssertTrue(result.anomalyEventIDs.contains(logs[0].id))
+        let allTime = metrics(recent + [huge])
+        XCTAssertTrue(allTime.anomalyEventIDs.contains(huge.id))
     }
 
-    @MainActor
-    func testRepairCluster_IgnoresTheCategoryFilter() {
-        let logs = [
-            log(daysAgo: 5, mileage: 30000, cost: Decimal(400), category: .repair),
-            log(daysAgo: 20, mileage: 29800, cost: Decimal(600), category: .repair),
-            log(daysAgo: 25, mileage: 29700, cost: Decimal(80), category: .maintenance)
-        ]
-
-        // Narrowed to maintenance, the repair warning must still fire.
-        let result = metrics(logs, category: .maintenance)
-
-        XCTAssertEqual(result.repairCluster?.count, 2)
-        XCTAssertEqual(result.repairCluster?.totalAmount, Decimal(1000))
-    }
-
-    // MARK: - No Vehicle
+    // MARK: - Wording
 
     @MainActor
-    func testWithoutVehicle_CostPerMileIsSuppressed() {
-        let logs = [
-            log(daysAgo: 5, mileage: 30000, cost: Decimal(200)),
-            log(daysAgo: 100, mileage: 28000, cost: Decimal(300))
-        ]
+    func test_summaries_areAlwaysWrittenWhenChartsAreReady() {
+        let result = metrics([
+            log(daysAgo: 5, cost: 100, category: .repair),
+            log(daysAgo: 70, cost: 200),
+            log(daysAgo: 130, cost: 300)
+        ])
 
-        let result = CostsMetrics(
-            logs: logs,
-            hasVehicle: false,
-            period: .all,
-            category: .all,
-            calendar: calendar,
-            now: now
-        )
-
-        XCTAssertNil(result.costPerMile)
-        XCTAssertEqual(result.totalSpent, Decimal(500))
+        XCTAssertFalse(result.chartSummary(.trend).isEmpty)
+        XCTAssertFalse(result.chartSummary(.category).isEmpty)
+        XCTAssertNotNil(result.averageLine)
     }
 }
