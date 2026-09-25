@@ -17,8 +17,7 @@ final class ThemeManager {
     /// Settable only through `activateTheme(_:)`, which keeps `palette` in step.
     /// A `didSet` here would be the obvious way to do that, but property
     /// observers on an `@Observable` stored property can cost it its observation
-    /// tracking — and `current` is what `Typography` and the app's color scheme
-    /// read.
+    /// tracking — and `current` is what `Typography` reads.
     private(set) var current: ThemeDefinition
 
     /// `current`'s colors, already parsed. Every `Theme.*` token reads this

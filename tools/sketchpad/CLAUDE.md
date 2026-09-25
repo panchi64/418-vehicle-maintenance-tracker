@@ -41,7 +41,7 @@ Anyone can mock a screen in HTML. What makes this worth keeping is that it turns
 - **Squint test.** Blurs the frame. If you can no longer tell what the screen is for, the hierarchy is carried by the words rather than by the layout — a stand-in for the real context: outdoors, one-handed, at arm's length.
 - **Tap budget.** Counts taps inside the frame against the budget declared for that screen in `SCREENS` (`src/App.tsx`). The doctrine's tap-budget test stops being an assertion and becomes a number.
 
-Plus a theme switcher over all eight themes and a Dynamic Type slider to 2×, because both are `[REQUIREMENT]`s that are easy to skip and expensive to discover late.
+Plus a theme switcher over all eight themes, a light/dark + Increase Contrast switch, and a Dynamic Type slider to 2×, because both are `[REQUIREMENT]`s that are easy to skip and expensive to discover late.
 
 ## Declaring hierarchy
 
@@ -202,7 +202,7 @@ Use the web for **exploration**, ship SwiftUI.
 
 1. **Never a hardcoded hue.** Use the CSS variables. If a color isn't a variable, it isn't in the design system.
 2. **Spend enclosures deliberately.** A border is emphasis, and emphasis is a budget. Before adding one, name the control it is supposed to outrank. If a screen's controls all carry the same enclosure, none of them is the decision — see `ServiceForm`.
-3. **Verify against more than one theme**, including a light-scheme one and a non-monospaced one, before calling a layout resolved. Eight themes ship.
+3. **Verify against more than one theme and both appearances**, including a non-monospaced theme, before calling a layout resolved. Eight themes ship, each in light, dark, and Increase Contrast — the harness's Appearance switch and contrast checkbox select among them, starting from the browser's own `prefers-color-scheme` / `prefers-contrast`.
 4. **Every screen states its problem** in a header comment. A mock with no thesis cannot be reviewed.
 5. **Don't let it rot into a second source of truth.** It models one screen's structure, not the app's behavior. No routing, persistence, or business logic beyond what a layout decision needs.
 6. **When a decision is settled, port it and say so** in the SwiftUI implementation, then update the screen comment here.

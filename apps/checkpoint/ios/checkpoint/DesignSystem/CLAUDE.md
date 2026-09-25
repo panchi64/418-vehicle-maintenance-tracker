@@ -15,16 +15,48 @@ Every color token is a computed property resolving through the active theme's
 static var accent: Color { ThemeManager.shared.palette.accent }
 ```
 
-`ThemeDefinition` stores hex *strings*; `ThemePalette` parses all sixteen into
+`ThemeDefinition` stores hex *strings*; `ThemePalette` parses them into
 `Color`s once, and `ThemeManager` rebuilds it only in `activateTheme(_:)`. Read
-colors through `Theme.*`. Do not reach for `ThemeManager.shared.current.<x>Color`
-in a view body — those accessors run a `Scanner` per call, and a screenful of
-rows touches tokens hundreds of times.
+colors through `Theme.*`. Don't parse hex in a view body — a screenful of rows
+touches tokens hundreds of times.
 
 `ThemeManager.current` is `private(set)`: change themes with `activateTheme(_:)`
 so the palette can't go stale.
 
 Themes are `ThemeDefinition` values loaded from `Resources/Themes.json`. **Eight ship today** — `default`, `clean_slate`, `red_line`, `blueprint`, `terra`, `midnight_oil`, `garage_day`, `stealth` — some unlocked via tips. Each defines every token, so **never assume a specific hue**. Write against the token, verify against more than one theme.
+
+### Every theme has four appearances; the app follows the system
+
+The app sets no `.preferredColorScheme`. Each theme defines a palette for
+light, dark, and Settings › Accessibility › **Increase Contrast** on each:
+
+```jsonc
+"colors": {
+  "light": { /* all 16 tokens */ },
+  "dark":  { /* all 16 tokens */ },
+  "lightHighContrast": { /* overrides on light — only what changes */ },
+  "darkHighContrast":  { /* overrides on dark */ }
+}
+```
+
+Decoding (`ThemeAppearances`) rejects a base set missing a token and any
+unknown token name, and merges each high-contrast set over its base. Every
+`ThemePalette` color is a DesignKit adaptive color
+(`Color(light:dark:lightHighContrast:darkHighContrast:)`), so it resolves from
+`\.colorScheme` / `\.colorSchemeContrast` at render time — call sites never
+branch on appearance, and `UIColor(Theme.x)` stays adaptive in UIKit too. To pin
+one appearance (e.g. a PDF on white paper), resolve it explicitly:
+`UIColor(Theme.accent).resolvedColor(with: UITraitCollection(userInterfaceStyle: .light))`.
+
+**Run the contrast gate after any palette change:**
+`uv run tools/theme-contrast/check_contrast.py`. It fails on text below 7:1
+(primary) / 4.5:1 (secondary, tertiary), status or accent below 3:1, a primary
+button label below 4.5:1, status colors too close to tell apart, and — in the
+high-contrast sets — anything below 7:1 text / 4.5:1 status and accent / 3:1
+grid lines, or anything *lower* than its base appearance. `textTertiary` is not
+a decorative opacity: it carries real labels and must pass 4.5:1.
+
+`previewColors` are identity swatches for the picker and don't vary by appearance.
 
 ### Token inventory
 
@@ -39,15 +71,16 @@ Themes are `ThemeDefinition` values loaded from `Resources/Themes.json`. **Eight
 
 ### The default theme, for orientation only
 
-The `default` theme ("Checkpoint") is a **saturated cerulean ground with off-white ink** — not a dark-neutral theme:
+The `default` theme ("Checkpoint") is AESTHETIC.md's two colors in either order — **cerulean ground with off-white ink** in dark, **off-white ground with cerulean ink** in light. It is not a dark-neutral theme:
 
-`backgroundPrimary #0033BE` · `textPrimary #F5F0DC` · `accent #F5F0DC` · `statusOverdue #FF6B6B` · `statusDueSoon #F7AD55` · `statusGood #38D9A9` · `statusNeutral #A5ADB5`
+- dark: `backgroundPrimary #0033BE` · `textPrimary #F5F0DC` · `accent #F5F0DC` · `statusOverdue #FF8F8F` · `statusDueSoon #F7AD55` · `statusGood #38D9A9` · `statusNeutral #B4BBC2`
+- light: `backgroundPrimary #F5F0DC` · `textPrimary #0033BE` · `accent #0033BE` · `statusOverdue #C62D2D` · `statusDueSoon #A65800` · `statusGood #0A7A55` · `statusNeutral #5F6873`
 
-Other themes diverge substantially, including in `colorScheme` and `fontDesign`.
+Other themes diverge substantially, including in `fontDesign`.
 
 ### Adding a token
 
-Add it to `ThemeProviding`, implement it on every provider, and add it to all eight entries in `Themes.json`. See [`packages/DesignKit/CLAUDE.md`](../../../../../packages/DesignKit/CLAUDE.md).
+Add a case to `ThemeToken`, add it to `ThemePalette`, add it to `ThemeProviding` and implement it on every provider, and add it to the `light` and `dark` sets of all eight entries in `Themes.json` (plus the high-contrast overrides if it should change there). Add it to `TOKENS` in `tools/theme-contrast/check_contrast.py`. See [`packages/DesignKit/CLAUDE.md`](../../../../../packages/DesignKit/CLAUDE.md).
 
 Then add the key to `COLOR_KEYS` in [`tools/sketchpad/src/theme/themes.ts`](../../../../../tools/sketchpad/src/theme/themes.ts). The sketchpad imports `Themes.json` directly rather than copying it, so hues never drift — but that one array is the list of keys it exposes as CSS variables, and a token missing from it simply won't render there.
 
@@ -143,7 +176,7 @@ Already adopted by the header odometer, `QuickMileageUpdateCard`, `CostHeadlineC
 
 1. **Always use tokens.** Never hardcode a color, font, or spacing value.
 2. **Zero corner radius.** No `cornerRadius()` modifiers.
-3. **Never assume a hue.** Eight themes; verify against more than one, including a light-scheme theme.
+3. **Never assume a hue or an appearance.** Eight themes × light/dark × Increase Contrast; verify in both appearances and more than one theme. No `.preferredColorScheme` outside `#Preview`s.
 4. **Status colors carry meaning, and never carry it alone.** Pair with a label, shape, or position.
 5. **Hierarchy is expressed with weight and spacing, not color.** Color is spoken for.
 6. **Use the `textStyle:` font accessors where Dynamic Type scaling matters.**
