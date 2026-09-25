@@ -54,7 +54,7 @@ v1.0 features are tracked throughout this document. Future versions are outlined
 | Service log detail     | Medium   | ✅     | Tap any history/activity/expense row to view full log details |
 | Edit service log       | Medium   | ✅     | Edit notes and add attachments to existing service logs. Save enables only on a real change; the odometer reading is required (it anchors mileage reminders). Tests: `ServiceLogEditValuesTests` |
 | Delete service log     | High     | ✅     | Delete from the log detail, its edit form, a Services swipe, or a long-press on any log row, with an Undo toast (toasts show above sheets). Recomputes the service's last-performed values and re-anchors a reminder derived from the deleted log; an emptied visit goes with it. Tests: `ServiceLogDeletionTests` |
-| Duplicate service log  | Medium   | ✅     | Services row action: a new entry prefilled with the service, cost, category, notes and cadence, dated today |
+| Duplicate service log  | Medium   | ✅     | Services row action: a new entry prefilled with the service, cost, category, notes and cadence, dated today. With more than one vehicle it can go to any of them — a Vehicle field at the top of the form, or "Duplicate To ▸ vehicle" in the row's long-press menu. On another vehicle it completes that vehicle's matching service (or creates one) and takes that vehicle's odometer. Tests: `DuplicateServiceLogTests` |
 | One-off service logging| Medium   | ✅     | "Schedule Recurring" toggle — log without creating a recurring schedule |
 | Forms usability overhaul | High   | ✅     | Essentials-first layout, Save in the sheet's toolbar (dim, never disabled), discard protection, history reference card, and edit-form change transparency across the service, Edit Service, Update Mileage, and Vehicle forms. Tests: `ReminderImpactCalculatorTests`, `ServiceFormDraftStoreTests`, `EditServiceViewRescheduleTests`, extended `AddServiceViewTests`/`EditServiceLogViewTests` |
 | Unified service form   | High     | ✅     | One `ServiceLogForm` for logging, Mark Done, editing a history entry, duplicating, and scheduling, with **derived intent**: the user answers "when"; a past answer logs, a future one schedules. Repeat interval is on the default path, the fire-time projection is a readout, and backfill no longer inherits a preset's cadence. Tests: extended `AddServiceViewTests`, `ServiceFormDraftStoreTests` |
@@ -624,7 +624,7 @@ Surface meaningful context alongside existing data to help users understand tren
 **Services Tab:**
 - Overdue / Due Soon / On Track groups, then history by month
 - Search across services and past logs
-- Row actions: Edit, Mark Done, Stop Tracking; on logs Duplicate, Edit, Delete with Undo
+- Row actions: Edit, Mark Done, Stop Tracking; on logs Duplicate (to any vehicle), Edit, Delete with Undo
 - Select mode for bulk Mark Done / Delete
 
 **Costs Tab:**

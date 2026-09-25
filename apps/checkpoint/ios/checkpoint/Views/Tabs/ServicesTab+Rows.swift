@@ -10,6 +10,9 @@
 //                                         Tracking and Delete sit in the
 //                                         context menu only: rarer, heavier.
 //    log:      Duplicate · Edit · Delete  full swipe = Delete, with Undo.
+//                                         With more than one vehicle the
+//                                         menu's Duplicate is "Duplicate To ▸",
+//                                         one item per vehicle.
 //
 //  (Listed leading-to-trailing as they appear; SwiftUI declares a trailing
 //  swipe's buttons outermost-first, so the code reads in reverse.)
@@ -111,10 +114,10 @@ extension ServicesTab {
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             deleteLogButton(log)
             editButton { sheet = .editLog(log) }
-            duplicateButton(log)
+            duplicateButton(log, vehicle: vehicle)
         }
         .contextMenu {
-            duplicateButton(log)
+            duplicateMenu(log, vehicle: vehicle)
             editButton { sheet = .editLog(log) }
             Divider()
             deleteLogButton(log)
@@ -146,12 +149,39 @@ extension ServicesTab {
         }
     }
 
-    private func duplicateButton(_ log: ServiceLog) -> some View {
+    /// Swipe: Duplicate onto this vehicle; the form's Vehicle field can move it.
+    private func duplicateButton(_ log: ServiceLog, vehicle: Vehicle) -> some View {
         Button {
-            sheet = .duplicateLog(log)
+            sheet = .duplicateLog(log, to: vehicle)
         } label: {
             Label(L10n.servicesActionDuplicate, systemImage: "plus.square.on.square")
         }
         .tint(Theme.accent)
+    }
+
+    /// Long-press: the same Duplicate, or — with more than one vehicle — a
+    /// "Duplicate To" submenu that opens the form on the chosen one directly.
+    /// This vehicle first, marked as current.
+    @ViewBuilder
+    private func duplicateMenu(_ log: ServiceLog, vehicle: Vehicle) -> some View {
+        if vehicles.count > 1 {
+            Menu {
+                Button {
+                    sheet = .duplicateLog(log, to: vehicle)
+                } label: {
+                    Text(vehicle.displayName)
+                    Text(L10n.servicesActionDuplicateCurrentVehicle)
+                }
+                ForEach(vehicles.filter { $0.id != vehicle.id }) { other in
+                    Button(other.displayName) {
+                        sheet = .duplicateLog(log, to: other)
+                    }
+                }
+            } label: {
+                Label(L10n.servicesActionDuplicateTo, systemImage: "plus.square.on.square")
+            }
+        } else {
+            duplicateButton(log, vehicle: vehicle)
+        }
     }
 }

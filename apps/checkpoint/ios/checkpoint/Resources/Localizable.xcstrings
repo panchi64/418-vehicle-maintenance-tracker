@@ -5858,6 +5858,24 @@
         }
       }
     },
+    "form.vehicle" : {
+      "comment" : "Field label on a duplicated entry: the vehicle it will be logged to.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vehicle"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vehículo"
+          }
+        }
+      }
+    },
     "form.vehicleBasicsRequired" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11413,6 +11431,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Duplicar"
+          }
+        }
+      }
+    },
+    "services.action.duplicateCurrentVehicle" : {
+      "comment" : "Subtitle under the entry's own vehicle in the Duplicate To submenu.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current Vehicle"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vehículo actual"
+          }
+        }
+      }
+    },
+    "services.action.duplicateTo" : {
+      "comment" : "Row submenu that starts a new log entry, prefilled from an existing one, on a chosen vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duplicate To"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duplicar en"
           }
         }
       }

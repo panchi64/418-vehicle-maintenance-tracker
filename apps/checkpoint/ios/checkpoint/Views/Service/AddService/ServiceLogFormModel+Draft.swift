@@ -98,6 +98,18 @@ extension ServiceLogFormModel {
         isRecurring = template.hasRecurringIntervals
     }
 
+    /// Duplicate, moved to another vehicle: everything in the form carries
+    /// over except an odometer the user never touched — that was this
+    /// vehicle's reading, and `target`'s own last confirmed one replaces it.
+    /// A reading the user typed is theirs, and stays.
+    func carryover(to target: Vehicle) -> ServiceFormDraft {
+        var draft = toDraft()
+        if draft.mileageText == baselineSnapshot?.mileageText {
+            draft.mileageText = String(target.currentMileage)
+        }
+        return draft
+    }
+
     /// Seasonal prefills carry a concrete due date, so they land on a dated
     /// reminder.
     func applySeasonalPrefill(_ prefill: SeasonalPrefill) {

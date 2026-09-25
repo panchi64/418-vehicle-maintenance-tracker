@@ -11,14 +11,15 @@ import SwiftUI
 enum ServicesTabSheet: Identifiable {
     case editService(Service)
     case editLog(ServiceLog)
-    case duplicateLog(ServiceLog)
+    /// A new entry prefilled from `log`, on `target` (the form can change it).
+    case duplicateLog(ServiceLog, to: Vehicle)
     case export
 
     var id: String {
         switch self {
         case .editService(let service): return "editService-\(service.id)"
         case .editLog(let log): return "editLog-\(log.id)"
-        case .duplicateLog(let log): return "duplicateLog-\(log.id)"
+        case .duplicateLog(let log, let target): return "duplicateLog-\(log.id)-\(target.id)"
         case .export: return "export"
         }
     }
@@ -56,8 +57,8 @@ extension ServicesTab {
                 EditServiceView(service: service, vehicle: vehicle)
             case .editLog(let log):
                 EditServiceLogView(log: log, onDelete: { logPendingDeletion = log })
-            case .duplicateLog(let log):
-                ServiceLogForm(duplicating: log, vehicle: vehicle)
+            case .duplicateLog(let log, let target):
+                DuplicateServiceLogForm(log: log, target: target)
             case .export:
                 ExportOptionsSheet(
                     vehicle: vehicle,

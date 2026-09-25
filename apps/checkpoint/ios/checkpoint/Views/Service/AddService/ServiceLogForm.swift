@@ -42,6 +42,10 @@ struct ServiceLogForm: View {
     var seasonalPrefill: SeasonalPrefill?
     var postRecordPrefill: PostRecordPrefill?
     var duplicating: ServiceLog?
+    /// Duplicate only: what the user entered before choosing this vehicle.
+    var carryover: ServiceLogCarryover?
+    /// Duplicate only, with more than one vehicle: where the entry goes.
+    var vehicleChoice: ServiceLogVehicleChoice?
     /// After a successful save (Mark Done's presenter pops its detail).
     var onSaved: (() -> Void)?
     /// Edit only: asks the presenter to delete the entry once this form has
@@ -49,10 +53,10 @@ struct ServiceLogForm: View {
     var onDelete: (() -> Void)?
 
     @State var model: ServiceLogFormModel
-    @State private var draftResumeBanner: ServiceFormDraft?
+    @State var draftResumeBanner: ServiceFormDraft?
     @State var showBlocker = false
     @State private var attachmentForDetail: Document?
-    @State private var adjacentLogs: (before: ServiceLog?, after: ServiceLog?) = (nil, nil)
+    @State var adjacentLogs: (before: ServiceLog?, after: ServiceLog?) = (nil, nil)
 
     init(
         vehicle: Vehicle,
@@ -78,35 +82,18 @@ struct ServiceLogForm: View {
     }
 
     /// Duplicate a history entry: same service, cost, notes and cadence,
-    /// logged today.
-    init(duplicating log: ServiceLog, vehicle: Vehicle) {
+    /// logged today — on `vehicle`, which need not be the entry's own
+    /// (`DuplicateServiceLogForm`).
+    init(
+        duplicating log: ServiceLog,
+        vehicle: Vehicle,
+        carryover: ServiceLogCarryover? = nil,
+        vehicleChoice: ServiceLogVehicleChoice? = nil
+    ) {
         self.init(vehicle: vehicle)
         self.duplicating = log
-    }
-
-    // MARK: - Derived
-
-    /// The tracked service this entry completes instead of duplicating.
-    var logTarget: Service? {
-        if let service = model.mode.completing { return service }
-        guard model.isLogging, !model.mode.isEdit else { return nil }
-        return services.activeMatch(
-            named: model.serviceName,
-            for: vehicle,
-            performedDate: model.performedDate,
-            logs: serviceLogs
-        )
-    }
-
-    private var hasExplicitPrefill: Bool {
-        seasonalPrefill != nil || postRecordPrefill != nil || duplicating != nil
-    }
-
-    private var title: String {
-        if model.mode.isEdit { return L10n.formTitleEdit }
-        if model.isScheduling { return L10n.formTitleSchedule }
-        if model.mode.completing != nil || logTarget != nil { return L10n.formTitleComplete }
-        return L10n.formTitleLog
+        self.carryover = carryover
+        self.vehicleChoice = vehicleChoice
     }
 
     /// What reseeds the recurrence policy. One key, one handler: separate
@@ -136,9 +123,19 @@ struct ServiceLogForm: View {
                                         draftResumeBanner = nil
                                     },
                                     onDiscard: {
-                                        ServiceFormDraftStore.clear(model.draftScope)
+                                        clearDraft()
                                         draftResumeBanner = nil
                                     }
+                                )
+                            }
+
+                            // Where the entry goes decides what it completes,
+                            // so the choice sits first, on the default path.
+                            if let vehicleChoice {
+                                ServiceLogVehicleMenu(
+                                    current: vehicle,
+                                    vehicles: vehicleChoice.vehicles,
+                                    onSelect: { retarget(to: $0, via: vehicleChoice) }
                                 )
                             }
 
@@ -201,7 +198,7 @@ struct ServiceLogForm: View {
                         if blocker.field == .service { model.isPickerOpen = true }
                         withAnimation { proxy.scrollTo(blocker.field, anchor: .center) }
                     },
-                    onDiscard: { ServiceFormDraftStore.clear(model.draftScope) }
+                    onDiscard: clearDraft
                 )
                 .onChange(of: ScheduleDefaultsKey(
                     presetName: model.selectedPreset?.name,
@@ -223,10 +220,10 @@ struct ServiceLogForm: View {
                 .task(id: model.contentSnapshot) {
                     // F10: only real edits produce a draft — a pristine form
                     // must never overwrite a stored one or leave a phantom.
-                    guard !hasExplicitPrefill, draftResumeBanner == nil, model.hasContentChanges else { return }
+                    guard let draftScope, draftResumeBanner == nil, model.hasContentChanges else { return }
                     try? await Task.sleep(for: .seconds(0.5))
                     guard !Task.isCancelled else { return }
-                    ServiceFormDraftStore.save(model.toDraft(), model.draftScope)
+                    ServiceFormDraftStore.save(model.toDraft(), draftScope)
                 }
                 .trackScreen(screen)
                 .onAppear(perform: prepare)
@@ -239,73 +236,11 @@ struct ServiceLogForm: View {
         }
     }
 
-    private var screen: AnalyticsEvent.ScreenName {
-        switch model.mode {
-        case .log: return .addService
-        case .complete: return .markServiceDone
-        case .edit: return .editServiceLog
-        }
-    }
-
     /// F2: a `.blocking` advisory, shown at its own field only after a tap on
     /// the dim Save.
     func blockerMessage(for field: ServiceLogFormModel.BlockingField) -> String? {
         guard showBlocker, let blocker = model.blocker, blocker.field == field else { return nil }
         return blocker.message
-    }
-
-    private func prepare() {
-        guard model.presets.isEmpty else { return }
-        model.presets = PresetDataService.shared.loadPresets()
-        if let seasonalPrefill { model.applySeasonalPrefill(seasonalPrefill) }
-        if let postRecordPrefill { model.applyPostRecordPrefill(postRecordPrefill) }
-        if let duplicating { model.applyTemplate(from: duplicating) }
-        if hasExplicitPrefill {
-            // The prefill is the starting point, not an edit to protect.
-            model.rebaseline()
-        } else {
-            draftResumeBanner = ServiceFormDraftStore.load(model.draftScope)
-        }
-        if let log = model.mode.editing {
-            let chronological = Array(serviceLogs.reversed())
-            if let index = chronological.firstIndex(where: { $0.id == log.id }) {
-                adjacentLogs = (
-                    index > 0 ? chronological[index - 1] : nil,
-                    index < chronological.count - 1 ? chronological[index + 1] : nil
-                )
-            }
-        }
-    }
-
-    // MARK: - Edit context (F8)
-
-    var anchors: ServiceFormAnchors {
-        ServiceFormAnchors(
-            vehicle: vehicle,
-            logs: serviceLogs,
-            serviceName: model.serviceName,
-            performedDate: model.performedDate,
-            enteredMileage: model.mileageAtService,
-            enteredCostString: model.cost,
-            excludingLogID: model.mode.editing?.id
-        )
-    }
-
-    /// Omits whichever half doesn't exist — the earliest/latest log for a
-    /// vehicle only has one neighbor (F8).
-    private var editContextLine: String? {
-        func summary(_ log: ServiceLog) -> String {
-            L10n.formLogSummary(
-                Formatters.mileage(log.mileageAtService),
-                Formatters.shortDate.string(from: log.performedDate)
-            )
-        }
-        switch adjacentLogs {
-        case let (before?, after?): return L10n.editBetweenLogs(summary(before), summary(after))
-        case let (before?, nil): return L10n.editSinceLog(summary(before))
-        case let (nil, after?): return L10n.editBeforeLog(summary(after))
-        case (nil, nil): return nil
-        }
     }
 }
 

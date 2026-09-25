@@ -32,6 +32,8 @@ struct ServicesTab: View {
     let onboardingState: OnboardingState
     @Query private var services: [Service]
     @Query var serviceLogs: [ServiceLog]
+    /// Where a log row's "Duplicate To" can send the entry.
+    @Query var vehicles: [Vehicle]
 
     /// Tasks started from a row. Local, like Service Detail's: the root
     /// router has no case for editing a particular service or log.
