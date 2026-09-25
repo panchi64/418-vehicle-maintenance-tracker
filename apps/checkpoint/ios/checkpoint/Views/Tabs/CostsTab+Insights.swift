@@ -1,51 +1,8 @@
 import Foundation
 
-// MARK: - Trend Direction
-
-enum TrendDirection {
-    case up, down, flat
-
-    /// "Worse" direction for cost metrics: spending more = up = bad.
-    /// Used to pick `Theme.statusOverdue` vs `Theme.statusGood`.
-    var isUnfavorable: Bool { self == .up }
-}
-
-// MARK: - Repair Cluster Signal
-
-struct RepairClusterSignal: Equatable {
-    let count: Int
-    let totalAmount: Decimal
-    let windowStart: Date
-    let windowEnd: Date
-}
-
 // MARK: - Pure Helpers
 
 enum CostsInsightsCore {
-    /// Detect a repair cluster among the given events. Returns nil unless ≥2
-    /// `.repair`-category events fall inside a rolling 90-day window anchored
-    /// to the most recent repair.
-    static func detectRepairCluster(events: [ExpenseEvent], calendar: Calendar = .current) -> RepairClusterSignal? {
-        let repairs = events
-            .filter { $0.category == .repair && $0.hasCost }
-            .sorted { $0.date > $1.date }
-
-        guard let anchor = repairs.first,
-              let windowStart = calendar.date(byAdding: .day, value: -90, to: anchor.date)
-        else { return nil }
-
-        let inWindow = repairs.filter { $0.date >= windowStart && $0.date <= anchor.date }
-        guard inWindow.count >= 2 else { return nil }
-
-        let total = inWindow.map(\.amount).reduce(0, +)
-        return RepairClusterSignal(
-            count: inWindow.count,
-            totalAmount: total,
-            windowStart: windowStart,
-            windowEnd: anchor.date
-        )
-    }
-
     /// IDs of events whose amount is more than 2× the average across the
     /// supplied event set. Returns an empty set when fewer than 3 events are
     /// present (anomaly detection needs a meaningful baseline).
@@ -57,31 +14,6 @@ enum CostsInsightsCore {
         let threshold = average * 2
         return Set(events.filter { $0.amount > threshold }.map(\.id))
     }
-
-    /// Top-N events by amount, descending.
-    static func topExpenses(events: [ExpenseEvent], limit: Int = 3) -> [ExpenseEvent] {
-        Array(events.sorted { $0.amount > $1.amount }.prefix(limit))
-    }
-
-    /// Project YTD spending to year-end given the fraction of the year already
-    /// elapsed. Returns nil for early-January (< 2% elapsed) since the
-    /// projection isn't meaningful yet.
-    static func projectYearEnd(totalSpent: Decimal, now: Date, calendar: Calendar = .current) -> Decimal? {
-        guard totalSpent > 0,
-              let yearStart = calendar.date(from: calendar.dateComponents([.year], from: now)),
-              let yearEnd = calendar.date(from: DateComponents(year: calendar.component(.year, from: now) + 1))
-        else { return nil }
-
-        let elapsed = now.timeIntervalSince(yearStart)
-        let total = yearEnd.timeIntervalSince(yearStart)
-        guard elapsed > 0, elapsed < total else { return nil }
-
-        let fractionElapsed = elapsed / total
-        guard fractionElapsed >= 0.02 else { return nil }
-
-        let totalDouble = NSDecimalNumber(decimal: totalSpent).doubleValue
-        return Decimal(totalDouble / fractionElapsed)
-    }
 }
 
 // MARK: - Presentation
@@ -91,121 +23,126 @@ enum CostsInsightsCore {
 /// list, which is what keeps these safe to read repeatedly from a view body.
 extension CostsMetrics {
 
-    // MARK: - Counts and Money
-
-    /// Number of distinct money events (visits + standalone logs with cost).
-    /// Not a service count: each log of an un-itemized visit is not its own
-    /// expense.
-    var serviceCount: Int { events.count }
-
     var isEmpty: Bool { events.isEmpty }
 
     var formattedTotalSpent: String { Formatters.currencyWhole(totalSpent) }
 
-    var formattedAverageCost: String {
-        guard let averageCost else { return "-" }
-        return Formatters.currencyWhole(averageCost)
+    /// "USD" — the chart titles carry their unit.
+    var currencyCode: String { Formatters.currencyWhole.currencyCode ?? "USD" }
+
+    // MARK: - Hero
+
+    /// "$330 a month on average", or its 12-month form for 30D.
+    var averageLine: String? {
+        guard let monthlyAverage else { return nil }
+        let amount = Formatters.currencyWhole(monthlyAverage)
+        return averageIsTwelveMonth
+            ? L10n.costsHeroAverage12Months(amount)
+            : L10n.costsHeroAverage(amount)
     }
 
-    var formattedCostPerMile: String {
-        guard let costPerMile else { return "-" }
-        let unitAbbr = DistanceSettings.shared.unit.abbreviation
-        return String(format: "$%.2f/\(unitAbbr)", costPerMile)
+    /// The amount inside `averageLine`, so the view can set it in a heavier
+    /// face without concatenating a sentence.
+    var formattedMonthlyAverage: String? {
+        monthlyAverage.map(Formatters.currencyWhole)
     }
 
-    // MARK: - Period Delta
+    // MARK: - Chart
 
-    var periodDeltaAmount: Decimal? {
-        guard hasPriorPeriod, priorPeriodTotal > 0 else { return nil }
-        return totalSpent - priorPeriodTotal
-    }
-
-    var periodDeltaDirection: TrendDirection {
-        guard let delta = periodDeltaAmount else { return .flat }
-        if delta > 0 { return .up }
-        if delta < 0 { return .down }
-        return .flat
-    }
-
-    // MARK: - Preventive / Reactive / Discretionary Split
-
-    var preventiveShare: Double { categoryShares[.maintenance] ?? 0 }
-    var reactiveShare: Double { categoryShares[.repair] ?? 0 }
-    var discretionaryShare: Double { categoryShares[.upgrade] ?? 0 }
-
-    // MARK: - Cost-Per-Mile Trend
-
-    var costPerMileDelta: Double? {
-        guard let costPerMile, let priorCostPerMile else { return nil }
-        return costPerMile - priorCostPerMile
-    }
-
-    var costPerMileDeltaDirection: TrendDirection {
-        guard let delta = costPerMileDelta else { return .flat }
-        if delta > 0.005 { return .up }
-        if delta < -0.005 { return .down }
-        return .flat
-    }
-
-    // MARK: - Labels
-
-    var periodLabel: String {
-        switch period {
-        case .month: return "Last 30 days"
-        case .ytd: return "Year to date"
-        case .year: return "Last 12 months"
-        case .all: return "All time"
+    func chartTitle(_ mode: CostsTab.ChartMode) -> String {
+        switch mode {
+        case .trend: return L10n.costsChartTrendTitle(currencyCode)
+        case .category: return L10n.costsChartCategoryTitle(currencyCode)
         }
     }
 
-    var priorPeriodLabel: String {
-        switch period {
-        case .month: return L10n.costsHeadlinePriorMonth
-        case .ytd:
-            let priorYear = Calendar.current.component(.year, from: Date.now) - 1
-            return L10n.costsHeadlinePriorYTD(priorYear)
-        case .year: return L10n.costsHeadlinePriorYear
-        case .all: return ""
+    func chartIsReady(_ mode: CostsTab.ChartMode) -> Bool {
+        switch mode {
+        case .trend: return trendIsReady
+        case .category: return categoryIsReady
         }
     }
 
-    var shouldShowYearlyRoundup: Bool {
-        (period == .year || period == .all) && !events.isEmpty
+    /// What will make the chart appear, when it can't yet.
+    func chartNote(_ mode: CostsTab.ChartMode) -> String {
+        switch mode {
+        case .trend:
+            return period == .last30Days ? L10n.costsNoteTrend30Days : L10n.costsNoteTrend
+        case .category:
+            return L10n.costsNoteCategory
+        }
     }
 
-    // MARK: - Share Summary
+    /// The chart's point in words — always shown, so the picture is never the
+    /// only carrier of it. "Averages $210 a month; highest March, $1,317."
+    func chartSummary(_ mode: CostsTab.ChartMode) -> String {
+        switch mode {
+        case .trend:
+            guard let peak = trend.max(by: { $0.amount < $1.amount }), !trend.isEmpty else { return "" }
+            let sum = trend.reduce(Decimal(0)) { $0 + $1.amount }
+            return L10n.costsChartTrendSummary(
+                Formatters.currencyWhole(sum / Decimal(trend.count)),
+                trendMonthName(peak.month),
+                Formatters.currencyWhole(peak.amount)
+            )
+        case .category:
+            guard let top = bucketShares.first else { return "" }
+            return L10n.costsChartCategorySummary(top.bucket.displayName, Int((top.fraction * 100).rounded()))
+        }
+    }
 
-    func costShareSummary(vehicle: Vehicle?) -> String {
+    /// The scrub readout for one bar: "June 2026 — $320".
+    func trendSelectionLine(_ month: CostMonth) -> String {
+        L10n.costsChartSelection(
+            month.month.formatted(.dateTime.month(.wide).year()),
+            Formatters.currencyWhole(month.amount)
+        )
+    }
+
+    /// Month name as the summary sentence says it — with the year once the
+    /// chart spans more than one of them.
+    private func trendMonthName(_ month: Date) -> String {
+        trend.count > 12
+            ? month.formatted(.dateTime.month(.wide).year())
+            : month.formatted(.dateTime.month(.wide))
+    }
+
+    // MARK: - Comparison
+
+    var comparisonTitle: String {
+        L10n.costsCompareTitle(String(currentYear), String(currentYear - 1))
+    }
+
+    func comparisonHeadline(_ comparison: CostYearComparison) -> String {
+        let magnitude = abs(comparison.percentChange)
+        if comparison.percentChange > 0 { return L10n.costsCompareMore(magnitude) }
+        if comparison.percentChange < 0 { return L10n.costsCompareLess(magnitude) }
+        return L10n.costsCompareSame
+    }
+
+    func comparisonDetail(_ comparison: CostYearComparison) -> String {
+        L10n.costsCompareDetail(
+            Formatters.currencyWhole(comparison.thisYearTotal),
+            Formatters.currencyWhole(comparison.lastYearTotal),
+            String(comparison.year - 1)
+        )
+    }
+
+    // MARK: - Share
+
+    /// Plain-text summary for the hero's Share action.
+    func shareSummary(vehicle: Vehicle?) -> String {
         var lines: [String] = []
-
         if let vehicle {
             lines.append(vehicle.identityLine)
         }
-        lines.append("\(periodLabel.uppercased()) · \(formattedTotalSpent)")
-
-        if let delta = periodDeltaAmount {
-            let absAmount = Formatters.currencyWhole(abs(delta))
-            let line: String
-            switch periodDeltaDirection {
-            case .up: line = L10n.costsHeadlineDeltaUp(absAmount, priorPeriodLabel)
-            case .down: line = L10n.costsHeadlineDeltaDown(absAmount, priorPeriodLabel)
-            case .flat: line = L10n.costsHeadlineDeltaFlat(priorPeriodLabel)
-            }
-            lines.append(line)
+        lines.append(L10n.costsLabeledValue(period.fullName, formattedTotalSpent))
+        if let averageLine {
+            lines.append(averageLine)
         }
-
-        if totalSpent > 0 {
-            lines.append(L10n.costsHeadlineSplit(
-                Int(reactiveShare.rounded()),
-                Int(preventiveShare.rounded()),
-                Int(discretionaryShare.rounded())
-            ))
+        if let comparison {
+            lines.append(L10n.costsLabeledValue(comparisonTitle, comparisonHeadline(comparison)))
         }
-
-        if let projection = yearEndProjection {
-            lines.append(L10n.costsHeadlineProjection(Formatters.currencyWhole(projection)))
-        }
-
         return lines.joined(separator: "\n")
     }
 }
