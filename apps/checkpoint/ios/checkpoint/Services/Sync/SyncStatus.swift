@@ -55,13 +55,6 @@ enum SyncError: Equatable {
             }
         }
 
-        // Core Data+CloudKit reports a missing account in its own domain
-        // ("Unable to initialize without an iCloud account"), not as a
-        // CKError; left unclassified it read as an unknown failure.
-        if error.domain == NSCocoaErrorDomain && error.code == Self.coreDataNoAccountCode {
-            return .notSignedIn
-        }
-
         if error.domain == NSURLErrorDomain {
             switch URLError.Code(rawValue: error.code) {
             case .notConnectedToInternet, .networkConnectionLost, .timedOut,
@@ -72,8 +65,17 @@ enum SyncError: Equatable {
             }
         }
 
-        if let underlying = error.userInfo[NSUnderlyingErrorKey] as? NSError {
-            return classify(underlying, depth: depth + 1)
+        if let underlying = error.userInfo[NSUnderlyingErrorKey] as? NSError,
+           let classified = classify(underlying, depth: depth + 1) {
+            return classified
+        }
+
+        // Core Data+CloudKit reports a missing account in its own domain
+        // ("Unable to initialize without an iCloud account"), not as a
+        // CKError; left unclassified it read as an unknown failure. Checked
+        // after the underlying error, which is more specific when present.
+        if error.domain == NSCocoaErrorDomain && error.code == Self.coreDataNoAccountCode {
+            return .notSignedIn
         }
         return nil
     }
