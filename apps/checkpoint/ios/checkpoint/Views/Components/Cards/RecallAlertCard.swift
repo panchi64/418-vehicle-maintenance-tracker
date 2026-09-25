@@ -49,7 +49,7 @@ struct RecallAlertCard: View {
                     .accessibilityHidden(true)
 
                 if hasParkIt {
-                    Text("PARK IT")
+                    Text(L10n.recallCardParkIt)
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.statusOverdue)
                         .tracking(2)

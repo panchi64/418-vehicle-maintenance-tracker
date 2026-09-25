@@ -24,7 +24,7 @@ struct ServiceFormAnchors {
            let cost = mostRecent.cost {
             let amount = Formatters.currencyWhole(cost)
             let date = Formatters.shortDate.string(from: mostRecent.performedDate)
-            self.priorCostHint = "LAST TIME: \(amount) · \(date.uppercased())"
+            self.priorCostHint = L10n.validationPriorCost(amount, date.uppercased())
         } else {
             self.priorCostHint = nil
         }

@@ -92,11 +92,11 @@ struct VehiclePickerSheet: View {
                     .padding(.top, Spacing.md)
                 }
             }
-            .navigationTitle("Select Vehicle")
+            .navigationTitle(L10n.pickerSelectVehicle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
+                    Button(L10n.commonDone) {
                         dismiss()
                     }
                     .toolbarButtonStyle()

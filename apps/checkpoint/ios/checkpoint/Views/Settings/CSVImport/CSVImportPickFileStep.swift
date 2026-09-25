@@ -13,14 +13,14 @@ struct CSVImportPickFileStep: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.lg) {
-            InstrumentSectionHeader(title: "Import Service History")
+            InstrumentSectionHeader(title: L10n.importPickTitle)
 
             VStack(alignment: .leading, spacing: Spacing.md) {
-                Text("Import your maintenance records from Fuelly, Drivvo, Simply Auto, or any CSV file.")
+                Text(L10n.importPickBody)
                     .font(.brutalistSecondary)
                     .foregroundStyle(Theme.textSecondary)
 
-                Text("Supported formats: Fuelly, Drivvo, Simply Auto, Custom CSV")
+                Text(L10n.importPickFormats)
                     .font(.brutalistLabel)
                     .foregroundStyle(Theme.textTertiary)
                     .tracking(1)
@@ -32,7 +32,7 @@ struct CSVImportPickFileStep: View {
                 HStack {
                     Image(systemName: "doc.badge.plus")
                         .accessibilityHidden(true)
-                    Text("Select CSV File")
+                    Text(L10n.importPickButton)
                 }
             }
             .buttonStyle(.primary)

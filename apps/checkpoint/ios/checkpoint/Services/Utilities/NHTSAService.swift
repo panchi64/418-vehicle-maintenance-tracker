@@ -21,17 +21,17 @@ enum NHTSAError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidVIN:
-            return "Invalid VIN. Must be 17 alphanumeric characters (no I, O, or Q)."
+            return L10n.nhtsaInvalidVIN
         case .networkUnavailable:
-            return "No internet connection. Check your connection and try again."
+            return L10n.nhtsaOffline
         case .serverError:
-            return "NHTSA service unavailable. Try again later."
+            return L10n.nhtsaServerError
         case .decodingFailed:
-            return "Unexpected response. Try again later."
+            return L10n.nhtsaDecodingFailed
         case .noResultsFound:
-            return "Could not decode this VIN. You can enter details manually."
+            return L10n.nhtsaNoResults
         case .timeout:
-            return "Request timed out. Try again."
+            return L10n.nhtsaTimeout
         }
     }
 }

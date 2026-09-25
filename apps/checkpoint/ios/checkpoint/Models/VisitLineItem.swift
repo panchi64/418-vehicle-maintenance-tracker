@@ -44,17 +44,4 @@ enum VisitLineItemKind: String, Codable, CaseIterable {
     case tip
     case discount
     case other
-
-    var displayName: String {
-        switch self {
-        case .parts: return "Parts"
-        case .labor: return "Labor"
-        case .supplies: return "Supplies"
-        case .fees: return "Fees"
-        case .tax: return "Tax"
-        case .tip: return "Tip"
-        case .discount: return "Discount"
-        case .other: return "Other"
-        }
-    }
 }

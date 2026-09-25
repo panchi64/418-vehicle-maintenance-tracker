@@ -293,12 +293,12 @@ final class WidgetDataService {
                     overdueWord: String(localized: "Expired")
                 )
             } else {
-                dueDescription = vehicle.marbeteExpirationFormatted ?? "Set"
+                dueDescription = vehicle.marbeteExpirationFormatted ?? L10n.descMarbeteSet
             }
 
             let row: WidgetServiceRow = (
                 serviceID: nil,
-                name: "Marbete Renewal",
+                name: L10n.descMarbeteRenewal,
                 status: statusString(for: marbeteStatus),
                 dueDescription: dueDescription,
                 dueMileage: nil,  // Marbete has no mileage component
@@ -410,7 +410,7 @@ final class WidgetDataService {
                     performedDate: completion.performedDate,
                     mileageAtService: completion.mileageAtService,
                     cost: 0,
-                    notes: "Completed via widget"
+                    notes: L10n.descCompletedViaWidget
                 )
                 log.service = service
                 log.vehicle = vehicle
@@ -481,10 +481,10 @@ final class WidgetDataService {
     /// so widget, watch, and Siri read consistently with the Next Up card.
     private func serviceDueDescription(for service: Service, effectiveDue: Date?) -> String {
         if service.dueMileage != nil {
-            return service.primaryDescription ?? "Scheduled"
+            return service.primaryDescription ?? L10n.descScheduled
         }
         guard let due = effectiveDue else {
-            return service.primaryDescription ?? "Scheduled"
+            return service.primaryDescription ?? L10n.descScheduled
         }
         return Self.periodPhrase(
             DuePeriodFormatter.describe(due),

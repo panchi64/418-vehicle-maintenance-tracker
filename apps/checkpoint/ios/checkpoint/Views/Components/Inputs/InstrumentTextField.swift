@@ -282,7 +282,7 @@ struct KeyboardDismissToolbar: ViewModifier {
             .toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Button("DONE") {
+                    Button(L10n.commonDone.uppercased()) {
                         UIApplication.shared.sendAction(
                             #selector(UIResponder.resignFirstResponder),
                             to: nil, from: nil, for: nil

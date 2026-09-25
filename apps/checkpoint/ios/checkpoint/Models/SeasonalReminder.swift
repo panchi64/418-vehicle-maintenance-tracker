@@ -22,8 +22,8 @@ struct SeasonalReminder: Identifiable {
     static let allReminders: [SeasonalReminder] = [
         SeasonalReminder(
             id: "antifreeze",
-            name: "Antifreeze Check",
-            description: "Check antifreeze levels before winter sets in.",
+            name: L10n.seasonalAntifreezeName,
+            description: L10n.seasonalAntifreezeDetail,
             icon: "thermometer.snowflake",
             targetMonth: 10,
             displayWindow: 30,
@@ -32,8 +32,8 @@ struct SeasonalReminder: Identifiable {
         ),
         SeasonalReminder(
             id: "winterTires",
-            name: "Winter Tire Swap",
-            description: "Time to switch to winter tires?",
+            name: L10n.seasonalWinterTiresName,
+            description: L10n.seasonalWinterTiresDetail,
             icon: "tire",
             targetMonth: 10,
             displayWindow: 30,
@@ -42,8 +42,8 @@ struct SeasonalReminder: Identifiable {
         ),
         SeasonalReminder(
             id: "summerTires",
-            name: "Summer Tire Swap",
-            description: "Roads are clearing up — time for summer tires.",
+            name: L10n.seasonalSummerTiresName,
+            description: L10n.seasonalSummerTiresDetail,
             icon: "tire",
             targetMonth: 3,
             displayWindow: 30,
@@ -52,8 +52,8 @@ struct SeasonalReminder: Identifiable {
         ),
         SeasonalReminder(
             id: "saltDamage",
-            name: "Undercarriage Inspection",
-            description: "Check for salt damage and rust underneath.",
+            name: L10n.seasonalSaltDamageName,
+            description: L10n.seasonalSaltDamageDetail,
             icon: "car.side",
             targetMonth: 3,
             displayWindow: 14,
@@ -62,8 +62,8 @@ struct SeasonalReminder: Identifiable {
         ),
         SeasonalReminder(
             id: "acSystem",
-            name: "AC System Check",
-            description: "Make sure your AC is ready for the heat.",
+            name: L10n.seasonalACCheckName,
+            description: L10n.seasonalACCheckDetail,
             icon: "snowflake",
             targetMonth: 4,
             displayWindow: 30,
@@ -72,8 +72,8 @@ struct SeasonalReminder: Identifiable {
         ),
         SeasonalReminder(
             id: "wiperBlades",
-            name: "Wiper Blade Check",
-            description: "Rain season approaching — check your wipers.",
+            name: L10n.seasonalWipersName,
+            description: L10n.seasonalWipersDetail,
             icon: "wiper.washer.fluid.and.wiper",
             targetMonth: 9,
             displayWindow: 14,
@@ -82,8 +82,8 @@ struct SeasonalReminder: Identifiable {
         ),
         SeasonalReminder(
             id: "batteryHeat",
-            name: "Battery Check",
-            description: "Extreme heat drains batteries — check yours.",
+            name: L10n.seasonalBatteryName,
+            description: L10n.seasonalBatteryDetail,
             icon: "minus.plus.batteryblock",
             targetMonth: 5,
             displayWindow: 30,
@@ -92,8 +92,8 @@ struct SeasonalReminder: Identifiable {
         ),
         SeasonalReminder(
             id: "coolantSummer",
-            name: "Coolant Level Check",
-            description: "Top off coolant before peak summer temperatures.",
+            name: L10n.seasonalCoolantName,
+            description: L10n.seasonalCoolantDetail,
             icon: "drop.fill",
             targetMonth: 5,
             displayWindow: 14,

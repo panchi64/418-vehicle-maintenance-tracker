@@ -44,11 +44,11 @@ struct VehicleMultiPicker: View {
                     .padding(.vertical, Spacing.lg)
                 }
             }
-            .navigationTitle("Link Vehicles")
+            .navigationTitle(L10n.pickerLinkVehicles)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button(L10n.commonDone) { dismiss() }
                         .toolbarButtonStyle()
                 }
             }

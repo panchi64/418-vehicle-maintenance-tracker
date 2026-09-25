@@ -23,7 +23,7 @@ struct ExportOptionsSheet: View {
             VStack(spacing: Spacing.lg) {
                 // Header info
                 VStack(alignment: .leading, spacing: Spacing.sm) {
-                    Text("EXPORT SERVICE HISTORY")
+                    Text(L10n.exportTitle)
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
                         .tracking(2)
@@ -32,7 +32,7 @@ struct ExportOptionsSheet: View {
                         .font(.brutalistHeading)
                         .foregroundStyle(Theme.textPrimary)
 
-                    Text("\(serviceLogs.count) service\(serviceLogs.count == 1 ? "" : "s") recorded")
+                    Text(L10n.exportServiceCount(serviceLogs.count))
                         .font(.brutalistSecondary)
                         .foregroundStyle(Theme.textSecondary)
                 }
@@ -45,11 +45,11 @@ struct ExportOptionsSheet: View {
                 VStack(spacing: 0) {
                     Toggle(isOn: $includeTotal) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Include Total")
+                            Text(L10n.exportIncludeTotal)
                                 .font(.brutalistBody)
                                 .foregroundStyle(Theme.textPrimary)
 
-                            Text("Show total amount spent")
+                            Text(L10n.exportIncludeTotalDetail)
                                 .font(.brutalistSecondary)
                                 .foregroundStyle(Theme.textSecondary)
                         }
@@ -78,7 +78,7 @@ struct ExportOptionsSheet: View {
                         ProgressView()
                             .tint(Theme.surfaceInstrument)
                     } else {
-                        Text("Generate PDF")
+                        Text(L10n.exportGenerate)
                     }
                 }
                 .buttonStyle(.primary)
@@ -91,7 +91,7 @@ struct ExportOptionsSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button(L10n.commonCancel) {
                         dismiss()
                     }
                     .toolbarButtonStyle()
@@ -122,7 +122,7 @@ struct ExportOptionsSheet: View {
                 dismiss()
                 onExport(url)
             } else {
-                exportError = "Failed to generate PDF. Please try again."
+                exportError = L10n.exportFailed
             }
         }
     }

@@ -169,14 +169,14 @@ extension Vehicle {
     /// Formatted string for last mileage update
     var mileageUpdateDescription: String {
         guard let days = daysSinceMileageUpdate else {
-            return "Never updated"
+            return L10n.descMileageNeverUpdated
         }
         if days == 0 {
-            return "Updated today"
+            return L10n.descMileageUpdatedToday
         } else if days == 1 {
-            return "Updated yesterday"
+            return L10n.descMileageUpdatedYesterday
         } else {
-            return "Updated \(days) days ago"
+            return L10n.descMileageUpdatedDaysAgo(days)
         }
     }
 

@@ -22,7 +22,7 @@ struct ProPaywallSheet: View {
                     VStack(spacing: Spacing.lg) {
                         // Header
                         VStack(spacing: Spacing.sm) {
-                            Text("CHECKPOINT PRO")
+                            Text(L10n.storeProTitle)
                                 .font(.brutalistTitle)
                                 .foregroundStyle(Theme.accent)
 
@@ -40,12 +40,12 @@ struct ProPaywallSheet: View {
 
                         // Feature list
                         VStack(alignment: .leading, spacing: Spacing.md) {
-                            InstrumentSectionHeader(title: "What You Get")
+                            InstrumentSectionHeader(title: L10n.storeProWhatYouGet)
 
-                            featureRow(icon: "car.2.fill", text: "Unlimited vehicles")
-                            featureRow(icon: "paintpalette.fill", text: "Full theme collection")
-                            featureRow(icon: "cpu", text: "Future AI features")
-                            featureRow(icon: "chart.bar.fill", text: "Future advanced insights")
+                            featureRow(icon: "car.2.fill", text: L10n.storeProFeatureVehicles)
+                            featureRow(icon: "paintpalette.fill", text: L10n.storeProFeatureThemes)
+                            featureRow(icon: "cpu", text: L10n.storeProFeatureAI)
+                            featureRow(icon: "chart.bar.fill", text: L10n.storeProFeatureInsights)
                         }
                         .padding(.horizontal, Spacing.screenHorizontal)
 
@@ -75,7 +75,7 @@ struct ProPaywallSheet: View {
                                     ProgressView()
                                         .tint(Theme.surfaceInstrument)
                                 } else {
-                                    Text("UNLOCK PRO")
+                                    Text(L10n.storeProUnlock)
                                 }
                             }
                             .buttonStyle(.primary)
@@ -104,7 +104,7 @@ struct ProPaywallSheet: View {
                     }
                 }
             }
-            .navigationTitle("Upgrade")
+            .navigationTitle(L10n.storeProNavTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -123,12 +123,12 @@ struct ProPaywallSheet: View {
     // StoreKit does not expose a pre-discount price for introductory offers
     @ViewBuilder
     private func priceLine(_ product: Product) -> some View {
-        Text("$14.99")
+        Text(verbatim: "$14.99")
             .font(.brutalistBody)
             .foregroundStyle(Theme.textTertiary)
             .strikethrough()
 
-        Text("\(product.displayPrice) LAUNCH PRICE")
+        Text(L10n.storeProLaunchPrice(product.displayPrice))
             .font(.brutalistHeading)
             .foregroundStyle(Theme.textPrimary)
     }

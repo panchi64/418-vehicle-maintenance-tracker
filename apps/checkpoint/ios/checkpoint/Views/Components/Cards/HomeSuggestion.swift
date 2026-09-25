@@ -85,7 +85,9 @@ struct HomeSuggestionView: View {
 
     private func bracketLink(_ label: String, color: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text("[\(label.uppercased())]")
+            // Brackets are typographic framing around an already-localized
+            // label, not words, so they stay out of the catalog.
+            Text(verbatim: "[\(label.uppercased())]")
                 .font(.brutalistLabel)
                 .tracking(1)
                 .foregroundStyle(color)

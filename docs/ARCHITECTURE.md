@@ -450,7 +450,6 @@ struct WidgetColors {
 ### Components/Feedback/
 | Component | Purpose |
 |-----------|---------|
-| `FeatureHintView.swift` | Feature discovery hints |
 | `FormAdvisory.swift` | **The** advisory component for data-entry surfaces (F12). Four-rung severity ladder — `.blocking` / `.contradiction` / `.caution` / `.info` — differentiated on type, enclosure, and color |
 | `ToastView.swift` | In-app toast notification |
 | `ToastWindow.swift` | Hosts the toast in a passthrough `UIWindow` above the app's, so toasts show over sheets |

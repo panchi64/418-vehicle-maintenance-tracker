@@ -90,7 +90,7 @@ These are enforced invariants, not style suggestions. Each is defined in `SURFAC
 
 All user-facing strings go through `L10n` (EN + ES). **No display strings built by concatenation** — use format keys so grammar survives translation, and so enum `rawValue` never leaks to screen (expose `displayName` instead).
 
-This is not yet true everywhere; a sweep is in progress. Don't add to the backlog.
+Accessors live in per-area `L10n+<Area>.swift` files beside the code that uses them; code that runs off the main actor (CSV parsing, PDF rendering, OCR, Siri, NHTSA) uses `nonisolated` accessors. `Text(verbatim:)` is for numbers and typographic framing only. Previews may use literals. Still English-only data: service preset names (`ServicePresets.json`), theme names/descriptions (`Themes.json`), and App Shortcut phrases.
 
 ## Previews
 

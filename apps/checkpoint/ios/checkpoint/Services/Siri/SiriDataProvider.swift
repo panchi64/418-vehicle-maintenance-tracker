@@ -37,13 +37,13 @@ nonisolated enum SiriServiceStatus: String {
     var dialogPrefix: String {
         switch self {
         case .overdue:
-            return "Overdue"
+            return L10n.siriStatusOverdue
         case .dueSoon:
-            return "Due soon"
+            return L10n.siriStatusDueSoon
         case .good:
-            return "Coming up"
+            return L10n.siriStatusComingUp
         case .neutral:
-            return "Scheduled"
+            return L10n.siriStatusScheduled
         }
     }
 }

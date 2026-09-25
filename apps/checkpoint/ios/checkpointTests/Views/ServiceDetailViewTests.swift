@@ -410,61 +410,53 @@ final class ServiceDetailViewTests: XCTestCase {
         XCTAssertNil(description)
     }
 
-    // MARK: - Mileage Description Tests
+    // MARK: - Primary Description Tests
 
-    func testMileageDescription_MilesRemaining() {
+    func testPrimaryDescription_MilesRemaining() {
         // Given: A vehicle and service with miles remaining
         let vehicle = Vehicle(name: "Test Car", make: "Toyota", model: "Camry", year: 2022, currentMileage: 30000)
         let service = Service(name: "Oil Change", dueMileage: 35000)
         service.vehicle = vehicle
 
-        // When: Getting mileage description
-        let description = service.mileageDescription
+        // When: Getting the primary description
+        let description = service.primaryDescription
 
-        // Then: Should show remaining miles (format: "or X miles" or "or X kilometers")
-        XCTAssertNotNil(description)
-        XCTAssertTrue(description!.hasPrefix("or "), "Description should start with 'or'")
-        XCTAssertTrue(description!.contains("5000") || description!.contains("5,000"), "Description should contain remaining distance")
+        // Then: Should read from the localized "remaining" format
+        let unit = DistanceSettings.shared.unit
+        XCTAssertEqual(description, L10n.descDistanceRemaining("\(unit.fromMiles(5000))", unit.fullName))
     }
 
-    func testMileageDescription_MilesOverdue() {
+    func testPrimaryDescription_MilesOverdue() {
         // Given: A vehicle that has exceeded service mileage
         let vehicle = Vehicle(name: "Test Car", make: "Toyota", model: "Camry", year: 2022, currentMileage: 36000)
         let service = Service(name: "Oil Change", dueMileage: 35000)
         service.vehicle = vehicle
 
-        // When: Getting mileage description
-        let description = service.mileageDescription
+        // When: Getting the primary description
+        let description = service.primaryDescription
 
-        // Then: Should show overdue miles (format: "X miles overdue" or "X kilometers overdue")
-        XCTAssertNotNil(description)
-        XCTAssertTrue(description!.contains("1000") || description!.contains("1,000"), "Description should contain overdue distance")
-        XCTAssertTrue(description!.contains("overdue"), "Description should contain 'overdue'")
+        // Then: Should read from the localized "overdue" format
+        let unit = DistanceSettings.shared.unit
+        XCTAssertEqual(description, L10n.descDistanceOverdue("\(unit.fromMiles(1000))", unit.fullName))
     }
 
-    func testMileageDescription_NilWhenNoDueMileage() {
-        // Given: A service with no due mileage
+    func testPrimaryDescription_NilWhenNoDueTracking() {
+        // Given: A service with neither due mileage nor due date
         let vehicle = Vehicle(name: "Test Car", make: "Toyota", model: "Camry", year: 2022, currentMileage: 30000)
         let service = Service(name: "Inspection", dueMileage: nil)
         service.vehicle = vehicle
 
-        // When: Getting mileage description
-        let description = service.mileageDescription
-
-        // Then: Should be nil
-        XCTAssertNil(description)
+        // Then: Nothing to describe
+        XCTAssertNil(service.primaryDescription)
     }
 
-    func testMileageDescription_NilWhenNoVehicle() {
-        // Given: A service with no vehicle
+    func testPrimaryDescription_NilWhenNoVehicle() {
+        // Given: A mileage-tracked service with no vehicle (and no due date)
         let service = Service(name: "Oil Change", dueMileage: 35000)
         service.vehicle = nil
 
-        // When: Getting mileage description
-        let description = service.mileageDescription
-
-        // Then: Should be nil
-        XCTAssertNil(description)
+        // Then: Mileage can't be judged, and there's no date to fall back to
+        XCTAssertNil(service.primaryDescription)
     }
 
     // MARK: - Form Validation Tests

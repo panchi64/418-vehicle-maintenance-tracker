@@ -68,7 +68,7 @@ extension Vehicle {
               let year = marbeteExpirationYear else { return nil }
 
         let monthName = Calendar.current.monthSymbols[month - 1]
-        return "\(monthName) \(year)"
+        return L10n.marbeteMonthYear(monthName, year)
     }
 
     /// Urgency score for marbete (for sorting with services)

@@ -39,7 +39,7 @@ struct AttachmentPicker: View {
                 // Opens the photo LIBRARY, so a library glyph — a camera icon
                 // promised a viewfinder this button never opens.
                 PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-                    AttachmentSourceLabel(icon: "photo.on.rectangle", title: "PHOTO")
+                    AttachmentSourceLabel(icon: "photo.on.rectangle", title: L10n.attachSourcePhoto)
                 }
                 .onChange(of: selectedPhotoItem) { _, newItem in
                     Task {
@@ -50,7 +50,7 @@ struct AttachmentPicker: View {
                 Button {
                     showDocumentPicker = true
                 } label: {
-                    AttachmentSourceLabel(icon: "doc.fill", title: "PDF")
+                    AttachmentSourceLabel(icon: "doc.fill", title: L10n.attachSourcePDF)
                 }
                 .buttonStyle(.plain)
                 .sheet(isPresented: $showDocumentPicker) {
@@ -62,7 +62,7 @@ struct AttachmentPicker: View {
                 Button {
                     showReceiptScanner = true
                 } label: {
-                    AttachmentSourceLabel(icon: "receipt", title: "RECEIPT", isBusy: isProcessingOCR)
+                    AttachmentSourceLabel(icon: "receipt", title: L10n.attachSourceReceipt, isBusy: isProcessingOCR)
                 }
                 .buttonStyle(.plain)
                 .disabled(isProcessingOCR)
@@ -76,7 +76,7 @@ struct AttachmentPicker: View {
                         onCancel: {},
                         onError: { error in
                             attachmentLogger.error("Receipt scan failed: \(error.localizedDescription)")
-                            ToastService.shared.show("Scan failed. Please try again.", icon: "xmark.circle", style: .error)
+                            ToastService.shared.show(L10n.attachScanFailed, icon: "xmark.circle", style: .error)
                         }
                     )
                 }
@@ -84,7 +84,7 @@ struct AttachmentPicker: View {
                 AdaptiveSpacer()
 
                 if !attachments.isEmpty {
-                    Text("\(attachments.count)")
+                    Text(verbatim: "\(attachments.count)")
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.accent)
                         .padding(.horizontal, 8)

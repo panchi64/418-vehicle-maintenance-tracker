@@ -55,15 +55,15 @@ struct RichNotesEditor: View {
 
     private var toolbar: some View {
         HStack(spacing: Spacing.sm) {
-            FormatButton(label: "BOLD", accessibility: L10n.a11yFormatBold) {
+            FormatButton(label: L10n.notesFormatBold, accessibility: L10n.a11yFormatBold) {
                 apply(MarkdownNotesEditing.applyBold)
             }
 
-            FormatButton(label: "BULLETS", accessibility: L10n.a11yFormatBulletedList) {
+            FormatButton(label: L10n.notesFormatBullets, accessibility: L10n.a11yFormatBulletedList) {
                 apply(MarkdownNotesEditing.applyBulletList)
             }
 
-            FormatButton(label: "NUMBERED", accessibility: L10n.a11yFormatNumberedList) {
+            FormatButton(label: L10n.notesFormatNumbered, accessibility: L10n.a11yFormatNumberedList) {
                 apply(MarkdownNotesEditing.applyNumberedList)
             }
 
@@ -175,7 +175,7 @@ private struct MarkdownTextView: UIViewRepresentable {
                 UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil),
                 // .plain, not .done — `.done` is deprecated as of iOS 26, and
                 // the emphasis it used to add is carried by the accent tint.
-                UIBarButtonItem(title: "DONE", style: .plain, target: self, action: #selector(dismissKeyboard))
+                UIBarButtonItem(title: L10n.commonDone.uppercased(), style: .plain, target: self, action: #selector(dismissKeyboard))
             ]
             return bar
         }

@@ -38,29 +38,16 @@ extension Service {
         if let dueDate = dueDate {
             let days = Calendar.current.dateComponents([.day], from: .now, to: dueDate).day ?? 0
             if days < 0 {
-                return "\(abs(days)) days overdue"
+                return L10n.descDaysOverdue(abs(days))
             } else if days == 0 {
-                return "Due today"
+                return L10n.descDueToday
             } else if days == 1 {
-                return "Due tomorrow"
+                return L10n.descDueTomorrow
             } else {
-                return "Due in \(days) days"
+                return L10n.descDueInDays(days)
             }
         }
         return nil
-    }
-
-    @MainActor
-    var mileageDescription: String? {
-        guard let dueMileage = dueMileage, let vehicle = vehicle else { return nil }
-        let milesRemaining = dueMileage - vehicle.currentMileage
-        let unit = DistanceSettings.shared.unit
-        let displayRemaining = unit.fromMiles(abs(milesRemaining))
-        if milesRemaining < 0 {
-            return "\(displayRemaining) \(unit.fullName) overdue"
-        } else {
-            return "or \(displayRemaining) \(unit.fullName)"
-        }
     }
 
     /// Primary description prioritizing miles over days
@@ -72,11 +59,11 @@ extension Service {
             let unit = DistanceSettings.shared.unit
             let displayRemaining = unit.fromMiles(abs(milesRemaining))
             if milesRemaining < 0 {
-                return "\(displayRemaining) \(unit.fullName) overdue"
+                return L10n.descDistanceOverdue("\(displayRemaining)", unit.fullName)
             } else if milesRemaining == 0 {
-                return "Due now"
+                return L10n.descDueNow
             } else {
-                return "\(displayRemaining) \(unit.fullName) remaining"
+                return L10n.descDistanceRemaining("\(displayRemaining)", unit.fullName)
             }
         }
         return dueDescription  // Fallback to date-based for services without mileage tracking

@@ -23,7 +23,7 @@ struct ThemeRevealView: View {
 
                     // Theme unlock header
                     VStack(spacing: Spacing.md) {
-                        Text("THEME UNLOCKED")
+                        Text(L10n.storeRevealTitle)
                             .font(.brutalistLabel)
                             .foregroundStyle(Theme.accent)
                             .tracking(2)
@@ -63,14 +63,14 @@ struct ThemeRevealView: View {
                             AnalyticsService.shared.capture(.themeActivated(themeID: theme.id))
                             dismiss()
                         } label: {
-                            Text("APPLY NOW")
+                            Text(L10n.storeRevealApply)
                         }
                         .buttonStyle(.primary)
 
                         Button {
                             dismiss()
                         } label: {
-                            Text("Later")
+                            Text(L10n.storeRevealLater)
                                 .font(.brutalistSecondary)
                                 .foregroundStyle(Theme.textTertiary)
                                 .minimumTouchTarget()
