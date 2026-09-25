@@ -132,23 +132,15 @@ final class AppIconSettingsTests: XCTestCase {
 
     // MARK: - Default Registration Tests
 
-    func testRegisterDefaultsSetsTrue() {
-        // Clear any existing value
-        UserDefaults.standard.removeObject(forKey: autoChangeKey)
-
-        AppIconSettings.registerDefaults()
-
-        // Registered defaults should return true
-        let value = UserDefaults.standard.bool(forKey: autoChangeKey)
-        XCTAssertTrue(value, "Registered default should be true")
-    }
-
-    func testRegisterDefaultsSetsAppGroupTrue() {
+    func testRegisterDefaultsSetsAppGroupFalseForNewInstall() {
+        let hadOnboarded = OnboardingState.hasCompletedOnboarding
+        defer { OnboardingState.hasCompletedOnboarding = hadOnboarded }
+        OnboardingState.hasCompletedOnboarding = false
         UserDefaults(suiteName: appGroupID)?.removeObject(forKey: autoChangeKey)
 
         AppIconSettings.registerDefaults()
 
         let value = UserDefaults(suiteName: appGroupID)?.bool(forKey: autoChangeKey)
-        XCTAssertEqual(value, true, "App Group registered default should be true")
+        XCTAssertEqual(value, false, "App Group should mirror the new-install default")
     }
 }
