@@ -110,7 +110,7 @@ final class WatchConnectivityService: NSObject {
             // Phone not reachable — queue for later delivery
             session.transferUserInfo(message)
             watchLogger.info("Phone not reachable, queued \(key) via transferUserInfo")
-            lastSyncError = "WILL SYNC WHEN PHONE IS NEARBY"
+            lastSyncError = String(localized: "WILL SYNC WHEN PHONE IS NEARBY")
         }
     }
 
@@ -134,7 +134,7 @@ final class WatchConnectivityService: NSObject {
             lastSyncError = nil
         } catch {
             watchLogger.error("Failed to decode application context: \(error.localizedDescription)")
-            lastSyncError = "SYNC ERROR"
+            lastSyncError = String(localized: "SYNC ERROR")
         }
     }
 }
@@ -146,7 +146,7 @@ extension WatchConnectivityService: WCSessionDelegate {
         Task { @MainActor in
             if let error {
                 watchLogger.error("Watch WCSession activation failed: \(error.localizedDescription)")
-                lastSyncError = "CONNECTION ERROR"
+                lastSyncError = String(localized: "CONNECTION ERROR")
             } else {
                 watchLogger.info("Watch WCSession activated: \(activationState.rawValue)")
                 isPhoneReachable = session.isReachable

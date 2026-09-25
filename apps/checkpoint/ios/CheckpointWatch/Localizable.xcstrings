@@ -1,0 +1,28 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%lld MORE" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "%lld MÁS" } } } },
+    "Add %lld" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Sumar %lld" } } } },
+    "AS OF %@" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "ACTUALIZADO %@" } } } },
+    "Complete" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Completar" } } } },
+    "CONNECTION ERROR" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "ERROR DE CONEXIÓN" } } } },
+    "DATE" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "FECHA" } } } },
+    "DONE" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "LISTO" } } } },
+    "DUE SOON" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "PRÓXIMO" } } } },
+    "EST" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "EST." } } } },
+    "MARK DONE" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "MARCAR HECHO" } } } },
+    "Mileage" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Millaje" } } } },
+    "MILEAGE AT SERVICE" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "MILLAJE DEL SERVICIO" } } } },
+    "MILEAGE SAVED" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "MILLAJE GUARDADO" } } } },
+    "NO SERVICES DUE" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "NINGÚN SERVICIO PENDIENTE" } } } },
+    "ON TRACK" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "AL DÍA" } } } },
+    "OPEN CHECKPOINT\nON IPHONE" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "ABRE CHECKPOINT\nEN EL IPHONE" } } } },
+    "OVERDUE" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "VENCIDO" } } } },
+    "SAVE" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "GUARDAR" } } } },
+    "SERVICE LOGGED" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "SERVICIO REGISTRADO" } } } },
+    "Subtract %lld" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Restar %lld" } } } },
+    "SYNC ERROR" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "ERROR DE SINCRONIZACIÓN" } } } },
+    "WILL SYNC WHEN PHONE IS NEARBY" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "SE SINCRONIZARÁ CUANDO EL IPHONE ESTÉ CERCA" } } } }
+  },
+  "version" : "1.0"
+}

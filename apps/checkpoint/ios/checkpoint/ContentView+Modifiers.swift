@@ -293,6 +293,11 @@ extension ContentView {
                 NotificationService.shared.pendingRoute = nil
                 appState.apply(route, vehicles: vehicles)
             }
+            // A widget row tap runs `OpenServiceIntent` in this process, which
+            // can land after activation already ran `enterForeground()`.
+            .onReceive(NotificationCenter.default.publisher(for: PendingWidgetRoute.queuedNotification)) { _ in
+                consumePendingWidgetRoute()
+            }
             // Clear AppState's retained SwiftData references before the App swaps
             // the ModelContainer on this notification (onboarding → CloudKit).
             // Without this, selectedVehicle et al. would point into the outgoing

@@ -9,18 +9,14 @@
 import SwiftUI
 
 enum WidgetColors {
-    // MARK: - Backgrounds (Cerulean blue to match app)
+    // MARK: - Background (Cerulean blue to match app)
     static let backgroundPrimary = Color(red: 0.0, green: 0.2, blue: 0.745)
-    static let backgroundElevated = Color(red: 0.08, green: 0.28, blue: 0.82)
     static let gridLine = Color.white.opacity(0.15)
 
     // MARK: - Text
     static let textPrimary = Color.white
     static let textSecondary = Color(white: 0.85)
-    static let textTertiary = Color(white: 0.6)
-
-    // MARK: - Accent
-    static let accent = Color(red: 0.91, green: 0.608, blue: 0.235) // #E89B3C
+    static let textTertiary = Color(white: 0.72)
 
     // MARK: - Status
     static let statusOverdue = Color(red: 0.92, green: 0.34, blue: 0.34)
@@ -32,48 +28,45 @@ enum WidgetColors {
     static let borderWidth: CGFloat = 2
 }
 
-// MARK: - Widget Brutalist Typography
+// MARK: - Widget Typography
+//
+// Every face is a text style so the widget follows Dynamic Type. Only the hero
+// numeral uses a point size, and that one scales relative to `.largeTitle`
+// (see `WidgetNumeral`).
 
 extension Font {
-    /// 13pt Mono Regular - Widget body text
+    /// Footnote mono — body text, list rows
     static var widgetBody: Font {
-        .system(size: 13, weight: .regular, design: .monospaced)
+        .system(.footnote, design: .monospaced)
     }
 
-    /// 11pt Mono Medium - Widget labels
+    /// Caption 2 mono medium — uppercase labels, units, status words
     static var widgetLabel: Font {
-        .system(size: 11, weight: .medium, design: .monospaced)
+        .system(.caption2, design: .monospaced).weight(.medium)
     }
 
-    /// 15pt Mono Medium - Widget headlines
+    /// Subheadline mono semibold — headlines (service / vehicle name)
     static var widgetHeadline: Font {
-        .system(size: 15, weight: .medium, design: .monospaced)
+        .system(.subheadline, design: .monospaced).weight(.semibold)
+    }
+}
+
+/// The hero figure of a widget: bold mono at `size`, scaled with Dynamic Type
+/// relative to `.largeTitle`, shrinking to fit rather than truncating.
+struct WidgetNumeral: View {
+    let text: String
+    @ScaledMetric private var size: CGFloat
+
+    init(_ text: String, size: CGFloat) {
+        self.text = text
+        self._size = ScaledMetric(wrappedValue: size, relativeTo: .largeTitle)
     }
 
-    /// 9pt Mono Regular - Widget caption
-    static var widgetCaption: Font {
-        .system(size: 9, weight: .regular, design: .monospaced)
-    }
-
-    /// 36pt Mono Bold - Large widget display number (small widget)
-    /// Optimized for small widget where space is limited but still glanceable
-    static var widgetDisplayLarge: Font {
-        .system(size: 36, weight: .bold, design: .monospaced)
-    }
-
-    /// 40pt Mono Bold - Extra large widget display number
-    static var widgetDisplayXLarge: Font {
-        .system(size: 40, weight: .bold, design: .monospaced)
-    }
-
-    /// 48pt Mono Bold - Hero display number (medium widget)
-    /// Larger since medium widget has more space
-    static var widgetDisplayHero: Font {
-        .system(size: 48, weight: .bold, design: .monospaced)
-    }
-
-    /// 10pt Mono Medium - Unit labels ("MI", "DAYS")
-    static var widgetUnit: Font {
-        .system(size: 10, weight: .medium, design: .monospaced)
+    var body: some View {
+        Text(text)
+            .font(.system(size: size, weight: .bold, design: .monospaced))
+            .monospacedDigit()
+            .minimumScaleFactor(0.5)
+            .lineLimit(1)
     }
 }

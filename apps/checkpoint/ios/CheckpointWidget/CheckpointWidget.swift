@@ -44,6 +44,9 @@ struct CheckpointWidget: Widget {
             intent: CheckpointWidgetConfigurationIntent.self,
             provider: WidgetProvider()
         ) { entry in
+            // The cerulean is removable: StandBy and the tinted/clear Home
+            // Screen styles swap it for their own backdrop, and every view
+            // stays legible on either because status never rides on hue.
             CheckpointWidgetEntryView(entry: entry)
                 .containerBackground(for: .widget) {
                     WidgetColors.backgroundPrimary
@@ -58,7 +61,8 @@ struct CheckpointWidget: Widget {
             .accessoryCircular,
             .accessoryRectangular
         ])
-        .contentMarginsDisabled()
+        // System content margins (HIG): no `contentMarginsDisabled()`, no
+        // hand-rolled padding in the family views.
     }
 }
 

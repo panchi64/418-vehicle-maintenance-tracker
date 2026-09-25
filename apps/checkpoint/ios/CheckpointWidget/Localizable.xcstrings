@@ -1,237 +1,108 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "—" : {
-
-    },
-    "— —" : {
-
-    },
-    "— NO SERVICES DUE —" : {
-
-    },
-    "%@" : {
-
-    },
-    "%@ • %@" : {
+    "%@" : { "shouldTranslate" : false },
+    "%@ %@ OVER" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ • %2$@"
-          }
-        }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ %2$@ OVER" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ %2$@ DE RETRASO" } }
       }
     },
-    "ALL CAUGHT UP" : {
-
-    },
-    "Always show kilometers (KM)" : {
-
-    },
-    "Always show miles (MI)" : {
-
-    },
-    "Checkpoint" : {
-
-    },
-    "Checkpoint Widget" : {
-
-    },
-    "Configure which vehicle to display, how mileage is shown, and distance units" : {
-
-    },
-    "Distance Unit" : {
-
-    },
-    "DONE" : {
-
-    },
+    "ALL CAUGHT UP" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "TODO AL DÍA" } } } },
+    "Always show kilometers (KM)" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Mostrar siempre kilómetros (KM)" } } } },
+    "Always show miles (MI)" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Mostrar siempre millas (MI)" } } } },
+    "AS OF %@" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "ACTUALIZADO %@" } } } },
+    "Brake Inspection" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Inspección de frenos" } } } },
+    "Checkpoint" : { "shouldTranslate" : false },
+    "Checkpoint Widget" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Widget de Checkpoint" } } } },
+    "Configure which vehicle to display, how mileage is shown, and distance units" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Elige qué vehículo mostrar, cómo se muestra el millaje y la unidad de distancia" } } } },
+    "DAYS" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "DÍAS" } } } },
+    "Distance Unit" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Unidad de distancia" } } } },
+    "DONE" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "HECHO" } } } },
+    "DUE" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "VENCE" } } } },
     "Due %@" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Due %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vence %@"
-          }
-        }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Due %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Vence %@" } }
       }
     },
-    "Due Mileage" : {
-
-    },
+    "DUE AT" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "VENCE A" } } } },
+    "DUE IN" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "VENCE EN" } } } },
+    "Due Mileage" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Millaje de vencimiento" } } } },
+    "DUE SOON" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "PRÓXIMO" } } } },
     "Early %@" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Early %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Principios de %@"
-          }
-        }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Early %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Principios de %@" } }
       }
     },
     "Expired" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Expired"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vencido"
-          }
-        }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Expired" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Vencido" } }
       }
     },
     "Expires %@" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Expires %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vence %@"
-          }
-        }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Expires %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Vence %@" } }
       }
     },
-    "Kilometers" : {
-
-    },
+    "Kilometers" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Kilómetros" } } } },
     "Late %@" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Late %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Finales de %@"
-          }
-        }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Late %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Finales de %@" } }
       }
     },
-    "MAINTENANCE" : {
-
-    },
-    "Mark a vehicle service as completed from the widget" : {
-
-    },
-    "Mark Service Done" : {
-
-    },
-    "Match App" : {
-
-    },
+    "Mark %@ done" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Marcar %@ como hecho" } } } },
+    "Mark a vehicle service as completed from the widget" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Marca un servicio del vehículo como completado desde el widget" } } } },
+    "Mark Service Done" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Marcar servicio como hecho" } } } },
+    "Match App" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Igual que la app" } } } },
     "Mid %@" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mid %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mediados de %@"
-          }
-        }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mid %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Mediados de %@" } }
       }
     },
-    "Mileage" : {
-
-    },
-    "Mileage Display" : {
-
-    },
-    "Miles" : {
-
-    },
-    "Miles Remaining" : {
-
-    },
+    "Mileage" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Millaje" } } } },
+    "Mileage Display" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Visualización del millaje" } } } },
+    "Miles" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Millas" } } } },
+    "Miles Remaining" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Millas restantes" } } } },
+    "My Vehicle" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Mi vehículo" } } } },
+    "NO SERVICES DUE" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "NINGÚN SERVICIO PENDIENTE" } } } },
+    "No services due" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Ningún servicio pendiente" } } } },
+    "No Vehicle" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin vehículo" } } } },
+    "NOTHING ELSE DUE" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "NADA MÁS PENDIENTE" } } } },
+    "Oil Change" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Cambio de aceite" } } } },
+    "ON TRACK" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "AL DÍA" } } } },
+    "Open a service in Checkpoint from the widget" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Abre un servicio en Checkpoint desde el widget" } } } },
+    "Open Service" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Abrir servicio" } } } },
     "Overdue" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Overdue"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vencido"
-          }
-        }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Overdue" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Vencido" } }
       }
     },
-    "See your upcoming vehicle maintenance at a glance." : {
-
-    },
-    "Service ID" : {
-
-    },
-    "Show miles until due (e.g., 500 MI)" : {
-
-    },
-    "Show when service is due (e.g., 35,000 MI)" : {
-
-    },
-    "TAP TO SET UP" : {
-
-    },
+    "OVERDUE" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "VENCIDO" } } } },
+    "OVERDUE BY" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "VENCIDO POR" } } } },
+    "REMAINING" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "RESTANTES" } } } },
+    "See your upcoming vehicle maintenance at a glance." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Ve de un vistazo el próximo mantenimiento de tu vehículo." } } } },
+    "Service ID" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "ID del servicio" } } } },
+    "Show miles until due (e.g., 500 MI)" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Muestra las millas que faltan para el vencimiento (p. ej., 500 MI)" } } } },
+    "Show when service is due (e.g., 35,000 MI)" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Muestra a qué millaje vence el servicio (p. ej., 35,000 MI)" } } } },
+    "TAP TO SET UP" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "TOCA PARA CONFIGURAR" } } } },
     "This week" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This week"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esta semana"
-          }
-        }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This week" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Esta semana" } }
       }
     },
-    "UPCOMING" : {
-
-    },
-    "Use the distance unit from the app" : {
-
-    },
-    "Vehicle" : {
-
-    },
-    "Vehicle ID" : {
-
-    }
+    "Tire Rotation" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Rotación de gomas" } } } },
+    "UPCOMING" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "PRÓXIMOS" } } } },
+    "Use the distance unit from the app" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Usa la unidad de distancia de la app" } } } },
+    "Vehicle" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Vehículo" } } } },
+    "Vehicle ID" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "ID del vehículo" } } } }
   },
   "version" : "1.0"
 }

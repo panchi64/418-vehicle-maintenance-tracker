@@ -7,7 +7,6 @@
 //
 
 import SwiftUI
-import WatchKit
 
 struct MileageUpdateView: View {
     @Environment(WatchDataStore.self) private var dataStore
@@ -26,41 +25,22 @@ struct MileageUpdateView: View {
         ScrollView {
             VStack(spacing: WatchSpacing.lg) {
                 if showSaved {
-                    // Saved confirmation
-                    Spacer()
-                    VStack(spacing: WatchSpacing.md) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 36, weight: .semibold))
-                            .foregroundStyle(WatchColors.accent)
-                        Text("SAVED")
-                            .font(.watchHeadline)
-                            .foregroundStyle(WatchColors.accent)
-                    }
-                    Spacer()
+                    WatchConfirmation(
+                        title: String(localized: "MILEAGE SAVED"),
+                        tint: WatchColors.accent,
+                        onFinish: { dismiss() }
+                    )
                 } else {
-                    // Mileage display
-                    Text("\(Int(mileage).formatted())")
-                        .font(.watchDisplayLarge)
-                        .foregroundStyle(WatchColors.accent)
-                        .monospacedDigit()
+                    // The screen's one job: the dial takes the Crown on arrival.
+                    MileageDial(
+                        mileage: $mileage,
+                        unit: distanceUnit.abbreviation,
+                        tint: WatchColors.accent,
+                        autofocus: true
+                    )
 
-                    Text(distanceUnit.abbreviation)
-                        .font(.watchCaption)
-                        .foregroundStyle(WatchColors.textTertiary)
+                    MileageStepButtons(mileage: $mileage)
 
-                    WatchDivider()
-
-                    // Quick-adjust buttons
-                    HStack(spacing: WatchSpacing.md) {
-                        adjustButton(delta: -100, label: "-100")
-                        adjustButton(delta: -10, label: "-10")
-                        adjustButton(delta: +10, label: "+10")
-                        adjustButton(delta: +100, label: "+100")
-                    }
-
-                    WatchDivider()
-
-                    // Save button
                     Button {
                         save()
                     } label: {
@@ -73,43 +53,17 @@ struct MileageUpdateView: View {
                     .tint(WatchColors.accent)
                     .disabled(isSaving)
 
-                    // Unreachable warning
                     if !connectivity.isPhoneReachable {
-                        Text("WILL SYNC WHEN\nPHONE IS NEARBY")
-                            .font(.watchCaption)
-                            .foregroundStyle(WatchColors.textTertiary)
-                            .multilineTextAlignment(.center)
+                        PhoneUnreachableNote()
                     }
                 }
             }
             .padding(.horizontal, WatchSpacing.md)
         }
-        .focusable()
-        .digitalCrownRotation(
-            $mileage,
-            from: 0,
-            through: 999999,
-            by: 10,
-            sensitivity: .medium
-        )
-        .navigationTitle("MILEAGE")
+        .navigationTitle(Text("Mileage"))
         .onAppear {
             mileage = Double(dataStore.vehicleData?.currentMileage ?? 0)
         }
-    }
-
-    // MARK: - Quick Adjust Button
-
-    private func adjustButton(delta: Int, label: String) -> some View {
-        Button {
-            mileage = max(0, mileage + Double(delta))
-        } label: {
-            Text(label)
-                .font(.watchCaption)
-                .foregroundStyle(WatchColors.textSecondary)
-                .frame(minWidth: 32)
-        }
-        .buttonStyle(.bordered)
     }
 
     // MARK: - Save
@@ -123,19 +77,9 @@ struct MileageUpdateView: View {
             newMileage: Int(mileage)
         )
 
-        // Haptic feedback
-        WKInterfaceDevice.current().play(.success)
-
-        // Show saved state, then dismiss
+        // The confirmation plays the haptic and announces itself.
         withAnimation(.easeIn(duration: 0.2)) {
             showSaved = true
-        }
-        Task {
-            try? await Task.sleep(for: .milliseconds(800))
-            await MainActor.run {
-                isSaving = false
-                dismiss()
-            }
         }
     }
 }

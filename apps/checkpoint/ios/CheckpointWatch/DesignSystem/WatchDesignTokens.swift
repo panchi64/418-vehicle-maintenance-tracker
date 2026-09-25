@@ -3,7 +3,7 @@
 //  CheckpointWatch
 //
 //  Brutalist-Tech-Modernist design tokens adapted for Apple Watch
-//  Monospace, ALL CAPS labels, zero radius, status colors
+//  Monospace, ALL CAPS labels, zero radius, status as shape + word
 //
 
 import SwiftUI
@@ -22,12 +22,11 @@ enum WatchColors {
 
     // Text
     static let textPrimary = Color.white
-    static let textSecondary = Color(white: 0.7)
-    static let textTertiary = Color(white: 0.45)
+    static let textSecondary = Color(white: 0.75)
+    static let textTertiary = Color(white: 0.6)
 
     // Surfaces
     static let backgroundPrimary = Color.black
-    static let surfaceElevated = Color(white: 0.1)
     static let gridLine = Color.white.opacity(0.15)
 
     // Borders
@@ -35,40 +34,58 @@ enum WatchColors {
 }
 
 // MARK: - Watch Typography
+//
+// Every face is a text style so the app follows the watch's text size. Only the
+// mileage readout uses a point size, scaled relative to `.title`
+// (see `WatchNumeral`).
 
 extension Font {
-    /// 15pt Mono Medium — Watch headlines
+    /// Headline mono — vehicle name, confirmation words
     static var watchHeadline: Font {
-        .system(size: 15, weight: .medium, design: .monospaced)
+        .system(.headline, design: .monospaced)
     }
 
-    /// 13pt Mono Regular — Watch body
+    /// Body mono — primary values, button titles
     static var watchBody: Font {
-        .system(size: 13, weight: .regular, design: .monospaced)
+        .system(.body, design: .monospaced)
     }
 
-    /// 11pt Mono Medium — Watch labels
+    /// Footnote mono medium — row titles, labels
     static var watchLabel: Font {
-        .system(size: 11, weight: .medium, design: .monospaced)
+        .system(.footnote, design: .monospaced).weight(.medium)
     }
 
-    /// 9pt Mono Regular — Watch caption
+    /// Caption 2 mono — supporting text, status words
     static var watchCaption: Font {
-        .system(size: 9, weight: .regular, design: .monospaced)
+        .system(.caption2, design: .monospaced)
     }
 
-    /// 22pt Mono Bold — Watch large number display
-    static var watchDisplayLarge: Font {
-        .system(size: 22, weight: .bold, design: .monospaced)
-    }
-
-    /// 17pt Mono Semibold — Watch title
+    /// Title 3 mono semibold — screen subject (service being completed)
     static var watchTitle: Font {
-        .system(size: 17, weight: .semibold, design: .monospaced)
+        .system(.title3, design: .monospaced).weight(.semibold)
     }
 }
 
-// MARK: - Status Color Extension
+/// Large mono figure that scales with the text size relative to `.title`.
+struct WatchNumeral: View {
+    let text: String
+    @ScaledMetric private var size: CGFloat
+
+    init(_ text: String, size: CGFloat = 28) {
+        self.text = text
+        self._size = ScaledMetric(wrappedValue: size, relativeTo: .title)
+    }
+
+    var body: some View {
+        Text(text)
+            .font(.system(size: size, weight: .bold, design: .monospaced))
+            .monospacedDigit()
+            .minimumScaleFactor(0.6)
+            .lineLimit(1)
+    }
+}
+
+// MARK: - Status
 
 extension WatchServiceStatus {
     var color: Color {
@@ -80,13 +97,55 @@ extension WatchServiceStatus {
         }
     }
 
-    var icon: String {
+    /// Uppercase status word; empty for neutral rows.
+    var label: String {
         switch self {
-        case .overdue: return "exclamationmark.triangle"
-        case .dueSoon: return "clock"
-        case .good: return "checkmark.circle"
-        case .neutral: return "minus.circle"
+        case .overdue: return String(localized: "OVERDUE")
+        case .dueSoon: return String(localized: "DUE SOON")
+        case .good: return String(localized: "ON TRACK")
+        case .neutral: return ""
         }
+    }
+}
+
+/// Status shape, mirroring the iPhone app's StatusMark: overdue a filled
+/// square, due soon an outlined square, on track a short rule. Hue is a
+/// second channel, never the only one.
+struct WatchStatusMark: View {
+    let status: WatchServiceStatus
+    var size: CGFloat = 8
+
+    var body: some View {
+        Group {
+            switch status {
+            case .overdue:
+                Rectangle().fill(status.color)
+            case .dueSoon:
+                Rectangle().strokeBorder(status.color, lineWidth: max(1.5, size / 5))
+            case .good:
+                Rectangle().fill(status.color).frame(height: max(2, size / 3))
+            case .neutral:
+                Color.clear
+            }
+        }
+        .frame(width: size, height: size)
+        .accessibilityHidden(true)
+    }
+}
+
+/// Status shape + word — the default status presentation.
+struct WatchStatusTag: View {
+    let status: WatchServiceStatus
+
+    var body: some View {
+        HStack(spacing: WatchSpacing.sm) {
+            WatchStatusMark(status: status)
+            Text(status.label)
+                .font(.watchCaption.weight(.semibold))
+                .foregroundStyle(status.color)
+                .lineLimit(1)
+        }
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -100,18 +159,6 @@ enum WatchSpacing {
     static let xl: CGFloat = 16
 }
 
-// MARK: - Status Indicator (8x8pt square, zero radius)
-
-struct StatusSquare: View {
-    let status: WatchServiceStatus
-
-    var body: some View {
-        Rectangle()
-            .fill(status.color)
-            .frame(width: 8, height: 8)
-    }
-}
-
 // MARK: - Watch Section Divider
 
 struct WatchDivider: View {
@@ -119,5 +166,6 @@ struct WatchDivider: View {
         Rectangle()
             .fill(WatchColors.gridLine)
             .frame(height: WatchColors.borderWidth)
+            .accessibilityHidden(true)
     }
 }

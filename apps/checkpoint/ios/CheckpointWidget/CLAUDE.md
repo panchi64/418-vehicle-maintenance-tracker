@@ -42,6 +42,18 @@ The medium widget includes a "Done" button (checkmark) on the most urgent servic
 4. Widget timeline reloads to reflect pending state
 5. When main app comes to foreground, `WidgetDataService.processPendingWidgetCompletions()` creates the actual `ServiceLog` entry
 
+## Tap → Service Detail (no URL scheme)
+
+The app registers no URL scheme (security invariant), so no `widgetURL`/`Link`. Service rows and heroes wrap in `OpenServiceButton` → `OpenServiceIntent` (`supportedModes = .foreground`, runs in the app). It stores a `PendingWidgetRoute` in the App Group and posts `PendingWidgetRoute.queuedNotification`; `ContentView.consumePendingWidgetRoute()` takes it (on that post or on `enterForeground`) and sets `NotificationService.pendingRoute = .services(...)`, reusing notification navigation. `Shared/PendingWidgetRoute.swift` is compiled into both targets (SharedEntities group in the pbxproj).
+
+## Rendering Modes & Type
+
+- Status is always shape + word (`WidgetStatusTag` / `WidgetStatusMark`): overdue filled square, due soon outlined square, on track short rule. In `.accented`/`.vibrant` (tinted, clear, Lock Screen) marks draw in `.primary` — never rely on hue.
+- Hero figure and status tag are `widgetAccentable()`. The cerulean `containerBackground` is removable (StandBy, tinted/clear).
+- System content margins — no `contentMarginsDisabled()`, no manual outer padding.
+- Fonts are text styles (`Font.widget*`); only `WidgetNumeral` uses a size, scaled relative to `.largeTitle`.
+- Mileage figures only move on app writes, so `ServiceEntry.updatedAt` drives an "AS OF" cue (always on medium; small/rectangular once it predates today).
+
 ## UserDefaults Best Practices
 
 - **Do NOT call `synchronize()`** - It's deprecated and unnecessary

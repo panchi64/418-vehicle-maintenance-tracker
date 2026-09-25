@@ -2,7 +2,7 @@
 //  WatchRectangularView.swift
 //  CheckpointWatchWidget
 //
-//  Rectangular Watch complication: 2px status bar + vehicle + service + due info
+//  Rectangular Watch complication: status tag, service, due phrase
 //  Brutalist: monospace, uppercase, sharp edges
 //
 
@@ -13,42 +13,42 @@ struct WatchRectangularView: View {
     let entry: WatchWidgetEntry
 
     var body: some View {
-        if let service = entry.service {
-            HStack(spacing: 6) {
-                // Status bar — 2px wide, sharp rectangle (brutalist)
-                Rectangle()
-                    .fill(service.status.color)
-                    .frame(width: 2)
-
-                VStack(alignment: .leading, spacing: 1) {
-                    // Vehicle name — 40% opacity
-                    Text(entry.vehicleName.uppercased())
-                        .font(.system(size: 9, weight: .medium, design: .monospaced))
-                        .opacity(0.4)
-
-                    // Service name — full opacity, bold
-                    Text(service.name.uppercased())
-                        .font(.system(size: 12, weight: .semibold, design: .monospaced))
+        VStack(alignment: .leading, spacing: 1) {
+            if let service = entry.service {
+                HStack(spacing: 4) {
+                    WatchWidgetStatusTag(status: service.status)
+                    Spacer(minLength: 0)
+                    Text(trailingCue)
+                        .font(.system(.caption2, design: .monospaced))
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
-
-                    // Due description — status colored
-                    Text(service.dueDescription.uppercased())
-                        .font(.system(size: 9, weight: .regular, design: .monospaced))
-                        .foregroundStyle(service.status.color)
                 }
 
-                Spacer(minLength: 0)
-            }
-        } else {
-            HStack(spacing: 6) {
-                Rectangle()
-                    .fill(.green)
-                    .frame(width: 2)
-                Text("— NO SERVICES DUE —")
-                    .font(.system(size: 10, weight: .medium, design: .monospaced))
-                    .opacity(0.4)
-                Spacer(minLength: 0)
+                Text(service.name.uppercased())
+                    .font(.system(.headline, design: .monospaced))
+                    .lineLimit(1)
+                    .widgetAccentable()
+
+                Text(WatchWidgetDisplay.compactDue(for: service, entry: entry))
+                    .font(.system(.caption, design: .monospaced))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            } else {
+                WatchWidgetStatusTag(status: .good)
+                Text("NO SERVICES DUE")
+                    .font(.system(.headline, design: .monospaced))
+                    .lineLimit(2)
+                    .widgetAccentable()
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// Vehicle name, or how old the figures are once the sync is stale.
+    private var trailingCue: String {
+        if entry.isStale, let updatedAt = entry.updatedAt {
+            return WatchWidgetDisplay.asOfLabel(updatedAt, now: entry.date)
+        }
+        return entry.vehicleName.uppercased()
     }
 }
