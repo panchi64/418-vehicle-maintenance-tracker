@@ -53,6 +53,10 @@ public struct GlassCardModifier: ViewModifier {
     let borderColor: Color
     let borderWidth: CGFloat
 
+    /// Increase Contrast turns the frosted plate into a near-solid one: text on
+    /// a card must not depend on what happens to be scrolling underneath it.
+    @Environment(\.colorSchemeContrast) private var contrast
+
     public init(intensity: GlassIntensity, padding: CGFloat, borderColor: Color, borderWidth: CGFloat) {
         self.intensity = intensity
         self.padding = padding
@@ -61,14 +65,18 @@ public struct GlassCardModifier: ViewModifier {
     }
 
     public func body(content: Content) -> some View {
+        // The system materials already resolve per light/dark. The white tint
+        // reads as "lifted" in both appearances — elevated surfaces are the
+        // lighter ones in every theme's light and dark palette alike.
+        let effective: GlassIntensity = contrast == .increased ? .opaque : intensity
         content
             .padding(padding)
             .background(
                 ZStack {
                     Rectangle()
-                        .fill(intensity.material)
-                        .opacity(intensity.materialOpacity)
-                    Rectangle().fill(Color.white.opacity(intensity.tintOpacity))
+                        .fill(effective.material)
+                        .opacity(effective.materialOpacity)
+                    Rectangle().fill(Color.white.opacity(effective.tintOpacity))
                 }
             )
             .brutalistBorder(color: borderColor, lineWidth: borderWidth)

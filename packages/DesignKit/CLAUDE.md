@@ -4,9 +4,13 @@ Shared design system for 418 Studio iOS apps. Codifies the brutalist philosophy 
 
 ## Architecture
 
-- **`ThemeProviding` protocol** (`ThemeProviding.swift`) — the contract each app conforms to. Exposes all color tokens, font design, and color scheme. The default `font(_:weight:)` implementation routes to JetBrains Mono when `fontDesign == .monospaced`.
+- **`ThemeProviding` protocol** (`ThemeProviding.swift`) — the contract each app conforms to. Exposes all color tokens, font design, and an optional forced color scheme. The default `font(_:weight:)` implementation routes to JetBrains Mono when `fontDesign == .monospaced`.
+  - **Tokens are appearance-adaptive.** A provider returns colors built with `Color(light:dark:lightHighContrast:darkHighContrast:)` (`Color+Appearance.swift`), which resolve from `\.colorScheme` and `\.colorSchemeContrast` at render time via a trait-resolving `UIColor`/`NSColor` (watchOS: always `dark`). Call sites just use the token.
+  - **`colorScheme` defaults to `nil` = follow the system** (HIG). Only a provider whose palette exists in one appearance should return non-nil; Checkpoint returns nil, Biombo's `AestheticBrutalistTheme` still forces `.dark` until it gets a light palette.
+- **`ThemeAppearance`** — `light` / `dark` / `lightHighContrast` / `darkHighContrast`. Raw values are the color-set keys in Checkpoint's `Themes.json`.
 - **`ThemeEnvironment`** (`ThemeEnvironment.swift`) — SwiftUI `EnvironmentKey` so views read `@Environment(\.theme)` instead of a singleton.
-- **`Providers/AestheticBrutalistTheme`** — Biombo's default provider. Cerulean `#0033BE` + Off-White `#F5F0DC`, `.monospaced` font design.
+- **`Providers/AestheticBrutalistTheme`** — Biombo's default provider. Cerulean `#0033BE` + Off-White `#F5F0DC`, `.monospaced` font design, dark only.
+- **`glassCard`** — system materials already adapt to light/dark; under Increase Contrast the plate goes to `.opaque` so card text never depends on what scrolls beneath it.
 - **`Spacing`** — 4pt base scale. Values mirror Checkpoint's current `Spacing` enum exactly so the eventual extraction is a source-level no-op.
 - **`Color(hex:)`** extension — utility ported from Checkpoint.
 - **`Resources/Fonts/JetBrainsMono-{Light,Regular,Medium,Bold}.ttf`** — bundled here so every app in the monorepo can use the same brutalist typeface. Registered lazily via `DesignKitFonts.registerAll()` on first font access (see `FontRegistration.swift`).
@@ -51,5 +55,5 @@ That extraction touches ~1,750 call sites in Checkpoint. It's deferred until Xco
 
 1. Add the property to `ThemeProviding`.
 2. Add a default implementation via protocol extension (optional, for backward compat).
-3. Implement it on all existing providers (`AestheticBrutalistTheme`, later `CheckpointDefaultTheme`).
+3. Implement it on all existing providers (`AestheticBrutalistTheme`, and Checkpoint's `ThemeManager` — which also means a `ThemeToken` case and a value in every `Themes.json` color set; see `apps/checkpoint/ios/checkpoint/DesignSystem/CLAUDE.md`).
 4. Run `swift build` from `packages/DesignKit/` before committing.

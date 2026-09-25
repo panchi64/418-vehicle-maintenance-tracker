@@ -125,14 +125,9 @@ struct checkpointApp: App {
 
     var body: some Scene {
         WindowGroup {
+            // No `.preferredColorScheme`: every theme ships light, dark, and
+            // Increase Contrast palettes, so the app follows the system setting.
             ContentView()
-                .preferredColorScheme({
-                    switch ThemeManager.shared.current.colorScheme {
-                    case .dark: return .dark
-                    case .light: return .light
-                    case .system: return nil
-                    }
-                }())
                 .task {
                     // Only request notification permission after onboarding is completed
                     // This avoids overwhelming new users with system prompts during intro

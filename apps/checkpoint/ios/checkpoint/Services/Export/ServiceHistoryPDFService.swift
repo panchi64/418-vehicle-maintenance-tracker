@@ -167,7 +167,10 @@ final class ServiceHistoryPDFService {
         let serviceCountString = "\(sortedLogs.count) service\(sortedLogs.count == 1 ? "" : "s") recorded"
 
         // Accent color resolved on main (Theme reads ThemeManager.shared).
+        // Theme colors adapt to appearance; a PDF is white paper, so take the
+        // light palette's accent regardless of the device's current setting.
         let accentColor = UIColor(Theme.accent)
+            .resolvedColor(with: UITraitCollection(userInterfaceStyle: .light))
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
         accentColor.getRed(&r, green: &g, blue: &b, alpha: &a)
 
