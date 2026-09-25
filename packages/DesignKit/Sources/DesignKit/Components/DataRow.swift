@@ -27,18 +27,31 @@ public struct DataRow: View {
         self.padding = padding
     }
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     public var body: some View {
-        HStack {
+        // At accessibility sizes a label and value side by side truncate each
+        // other, so the row becomes a leading-aligned column.
+        let stacked = dynamicTypeSize.isAccessibilitySize
+        let layout = stacked
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+            : AnyLayout(HStackLayout())
+
+        layout {
             Text(label)
                 .font(labelFont)
                 .foregroundStyle(labelColor)
                 .textCase(.uppercase)
                 .tracking(1)
-            Spacer()
+            if !stacked {
+                Spacer()
+            }
             Text(value)
                 .font(valueFont)
                 .foregroundStyle(valueColor)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(padding)
+        .accessibilityElement(children: .combine)
     }
 }

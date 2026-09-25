@@ -120,8 +120,7 @@ struct PrimaryButtonStyle: ButtonStyle {
             .tracking(1)
             .foregroundStyle(Theme.surfaceInstrument)
             .buttonLabelFit()
-            .frame(maxWidth: .infinity)
-            .frame(height: Theme.buttonHeight)
+            .frame(maxWidth: .infinity, minHeight: Theme.buttonHeight)
             .background(Theme.accent)
             .opacity(configuration.isPressed ? 0.8 : 1.0)
             .animation(.easeOut(duration: Theme.animationFast), value: configuration.isPressed)
@@ -138,8 +137,7 @@ struct SecondaryButtonStyle: ButtonStyle {
             .tracking(1)
             .foregroundStyle(Theme.textPrimary)
             .buttonLabelFit()
-            .frame(maxWidth: .infinity)
-            .frame(height: Theme.buttonHeight)
+            .frame(maxWidth: .infinity, minHeight: Theme.buttonHeight)
             .background(Theme.surfaceInstrument)
             .brutalistBorder()
             .opacity(configuration.isPressed ? 0.7 : 1.0)
@@ -157,11 +155,15 @@ private extension View {
     /// the label scales into what is left, and a long word breaks rather than
     /// truncating to an ellipsis on a control whose whole job is to say what it
     /// does.
+    ///
+    /// Height is a floor, not a cap: at accessibility text sizes the button
+    /// grows to fit its label rather than shrinking the label the user enlarged.
     func buttonLabelFit() -> some View {
         multilineTextAlignment(.center)
-            .lineLimit(2)
+            .lineLimit(3)
             .minimumScaleFactor(0.75)
             .padding(.horizontal, Spacing.listItem)
+            .padding(.vertical, Spacing.sm)
     }
 }
 
