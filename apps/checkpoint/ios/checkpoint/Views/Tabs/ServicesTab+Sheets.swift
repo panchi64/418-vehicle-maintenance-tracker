@@ -56,11 +56,8 @@ extension ServicesTab {
                 EditServiceView(service: service, vehicle: vehicle)
             case .editLog(let log):
                 EditServiceLogView(log: log, onDelete: { logPendingDeletion = log })
-            case .duplicateLog:
-                // Agent E's `ServiceLogForm(duplicating: log, vehicle:)` — a
-                // log-mode form prefilled from the entry — replaces this at
-                // merge. Until then Duplicate opens a blank log form.
-                AddServiceView(vehicle: vehicle)
+            case .duplicateLog(let log):
+                ServiceLogForm(duplicating: log, vehicle: vehicle)
             case .export:
                 ExportOptionsSheet(
                     vehicle: vehicle,

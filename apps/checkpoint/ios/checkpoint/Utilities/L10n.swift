@@ -18,7 +18,6 @@ enum L10n {
     static var commonUpdate: String { localized("common.update") }
     static var commonDone: String { localized("common.done") }
     static var commonDismiss: String { localized("common.dismiss") }
-    static var commonDays: String { localized("common.days") }
     static var commonDelete: String { localized("common.delete") }
     static var commonUndo: String { localized("common.undo") }
     static var commonViewAll: String { localized("common.viewAll") }
@@ -89,12 +88,9 @@ enum L10n {
 
     // MARK: - Relative time
 
-    /// Lowercase — composes inside a sentence ("Last done today").
-    static var timeSinceToday: String { localized("timeSince.today") }
     /// Sentence-cased — stands alone as a value.
     static var timeSinceTodaySentence: String { localized("timeSince.todaySentence") }
     static var timeSinceYesterdaySentence: String { localized("timeSince.yesterdaySentence") }
-    static var timeSinceYesterday: String { localized("timeSince.yesterday") }
     static var timeSinceOneMonthAgo: String { localized("timeSince.oneMonthAgo") }
     static func timeSinceDaysAgo(_ days: Int) -> String {
         String(format: localized("timeSince.daysAgo"), days)
@@ -102,21 +98,12 @@ enum L10n {
     static func timeSinceMonthsAgo(_ months: Int) -> String {
         String(format: localized("timeSince.monthsAgo"), months)
     }
-    static func timeSinceDaysAgoShort(_ days: Int) -> String {
-        String(format: localized("timeSince.daysAgoShort"), days)
-    }
-    static func timeSinceMonthsAgoShort(_ months: Int) -> String {
-        String(format: localized("timeSince.monthsAgoShort"), months)
-    }
 
     // MARK: - Filters and view modes
     //
     // Rule 10: enums that reach the UI expose `displayName`; `rawValue` stays
     // storage. These previously rendered their raw values directly, so the tab
     // chrome was unlocalizable and presentation was welded to persistence.
-
-    /// Shared across every "no filter applied" control.
-    static var filterAll: String { localized("filter.all") }
 
     static var costsExpenses: String { localized("costs.expenses") }
     static var homeUpcoming: String { localized("home.upcoming") }
@@ -146,7 +133,6 @@ enum L10n {
     static var vehicleModelPlaceholder: String { localized("vehicle.model_placeholder") }
     static var vehicleYearPlaceholder: String { localized("vehicle.year_placeholder") }
     static var vehicleNicknamePlaceholder: String { localized("vehicle.nickname_placeholder") }
-    static var vehicleOptional: String { localized("vehicle.optional") }
     static var vehicleOdometer: String { localized("vehicle.odometer") }
     static var vehicleOdometerRequired: String { localized("vehicle.odometerRequired") }
     static var vehicleIdentityRequired: String { localized("vehicle.identityRequired") }
@@ -163,7 +149,6 @@ enum L10n {
     }
     static var vehicleCurrentMileage: String { localized("vehicle.current_mileage") }
     static var vehicleMileagePlaceholder: String { localized("vehicle.mileage_placeholder") }
-    static var vehicleIdentification: String { localized("vehicle.identification") }
     static var vehicleVIN: String { localized("vehicle.vin") }
     static var vehicleVINPlaceholder: String { localized("vehicle.vin_placeholder") }
     static var vehicleVINHelp: String { localized("vehicle.vin_help") }
@@ -175,8 +160,6 @@ enum L10n {
     static var vehicleNotes: String { localized("vehicle.notes") }
     static var vehicleNotesPlaceholder: String { localized("vehicle.notes_placeholder") }
     static var vehicleSave: String { localized("vehicle.save") }
-    static var vehicleSkipDetails: String { localized("vehicle.skip_details") }
-    static var vehicleFirstVehicle: String { localized("vehicle.first_vehicle") }
     static var vehicleLicensePlate: String { localized("vehicle.license_plate") }
     static var vehicleMarbeteHelp: String { localized("vehicle.marbete_help") }
     static var vehicleMarbeteHelpLong: String { localized("vehicle.marbete_help_long") }
@@ -188,15 +171,8 @@ enum L10n {
     static var vehicleDeleteConfirmTitle: String { localized("vehicle.delete.confirm_title") }
     static var vehicleDeleteConfirmMessage: String { localized("vehicle.delete.confirm_message") }
     static var vehicleDeleteConfirmMessageLast: String { localized("vehicle.delete.confirm_message_last") }
-    static func vehicleVINCharacterCount(_ count: Int) -> String {
-        String(format: localized("vehicle.vin_character_count"), count)
-    }
 
     // MARK: - Add Vehicle Flow
-
-    static func addVehicleStep(_ current: Int, _ total: Int) -> String {
-        String(format: localized("addvehicle.step"), current, total)
-    }
 
     static var addVehicleBasics: String { localized("addvehicle.basics") }
     static var addVehicleScanningVIN: String { localized("addvehicle.scanning_vin") }
@@ -204,18 +180,13 @@ enum L10n {
     static var addVehicleVINAlignGuide: String { localized("addvehicle.vin_align_guide") }
     static var addVehicleVINLookup: String { localized("addvehicle.vin_lookup") }
     static var addVehicleVINLookupLoading: String { localized("addvehicle.vin_lookup_loading") }
-    static var addVehicleVINValueProp: String { localized("addvehicle.vin_value_prop") }
     static var addVehicleVINDetailsFilled: String { localized("addvehicle.vin_details_filled") }
-    static var addVehicleVINValidLookup: String { localized("addvehicle.vin_valid_lookup") }
 
     // MARK: - Settings
 
     static var settingsTitle: String { localized("settings.title") }
     static var settingsDisplay: String { localized("settings.display") }
-    static var settingsAlerts: String { localized("settings.alerts") }
     static var settingsReminders: String { localized("settings.reminders") }
-    static var settingsWidgets: String { localized("settings.widgets") }
-    static var settingsServiceBundling: String { localized("settings.service_bundling") }
     static var settingsSmartFeatures: String { localized("settings.smart_features") }
     static var settingsSafety: String { localized("settings.safety") }
     static var settingsPrivacy: String { localized("settings.privacy") }
@@ -228,8 +199,6 @@ enum L10n {
     static var settingsAutomaticIconDesc: String { localized("settings.automatic_icon_desc") }
     static var settingsBundleSuggestions: String { localized("settings.bundle_suggestions") }
     static var settingsBundleSuggestionsDesc: String { localized("settings.bundle_suggestions_desc") }
-    static var settingsDefaultVehicle: String { localized("settings.default_vehicle") }
-    static var settingsMileageDisplay: String { localized("settings.mileage_display") }
     static var settingsMileageWindow: String { localized("settings.mileage_window") }
     static var settingsDaysWindow: String { localized("settings.days_window") }
     static var settingsDaysWindowDesc: String { localized("settings.days_window_desc") }
@@ -293,8 +262,6 @@ enum L10n {
 
     // MARK: - Distance Unit Picker
 
-    static var distanceMiles: String { localized("distance.miles") }
-    static var distanceKilometers: String { localized("distance.kilometers") }
     static var distanceMilesDefault: String { localized("distance.miles_default") }
     static var distanceKilometersAbbr: String { localized("distance.kilometers_abbr") }
     static var distanceUnitTitle: String { localized("distance.unit_title") }
@@ -312,16 +279,11 @@ enum L10n {
     static var toastServiceLogged: String { localized("toast.service_logged") }
     static var toastVehicleSaved: String { localized("toast.vehicle_saved") }
     static var toastVehicleUpdated: String { localized("toast.vehicle_updated") }
-    static var toastVehicleDeleted: String { localized("toast.vehicle_deleted") }
-    static var toastServiceAdded: String { localized("toast.service_added") }
-    static var toastServiceScheduled: String { localized("toast.service_scheduled") }
     static var toastServiceRecorded: String { localized("toast.service_recorded") }
     static var toastReminderSet: String { localized("toast.reminder_set") }
-    static var reminderHelperText: String { localized("reminder.helper_text") }
     static var toastMileageUpdated: String { localized("toast.mileage_updated") }
     static var toastPDFReady: String { localized("toast.pdf_ready") }
     static var toastSyncError: String { localized("toast.sync_error") }
-    static var toastReadingCaptured: String { localized("toast.reading_captured") }
     static var toastServiceLogUpdated: String { localized("toast.service_log_updated") }
     static var toastServiceLogDeleted: String { localized("toast.service_log_deleted") }
     static var toastServiceUpdated: String { localized("toast.service_updated") }
@@ -340,8 +302,6 @@ enum L10n {
 
     // MARK: - Recall Alerts
 
-    static var recallErrorTitle: String { localized("recall.error_title") }
-    static var recallRetry: String { localized("recall.retry") }
     static func recallLastChecked(_ timeAgo: String) -> String {
         String(format: localized("recall.last_checked"), timeAgo)
     }
@@ -407,19 +367,11 @@ enum L10n {
 
     // MARK: - Empty States
 
-    static var emptyPaceHint: String { localized("empty.pace_hint") }
-    static var emptyNoResultsTitle: String { localized("empty.noResultsTitle") }
-    static var emptyNoResultsMessage: String { localized("empty.noResultsMessage") }
     static var emptyNoVehicleTitle: String { localized("empty.noVehicleTitle") }
     static var emptyNoVehicleMessage: String { localized("empty.noVehicleMessage") }
-    static func emptyFilterShowing(_ shown: Int, _ total: Int) -> String {
-        String(format: localized("empty.filter_showing"), shown, total)
-    }
-    static var emptyFilterClear: String { localized("empty.filter_clear") }
 
     // MARK: - Errors
 
-    static var errorRequiredField: String { localized("error.required_field") }
     static var errorInvalidVINFormat: String { localized("error.invalid_vin_format") }
     static var errorCouldNotReadOdometer: String { localized("error.could_not_read_odometer") }
     static var errorNetworkConnectionFailed: String { localized("error.network_connection_failed") }
@@ -496,8 +448,6 @@ enum L10n {
     static var documentsEmptyMessage: String { localized("documents.empty.message") }
     static var documentsEmptyAction: String { localized("documents.empty.action") }
     static var documentsSearchPlaceholder: String { localized("documents.search.placeholder") }
-    static var documentsSegmentTimeline: String { localized("documents.segment.timeline") }
-    static var documentsSegmentDocuments: String { localized("documents.segment.documents") }
     static var documentsRowQuickSpecs: String { localized("documents.row.quick_specs") }
     static var documentsNotesLabel: String { localized("documents.notes.label") }
     static var documentsNotesPlaceholder: String { localized("documents.notes.placeholder") }
@@ -592,25 +542,16 @@ enum L10n {
     static var formCost: String { localized("form.cost") }
     static var formCategory: String { localized("form.category") }
     static var formMileage: String { localized("form.mileage") }
-    static var formReminder: String { localized("form.reminder") }
     static var formRemindNextTime: String { localized("form.remindNextTime") }
     static var formNotes: String { localized("form.notes") }
     static var formNotesPlaceholder: String { localized("form.notesPlaceholder") }
     static var formAttachments: String { localized("form.attachments") }
     static var formAddAttachments: String { localized("form.addAttachments") }
     static var formNextDue: String { localized("form.nextDue") }
-    static func formNextDuePreview(_ schedule: String) -> String {
-        String(format: localized("form.nextDuePreview"), schedule)
-    }
-    static func formAtMileage(_ mileage: String) -> String {
-        String(format: localized("form.atMileage"), mileage)
-    }
-    static var formOr: String { localized("form.or") }
     static var formSetDueDate: String { localized("form.setDueDate") }
     static var formDueDate: String { localized("form.dueDate") }
     static var formDueMileage: String { localized("form.dueMileage") }
     static var formUse: String { localized("form.use") }
-    static var formDatePastWarning: String { localized("form.datePastWarning") }
     static var formRepeats: String { localized("form.repeats") }
     static var formRequiredTag: String { localized("form.requiredTag") }
     static var formRequiredAccessibility: String { localized("form.requiredAccessibility") }
@@ -618,26 +559,6 @@ enum L10n {
     static var formEvery: String { localized("form.every") }
     static var formOrEvery: String { localized("form.orEvery") }
     static var formMonthsSuffix: String { localized("form.monthsSuffix") }
-    static var formWhicheverFirst: String { localized("form.whicheverFirst") }
-    static func formDaysOverdue(_ days: Int) -> String {
-        String(format: localized("form.daysOverdue"), days)
-    }
-    static func formDaysAhead(_ days: Int) -> String {
-        String(format: localized("form.daysAhead"), days)
-    }
-    static func formMileagePast(_ mileage: String) -> String {
-        String(format: localized("form.mileagePast"), mileage)
-    }
-    static func formMileageAhead(_ mileage: String) -> String {
-        String(format: localized("form.mileageAhead"), mileage)
-    }
-    static var formEveryMonth: String { localized("form.everyMonth") }
-    static func formEveryNMonths(_ months: Int) -> String {
-        String(format: localized("form.everyNMonths"), months)
-    }
-    static func formEveryMileage(_ mileage: String) -> String {
-        String(format: localized("form.everyMileage"), mileage)
-    }
 
     // MARK: - Unified service form
     //
@@ -735,8 +656,6 @@ enum L10n {
     // MARK: - Deleting a service log
 
     static var logDeleteAction: String { localized("log.delete.action") }
-    static var logDeleteConfirmTitle: String { localized("log.delete.confirm_title") }
-    static var logDeleteConfirmMessage: String { localized("log.delete.confirm_message") }
 
     // MARK: - Tip jar
 
@@ -758,7 +677,6 @@ enum L10n {
     static func tipPurchaseLabel(name: String, price: String) -> String {
         String(format: localized("tip.purchase_label"), name, price)
     }
-    static var remindNoScheduleWarning: String { localized("remind.noScheduleWarning") }
 
     // MARK: - Service reminder notifications
     //

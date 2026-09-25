@@ -154,7 +154,7 @@ struct ServicesTab: View {
                     }
                 } header: {
                     sectionHeader(L10n.servicesGroupTitle(group.status), count: group.services.count)
-                        .tourTarget(.servicesControls, active: index == 0 && onboardingState.currentPhase.isTour)
+                        .tourTarget(.servicesStatusGroup, active: index == 0 && onboardingState.currentPhase.isTour)
                 }
             }
 

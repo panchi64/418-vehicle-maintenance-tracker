@@ -78,7 +78,6 @@ struct ServiceEventRow: View {
     let title: String
     var metadata: [Metadatum] = []
     var amount: Amount?
-    var isHighlighted: Bool = false
     /// Overrides the spoken value. Defaults to the amount, or a stated absence.
     var accessibilityValueText: String?
     var accessibilityLabelText: String?
@@ -146,7 +145,6 @@ struct ServiceEventRow: View {
         // Vertical only — see ServiceRow. The horizontal inset was interior
         // padding for a card these rows no longer sit inside.
         .padding(.vertical, Spacing.listItem)
-        .background(isHighlighted ? Theme.accent.opacity(0.12) : Color.clear)
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityLabelText ?? title)

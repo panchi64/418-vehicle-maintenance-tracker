@@ -104,8 +104,6 @@ enum AnalyticsEvent {
 
     // MARK: - Services Tab
 
-    case servicesFilterChanged(filter: String)
-    case servicesViewModeChanged(mode: String)
     case servicesSearchUsed
     case serviceHistoryExported
 
@@ -184,8 +182,6 @@ enum AnalyticsEvent {
         case .ocrFailed: return "ocr_failed"
         case .ocrConfirmed: return "ocr_confirmed"
         case .costsPeriodChanged: return "costs_period_changed"
-        case .servicesFilterChanged: return "services_filter_changed"
-        case .servicesViewModeChanged: return "services_view_mode_changed"
         case .servicesSearchUsed: return "services_search_used"
         case .serviceHistoryExported: return "service_history_exported"
         case .settingChanged: return "setting_changed"
@@ -265,10 +261,6 @@ enum AnalyticsEvent {
             return ["ocr_type": ocrType.rawValue, "value_edited": valueEdited]
         case .costsPeriodChanged(let period):
             return ["period": period]
-        case .servicesFilterChanged(let filter):
-            return ["filter": filter]
-        case .servicesViewModeChanged(let mode):
-            return ["mode": mode]
         case .settingChanged(let setting, let enabled):
             return ["setting": setting, "enabled": enabled]
         case .recallAlertShown(let recallCount):

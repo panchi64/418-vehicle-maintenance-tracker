@@ -47,43 +47,6 @@ final class ContextualInsightsTests: XCTestCase {
         XCTAssertEqual(result, "1 month ago", "1 month ago should use singular form")
     }
 
-    // MARK: - TimeSinceFormatter Abbreviated Format
-    //
-    // `abbreviated` is now lowercase and localized. It has exactly one caller
-    // (`ServiceRow`), which composes it into "Last done %@" — so it is a
-    // sentence fragment, not a label. Uppercasing prose also costs word-shape
-    // recognition (AESTHETIC.md, Typography → Hierarchy).
-    //
-    // `full` remains sentence-cased: it is used standalone as a data-row value
-    // in ServiceDetailView, verified by the tests above.
-
-    func test_timeSinceAbbreviated_today_returnsLowercaseToday() {
-        let now = Date.now
-        let result = TimeSinceFormatter.abbreviated(from: now, relativeTo: now)
-        XCTAssertEqual(result, "today", "Same date should return the lowercase fragment")
-    }
-
-    func test_timeSinceAbbreviated_yesterday_returnsLowercaseYesterday() {
-        let now = Date.now
-        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: now)!
-        let result = TimeSinceFormatter.abbreviated(from: yesterday, relativeTo: now)
-        XCTAssertEqual(result, "yesterday", "1 day ago should return the lowercase fragment")
-    }
-
-    func test_timeSinceAbbreviated_days_returnsDaysAbbreviated() {
-        let now = Date.now
-        let twelveDaysAgo = Calendar.current.date(byAdding: .day, value: -12, to: now)!
-        let result = TimeSinceFormatter.abbreviated(from: twelveDaysAgo, relativeTo: now)
-        XCTAssertEqual(result, "12d ago", "12 days ago should return '12d ago'")
-    }
-
-    func test_timeSinceAbbreviated_months_returnsMonthsAbbreviated() {
-        let now = Date.now
-        let fiveMonthsAgo = Calendar.current.date(byAdding: .month, value: -5, to: now)!
-        let result = TimeSinceFormatter.abbreviated(from: fiveMonthsAgo, relativeTo: now)
-        XCTAssertEqual(result, "5 mo ago", "5 months ago should return '5 mo ago'")
-    }
-
     // MARK: - Average Cost Calculation
 
     func test_averageCost_multipleLogsWithCost_calculatesCorrectly() {

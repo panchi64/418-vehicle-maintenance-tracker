@@ -247,10 +247,10 @@ private struct ScaleToFitWidth<Content: View>: View {
         //
         // It carries the font's line height from the very first pass, so a
         // container resolving an *ideal* height never sees a zero-height value
-        // line — `StatsCardRow` settles its equal-height trick with
-        // `fixedSize(vertical:)`, and a `Color.clear` sized to an as-yet
-        // unmeasured `naturalSize` would hand it a height missing this row
-        // entirely, then resize once the geometry callback landed.
+        // line — a row of cards equalizing heights with
+        // `fixedSize(vertical:)` would otherwise be handed, by a `Color.clear`
+        // sized to an as-yet unmeasured `naturalSize`, a height missing this
+        // row entirely, then resize once the geometry callback landed.
         //
         // And its width stays flexible. Driving layout from the content at
         // `fixedSize()` instead makes this rigid, and an HStack satisfies

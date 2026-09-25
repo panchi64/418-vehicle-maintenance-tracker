@@ -81,7 +81,7 @@ enum WidgetDisplayHelpers {
         switch status {
         case .overdue: return "OVERDUE"
         case .dueSoon: return "DUE SOON"
-        case .good: return "GOOD"
+        case .good: return "ON TRACK"
         case .neutral: return ""
         }
     }

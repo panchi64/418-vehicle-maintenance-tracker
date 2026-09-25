@@ -13,18 +13,15 @@ struct ExpenseRow: View {
     let log: ServiceLog
     let onTap: (() -> Void)?
     let isAnomalous: Bool
-    let isHighlighted: Bool
 
     init(
         log: ServiceLog,
         isAnomalous: Bool = false,
-        isHighlighted: Bool = false,
         onTap: (() -> Void)? = nil
     ) {
         self.log = log
         self.onTap = onTap
         self.isAnomalous = isAnomalous
-        self.isHighlighted = isHighlighted
     }
 
     private var title: String {
@@ -57,7 +54,6 @@ struct ExpenseRow: View {
             amount: log.formattedCost.map {
                 .init(text: $0, color: log.costCategory?.color ?? Theme.accent)
             },
-            isHighlighted: isHighlighted,
             accessibilityValueText: log.formattedCost ?? L10n.rowNoCostRecorded,
             accessibilityLabelText: isAnomalous
                 ? L10n.readoutEventOutlier(title, formattedDate)

@@ -26,7 +26,8 @@ enum ServiceStatus {
         switch self {
         case .overdue: return String(localized: "OVERDUE")
         case .dueSoon: return String(localized: "DUE SOON")
-        case .good: return String(localized: "GOOD")
+        // Matches the Services "On Track" group header.
+        case .good: return String(localized: "ON TRACK")
         case .neutral: return ""
         }
     }

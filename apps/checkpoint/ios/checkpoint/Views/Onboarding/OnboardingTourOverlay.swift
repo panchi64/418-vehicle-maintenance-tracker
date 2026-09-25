@@ -216,8 +216,8 @@ struct OnboardingTourOverlay: View {
             Text(currentTourStep?.body() ?? "")
                 .font(.brutalistBody)
                 .foregroundStyle(Theme.textPrimary)
-                // Claim natural vertical size so a tall spotlight (e.g.
-                // CostHeadlineCard) can't squeeze the body into an ellipsis.
+                // Claim natural vertical size so a tall spotlight (e.g. the
+                // Costs period total) can't squeeze the body into an ellipsis.
                 .fixedSize(horizontal: false, vertical: true)
 
             // Primary advance on its own row so the foreshadow label

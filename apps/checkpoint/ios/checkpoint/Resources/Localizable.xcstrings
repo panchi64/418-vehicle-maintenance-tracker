@@ -346,23 +346,6 @@
         }
       }
     },
-    "a11y.clearSearch" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clear search"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Borrar búsqueda"
-          }
-        }
-      }
-    },
     "a11y.collapsed" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -716,23 +699,6 @@
         }
       }
     },
-    "addvehicle.step" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Step %d of %d"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Paso %d de %d"
-          }
-        }
-      }
-    },
     "addvehicle.vin_align_guide" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -797,40 +763,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Consultando…"
-          }
-        }
-      }
-    },
-    "addvehicle.vin_valid_lookup" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "VIN VALID — LOOK UP DETAILS"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "VIN VÁLIDO — CONSULTAR DETALLES"
-          }
-        }
-      }
-    },
-    "addvehicle.vin_value_prop" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enter your VIN to auto-fill make, model, and year — and check for open recalls."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingresa tu VIN para completar marca, modelo y año — y ver retiros abiertos."
           }
         }
       }
@@ -1174,23 +1106,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cancelar"
-          }
-        }
-      }
-    },
-    "common.days" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "days"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "días"
           }
         }
       }
@@ -2096,23 +2011,6 @@
     "Dismiss service visit suggestion" : {
 
     },
-    "distance.kilometers" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kilometers"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kilómetros"
-          }
-        }
-      }
-    },
     "distance.kilometers_abbr" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2126,23 +2024,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "km"
-          }
-        }
-      }
-    },
-    "distance.miles" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Miles"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Millas"
           }
         }
       }
@@ -2712,40 +2593,6 @@
         }
       }
     },
-    "documents.segment.documents" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Documents"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Documentos"
-          }
-        }
-      }
-    },
-    "documents.segment.timeline" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Timeline"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cronología"
-          }
-        }
-      }
-    },
     "documents.select.action" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3188,40 +3035,6 @@
         }
       }
     },
-    "log.delete.confirm_message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The service's history and next reminder are recalculated from the remaining entries. Attachments stay in your documents. This can't be undone."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El historial del servicio y su próximo recordatorio se recalculan con los registros restantes. Los adjuntos se quedan en tus documentos. Esto no se puede deshacer."
-          }
-        }
-      }
-    },
-    "log.delete.confirm_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete this entry?"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¿Eliminar este registro?"
-          }
-        }
-      }
-    },
     "tip.purchase_failed" : {
       "comment" : "Shown in the tip jar when a purchase throws. States that nothing was charged and what to do next.",
       "extractionState" : "manual",
@@ -3345,74 +3158,6 @@
     "Empty" : {
 
     },
-    "empty.filter_clear" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clear"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Limpiar"
-          }
-        }
-      }
-    },
-    "empty.filter_showing" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Showing %d of %d"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrando %d de %d"
-          }
-        }
-      }
-    },
-    "empty.noResultsMessage" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Try a different search term\nor filter"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prueba otro término de búsqueda\no filtro"
-          }
-        }
-      }
-    },
-    "empty.noResultsTitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No results"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sin resultados"
-          }
-        }
-      }
-    },
     "empty.noVehicleMessage" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3443,23 +3188,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sin vehículo"
-          }
-        }
-      }
-    },
-    "empty.pace_hint" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Update mileage to enable pace estimates"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Actualiza el kilometraje para habilitar estimaciones de ritmo"
           }
         }
       }
@@ -3511,23 +3239,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Falló la conexión de red"
-          }
-        }
-      }
-    },
-    "error.required_field" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This field is required"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Este campo es obligatorio"
           }
         }
       }
@@ -3617,24 +3328,6 @@
     "Extracted Mileage" : {
 
     },
-    "filter.all" : {
-      "comment" : "Shared 'no filter applied' option for status and category filters.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "All"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Todos"
-          }
-        }
-      }
-    },
     "filter.clear" : {
       "comment" : "VoiceOver label for the button that clears an active filter. %@ is the dimension, e.g. Status.",
       "extractionState" : "manual",
@@ -3687,23 +3380,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Añadir adjuntos"
-          }
-        }
-      }
-    },
-    "form.atMileage" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "at %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "a las %@"
           }
         }
       }
@@ -4017,23 +3693,6 @@
         }
       }
     },
-    "form.datePastWarning" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This date is in the past — will be marked overdue."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esta fecha ya pasó — se marcará como vencido."
-          }
-        }
-      }
-    },
     "form.datePerformed" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4047,40 +3706,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fecha del servicio"
-          }
-        }
-      }
-    },
-    "form.daysAhead" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "~%d days"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "~%d días"
-          }
-        }
-      }
-    },
-    "form.daysOverdue" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d days overdue"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d días de atraso"
           }
         }
       }
@@ -4391,57 +4016,6 @@
         }
       }
     },
-    "form.everyMileage" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "every %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "cada %@"
-          }
-        }
-      }
-    },
-    "form.everyMonth" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "every month"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "cada mes"
-          }
-        }
-      }
-    },
-    "form.everyNMonths" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "every %d months"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "cada %d meses"
-          }
-        }
-      }
-    },
     "form.fewerDetails" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4616,40 +4190,6 @@
         }
       }
     },
-    "form.mileageAhead" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "~%@ ahead"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "~%@ restantes"
-          }
-        }
-      }
-    },
-    "form.mileagePast" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ past"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ de más"
-          }
-        }
-      }
-    },
     "form.monthsSuffix" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4697,23 +4237,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Próximo vencimiento"
-          }
-        }
-      }
-    },
-    "form.nextDuePreview" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Next due: %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Próximo vencimiento: %@"
           }
         }
       }
@@ -4942,23 +4465,6 @@
         }
       }
     },
-    "form.or" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "or"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "o"
-          }
-        }
-      }
-    },
     "form.orEvery" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4989,23 +4495,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recientes"
-          }
-        }
-      }
-    },
-    "form.reminder" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reminder"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recordatorio"
           }
         }
       }
@@ -5473,23 +4962,6 @@
         }
       }
     },
-    "form.whicheverFirst" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Whichever comes first"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lo que ocurra primero"
-          }
-        }
-      }
-    },
     "form.wontComeBack" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5512,22 +4984,6 @@
     },
     "Generate PDF" : {
 
-    },
-    "GOOD" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GOOD"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "AL DÍA"
-          }
-        }
-      }
     },
     "GOT IT" : {
 
@@ -7440,6 +6896,22 @@
     "On" : {
 
     },
+    "ON TRACK" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ON TRACK"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AL DÍA"
+          }
+        }
+      }
+    },
     "onboarding.climate_zone" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8058,13 +7530,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Scheduled maintenance and completed history. Search, filter, export. Everything your vehicle needs, in one list."
+            "value" : "Grouped by status — overdue first, then due soon, then on track. Search to find any service or past log."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mantenimiento programado e historial completado. Busca, filtra, exporta. Todo lo que tu vehículo necesita, en una lista."
+            "value" : "Agrupados por estado: vencidos primero, luego próximos, luego al día. Busca cualquier servicio o registro pasado."
           }
         }
       }
@@ -8974,23 +8446,6 @@
         }
       }
     },
-    "recall.error_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Couldn't check recalls"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No se pudieron consultar los retiros"
-          }
-        }
-      }
-    },
     "recall.last_checked" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9021,23 +8476,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Retiro: %@"
-          }
-        }
-      }
-    },
-    "recall.retry" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap to retry"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toca para reintentar"
           }
         }
       }
@@ -9355,40 +8793,6 @@
     },
     "REMEDY" : {
 
-    },
-    "remind.noScheduleWarning" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Set a due date, mileage, or interval — this reminder won't fire yet"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Define fecha, millaje o intervalo — este recordatorio aún no se activará"
-          }
-        }
-      }
-    },
-    "reminder.helper_text" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You'll be notified when this service is due again"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Se te notificará cuando este servicio vuelva a vencer"
-          }
-        }
-      }
     },
     "Replay Tour" : {
       "extractionState" : "manual",
@@ -10669,23 +10073,6 @@
     "Settings" : {
 
     },
-    "settings.alerts" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ALERTS"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ALERTAS"
-          }
-        }
-      }
-    },
     "settings.automatic_icon" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10771,23 +10158,6 @@
         }
       }
     },
-    "settings.default_vehicle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Default Vehicle"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vehículo predeterminado"
-          }
-        }
-      }
-    },
     "settings.display" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10852,23 +10222,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Próximo a vencer (kilometraje)"
-          }
-        }
-      }
-    },
-    "settings.mileage_display" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mileage Display"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Visualización de kilometraje"
           }
         }
       }
@@ -10975,23 +10328,6 @@
         }
       }
     },
-    "settings.service_bundling" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SERVICE BUNDLING"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "AGRUPAR SERVICIOS"
-          }
-        }
-      }
-    },
     "settings.smart_features" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11022,23 +10358,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ajustes"
-          }
-        }
-      }
-    },
-    "settings.widgets" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "WIDGETS"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "WIDGETS"
           }
         }
       }
@@ -11308,24 +10627,6 @@
         }
       }
     },
-    "timeSince.daysAgoShort" : {
-      "comment" : "Abbreviated relative time for width-constrained rows.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lldd ago"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "hace %lldd"
-          }
-        }
-      }
-    },
     "timeSince.monthsAgo" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11339,24 +10640,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "hace %lld meses"
-          }
-        }
-      }
-    },
-    "timeSince.monthsAgoShort" : {
-      "comment" : "Abbreviated relative time for width-constrained rows.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld mo ago"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "hace %lld m"
           }
         }
       }
@@ -11378,23 +10661,6 @@
         }
       }
     },
-    "timeSince.today" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "today"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "hoy"
-          }
-        }
-      }
-    },
     "timeSince.todaySentence" : {
       "comment" : "Standalone, sentence-cased. Used where the value stands alone rather than inside a sentence.",
       "extractionState" : "manual",
@@ -11409,23 +10675,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hoy"
-          }
-        }
-      }
-    },
-    "timeSince.yesterday" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "yesterday"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ayer"
           }
         }
       }
@@ -11576,23 +10825,6 @@
         }
       }
     },
-    "toast.reading_captured" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reading captured"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lectura capturada"
-          }
-        }
-      }
-    },
     "toast.reminder_set" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11659,23 +10891,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Programar siguiente"
-          }
-        }
-      }
-    },
-    "toast.service_added" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Service added"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Servicio añadido"
           }
         }
       }
@@ -11748,23 +10963,6 @@
         }
       }
     },
-    "toast.service_scheduled" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Service scheduled"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Servicio programado"
-          }
-        }
-      }
-    },
     "toast.service_updated" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11795,23 +10993,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Problema de sincronización — datos guardados localmente"
-          }
-        }
-      }
-    },
-    "toast.vehicle_deleted" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vehicle deleted"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vehículo eliminado"
           }
         }
       }
@@ -12062,40 +11243,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Editar vehículo"
-          }
-        }
-      }
-    },
-    "vehicle.first_vehicle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "First Vehicle"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Primer vehículo"
-          }
-        }
-      }
-    },
-    "vehicle.identification" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Identification"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Identificación"
           }
         }
       }
@@ -12462,23 +11609,6 @@
         }
       }
     },
-    "vehicle.optional" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Optional"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opcional"
-          }
-        }
-      }
-    },
     "vehicle.save" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -12492,23 +11622,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Guardar vehículo"
-          }
-        }
-      }
-    },
-    "vehicle.skip_details" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Skip Details"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Omitir detalles"
           }
         }
       }
@@ -12594,23 +11707,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "VIN"
-          }
-        }
-      }
-    },
-    "vehicle.vin_character_count" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d / 17 CHARACTERS"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d / 17 CARACTERES"
           }
         }
       }

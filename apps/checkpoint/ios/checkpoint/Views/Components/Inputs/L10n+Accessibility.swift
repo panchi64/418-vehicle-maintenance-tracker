@@ -20,7 +20,6 @@ extension L10n {
     static var a11yDate: String { a11y("a11y.date") }
     static var a11yExpanded: String { a11y("a11y.expanded") }
     static var a11yCollapsed: String { a11y("a11y.collapsed") }
-    static var a11yClearSearch: String { a11y("a11y.clearSearch") }
     static var a11yScanWithCamera: String { a11y("a11y.scanWithCamera") }
     static var a11yDistanceUnit: String { a11y("a11y.distanceUnit") }
 

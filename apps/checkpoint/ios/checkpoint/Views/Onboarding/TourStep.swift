@@ -44,9 +44,9 @@ struct TourStep {
             transitionLabel: nil
         ),
         TourStep(
-            // Search is the system field, which exposes no frame; the mode and
-            // filter row is the content the step describes.
-            target: .servicesControls,
+            // Search is the system field, which exposes no frame; the first
+            // status group's header stands in for the grouped list.
+            target: .servicesStatusGroup,
             tab: .services,
             title: { L10n.onboardingTourServicesTitle },
             body: { L10n.onboardingTourServicesBody },

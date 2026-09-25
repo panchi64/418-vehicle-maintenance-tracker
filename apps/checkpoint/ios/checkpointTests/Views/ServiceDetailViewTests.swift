@@ -121,7 +121,7 @@ final class ServiceDetailViewTests: XCTestCase {
 
         // Then: Status should be good
         XCTAssertEqual(status, .good, "Service should be good when not due soon")
-        XCTAssertEqual(status.label, "GOOD")
+        XCTAssertEqual(status.label, "ON TRACK")
     }
 
     func testStatusDisplay_Neutral() {

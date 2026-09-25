@@ -148,9 +148,9 @@ struct SecondaryButtonStyle: ButtonStyle {
 private extension View {
     /// Keeps a button label off its own border.
     ///
-    /// Both styles are `maxWidth: .infinity`, so a long label in a shared row —
-    /// "SAVE & LOG ANOTHER" next to "SAVE" in `FormActionBar` — got exactly the
-    /// half-width it was given and ran edge to edge inside a 2pt border. The
+    /// Both styles are `maxWidth: .infinity`, so a long label sharing a row
+    /// with another button gets exactly the half-width it is given and would
+    /// run edge to edge inside a 2pt border. The
     /// gutter is stated first so it is never the thing that gets sacrificed;
     /// the label scales into what is left, and a long word breaks rather than
     /// truncating to an ellipsis on a control whose whole job is to say what it

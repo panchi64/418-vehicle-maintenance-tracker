@@ -60,16 +60,7 @@ extension EditServiceView {
     // MARK: - Delete
 
     func deleteService() {
-        AnalyticsService.shared.capture(.serviceDeleted)
-        modelContext.delete(service)
-        // Deleting the service cascades to its logs, which .nullify their
-        // attachments. Any attachment left with neither a log nor a vehicle is
-        // swept so it doesn't linger in external storage with no owner.
-        Document.purgeOrphans(in: modelContext)
-        // Rebuild the vehicle's reminders around what's left, so a stale
-        // bundled banner can't name the deleted service.
-        ServiceNotificationScheduler.rescheduleNotifications(for: vehicle)
-        refreshSurfaces()
+        ServiceDeleteAction.delete([service], vehicle: vehicle, in: modelContext)
         dismiss()
     }
 
