@@ -6,7 +6,7 @@
 //  vehicle-specs panel that expands beneath them.
 //
 //    ──────────────────────┬──────────────────────
-//    ODOMETER            › │ SPECS             ⌄
+//    ODOMETER □ 16 D OLD › │ SPECS             ⌄
 //    33,417 mi             │ IWK-482 · 0W-20
 //    ──────────────────────┴──────────────────────
 //
@@ -71,6 +71,12 @@ struct VehicleSummaryBand: View {
         .onChange(of: vehicle.id) { _, _ in
             isSpecsExpanded = false
         }
+        // The stale tag is the mileage prompt now; keep counting impressions.
+        .onAppear {
+            if staleFlag != nil {
+                AnalyticsService.shared.capture(.mileagePromptShown)
+            }
+        }
     }
 
     /// What the collapsed strip shows: the plate, needed constantly (parking,
@@ -89,6 +95,21 @@ struct VehicleSummaryBand: View {
         return values.joined(separator: "  \u{00B7}  ")
     }
 
+    /// "16 d old" on the odometer cell when the reading is stale. It replaced a
+    /// separate "update your mileage" card above the hero, which pushed Next Up
+    /// down on exactly the days a stale reading made it least trustworthy, and
+    /// warned away from the control that resolves it. This cell IS that
+    /// control. Word + shape; the bare square it grew from was color alone.
+    private var staleFlag: String? {
+        guard vehicle.shouldDisplayMileageUpdatePrompt(isInteractive: onMileageTap != nil) else {
+            return nil
+        }
+        guard let days = vehicle.daysSinceMileageUpdate, vehicle.currentMileage > 0 else {
+            return L10n.homeOdometerUpdate
+        }
+        return L10n.homeOdometerDaysOld(days)
+    }
+
     private var dataBand: some View {
         AdaptiveStack(spacing: 0) {
             // The trailing glyphs differ on purpose: `chevron.right` opens a
@@ -104,9 +125,7 @@ struct VehicleSummaryBand: View {
                 rollsDigits: true,
                 subjectID: vehicle.id,
                 glyph: "chevron.right",
-                isFlagged: vehicle.shouldDisplayMileageUpdatePrompt(
-                    isInteractive: onMileageTap != nil
-                ),
+                flag: staleFlag,
                 growsToFill: isAccessibilitySize,
                 action: onMileageTap
             )
@@ -165,8 +184,8 @@ private struct SummaryCell: View {
     var subjectID: AnyHashable?
     let glyph: String
     var isGlyphRotated: Bool = false
-    /// Small status square beside the label, e.g. a stale odometer reading.
-    var isFlagged: Bool = false
+    /// Stale-reading tag beside the label, drawn as the due-soon mark + word.
+    var flag: String?
     var isActive: Bool = false
     var isExpanded: Bool?
     /// Set on the cell that should absorb the leftover width.
@@ -179,19 +198,27 @@ private struct SummaryCell: View {
         } label: {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: Spacing.xs) {
-                    if isFlagged {
-                        Rectangle()
-                            .fill(Theme.statusDueSoon)
-                            .frame(width: 6, height: 6)
-                            .accessibilityHidden(true)
-                    }
-
                     Text(label.uppercased())
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
                         .tracking(1.5)
                         .lineLimit(1)
-                        .frame(maxWidth: growsToFill ? .infinity : nil, alignment: .leading)
+
+                    if let flag {
+                        HStack(spacing: 3) {
+                            StatusMark(status: .dueSoon)
+                            Text(flag.uppercased())
+                                .font(.brutalistLabelBold)
+                                .tracking(1)
+                                .foregroundStyle(Theme.statusDueSoon)
+                                .lineLimit(1)
+                        }
+                        .fixedSize()
+                    }
+
+                    if growsToFill {
+                        Spacer(minLength: Spacing.xs)
+                    }
 
                     Image(systemName: glyph)
                         .font(.caption2.weight(.semibold))
@@ -225,8 +252,7 @@ private struct SummaryCell: View {
         .animation(.easeOut(duration: Theme.animationFast), value: isActive)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(label)
-        // The flag square is color and shape only; say it aloud too.
-        .accessibilityValue(isFlagged ? L10n.readoutValueWithStatus(value, L10n.readoutMileageUpdateDue) : value)
+        .accessibilityValue(flag != nil ? L10n.readoutValueWithStatus(value, L10n.readoutMileageUpdateDue) : value)
         .accessibilityAddTraits(isExpanded == true ? [.isButton, .isSelected] : .isButton)
     }
 }

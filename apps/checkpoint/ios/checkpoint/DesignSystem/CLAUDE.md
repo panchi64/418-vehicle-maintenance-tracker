@@ -171,7 +171,7 @@ RollingNumberText(Formatters.mileage(vehicle.currentMileage))
     .foregroundStyle(Theme.accent)
 ```
 
-Already adopted by the header odometer, `QuickMileageUpdateCard`, `CostHeadlineCard`, `NextUpCard`, and `StatsCard`. **Don't add another hand-rolled digit animation** — extend this one.
+Already adopted by Home's odometer cell (`VehicleSummaryBand`), `CostHeadlineCard`, and `StatsCard`. (`NextUpCard`'s hero is plain `Text` with `.minimumScaleFactor(0.5)`, so its unit can sit on the number's baseline.) **Don't add another hand-rolled digit animation** — extend this one.
 
 - **Formatting stays the caller's job.** It takes a finished string, so `Formatters` and locale rules remain the only place a number's appearance is decided.
 - **`.minimumScaleFactor` is a parameter, not a modifier** — each digit is its own `Text`, so the modifier would scale neighbours independently. Passing it also makes the view width-greedy; it has to know the width to pick a scale.

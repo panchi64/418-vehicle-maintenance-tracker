@@ -2,64 +2,56 @@
 //  HomeTab+EmptyStates.swift
 //  checkpoint
 //
-//  Empty state views extracted from HomeTab
+//  Home with no vehicle at all. (A vehicle with no services is not an empty
+//  state: Home keeps its five sections, each with one quiet line.)
 //
 
 import SwiftUI
 
 extension HomeTab {
-    var syncingDataState: some View {
-        VStack(spacing: Spacing.lg) {
-            ZStack {
-                Rectangle()
-                    .fill(Theme.accent.opacity(0.1))
-                    .frame(minWidth: 100, minHeight: 100)
-
-                Image(systemName: "icloud.and.arrow.down")
-                    .font(.largeTitle.weight(.light))
-                    .foregroundStyle(Theme.accent)
-                    .symbolEffect(.pulse, options: .repeating)
-                    .padding(Spacing.md)
-            }
-            .fixedSize()
-            .accessibilityHidden(true)
-
-            VStack(spacing: Spacing.xs) {
-                Text("Syncing Your Data")
-                    .font(.brutalistHeading)
-                    .foregroundStyle(Theme.textPrimary)
-
-                Text("Restoring your vehicles and maintenance\nhistory from iCloud")
+    @ViewBuilder
+    var noVehicleState: some View {
+        if case .syncing = SyncStatusService.shared.syncState {
+            ContentUnavailableView {
+                Label {
+                    Text(L10n.homeSyncingTitle)
+                        .font(.brutalistHeading)
+                        .foregroundStyle(Theme.textPrimary)
+                } icon: {
+                    Image(systemName: "icloud.and.arrow.down")
+                        .foregroundStyle(Theme.accent)
+                        .symbolEffect(.pulse, options: .repeating)
+                }
+            } description: {
+                Text(L10n.homeSyncingMessage)
                     .font(.brutalistSecondary)
                     .foregroundStyle(Theme.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
+            } actions: {
+                ProgressView()
+                    .tint(Theme.accent)
             }
-
-            ProgressView()
-                .tint(Theme.accent)
-                .padding(.top, Spacing.sm)
+        } else {
+            // One primary: the action that fixes it.
+            ContentUnavailableView {
+                Label {
+                    Text(L10n.homeEmptyTitle)
+                        .font(.brutalistHeading)
+                        .foregroundStyle(Theme.textPrimary)
+                } icon: {
+                    Image(systemName: "car.side")
+                        .foregroundStyle(Theme.accent)
+                }
+            } description: {
+                Text(L10n.homeEmptyMessage)
+                    .font(.brutalistSecondary)
+                    .foregroundStyle(Theme.textSecondary)
+            } actions: {
+                Button(L10n.homeEmptyAddVehicle) {
+                    appState.requestAddVehicle(vehicleCount: 0)
+                }
+                .buttonStyle(.primary)
+                .fixedSize()
+            }
         }
-        .padding(Spacing.xxl)
-    }
-
-    var emptyVehicleState: some View {
-        EmptyStateView(
-            icon: "car.side.fill",
-            title: "No Vehicles",
-            message: "Add your first vehicle to start\ntracking maintenance",
-            action: { appState.requestAddVehicle(vehicleCount: 0) },
-            actionLabel: "Add Vehicle"
-        )
-    }
-
-    var noServicesState: some View {
-        EmptyStateView(
-            icon: "wrench.and.screwdriver",
-            title: "SET UP MAINTENANCE",
-            message: "Add your first service to start\ntracking maintenance schedules",
-            action: { appState.present(.addService()) },
-            actionLabel: "ADD SERVICE"
-        )
     }
 }

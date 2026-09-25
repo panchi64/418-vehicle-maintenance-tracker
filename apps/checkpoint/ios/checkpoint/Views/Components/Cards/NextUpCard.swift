@@ -2,383 +2,244 @@
 //  NextUpCard.swift
 //  checkpoint
 //
-//  Brutalist-Tech-Modernist hero card - terminal data display
+//  Home's hero: the one thing this car needs next, and the button that does it.
+//
+//    ┌───────────────────────────────────────────┐
+//    │ ■ OVERDUE                        NEXT UP  │  status: word + shape
+//    │ Oil & Filter Change                       │  20 Medium
+//    │ 917  mi over                              │  56 Light hero (the primary)
+//    │ Due 32,500 mi or Jul 4                    │  13 support — ONE line
+//    │ [ Mark Done ]                             │  filled, full width
+//    └───────────────────────────────────────────┘
+//
+//  NEXT UP ENDS IN AN ACTION. The card used to be a readout you tapped through
+//  to a detail screen, found Mark Done on, then confirmed in a sheet — four
+//  taps to close the loop on the one thing Home exists to surface. Mark Done is
+//  now on the card: button → Save.
+//
+//  The card body and the button are SEPARATE targets. The body pushes the
+//  detail; nesting the button inside a tappable card made the inner target
+//  ambiguous.
+//
+//  The hero shows whichever trigger is closer (`NextUpReadout`). The marbete
+//  takes this card when it is the most urgent item; its hero is always days
+//  and its action reads "Mark Renewed". Same component — the differences are
+//  props, not a fork (there used to be a separate `MarbeteNextUpCard`).
+//
+//  See tools/sketchpad/src/components/Cards.tsx for the resolved layout.
 //
 
 import SwiftUI
 
 struct NextUpCard: View {
-    let service: Service
-    let currentMileage: Int
-    var dailyMilesPace: Double? = nil
-    var isEstimatedMileage: Bool = false
-    let onTap: () -> Void
+    let title: String
+    let status: ServiceStatus
+    let readout: NextUpReadout
+    let dueLine: String
+    let actionLabel: String
+    let onOpen: () -> Void
+    let onAction: () -> Void
 
-    private var status: ServiceStatus {
-        service.status(currentMileage: currentMileage)
-    }
-
-    /// Abstracted month period for the projected due date (earlier of the
-    /// calendar due date or the pace-predicted mileage date). Nil when there's
-    /// no projection, or when it resolves to "Overdue" (the hero already says so).
-    private var estimatedDuePeriod: String? {
-        guard let due = service.effectiveDueDate(currentMileage: currentMileage, dailyPace: dailyMilesPace) else {
-            return nil
-        }
-        let period = DuePeriodFormatter.describe(due)
-        return period.isOverdue ? nil : period.label
-    }
-
-    private var milesUntilDue: Int? {
-        guard let dueMileage = service.dueMileage else { return nil }
-        return dueMileage - currentMileage
-    }
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            UpcomingItemHeader(status: status, itemName: service.name)
-                .padding(.bottom, Spacing.md)
-
-            // Divider
-            Rectangle()
-                .fill(Theme.gridLine)
-                .frame(height: 1)
-
-            // Hero data display - miles first, days as fallback
-            if let miles = milesUntilDue {
-                VStack(alignment: .leading, spacing: Spacing.xs) {
-                    HStack(alignment: .lastTextBaseline, spacing: 4) {
-                        // Keyed to the service so switching vehicles replaces
-                        // the reading instead of rolling one car's countdown
-                        // into another's.
-                        RollingNumberText(
-                            Formatters.mileageNumber(abs(miles)),
-                            resetToken: service.id
-                        )
-                            .font(.brutalistHero)
-                            .foregroundStyle(status.color)
-
-                        Text(DistanceSettings.shared.unit.uppercaseAbbreviation)
-                            .font(.brutalistHeading)
-                            .foregroundStyle(status.color)
-                    }
-                    // Hero numerals stop growing at AX2: past that a six-digit
-                    // reading no longer fits the card at any scale factor.
-                    .dynamicTypeSize(...DynamicTypeSize.accessibility2)
-
-                    Text(miles < 0 ? "OVERDUE" : "REMAINING")
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
-                        .tracking(1.5)
-
-                    // Estimated due as an abstracted month period (not raw days)
-                    if status != .overdue, let period = estimatedDuePeriod {
-                        Text("EST. DUE \(period.uppercased())")
-                            .font(.brutalistSecondary)
-                            .foregroundStyle(Theme.textSecondary)
-                            .tracking(1)
-                            .padding(.top, 4)
-                    } else if dailyMilesPace == nil || dailyMilesPace == 0 {
-                        Text(L10n.emptyPaceHint.uppercased())
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.textTertiary)
-                            .tracking(1.5)
-                            .padding(.top, 4)
-                    }
-                }
-                .padding(.vertical, Spacing.lg)
-            } else if let dueDate = service.dueDate {
-                // Date-only services (e.g., battery check, wiper blades):
-                // abstracted month period instead of a raw day count.
-                DuePeriodHero(date: dueDate, status: status, overdueWord: String(localized: "OVERDUE"), dueLabel: String(localized: "DUE"))
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            Button(action: onOpen) {
+                readoutBody
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
             }
+            .buttonStyle(CardButtonStyle())
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(title)
+            .accessibilityValue(accessibilityValue)
+            .accessibilityHint(L10n.rowViewDetailsHint)
+            .accessibilityAddTraits(.isButton)
 
-            // Divider
-            Rectangle()
-                .fill(Theme.gridLine)
-                .frame(height: 1)
-
-            // Data rows
-            VStack(spacing: Spacing.sm) {
-                if let dueMileage = service.dueMileage {
-                    AdaptiveStack {
-                        Text("CURRENT")
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.textTertiary)
-                            .tracking(1)
-
-                        Spacer()
-
-                        HStack(spacing: 4) {
-                            RollingNumberText(
-                                Formatters.mileageDisplay(currentMileage),
-                                resetToken: service.id
-                            )
-                                .font(.brutalistBody)
-                                .foregroundStyle(Theme.accent)
-
-                            if isEstimatedMileage {
-                                Text("(EST)")
-                                    .font(.brutalistLabel)
-                                    .foregroundStyle(Theme.textSecondary)
-                                    .tracking(0.5)
-                            }
-                        }
-                    }
-
-                    AdaptiveStack {
-                        Text("DUE AT")
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.textTertiary)
-                            .tracking(1)
-
-                        Spacer()
-
-                        Text(Formatters.mileageDisplay(dueMileage))
-                            .font(.brutalistBody)
-                            .foregroundStyle(status.color)
-                    }
-
-                    // Last service date
-                    if let lastPerformed = service.lastPerformed {
-                        AdaptiveStack {
-                            Text("LAST_SERVICE")
-                                .font(.brutalistLabel)
-                                .foregroundStyle(Theme.textTertiary)
-                                .tracking(1)
-
-                            Spacer()
-
-                            Text(Formatters.mediumDate.string(from: lastPerformed).uppercased())
-                                .font(.brutalistBody)
-                                .foregroundStyle(Theme.textSecondary)
-                        }
-                    }
-
-                    // Progress bar (simple, geometric)
-                    progressBar
-                        .padding(.top, 8)
-                }
+            Button(action: onAction) {
+                Text(actionLabel)
+                    .frame(maxWidth: .infinity)
             }
-            .padding(.top, Spacing.listItem)
+            .buttonStyle(.primary)
         }
-        .glassCardStyle(intensity: .subtle)
-        .tappableCard(action: onTap)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(service.name)
-        .accessibilityValue(accessibilityValue)
-        .accessibilityHint(L10n.rowViewDetailsHint)
-        .accessibilityAddTraits(.isButton)
+        .padding(Theme.cardPadding)
+        .background(tint.opacity(0.08))
+        .background(Theme.surfaceInstrument)
+        .overlay(
+            Rectangle().strokeBorder(tint, lineWidth: Theme.borderWidth)
+        )
     }
 
-    /// The card's datum in words: status, distance left or overdue, where it
-    /// falls due, and when the pace projects it — or the due date for
-    /// date-only services.
+    private var tint: Color {
+        status == .neutral ? Theme.gridLine : status.color
+    }
+
+    private var readoutBody: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            HStack(alignment: .firstTextBaseline) {
+                StatusTag(status: status)
+                Spacer(minLength: Spacing.sm)
+                Text(L10n.homeNextUp.uppercased())
+                    .font(.brutalistLabel)
+                    .tracking(1.5)
+                    .foregroundStyle(Theme.textTertiary)
+            }
+
+            Text(title)
+                .font(.brutalistHeading)
+                .foregroundStyle(Theme.textPrimary)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if let figure = heroFigure {
+                // Side by side while it fits; the qualifier drops beneath the
+                // number at large type rather than crushing it.
+                ViewThatFits(in: .horizontal) {
+                    HStack(alignment: .lastTextBaseline, spacing: Spacing.sm) {
+                        heroNumber(figure.value)
+                        heroQualifier(figure.qualifier)
+                    }
+                    VStack(alignment: .leading, spacing: 0) {
+                        heroNumber(figure.value)
+                        heroQualifier(figure.qualifier)
+                    }
+                }
+            }
+
+            Text(dueLine)
+                .font(.brutalistSecondary)
+                .foregroundStyle(Theme.textTertiary)
+                .lineLimit(dynamicTypeSize.isAccessibilitySize ? 3 : 1)
+                .multilineTextAlignment(.leading)
+        }
+    }
+
+    private func heroNumber(_ value: String) -> some View {
+        Text(value)
+            .font(.brutalistHero)
+            .monospacedDigit()
+            .foregroundStyle(status == .neutral ? Theme.textPrimary : status.color)
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
+            .contentTransition(.numericText())
+    }
+
+    private func heroQualifier(_ text: String) -> some View {
+        Text(text)
+            .font(.brutalistHeading)
+            .foregroundStyle(Theme.textSecondary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
+    }
+
+    // MARK: - Hero text
+
+    private struct HeroFigure {
+        let value: String
+        let qualifier: String
+    }
+
+    private var heroFigure: HeroFigure? {
+        guard let figure = readout.figure else { return nil }
+        let past = readout.isPast
+        switch figure {
+        case .distance(let miles):
+            let unit = DistanceSettings.shared.unit.abbreviation
+            return HeroFigure(
+                value: Formatters.mileageNumber(abs(miles)),
+                qualifier: past ? L10n.homeHeroDistanceOver(unit) : L10n.homeHeroDistanceLeft(unit)
+            )
+        case .days(let days):
+            let count = abs(days)
+            let qualifier: String
+            if past {
+                qualifier = L10n.homeHeroDaysOver(count)
+            } else if readout.kind == .marbete {
+                qualifier = L10n.homeHeroDaysToExpiry(count)
+            } else {
+                qualifier = L10n.homeHeroDaysLeft(count)
+            }
+            return HeroFigure(value: count.formatted(), qualifier: qualifier)
+        }
+    }
+
     private var accessibilityValue: String {
         let statusWord = L10n.readoutStatus(status)
-        if let miles = milesUntilDue, let dueMileage = service.dueMileage {
+        guard let heroFigure else { return L10n.readoutValueWithStatus(dueLine, statusWord) }
+        let hero: String
+        switch readout.figure {
+        case .distance(let miles):
             let distance = L10n.spokenDistance(abs(miles))
-            let distancePhrase = miles < 0
-                ? L10n.readoutDistanceOverdue(distance)
-                : L10n.readoutDistanceLeft(distance)
-            let dueAt = L10n.spokenDistance(dueMileage)
-            if status != .overdue, let period = estimatedDuePeriod {
-                return L10n.readoutNextUpMileageEstimate(statusWord, distancePhrase, dueAt, period)
-            }
-            return L10n.readoutNextUpMileage(statusWord, distancePhrase, dueAt)
+            hero = readout.isPast ? L10n.readoutDistanceOverdue(distance) : L10n.readoutDistanceLeft(distance)
+        default:
+            hero = L10n.homeSpokenFigure(heroFigure.value, heroFigure.qualifier)
         }
-        if let dueDate = service.dueDate {
-            return L10n.readoutNextUpDate(statusWord, L10n.spokenDate(dueDate))
-        }
-        return statusWord
-    }
-
-    // MARK: - Progress Bar
-
-    private var progressBar: some View {
-        let progressValue: Double = {
-            guard let dueMileage = service.dueMileage,
-                  let lastMileage = service.lastMileage,
-                  dueMileage > lastMileage else { return 0 }
-            let total = Double(dueMileage - lastMileage)
-            let elapsed = Double(currentMileage - lastMileage)
-            return min(max(elapsed / total, 0), 1)
-        }()
-
-        return GeometryReader { geo in
-            ZStack(alignment: .leading) {
-                // Track
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: 2)
-
-                // Fill
-                Rectangle()
-                    .fill(status.color)
-                    .frame(width: geo.size.width * progressValue, height: 2)
-            }
-        }
-        .frame(height: 2)
-    }
-
-}
-
-// MARK: - Due Period Hero
-
-/// Status square + eyebrow label + item name. Shared by both Next Up cards,
-/// which previously carried byte-identical copies of this block.
-///
-/// The square is baseline-aligned to the eyebrow rather than top-aligned: a
-/// top-aligned 8pt square pins to the text's frame top while the uppercase
-/// cap-height sits lower, so it read as floating above the label.
-struct UpcomingItemHeader: View {
-    let status: ServiceStatus
-    let itemName: String
-
-    private var isUrgent: Bool {
-        status == .overdue || status == .dueSoon
-    }
-
-    var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: Spacing.sm) {
-            Rectangle()
-                .fill(status.color)
-                .frame(width: 8, height: 8)
-                .statusGlow(color: status.color, isActive: isUrgent)
-                .pulseAnimation(isActive: isUrgent)
-                // Sit the square's bottom edge on the text baseline; uppercase
-                // caps also sit on the baseline, so the two optically align.
-                .alignmentGuide(.firstTextBaseline) { $0.height }
-                .accessibilityHidden(true)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(status.label.isEmpty ? String(localized: "SCHEDULED") : status.label)
-                    .font(.brutalistLabel)
-                    .foregroundStyle(status.color)
-                    .textCase(.uppercase)
-                    .tracking(1.5)
-
-                Text(itemName)
-                    .font(.brutalistHeading)
-                    .foregroundStyle(Theme.textPrimary)
-                    .textCase(.uppercase)
-            }
-
-            Spacer()
-        }
+        return L10n.homeNextUpAccessibility(statusWord, hero, dueLine)
     }
 }
 
-/// Hero display for date-based Next Up items: an abstracted month period
-/// (e.g. "MID MAY") with an optional label beneath, or the domain "overdue"
-/// word when past due. Shared by date-only services and marbete renewal.
-struct DuePeriodHero: View {
-    let date: Date
-    let status: ServiceStatus
-    /// Word shown when overdue, e.g. "OVERDUE" (services) or "EXPIRED" (marbete).
-    let overdueWord: String
-    /// Label beneath the period, e.g. "DUE". Pass nil when the card already
-    /// labels the same value elsewhere — the marbete card previously rendered
-    /// "EXPIRES" here *and* in its footer row, so the word appeared twice for
-    /// one fact.
-    var dueLabel: String?
+// MARK: - Convenience builders
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text(status == .overdue ? overdueWord : DuePeriodFormatter.describe(date).label.uppercased())
-                .font(.brutalistTitle)
-                .foregroundStyle(status.color)
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
+extension NextUpCard {
+    /// A due-tracking service as the hero.
+    init(
+        service: Service,
+        mileage: MileageEstimate,
+        onOpen: @escaping () -> Void,
+        onMarkDone: @escaping () -> Void
+    ) {
+        self.init(
+            title: service.name,
+            status: service.status(currentMileage: mileage.effective),
+            readout: .service(service, currentMileage: mileage.effective, dailyPace: mileage.pace),
+            dueLine: Self.dueLine(for: service),
+            actionLabel: L10n.homeMarkDone,
+            onOpen: onOpen,
+            onAction: onMarkDone
+        )
+    }
 
-            if status != .overdue, let dueLabel {
-                Text(dueLabel)
-                    .font(.brutalistLabel)
-                    .foregroundStyle(Theme.textTertiary)
-                    .tracking(1.5)
-            }
+    /// The marbete as the hero. Always days; the action renews it.
+    init(
+        marbete: MarbeteUpcomingItem,
+        onOpen: @escaping () -> Void,
+        onMarkRenewed: @escaping () -> Void
+    ) {
+        let expires = marbete.vehicle.marbeteExpiration.map(Vehicle.marbeteExpirationLabel)
+        self.init(
+            title: marbete.itemName,
+            status: marbete.itemStatus,
+            readout: .marbete(daysUntilExpiration: marbete.daysRemaining),
+            dueLine: expires.map(L10n.homeExpires) ?? "",
+            actionLabel: L10n.homeMarkRenewed,
+            onOpen: onOpen,
+            onAction: onMarkRenewed
+        )
+    }
+
+    /// "Due 32,500 mi or Jul 4" — both triggers, one line. The interval that
+    /// produced them is detail and lives on the service screen.
+    static func dueLine(for service: Service) -> String {
+        let date = service.dueDate?.formatted(.dateTime.month(.abbreviated).day())
+        let mileage = service.dueMileage.map(Formatters.mileage)
+        switch (mileage, date) {
+        case (let mileage?, let date?): return L10n.homeDueMileageOrDate(mileage, date)
+        case (let mileage?, nil): return L10n.homeDue(mileage)
+        case (nil, let date?): return L10n.homeDue(date)
+        case (nil, nil): return ""
         }
-        .padding(.vertical, Spacing.lg)
     }
 }
 
 // MARK: - Card Button Style
 
+/// Press feedback for a tappable card body: dims, never scales.
 struct CardButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .opacity(configuration.isPressed ? 0.7 : 1.0)
             .animation(.easeOut(duration: Theme.animationFast), value: configuration.isPressed)
-    }
-}
-
-// MARK: - Marbete Next Up Card
-
-/// Specialized NextUpCard for marbete renewal display
-struct MarbeteNextUpCard: View {
-    let marbeteItem: MarbeteUpcomingItem
-    let onTap: () -> Void
-
-    private var status: ServiceStatus { marbeteItem.itemStatus }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            UpcomingItemHeader(status: status, itemName: marbeteItem.itemName)
-                .padding(.bottom, Spacing.md)
-
-            // Divider
-            Rectangle()
-                .fill(Theme.gridLine)
-                .frame(height: 1)
-
-            // Hero data display — abstracted month period instead of raw days
-            if let expiration = marbeteItem.vehicle.marbeteExpirationDate {
-                // No dueLabel: the footer row below already says EXPIRES with
-                // the precise date. The hero is the primary; the footer is its
-                // supporting detail — one fact, labeled once.
-                DuePeriodHero(
-                    date: expiration,
-                    status: status,
-                    overdueWord: String(localized: "EXPIRED")
-                )
-            }
-
-            // Divider
-            Rectangle()
-                .fill(Theme.gridLine)
-                .frame(height: 1)
-
-            // Expiration info
-            VStack(spacing: Spacing.sm) {
-                AdaptiveStack {
-                    Text("EXPIRES")
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
-                        .tracking(1)
-
-                    Spacer()
-
-                    if let formatted = marbeteItem.expirationFormatted {
-                        Text(formatted)
-                            .font(.brutalistBody)
-                            .foregroundStyle(status.color)
-                    }
-                }
-            }
-            .padding(.top, Spacing.listItem)
-        }
-        .glassCardStyle(intensity: .subtle)
-        .tappableCard(action: onTap)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(marbeteItem.itemName)
-        .accessibilityValue(accessibilityValue)
-        .accessibilityAddTraits(.isButton)
-    }
-
-    private var accessibilityValue: String {
-        let statusWord = L10n.readoutStatus(status)
-        guard let expiration = marbeteItem.vehicle.marbeteExpirationDate else { return statusWord }
-        return L10n.readoutMarbeteExpires(statusWord, L10n.spokenDate(expiration))
     }
 }
 
@@ -389,15 +250,14 @@ struct MarbeteNextUpCard: View {
     return ZStack {
         AtmosphericBackground()
 
-        VStack(spacing: 16) {
+        VStack(spacing: Spacing.lg) {
             ForEach(services.prefix(2), id: \.name) { service in
                 NextUpCard(
                     service: service,
-                    currentMileage: vehicle.currentMileage,
-                    dailyMilesPace: 40.0  // ~40 miles per day
-                ) {
-                    print("Tapped \(service.name)")
-                }
+                    mileage: MileageEstimate(pace: 40, effective: vehicle.currentMileage, isEstimated: false),
+                    onOpen: {},
+                    onMarkDone: {}
+                )
             }
         }
         .padding(Theme.screenHorizontalPadding)

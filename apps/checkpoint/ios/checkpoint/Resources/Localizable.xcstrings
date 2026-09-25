@@ -13,22 +13,6 @@
     "(default)" : {
 
     },
-    "(EST)" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(EST)"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(EST)"
-          }
-        }
-      }
-    },
     "[%@" : {
 
     },
@@ -42,9 +26,6 @@
 
     },
     "]" : {
-
-    },
-    "@ %@" : {
 
     },
     "//" : {
@@ -213,9 +194,6 @@
           }
         }
       }
-    },
-    "%lld SERVICES DUE SOON" : {
-
     },
     "%lld yearly cost roundup, total spent %@" : {
       "localizations" : {
@@ -2318,22 +2296,6 @@
     "Create New Vehicle" : {
 
     },
-    "CURRENT" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CURRENT"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ACTUAL"
-          }
-        }
-      }
-    },
     "Currently selected" : {
 
     },
@@ -3170,9 +3132,6 @@
         }
       }
     },
-    "Don't Show Again" : {
-
-    },
     "Done" : {
 
     },
@@ -3904,22 +3863,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Este campo es obligatorio"
-          }
-        }
-      }
-    },
-    "EST. DUE %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "EST. DUE %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "VENC. EST. %@"
           }
         }
       }
@@ -5588,6 +5531,447 @@
     "Helps us improve Checkpoint. No personal data is ever collected." : {
 
     },
+    "home.due" : {
+      "comment" : "Next Up due line with one trigger. %@ is a distance ('32,500 mi') or a short date ('Jul 4').",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Due %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence: %@"
+          }
+        }
+      }
+    },
+    "home.dueMileageOrDate" : {
+      "comment" : "Next Up due line with both triggers. %1$@ distance, %2$@ short date.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Due %1$@ or %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence: %1$@ o %2$@"
+          }
+        }
+      }
+    },
+    "home.empty.addVehicle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a Vehicle"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añadir vehículo"
+          }
+        }
+      }
+    },
+    "home.empty.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add one with its VIN and odometer. Reminders start from there."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añade uno con su VIN y su odómetro. Los recordatorios empiezan desde ahí."
+          }
+        }
+      }
+    },
+    "home.empty.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No vehicle yet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay vehículo"
+          }
+        }
+      }
+    },
+    "home.expires" : {
+      "comment" : "Marbete due line on Next Up. %@ is month and year ('September 2026').",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expires %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence en %@"
+          }
+        }
+      }
+    },
+    "home.hero.dayLeft" : {
+      "comment" : "Beside the Next Up hero number when it is 1.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "day left"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "día restante"
+          }
+        }
+      }
+    },
+    "home.hero.dayOver" : {
+      "comment" : "Beside the Next Up hero number when it is 1 and past due.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "day over"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "día de retraso"
+          }
+        }
+      }
+    },
+    "home.hero.daysLeft" : {
+      "comment" : "Beside the Next Up hero day count.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "days left"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "días restantes"
+          }
+        }
+      }
+    },
+    "home.hero.daysOver" : {
+      "comment" : "Beside the Next Up hero day count when past due.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "days over"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "días de retraso"
+          }
+        }
+      }
+    },
+    "home.hero.daysToExpiry" : {
+      "comment" : "Beside the marbete's Next Up day count.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "days to expiry"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "días para vencer"
+          }
+        }
+      }
+    },
+    "home.hero.dayToExpiry" : {
+      "comment" : "Beside the marbete's Next Up day count when it is 1.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "day to expiry"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "día para vencer"
+          }
+        }
+      }
+    },
+    "home.hero.distanceLeft" : {
+      "comment" : "Beside the Next Up hero distance. %@ is the unit abbreviation ('mi', 'km').",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ left"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ restantes"
+          }
+        }
+      }
+    },
+    "home.hero.distanceOver" : {
+      "comment" : "Beside the Next Up hero distance when past due. %@ is the unit abbreviation.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ over"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ de más"
+          }
+        }
+      }
+    },
+    "home.marbete.renewConfirm" : {
+      "comment" : "Confirm button for renewing the marbete. %@ is the new expiration month and year.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renewed through %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renovado hasta %@"
+          }
+        }
+      }
+    },
+    "home.marbete.renewedToast" : {
+      "comment" : "Toast after renewing the marbete. %@ is the new expiration month and year.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marbete renewed through %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marbete renovado hasta %@"
+          }
+        }
+      }
+    },
+    "home.marbete.renewTitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mark the marbete renewed?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Marcar el marbete como renovado?"
+          }
+        }
+      }
+    },
+    "home.markDone" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mark Done"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcar hecho"
+          }
+        }
+      }
+    },
+    "home.markRenewed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mark Renewed"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcar renovado"
+          }
+        }
+      }
+    },
+    "home.nextUp" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next Up"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo próximo"
+          }
+        }
+      }
+    },
+    "home.nextUp.accessibility" : {
+      "comment" : "VoiceOver value for the Next Up card. %1$@ status, %2$@ hero phrase ('12 days left'), %3$@ due line.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@. %2$@. %3$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@. %2$@. %3$@."
+          }
+        }
+      }
+    },
+    "home.nextUp.empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing scheduled. Add a service with +."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada programado. Añade un servicio con +."
+          }
+        }
+      }
+    },
+    "home.odometer.daysOld" : {
+      "comment" : "Stale-odometer tag on Home's odometer cell. %lld is days since the last reading.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld d old"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hace %lld d"
+          }
+        }
+      }
+    },
+    "home.odometer.update" : {
+      "comment" : "Stale-odometer tag when the reading has never been dated.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizar"
+          }
+        }
+      }
+    },
+    "home.recent.empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Completed services appear here."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los servicios completados aparecen aquí."
+          }
+        }
+      }
+    },
     "home.recentActivity" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5605,6 +5989,213 @@
         }
       }
     },
+    "home.spokenFigure" : {
+      "comment" : "VoiceOver reading of the Next Up hero. %1$@ number, %2$@ qualifier ('days left').",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@"
+          }
+        }
+      }
+    },
+    "home.suggestion.clusterDetail" : {
+      "comment" : "Visit suggestion detail. %1$@ is a list of service names, %2$@ the mileage window ('1,000 mi').",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · all within %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · todos dentro de %2$@"
+          }
+        }
+      }
+    },
+    "home.suggestion.clusterTitle" : {
+      "comment" : "Visit suggestion title. %lld is the number of services (always 2 or more).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Do %lld services on one visit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haz %lld servicios en una sola visita"
+          }
+        }
+      }
+    },
+    "home.suggestion.neverShow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Don't Show Again"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No volver a mostrar"
+          }
+        }
+      }
+    },
+    "home.suggestion.notNow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not now"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahora no"
+          }
+        }
+      }
+    },
+    "home.suggestion.notThisYear" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not this year"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este año no"
+          }
+        }
+      }
+    },
+    "home.suggestion.reviewVisit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review visit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver visita"
+          }
+        }
+      }
+    },
+    "home.suggestion.schedule" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schedule"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programar"
+          }
+        }
+      }
+    },
+    "home.suggestions" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suggestions"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sugerencias"
+          }
+        }
+      }
+    },
+    "home.suggestions.empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing to suggest right now."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada que sugerir por ahora."
+          }
+        }
+      }
+    },
+    "home.syncing.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restoring your vehicles and maintenance history from iCloud."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurando tus vehículos y tu historial de mantenimiento desde iCloud."
+          }
+        }
+      }
+    },
+    "home.syncing.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Syncing your data"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronizando tus datos"
+          }
+        }
+      }
+    },
     "home.upcoming" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5618,6 +6209,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Próximos"
+          }
+        }
+      }
+    },
+    "home.upcoming.empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing else scheduled."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada más programado."
           }
         }
       }
@@ -5693,27 +6301,8 @@
     "Include Total" : {
 
     },
-    "KEEPS %lld SERVICE REMINDERS ACCURATE" : {
-
-    },
     "Last synced %@" : {
 
-    },
-    "LAST_SERVICE" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "LAST SERVICE"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ÚLT. SERVICIO"
-          }
-        }
-      }
     },
     "Late %@" : {
       "localizations" : {
@@ -6026,9 +6615,6 @@
 
     },
     "Not Set" : {
-
-    },
-    "NOT THIS YEAR" : {
 
     },
     "Notes" : {
@@ -7953,24 +8539,6 @@
         }
       }
     },
-    "readout.dismissVisitSuggestion" : {
-      "comment" : "VoiceOver label for the dismiss button on the service visit suggestion card.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dismiss service visit suggestion"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Descartar sugerencia de visita"
-          }
-        }
-      }
-    },
     "readout.distanceLeft" : {
       "comment" : "VoiceOver: distance remaining until due. %@ is a spoken distance ('1,200 miles').",
       "extractionState" : "manual",
@@ -8115,24 +8683,6 @@
         }
       }
     },
-    "readout.marbeteExpires" : {
-      "comment" : "VoiceOver value for the marbete Next Up card. %1$@ status, %2$@ full expiration date.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@. Expires %2$@."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@. Vence el %2$@."
-          }
-        }
-      }
-    },
     "readout.mileageUpdateDue" : {
       "comment" : "VoiceOver: the header's odometer reading is stale and should be updated.",
       "extractionState" : "manual",
@@ -8147,96 +8697,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Actualización del odómetro pendiente"
-          }
-        }
-      }
-    },
-    "readout.nextUpDate" : {
-      "comment" : "VoiceOver value for a date-only Next Up card. %1$@ status, %2$@ full due date.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@. Due %2$@."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@. Vence el %2$@."
-          }
-        }
-      }
-    },
-    "readout.nextUpMileage" : {
-      "comment" : "VoiceOver value for the Next Up card. %1$@ status, %2$@ distance phrase ('1,200 miles left'), %3$@ due-at distance.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@. %2$@. Due at %3$@."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@. %2$@. Vence a los %3$@."
-          }
-        }
-      }
-    },
-    "readout.nextUpMileageEstimate" : {
-      "comment" : "As readout.nextUpMileage, plus %4$@, the projected due period ('mid June').",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@. %2$@. Due at %3$@, estimated %4$@."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@. %2$@. Vence a los %3$@, estimado para %4$@."
-          }
-        }
-      }
-    },
-    "readout.odometer" : {
-      "comment" : "VoiceOver label for an odometer reading. %@ is a spoken distance.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Odometer, %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Odómetro, %@"
-          }
-        }
-      }
-    },
-    "readout.odometerEstimated" : {
-      "comment" : "VoiceOver label for an estimated odometer reading. %@ is a spoken distance.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Odometer, about %@, estimated"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Odómetro, aproximadamente %@, estimado"
           }
         }
       }
@@ -9448,9 +9908,6 @@
     "Scan with camera" : {
 
     },
-    "SCHEDULE SERVICE" : {
-
-    },
     "Schedule services or log\ncompleted maintenance" : {
 
     },
@@ -9458,25 +9915,6 @@
 
     },
     "SCHEDULE TOGETHER" : {
-
-    },
-    "SCHEDULED" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SCHEDULED"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PROGRAMADO"
-          }
-        }
-      }
-    },
-    "SEASONAL ADVISORY" : {
 
     },
     "Seasonal advisory, %@" : {
@@ -9537,9 +9975,6 @@
 
     },
     "SERVICE VISIT" : {
-
-    },
-    "SERVICE VISIT OPPORTUNITY" : {
 
     },
     "Service visit opportunity, %lld services due soon" : {
@@ -11954,9 +12389,6 @@
 
     },
     "WINDOW" : {
-
-    },
-    "WITHIN %@" : {
 
     }
   },

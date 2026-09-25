@@ -2,7 +2,26 @@
 //  HomeTab.swift
 //  checkpoint
 //
-//  Home tab showing glanceable "what's next" overview
+//  Home — a Readout. "What does this car need from me, and can I do it now?"
+//
+//  FIXED ORDER, ALWAYS THE SAME FIVE BLOCKS:
+//    0. Vehicle band   odometer (tap → update; stale tag) | specs ⌄
+//    1. Next Up        THE hero, ending in Mark Done (marbete: Mark Renewed)
+//    2. Suggestions    at most ONE: the visit cluster or a seasonal item
+//    3. Upcoming       the next 3 after Next Up
+//    4. Recent         the last 3 logs
+//
+//  Sparse data never removes a section and never renders an apology card: an
+//  empty section is its header plus one quiet `InsufficientDataNote`, so a new
+//  user's Home already has the shape it will have later.
+//
+//  A safety recall outranks all of it and sits above Next Up when present.
+//
+//  Removed with this layout: the stale-mileage prompt card (the stale tag now
+//  sits on the band's odometer cell, the control that resolves it), "Miles this
+//  year", and the separate cluster and seasonal cards.
+//
+//  Spec: tools/sketchpad/src/screens/HomeTab.tsx.
 //
 
 import SwiftUI
@@ -24,6 +43,9 @@ struct HomeTab: View {
     // Seasonal reminders
     @State var activeSeasonalReminders: [SeasonalReminder] = []
 
+    /// The expiration a pending "Mark Renewed" would set; drives its dialog.
+    @State var pendingMarbeteRenewal: Vehicle.MarbeteExpiration?
+
     /// Scopes the service + log fetches to `vehicle` at the database level so a
     /// write to another vehicle's data doesn't re-run this tab's queries.
     /// `appState` and the model context arrive through the environment.
@@ -32,8 +54,8 @@ struct HomeTab: View {
         _recallAcknowledgments = Query()
         if let vehicleID = vehicle?.id {
             _services = Query(filter: #Predicate<Service> { $0.vehicle?.id == vehicleID })
-            // Sorted in the store, so Recent Activity doesn't re-sort the whole
-            // history to show three rows.
+            // Sorted in the store, so Recent doesn't re-sort the whole history
+            // to show three rows.
             _serviceLogs = Query(
                 filter: #Predicate<ServiceLog> { $0.vehicle?.id == vehicleID },
                 sort: \.performedDate,
@@ -45,11 +67,7 @@ struct HomeTab: View {
         }
     }
 
-    private var syncService: SyncStatusService {
-        SyncStatusService.shared
-    }
-
-    private var vehicle: Vehicle? {
+    var vehicle: Vehicle? {
         appState.selectedVehicle
     }
 
@@ -62,47 +80,27 @@ struct HomeTab: View {
 
     /// Recalls that should appear on Home: drops resolved + actively snoozed,
     /// but never hides a parkIt recall (safety override).
-    private var visibleRecalls: [RecallInfo] {
-        guard let vehicle = vehicle else { return [] }
-        return RecallVisibility.visibleRecalls(
+    private func visibleRecalls(for vehicle: Vehicle) -> [RecallInfo] {
+        RecallVisibility.visibleRecalls(
             from: appState.currentRecalls,
             acknowledgments: recallAcknowledgments.dictionary(forVehicle: vehicle.id)
         )
     }
 
-    /// What this screen shows, derived in a single pass.
-    ///
-    /// The pieces below were computed properties that SwiftUI read repeatedly per
-    /// body evaluation — `remainingServices` alone was read four times, and each
-    /// read re-ran an urgency sort plus `nextUpItem`, which walks every mileage
-    /// snapshot to re-derive the driving pace. Now: one sort, one pace.
-    private struct Content {
+    /// What this screen shows, derived in a single pass: one urgency sort, one
+    /// walk of the mileage snapshots (Views/CLAUDE.md).
+    struct Content {
         let nextUp: (any UpcomingItem)?
-        /// Due-tracking services minus whatever Next Up is already showing.
-        let remaining: [Service]
-        let hasAnyService: Bool
+        /// The three due-tracking services after Next Up.
+        let upcoming: [Service]
         let recentLogs: [ServiceLog]
-        let logCount: Int
-        let mileageTrackedCount: Int
+        let suggestion: HomeSuggestion?
         let mileage: MileageEstimate
     }
 
-    private func makeContent() -> Content {
-        guard let vehicle else {
-            return Content(
-                nextUp: nil,
-                remaining: [],
-                hasAnyService: false,
-                recentLogs: [],
-                logCount: 0,
-                mileageTrackedCount: 0,
-                mileage: MileageEstimate(pace: nil, effective: 0, isEstimated: false)
-            )
-        }
-
+    private func makeContent(for vehicle: Vehicle) -> Content {
         let mileage = vehicle.mileageEstimate
-        let sorted = services.sortedByUrgency(mileage)
-        let tracked = sorted.filter { $0.hasDueTracking }
+        let tracked = services.sortedByUrgency(mileage).filter { $0.hasDueTracking }
 
         // Next Up is the most urgent tracked service unless the marbete beats it.
         let nextUp = vehicle.mostUrgentUpcomingItem(mileage: mileage, tracked: tracked)
@@ -118,200 +116,28 @@ struct HomeTab: View {
 
         return Content(
             nextUp: nextUp,
-            remaining: remaining,
-            hasAnyService: !sorted.isEmpty,
+            upcoming: Array(remaining.prefix(3)),
             // Already newest-first from the query.
             recentLogs: Array(serviceLogs.prefix(3)),
-            logCount: serviceLogs.count,
-            mileageTrackedCount: sorted.filter { $0.dueMileage != nil }.count,
+            suggestion: HomeSuggestion.pick(
+                cluster: primaryCluster,
+                dismissedClusterHashes: dismissedClusterHashes,
+                clusteringEnabled: ClusteringSettings.shared.isEnabled,
+                seasonal: activeSeasonalReminders
+            ),
             mileage: mileage
         )
     }
 
     var body: some View {
-        let content = makeContent()
-        ScrollView {
-            // Odometer + specs, full-bleed under the navigation bar. It was the
-            // bottom band of the custom header above every tab; the system bar
-            // took the rest of that header, and this part is Home's.
+        Group {
             if let vehicle {
-                VehicleSummaryBand(
-                    vehicle: vehicle,
-                    onMileageTap: { appState.present(.mileageUpdate()) },
-                    onEdit: { appState.present(.editVehicle) },
-                    onDocumentsTap: { appState.push(.documents(vehicle)) }
-                )
-                .tourTarget(.vehicleSummary, active: onboardingState.currentPhase.isTour)
+                ScrollView {
+                    readout(for: vehicle, content: makeContent(for: vehicle))
+                }
+            } else {
+                noVehicleState
             }
-
-            VStack(spacing: Spacing.xl) {
-                // Recall alert is safety-critical and outranks everything else,
-                // so it stays first.
-                if let vehicle = vehicle, !visibleRecalls.isEmpty {
-                    RecallAlertCard(
-                        vehicle: vehicle,
-                        recalls: visibleRecalls,
-                        allRecalls: appState.currentRecalls,
-                        appState: appState
-                    )
-                    .revealAnimation(delay: 0.05)
-                }
-
-                // Next Up hero card (service or marbete, whichever is more urgent)
-                if let nextUp = content.nextUp, vehicle != nil {
-                    VStack(alignment: .leading, spacing: Spacing.sm) {
-                        InstrumentSectionHeader(title: "Next Up")
-
-                        // Display appropriate card based on item type
-                        switch nextUp.itemType {
-                        case .service:
-                            if let service = nextUp as? Service {
-                                NextUpCard(
-                                    service: service,
-                                    currentMileage: content.mileage.effective,
-                                    dailyMilesPace: content.mileage.pace,
-                                    isEstimatedMileage: content.mileage.isEstimated
-                                ) {
-                                    appState.push(.service(service))
-                                }
-                            }
-                        case .marbete:
-                            if let marbeteItem = nextUp as? MarbeteUpcomingItem {
-                                MarbeteNextUpCard(marbeteItem: marbeteItem) {
-                                    // Navigate to EditVehicleView to update marbete
-                                    appState.present(.editVehicle)
-                                }
-                            }
-                        }
-                    }
-                    .tourTarget(.homeNextUp, active: onboardingState.currentPhase.isTour)
-                    .revealAnimation(delay: 0.15)
-                }
-
-                // Quick Mileage Update Card (shown if never updated or 14+ days ago)
-                if let vehicle = vehicle, vehicle.shouldPromptMileageUpdate {
-                    QuickMileageUpdateCard(
-                        vehicle: vehicle,
-                        mileageTrackedServiceCount: content.mileageTrackedCount
-                    ) { newMileage in
-                        AnalyticsService.shared.capture(.mileageUpdated(source: .quickUpdate))
-                        updateMileage(newMileage, for: vehicle)
-                    }
-                    .onAppear {
-                        AnalyticsService.shared.capture(.mileagePromptShown)
-                    }
-                    .revealAnimation(delay: 0.2)
-                }
-
-                // Service Cluster Suggestion Card (after Next Up)
-                if let cluster = primaryCluster,
-                   !dismissedClusterHashes.contains(cluster.contentHash),
-                   ClusteringSettings.shared.isEnabled {
-                    ServiceClusterCard(
-                        cluster: cluster,
-                        onTap: {
-                            AnalyticsService.shared.capture(.serviceClusterTapped)
-                            appState.present(.clusterDetail(cluster))
-                        },
-                        onDismiss: {
-                            dismissCluster(cluster)
-                        }
-                    )
-                    .revealAnimation(delay: 0.25)
-                }
-
-                // Seasonal Advisory Cards (max 2)
-                ForEach(Array(activeSeasonalReminders.prefix(2)), id: \.id) { reminder in
-                    SeasonalReminderCard(
-                        reminder: reminder,
-                        onScheduleService: {
-                            scheduleSeasonalService(reminder)
-                        },
-                        onDismiss: {
-                            dismissSeasonalReminder(reminder)
-                        }
-                    )
-                    .revealAnimation(delay: 0.3)
-                }
-
-                // Upcoming services list (max 3 for home tab).
-                //
-                // No bordered container. Rows separated by dividers under a
-                // titled header already read as one group — proximity carries
-                // grouping before borders do — and the box put a second
-                // enclosure inside a screen whose hero cards are already boxed,
-                // so the list competed with the thing it sits beneath.
-                if !content.remaining.isEmpty {
-                    ReadoutSection(title: L10n.homeUpcoming) {
-                        VStack(spacing: 0) {
-                            ForEach(Array(content.remaining.prefix(3).enumerated()), id: \.element.id) { index, service in
-                                ServiceRow(
-                                    service: service,
-                                    currentMileage: content.mileage.effective,
-                                    isEstimatedMileage: content.mileage.isEstimated
-                                ) {
-                                    appState.push(.service(service))
-                                }
-                                .staggeredReveal(index: index, baseDelay: 0.25)
-
-                                if index < min(content.remaining.count, 3) - 1 {
-                                    ListDivider()
-                                }
-                            }
-                        }
-                    } action: {
-                        if content.remaining.count > 3 {
-                            ReadoutSectionAction(label: L10n.commonViewAll) {
-                                appState.selectedTab = .services
-                            }
-                        }
-                    }
-                }
-
-                // Recent Activity Feed (max 3, with View All)
-                if !content.recentLogs.isEmpty {
-                    ReadoutSection(title: L10n.homeRecentActivity) {
-                        VStack(spacing: 0) {
-                            ForEach(Array(content.recentLogs.enumerated()), id: \.element.id) { index, log in
-                                // ServiceEventRow owns its own tap target.
-                                activityRow(log: log)
-
-                                if index < content.recentLogs.count - 1 {
-                                    ListDivider()
-                                }
-                            }
-                        }
-                    } action: {
-                        if content.logCount > 3 {
-                            // Services, not Costs. This sent a maintenance
-                            // history list to a financial view — the rule is
-                            // that "View All" lands on a list containing the
-                            // items the section actually showed.
-                            ReadoutSectionAction(label: L10n.commonViewAll) {
-                                appState.selectedTab = .services
-                            }
-                        }
-                    }
-                    .revealAnimation(delay: 0.35)
-                }
-
-                // Empty states
-                if appState.selectedVehicle == nil {
-                    if case .syncing = syncService.syncState {
-                        syncingDataState
-                            .revealAnimation(delay: 0.2)
-                    } else {
-                        emptyVehicleState
-                            .revealAnimation(delay: 0.2)
-                    }
-                } else if !content.hasAnyService && vehicle != nil {
-                    noServicesState
-                        .revealAnimation(delay: 0.2)
-                }
-            }
-            .padding(.horizontal, Spacing.screenHorizontal)
-            .padding(.top, Spacing.lg)
-            .padding(.bottom, Spacing.xxl)
         }
         .task(id: vehicle?.id) {
             detectClusters()
@@ -324,9 +150,6 @@ struct HomeTab: View {
             detectClusters()
         }
         .trackScreen(.home)
-        // No `refreshSeasonalReminders()` here — the `.task` above already runs it
-        // on every appearance, and doing it twice meant two extra `@State` writes,
-        // each triggering another pass over this whole body.
         .onAppear {
             loadDismissedClusters()
         }
@@ -334,6 +157,145 @@ struct HomeTab: View {
         // marking one done bumps this token.
         .onChange(of: appState.clusterRefreshToken) { _, _ in
             detectClusters()
+        }
+        .marbeteRenewalDialog(pending: $pendingMarbeteRenewal) { expiration in
+            if let vehicle { renewMarbete(of: vehicle, to: expiration) }
+        }
+    }
+
+    @ViewBuilder
+    private func readout(for vehicle: Vehicle, content: Content) -> some View {
+        // Full-bleed, inside the scroll: it scrolls away with the content as
+        // the large title collapses rather than pinning ~55pt of chrome.
+        VehicleSummaryBand(
+            vehicle: vehicle,
+            onMileageTap: { appState.present(.mileageUpdate()) },
+            onEdit: { appState.present(.editVehicle) },
+            onDocumentsTap: { appState.push(.documents(vehicle)) }
+        )
+        .tourTarget(.vehicleSummary, active: onboardingState.currentPhase.isTour)
+
+        VStack(alignment: .leading, spacing: Spacing.xl) {
+            let recalls = visibleRecalls(for: vehicle)
+            if !recalls.isEmpty {
+                RecallAlertCard(
+                    vehicle: vehicle,
+                    recalls: recalls,
+                    allRecalls: appState.currentRecalls,
+                    appState: appState
+                )
+                .revealAnimation(delay: 0.05)
+            }
+
+            nextUpSection(content, vehicle: vehicle)
+                .tourTarget(.homeNextUp, active: onboardingState.currentPhase.isTour)
+                .revealAnimation(delay: 0.1)
+
+            suggestionSection(content.suggestion)
+                .revealAnimation(delay: 0.15)
+
+            upcomingSection(content)
+                .revealAnimation(delay: 0.2)
+
+            recentSection(content)
+                .revealAnimation(delay: 0.25)
+        }
+        .padding(.horizontal, Spacing.screenHorizontal)
+        .padding(.top, Spacing.lg)
+        .padding(.bottom, Spacing.xxl)
+    }
+
+    // MARK: - Sections
+
+    @ViewBuilder
+    private func nextUpSection(_ content: Content, vehicle: Vehicle) -> some View {
+        if let service = content.nextUp as? Service {
+            NextUpCard(
+                service: service,
+                mileage: content.mileage,
+                onOpen: { appState.push(.service(service)) },
+                onMarkDone: {
+                    appState.present(.markDone(MarkDoneRequest(services: [service], vehicle: vehicle)))
+                }
+            )
+        } else if let marbete = content.nextUp as? MarbeteUpcomingItem {
+            NextUpCard(
+                marbete: marbete,
+                // No marbete detail screen exists; its fields live on the vehicle.
+                onOpen: { appState.present(.editVehicle) },
+                onMarkRenewed: { pendingMarbeteRenewal = vehicle.renewedMarbeteExpiration() }
+            )
+        } else {
+            ReadoutSection(title: L10n.homeNextUp) {
+                InsufficientDataNote(message: L10n.homeNextUpEmpty)
+            }
+        }
+    }
+
+    private func suggestionSection(_ suggestion: HomeSuggestion?) -> some View {
+        ReadoutSection(title: L10n.homeSuggestions) {
+            if let suggestion {
+                suggestionView(suggestion)
+            } else {
+                InsufficientDataNote(message: L10n.homeSuggestionsEmpty)
+            }
+        }
+    }
+
+    private func upcomingSection(_ content: Content) -> some View {
+        ReadoutSection(title: L10n.homeUpcoming) {
+            if content.upcoming.isEmpty {
+                InsufficientDataNote(message: L10n.homeUpcomingEmpty)
+            } else {
+                VStack(spacing: 0) {
+                    ForEach(Array(content.upcoming.enumerated()), id: \.element.id) { index, service in
+                        ServiceRow(
+                            service: service,
+                            currentMileage: content.mileage.effective,
+                            isEstimatedMileage: content.mileage.isEstimated
+                        ) {
+                            appState.push(.service(service))
+                        }
+
+                        if index < content.upcoming.count - 1 {
+                            ListDivider()
+                        }
+                    }
+                }
+            }
+        } action: {
+            // Services' status groups contain every row shown here.
+            if !content.upcoming.isEmpty {
+                ReadoutSectionAction(label: L10n.commonViewAll) {
+                    appState.selectedTab = .services
+                }
+            }
+        }
+    }
+
+    private func recentSection(_ content: Content) -> some View {
+        ReadoutSection(title: L10n.homeRecentActivity) {
+            if content.recentLogs.isEmpty {
+                InsufficientDataNote(message: L10n.homeRecentEmpty)
+            } else {
+                VStack(spacing: 0) {
+                    ForEach(Array(content.recentLogs.enumerated()), id: \.element.id) { index, log in
+                        activityRow(log: log)
+
+                        if index < content.recentLogs.count - 1 {
+                            ListDivider()
+                        }
+                    }
+                }
+            }
+        } action: {
+            // Services' history, never Costs: a maintenance-history list must
+            // not point at a financial view.
+            if !content.recentLogs.isEmpty {
+                ReadoutSectionAction(label: L10n.commonViewAll) {
+                    appState.selectedTab = .services
+                }
+            }
         }
     }
 }
