@@ -22,12 +22,14 @@ struct ServiceClusterCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header row: status square + label + dismiss button
+            // Header row: accent square + label. The dismiss button is
+            // overlaid (below) so it stays outside the combined element.
             HStack(alignment: .top) {
                 Rectangle()
                     .fill(Theme.accent)
                     .frame(width: 8, height: 8)
                     .statusGlow(color: Theme.accent, isActive: isUrgent)
+                    .accessibilityHidden(true)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("SERVICE VISIT OPPORTUNITY")
@@ -41,20 +43,7 @@ struct ServiceClusterCard: View {
                         .textCase(.uppercase)
                 }
 
-                Spacer()
-
-                // Dismiss button - uses highPriorityGesture to capture taps before card gesture
-                Button {
-                    onDismiss()
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(Theme.textTertiary)
-                        .frame(width: 44, height: 44)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Dismiss service visit suggestion")
+                Spacer(minLength: TouchTarget.minimum)
             }
             .padding(.bottom, Spacing.md)
 
@@ -66,15 +55,25 @@ struct ServiceClusterCard: View {
             // Service list (max 4, with +N more)
             VStack(alignment: .leading, spacing: 6) {
                 ForEach(Array(cluster.services.prefix(4)), id: \.id) { service in
-                    HStack(spacing: 8) {
+                    let serviceStatus = service.status(currentMileage: effectiveMileage)
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
                         Rectangle()
-                            .fill(service.status(currentMileage: cluster.vehicle.effectiveMileage).color)
+                            .fill(serviceStatus.color)
                             .frame(width: 4, height: 4)
+                            .accessibilityHidden(true)
 
                         Text(service.name.uppercased())
                             .font(.brutalistSecondary)
                             .foregroundStyle(Theme.textSecondary)
-                            .lineLimit(1)
+
+                        // The square's color is the status; the word says it
+                        // too, for color-blind users and VoiceOver.
+                        if !serviceStatus.label.isEmpty {
+                            Text(serviceStatus.label)
+                                .font(.brutalistLabel)
+                                .foregroundStyle(serviceStatus.color)
+                                .tracking(1)
+                        }
                     }
                 }
 
@@ -94,7 +93,7 @@ struct ServiceClusterCard: View {
 
             // Technical data rows
             VStack(spacing: Spacing.sm) {
-                HStack {
+                AdaptiveStack {
                     Text("WINDOW")
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
@@ -108,7 +107,7 @@ struct ServiceClusterCard: View {
                 }
 
                 if let targetMileage = cluster.suggestedMileage {
-                    HStack {
+                    AdaptiveStack {
                         Text("TARGET")
                             .font(.brutalistLabel)
                             .foregroundStyle(Theme.textTertiary)
@@ -126,9 +125,30 @@ struct ServiceClusterCard: View {
         }
         .glassCardStyle(intensity: .subtle)
         .tappableCard(action: onTap)
+        // Reads the header, each service with its status, and the window —
+        // the datum, in reading order. The dismiss button is overlaid after
+        // this so it remains its own element instead of being swallowed.
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Service visit opportunity, \(cluster.serviceCount) services due soon")
-        .accessibilityHint("Tap to view details, or dismiss")
+        .accessibilityAddTraits(.isButton)
+        .overlay(alignment: .topTrailing) {
+            Button {
+                onDismiss()
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(Theme.textTertiary)
+                    .minimumTouchTarget()
+            }
+            .buttonStyle(.plain)
+            // Same position it had inside the header row, whose trailing
+            // spacer still reserves room for it.
+            .padding([.top, .trailing], Theme.cardPadding)
+            .accessibilityLabel(L10n.readoutDismissVisitSuggestion)
+        }
+    }
+
+    private var effectiveMileage: Int {
+        cluster.vehicle.effectiveMileage
     }
 }
 

@@ -59,8 +59,9 @@ struct ExpenseRow: View {
             },
             isHighlighted: isHighlighted,
             accessibilityValueText: log.formattedCost ?? L10n.rowNoCostRecorded,
-            accessibilityLabelText: "\(title), \(formattedDate)"
-                + (isAnomalous ? L10n.rowOutlierAccessibility : ""),
+            accessibilityLabelText: isAnomalous
+                ? L10n.readoutEventOutlier(title, formattedDate)
+                : L10n.readoutEvent(title, formattedDate),
             onTap: onTap
         )
     }

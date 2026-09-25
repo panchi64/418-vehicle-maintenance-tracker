@@ -26,14 +26,19 @@ struct LastServiceReferenceCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text(L10n.refCardLast(serviceName.uppercased()))
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1.5)
+            // The readout combines into one element; the button stays its own
+            // so VoiceOver can reach it rather than folding it into the text.
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                Text(L10n.refCardLast(serviceName.uppercased()))
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.textTertiary)
+                    .tracking(1.5)
 
-            Text(summaryLine)
-                .font(.brutalistBody)
-                .foregroundStyle(Theme.textPrimary)
+                Text(summaryLine)
+                    .font(.brutalistBody)
+                    .foregroundStyle(Theme.textPrimary)
+            }
+            .accessibilityElement(children: .combine)
 
             if let onUseValues {
                 Button(action: onUseValues) {
@@ -41,6 +46,8 @@ struct LastServiceReferenceCard: View {
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.accent)
                         .tracking(1)
+                        .frame(minHeight: TouchTarget.minimum)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(L10n.refCardUseValues)
@@ -48,7 +55,6 @@ struct LastServiceReferenceCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .cardStyle()
-        .accessibilityElement(children: .combine)
     }
 }
 

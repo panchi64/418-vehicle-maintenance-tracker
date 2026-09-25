@@ -19,15 +19,66 @@ struct MonthlyTrendChartCard: View {
 
     private static let monthFormatter: DateFormatter = {
         let f = DateFormatter()
-        f.dateFormat = "MMM"
+        f.setLocalizedDateFormatFromTemplate("MMM")
         return f
     }()
 
     private static let monthYearFormatter: DateFormatter = {
         let f = DateFormatter()
-        f.dateFormat = "MMM yyyy"
+        f.setLocalizedDateFormatFromTemplate("MMMyyyy")
         return f
     }()
+
+    /// Spoken month for VoiceOver: "June 2026", not "Jun 2026" or "6/26".
+    private static func spokenMonth(_ date: Date) -> String {
+        date.formatted(.dateTime.month(.wide).year())
+    }
+
+    /// Audio Graph description: every month's amount (per category when
+    /// stacked), plus the total and the highest month as a summary.
+    private var chartDescriptor: CostChartDescriptor {
+        let months = breakdown.map { Self.spokenMonth($0.month) }
+        let series: [SpokenChartSeries]
+        if isStacked, let byCategory = breakdownByCategory {
+            let categories = Array(Set(byCategory.map(\.category))).sorted { $0.displayName < $1.displayName }
+            series = categories.map { category in
+                SpokenChartSeries(
+                    name: category.displayName,
+                    points: byCategory
+                        .filter { $0.category == category }
+                        .map { SpokenChartPoint(label: Self.spokenMonth($0.month), amount: $0.amount) }
+                )
+            }
+        } else {
+            series = [SpokenChartSeries(
+                name: L10n.readoutChartSeriesSpending,
+                points: breakdown.map { SpokenChartPoint(label: Self.spokenMonth($0.month), amount: $0.amount) }
+            )]
+        }
+
+        let total = breakdown.map(\.amount).reduce(0, +)
+        let summary: String
+        if let peak = breakdown.max(by: { $0.amount < $1.amount }) {
+            summary = L10n.readoutChartMonthlySummary(
+                Formatters.currencyWhole(total),
+                breakdown.count,
+                Self.spokenMonth(peak.month),
+                Formatters.currencyWhole(peak.amount)
+            )
+        } else {
+            summary = ""
+        }
+
+        return CostChartDescriptor(
+            title: L10n.readoutChartMonthlyTitle,
+            summary: summary,
+            xAxisTitle: L10n.readoutChartAxisMonth,
+            yAxisTitle: L10n.readoutChartAxisAmount,
+            categories: months,
+            series: series,
+            currencyCode: Formatters.currencyWhole.currencyCode ?? "USD"
+        )
+    }
 
     /// Month stride count for x-axis labels based on data span
     private var xAxisMonthStride: Int {
@@ -45,12 +96,13 @@ struct MonthlyTrendChartCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "Monthly Trend")
+            InstrumentSectionHeader(title: L10n.readoutChartMonthlyTitle)
 
             VStack(spacing: 0) {
                 ZStack(alignment: .topLeading) {
                     chart
                         .brutalistChartStyle()
+                        .accessibilityChartDescriptor(chartDescriptor)
 
                     if let entry = selectedBreakdownEntry {
                         selectionOverlay(month: entry.month, amount: entry.amount)
@@ -68,7 +120,6 @@ struct MonthlyTrendChartCard: View {
             textRows
         }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("Monthly spending trend chart")
         .onChange(of: selectedBreakdownEntry?.month) { _, newMonth in
             onSelectionChange?(newMonth)
         }
@@ -175,7 +226,7 @@ struct MonthlyTrendChartCard: View {
     private func legend(for data: [(month: Date, category: CostCategory, amount: Decimal)]) -> some View {
         let categories = Array(Set(data.map(\.category))).sorted { $0.displayName < $1.displayName }
 
-        return HStack(spacing: Spacing.md) {
+        return AdaptiveStack(spacing: Spacing.md) {
             ForEach(categories, id: \.self) { category in
                 HStack(spacing: Spacing.xs) {
                     Rectangle()
@@ -198,11 +249,10 @@ struct MonthlyTrendChartCard: View {
     private var textRows: some View {
         VStack(spacing: 0) {
             ForEach(Array(breakdown.enumerated()), id: \.element.month) { index, item in
-                HStack(spacing: Spacing.sm) {
+                AdaptiveStack(spacing: Spacing.sm) {
                     Text(formatMonthYear(item.month))
                         .font(.brutalistBody)
                         .foregroundStyle(Theme.textPrimary)
-                        .lineLimit(1)
 
                     Spacer()
 

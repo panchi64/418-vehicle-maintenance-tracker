@@ -53,7 +53,7 @@ struct RecallRowCard: View {
             HStack(spacing: Spacing.sm) {
                 if recall.parkIt {
                     Image(systemName: "exclamationmark.octagon.fill")
-                        .font(.system(size: 12))
+                        .font(.caption)
                         .foregroundStyle(Theme.statusOverdue)
                 }
 
@@ -70,7 +70,7 @@ struct RecallRowCard: View {
                 Spacer()
 
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 11, weight: .bold))
+                    .font(.caption2.weight(.bold))
                     .foregroundStyle(Theme.statusOverdue)
                     .rotationEffect(.degrees(isExpanded ? 180 : 0))
             }
@@ -78,8 +78,18 @@ struct RecallRowCard: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(recall.component), \(isExpanded ? "expanded" : "collapsed")")
-        .accessibilityHint(isExpanded ? "Double tap to collapse" : "Double tap to expand details")
+        .accessibilityLabel(headerAccessibilityLabel)
+        .accessibilityValue(isExpanded ? L10n.readoutExpanded : L10n.readoutCollapsed)
+    }
+
+    /// The component, plus its tracked status when it has one — the badge
+    /// under the name would otherwise be replaced by this label.
+    private var headerAccessibilityLabel: String {
+        switch status {
+        case .open: recall.component
+        case .scheduled: L10n.readoutValueWithStatus(recall.component, L10n.recallStatusScheduled)
+        case .resolved: L10n.readoutValueWithStatus(recall.component, L10n.recallStatusResolved)
+        }
     }
 
     @ViewBuilder
@@ -95,7 +105,8 @@ struct RecallRowCard: View {
         case .resolved:
             HStack(spacing: 4) {
                 Image(systemName: "checkmark")
-                    .font(.system(size: 9, weight: .bold))
+                    .font(.caption2.weight(.bold))
+                    .accessibilityHidden(true)
                 Text(L10n.recallStatusResolved.uppercased())
                     .font(.brutalistLabel)
                     .tracking(1.5)
@@ -144,7 +155,7 @@ struct RecallRowCard: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            HStack {
+            AdaptiveStack {
                 Text("NHTSA #\(recall.campaignNumber)")
                     .font(.brutalistLabel)
                     .foregroundStyle(Theme.textTertiary)
@@ -215,10 +226,11 @@ struct RecallRowCard: View {
             Spacer()
 
             Image(systemName: "arrow.up.right")
-                .font(.system(size: 10, weight: .bold))
+                .font(.caption2.weight(.bold))
                 .foregroundStyle(tint)
+                .accessibilityHidden(true)
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, minHeight: TouchTarget.minimum - 2 * Spacing.sm)
         .padding(.vertical, Spacing.sm)
         .padding(.horizontal, Spacing.sm)
         .background(tint.opacity(0.1))
@@ -253,16 +265,16 @@ struct RecallRowCard: View {
         } label: {
             HStack(spacing: Spacing.xs) {
                 Image(systemName: "ellipsis.circle")
-                    .font(.system(size: 11, weight: .bold))
+                    .font(.caption2.weight(.bold))
+                    .accessibilityHidden(true)
                 Text("UPDATE STATUS")
                     .font(.brutalistLabel)
                     .tracking(1.5)
             }
             .foregroundStyle(Theme.textTertiary)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, Spacing.sm)
+            .frame(maxWidth: .infinity, minHeight: TouchTarget.minimum)
             .contentShape(Rectangle())
         }
-        .accessibilityLabel("Update recall status")
+        .accessibilityLabel(L10n.readoutUpdateRecallStatus)
     }
 }

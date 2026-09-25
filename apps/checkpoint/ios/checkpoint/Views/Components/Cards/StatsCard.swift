@@ -79,8 +79,8 @@ struct StatsCard: View {
         .frame(maxHeight: .infinity, alignment: .topLeading)
         .background(Theme.surfaceInstrument)
         .brutalistBorder()
+        // Reads label, value, subvalue in order from the children themselves.
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(label): \(value)\(subvalue.map { ", \($0)" } ?? "")")
     }
 }
 
@@ -97,7 +97,9 @@ struct StatsCardRow<Content: View>: View {
     @ViewBuilder let content: Content
 
     var body: some View {
-        HStack(alignment: .top, spacing: Spacing.md) {
+        // Three tiles side by side can't hold AX-size numerals, so the row
+        // stacks at accessibility sizes; each tile is then full width.
+        AdaptiveStack(verticalAlignment: .top, spacing: Spacing.md) {
             content
         }
         .fixedSize(horizontal: false, vertical: true)

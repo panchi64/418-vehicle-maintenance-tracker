@@ -34,6 +34,9 @@ struct CategoryBreakdownCard: View {
                     .frame(height: 12)
                     .padding(.horizontal, Spacing.md)
                     .padding(.top, Spacing.md)
+                    // Color-only summary of the rows below, which carry each
+                    // category's name, share, and amount in text.
+                    .accessibilityHidden(true)
 
                     Rectangle()
                         .fill(Theme.gridLine)
@@ -42,34 +45,41 @@ struct CategoryBreakdownCard: View {
                 }
 
                 ForEach(breakdown, id: \.category) { item in
-                    HStack(spacing: Spacing.sm) {
-                        Image(systemName: item.category.icon)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(item.category.color)
-                            .frame(width: 20)
-                            .accessibilityHidden(true)
+                    AdaptiveStack(spacing: Spacing.sm) {
+                        HStack(spacing: Spacing.sm) {
+                            Image(systemName: item.category.icon)
+                                .font(.body.weight(.medium))
+                                .foregroundStyle(item.category.color)
+                                .accessibilityHidden(true)
 
-                        Text(item.category.displayName)
-                            .font(.brutalistBody)
-                            .foregroundStyle(Theme.textPrimary)
+                            Text(item.category.displayName)
+                                .font(.brutalistBody)
+                                .foregroundStyle(Theme.textPrimary)
+                        }
 
                         Spacer()
 
-                        Text(String(format: "%.0f%%", item.percentage))
-                            .font(.brutalistSecondary)
-                            .foregroundStyle(Theme.textTertiary)
-                            .frame(width: 40, alignment: .trailing)
+                        HStack(spacing: Spacing.sm) {
+                            Text(item.percentage / 100, format: .percent.precision(.fractionLength(0)))
+                                .font(.brutalistSecondary)
+                                .foregroundStyle(Theme.textTertiary)
+                                .frame(minWidth: 40, alignment: .trailing)
 
-                        Text(formatCurrency(item.amount))
-                            .font(.brutalistBody)
-                            .foregroundStyle(item.category.color)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-                            .frame(minWidth: 60, alignment: .trailing)
+                            Text(formatCurrency(item.amount))
+                                .font(.brutalistBody)
+                                .foregroundStyle(item.category.color)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
+                                .frame(minWidth: 60, alignment: .trailing)
+                        }
                     }
                     .padding(Spacing.md)
-                    .accessibilityElement(children: .combine)
-                    .accessibilityLabel("\(item.category.displayName), \(formatCurrency(item.amount)), \(String(format: "%.0f", item.percentage)) percent")
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(L10n.readoutCategoryShare(
+                        item.category.displayName,
+                        formatCurrency(item.amount),
+                        Int(item.percentage.rounded())
+                    ))
 
                     if item.category != breakdown.last?.category {
                         Rectangle()

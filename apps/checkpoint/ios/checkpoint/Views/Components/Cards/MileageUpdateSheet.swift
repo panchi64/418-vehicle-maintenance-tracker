@@ -152,7 +152,7 @@ struct MileageUpdateSheet: View {
     private var contextRow: some View {
         if hasEstimate {
             // Show both estimate and last confirmed
-            HStack(spacing: Spacing.sm) {
+            AdaptiveStack(spacing: Spacing.sm) {
                 // Current estimate card
                 estimateContextCard
 
@@ -288,8 +288,9 @@ struct MileageUpdateSheet: View {
     private func ocrErrorView(_ error: String) -> some View {
         HStack(spacing: Spacing.sm) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 14, weight: .medium))
+                .font(.subheadline.weight(.medium))
                 .foregroundStyle(Theme.statusOverdue)
+                .accessibilityHidden(true)
 
             Text(error.uppercased())
                 .font(.brutalistLabel)
@@ -302,10 +303,9 @@ struct MileageUpdateSheet: View {
                 ocrError = nil
             } label: {
                 Image(systemName: "xmark")
-                    .font(.system(size: 12, weight: .bold))
+                    .font(.caption.weight(.bold))
                     .foregroundStyle(Theme.textTertiary)
-                    .frame(minWidth: 44, minHeight: 44)
-                    .contentShape(Rectangle())
+                    .minimumTouchTarget()
             }
             .accessibilityLabel(L10n.mileageDismissError)
         }

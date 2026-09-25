@@ -119,8 +119,9 @@ struct RecallSheetView: View {
                     VStack(spacing: 2) {
                         HStack(spacing: Spacing.sm) {
                             Image(systemName: "exclamationmark.triangle.fill")
-                                .font(.system(size: 14, weight: .bold))
+                                .font(.subheadline.weight(.bold))
                                 .foregroundStyle(Theme.statusOverdue)
+                                .accessibilityHidden(true)
                             Text(titleText.uppercased())
                                 .font(.brutalistLabel)
                                 .foregroundStyle(Theme.statusOverdue)
@@ -147,7 +148,7 @@ struct RecallSheetView: View {
                         }
                         .tint(showResolved ? Theme.accent : Theme.textSecondary)
                         .accessibilityLabel(L10n.recallToggleShowResolved)
-                        .accessibilityValue(showResolved ? "On" : "Off")
+                        .accessibilityAddTraits(showResolved ? .isSelected : [])
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
@@ -155,12 +156,11 @@ struct RecallSheetView: View {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")
-                            .font(.system(size: 14, weight: .bold))
+                            .font(.subheadline.weight(.bold))
                             .foregroundStyle(Theme.textSecondary)
-                            .frame(minWidth: 44, minHeight: 44)
-                            .contentShape(Rectangle())
+                            .minimumTouchTarget()
                     }
-                    .accessibilityLabel("Close")
+                    .accessibilityLabel(L10n.readoutClose)
                 }
             }
         }
@@ -181,8 +181,9 @@ struct RecallSheetView: View {
     private var emptyState: some View {
         VStack(spacing: Spacing.md) {
             Image(systemName: "checkmark.shield")
-                .font(.system(size: 40, weight: .light))
+                .font(.largeTitle.weight(.light))
                 .foregroundStyle(Theme.statusGood)
+                .accessibilityHidden(true)
 
             Text(L10n.recallEmptyAllClear.uppercased())
                 .font(.brutalistHeading)

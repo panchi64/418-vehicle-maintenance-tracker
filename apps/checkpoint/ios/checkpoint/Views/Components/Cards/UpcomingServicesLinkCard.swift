@@ -9,9 +9,8 @@ struct UpcomingServicesLinkCard: View {
         Button(action: onTap) {
             HStack(spacing: Spacing.sm) {
                 Image(systemName: "calendar.badge.clock")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.subheadline.weight(.medium))
                     .foregroundStyle(Theme.accent)
-                    .frame(width: 20)
                     .accessibilityHidden(true)
 
                 VStack(alignment: .leading, spacing: 2) {
@@ -23,14 +22,14 @@ struct UpcomingServicesLinkCard: View {
                     Text(body(name: nextServiceName, more: additionalCount))
                         .font(.brutalistBody)
                         .foregroundStyle(Theme.textPrimary)
-                        .lineLimit(1)
                 }
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.caption.weight(.semibold))
                     .foregroundStyle(Theme.textTertiary)
+                    .accessibilityHidden(true)
             }
             .padding(Spacing.md)
             .background(Theme.surfaceInstrument)
@@ -38,9 +37,8 @@ struct UpcomingServicesLinkCard: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        // The button's label reads the title then the service line.
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Coming up: \(body(name: nextServiceName, more: additionalCount))")
-        .accessibilityHint("Double tap to view services")
     }
 
     private func body(name: String, more: Int) -> String {

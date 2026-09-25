@@ -37,25 +37,30 @@ struct EmptyStateView: View {
     /// Optional button label (required if action is provided)
     var actionLabel: String?
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     var body: some View {
         VStack(spacing: Spacing.lg) {
             // Icon container - brutalist rectangle with accent tint
             ZStack {
                 Rectangle()
                     .fill(Theme.accent.opacity(0.1))
-                    .frame(width: 100, height: 100)
+                    .frame(minWidth: 100, minHeight: 100)
 
                 Image(systemName: icon)
-                    .font(.system(size: 40, weight: .light))
+                    .font(.largeTitle.weight(.light))
                     .foregroundStyle(Theme.accent)
+                    .padding(Spacing.md)
             }
+            .fixedSize()
             .accessibilityHidden(true)
 
-            // Text content
+            // Text content — one element; the button below stays separate.
             VStack(spacing: Spacing.xs) {
                 Text(title)
                     .font(.brutalistHeading)
                     .foregroundStyle(Theme.textPrimary)
+                    .multilineTextAlignment(.center)
 
                 Text(message)
                     .font(.brutalistSecondary)
@@ -63,18 +68,19 @@ struct EmptyStateView: View {
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
             }
+            .accessibilityElement(children: .combine)
 
             // Optional action button
             if let action = action, let actionLabel = actionLabel {
                 Button(actionLabel, action: action)
                     .buttonStyle(.primary)
-                    .frame(width: 160)
+                    // 160pt at standard sizes; full width once the label
+                    // can no longer fit in that.
+                    .frame(maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : 160)
                     .padding(.top, Spacing.sm)
             }
         }
         .padding(Spacing.xxl)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(title). \(message)")
     }
 }
 

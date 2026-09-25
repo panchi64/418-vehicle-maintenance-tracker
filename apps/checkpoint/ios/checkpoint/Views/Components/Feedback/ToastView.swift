@@ -15,8 +15,9 @@ struct ToastView: View {
             // Icon
             if let icon = toast.icon {
                 Image(systemName: icon)
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.subheadline.weight(.medium))
                     .foregroundStyle(toast.style.iconColor)
+                    .accessibilityHidden(true)
             }
 
             // Message
@@ -36,8 +37,11 @@ struct ToastView: View {
                         .font(.brutalistLabelBold)
                         .foregroundStyle(Theme.accent)
                         .tracking(1.5)
+                        .frame(minHeight: TouchTarget.minimum)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.instrument)
+                .accessibilityLabel(action.label)
             }
 
             // Dismiss button
@@ -45,12 +49,12 @@ struct ToastView: View {
                 ToastService.shared.dismiss()
             } label: {
                 Image(systemName: "xmark")
-                    .font(.system(size: 12, weight: .bold))
+                    .font(.caption.weight(.bold))
                     .foregroundStyle(Theme.textTertiary)
-                    .frame(minWidth: 44, minHeight: 44)
-                    .contentShape(Rectangle())
+                    .minimumTouchTarget()
             }
             .buttonStyle(.instrument)
+            .accessibilityLabel(L10n.commonDismiss)
         }
         .padding(.horizontal, Spacing.md)
         .padding(.vertical, Spacing.sm)

@@ -152,7 +152,7 @@ struct HomeTab: View {
                 }
 
                 // Next Up hero card (service or marbete, whichever is more urgent)
-                if let nextUp = content.nextUp, let vehicle = vehicle {
+                if let nextUp = content.nextUp, vehicle != nil {
                     VStack(alignment: .leading, spacing: Spacing.sm) {
                         InstrumentSectionHeader(title: "Next Up")
 
@@ -163,7 +163,6 @@ struct HomeTab: View {
                                 NextUpCard(
                                     service: service,
                                     currentMileage: content.mileage.effective,
-                                    vehicleName: vehicle.displayName,
                                     dailyMilesPace: content.mileage.pace,
                                     isEstimatedMileage: content.mileage.isEstimated
                                 ) {
@@ -172,10 +171,7 @@ struct HomeTab: View {
                             }
                         case .marbete:
                             if let marbeteItem = nextUp as? MarbeteUpcomingItem {
-                                MarbeteNextUpCard(
-                                    marbeteItem: marbeteItem,
-                                    vehicleName: vehicle.displayName
-                                ) {
+                                MarbeteNextUpCard(marbeteItem: marbeteItem) {
                                     // Navigate to EditVehicleView to update marbete
                                     appState.showEditVehicle = true
                                 }

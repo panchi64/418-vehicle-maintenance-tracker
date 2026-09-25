@@ -107,7 +107,7 @@ struct FilterControlRow<Value: Hashable, Leading: View>: View {
                     .tracking(1)
 
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 9, weight: .semibold))
+                    .font(.caption2.weight(.semibold))
                     .rotationEffect(.degrees(isExpanded ? 180 : 0))
 
                 Text("]")
@@ -156,31 +156,37 @@ struct ActiveFilterBar<Value: Hashable>: View {
                     .frame(width: Theme.borderWidth, height: 14)
                     .accessibilityHidden(true)
 
-                Text(name.uppercased())
-                    .font(.brutalistLabel)
-                    .foregroundStyle(Theme.textTertiary)
-                    .tracking(1.5)
-
-                Text(active.label)
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textPrimary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .lineLimit(1)
-
-                if let count = active.count {
-                    Text(String(count))
-                        .font(.brutalistSecondary)
+                // Dimension, value, and count stack at accessibility sizes so
+                // the value isn't truncated beside its own label.
+                AdaptiveStack(spacing: Spacing.sm) {
+                    Text(name.uppercased())
+                        .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
-                        .monospacedDigit()
+                        .tracking(1.5)
+
+                    HStack(spacing: Spacing.sm) {
+                        Text(active.label)
+                            .font(.brutalistBody)
+                            .foregroundStyle(Theme.textPrimary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        if let count = active.count {
+                            Text(String(count))
+                                .font(.brutalistSecondary)
+                                .foregroundStyle(Theme.textTertiary)
+                                .monospacedDigit()
+                        }
+                    }
                 }
+                .padding(.vertical, Spacing.xs)
+                .accessibilityElement(children: .combine)
 
                 // Clearing is one tap, not "reopen the list and find All again".
                 Button(action: onClear) {
                     Image(systemName: "xmark")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.caption.weight(.semibold))
                         .foregroundStyle(Theme.accent)
-                        .frame(width: TouchTarget.minimum, height: TouchTarget.minimum)
-                        .contentShape(Rectangle())
+                        .minimumTouchTarget()
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(L10n.filterClear(name))
@@ -201,11 +207,14 @@ struct ActiveFilterBar<Value: Hashable>: View {
 // MARK: - Control row
 
 /// The one row of chrome a readout tab is allowed by default.
+///
+/// At accessibility sizes the segmented control and the filter trigger can't
+/// share a line without the segments truncating, so they stack.
 struct ControlRow<Content: View>: View {
     @ViewBuilder let content: Content
 
     var body: some View {
-        HStack(spacing: Spacing.sm) {
+        AdaptiveStack(spacing: Spacing.sm) {
             content
         }
         .padding(.horizontal, Spacing.screenHorizontal)

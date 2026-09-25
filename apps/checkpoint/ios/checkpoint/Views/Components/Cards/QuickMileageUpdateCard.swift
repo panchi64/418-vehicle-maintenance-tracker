@@ -47,12 +47,20 @@ struct QuickMileageUpdateCard: View {
         DistanceSettings.shared.unit.uppercaseAbbreviation
     }
 
+    /// Spoken form of the reading ("~45,000" + "MI" would be read as "tilde"
+    /// and letters). The card's other lines — pace confidence, last update,
+    /// reminder count — combine after it.
+    private var odometerAccessibilityLabel: String {
+        let distance = L10n.spokenDistance(displayMileage)
+        return isShowingEstimate ? L10n.readoutOdometerEstimated(distance) : L10n.readoutOdometer(distance)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             InstrumentSectionHeader(title: "Odometer")
 
             VStack(alignment: .leading, spacing: Spacing.sm) {
-                HStack(alignment: .center) {
+                AdaptiveStack(verticalAlignment: .center) {
                     // Mileage display
                     VStack(alignment: .leading, spacing: 2) {
                         HStack(alignment: .firstTextBaseline, spacing: 4) {
@@ -65,6 +73,8 @@ struct QuickMileageUpdateCard: View {
                                 .foregroundStyle(Theme.textTertiary)
                                 .tracking(1)
                         }
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(odometerAccessibilityLabel)
 
                         // Inline confidence indicator when showing estimate
                         if isShowingEstimate, let confidence = vehicle.paceConfidence {
@@ -88,6 +98,9 @@ struct QuickMileageUpdateCard: View {
                                 .tracking(1)
                         }
                     }
+                    // One element for the reading; the Update button beside
+                    // it stays separately reachable.
+                    .accessibilityElement(children: .combine)
 
                     Spacer()
 
@@ -101,19 +114,17 @@ struct QuickMileageUpdateCard: View {
                             .tracking(1.5)
                             .padding(.horizontal, Spacing.md)
                             .padding(.vertical, Spacing.sm)
+                            .frame(minHeight: TouchTarget.minimum)
                             .background(Theme.accent)
+                            .contentShape(Rectangle())
                     }
-                    .accessibilityLabel("Update mileage")
-                    .accessibilityHint("Opens mileage entry screen")
+                    .accessibilityLabel(L10n.mileageUpdateTitle)
                 }
             }
             .padding(Spacing.md)
             .background(Theme.surfaceInstrument)
             .brutalistBorder()
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Odometer, \(formattedMileage) \(unitAbbreviation)")
-        .accessibilityValue(vehicle.mileageUpdateDescription)
         .sheet(isPresented: $showMileageSheet) {
             MileageUpdateSheet(
                 vehicle: vehicle,

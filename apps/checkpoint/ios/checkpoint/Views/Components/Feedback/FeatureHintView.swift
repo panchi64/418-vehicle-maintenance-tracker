@@ -23,10 +23,10 @@ struct FeatureHintView: View {
 
     var body: some View {
         if isVisible {
-            HStack(spacing: Spacing.sm) {
+            AdaptiveStack(spacing: Spacing.sm) {
                 // Icon
                 Image(systemName: icon)
-                    .font(.system(size: 20, weight: .regular))
+                    .font(.title3)
                     .foregroundStyle(Theme.accent)
                     .accessibilityHidden(true)
 
@@ -35,7 +35,7 @@ struct FeatureHintView: View {
                     .font(.brutalistSecondary)
                     .foregroundStyle(Theme.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 // Dismiss button
                 Button {
@@ -50,7 +50,7 @@ struct FeatureHintView: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Dismiss hint")
+                .accessibilityLabel(L10n.readoutDismissHint)
             }
             .padding(Spacing.md)
             .background(
