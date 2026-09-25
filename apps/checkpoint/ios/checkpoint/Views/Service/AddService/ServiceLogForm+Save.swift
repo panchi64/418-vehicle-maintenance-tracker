@@ -16,9 +16,13 @@ extension ServiceLogForm {
             saveSchedule()
         }
 
-        AppIconService.shared.updateIcon(for: vehicle, services: services)
+        // The icon reflects the selected vehicle; a Duplicate saved to another
+        // one must not repaint it with that vehicle's status.
+        if vehicle.id == appState.selectedVehicle?.id {
+            AppIconService.shared.updateIcon(for: vehicle, services: services)
+        }
         WidgetDataService.shared.updateWidget(for: vehicle)
-        ServiceFormDraftStore.clear(model.draftScope)
+        clearDraft()
         if !model.mode.isEdit { appState.recordCompletedAction() }
         onSaved?()
         dismiss()
@@ -52,12 +56,14 @@ extension ServiceLogForm {
     }
 
     /// A recurring completion is offered Undo; one that left no reminder
-    /// behind is offered "Schedule next" instead.
+    /// behind is offered "Schedule next" instead — except on a vehicle other
+    /// than the selected one (a Duplicate moved across), where [+] would open
+    /// on the wrong vehicle, so it keeps Undo.
     private func showLoggedToast(undo: RecordedServiceUndo) {
         let context = modelContext
         let toastAction: ToastService.ToastAction
 
-        if !undo.leftFutureReminder {
+        if !undo.leftFutureReminder, vehicle.id == appState.selectedVehicle?.id {
             let prefill = PostRecordPrefill(
                 serviceName: model.serviceName,
                 performedDate: model.performedDate,
