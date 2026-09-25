@@ -8,7 +8,7 @@
  */
 import type { JSX } from 'solid-js'
 import { Show } from 'solid-js'
-import { Label } from './Text'
+import { Label, SectionTitle, Secondary } from './Text'
 
 interface ReadoutSectionProps {
   title: string
@@ -17,6 +17,8 @@ interface ReadoutSectionProps {
   /** Supporting content, which must recede from `primary`. */
   supporting?: JSX.Element
   action?: { label: string; onClick?: () => void }
+  /** A quiet trailing value on the header line, e.g. a month's total. */
+  trailing?: string
   /** Set when the section should read as a discrete card rather than open flow. */
   enclosed?: boolean
 }
@@ -43,7 +45,12 @@ export function ReadoutSection(props: ReadoutSectionProps) {
           'min-height': '20px',
         }}
       >
-        <Label>{props.title}</Label>
+        <SectionTitle>{props.title}</SectionTitle>
+        <Show when={props.trailing}>
+          <Secondary color="tertiary" style={{ 'margin-left': 'auto' }}>
+            {props.trailing}
+          </Secondary>
+        </Show>
         <Show when={props.action}>
           {(action) => (
             <button

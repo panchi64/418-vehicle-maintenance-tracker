@@ -1,5 +1,5 @@
 /*
- * OptionList — the dropdown panel shared by FilterControl and InlinePicker.
+ * OptionList — the dropdown panel shared by InlinePicker and the title menu.
  *
  * Extracted on the second use rather than the third. The two triggers differ
  * (a filter names its dimension, a form field shows its value) but the list they

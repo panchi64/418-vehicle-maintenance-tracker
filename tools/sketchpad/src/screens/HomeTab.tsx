@@ -1,91 +1,162 @@
 /*
- * Home.
+ * Home — Readout. "What does this car need from me, and can I do it now?"
  *
- * The problem being solved: nine sections can stack below the hero, each gated
- * by a different condition, all at uniform weight — so the tab's shape and
- * length are never the same twice and cannot be learned.
+ * FIXED ORDER, ALWAYS THE SAME FIVE BLOCKS (Readout rule 2):
  *
- * The fix modelled here: a FIXED section order, every section a ReadoutSection
- * with one primary, and a cap on simultaneous advisory cards.
+ *   0. Vehicle band      odometer (tap → update; stale tag) | specs ⌄
+ *   1. Next up           THE hero: status word, remaining figure, due line,
+ *                        and a primary MARK DONE. The marbete takes this slot
+ *                        when it is the most urgent item.
+ *   2. Suggestions       at most ONE item — the cluster ("do X on the same
+ *                        visit") and seasonal suggestions used to be separate
+ *                        sections that could both show; they share one slot,
+ *                        and the more actionable wins it.
+ *   3. Upcoming          the next 3 after Next Up, dense two-line rows
+ *   4. Recent            the last 3 logs
+ *
+ * What was removed, and why:
+ *   - The odometer caution ADVISORY above the hero. It pushed the hero down
+ *     on exactly the days a stale reading made the hero least trustworthy,
+ *     and it was a warning rendered away from the control that resolves it.
+ *     The stale tag now sits ON the odometer cell, which is that control.
+ *   - "Miles this year". A genuinely interesting stat that answered no
+ *     question Home is for; it belongs with Costs or vehicle detail.
+ *
+ * SPARSE DATA never removes a section and never renders an apology card: an
+ * empty section is its header plus ONE quiet line (InsufficientDataNote).
+ * Five headers and three quiet lines on a new user's Home is a screen whose
+ * shape they will recognise later, instead of one that grows new sections
+ * under them.
  */
-import { For, Show } from 'solid-js'
-import { NextUpCard, MileageReadout } from '../components/Cards'
-import { ExpenseRow, ListDivider, ServiceRow } from '../components/Rows'
+import { Show } from 'solid-js'
+import { NextUpCard, QuickSpecsPanel } from '../components/Cards'
+import { VehicleBand } from '../components/VehicleBand'
+import { ExpenseRow, RowList, ServiceRow } from '../components/Rows'
 import { ReadoutSection } from '../ui/ReadoutSection'
-import { FormAdvisory } from '../ui/FormAdvisory'
-import { Emphasis, Secondary } from '../ui/Text'
+import { InsufficientDataNote } from '../ui/FormAdvisory'
+import { Emphasis, Label, Secondary } from '../ui/Text'
 import { Screen } from './Screen'
-import { serviceLogs, services, vehicle } from '../data/fixtures'
-import type { TabId } from '../components/TabBar'
+import { sortedByUrgency, useScenario } from '../data/scenario'
+import { NavBar, type TabId } from '../components/TabBar'
+import type { Service } from '../data/fixtures'
 
-export function HomeTab(props: { onNavigate: (tab: TabId) => void }) {
-  const nextUp = () => services[0]
-  const upcoming = () => services.slice(1, 4)
-  const recent = () => serviceLogs.slice(0, 3)
+export function HomeTab(props: {
+  title: string
+  onAdd: () => void
+  onNavigate: (tab: TabId) => void
+  onMarkDone: (service: Service) => void
+  specsExpanded: boolean
+  onToggleSpecs: () => void
+}) {
+  const data = useScenario()
+  // Derived once and passed down (Views/CLAUDE.md: one derivation per body).
+  const sorted = () => sortedByUrgency(data().services, data().vehicle!)
+  const nextUp = () => sorted()[0] as Service | undefined
+  const upcoming = () => sorted().slice(1, 4)
+  const recent = () => data().logs.slice(0, 3)
 
   return (
+    <>
+    <NavBar title={props.title} onAdd={props.onAdd} />
     <Screen>
-      {/* 1. Advisories, capped. Two at most — a stack of five equal-weight
-             warnings is indistinguishable from noise and trains the user to
-             scroll past all of them. */}
-      <FormAdvisory
-        severity="caution"
-        message="Odometer last updated 9 days ago. Mileage-based estimates drift without it."
+      {/* Full-bleed, and inside the scroll: it scrolls away with the content
+          as the large title collapses, rather than pinning ~55pt of chrome. */}
+      <div style={{ margin: 'calc(var(--space-md) * -1) calc(var(--space-screen-h) * -1) 0' }}>
+        <VehicleBand
+          vehicle={data().vehicle!}
+          specsExpanded={props.specsExpanded}
+          onToggleSpecs={props.onToggleSpecs}
+        />
+        <Show when={props.specsExpanded}>
+          <QuickSpecsPanel vehicle={data().vehicle!} />
+        </Show>
+      </div>
+
+      {/* 1. The hero. One per screen. */}
+      <Show
+        when={nextUp()}
+        fallback={<InsufficientDataNote message="Nothing scheduled. Add a service with [+]." />}
+      >
+        {(s) => (
+          <NextUpCard
+            service={s()}
+            vehicle={data().vehicle!}
+            onMarkDone={() => props.onMarkDone(s())}
+          />
+        )}
+      </Show>
+
+      {/* 2. Suggestions — one slot. */}
+      <ReadoutSection
+        title="Suggestions"
+        primary={
+          <Show
+            when={data().suggestion}
+            fallback={<InsufficientDataNote message="Nothing to suggest right now." />}
+          >
+            {(sg) => (
+              <div style={{ display: 'flex', 'flex-direction': 'column', 'align-items': 'flex-start', gap: '2px' }}>
+                <Emphasis as="div">{sg().title}</Emphasis>
+                <Secondary color="tertiary" as="div">
+                  {sg().detail}
+                </Secondary>
+                {/* A bracket link, not an outlined button: the hero's Mark Done
+                    is the screen's one filled action, and a boxed button here
+                    competed with it in the squint test. */}
+                <button style={{ 'min-height': 'var(--touch-target)', display: 'flex', 'align-items': 'center' }}>
+                  <Label color="accent" tracking={1}>
+                    [{sg().action}]
+                  </Label>
+                </button>
+              </div>
+            )}
+          </Show>
+        }
       />
 
-      {/* 2. The hero. One per screen. */}
-      <NextUpCard service={nextUp()} vehicle={vehicle} />
-
-      {/* 3. Upcoming. */}
+      {/* 3. Upcoming — the three after Next Up. "View all" lands on Services'
+             Due/Upcoming list, which contains every row shown here. */}
       <ReadoutSection
         title="Upcoming"
         action={{ label: 'View all', onClick: () => props.onNavigate('services') }}
         primary={
-          <div style={{ display: 'flex', 'flex-direction': 'column' }}>
-            <For each={upcoming()}>
-              {(service, i) => (
-                <>
-                  <Show when={i() > 0}>
-                    <ListDivider />
-                  </Show>
-                  <ServiceRow service={service} />
-                </>
+          <Show
+            when={upcoming().length}
+            fallback={<InsufficientDataNote message="Nothing else scheduled." />}
+          >
+            <RowList each={upcoming()}>
+              {(s) => (
+                <ServiceRow
+                  service={s}
+                  vehicle={data().vehicle!}
+                  actions={['Edit', 'Mark Done']}
+                />
               )}
-            </For>
-          </div>
+            </RowList>
+          </Show>
         }
       />
 
-      {/* 4. Mileage readout — where the YTD/YoY metric belongs. It used to be a
-             13pt tertiary subline in the corner of the persistent header, which
-             is a genuinely interesting stat rendered where nobody would read it. */}
-      <MileageReadout vehicle={vehicle} />
-
-      {/* 5. Recent activity. "View all" lands on Service History, NOT on Costs —
+      {/* 4. Recent — "View all" lands on Services' History, never on Costs:
              a maintenance-history list must not point at a financial view. */}
       <ReadoutSection
-        title="Recent activity"
+        title="Recent"
         action={{ label: 'View all', onClick: () => props.onNavigate('services') }}
         primary={
-          <div style={{ display: 'flex', 'flex-direction': 'column' }}>
-            <For each={recent()}>
-              {(log, i) => (
-                <>
-                  <Show when={i() > 0}>
-                    <ListDivider />
-                  </Show>
-                  <ExpenseRow log={log} />
-                </>
-              )}
-            </For>
-          </div>
+          <Show
+            when={recent().length}
+            fallback={<InsufficientDataNote message="Completed services appear here." />}
+          >
+            <RowList each={recent()}>{(log) => <ExpenseRow log={log} />}</RowList>
+          </Show>
         }
       />
     </Screen>
+    </>
   )
 }
 
-/** The empty state, which must not clip behind the tab bar. */
+/** No vehicle at all. One primary: the action that fixes it. */
 export function HomeEmpty(props: { onAdd?: () => void }) {
   return (
     <Screen center>
@@ -98,23 +169,21 @@ export function HomeEmpty(props: { onAdd?: () => void }) {
           'text-align': 'center',
         }}
       >
-        <Emphasis rank="primary">Nothing scheduled yet</Emphasis>
+        <Emphasis>No vehicle yet</Emphasis>
         <Secondary color="tertiary">
-          Add a service to start tracking. One is enough to get reminders working.
+          Add one with its VIN and odometer. Reminders start from there.
         </Secondary>
         <button
           onClick={props.onAdd}
+          data-rank="primary"
           style={{
             'margin-top': 'var(--space-sm)',
             'min-height': 'var(--button-height)',
             padding: '0 var(--space-lg)',
-            border: 'var(--border-width) solid var(--accent)',
             background: 'var(--accent)',
           }}
         >
-          <Emphasis style={{ color: 'var(--background-primary)' }} uppercase tracking={1}>
-            Add a service
-          </Emphasis>
+          <Emphasis style={{ color: 'var(--background-primary)' }}>Add a Vehicle</Emphasis>
         </button>
       </div>
     </Screen>

@@ -1,361 +1,434 @@
 /*
- * The unified service form — the Phase 4 target, and the reason this sketchpad
- * exists. This is the surface the current app gets most wrong ("a wall of data
- * when filling it out").
+ * The unified service form — Decision surface.
  *
- * Three ideas carry the design:
+ * ONE FORM, THREE DOORS. The same surface serves:
+ *   log       [+] → pick a service → Save          "Log Service"
+ *   complete  Mark Done on a card → Save           "Complete Service"
+ *   edit      a history row → change → Save        "Edit Entry"
+ * and scheduling is not a fourth door: choosing "Not done yet" under When
+ * turns the same form into "Schedule Service". Intent is still DERIVED from
+ * the answer to "when", never asked as a mode.
  *
- * 1. ONE FORM, INTENT DERIVED. There is no Record/Remind mode switch. The user
- *    answers "when", and a past answer means they are logging while a future
- *    answer means they are scheduling. They never see or name those words. The
- *    mode switch was asking the user to classify their own intent before the
- *    app would let them describe it.
+ * TAP BUDGETS (measured by the harness, from Home):
+ *   Mark Next Up done              2   Mark Done → Save
+ *   Log an oil change today + $    4   [+] → Oil row → Cost field → Save
+ *   Schedule a future service      4   [+] → service → Not done yet → Save
  *
- * 2. DEFAULT-DISCLOSE WHAT MAKES IT WORK; HIDE WHAT MAKES IT COMPLETE. The
- *    repeat interval is what makes a reminder fire again, so it is on the
- *    default path. Notes, vendor, and receipts make an entry complete, so they
- *    live in depth. Today this is inverted.
+ * What makes those numbers possible — DEFAULTS DO THE WORK:
+ *   - When defaults to Today. The past/future chip grid used to have no
+ *     default, so every entry cost a tap to say "today".
+ *   - The odometer defaults to the last CONFIRMED reading, never the estimate
+ *     (Mark Done once committed the estimate as fact). The estimate is a hint
+ *     under the field, one tap away.
+ *   - Picking a service that is due LINKS it: saving completes it, and the
+ *     form says so (.info "Completes …") instead of asking.
+ *   - The next reminder is derived from the service's interval and shown as a
+ *     readout with a Remind toggle, ON by default. Turning it off is the
+ *     decision; leaving it is free.
+ *   - Scheduling defaults to the service's own interval, so "Not done yet"
+ *     is immediately saveable.
  *
- * 3. THE TAP BUDGET IS A REAL CONSTRAINT. Log an oil change with a cost in <=6
- *    taps; schedule a reminder that provably fires in <=5. The harness counts
- *    taps so this is measured, not asserted.
+ * THE SERVICE PICKER ORDERS BY LIKELIHOOD: due-now services first (with their
+ * status, because "which one is overdue" is why you opened the form), then
+ * services you've logged recently, then Browse all. Typing a name is always
+ * available for anything else. Once chosen, the picker collapses to one row
+ * with [Change] — the list has done its job and would otherwise push every
+ * other field below the fold.
+ *
+ * DEFAULT-DISCLOSED vs HIDDEN (Decision rule 5): everything that makes the
+ * entry WORK is on the default path — service, when, odometer, cost, shop,
+ * next reminder. Category (it has a working default), notes, and receipts
+ * make it COMPLETE and live under More Details, whose collapsed row names
+ * its contents and the category's current value.
+ *
+ * SAVE IS IN THE TOOLBAR (FormToolbar). A tap on the dim Save scrolls to the
+ * blocking field and shows why there (F2).
  */
+import type { JSX } from 'solid-js'
 import { createMemo, createSignal, For, Show } from 'solid-js'
 import { Chip, ChipRow, Field, InlinePicker, Toggle } from '../ui/Controls'
 import { FormSection, FormSubgroup } from '../ui/FormSection'
 import { FormAdvisory } from '../ui/FormAdvisory'
-import { FormActionBar } from '../ui/FormActionBar'
-import { Body, Emphasis, Heading, Label, Secondary } from '../ui/Text'
+import { FormToolbar, revealBlocker } from '../ui/FormToolbar'
+import { Body, Emphasis, Label, Secondary } from '../ui/Text'
+import { remainingText, StatusTag } from '../components/status'
 import {
+  ago,
   categoryLabels,
+  fmtDate,
   fmtMileageBare,
-  quickServiceTypes,
-  vehicle,
+  fmtShortDate,
+  MILES_PER_DAY,
+  today,
   type CostCategory,
+  type Service,
+  type ServiceLog,
 } from '../data/fixtures'
+import { isMarbete, sortedByUrgency, useScenario } from '../data/scenario'
 
-// --- Timing model ---------------------------------------------------------
+export type FormMode = 'log' | 'complete' | 'edit'
 
-type PastKind = 'today' | 'yesterday' | 'earlier'
-type FutureKind = 'in3mo' | 'in6mo' | 'atMileage' | 'onDate'
+type When = 'today' | 'yesterday' | 'date' | 'later'
+type DueKind = 'interval' | 'date' | 'mileage'
 
-type Timing =
-  | { when: 'past'; kind: PastKind }
-  | { when: 'future'; kind: FutureKind }
+/** Catalog intervals for services picked by name rather than from a schedule. */
+const CATALOG: Record<string, { months?: number; miles?: number }> = {
+  'Oil & Filter Change': { months: 6, miles: 5_000 },
+  'Tire Rotation': { months: 6, miles: 6_000 },
+  'Wiper Blades': { months: 12 },
+  'Wheel Alignment': { months: 24, miles: 24_000 },
+}
 
-/** Intent is DERIVED. Nothing in the UI names it. */
-type Intent = 'log' | 'schedule'
-const intentOf = (t: Timing | undefined): Intent | undefined =>
-  t == null ? undefined : t.when === 'past' ? 'log' : 'schedule'
+const DAY = 24 * 60 * 60 * 1000
+const addMonths = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth() + n, d.getDate())
+const parseMiles = (s: string) => {
+  const n = parseInt(s.replace(/\D/g, ''), 10)
+  return Number.isFinite(n) ? n : undefined
+}
 
-export function ServiceForm(props: { onClose?: () => void }) {
-  const [name, setName] = createSignal('')
-  const [timing, setTiming] = createSignal<Timing>()
-  const [customDate, setCustomDate] = createSignal('')
+export function ServiceForm(props: {
+  mode: FormMode
+  /** complete: the service being marked done. */
+  service?: Service
+  /** edit: the log being edited. */
+  log?: ServiceLog
+  onClose?: () => void
+}) {
+  const data = useScenario()
+  const v = () => data().vehicle!
+  const editing = props.mode === 'edit'
+  const orig = props.log
 
-  // Past branch
-  const [odometer, setOdometer] = createSignal('')
-  const [cost, setCost] = createSignal('')
-  const [category, setCategory] = createSignal<CostCategory>('maintenance')
+  // --- State ------------------------------------------------------------
+  const [name, setName] = createSignal(props.service?.name ?? orig?.name ?? '')
+  const [linked, setLinked] = createSignal<Service | undefined>(props.service)
+  const [pickerOpen, setPickerOpen] = createSignal(props.mode === 'log')
 
-  // Future branch
-  const [remindAtMileage, setRemindAtMileage] = createSignal('')
-  const [repeats, setRepeats] = createSignal(true)
-  const [intervalMonths, setIntervalMonths] = createSignal('6')
-  const [intervalMiles, setIntervalMiles] = createSignal('5000')
+  const origWhen: When = orig ? 'date' : 'today'
+  const origDate = orig ? fmtDate(orig.performedAt) : ''
+  const [when, setWhen] = createSignal<When>(origWhen)
+  const [customDate, setCustomDate] = createSignal(origDate)
 
-  // Depth
+  const origOdo = orig?.mileage != null ? fmtMileageBare(orig.mileage) : fmtMileageBare(v().currentMileage)
+  const origCost = orig?.cost != null ? orig.cost.toFixed(2) : ''
+  const origShop = orig?.vendor ?? ''
+  const [odometer, setOdometer] = createSignal(origOdo)
+  const [cost, setCost] = createSignal(origCost)
+  const [shop, setShop] = createSignal(origShop)
+  const [remind, setRemind] = createSignal(true)
+
+  const [dueKind, setDueKind] = createSignal<DueKind>('interval')
+  const [dueValue, setDueValue] = createSignal('')
+
   const [depthOpen, setDepthOpen] = createSignal(false)
-  const [vendor, setVendor] = createSignal('')
+  const [category, setCategory] = createSignal<CostCategory>(orig?.category ?? 'maintenance')
   const [notes, setNotes] = createSignal('')
 
   const [mileageResolution, setMileageResolution] = createSignal<'adopt' | 'keep'>()
+  const [showBlocker, setShowBlocker] = createSignal(false)
+  let scrollRef: HTMLDivElement | undefined
 
-  const intent = createMemo(() => intentOf(timing()))
+  const later = () => when() === 'later'
 
-  // --- Mileage-commit reasoning, mirroring Utilities/MileageCommit.swift ---
-  //
-  // Adoption is gated on "is this the newest reading", not on magnitude. A
-  // backfilled 2023 service at 40,000 mi must never overwrite a current
-  // odometer of 33,417.
-
-  const enteredOdometer = createMemo(() => {
-    const n = parseInt(odometer().replace(/\D/g, ''), 10)
-    return Number.isFinite(n) ? n : undefined
-  })
-
-  const isBackfill = createMemo(() => timing()?.when === 'past' && timing()?.kind === 'earlier')
-
-  const wouldAdopt = createMemo(() => {
-    const reading = enteredOdometer()
-    if (reading == null || intent() !== 'log') return false
-    return reading > vehicle.currentMileage && !isBackfill()
-  })
-
-  /** The genuinely unresolvable case: an old date carrying a reading above current. */
-  const contradiction = createMemo(() => {
-    const reading = enteredOdometer()
-    return (
-      reading != null && isBackfill() && reading > vehicle.currentMileage && !mileageResolution()
-    )
-  })
-
-  // --- Can this be saved, and if not, why -------------------------------
-
-  const blockingReason = createMemo(() => {
-    if (!name().trim()) return 'Name the service first.'
-    if (!timing()) return 'Choose when it happened, or when it is due.'
-    if (contradiction()) return 'Resolve the odometer conflict above.'
-    // A future item with "at mileage" selected but no mileage typed has no
-    // trigger and would never fire. This is the one case that genuinely blocks.
-    if (
-      timing()?.when === 'future' &&
-      timing()?.kind === 'atMileage' &&
-      !remindAtMileage().trim()
-    ) {
-      return 'Enter the mileage to be reminded at, or this reminder will not fire.'
+  // --- Picker content: due now → recent → browse ------------------------
+  const dueNow = () =>
+    sortedByUrgency(data().services, v()).filter((s) => s.status === 'overdue' || s.status === 'dueSoon')
+  /** Distinct recently-logged names not already offered under Due now. */
+  const recent = () => {
+    const seen = new Set(dueNow().map((s) => s.name))
+    const out: { name: string; at: Date }[] = []
+    for (const l of data().logs) {
+      if (seen.has(l.name)) continue
+      seen.add(l.name)
+      out.push({ name: l.name, at: l.performedAt })
     }
+    return out.slice(0, 3)
+  }
+  const recentShops = () =>
+    [...new Set(data().logs.map((l) => l.vendor).filter(Boolean) as string[])].slice(0, 3)
+
+  const choose = (n: string, s?: Service) => {
+    setName(n)
+    setLinked(s)
+    setPickerOpen(false)
+    setShowBlocker(false)
+  }
+
+  const interval = () => {
+    const s = linked()
+    if (s && (s.intervalMonths || s.intervalMiles)) return { months: s.intervalMonths, miles: s.intervalMiles }
+    return CATALOG[name()]
+  }
+  const intervalText = () => {
+    const i = interval()
+    if (!i) return undefined
+    return [i.months ? `${i.months} mo` : null, i.miles ? `${fmtMileageBare(i.miles)} mi` : null]
+      .filter(Boolean)
+      .join(' / ')
+  }
+
+  // --- Mileage (MileageCommit rules; SURFACE_DOCTRINE "values that mean two things")
+  const entered = () => parseMiles(odometer())
+  const isBackfill = () => when() === 'date' && !editing
+  const estimate = () =>
+    v().currentMileage + Math.round(((today.getTime() - v().mileageUpdatedAt.getTime()) / DAY) * MILES_PER_DAY)
+  const confirmedAge = () => Math.round((today.getTime() - v().mileageUpdatedAt.getTime()) / DAY)
+  const wouldAdopt = () => {
+    const r = entered()
+    return !later() && r != null && r > v().currentMileage && !isBackfill()
+  }
+  const contradiction = () => {
+    const r = entered()
+    return !later() && r != null && isBackfill() && r > v().currentMileage && !mileageResolution()
+  }
+
+  // --- Projection (F4: same calculation as the save path) ---------------
+  const performedAt = () => (when() === 'yesterday' ? ago(1) : today)
+  const nextDue = () => {
+    const i = interval()
+    if (!i) return undefined
+    const base = later() ? today : performedAt()
+    const odo = later() ? v().currentMileage : (entered() ?? v().currentMileage)
+    return {
+      date: i.months ? addMonths(base, i.months) : undefined,
+      miles: i.miles ? odo + i.miles : undefined,
+    }
+  }
+  const nextText = () => {
+    const n = nextDue()
+    if (!n) return undefined
+    return [n.date ? fmtDate(n.date) : null, n.miles ? `${fmtMileageBare(n.miles)} mi` : null]
+      .filter(Boolean)
+      .join(' or ')
+  }
+  const scheduleText = () => {
+    if (dueKind() === 'interval') return nextText() ?? 'choose when it is due'
+    if (!dueValue().trim()) return dueKind() === 'mileage' ? 'once you enter a mileage' : 'once you pick a date'
+    return dueKind() === 'mileage' ? `at ${dueValue()} mi` : dueValue()
+  }
+
+  // --- Blocking (F2) ----------------------------------------------------
+  type BlockKey = 'service' | 'date' | 'due' | 'odometer'
+  const blocker = createMemo<{ key: BlockKey; message: string } | undefined>(() => {
+    if (!name().trim()) return { key: 'service', message: 'Pick a service, or type its name.' }
+    if (when() === 'date' && !customDate().trim()) return { key: 'date', message: 'Pick the date it was done.' }
+    if (later() && dueKind() !== 'interval' && !dueValue().trim())
+      return { key: 'due', message: 'Enter when it is due, or this reminder will never fire.' }
+    if (later() && dueKind() === 'interval' && !interval())
+      return { key: 'due', message: 'This service has no usual interval — pick a date or mileage.' }
+    if (contradiction()) return { key: 'odometer', message: 'Resolve the odometer conflict first.' }
     return undefined
   })
+  const blockerAt = (key: BlockKey) => (
+    <Show when={showBlocker() && blocker()?.key === key}>
+      <div data-blocker={key}>
+        <FormAdvisory severity="blocking" message={blocker()!.message} />
+      </div>
+    </Show>
+  )
 
-  const canSave = () => blockingReason() == null
+  // Edit: Save only once something actually changed.
+  const dirty = () =>
+    !editing ||
+    name() !== orig!.name ||
+    odometer() !== origOdo ||
+    cost() !== origCost ||
+    shop() !== origShop ||
+    customDate() !== origDate ||
+    when() !== origWhen ||
+    category() !== orig!.category ||
+    notes() !== ''
 
-  /**
-   * When the reminder will fire, and whether that is yet knowable.
-   *
-   * `known: false` means the user has chosen a trigger but not supplied its
-   * value, so the readout must say what is missing rather than print a
-   * confident-looking placeholder date.
-   */
-  const fireTime = createMemo<{ text: string; known: boolean }>(() => {
-    const kind = timing()?.kind
-    if (kind === 'atMileage') {
-      const target = parseInt(remindAtMileage().replace(/\D/g, ''), 10)
-      if (!Number.isFinite(target)) {
-        return { text: 'once you enter a mileage', known: false }
-      }
-      // ~940 mi/month, from the fixture vehicle's recent pace.
-      const months = Math.max(1, Math.round((target - vehicle.currentMileage) / 940))
-      return {
-        text: `at ${fmtMileageBare(target)} mi — about ${months} ${
-          months === 1 ? 'month' : 'months'
-        } away at your pace`,
-        known: true,
-      }
-    }
-    if (kind === 'in3mo') return { text: '25 Oct 2026', known: true }
-    if (kind === 'in6mo') return { text: '25 Jan 2027', known: true }
-    return { text: 'on the date you pick', known: false }
-  })
+  const canSave = () => blocker() == null && dirty()
 
-  /* Neutral until a timing is picked. Saying "Log it" before the user has said
-     when it happened claims an intent they have not expressed yet, and the
-     button would silently change meaning under their finger. */
-  const saveLabel = () =>
-    intent() === 'schedule' ? 'Schedule it' : intent() === 'log' ? 'Log it' : 'Save'
+  const title = () =>
+    later()
+      ? 'Schedule Service'
+      : editing
+        ? 'Edit Entry'
+        : props.mode === 'complete' || linked()
+          ? 'Complete Service'
+          : 'Log Service'
 
-  const pastChips: { kind: PastKind; label: string }[] = [
-    { kind: 'today', label: 'Today' },
-    { kind: 'yesterday', label: 'Yesterday' },
-    { kind: 'earlier', label: 'Earlier…' },
-  ]
-
-  const futureChips: { kind: FutureKind; label: string }[] = [
-    { kind: 'in3mo', label: 'In 3 months' },
-    { kind: 'in6mo', label: 'In 6 months' },
-    { kind: 'atMileage', label: 'At mileage…' },
-    { kind: 'onDate', label: 'Pick a date…' },
-  ]
-
-  const select = (t: Timing) => {
-    setTiming(t)
-    setMileageResolution(undefined)
+  const subtitle = () => {
+    const x = v()
+    return x.name ? `${x.name} · ${x.year} ${x.model}` : `${x.year} ${x.make} ${x.model}`
   }
+
+  const whenChips: { value: When; label: string }[] = [
+    { value: 'today', label: 'Today' },
+    { value: 'yesterday', label: 'Yesterday' },
+    { value: 'date', label: 'Pick date…' },
+    { value: 'later', label: 'Not done yet' },
+  ]
 
   return (
     <div style={{ display: 'flex', 'flex-direction': 'column', flex: '1 1 auto', 'min-height': '0' }}>
-      {/* Sheet header */}
-      <div
-        style={{
-          display: 'flex',
-          'align-items': 'center',
-          'justify-content': 'space-between',
-          padding: 'var(--space-md) var(--space-screen-h)',
-          'border-bottom': 'var(--border-width) solid var(--grid-line)',
+      <FormToolbar
+        title={title()}
+        subtitle={subtitle()}
+        canSave={canSave()}
+        onCancel={props.onClose}
+        onSave={props.onClose}
+        onBlocked={() => {
+          if (!blocker()) return // edit with no changes: nothing to point at
+          setShowBlocker(true)
+          if (blocker()!.key === 'service') setPickerOpen(true)
+          revealBlocker(scrollRef, blocker()!.key)
         }}
-      >
-        {/* The title states what will happen, which is how the derived intent
-            becomes visible without ever asking the user to pick a mode.
-
-            20pt, not 15. At 15 Medium it was the same size as the body text and
-            the save button, so the sheet had no title tier at all. */}
-        <Heading rank="primary" uppercase tracking={1}>
-          {intent() === 'schedule' ? 'New reminder' : intent() === 'log' ? 'New entry' : 'Add service'}
-        </Heading>
-        <button onClick={props.onClose} style={{ 'min-height': 'var(--touch-target)' }}>
-          <Label color="accent" tracking={1}>
-            [Cancel]
-          </Label>
-        </button>
-      </div>
+      />
 
       <div
+        ref={scrollRef}
         style={{
           flex: '1 1 auto',
           'min-height': '0',
           'overflow-y': 'auto',
           display: 'flex',
           'flex-direction': 'column',
-          /* xl between sections, against 16px between fields and 8px from a
-             header to its own content. Three unambiguous steps.
-             This was lg (24px) for a while, on the theory that the header rules
-             already carried the separation and the extra gap only cost height.
-             They don't: at 24-vs-16 the sections did not read as separate at a
-             glance, because a 1.5:1 ratio is not a signal. Tightening the inner
-             steps pays for this one. */
           gap: 'var(--space-xl)',
-          padding: 'var(--space-md) var(--space-screen-h) var(--space-lg)',
+          padding: 'var(--space-md) var(--space-screen-h) var(--space-xxl)',
         }}
       >
-        {/* ---------- 1. WHAT ----------
-            The section header IS this field's label, so the field carries none.
-            Labelling both "SERVICE" stacked two identical labels on one input. */}
-        <FormSection title="Service" trailing="Required">
-          <Field
-            value={name()}
-            onInput={setName}
-            placeholder="Oil change"
-            /* No autofocus. It scrolled the section label out of view on open,
-               and on device it would raise the keyboard over the timing chips —
-               hiding the control that derives the intent in order to save one
-               tap on a field the quick chips can fill anyway. */
-          />
-
-          {/* Plain, not outlined. These are a shortcut for the field above, not
-              a choice the form requires — eight outlined rectangles made them
-              compete with the timing control, which IS required.
-
-              The row carries its own label. Without one it read as a second
-              input: an unlabelled strip of text sitting directly beneath a
-              labelled field, in a form where every other line IS a field. */}
-          <div
-            style={{ display: 'flex', 'flex-direction': 'column', gap: 'var(--space-xs)' }}
+        {/* ---------- 1. SERVICE ---------- */}
+        <FormSection title="Service">
+          {blockerAt('service')}
+          <Show
+            when={pickerOpen()}
+            fallback={
+              <SelectedService
+                name={name()}
+                onChange={() => setPickerOpen(true)}
+                locked={props.mode === 'complete'}
+              />
+            }
           >
-            <Label>Common</Label>
-            <ChipRow wrap={false}>
-              <For each={quickServiceTypes}>
-                {(t) => (
-                  <Chip
-                    variant="plain"
-                    label={t}
-                    selected={name() === t}
-                    onClick={() => setName(t)}
-                  />
-                )}
-              </For>
-            </ChipRow>
-          </div>
-        </FormSection>
-
-        {/* ---------- 2. WHEN — the control that derives intent ---------- */}
-        <FormSection title="When">
-          <FormSubgroup title="Already done">
-            <ChipRow>
-              <For each={pastChips}>
-                {(c) => (
-                  <Chip
-                    label={c.label}
-                    selected={timing()?.when === 'past' && timing()?.kind === c.kind}
-                    onClick={() => select({ when: 'past', kind: c.kind })}
-                  />
-                )}
-              </For>
-            </ChipRow>
-          </FormSubgroup>
-
-          <FormSubgroup title="Coming up">
-            <ChipRow>
-              <For each={futureChips}>
-                {(c) => (
-                  <Chip
-                    label={c.label}
-                    selected={timing()?.when === 'future' && timing()?.kind === c.kind}
-                    onClick={() => select({ when: 'future', kind: c.kind })}
-                  />
-                )}
-              </For>
-            </ChipRow>
-          </FormSubgroup>
-
-          <Show when={timing()?.kind === 'earlier' || timing()?.kind === 'onDate'}>
             <Field
-              label="Date"
-              value={customDate()}
-              onInput={setCustomDate}
-              placeholder="2023-08-14"
-              requirement={{ kind: 'required' }}
+              value={name()}
+              onInput={(n) => {
+                setName(n)
+                setLinked(undefined)
+              }}
+              placeholder="Type a service name"
+            />
+
+            <Show when={dueNow().length}>
+              <FormSubgroup title="Due now">
+                <div style={{ display: 'flex', 'flex-direction': 'column' }}>
+                  <For each={dueNow()}>
+                    {(s) => (
+                      <PickRow name={s.name} onClick={() => choose(s.name, s)}>
+                        <StatusTag status={s.status} text={remainingText(s, v())} />
+                      </PickRow>
+                    )}
+                  </For>
+                </div>
+              </FormSubgroup>
+            </Show>
+
+            {/* Rows, like Due now — not chips. As plain chips the recent names
+                were 11pt tracked caps wrapping into three 44pt rows: the same
+                height as rows, but shouted, and a second option vocabulary in
+                one picker. */}
+            <Show when={recent().length}>
+              <FormSubgroup title="Recent">
+                <div style={{ display: 'flex', 'flex-direction': 'column' }}>
+                  <For each={recent()}>
+                    {(r) => (
+                      <PickRow name={r.name} onClick={() => choose(r.name)}>
+                        <Secondary color="tertiary">{fmtShortDate(r.at)}</Secondary>
+                      </PickRow>
+                    )}
+                  </For>
+                </div>
+              </FormSubgroup>
+            </Show>
+
+            <button style={{ 'min-height': 'var(--touch-target)', display: 'flex', 'align-items': 'center', gap: 'var(--space-sm)' }}>
+              <Body color="accent">Browse all services</Body>
+              <Body color="tertiary">›</Body>
+            </button>
+          </Show>
+
+          {/* The system says what it will do: saving completes the schedule. */}
+          <Show when={linked() && !pickerOpen() && !later()}>
+            <FormAdvisory
+              severity="info"
+              message={
+                isMarbete(linked()!)
+                  ? `Renews ${linked()!.name} — it expires ${remainingText(linked()!, v())}.`
+                  : `Completes ${linked()!.name} — ${remainingText(linked()!, v())}.`
+              }
             />
           </Show>
         </FormSection>
 
-        {/* ---------- 3. BRANCH BODY ---------- */}
+        {/* ---------- 2. WHEN — derives intent; Today is the default ---------- */}
+        <FormSection title="When">
+          {blockerAt('date')}
+          <ChipRow>
+            <For each={whenChips}>
+              {(c) => (
+                <Chip
+                  label={c.label}
+                  selected={when() === c.value}
+                  onClick={() => {
+                    setWhen(c.value)
+                    setMileageResolution(undefined)
+                  }}
+                />
+              )}
+            </For>
+          </ChipRow>
+          <Show when={when() === 'date'}>
+            <Field label="Date" value={customDate()} onInput={setCustomDate} placeholder="Aug 14, 2025" original={editing ? origDate : undefined} />
+          </Show>
+        </FormSection>
 
-        {/* Past: what it cost and what the odometer read. */}
-        <Show when={intent() === 'log'}>
-          <FormSection title="The visit">
+        {/* ---------- 3a. DONE: what the visit recorded ---------- */}
+        <Show when={!later()}>
+          <FormSection title="Details">
+            {blockerAt('odometer')}
             <Field
-              // Distinct from "Remind me at". Identical labels across the two
-              // branches are what made "should this update current mileage?"
-              // ambiguous in the first place.
               label="Odometer at service"
               value={odometer()}
-              onInput={(v) => {
-                setOdometer(v)
+              onInput={(x) => {
+                setOdometer(x)
                 setMileageResolution(undefined)
               }}
-              placeholder={fmtMileageBare(vehicle.currentMileage)}
               suffix="mi"
               numeric
-              requirement={{ kind: 'optional' }}
+              original={editing ? origOdo : undefined}
               below={
                 <>
-                  {/* Adoption is STATED, never prompted. The app knows what it
-                      will do; a modal question would be the app asking the user
-                      to make its decision for it. */}
+                  <Show when={!editing && !wouldAdopt() && !contradiction()}>
+                    <div style={{ display: 'flex', 'align-items': 'baseline', gap: 'var(--space-sm)', 'flex-wrap': 'wrap' }}>
+                      <Secondary color="tertiary">
+                        Confirmed {confirmedAge()} d ago · est. now ~{fmtMileageBare(estimate())}
+                      </Secondary>
+                      <Show when={estimate() !== v().currentMileage}>
+                        <button onClick={() => setOdometer(fmtMileageBare(estimate()))} style={{ 'min-height': '28px' }}>
+                          <Label color="accent" tracking={1}>
+                            [Use]
+                          </Label>
+                        </button>
+                      </Show>
+                    </div>
+                  </Show>
                   <Show when={wouldAdopt()}>
                     <FormAdvisory
                       severity="info"
-                      message={`Also updates your odometer — ${fmtMileageBare(
-                        vehicle.currentMileage,
-                      )} → ${fmtMileageBare(enteredOdometer()!)} mi.`}
+                      message={`Will update current mileage to ${fmtMileageBare(entered()!)} mi.`}
                     />
                   </Show>
-
-                  {/* Reserved for the case the app genuinely cannot resolve:
-                      an old date carrying a reading above the current odometer. */}
                   <Show when={contradiction()}>
                     <FormAdvisory
                       severity="contradiction"
-                      message={`This is dated earlier than your last reading but is higher than it (${fmtMileageBare(
-                        vehicle.currentMileage,
-                      )} mi). Which is right?`}
+                      message={`This is dated before your last reading but is higher than it (${fmtMileageBare(v().currentMileage)} mi). Which is right?`}
                       outcomes={[
-                        {
-                          label: 'Keep my odometer',
-                          onClick: () => setMileageResolution('keep'),
-                        },
-                        {
-                          label: 'Correct it upward',
-                          onClick: () => setMileageResolution('adopt'),
-                        },
+                        { label: 'Keep my odometer', onClick: () => setMileageResolution('keep') },
+                        { label: 'Correct it upward', onClick: () => setMileageResolution('adopt') },
                       ]}
-                    />
-                  </Show>
-
-                  <Show when={mileageResolution() === 'keep'}>
-                    <FormAdvisory
-                      severity="info"
-                      message={`Your odometer stays at ${fmtMileageBare(vehicle.currentMileage)} mi.`}
                     />
                   </Show>
                 </>
@@ -364,200 +437,144 @@ export function ServiceForm(props: { onClose?: () => void }) {
 
             <Field
               label="Cost"
+              prefix="$"
               value={cost()}
               onInput={setCost}
               placeholder="0.00"
-              suffix="USD"
               numeric
-              requirement={{ kind: 'optional' }}
+              original={editing ? origCost : undefined}
             />
 
-            {/* A picker, not six chips. Category has a working default and is
-                rarely changed, so a permanent option set spent six enclosures on
-                a decision most users never make. */}
-            <InlinePicker
-              label="Category"
-              value={category()}
-              onChange={setCategory}
-              options={(Object.keys(categoryLabels) as CostCategory[]).map((c) => ({
-                value: c,
-                label: categoryLabels[c],
-              }))}
+            <Field
+              label="Shop"
+              value={shop()}
+              onInput={setShop}
+              placeholder="Where it was done"
+              original={editing ? origShop : undefined}
+              below={
+                <Show when={!shop() && recentShops().length}>
+                  <ChipRow>
+                    <For each={recentShops()}>
+                      {(s) => <Chip variant="plain" label={s} onClick={() => setShop(s)} />}
+                    </For>
+                  </ChipRow>
+                </Show>
+              }
+            />
+          </FormSection>
+
+          {/* ---------- 4a. NEXT — the reminder this entry leaves behind ----------
+              A readout (label + emphasis), not an advisory: it is the value the
+              save produces. The toggle is the only decision, and it defaults on. */}
+          <Show when={intervalText()}>
+            <FormSection title="Next Reminder">
+              <div style={{ display: 'flex', 'flex-direction': 'column', gap: '2px' }}>
+                <Emphasis color={remind() ? 'primary' : 'tertiary'} as="div">
+                  {remind() ? nextText() : 'No reminder'}
+                </Emphasis>
+                <Secondary color="tertiary" as="div">
+                  {remind()
+                    ? `Every ${intervalText()}, whichever comes first.`
+                    : `${name()} won't come back on its own.`}
+                </Secondary>
+              </div>
+              <Toggle label="Remind me" checked={remind()} onChange={setRemind} />
+            </FormSection>
+          </Show>
+        </Show>
+
+        {/* ---------- 3b. NOT DONE YET: when it is due ---------- */}
+        <Show when={later()}>
+          <FormSection title="Due">
+            {blockerAt('due')}
+            <ChipRow>
+              <Show when={intervalText()}>
+                <Chip label={`In ${intervalText()}`} selected={dueKind() === 'interval'} onClick={() => setDueKind('interval')} />
+              </Show>
+              <Chip label="Pick date…" selected={dueKind() === 'date'} onClick={() => setDueKind('date')} />
+              <Chip label="At mileage…" selected={dueKind() === 'mileage'} onClick={() => setDueKind('mileage')} />
+            </ChipRow>
+            <Show when={dueKind() !== 'interval'}>
+              <Field
+                label={dueKind() === 'mileage' ? 'Remind me at' : 'Due date'}
+                value={dueValue()}
+                onInput={setDueValue}
+                suffix={dueKind() === 'mileage' ? 'mi' : undefined}
+                numeric={dueKind() === 'mileage'}
+                placeholder={dueKind() === 'mileage' ? fmtMileageBare(v().currentMileage + 5_000) : 'Jan 25, 2027'}
+              />
+            </Show>
+            <div style={{ display: 'flex', 'align-items': 'baseline', gap: 'var(--space-md)', 'padding-top': 'var(--space-xs)' }}>
+              <Label style={{ flex: '0 0 auto' }}>Fires</Label>
+              <Emphasis color={blocker()?.key === 'due' ? 'tertiary' : 'primary'}>{scheduleText()}</Emphasis>
+            </div>
+            <Toggle
+              label="Repeat after each service"
+              detail={intervalText() ? `Every ${intervalText()}` : 'Set an interval under More Details'}
+              checked={remind()}
+              onChange={setRemind}
             />
           </FormSection>
         </Show>
 
-        {/* Future: what makes it fire, and whether it comes back. */}
-        <Show when={intent() === 'schedule'}>
-          <FormSection title="The reminder">
-            <Show when={timing()?.kind === 'atMileage'}>
-              <Field
-                label="Remind me at"
-                value={remindAtMileage()}
-                onInput={setRemindAtMileage}
-                placeholder={fmtMileageBare(vehicle.currentMileage + 5000)}
-                suffix="mi"
-                numeric
-                requirement={{ kind: 'required' }}
-              />
-            </Show>
-
-            {/* THE REPEAT POLICY IS ON THE DEFAULT PATH, not in a drawer. It is
-                what makes the reminder come back, and hiding the thing that
-                makes a feature work is the inversion this refactor exists to
-                fix. */}
-            <div style={{ display: 'flex', 'flex-direction': 'column', gap: 'var(--space-sm)' }}>
-              <Toggle
-                label="Repeat after each service"
-                detail={repeats() ? undefined : 'This will remind you once, then stop.'}
-                checked={repeats()}
-                onChange={setRepeats}
-              />
-
-              <Show when={repeats()}>
-                {/* Wraps to two rows at large type, same as Add Vehicle's
-                    Year/Make pair — a fixed two-column split cannot survive
-                    Dynamic Type on a 375pt screen. */}
-                <div style={{ display: 'flex', 'flex-wrap': 'wrap', gap: 'var(--space-sm)' }}>
-                  <div style={{ flex: '1 1 calc(130px * var(--type-scale))', 'min-width': '0' }}>
-                    <Field
-                      label="Every"
-                      value={intervalMonths()}
-                      onInput={setIntervalMonths}
-                      suffix="mo"
-                      numeric
-                    />
-                  </div>
-                  <div style={{ flex: '1 1 calc(130px * var(--type-scale))', 'min-width': '0' }}>
-                    <Field
-                      label="Or every"
-                      value={intervalMiles()}
-                      onInput={setIntervalMiles}
-                      suffix="mi"
-                      numeric
-                    />
-                  </div>
-                </div>
-                <Secondary color="tertiary">
-                  Whichever comes first, counted from the day you mark it done.
+        {/* ---------- 5. DEPTH — what makes it complete ---------- */}
+        <div>
+          <button
+            onClick={() => setDepthOpen(!depthOpen())}
+            aria-expanded={depthOpen()}
+            style={{
+              display: 'flex',
+              'align-items': 'center',
+              gap: 'var(--space-sm)',
+              width: '100%',
+              'min-height': '54px',
+              'border-bottom': 'var(--border-width) solid var(--grid-line)',
+            }}
+          >
+            <div style={{ display: 'flex', 'flex-direction': 'column', gap: '2px', flex: '1 1 auto', 'min-width': '0' }}>
+              <Body color="accent">{depthOpen() ? 'Fewer details' : 'More details'}</Body>
+              <Show when={!depthOpen()}>
+                <Secondary color="tertiary" lines={1} as="div">
+                  {later() ? 'Notes' : `${categoryLabels[category()]} · notes · receipt`}
                 </Secondary>
               </Show>
             </div>
+            <span
+              aria-hidden="true"
+              style={{
+                font: 'var(--font-heading)',
+                color: 'var(--accent)',
+                transform: depthOpen() ? 'rotate(180deg)' : 'none',
+                transition: 'transform var(--anim-medium) ease-out',
+              }}
+            >
+              ⌄
+            </span>
+          </button>
 
-            {/* The projection is a READOUT, not an advisory.
-
-                It was an `.info` advisory, which made the most important line on
-                the screen the quietest thing on it — this is the proof that the
-                reminder will actually fire, which is the entire point of the
-                surface. The severity ladder is for things needing attention or
-                resolution; a projected outcome is a value, so it gets a label and
-                emphasis weight instead.
-
-                It shares the save path's calculation (F4), so the preview cannot
-                promise something the save does not do. */}
+          <Show when={depthOpen()}>
             <div
               style={{
                 display: 'flex',
-                'align-items': 'baseline',
+                'flex-direction': 'column',
                 gap: 'var(--space-md)',
-                'padding-top': 'var(--space-xs)',
-                'border-top': '1px solid var(--grid-line)',
+                'padding-top': 'var(--space-md)',
+                animation: 'fade-in var(--anim-medium) ease-out',
               }}
             >
-              <Label style={{ flex: '0 0 auto', 'padding-top': 'var(--space-sm)' }}>Fires</Label>
-              <Emphasis
-                color={fireTime().known ? 'primary' : 'tertiary'}
-                style={{ flex: '1 1 auto', 'padding-top': 'var(--space-sm)' }}
-              >
-                {fireTime().text}
-              </Emphasis>
-            </div>
-          </FormSection>
-        </Show>
-
-        {/* ---------- 4. DEPTH — what makes it complete ---------- */}
-        <Show when={intent() != null}>
-          <section data-section="Depth">
-            {/* A full-width row with a rule, not a bare bracket label. As an
-                11pt label at the end of a long form it was invisible — the
-                cheapest control on screen guarding the only content still
-                hidden. It now gets the same presence as the header's specs
-                strip, and names its contents so you can tell whether to bother
-                opening it. */}
-            <button
-              onClick={() => setDepthOpen(!depthOpen())}
-              aria-expanded={depthOpen()}
-              style={{
-                display: 'flex',
-                'align-items': 'center',
-                gap: 'var(--space-sm)',
-                width: '100%',
-                'min-height': '54px',
-                /* Bottom rule only. A top rule sat a few pixels under the
-                   category field's own underline and read as a doubled line. */
-                'border-bottom': 'var(--border-width) solid var(--grid-line)',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  'flex-direction': 'column',
-                  gap: '2px',
-                  flex: '1 1 auto',
-                  'min-width': '0',
-                }}
-              >
-                <Label color="accent" tracking={1.5}>
-                  {depthOpen() ? 'Fewer details' : 'More details'}
-                </Label>
-                <Show when={!depthOpen()}>
-                  <Secondary color="tertiary" lines={1} as="div">
-                    Shop, notes, receipt
-                  </Secondary>
-                </Show>
-              </div>
-
-              <span
-                aria-hidden="true"
-                style={{
-                  flex: '0 0 auto',
-                  font: 'var(--font-heading)',
-                  color: 'var(--accent)',
-                  display: 'inline-block',
-                  'line-height': '1',
-                  transform: depthOpen() ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform var(--anim-medium) ease-out',
-                }}
-              >
-                ⌄
-              </span>
-            </button>
-
-            {/* Fade only. AESTHETIC.md forbids slide transitions. */}
-            <Show when={depthOpen()}>
-              <div
-                style={{
-                  display: 'flex',
-                  'flex-direction': 'column',
-                  gap: 'var(--space-md)',
-                  'padding-top': 'var(--space-sm)',
-                  animation: 'fade-in var(--anim-medium) ease-out',
-                }}
-              >
-                <Field
-                  label="Shop or vendor"
-                  value={vendor()}
-                  onInput={setVendor}
-                  placeholder="Toyota de Puerto Rico"
-                  requirement={{ kind: 'optional' }}
+              <Show when={!later()}>
+                <InlinePicker
+                  label="Category"
+                  value={category()}
+                  onChange={setCategory}
+                  options={(Object.keys(categoryLabels) as CostCategory[]).map((c) => ({
+                    value: c,
+                    label: categoryLabels[c],
+                  }))}
                 />
-                <Field
-                  label="Notes"
-                  value={notes()}
-                  onInput={setNotes}
-                  placeholder="Used full synthetic"
-                  requirement={{ kind: 'optional' }}
-                />
+              </Show>
+              <Field label="Notes" value={notes()} onInput={setNotes} placeholder="Used full synthetic" />
+              <Show when={!later()}>
                 <button
                   style={{
                     'min-height': 'var(--button-height)',
@@ -569,18 +586,61 @@ export function ServiceForm(props: { onClose?: () => void }) {
                 >
                   <Body color="secondary">Attach a receipt</Body>
                 </button>
-              </div>
-            </Show>
-          </section>
+              </Show>
+            </div>
+          </Show>
+        </div>
+
+        {/* Destructive, last, and only where there is something to delete. */}
+        <Show when={editing}>
+          <button style={{ 'min-height': 'var(--touch-target)', 'align-self': 'center' }}>
+            <Body color="overdue">Delete Entry</Body>
+          </button>
         </Show>
       </div>
+    </div>
+  )
+}
 
-      <FormActionBar
-        label={saveLabel()}
-        enabled={canSave()}
-        disabledReason={blockingReason()}
-        onSave={props.onClose}
-      />
+/** One option in the service picker: name leading, context trailing. */
+function PickRow(props: { name: string; onClick: () => void; children: JSX.Element }) {
+  return (
+    <button
+      onClick={props.onClick}
+      data-pick={props.name}
+      style={{
+        display: 'flex',
+        'align-items': 'center',
+        gap: 'var(--space-sm)',
+        'min-height': 'var(--touch-target)',
+        padding: 'var(--space-xs) 0',
+        'border-bottom': '1px solid var(--grid-line)',
+      }}
+    >
+      <Emphasis lines={1} style={{ flex: '1 1 auto', 'min-width': '0', 'text-align': 'left' }}>
+        {props.name}
+      </Emphasis>
+      <span style={{ flex: '0 0 auto' }}>{props.children}</span>
+    </button>
+  )
+}
+
+/** The picker, collapsed to its answer. */
+function SelectedService(props: { name: string; locked?: boolean; onChange: () => void }) {
+  // No status tag here: the .info line beneath ("Completes … — 917 mi over")
+  // already says it, and saying it twice was the first thing the eye hit.
+  return (
+    <div style={{ display: 'flex', 'align-items': 'center', gap: 'var(--space-sm)', 'min-height': 'var(--touch-target)' }}>
+      <Emphasis as="div" lines={2} style={{ flex: '1 1 auto', 'min-width': '0' }}>
+        {props.name}
+      </Emphasis>
+      <Show when={!props.locked}>
+        <button onClick={props.onChange} style={{ 'min-height': 'var(--touch-target)', padding: '0 var(--space-xs)' }}>
+          <Label color="accent" tracking={1}>
+            [Change]
+          </Label>
+        </button>
+      </Show>
     </div>
   )
 }

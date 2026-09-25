@@ -41,7 +41,13 @@ Anyone can mock a screen in HTML. What makes this worth keeping is that it turns
 - **Squint test.** Blurs the frame. If you can no longer tell what the screen is for, the hierarchy is carried by the words rather than by the layout — a stand-in for the real context: outdoors, one-handed, at arm's length.
 - **Tap budget.** Counts taps inside the frame against the budget declared for that screen in `SCREENS` (`src/App.tsx`). The doctrine's tap-budget test stops being an assertion and becomes a number.
 
-Plus a theme switcher over all eight themes, a light/dark + Increase Contrast switch, and a Dynamic Type slider to 2×, because both are `[REQUIREMENT]`s that are easy to skip and expensive to discover late.
+Plus a theme switcher over all eight themes, a light/dark + Increase Contrast switch, and a Dynamic Type slider to 2×, because both are `[REQUIREMENT]`s that are easy to skip and expensive to discover late. Also:
+
+- **Type distribution panel** — the histogram below, live, for whatever the frame shows.
+- **Section headers switch** — Title Case vs UPPERCASE for the section tier only (`SectionTitle`, `--section-*` in `base.css`). Title Case is the resolved choice; the switch stays so the comparison can be re-run.
+- **Scenarios** (`src/data/scenario.ts`) — full, marbete-most-urgent, sparse, fresh (vehicle, no services), empty. Screens read data through `useScenario()`, so sparse-data rules are checked, not assumed.
+- **Flows** — a `SCREENS` entry can start on one screen and be measured through in-frame navigation (Mark Done → form → Save). In-frame navigation never resets the tap counter; picking an entry does.
+- **Reveal row actions** — draws each row's swipe actions, so the action set per row is visible in review.
 
 ## Declaring hierarchy
 
@@ -62,11 +68,13 @@ A form has section titles, field labels, and subgroup labels. Rendering all thre
 
 | Level | Treatment | Component |
 |---|---|---|
-| Section | 11 Bold caps, secondary, **+ a full-width rule** | `FormSection` |
+| Section | `SectionTitle` — 15 Bold Title Case, primary (was 11 Bold caps); **+ a full-width rule** in forms | `FormSection`, `ReadoutSection` |
 | Field | 11 Medium caps, tertiary, no rule | `Field`, `InlinePicker` |
 | Subgroup | 13 Regular sentence case, tertiary | `FormSubgroup` |
 
 The rule marks the boundary; the spacing is what makes it read as one at a glance.
+
+**Why the section tier left 11pt caps (Sep 2026).** At 11 Bold caps a section header ("DETAILS") sat directly above a field label ("ODOMETER AT SERVICE") in nearly the same treatment — weight was the only channel between them. Under the squint test the caps headers vanished entirely and the first 15pt line of each section read as its heading. At 15 Bold Title Case the header differs from field labels on size, case, weight, and color, survives the blur, and the 11pt share of each screen dropped (Services 20%→8%, log form 29%→16%, Add Vehicle 59%→41%). Status tags and metadata labels stay uppercase.
 
 ### Spacing is 8 / 16 / 32 — and the ratio is the point
 
@@ -144,8 +152,9 @@ src/
   styles/base.css     tokens, @font-face, reset
   theme/themes.ts     reads the real Themes.json, applies as CSS variables
   data/fixtures.ts    sample data — deliberately not a happy path
-  ui/                 primitives: Text, Controls, ReadoutSection, FormAdvisory, FormActionBar
-  components/         VehicleHeader, Rows, Cards, TabBar
+  data/scenario.ts    scenarios + urgency sort + month grouping, via useScenario()
+  ui/                 primitives: Text (incl. SectionTitle), Controls, ReadoutSection, FormAdvisory, FormToolbar
+  components/         status (StatusTag/StatusMark), VehicleBand, Rows, Cards, TabBar (chrome stand-ins)
   screens/            HomeTab, ServicesTab, CostsTab, ServiceForm, AddVehicle
   harness/            Inspector (audit), harness.css — chrome around the frame
 ```
@@ -156,7 +165,7 @@ Harness chrome is styled deliberately unlike Checkpoint. The controls around the
 
 ## Screens model the target
 
-**Everything below now ships in the iOS app.** The sketchpad is no longer ahead of it, so where the two disagree, treat that as drift and work out which one is wrong — do not assume the sketchpad leads.
+**The iOS 26 overhaul (Sep 2026) put the sketchpad ahead of the app again** for Home, Services, Costs, the unified service form, and `FormToolbar`. Until those are ported, the sketchpad leads on them; [`PORT_NOTES.md`](PORT_NOTES.md) lists what the port must change. Everything else below ships, and disagreement there is drift.
 
 Each screen file opens with a comment stating the problem it solves. Those comments are the durable part: they record what was tried and why it failed, and several of them were expensive to learn. The SwiftUI files carry the same reasoning at their own call sites, so the rationale survives even if this directory is eventually retired.
 
@@ -164,13 +173,13 @@ The resolved decisions:
 
 - `ServiceForm` — **enclosure is a budget.** The form once rendered every control as an outlined rectangle: eight quick-service chips, seven timing chips, six category chips, three boxed fields — twenty-four identical enclosures, so nothing read as the decision. Now only the timing chips are outlined, because that choice derives the intent and every user must answer it. Fields are a single bottom rule (accent on focus), shortcut chips are plain text with an underline when active, and category is an `InlinePicker` since it has a working default most users never change. Same information, seven rectangles instead of twenty-four, and the form fits one screen. This follows the doctrine's own "proximity and whitespace communicate grouping before borders do" — it is not a style preference.
 - `ServiceForm` — one unified form with **derived intent**. No Record/Remind mode switch: the user answers "when", and a past answer means logging while a future answer means scheduling. The repeat interval is on the default path because it is what makes a reminder fire; notes and receipts are in depth because they only make an entry complete.
-- `TabBar` — a single `[+]`, not the two-way `[LOG]`/`[SCHEDULE]` expansion.
-- `ServicesTab` / `CostsTab` — **one** control row instead of two-to-four. A segmented control for the dimension that changes what the screen *is* (mode, period), and a `FilterControl` for refinement. The scrolling chip rows they replace hid options off the right edge — "On track" was cut to "ON TR…", and three of six Costs categories were off-screen — which fails recognition-over-recall outright.
+- `TabBar` — a single `[+]`, not the two-way `[LOG]`/`[SCHEDULE]` expansion. Since the iOS 26 shell, the `[+]` is a trailing toolbar item and the tab bar holds tabs only; `TabBar.tsx` is now plain stand-ins for system chrome, not a design.
+- `ServicesTab` / `CostsTab` — *(superseded Sep 2026: Services has no control row, just status groups then month history; Costs keeps only the period control. `FilterControl` was deleted.)* **One** control row instead of two-to-four. A segmented control for the dimension that changes what the screen *is* (mode, period), and a `FilterControl` for refinement. The scrolling chip rows they replace hid options off the right edge — "On track" was cut to "ON TR…", and three of six Costs categories were off-screen — which fails recognition-over-recall outright.
 - `FilterControl` — the trigger is labelled with the **dimension**, never the selected value. Labelling it with the value widened it on selection and crushed the segmented control beside it until `ALL` collided with the trigger; any control whose width depends on its own value cannot share a fixed row. The active value gets `ActiveFilterBar`, a row that exists only while a filter is on — a consequence of the user's action rather than permanent chrome, and it replaces the old always-present filter-indicator row.
 - `ServicesTab` — Documents is a destination, not a view mode.
 - `CostsTab` — fixed card order; "not enough data" is one quiet line, never a card.
 - `AddVehicle` — single scroll, VIN above the fields it fills, odometer required.
-- `VehicleHeader` — the specs disclosure is a **full-width strip whose collapsed label is the specs themselves**. The version before it used a `[SPECS] ⌄` label, whose target was only as wide as the word and which showed nothing until tapped — so the reference data that used to be glanceable on Home became two taps away. The header comment records all five iterations and why each failed; read it before revisiting. (The sketchpad's fixture has a `trim` field and `Vehicle` does not, so the shipping strip pairs the plate with the oil or tire spec instead.)
+- `VehicleHeader` (now `VehicleBand`, Home only — the large title took the name, menu, and gear) — the specs disclosure is a **full-width strip whose collapsed label is the specs themselves**. The version before it used a `[SPECS] ⌄` label, whose target was only as wide as the word and which showed nothing until tapped — so the reference data that used to be glanceable on Home became two taps away. The header comment records all five iterations and why each failed; read it before revisiting. (The sketchpad's fixture has a `trim` field and `Vehicle` does not, so the shipping strip pairs the plate with the oil or tire spec instead.)
 
 ### Where SwiftUI had to diverge
 
@@ -183,7 +192,7 @@ Two places where the port could not copy the sketchpad literally, both worth kno
 
 Take this seriously. A layout that looks resolved here can still be wrong on device, and these are exactly the failures a browser hides:
 
-- **Keyboard avoidance.** There is no software keyboard, so invariant F3 ("the action bar never rides above the keyboard") will *always* appear satisfied here — including for a layout that breaks on device.
+- **Keyboard avoidance.** There is no software keyboard. (F3's bottom bar is gone — Save is in the toolbar — but a focused field can still end up under the keyboard.)
 - **VoiceOver order and quality.** ARIA is a rough proxy for the accessibility tree, not the same thing.
 - **Dynamic Type past the slider**, plus the accessibility sizes that reflow rather than scale.
 - **Scroll physics, momentum, safe-area insets, the Home indicator, keyboard dismissal, sheet detents.**
@@ -194,7 +203,7 @@ Take this seriously. A layout that looks resolved here can still be wrong on dev
 
 ## What this is not
 
-Not a step toward shipping the UI in a webview. That was evaluated and rejected: forms are the single worst thing to put in an iOS webview, and forms are exactly what hurts. `FormActionBar`'s keyboard avoidance is ~4 centrally-solved lines natively and would be re-solved per-screen, badly, in a webview — and Dynamic Type and VoiceOver quality, both `[REQUIREMENT]`s, degrade.
+Not a step toward shipping the UI in a webview. That was evaluated and rejected: forms are the single worst thing to put in an iOS webview, and forms are exactly what hurts. Keyboard avoidance and toolbar placement are solved once natively and would be re-solved per-screen, badly, in a webview — and Dynamic Type and VoiceOver quality, both `[REQUIREMENT]`s, degrade.
 
 Use the web for **exploration**, ship SwiftUI.
 

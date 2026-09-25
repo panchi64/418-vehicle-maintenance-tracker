@@ -55,6 +55,67 @@ export function useAudit(getRoot: () => HTMLElement | undefined, enabled: () => 
   return rows
 }
 
+/**
+ * 3. THE TYPE HISTOGRAM, live. CLAUDE.md's "measure the type distribution"
+ *    console snippet, promoted to a panel so it is read on every screen rather
+ *    than remembered on some. Buckets are size/weight(/CAPS) over visible text
+ *    nodes in the frame; the headline number is the share at the most common
+ *    size — a wall shows up as one bucket holding most of the screen.
+ */
+export interface TypeBucket {
+  key: string
+  count: number
+}
+
+export function typeHistogram(root: HTMLElement): { buckets: TypeBucket[]; total: number } {
+  const b = new Map<string, number>()
+  let total = 0
+  const walk = (el: Element) => {
+    for (const c of el.children) {
+      const own = [...c.childNodes].some((n) => n.nodeType === 3 && n.textContent?.trim())
+      if (own && (c as HTMLElement).offsetParent !== null) {
+        const s = getComputedStyle(c)
+        const key = `${Math.round(parseFloat(s.fontSize))}/${s.fontWeight}${s.textTransform === 'uppercase' ? ' CAPS' : ''}`
+        b.set(key, (b.get(key) ?? 0) + 1)
+        total++
+      }
+      walk(c)
+    }
+  }
+  walk(root)
+  return {
+    buckets: [...b.entries()].map(([key, count]) => ({ key, count })).sort((x, y) => y.count - x.count),
+    total,
+  }
+}
+
+export function useTypeHistogram(getRoot: () => HTMLElement | undefined) {
+  const [hist, setHist] = createSignal<{ buckets: TypeBucket[]; total: number }>({ buckets: [], total: 0 })
+  const id = setInterval(() => {
+    const root = getRoot()?.querySelector<HTMLElement>('.hz-app')
+    if (root) setHist(typeHistogram(root))
+  }, 600)
+  onCleanup(() => clearInterval(id))
+  return hist
+}
+
+export function HistogramPanel(props: { hist: { buckets: TypeBucket[]; total: number } }) {
+  return (
+    <ul class="hz-audit">
+      <For each={props.hist.buckets.slice(0, 7)}>
+        {(b) => (
+          <li>
+            <span class="hz-audit-name">{b.key}</span>
+            <span>
+              {b.count} · {Math.round((b.count / Math.max(1, props.hist.total)) * 100)}%
+            </span>
+          </li>
+        )}
+      </For>
+    </ul>
+  )
+}
+
 export function AuditPanel(props: { rows: AuditRow[] }) {
   return (
     <Show
