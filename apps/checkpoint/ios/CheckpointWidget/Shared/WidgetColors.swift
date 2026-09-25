@@ -66,7 +66,10 @@ struct WidgetNumeral: View {
         Text(text)
             .font(.system(size: size, weight: .bold, design: .monospaced))
             .monospacedDigit()
+            // Two lines for word values ("MEDIADOS DE / FEB"): they wrap at a
+            // space before scaling. Numbers have no spaces, so they only scale.
+            .multilineTextAlignment(.center)
             .minimumScaleFactor(0.5)
-            .lineLimit(1)
+            .lineLimit(2)
     }
 }

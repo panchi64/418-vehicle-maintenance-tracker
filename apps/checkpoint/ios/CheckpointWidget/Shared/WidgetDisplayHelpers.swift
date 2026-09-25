@@ -49,20 +49,33 @@ enum WidgetDisplayHelpers {
                 return formatMileage(abs(dueMileage - currentMileage), unit: distanceUnit)
             }
         } else if let period = service.duePeriod {
-            return period.uppercased()
+            return periodParts(period).label.uppercased()
         } else if let days = service.daysRemaining {
             return "\(abs(days))"
         }
         return "\u{2014}"
     }
 
+    /// Splits a trailing year off a period label so the hero can set it small
+    /// in the unit slot: "Mid Feb 2027" → ("Mid Feb", "2027"). As one hero
+    /// string it truncated to "MID FEB 20…". The year is a trailing run of
+    /// four digits in every supported locale ("Mediados de feb 2027"); a label
+    /// without one comes back whole.
+    static func periodParts(_ period: String) -> (label: String, year: String?) {
+        guard let space = period.lastIndex(of: " ") else { return (period, nil) }
+        let tail = period[period.index(after: space)...]
+        guard tail.count == 4, tail.allSatisfy(\.isNumber) else { return (period, nil) }
+        return (String(period[..<space]), String(tail))
+    }
+
     /// Unit beside the hero value
     static func displayUnit(for service: WidgetService, distanceUnit: WidgetDistanceUnit) -> String {
         if service.dueMileage != nil {
             return distanceUnit.uppercaseAbbreviation
-        } else if service.duePeriod != nil {
-            // The period word ("MID MAY") is the value; no separate unit.
-            return ""
+        } else if let period = service.duePeriod {
+            // The period word ("MID MAY") is the value; a year, when the date
+            // isn't this year, is the unit.
+            return periodParts(period).year ?? ""
         } else if service.daysRemaining != nil {
             return String(localized: "DAYS")
         }

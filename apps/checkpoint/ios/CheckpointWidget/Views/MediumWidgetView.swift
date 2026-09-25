@@ -122,16 +122,31 @@ struct MediumWidgetView: View {
                 .foregroundStyle(WidgetColors.textPrimary)
                 .lineLimit(1)
 
-            HStack(spacing: 6) {
-                WidgetStatusTag(status: service.status)
-                Text(WidgetDisplayHelpers.compactDue(for: service, currentMileage: entry.currentMileage, distanceUnit: entry.distanceUnit))
-                    .font(.widgetLabel)
-                    .foregroundStyle(WidgetColors.textTertiary)
-                    .lineLimit(1)
+            // One line when both fit; otherwise the due phrase drops beneath.
+            // Sharing a line, a date-based phrase truncated both halves
+            // ("ON TRA… MID FEB 2…"), and dropping the word would leave
+            // status as shape alone.
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 6) {
+                    WidgetStatusTag(status: service.status)
+                    upcomingDue(service)
+                }
+                VStack(alignment: .leading, spacing: 1) {
+                    WidgetStatusTag(status: service.status)
+                    upcomingDue(service)
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
+    }
+
+    private func upcomingDue(_ service: WidgetService) -> some View {
+        Text(WidgetDisplayHelpers.compactDue(for: service, currentMileage: entry.currentMileage, distanceUnit: entry.distanceUnit))
+            .font(.widgetLabel)
+            .foregroundStyle(WidgetColors.textTertiary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
     }
 }
 
