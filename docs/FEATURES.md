@@ -116,6 +116,8 @@ v1.0 features are tracked throughout this document. Future versions are outlined
 | Severe vs normal schedules   | Medium   | 🔮     | Moved to v2.0 — only meaningful with pre-loaded factory schedules |
 | Custom reminder intervals    | Medium   | ✅     | User-defined schedules                                          |
 | Service notes                | Medium   | ✅     | Optional notes on scheduled services — shown as context when marking done |
+| Starter schedule             | High     | ✅     | After any new vehicle, a sheet offers 7 common services with default intervals, each with "Last done: Don't know / Date / Mileage". Save Vehicle → Add is 2 taps. Tests: `StarterScheduleTests` |
+| Notification ask in context  | High     | ✅     | No permission request at onboarding or launch; a one-line pre-prompt appears once the first service exists, "Not Now" waits 14 days. Tests: `NotificationAskPolicyTests` |
 
 #### Setup: Schedule Source Choice
 
@@ -181,11 +183,11 @@ v1.0 features are tracked throughout this document. Future versions are outlined
 | Feature               | Priority | Status | Notes                                                      |
 | --------------------- | -------- | ------ | ---------------------------------------------------------- |
 | Multi-vehicle support | High     | ✅     | Families, enthusiasts, collectors                          |
-| VIN decoding          | High     | ✅     | Auto-populate year/make/model/engine via NHTSA vPIC API    |
+| VIN decoding          | High     | ✅     | Auto-populate year/make/model/engine via NHTSA vPIC API. Decodes on its own once 17 valid characters are entered; the "filled from VIN" note stays until the VIN changes. Tests: `VINRegistrationTests` |
 | Odometer tracking     | High     | ✅     | Manual entry + smart estimation                            |
 | Distance unit support | Medium   | ✅     | Miles or kilometers preference (global setting)            |
 | Vehicle notes         | Medium   | ✅     | Freeform notes area for quirks, history, or reminders      |
-| Vehicle documents library | High | ✅ | Per-vehicle place for registration, insurance, title, manual, warranty, inspection, receipts. Notes searchable. Optional cross-vehicle linking (single file, multiple vehicle references). Reached from Home (QuickSpecsCard row) and from a Documents sub-tab on the Services screen. Native QuickLook viewing + iOS share sheet. Receipts captured inside service logs surface here automatically. |
+| Vehicle documents library | High | ✅ | Per-vehicle place for registration, insurance, title, manual, warranty, inspection, receipts. Notes searchable. Optional cross-vehicle linking (single file, multiple vehicle references). Reached from Home (QuickSpecsCard row) and from Services › Reference, as a pushed screen. Swipe or long-press to Share or Delete; deletes are immediate with Undo. Native QuickLook viewing + iOS share sheet. Receipts captured inside service logs surface here automatically. |
 
 #### Vehicle Documents — future enhancements
 
@@ -481,6 +483,7 @@ Surface meaningful context alongside existing data to help users understand tren
 | CarPlay Dashboard Widget     | Medium   | ✅     | iOS 16+ compact widget on CarPlay home screen  |
 | Dynamic App Icon             | Medium   | ✅     | Icon changes based on service urgency (configurable in Settings) |
 | Interactive Widgets          | Medium   | ✅     | iOS 17+ button on medium widget to mark service complete |
+| Widget tap opens the service | Medium   | ✅     | A widget row opens that service's detail via `OpenServiceIntent` (no URL scheme). Status is shape + word in every rendering mode (tinted, clear, Lock Screen). Tests: `PendingWidgetRouteTests` |
 
 **Notification philosophy:**
 
