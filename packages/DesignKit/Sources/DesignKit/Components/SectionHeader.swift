@@ -6,14 +6,18 @@ public struct SectionHeader<Trailing: View>: View {
     let dividerColor: Color
     let dividerHeight: CGFloat
     let labelFont: Font
+    let uppercased: Bool
     let trailing: Trailing
 
+    /// - Parameter uppercased: `true` renders the terminal-style tracked caps
+    ///   label; `false` renders the title as given (iOS 26 title-case headers).
     public init(
         title: String,
         labelColor: Color,
         dividerColor: Color,
         dividerHeight: CGFloat = 2,
         labelFont: Font = .caption.monospaced(),
+        uppercased: Bool = true,
         @ViewBuilder trailing: () -> Trailing = { EmptyView() }
     ) {
         self.title = title
@@ -21,6 +25,7 @@ public struct SectionHeader<Trailing: View>: View {
         self.dividerColor = dividerColor
         self.dividerHeight = dividerHeight
         self.labelFont = labelFont
+        self.uppercased = uppercased
         self.trailing = trailing()
     }
 
@@ -30,8 +35,9 @@ public struct SectionHeader<Trailing: View>: View {
                 Text(title)
                     .font(labelFont)
                     .foregroundStyle(labelColor)
-                    .textCase(.uppercase)
-                    .tracking(2)
+                    .textCase(uppercased ? .uppercase : nil)
+                    .tracking(uppercased ? 2 : 0)
+                    .accessibilityAddTraits(.isHeader)
                 Spacer()
                 trailing
             }

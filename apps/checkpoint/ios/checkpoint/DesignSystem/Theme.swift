@@ -397,12 +397,15 @@ struct InstrumentSectionHeader<Trailing: View>: View {
     }
 
     var body: some View {
+        // Title Case, untracked, primary ink: the section tier must out-rank
+        // the 11pt caps field labels under it (tools/sketchpad/PORT_NOTES.md).
         DesignKit.SectionHeader(
             title: title,
-            labelColor: Theme.textTertiary,
+            labelColor: Theme.textPrimary,
             dividerColor: Theme.gridLine,
             dividerHeight: Theme.borderWidth,
-            labelFont: .brutalistLabel
+            labelFont: .brutalistSectionTitle,
+            uppercased: false
         ) {
             trailing
         }

@@ -49,6 +49,16 @@ extension Font {
         brutalist(size: 20, weight: .medium, jetBrains: .medium, relativeTo: .title3)
     }
 
+    /// 15pt Bold - Section titles (Title Case, untracked, textPrimary).
+    ///
+    /// Sits between Heading and the body step so a section's name out-ranks
+    /// the field labels beneath it on size, weight, case, and color — the 11pt
+    /// caps it replaced disappeared in the squint test and read as one more
+    /// label (tools/sketchpad/PORT_NOTES.md).
+    @MainActor static var brutalistSectionTitle: Font {
+        brutalist(size: 15, weight: .bold, jetBrains: .bold, relativeTo: .headline)
+    }
+
     /// 15pt Regular - Body text
     @MainActor static var brutalistBody: Font {
         brutalist(size: 15, weight: .regular, jetBrains: .regular, relativeTo: .body)

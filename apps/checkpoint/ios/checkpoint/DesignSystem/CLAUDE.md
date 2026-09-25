@@ -94,7 +94,8 @@ Monospaced themes use bundled JetBrains Mono via DesignKit; other themes fall ba
 |---|---|---|---|
 | `brutalistHero` | 56 Light | `.largeTitle` | Hero data displays |
 | `brutalistTitle` | 32 Medium | `.title` | Primary headings (uppercased by its style modifier) |
-| `brutalistHeading` | 20 Medium | `.title3` | Section titles, service names |
+| `brutalistHeading` | 20 Medium | `.title3` | Service names, sheet headings |
+| `brutalistSectionTitle` | 15 Bold | `.headline` | Section titles — **Title Case, untracked, `textPrimary`** (`InstrumentSectionHeader` uses it). Uppercase stays for status tags and field labels only |
 | `brutalistBodyEmphasis` | 15 Medium | `.body` | **The one primary datum** of a section or form |
 | `brutalistBody` | 15 Regular | `.body` | Ordinary values, body text |
 | `brutalistSecondary` | 13 Regular | `.footnote` | Supporting text |
@@ -155,6 +156,8 @@ Glow: `glowRadius` 8 / `glowOpacity` 0.3 · `statusGlowRadius` 12 / `statusGlowO
 **Entrance** — `.revealAnimation(delay:animation:)`, `.staggeredReveal(index:baseDelay:)`
 
 **Buttons** — `.buttonStyle(.primary)` (filled), `.buttonStyle(.secondary)` (outlined), `.buttonStyle(.instrument)`, `.toolbarButtonStyle(isDisabled:)`
+
+**Status** — `StatusTag(status:)` (shape + word; the default) and `StatusMark(status:)` (shape only, when the word is already adjacent). Overdue = filled square, due soon = outlined square, good = short rule. Never draw status as a bare colored dot.
 
 **Structural components** — `InstrumentSection`, `InstrumentSectionHeader`, `BrutalistDataRow`, `AtmosphericBackground`, `AdaptiveStack` + `AdaptiveSpacer` (AX-size stacking)
 
