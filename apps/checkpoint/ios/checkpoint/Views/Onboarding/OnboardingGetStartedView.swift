@@ -2,381 +2,87 @@
 //  OnboardingGetStartedView.swift
 //  checkpoint
 //
-//  Phase 3: Full-screen VIN input view with lookup, manual entry, and skip options
+//  The hand-off after the tour: add your vehicle, bring back iCloud
+//  vehicles, or skip.
+//
+//  This used to be a second VIN form (field, camera, lookup, marbete) that
+//  handed its answers to Add Vehicle — which asks for the VIN first and now
+//  decodes it by itself. Asking twice is the "Ask once" defect, so the page
+//  is one decision and Add Vehicle does the work.
 //
 
 import SwiftUI
 
 struct OnboardingGetStartedView: View {
-    let onVINLookupComplete: (VINDecodeResult, String) -> Void
-    let onManualEntry: () -> Void
+    let onAddVehicle: () -> Void
     let onUseICloudVehicles: () -> Void
     let onSkip: () -> Void
 
-    // Marbete bindings (flow back to parent for prefill)
-    @Binding var marbeteMonth: Int?
-    @Binding var marbeteYear: Int?
-
-    @State private var showMarbeteSection = false
-    @State private var vin = ""
-    @State private var isDecodingVIN = false
-    @State private var vinLookupError: String?
-    @State private var vinResult: VINDecodeResult?
-    @State private var showVINCamera = false
-
-    @FocusState private var isVINFieldFocused: Bool
-
-    private var isVINValid: Bool {
-        let trimmed = vin.trimmingCharacters(in: .whitespaces)
-        guard trimmed.count == 17 else { return false }
-        let forbidden = CharacterSet(charactersIn: "IOQioq")
-        return trimmed.unicodeScalars.allSatisfy {
-            !forbidden.contains($0) && CharacterSet.alphanumerics.contains($0)
-        }
+    private var offersICloud: Bool {
+        SyncStatusService.shared.hasICloudAccount && SyncStatusService.shared.hasExistingCloudData
     }
 
     var body: some View {
         ZStack {
             AtmosphericBackground()
 
-            VStack(spacing: 0) {
-                // Skip button — top right
-                HStack {
-                    Spacer()
-                    Button {
-                        onSkip()
-                    } label: {
-                        Text(L10n.onboardingSkip)
-                            .brutalistLabelStyle(color: Theme.textTertiary)
-                            .minimumTouchTarget()
-                    }
+            VStack(alignment: .leading, spacing: Spacing.lg) {
+                Spacer()
+
+                Text(L10n.onboardingGetStartedTitle)
+                    .font(.brutalistHeading)
+                    .foregroundStyle(Theme.textPrimary)
+                    .textCase(.uppercase)
+                    .accessibilityAddTraits(.isHeader)
+
+                Text(L10n.onboardingGetStartedBody)
+                    .font(.brutalistBody)
+                    .foregroundStyle(Theme.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Spacer()
+
+                Button(action: onAddVehicle) {
+                    Text(L10n.onboardingGetStartedAddVehicle)
                 }
-                .padding(.horizontal, Spacing.screenHorizontal)
-                .padding(.top, Spacing.md)
+                .buttonStyle(.primary)
 
-                ScrollView {
-                    VStack(spacing: 0) {
-                        Spacer(minLength: Spacing.xxl)
-
-                        VStack(alignment: .leading, spacing: Spacing.lg) {
-                            // Title
-                            Text(L10n.onboardingGetStartedTitle)
-                                .font(.brutalistHeading)
-                                .foregroundStyle(Theme.textPrimary)
-                                .textCase(.uppercase)
-
-                            Rectangle()
-                                .fill(Theme.gridLine)
-                                .frame(height: Theme.borderWidth)
-
-                            // VIN section
-                            VStack(alignment: .leading, spacing: Spacing.sm) {
-                                HStack(spacing: Spacing.sm) {
-                                    Image(systemName: "barcode.viewfinder")
-                                        .font(.caption2.weight(.medium))
-                                        .foregroundStyle(Theme.accent)
-                                        .accessibilityHidden(true)
-
-                                    Text(L10n.onboardingGetStartedVINLabel)
-                                        .brutalistLabelStyle(color: Theme.accent)
-                                }
-                                .accessibilityAddTraits(.isHeader)
-
-                                Text(L10n.onboardingGetStartedVINHelp)
-                                    .font(.brutalistSecondary)
-                                    .foregroundStyle(Theme.textSecondary)
-                            }
-
-                            // VIN input field
-                            VStack(alignment: .leading, spacing: 4) {
-                                HStack(spacing: 0) {
-                                    TextField(L10n.onboardingGetStartedVINPlaceholder, text: $vin)
-                                        .font(.brutalistBody)
-                                        .foregroundStyle(Theme.textPrimary)
-                                        .textInputAutocapitalization(.characters)
-                                        .autocorrectionDisabled()
-                                        .focused($isVINFieldFocused)
-                                        .submitLabel(.done)
-                                        .onSubmit { isVINFieldFocused = false }
-                                        .padding(16)
-                                        .background(Theme.surfaceInstrument)
-                                        .onChange(of: vin) {
-                                            vinLookupError = nil
-                                            vinResult = nil
-                                        }
-
-                                    if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                                        Button {
-                                            showVINCamera = true
-                                        } label: {
-                                            Image(systemName: "camera.fill")
-                                                .font(.body.weight(.medium))
-                                                .foregroundStyle(Theme.accent)
-                                                .frame(minWidth: 52, minHeight: 52)
-                                                .background(Theme.surfaceInstrument)
-                                                .contentShape(Rectangle())
-                                        }
-                                        .brutalistBorder()
-                                        .accessibilityLabel(L10n.addVehicleScanVIN)
-                                    }
-                                }
-                                .brutalistBorder()
-
-                                // Character count
-                                Text(L10n.onboardingGetStartedCharacters(vin.count))
-                                    .font(.brutalistLabel)
-                                    .foregroundStyle(Theme.textTertiary)
-                                    .tracking(1.5)
-                                    .textCase(.uppercase)
-                                    .padding(.leading, 4)
-                            }
-
-                            // VIN lookup error
-                            if let error = vinLookupError {
-                                Text(error)
-                                    .font(.brutalistSecondary)
-                                    .foregroundStyle(Theme.statusOverdue)
-                            }
-
-                            // VIN lookup results
-                            if let result = vinResult {
-                                VStack(alignment: .leading, spacing: Spacing.sm) {
-                                    vinResultRow(label: L10n.vehicleMake, value: result.make)
-                                    vinResultRow(label: L10n.vehicleModel, value: result.model)
-                                    if let year = result.modelYear {
-                                        vinResultRow(label: L10n.vehicleYear, value: String(year))
-                                    }
-                                }
-                                .padding(Spacing.md)
-                                .background(Theme.surfaceInstrument)
-                                .brutalistBorder()
-                            }
-
-                            // Marbete section (collapsible — region-specific)
-                            Rectangle()
-                                .fill(Theme.gridLine)
-                                .frame(height: Theme.borderWidth)
-
-                            VStack(alignment: .leading, spacing: 0) {
-                                Button {
-                                    withAnimation(.easeOut(duration: Theme.animationMedium)) {
-                                        showMarbeteSection.toggle()
-                                    }
-                                } label: {
-                                    HStack(spacing: Spacing.sm) {
-                                        Image(systemName: "calendar.badge.clock")
-                                            .font(.caption2.weight(.medium))
-                                            .foregroundStyle(Theme.accent)
-                                            .accessibilityHidden(true)
-
-                                        VStack(alignment: .leading, spacing: 2) {
-                                            Text(L10n.onboardingGetStartedRegistrationTag)
-                                                .brutalistLabelStyle(color: Theme.accent)
-                                            Text(L10n.vehicleMarbete)
-                                                .font(.brutalistLabel)
-                                                .foregroundStyle(Theme.textTertiary)
-                                                .textCase(.uppercase)
-                                                .tracking(1.5)
-                                        }
-
-                                        Spacer()
-
-                                        Image(systemName: "chevron.down")
-                                            .font(.caption2.weight(.semibold))
-                                            .foregroundStyle(Theme.accent)
-                                            .rotationEffect(.degrees(showMarbeteSection ? 180 : 0))
-                                            .accessibilityHidden(true)
-                                    }
-                                    .frame(minHeight: TouchTarget.minimum)
-                                    .contentShape(Rectangle())
-                                }
-                                .buttonStyle(.plain)
-                                .accessibilityElement(children: .combine)
-                                .accessibilityValue(showMarbeteSection ? L10n.disclosureExpanded : L10n.disclosureCollapsed)
-
-                                if showMarbeteSection {
-                                    VStack(alignment: .leading, spacing: Spacing.sm) {
-                                        Text(L10n.onboardingGetStartedMarbeteHelp)
-                                            .font(.brutalistSecondary)
-                                            .foregroundStyle(Theme.textSecondary)
-
-                                        MarbetePicker(
-                                            month: $marbeteMonth,
-                                            year: $marbeteYear
-                                        )
-                                    }
-                                    .padding(.top, Spacing.sm)
-                                    .transition(.opacity)
-                                }
-                            }
-
-                            // Primary action button
-                            if let result = vinResult {
-                                Button {
-                                    onVINLookupComplete(result, vin)
-                                } label: {
-                                    Text(L10n.onboardingGetStartedAddVehicle)
-                                }
-                                .buttonStyle(.primary)
-                            } else if isVINValid {
-                                Button {
-                                    lookUpVIN()
-                                } label: {
-                                    HStack(spacing: Spacing.sm) {
-                                        if isDecodingVIN {
-                                            ProgressView()
-                                                .tint(Theme.surfaceInstrument)
-                                        }
-                                        Text(isDecodingVIN ? L10n.onboardingGetStartedLookingUp : L10n.onboardingGetStartedLookup)
-                                    }
-                                }
-                                .buttonStyle(.primary)
-                                .disabled(isDecodingVIN)
-                            }
-
-                            // Divider with OR
+                // Only when iCloud actually holds this app's data.
+                if offersICloud {
+                    VStack(spacing: Spacing.sm) {
+                        Button(action: onUseICloudVehicles) {
                             HStack(spacing: Spacing.sm) {
-                                Rectangle()
-                                    .fill(Theme.gridLine)
-                                    .frame(height: 1)
-                                Text(L10n.onboardingGetStartedOr)
-                                    .font(.brutalistLabel)
-                                    .foregroundStyle(Theme.textTertiary)
-                                    .tracking(1.5)
-                                Rectangle()
-                                    .fill(Theme.gridLine)
-                                    .frame(height: 1)
-                            }
-
-                            // iCloud sync option (only when iCloud account exists AND has app data)
-                            if SyncStatusService.shared.hasICloudAccount && SyncStatusService.shared.hasExistingCloudData {
-                                VStack(spacing: Spacing.sm) {
-                                    Button {
-                                        onUseICloudVehicles()
-                                    } label: {
-                                        HStack(spacing: Spacing.sm) {
-                                            Image(systemName: "icloud.fill")
-                                                .font(.body.weight(.medium))
-                                                .accessibilityHidden(true)
-                                            Text(L10n.onboardingGetStartedUseICloud)
-                                        }
-                                    }
-                                    .buttonStyle(.secondary)
-
-                                    Text(L10n.onboardingGetStartedICloudHelp)
-                                        .font(.brutalistSecondary)
-                                        .foregroundStyle(Theme.textTertiary)
-                                        .frame(maxWidth: .infinity, alignment: .center)
-                                }
-                            }
-
-                            // Manual entry
-                            Button {
-                                onManualEntry()
-                            } label: {
-                                Text(L10n.onboardingGetStartedManual)
-                            }
-                            .buttonStyle(.secondary)
-
-                            // Skip
-                            HStack {
-                                Spacer()
-                                Button {
-                                    onSkip()
-                                } label: {
-                                    Text(L10n.onboardingGetStartedSkip)
-                                        .brutalistLabelStyle(color: Theme.textTertiary)
-                                        .multilineTextAlignment(.center)
-                                        .minimumTouchTarget()
-                                }
-                                Spacer()
+                                Image(systemName: "icloud.fill")
+                                    .font(.body.weight(.medium))
+                                    .accessibilityHidden(true)
+                                Text(L10n.onboardingGetStartedUseICloud)
                             }
                         }
-                        .padding(.horizontal, Spacing.screenHorizontal)
+                        .buttonStyle(.secondary)
 
-                        Spacer(minLength: Spacing.xxl)
+                        Text(L10n.onboardingGetStartedICloudHelp)
+                            .font(.brutalistSecondary)
+                            .foregroundStyle(Theme.textTertiary)
+                            .frame(maxWidth: .infinity, alignment: .center)
                     }
                 }
+
+                Button(action: onSkip) {
+                    Text(L10n.onboardingGetStartedSkip)
+                        .brutalistLabelStyle(color: Theme.textTertiary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .minimumTouchTarget()
+                }
             }
+            .padding(.horizontal, Spacing.screenHorizontal)
+            .padding(.bottom, Spacing.xl)
+            .scrollingWhenTooTall()
         }
-        .keyboardDismissToolbar()
         .preferredColorScheme(.dark)
-        .fullScreenCover(isPresented: $showVINCamera) {
-            OdometerCameraSheet(
-                onImageCaptured: { image in
-                    processVINOCR(image: image)
-                },
-                guideText: L10n.addVehicleVINAlignGuide,
-                viewfinderAspectRatio: 5.0
-            )
-        }
-    }
-
-    // MARK: - VIN Result Row
-
-    private func vinResultRow(label: String, value: String) -> some View {
-        HStack(alignment: .firstTextBaseline) {
-            Image(systemName: "checkmark")
-                .font(.caption2.weight(.bold))
-                .foregroundStyle(Theme.statusGood)
-                .accessibilityHidden(true)
-
-            Text(label)
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .textCase(.uppercase)
-                .tracking(1.5)
-
-            Spacer(minLength: Spacing.sm)
-
-            Text(value)
-                .font(.brutalistBody)
-                .foregroundStyle(Theme.textPrimary)
-                .multilineTextAlignment(.trailing)
-        }
-        .accessibilityElement(children: .combine)
-    }
-
-    // MARK: - VIN Lookup
-
-    private func lookUpVIN() {
-        isDecodingVIN = true
-        vinLookupError = nil
-
-        Task {
-            do {
-                let result = try await NHTSAService.shared.decodeVIN(vin)
-                isDecodingVIN = false
-                vinResult = result
-            } catch {
-                isDecodingVIN = false
-                vinLookupError = error.localizedDescription
-            }
-        }
-    }
-
-    // MARK: - VIN OCR
-
-    private func processVINOCR(image: UIImage) {
-        Task {
-            do {
-                let result = try await VINOCRService.shared.recognizeVIN(from: image)
-                vin = result.vin
-            } catch {
-                vinLookupError = error.localizedDescription
-            }
-        }
     }
 }
 
 #Preview {
-    OnboardingGetStartedView(
-        onVINLookupComplete: { _, _ in },
-        onManualEntry: {},
-        onUseICloudVehicles: {},
-        onSkip: {},
-        marbeteMonth: .constant(nil),
-        marbeteYear: .constant(nil)
-    )
-    .preferredColorScheme(.dark)
+    OnboardingGetStartedView(onAddVehicle: {}, onUseICloudVehicles: {}, onSkip: {})
 }

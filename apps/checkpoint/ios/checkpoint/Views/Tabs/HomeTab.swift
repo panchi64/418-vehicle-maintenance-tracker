@@ -173,7 +173,6 @@ struct HomeTab: View {
             onEdit: { appState.present(.editVehicle) },
             onDocumentsTap: { appState.push(.documents(vehicle)) }
         )
-        .tourTarget(.vehicleSummary, active: onboardingState.currentPhase.isTour)
 
         VStack(alignment: .leading, spacing: Spacing.xl) {
             let recalls = visibleRecalls(for: vehicle)

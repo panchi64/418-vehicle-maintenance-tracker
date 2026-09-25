@@ -11,45 +11,46 @@ import SwiftUI
 struct SyncSettingsSection: View {
     @State private var syncService = SyncStatusService.shared
     @State private var isEnabled: Bool = SyncSettings.shared.iCloudSyncEnabled
-    @State private var showRestartAlert = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            SettingsGroup(title: L10n.syncSectionTitle) {
-                syncToggleRow
+        SettingsGroup(title: L10n.syncSectionTitle, footer: L10n.syncFooter) {
+            syncToggleRow
 
-                SettingsRowDivider()
+            SettingsRowDivider()
 
-                syncStatusRow
-            }
-
-            Text(L10n.syncFooter)
-                .font(.brutalistSecondary)
-                .foregroundStyle(Theme.textTertiary)
-                .padding(.top, Spacing.xs)
-        }
-        .alert(L10n.syncRestartTitle, isPresented: $showRestartAlert) {
-            Button(L10n.syncRestartOK, role: .cancel) {}
-        } message: {
-            Text(L10n.syncRestartMessage)
+            syncStatusRow
         }
     }
 
     // MARK: - Sync Toggle Row
 
+    /// The data store is chosen at launch and can't be swapped under open
+    /// screens, so a flipped toggle says when it applies, right under
+    /// itself — not in an alert that has to be dismissed and then forgotten.
+    private var takesEffectNextLaunch: Bool {
+        isEnabled != SyncSettings.shared.isSyncActiveThisLaunch
+    }
+
     private var syncToggleRow: some View {
         let needsAccount = !syncService.hasICloudAccount && isEnabled
+        let subtitle: String
+        if needsAccount {
+            subtitle = L10n.syncSignInPrompt
+        } else if takesEffectNextLaunch {
+            subtitle = L10n.syncTakesEffectNextLaunch
+        } else {
+            subtitle = L10n.syncToggleSubtitle
+        }
 
         return SettingsToggleRow(
             title: L10n.syncToggleTitle,
-            subtitle: needsAccount ? L10n.syncSignInPrompt : L10n.syncToggleSubtitle,
+            subtitle: subtitle,
             subtitleColor: needsAccount ? Theme.statusOverdue : Theme.textTertiary,
             isOn: $isEnabled
         )
         .onChange(of: isEnabled) { _, newValue in
             SyncSettings.shared.iCloudSyncEnabled = newValue
             syncService.syncSettingChanged(enabled: newValue)
-            showRestartAlert = true
         }
     }
 

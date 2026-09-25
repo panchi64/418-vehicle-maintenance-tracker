@@ -22,10 +22,9 @@
 import SwiftUI
 
 enum TourTargetID: Hashable {
-    case homeNextUp        // Step 0 — Home: Next Up card
-    case vehicleSummary    // Step 1 — Home: odometer + specs band
-    case servicesStatusGroup // Step 2 — Services: first status group header
-    case costsHeadline     // Step 3 — Costs: period total readout
+    case homeNextUp          // Step 0 — Home: Next Up card
+    case servicesStatusGroup // Step 1 — Services: first status group header
+    case costsHeadline       // Step 2 — Costs: period total readout
 }
 
 /// Window-space frames of the tour targets currently on screen.

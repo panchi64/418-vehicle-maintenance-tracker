@@ -164,13 +164,30 @@ final class StoreManager {
 
     // MARK: - Restore
 
-    func restorePurchases() async {
+    enum RestoreOutcome: Equatable {
+        /// Pro is unlocked (the only non-consumable a restore can return).
+        case restored
+        /// The sync worked; this Apple Account has nothing to restore.
+        case nothingToRestore
+        /// The user dismissed the App Store sign-in; nothing to report.
+        case cancelled
+        case failed
+    }
+
+    /// Re-syncs App Store transactions and reports what happened, so the
+    /// caller can say so — a restore that returns silently looks broken.
+    @discardableResult
+    func restorePurchases() async -> RestoreOutcome {
         do {
             try await AppStore.sync()
             await checkEntitlements()
             storeLogger.info("Purchases restored")
+            return isPro ? .restored : .nothingToRestore
+        } catch StoreKitError.userCancelled {
+            return .cancelled
         } catch {
             storeLogger.error("Restore failed: \(error.localizedDescription)")
+            return .failed
         }
     }
 

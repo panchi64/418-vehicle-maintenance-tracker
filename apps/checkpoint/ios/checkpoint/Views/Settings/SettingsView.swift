@@ -2,18 +2,18 @@
 //  SettingsView.swift
 //  checkpoint
 //
-//  Settings screen organized by: Display, Reminders, Smart Features, Data & Sync, Privacy
+//  Switchboard: independent, equal-weight rows in system-style grouped
+//  sections. Order runs from what is adjusted most (Display, Reminders) to
+//  what is set once (Data, Privacy). Support comes last and looks like every
+//  other group — nothing here may out-rank the functional settings.
 //
 
 import SwiftUI
 import SwiftData
-#if DEBUG
-import UserNotifications
-#endif
 
 struct SettingsView: View {
-    @Environment(\.dismiss) private var dismiss
-    @Environment(AppState.self) private var appState
+    @Environment(\.dismiss) var dismiss
+    @Environment(AppState.self) var appState
     var onboardingState: OnboardingState?
     /// Replays the tour without re-running the intro/preferences flow.
     /// Owned by ContentView because seeding sample data requires the
@@ -22,6 +22,9 @@ struct SettingsView: View {
 
     @State private var showRecallSheet = false
     @State private var showCSVImport = false
+    #if DEBUG
+    @State var showTipModal = false
+    #endif
 
     var body: some View {
         NavigationStack {
@@ -30,27 +33,15 @@ struct SettingsView: View {
                     .ignoresSafeArea()
 
                 ScrollView {
-                    VStack(alignment: .leading, spacing: Spacing.lg) {
-                        // DISPLAY — most commonly adjusted
+                    VStack(alignment: .leading, spacing: Spacing.xl) {
                         displaySection
-
-                        // REMINDERS — notification thresholds and seasonal alerts
                         remindersSection
-
-                        // SAFETY — recalls (per current vehicle)
                         safetySection
-
-                        // SMART FEATURES — service bundling
                         smartFeaturesSection
-
-                        // DATA & SYNC — rarely changed after setup
                         dataSection
-
-                        // SUPPORT
-                        supportSection
-
-                        // PRIVACY — analytics opt-out
+                        SyncSettingsSection()
                         privacySection
+                        supportSection
 
                         #if DEBUG
                         debugSection
@@ -80,16 +71,18 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Display Section
+    // MARK: - Display
 
     private var displaySection: some View {
         SettingsGroup(title: L10n.settingsDisplay) {
             NavigationLink {
                 ThemePickerView()
             } label: {
+                let theme = ThemeManager.shared.current
                 SettingsValueRow(
                     title: L10n.settingsTheme,
-                    value: ThemeManager.shared.current.displayName
+                    value: theme.displayName,
+                    swatch: theme.previewColors.map { Color(hex: $0) }
                 )
             }
             .buttonStyle(.plain)
@@ -117,7 +110,6 @@ struct SettingsView: View {
 
             SettingsRowDivider()
 
-            // App Icon Auto-change (moved from Alerts — it's a display preference)
             SettingToggle(
                 title: L10n.settingsAutomaticIcon,
                 subtitle: L10n.settingsAutomaticIconDesc,
@@ -132,10 +124,15 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Reminders Section
+    // MARK: - Reminders
 
     private var remindersSection: some View {
         SettingsGroup(title: L10n.settingsReminders) {
+            // First: every threshold below is moot while this is off.
+            SettingsNotificationRow()
+
+            SettingsRowDivider()
+
             NavigationLink {
                 DueSoonMileageThresholdPicker()
             } label: {
@@ -184,7 +181,7 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Safety Section
+    // MARK: - Safety
 
     private var safetySection: some View {
         let recalls = appState.currentRecalls
@@ -205,7 +202,7 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Smart Features Section
+    // MARK: - Smart Features
 
     private var smartFeaturesSection: some View {
         let bundlingEnabled = ClusteringSettings.shared.isEnabled
@@ -249,28 +246,39 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Data Section
+    // MARK: - Data
 
     private var dataSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.lg) {
-            SettingsGroup(title: L10n.settingsDataSync) {
-                SettingsActionRow(
-                    title: L10n.settingsImportHistory,
-                    systemImage: "square.and.arrow.down",
-                    iconColor: Theme.textTertiary
-                ) {
-                    showCSVImport = true
-                }
+        SettingsGroup(title: L10n.settingsDataSync) {
+            SettingsActionRow(
+                title: L10n.settingsImportHistory,
+                systemImage: "square.and.arrow.down",
+                iconColor: Theme.textTertiary
+            ) {
+                showCSVImport = true
             }
-
-            SyncSettingsSection()
         }
     }
 
-    // MARK: - Support Section
+    // MARK: - Privacy
 
+    private var privacySection: some View {
+        SettingsGroup(title: L10n.settingsPrivacy) {
+            SettingToggle(
+                title: L10n.settingsUsageAnalytics,
+                subtitle: L10n.settingsUsageAnalyticsDesc,
+                read: { AnalyticsSettings.shared.isEnabled },
+                write: { AnalyticsService.shared.setEnabled($0) }
+            )
+        }
+    }
+
+    // MARK: - Support
+
+    /// Plain like every other group: no accent border or accent title, and
+    /// the heart icon in the same tertiary ink as the rest.
     private var supportSection: some View {
-        SettingsGroup(title: L10n.settingsSupport, titleColor: Theme.accent, borderColor: Theme.accent) {
+        SettingsGroup(title: L10n.settingsSupport) {
             NavigationLink {
                 TipJarView()
                     .environment(appState)
@@ -278,7 +286,8 @@ struct SettingsView: View {
                 SettingsRowLabel(
                     title: L10n.tipSupportCheckpoint,
                     subtitle: L10n.tipEveryTipUnlocks,
-                    systemImage: "heart.fill"
+                    systemImage: "chevron.right",
+                    iconColor: Theme.textTertiary
                 )
             }
             .buttonStyle(.plain)
@@ -302,7 +311,7 @@ struct SettingsView: View {
                 systemImage: "arrow.counterclockwise",
                 iconColor: Theme.textTertiary
             ) {
-                Task { await StoreManager.shared.restorePurchases() }
+                Task { await RestorePurchasesAction.run() }
             }
 
             SettingsRowDivider()
@@ -310,93 +319,13 @@ struct SettingsView: View {
             SettingsActionRow(
                 title: L10n.settingsFindGasPrices,
                 subtitle: L10n.settingsFindGasPricesDesc,
-                systemImage: "fuelpump.fill"
+                systemImage: "fuelpump",
+                iconColor: Theme.textTertiary
             ) {
                 CompanionAppLauncher.openBiombo()
             }
         }
     }
-
-    // MARK: - Privacy Section
-
-    private var privacySection: some View {
-        SettingsGroup(title: L10n.settingsPrivacy) {
-            SettingToggle(
-                title: L10n.settingsUsageAnalytics,
-                subtitle: L10n.settingsUsageAnalyticsDesc,
-                read: { AnalyticsSettings.shared.isEnabled },
-                write: { AnalyticsService.shared.setEnabled($0) }
-            )
-        }
-    }
-
-    // MARK: - Debug Section
-
-    #if DEBUG
-    @State private var showTipModal = false
-
-    // Developer-only rows: English, never localized.
-    private var debugSection: some View {
-        SettingsGroup(title: "DEBUG", titleColor: Theme.statusOverdue) {
-            SettingsActionRow(
-                title: "Replay Onboarding",
-                systemImage: "arrow.counterclockwise",
-                iconColor: Theme.textTertiary
-            ) {
-                onboardingState?.replayOnboarding()
-                dismiss()
-            }
-
-            SettingsRowDivider()
-
-            SettingsActionRow(
-                title: "Show Tip Prompt",
-                systemImage: "heart",
-                iconColor: Theme.textTertiary
-            ) {
-                showTipModal = true
-            }
-            .sheet(isPresented: $showTipModal) {
-                TipModalView()
-                    .environment(appState)
-            }
-
-            SettingsRowDivider()
-
-            SettingsActionRow(
-                title: "Fire Test Notification (3s)",
-                systemImage: "bell",
-                iconColor: Theme.textTertiary
-            ) {
-                Task { await Self.fireTestNotification() }
-            }
-        }
-    }
-
-    private static func fireTestNotification() async {
-        let messages: [(title: String, body: String)] = [
-            ("Odometer Sync Requested", "It's been a while. How far have we gone?"),
-            ("Marbete Status: 30 Days", "Would prefer not to be impounded."),
-            ("Marbete Status: 7 Days", "Starting to worry about that marbete."),
-            ("Marbete Status: URGENT", "Expires tomorrow. Legally speaking."),
-            ("Oil Change Due in 1 Week", "The oil is aging. So are we all."),
-            ("Tire Rotation Reminder", "The tires asked me to ask you."),
-            ("Brake Inspection Due", "Stopping is optional. Until it isn't."),
-            ("Coolant Flush Due Soon", "Running a little warm. Thought you should know."),
-            ("2025 Expense Report", "You spent a lot last year. You're welcome."),
-            ("Marbete Status: 60 Days", "Requesting registration renewal. No rush. Yet."),
-        ]
-        guard let pick = messages.randomElement() else { return }
-        let content = UNMutableNotificationContent()
-        content.title = pick.title
-        content.body = pick.body
-        content.sound = .default
-        content.categoryIdentifier = NotificationService.serviceDueCategoryID
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
-        let request = UNNotificationRequest(identifier: "debug-test-notification", content: content, trigger: trigger)
-        try? await UNUserNotificationCenter.current().add(request)
-    }
-    #endif
 }
 
 #Preview {

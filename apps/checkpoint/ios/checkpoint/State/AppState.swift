@@ -123,7 +123,6 @@ final class AppState {
 
     var recall = RecallState()
     var servicesTab = ServicesTabState()
-    var onboarding = OnboardingPrefillState()
 
     // MARK: - Container Lifecycle
 

@@ -155,8 +155,6 @@ enum L10n {
     static var vehicleMarbeteHelp: String { localized("vehicle.marbete_help") }
     static var vehicleMarbeteHelpLong: String { localized("vehicle.marbete_help_long") }
     static var vehicleMarbeteEffect: String { localized("vehicle.marbete_effect") }
-    static var vehicleTireSizePlaceholderOptional: String { localized("vehicle.tire_size_placeholder_optional") }
-    static var vehicleOilTypePlaceholderOptional: String { localized("vehicle.oil_type_placeholder_optional") }
     static var vehicleEditTitle: String { localized("vehicle.edit.title") }
     static var vehicleDeleteAction: String { localized("vehicle.delete.action") }
     static var vehicleDeleteConfirmTitle: String { localized("vehicle.delete.confirm_title") }
@@ -237,9 +235,6 @@ enum L10n {
     static var syncSignInPrompt: String { localized("sync.sign_in_prompt") }
     static var syncFooter: String { localized("sync.footer") }
     static var syncDisabled: String { localized("sync.disabled") }
-    static var syncRestartTitle: String { localized("sync.restart_title") }
-    static var syncRestartMessage: String { localized("sync.restart_message") }
-    static var syncRestartOK: String { localized("sync.restart_ok") }
     static func syncLastSynced(_ relative: String) -> String {
         String(format: localized("sync.last_synced"), relative)
     }
@@ -361,12 +356,6 @@ enum L10n {
     static var emptyNoVehicleTitle: String { localized("empty.noVehicleTitle") }
     static var emptyNoVehicleMessage: String { localized("empty.noVehicleMessage") }
 
-    // MARK: - Errors
-
-    static var errorInvalidVINFormat: String { localized("error.invalid_vin_format") }
-    static var errorCouldNotReadOdometer: String { localized("error.could_not_read_odometer") }
-    static var errorNetworkConnectionFailed: String { localized("error.network_connection_failed") }
-
     // MARK: - Onboarding
 
     static var onboardingWelcomeTitle: String { localized("onboarding.welcome.title") }
@@ -383,23 +372,13 @@ enum L10n {
     static var onboardingFeature3Body: String { localized("onboarding.feature3.body") }
 
     static var onboardingDistanceUnit: String { localized("onboarding.distance_unit") }
-    static var onboardingDistanceUnitExplanation: String { localized("onboarding.distance_unit_explanation") }
-    static var onboardingClimateZone: String { localized("onboarding.climate_zone") }
-    static var onboardingClimateZoneExplanation: String { localized("onboarding.climate_zone_explanation") }
-    static var onboardingSwipeNext: String { localized("onboarding.swipe_next") }
 
     static var onboardingTourDashboardTitle: String { localized("onboarding.tour.dashboard.title") }
     static var onboardingTourDashboardBody: String { localized("onboarding.tour.dashboard.body") }
-    static var onboardingTourVehicleTitle: String { localized("onboarding.tour.vehicle.title") }
-    static var onboardingTourVehicleBody: String { localized("onboarding.tour.vehicle.body") }
     static var onboardingTourServicesTitle: String { localized("onboarding.tour.services.title") }
     static var onboardingTourServicesBody: String { localized("onboarding.tour.services.body") }
     static var onboardingTourCostsTitle: String { localized("onboarding.tour.costs.title") }
     static var onboardingTourCostsBody: String { localized("onboarding.tour.costs.body") }
-
-    static var onboardingTransitionServices: String { localized("onboarding.transition.services") }
-    static var onboardingTransitionCosts: String { localized("onboarding.transition.costs") }
-    static var onboardingTransitionTapToContinue: String { localized("onboarding.transition.tap_to_continue") }
 
     static func onboardingTourNextTo(_ destination: String) -> String {
         String(format: localized("onboarding.tour.next_to"), destination)
@@ -408,28 +387,11 @@ enum L10n {
         String(format: localized("onboarding.tour.progress"), tab, step, total)
     }
 
-    static var onboardingTourRecapTitle: String { localized("onboarding.tour.recap.title") }
-    static var onboardingTourRecapBody: String { localized("onboarding.tour.recap.body") }
-    static var onboardingTourRecapDone: String { localized("onboarding.tour.recap.done") }
-
-
     static var onboardingGetStartedTitle: String { localized("onboarding.getstarted.title") }
-    static var onboardingGetStartedVINLabel: String { localized("onboarding.getstarted.vin_label") }
-    static var onboardingGetStartedVINHelp: String { localized("onboarding.getstarted.vin_help") }
-    static var onboardingGetStartedVINPlaceholder: String { localized("onboarding.getstarted.vin_placeholder") }
-    static func onboardingGetStartedCharacters(_ count: Int) -> String {
-        String(format: localized("onboarding.getstarted.characters"), count)
-    }
-    static var onboardingGetStartedLookup: String { localized("onboarding.getstarted.lookup") }
-    static var onboardingGetStartedLookingUp: String { localized("onboarding.getstarted.looking_up") }
     static var onboardingGetStartedAddVehicle: String { localized("onboarding.getstarted.add_vehicle") }
-    static var onboardingGetStartedManual: String { localized("onboarding.getstarted.manual") }
-    static var onboardingGetStartedOr: String { localized("onboarding.getstarted.or") }
     static var onboardingGetStartedUseICloud: String { localized("onboarding.getstarted.use_icloud") }
     static var onboardingGetStartedICloudHelp: String { localized("onboarding.getstarted.icloud_help") }
     static var onboardingGetStartedSkip: String { localized("onboarding.getstarted.skip") }
-    static var onboardingGetStartedRegistrationTag: String { localized("onboarding.getstarted.registration_tag") }
-    static var onboardingGetStartedMarbeteHelp: String { localized("onboarding.getstarted.marbete_help") }
 
     // MARK: - Documents
 
@@ -451,8 +413,6 @@ enum L10n {
     static func documentsLinkedCount(_ count: Int) -> String {
         String(format: localized("documents.linked_count"), count)
     }
-    static var documentsDeleteConfirmTitle: String { localized("documents.delete.confirm_title") }
-    static var documentsDeleteConfirmMessage: String { localized("documents.delete.confirm_message") }
     static func documentsDeleteBulkConfirmTitle(_ count: Int) -> String {
         String(format: localized("documents.delete.bulk_confirm_title"), count)
     }
@@ -473,20 +433,12 @@ enum L10n {
     static var documentsExtractedTextLabel: String { localized("documents.extracted_text.label") }
     static var documentsMoreActions: String { localized("documents.more_actions") }
     static var documentsNoLinkedVehicles: String { localized("documents.no_linked_vehicles") }
-    static var documentsNoResultsTitle: String { localized("documents.no_results.title") }
-    static var documentsNoResultsMessage: String { localized("documents.no_results.message") }
     static var documentsOpenBadge: String { localized("documents.open_badge") }
     static var documentsOpenFullLabel: String { localized("documents.open_full.label") }
     static var documentsOpenFullHint: String { localized("documents.open_full.hint") }
     static var documentsServiceFallback: String { localized("documents.service_fallback") }
     static func documentsServiceLogSummary(_ serviceName: String, _ date: String) -> String {
         String(format: localized("documents.service_log_summary"), serviceName, date)
-    }
-    static func documentsSectionTitle(_ typeName: String, _ count: Int) -> String {
-        String(format: localized("documents.section_title"), typeName, count)
-    }
-    static func documentsSelectedCount(_ count: Int) -> String {
-        String(format: localized("documents.selected_count"), count)
     }
     static func documentsDeleteCount(_ count: Int) -> String {
         String(format: localized("documents.delete_count"), count)

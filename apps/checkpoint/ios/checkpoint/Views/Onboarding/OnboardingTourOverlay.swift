@@ -19,12 +19,11 @@
 //
 //  Wayfinding additions vs. the bare anchor overlay:
 //      • A `TAB · STEP NN / NN` header pill on every spotlight card so the
-//        user knows where they are after tab transitions.
-//      • The Next button foreshadows the destination tab on the last step
-//        of each tab (`Next: Services →`) so transitions stop being a teleport.
-//      • A Back affordance on every step after the first, mirroring forward
-//        motion. Back across a tab boundary is a direct rewind — the
-//        transition card only narrates forward.
+//        user knows where they are after a tab change.
+//      • The Next button names the destination tab (`Next: Services`), so a
+//        tab change is a step the user took rather than a teleport — which
+//        is why no interstitial card sits between tabs.
+//      • A Back affordance on every step after the first.
 //      • Skip is available immediately on every step, with no confirmation:
 //        leaving a tour destroys nothing, and Settings → Replay Tour brings
 //        it back.
@@ -61,17 +60,14 @@ struct OnboardingTourOverlay: View {
         currentStep == 0
     }
 
-    /// `Done →` on the last spotlight (signals exit from the guided
-    /// spotlights — the recap is a brief closer, not another spotlight).
-    /// `Next: <destination>` when the next step crosses a tab boundary.
-    /// Plain `Next` otherwise.
+    /// `Done` on the last spotlight. `Next: <destination>` when the next step
+    /// crosses a tab boundary. Plain `Next` otherwise.
     private var nextButtonTitle: String {
         if isLastStep { return L10n.commonDone }
         if let next = TourStep.at(currentStep + 1),
            let current = currentTourStep,
-           next.tab != current.tab,
-           let label = next.transitionLabel?() {
-            return L10n.onboardingTourNextTo(label)
+           next.tab != current.tab {
+            return L10n.onboardingTourNextTo(next.tab.title)
         }
         return L10n.commonNext
     }
@@ -257,10 +253,8 @@ struct OnboardingTourOverlay: View {
 }
 
 /// Leaves the guided tour. Available immediately and unconfirmed: skipping
-/// destroys nothing, and Settings → Replay Tour brings the tour back. Shared
-/// by the spotlight card and the between-tab transition card so the two
-/// can't drift apart again.
-struct OnboardingSkipTourButton: View {
+/// destroys nothing, and Settings → Replay Tour brings the tour back.
+private struct OnboardingSkipTourButton: View {
     let step: Int
     let onSkipTour: () -> Void
 

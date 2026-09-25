@@ -28,6 +28,9 @@ struct ContentView: View {
     /// `.active` re-runs it.
     @State var isForegroundActive = false
 
+    /// The one-line "why reminders" ask shown before the system prompt.
+    @State var showNotificationPrePrompt = false
+
     // MARK: - Vehicle Selection Persistence
 
     static let selectedVehicleIDKey = AppGroupConstants.appSelectedVehicleIDKey
@@ -66,6 +69,12 @@ struct ContentView: View {
                 )
             )
         )
+        .alert(L10n.onboardingRemindersTitle, isPresented: $showNotificationPrePrompt) {
+            Button(L10n.onboardingRemindersAllow) { answerNotificationPrePrompt(allow: true) }
+            Button(L10n.onboardingRemindersNotNow, role: .cancel) { answerNotificationPrePrompt(allow: false) }
+        } message: {
+            Text(L10n.onboardingRemindersMessage)
+        }
         .environment(appState)
         .environment(tourSpotlights)
         // Toasts render in their own window above sheets (`ToastWindow`).

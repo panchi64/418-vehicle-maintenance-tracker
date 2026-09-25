@@ -2349,13 +2349,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This cannot be undone."
+            "value" : "You can undo this right after."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esto no se puede deshacer."
+            "value" : "Podrás deshacerlo justo después."
           }
         }
       }
@@ -2377,40 +2377,6 @@
         }
       }
     },
-    "documents.delete.confirm_message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This cannot be undone."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esto no se puede deshacer."
-          }
-        }
-      }
-    },
-    "documents.delete.confirm_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete document?"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¿Eliminar documento?"
-          }
-        }
-      }
-    },
     "documents.delete.error" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2424,6 +2390,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No se pudo eliminar. Inténtalo de nuevo."
+          }
+        }
+      }
+    },
+    "documents.editNotes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit Notes"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar notas"
           }
         }
       }
@@ -2833,6 +2816,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Documentos"
+          }
+        }
+      }
+    },
+    "documents.toast.deleted" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Document deleted"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Documento eliminado"
+          }
+        }
+      }
+    },
+    "documents.toast.deletedCount" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Documents deleted: %lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Documentos eliminados: %lld"
           }
         }
       }
@@ -3296,57 +3313,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sin vehículo"
-          }
-        }
-      }
-    },
-    "error.could_not_read_odometer" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could not read odometer from image"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No se pudo leer el odómetro de la imagen"
-          }
-        }
-      }
-    },
-    "error.invalid_vin_format" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Invalid VIN format"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Formato de VIN inválido"
-          }
-        }
-      }
-    },
-    "error.network_connection_failed" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Network connection failed"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Falló la conexión de red"
           }
         }
       }
@@ -6984,40 +6950,6 @@
         }
       }
     },
-    "onboarding.climate_zone" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Climate Zone"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zona climática"
-          }
-        }
-      }
-    },
-    "onboarding.climate_zone_explanation" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Seasonal reminders adapt to your climate — winter tires, AC checks, battery heat warnings. You can change this later in Settings."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Los recordatorios de temporada se adaptan a tu clima — gomas de invierno, revisión del A/C, avisos por calor en la batería. Puedes cambiarlo después en Ajustes."
-          }
-        }
-      }
-    },
     "onboarding.distance_unit" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7031,23 +6963,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Unidad de distancia"
-          }
-        }
-      }
-    },
-    "onboarding.distance_unit_explanation" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "All mileage tracking, service intervals, and cost-per-distance calculations use this unit. You can change it later in Settings."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Todo el seguimiento de kilometraje, los intervalos de servicio y los cálculos de costo por distancia usan esta unidad. Puedes cambiarla después en Ajustes."
           }
         }
       }
@@ -7171,19 +7086,19 @@
         }
       }
     },
-    "onboarding.getstarted.characters" : {
+    "onboarding.getstarted.body" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%d / 17 Characters"
+            "value" : "Add it now. The VIN fills in the rest, and a starter schedule gets its reminders going."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%d / 17 caracteres"
+            "value" : "Añádelo ahora. El VIN completa el resto y un plan inicial pone en marcha sus recordatorios."
           }
         }
       }
@@ -7201,74 +7116,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sincroniza vehículos de una instalación anterior"
-          }
-        }
-      }
-    },
-    "onboarding.getstarted.looking_up" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Looking Up..."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Consultando…"
-          }
-        }
-      }
-    },
-    "onboarding.getstarted.lookup" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Look Up VIN"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Consultar VIN"
-          }
-        }
-      }
-    },
-    "onboarding.getstarted.manual" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enter Details Manually"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingresar datos manualmente"
-          }
-        }
-      }
-    },
-    "onboarding.getstarted.or" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OR"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O"
           }
         }
       }
@@ -7324,57 +7171,6 @@
         }
       }
     },
-    "onboarding.getstarted.vin_help" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "17 characters. We handle the rest. Make, model, year, open recalls."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "17 caracteres. Nosotros nos ocupamos del resto. Marca, modelo, año, retiros abiertos."
-          }
-        }
-      }
-    },
-    "onboarding.getstarted.vin_label" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enter Your VIN"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingresa tu VIN"
-          }
-        }
-      }
-    },
-    "onboarding.getstarted.vin_placeholder" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enter VIN..."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingresar VIN…"
-          }
-        }
-      }
-    },
     "onboarding.lets_look" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7388,6 +7184,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vamos a verlo"
+          }
+        }
+      }
+    },
+    "onboarding.reminders.allow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow Reminders"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permitir recordatorios"
+          }
+        }
+      }
+    },
+    "onboarding.reminders.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checkpoint notifies you before a service is due. You can change this anytime in Settings."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checkpoint te avisa antes de que venza un servicio. Puedes cambiarlo cuando quieras en Ajustes."
+          }
+        }
+      }
+    },
+    "onboarding.reminders.notNow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not Now"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahora no"
+          }
+        }
+      }
+    },
+    "onboarding.reminders.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get service reminders?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Recibir recordatorios de servicio?"
           }
         }
       }
@@ -7426,23 +7290,6 @@
         }
       }
     },
-    "onboarding.swipe_next" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Swipe to continue"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Desliza para continuar"
-          }
-        }
-      }
-    },
     "onboarding.tour.costs.body" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7466,13 +7313,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "04 // Costs"
+            "value" : "03 // Costs"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "04 // Costos"
+            "value" : "03 // Costos"
           }
         }
       }
@@ -7483,13 +7330,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The most urgent item surfaces first. No buried information. No digging."
+            "value" : "The most urgent item surfaces first. Tap the vehicle name at the top to switch vehicles."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lo más urgente aparece primero. Nada enterrado. Nada que excavar."
+            "value" : "Lo más urgente aparece primero. Toca el nombre del vehículo arriba para cambiar de vehículo."
           }
         }
       }
@@ -7545,57 +7392,6 @@
         }
       }
     },
-    "onboarding.tour.recap.body" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Home for what's due. Services for the full history. Costs for the damage. Everything else is one tap away."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inicio para lo pendiente. Servicios para el historial. Costos para lo que ha costado. Todo lo demás, a un toque."
-          }
-        }
-      }
-    },
-    "onboarding.tour.recap.done" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Let's go"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vamos"
-          }
-        }
-      }
-    },
-    "onboarding.tour.recap.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You're set."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Listo."
-          }
-        }
-      }
-    },
     "onboarding.tour.services.body" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7619,98 +7415,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "03 // Services"
+            "value" : "02 // Services"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "03 // Servicios"
-          }
-        }
-      }
-    },
-    "onboarding.tour.vehicle.body" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap the vehicle name at the top to switch vehicles. Tap the amber mileage when the odometer changes. Your vehicle tracks the rest."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toca el nombre del vehículo arriba para cambiar de vehículo. Toca el kilometraje ámbar cuando cambie el odómetro. Tu vehículo lleva el resto."
-          }
-        }
-      }
-    },
-    "onboarding.tour.vehicle.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "02 // Your Vehicle"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "02 // Tu vehículo"
-          }
-        }
-      }
-    },
-    "onboarding.transition.costs" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Costs"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Costos"
-          }
-        }
-      }
-    },
-    "onboarding.transition.services" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Services"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Servicios"
-          }
-        }
-      }
-    },
-    "onboarding.transition.tap_to_continue" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap to continue"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toca para continuar"
+            "value" : "02 // Servicios"
           }
         }
       }
@@ -10236,13 +9947,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "DISPLAY"
+            "value" : "Display"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "PANTALLA"
+            "value" : "Pantalla"
           }
         }
       }
@@ -10349,19 +10060,121 @@
         }
       }
     },
+    "settings.notifications" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notificaciones"
+          }
+        }
+      }
+    },
+    "settings.notifications.allowed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allowed"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permitidas"
+          }
+        }
+      }
+    },
+    "settings.notifications.notAsked" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not asked yet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no solicitadas"
+          }
+        }
+      }
+    },
+    "settings.notifications.off" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off — reminders can't reach you"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desactivadas: los recordatorios no te llegan"
+          }
+        }
+      }
+    },
+    "settings.notifications.openSettings" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Settings"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir Ajustes"
+          }
+        }
+      }
+    },
+    "settings.notifications.turnOn" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn On"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activar"
+          }
+        }
+      }
+    },
     "settings.privacy" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "PRIVACY"
+            "value" : "Privacy"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "PRIVACIDAD"
+            "value" : "Privacidad"
           }
         }
       }
@@ -10372,13 +10185,64 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "REMINDERS"
+            "value" : "Reminders"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "RECORDATORIOS"
+            "value" : "Recordatorios"
+          }
+        }
+      }
+    },
+    "settings.restore.failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't restore purchases. Check your connection and try again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron restaurar las compras. Revisa tu conexión e inténtalo de nuevo."
+          }
+        }
+      }
+    },
+    "settings.restore.nothing" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No purchases to restore on this Apple Account"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay compras para restaurar en esta cuenta de Apple"
+          }
+        }
+      }
+    },
+    "settings.restore.success" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Purchases restored. Pro is unlocked."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compras restauradas. Pro está desbloqueado."
           }
         }
       }
@@ -10389,13 +10253,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SAFETY"
+            "value" : "Safety"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SEGURIDAD"
+            "value" : "Seguridad"
           }
         }
       }
@@ -10406,13 +10270,30 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SMART FEATURES"
+            "value" : "Smart Features"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "FUNCIONES INTELIGENTES"
+            "value" : "Funciones inteligentes"
+          }
+        }
+      }
+    },
+    "settings.sync.nextLaunch" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Takes effect next launch"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se aplica la próxima vez que abras la app"
           }
         }
       }
@@ -10448,9 +10329,9 @@
     "settings.not_set" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Not Set" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin definir" } } } },
     "settings.seasonal_alerts" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Seasonal Alerts" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Alertas estacionales" } } } },
     "settings.seasonal_alerts_desc" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Show seasonal maintenance tips on the dashboard" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Muestra consejos de mantenimiento de temporada en el panel" } } } },
-    "settings.data_sync" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "DATA & SYNC" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "DATOS Y SINCRONIZACIÓN" } } } },
+    "settings.data_sync" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Data & Sync" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Datos y sincronización" } } } },
     "settings.import_history" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Import Service History" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Importar historial de servicios" } } } },
-    "settings.support" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "SUPPORT" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "APOYO" } } } },
+    "settings.support" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Support" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Apoyo" } } } },
     "settings.replay_tour" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Replay Tour" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Repetir recorrido" } } } },
     "settings.replay_tour_desc" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "See the guided walkthrough again" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Vuelve a ver el recorrido guiado" } } } },
     "settings.restore_purchases" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Restore Purchases" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Restaurar compras" } } } },
@@ -10460,32 +10341,23 @@
     "settings.usage_analytics_desc" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Helps us improve Checkpoint. No personal data is ever collected." } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Nos ayuda a mejorar Checkpoint. Nunca recopilamos datos personales." } } } },
     "settings.days_count" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld days" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "%lld días" } } } },
     "settings.distance_value" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ %2$@" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ %2$@" } } } },
-    "sync.section_title" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "ICLOUD SYNC" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "SINCRONIZACIÓN CON ICLOUD" } } } },
+    "sync.section_title" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "iCloud Sync" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Sincronización con iCloud" } } } },
     "sync.toggle_title" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "iCloud Sync" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Sincronizar con iCloud" } } } },
     "sync.toggle_subtitle" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Free • No account required" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Gratis • No requiere cuenta" } } } },
     "sync.sign_in_prompt" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Sign in to iCloud in Settings" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Inicia sesión en iCloud en Ajustes" } } } },
     "sync.footer" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Syncs your vehicles and maintenance data across your Apple devices via iCloud." } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Sincroniza tus vehículos y datos de mantenimiento entre tus dispositivos Apple mediante iCloud." } } } },
     "sync.disabled" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Sync disabled" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Sincronización desactivada" } } } },
-    "sync.restart_title" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Restart Required" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Reinicio necesario" } } } },
-    "sync.restart_message" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Please restart the app for sync changes to take effect." } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Reinicia la app para que se apliquen los cambios de sincronización." } } } },
-    "sync.restart_ok" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "OK" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Aceptar" } } } },
     "sync.last_synced" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Last synced %@" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Última sincronización: %@" } } } },
     "common.close" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Close" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Cerrar" } } } },
     "disclosure.expanded" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Expanded" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Expandido" } } } },
     "disclosure.collapsed" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Collapsed" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Contraído" } } } },
-    "onboarding.getstarted.registration_tag" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Registration Tag" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Marbete de registro" } } } },
-    "onboarding.getstarted.marbete_help" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Track your yearly vehicle registration expiration and get reminders before it lapses." } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Lleva el control del vencimiento anual del registro de tu vehículo y recibe recordatorios antes de que expire." } } } },
     "documents.more_actions" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "More actions" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Más acciones" } } } },
     "documents.no_linked_vehicles" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "No linked vehicles" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin vehículos vinculados" } } } },
-    "documents.no_results.title" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "No Results" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin resultados" } } } },
-    "documents.no_results.message" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Try a different search term" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Prueba con otro término de búsqueda" } } } },
     "documents.open_badge" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Open" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Abrir" } } } },
     "documents.open_full.label" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Open full document" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Abrir documento completo" } } } },
     "documents.open_full.hint" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Opens the document in the system viewer" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Abre el documento en el visor del sistema" } } } },
     "documents.service_fallback" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Service" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Servicio" } } } },
     "documents.service_log_summary" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ • %2$@" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ • %2$@" } } } },
-    "documents.section_title" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ (%2$lld)" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ (%2$lld)" } } } },
-    "documents.selected_count" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld selected" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "%lld seleccionados" } } } },
     "documents.delete_count" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Delete (%lld)" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Eliminar (%lld)" } } } },
     "tip.support_checkpoint" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Support Checkpoint" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Apoya a Checkpoint" } } } },
     "tip.every_tip_unlocks" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Every tip unlocks a rare theme" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Cada propina desbloquea un tema raro" } } } },
@@ -11664,23 +11536,6 @@
         }
       }
     },
-    "vehicle.oil_type_placeholder_optional" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "0W-20 Synthetic (Optional)"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "0W-20 Sintético (Opcional)"
-          }
-        }
-      }
-    },
     "vehicle.save" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11711,6 +11566,159 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Especificaciones"
+          }
+        }
+      }
+    },
+    "vehicle.starter.add" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add %lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añadir %lld"
+          }
+        }
+      }
+    },
+    "vehicle.starter.intro" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set up a starter schedule? These are the usual services for a car. Keep the ones you want — if you don't know when one was last done, its first reminder counts from today."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Configurar un plan inicial? Estos son los servicios habituales de un auto. Deja los que quieras; si no sabes cuándo se hizo uno por última vez, su primer recordatorio cuenta desde hoy."
+          }
+        }
+      }
+    },
+    "vehicle.starter.lastDone" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last done"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última vez"
+          }
+        }
+      }
+    },
+    "vehicle.starter.lastDone.date" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fecha"
+          }
+        }
+      }
+    },
+    "vehicle.starter.lastDone.mileage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mileage"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Millaje"
+          }
+        }
+      }
+    },
+    "vehicle.starter.lastDone.unknown" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Don't know"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No sé"
+          }
+        }
+      }
+    },
+    "vehicle.starter.noneSelected" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select at least one service, or tap Cancel to skip."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecciona al menos un servicio, o toca Cancelar para omitir."
+          }
+        }
+      }
+    },
+    "vehicle.starter.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starter Schedule"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plan inicial"
+          }
+        }
+      }
+    },
+    "vehicle.starter.toastAdded" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Services scheduled: %lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servicios programados: %lld"
           }
         }
       }
@@ -11749,23 +11757,6 @@
         }
       }
     },
-    "vehicle.tire_size_placeholder_optional" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "225/45R17 (Optional)"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "225/45R17 (Opcional)"
-          }
-        }
-      }
-    },
     "vehicle.vin" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11779,6 +11770,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "VIN"
+          }
+        }
+      }
+    },
+    "vehicle.vin.nothingNew" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIN matched. Your details were already filled in, so nothing changed."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIN verificado. Tus datos ya estaban completos, así que no se cambió nada."
           }
         }
       }

@@ -230,9 +230,10 @@ struct ServiceLogForm: View {
                 }
                 .trackScreen(screen)
                 .onAppear(perform: prepare)
-                .sheet(item: $attachmentForDetail) { document in
-                    DocumentDetailSheet(document: document)
-                        .environment(appState)
+                // Pushed on the form's own stack — details push (F13), and a
+                // sheet over this sheet was navigation by stacking.
+                .navigationDestination(item: $attachmentForDetail) { document in
+                    DocumentDetailView(document: document, showsServiceLogLink: false)
                 }
             }
         }

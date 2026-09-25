@@ -2,7 +2,11 @@
 //  OnboardingState.swift
 //  checkpoint
 //
-//  State machine for the onboarding flow with persistence
+//  State machine for the onboarding flow with persistence.
+//
+//  Four short steps: the welcome page, then one spotlight per tab. The
+//  between-tab transition cards and the closing recap card are gone — they
+//  narrated what the spotlight cards already say. Every step can be skipped.
 //
 
 import SwiftUI
@@ -10,42 +14,25 @@ import SwiftUI
 enum OnboardingPhase: Equatable {
     case intro
     case tour(step: Int)
-    case tourTransition(toStep: Int)
-    /// Final tour beat — a centered recap card with no spotlight, shown
-    /// after the last anchored step. Closes the tour by tying the three
-    /// tabs into a single mental model before handing off to .getStarted.
-    case tourRecap
     case getStarted
     case completed
 
-    /// True for the anchored, spotlight-driven steps. The recap is a
-    /// separate non-anchored beat, so it is NOT a tour phase by this
-    /// definition — render it through its own branch.
+    /// True for the anchored, spotlight-driven steps.
     var isTour: Bool {
-        switch self {
-        case .tour, .tourTransition: return true
-        default: return false
-        }
-    }
-
-    var isTourRecap: Bool {
-        if case .tourRecap = self { return true }
+        if case .tour = self { return true }
         return false
     }
 
     /// True for every phase EXCEPT `.completed`. Used to gate UI gestures
-    /// (e.g. tab swipes) that should not fire while any onboarding surface
-    /// is on screen.
+    /// (e.g. tab swipes) and app-initiated prompts (tip, notifications) that
+    /// must not fire while any onboarding surface is on screen.
     var isActiveOnboarding: Bool {
         self != .completed
     }
 
     var tourStep: Int? {
-        switch self {
-        case .tour(let step): return step
-        case .tourTransition(let toStep): return toStep
-        default: return nil
-        }
+        if case .tour(let step) = self { return step }
+        return nil
     }
 }
 
@@ -80,43 +67,20 @@ final class OnboardingState {
         animate { currentPhase = .tour(step: 0) }
     }
 
+    /// Next spotlight, or — past the last one — the hand-off to adding a
+    /// vehicle. The tab follows via ContentView's phase `onChange`.
     func advanceTour() {
         guard case .tour(let step) = currentPhase else { return }
-        let nextStep = step + 1
-        let newPhase: OnboardingPhase
-
-        if let next = TourStep.at(nextStep), let current = TourStep.at(step) {
-            newPhase = next.tab != current.tab
-                ? .tourTransition(toStep: nextStep)
-                : .tour(step: nextStep)
-        } else {
-            // Past the last spotlight step — show the recap before handing
-            // off to .getStarted.
-            newPhase = .tourRecap
+        let next = step + 1
+        animate {
+            currentPhase = TourStep.at(next) != nil ? .tour(step: next) : .getStarted
         }
-
-        animate { currentPhase = newPhase }
     }
 
-    /// Rewinds a single step in the tour. Back across a tab boundary is a
-    /// direct rewind — the transition card only narrates forward motion;
-    /// rewinding through it would feel like a stutter. The tab itself
-    /// follows automatically via ContentView's `.onChange(of: currentPhase)`
-    /// handler.
+    /// Rewinds a single step in the tour.
     func goBackTour() {
-        switch currentPhase {
-        case .tour(let step) where step > 0:
-            animate { currentPhase = .tour(step: step - 1) }
-        case .tourRecap:
-            animate { currentPhase = .tour(step: TourStep.lastIndex) }
-        default:
-            return
-        }
-    }
-
-    func resolveTransition() {
-        guard case .tourTransition(let toStep) = currentPhase else { return }
-        animate { currentPhase = .tour(step: toStep) }
+        guard case .tour(let step) = currentPhase, step > 0 else { return }
+        animate { currentPhase = .tour(step: step - 1) }
     }
 
     func finishTour() {
@@ -153,7 +117,7 @@ final class OnboardingState {
     }
 
     /// Wraps a phase mutation in an animation so attached `.transition(...)`
-    /// modifiers on the overlay/transition card actually fire.
+    /// modifiers on the overlay actually fire.
     private func animate(_ change: () -> Void) {
         withAnimation(.easeOut(duration: Theme.animationMedium), change)
     }

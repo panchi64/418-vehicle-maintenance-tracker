@@ -129,6 +129,9 @@ extension ContentView {
             MarkClusterDoneSheet(cluster: cluster) {
                 appState.clusterRefreshToken += 1
             }
+
+        case .starterSchedule(let vehicle):
+            StarterScheduleSheet(vehicle: vehicle)
         }
     }
 
@@ -148,15 +151,13 @@ extension ContentView {
         }
     }
 
-    /// Per-sheet cleanup once a sheet has finished closing, after which any
-    /// queued sheet is already on its way up.
+    /// Once a sheet has finished closing (and any queued sheet is on its way
+    /// up): the moment a service may have just come into existence, which is
+    /// when asking about reminders makes sense.
     private func handleSheetDismiss() {
-        guard let dismissed = appState.sheetDidDismiss() else { return }
-        switch dismissed {
-        case .addVehicle:
-            appState.onboarding.marbeteMonth = nil
-            appState.onboarding.marbeteYear = nil
-            appState.onboarding.vinLookupResult = nil
+        switch appState.sheetDidDismiss() {
+        case .addService, .markDone, .clusterMarkDone, .starterSchedule:
+            considerNotificationPrePrompt()
         default:
             break
         }
@@ -171,7 +172,6 @@ extension ContentView {
                 set: { if !$0 { /* dismiss handled by callbacks */ } }
             )) {
                 OnboardingIntroView(
-                    onboardingState: onboardingState,
                     onStartTour: {
                         AnalyticsService.shared.capture(.onboardingTourStarted)
                         seedSampleDataForTour()
@@ -193,18 +193,7 @@ extension ContentView {
                 set: { if !$0 { /* dismiss handled by callbacks */ } }
             )) {
                 OnboardingGetStartedView(
-                    onVINLookupComplete: { result, vin in
-                        AnalyticsService.shared.capture(.onboardingVINLookupUsed)
-                        // Store VIN lookup result for AddVehicleFlowView to consume
-                        appState.onboarding.vinLookupResult = OnboardingPrefillState.VINLookupPassthrough(
-                            make: result.make,
-                            model: result.model,
-                            year: result.modelYear,
-                            vin: vin
-                        )
-                        completeOnboardingAndPresentAddVehicle()
-                    },
-                    onManualEntry: {
+                    onAddVehicle: {
                         AnalyticsService.shared.capture(.onboardingManualEntry)
                         completeOnboardingAndPresentAddVehicle()
                     },
@@ -217,50 +206,22 @@ extension ContentView {
                         AnalyticsService.shared.capture(.onboardingSkippedGetStarted)
                         clearSampleData()
                         onboardingState.complete()
-                    },
-                    marbeteMonth: $appState.onboarding.marbeteMonth,
-                    marbeteYear: $appState.onboarding.marbeteYear
+                    }
                 )
             }
     }
 
-    /// The tour's spotlight, transition, and recap cards, over the whole
-    /// shell — tab bar and navigation bar included.
+    /// The tour's spotlight card, over the whole shell — tab bar and
+    /// navigation bar included.
     @ViewBuilder
     private func tourOverlay(in geo: GeometryProxy) -> some View {
         if onboardingState.currentPhase.isTour {
-            if case .tourTransition(let toStep) = onboardingState.currentPhase {
-                OnboardingTourTransitionCard(
-                    targetStep: toStep,
-                    // Analytics for the skip-intent fire from the
-                    // button itself; this closure handles state only.
-                    onSkipTour: skipTour,
-                    onContinue: {
-                        onboardingState.resolveTransition()
-                    }
-                )
-                .transition(.opacity)
-            } else {
-                OnboardingTourOverlay(
-                    onboardingState: onboardingState,
-                    spotlight: tourSpotlight(in: geo),
-                    geometry: geo,
-                    // Analytics fire from the Skip button itself.
-                    onSkipTour: skipTour
-                )
-                .transition(.opacity)
-            }
-        } else if onboardingState.currentPhase.isTourRecap {
-            OnboardingTourRecapCard(
-                onBack: {
-                    onboardingState.goBackTour()
-                },
-                // onboardingTourCompleted analytics already fired
-                // on entering .tourRecap via the onChange handler.
-                onDone: {
-                    appState.selectedTab = .home
-                    onboardingState.finishTour()
-                }
+            OnboardingTourOverlay(
+                onboardingState: onboardingState,
+                spotlight: tourSpotlight(in: geo),
+                geometry: geo,
+                // Analytics fire from the Skip button itself.
+                onSkipTour: skipTour
             )
             .transition(.opacity)
         }

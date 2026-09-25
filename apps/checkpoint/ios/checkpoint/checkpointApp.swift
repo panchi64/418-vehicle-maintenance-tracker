@@ -104,6 +104,7 @@ struct checkpointApp: App {
         let userSyncPref = SyncSettings.shared.iCloudSyncEnabled
         let syncEnabled = hasCompleted && userSyncPref
         let container = Self.createContainer(syncEnabled: syncEnabled)
+        SyncSettings.shared.isSyncActiveThisLaunch = syncEnabled
         _modelContainer = State(initialValue: container)
 
         // Run post-launch backfills off the blocking launch path: dispatch as
@@ -129,19 +130,11 @@ struct checkpointApp: App {
             // Increase Contrast palettes, so the app follows the system setting.
             ContentView()
                 .task {
-                    // Only request notification permission after onboarding is completed
-                    // This avoids overwhelming new users with system prompts during intro
+                    // Read (never request) the notification permission: the
+                    // app asks in context, once a service exists
+                    // (`NotificationAskPolicy`), not at launch.
+                    await NotificationService.shared.checkAuthorizationStatus()
                     if OnboardingState.hasCompletedOnboarding {
-                        await NotificationService.shared.checkAuthorizationStatus()
-                        if !NotificationService.shared.isAuthorized {
-                            let granted = await NotificationService.shared.requestAuthorization()
-                            if granted {
-                                AnalyticsService.shared.capture(.notificationPermissionGranted)
-                            } else {
-                                AnalyticsService.shared.capture(.notificationPermissionDenied)
-                            }
-                        }
-
                         // Sweep orphaned service notifications and refresh pending
                         // content (vehicle renames, pace changes). Skipped when the
                         // fetch fails so a transient error can't wipe valid reminders.
@@ -166,6 +159,7 @@ struct checkpointApp: App {
                     guard userSyncPref else { return }
                     appLogger.info("Onboarding complete — enabling CloudKit sync")
                     let newContainer = Self.createContainer(syncEnabled: true)
+                    SyncSettings.shared.isSyncActiveThisLaunch = true
                     modelContainer = newContainer
                     WatchSessionService.shared.modelContainer = newContainer
                     WidgetDataService.shared.modelContainer = newContainer

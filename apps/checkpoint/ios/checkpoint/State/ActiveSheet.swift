@@ -29,6 +29,8 @@ enum ActiveSheet: Identifiable {
     case markDone(MarkDoneRequest)
     case clusterDetail(ServiceCluster)
     case clusterMarkDone(ServiceCluster)
+    /// Offered after a vehicle is added: common services with default intervals.
+    case starterSchedule(Vehicle)
 
     var id: String {
         switch self {
@@ -44,6 +46,7 @@ enum ActiveSheet: Identifiable {
         case .markDone(let request): return "markDone-\(request.id)"
         case .clusterDetail(let cluster): return "clusterDetail-\(cluster.id)"
         case .clusterMarkDone(let cluster): return "clusterMarkDone-\(cluster.id)"
+        case .starterSchedule(let vehicle): return "starterSchedule-\(vehicle.id)"
         }
     }
 
@@ -51,7 +54,7 @@ enum ActiveSheet: Identifiable {
     /// the app swaps its `ModelContainer`.
     var retainsModels: Bool {
         switch self {
-        case .markDone, .clusterDetail, .clusterMarkDone: return true
+        case .markDone, .clusterDetail, .clusterMarkDone, .starterSchedule: return true
         default: return false
         }
     }

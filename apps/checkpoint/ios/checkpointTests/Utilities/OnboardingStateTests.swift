@@ -36,6 +36,18 @@ final class OnboardingStateTests: XCTestCase {
         XCTAssertEqual(state.currentPhase, .completed)
     }
 
+    // MARK: - Length
+
+    func testTour_isAtMostFourStepsWithWelcome() {
+        // Welcome page + one spotlight per tab. The tour must stay short.
+        XCTAssertLessThanOrEqual(TourStep.all.count + 1, 4)
+    }
+
+    func testTour_oneStepPerTab() {
+        let tabs = TourStep.all.map(\.tab)
+        XCTAssertEqual(tabs, [.home, .services, .costs])
+    }
+
     // MARK: - Phase Transitions
 
     func testStartTour_setsPhaseToTourStep0() {
@@ -44,74 +56,27 @@ final class OnboardingStateTests: XCTestCase {
         XCTAssertEqual(state.currentPhase, .tour(step: 0))
     }
 
-    func testAdvanceTour_sameTab_noTransition() {
-        // Step 0 → 1: both on Home tab, no transition needed
+    func testAdvanceTour_crossingTabs_goesStraightToNextStep() {
+        // No interstitial card between tabs.
         let state = OnboardingState()
         state.startTour()
         state.advanceTour()
         XCTAssertEqual(state.currentPhase, .tour(step: 1))
     }
 
-    func testAdvanceTour_tabChange_insertsTransition() {
-        // Step 1 → 2: Home → Services, should insert transition
+    func testAdvanceTour_pastLastStep_goesToGetStarted() {
         let state = OnboardingState()
         state.startTour()
-        state.advanceTour() // → tour(step: 1)
-        state.advanceTour() // → tourTransition(toStep: 2)
-        XCTAssertEqual(state.currentPhase, .tourTransition(toStep: 2))
+        for _ in 0...TourStep.lastIndex {
+            state.advanceTour()
+        }
+        XCTAssertEqual(state.currentPhase, .getStarted)
     }
 
-    func testAdvanceTour_step2To3_insertsTransition() {
-        // Step 2 → 3: Services → Costs, should insert transition
+    func testAdvanceTour_outsideTour_isNoOp() {
         let state = OnboardingState()
-        state.startTour()
-        state.advanceTour() // → tour(step: 1)
-        state.advanceTour() // → tourTransition(toStep: 2)
-        state.resolveTransition() // → tour(step: 2)
-        state.advanceTour() // → tourTransition(toStep: 3)
-        XCTAssertEqual(state.currentPhase, .tourTransition(toStep: 3))
-    }
-
-    func testAdvanceTour_pastLastStep_goesToTourRecap() {
-        let state = OnboardingState()
-        state.startTour()
-        state.advanceTour() // → tour(step: 1)
-        state.advanceTour() // → tourTransition(toStep: 2)
-        state.resolveTransition() // → tour(step: 2)
-        state.advanceTour() // → tourTransition(toStep: 3)
-        state.resolveTransition() // → tour(step: 3)
-        state.advanceTour() // → tourRecap
-        XCTAssertEqual(state.currentPhase, .tourRecap)
-    }
-
-    func testAdvanceTour_fromTourRecap_isNoOp() {
-        // .tourRecap exits via finishTour(), not advanceTour().
-        let state = OnboardingState()
-        state.startTour()
         state.advanceTour()
-        state.advanceTour()
-        state.resolveTransition()
-        state.advanceTour()
-        state.resolveTransition()
-        state.advanceTour() // → tourRecap
-        state.advanceTour() // should stay on tourRecap
-        XCTAssertEqual(state.currentPhase, .tourRecap)
-    }
-
-    func testResolveTransition_movesToTourStep() {
-        let state = OnboardingState()
-        state.startTour()
-        state.advanceTour() // → tour(step: 1)
-        state.advanceTour() // → tourTransition(toStep: 2)
-        state.resolveTransition()
-        XCTAssertEqual(state.currentPhase, .tour(step: 2))
-    }
-
-    func testResolveTransition_noOp_whenNotTransition() {
-        let state = OnboardingState()
-        state.startTour() // → tour(step: 0)
-        state.resolveTransition() // should be a no-op
-        XCTAssertEqual(state.currentPhase, .tour(step: 0))
+        XCTAssertEqual(state.currentPhase, .intro)
     }
 
     func testFinishTour_goesToGetStarted() {
@@ -145,20 +110,11 @@ final class OnboardingStateTests: XCTestCase {
         XCTAssertEqual(state.currentPhase, .tour(step: 0))
     }
 
-    func testGoBackTour_fromTourRecap_returnsToLastSpotlight() {
+    func testGoBackTour_fromGetStarted_noOp() {
         let state = OnboardingState()
-        state.currentPhase = .tourRecap
+        state.currentPhase = .getStarted
         state.goBackTour()
-        XCTAssertEqual(state.currentPhase, .tour(step: TourStep.lastIndex))
-    }
-
-    func testGoBackTour_fromTourTransition_noOp() {
-        // The transition card has no Back affordance; goBackTour from there
-        // is a defensive no-op rather than an unexpected rewind.
-        let state = OnboardingState()
-        state.currentPhase = .tourTransition(toStep: 2)
-        state.goBackTour()
-        XCTAssertEqual(state.currentPhase, .tourTransition(toStep: 2))
+        XCTAssertEqual(state.currentPhase, .getStarted)
     }
 
     // MARK: - Replay
@@ -182,58 +138,31 @@ final class OnboardingStateTests: XCTestCase {
     // MARK: - Phase Properties
 
     func testIsTour_tourPhase_returnsTrue() {
-        let phase = OnboardingPhase.tour(step: 2)
-        XCTAssertTrue(phase.isTour)
+        XCTAssertTrue(OnboardingPhase.tour(step: 2).isTour)
     }
 
-    func testIsTour_includesTransition() {
-        let phase = OnboardingPhase.tourTransition(toStep: 2)
-        XCTAssertTrue(phase.isTour)
-    }
-
-    func testIsTour_excludesTourRecap() {
-        XCTAssertFalse(OnboardingPhase.tourRecap.isTour)
-    }
-
-    func testIsTour_introPhase_returnsFalse() {
+    func testIsTour_introAndGetStarted_returnFalse() {
         XCTAssertFalse(OnboardingPhase.intro.isTour)
-    }
-
-    func testIsTourRecap_recapPhase_returnsTrue() {
-        XCTAssertTrue(OnboardingPhase.tourRecap.isTourRecap)
-    }
-
-    func testIsTourRecap_tourPhase_returnsFalse() {
-        XCTAssertFalse(OnboardingPhase.tour(step: 0).isTourRecap)
+        XCTAssertFalse(OnboardingPhase.getStarted.isTour)
     }
 
     func testIsActiveOnboarding_completedPhase_returnsFalse() {
         XCTAssertFalse(OnboardingPhase.completed.isActiveOnboarding)
     }
 
-    func testIsActiveOnboarding_recapPhase_returnsTrue() {
-        XCTAssertTrue(OnboardingPhase.tourRecap.isActiveOnboarding)
-    }
-
-    func testIsActiveOnboarding_tourPhase_returnsTrue() {
-        XCTAssertTrue(OnboardingPhase.tour(step: 0).isActiveOnboarding)
-    }
-
-    func testIsActiveOnboarding_introPhase_returnsTrue() {
+    func testIsActiveOnboarding_everyOtherPhase_returnsTrue() {
         XCTAssertTrue(OnboardingPhase.intro.isActiveOnboarding)
+        XCTAssertTrue(OnboardingPhase.tour(step: 0).isActiveOnboarding)
+        XCTAssertTrue(OnboardingPhase.getStarted.isActiveOnboarding)
     }
 
     func testTourStep_tourPhase_returnsStep() {
         XCTAssertEqual(OnboardingPhase.tour(step: 2).tourStep, 2)
     }
 
-    func testTourStep_transitionPhase_returnsToStep() {
-        XCTAssertEqual(OnboardingPhase.tourTransition(toStep: 3).tourStep, 3)
-    }
-
     func testTourStep_nonTourPhase_returnsNil() {
         XCTAssertNil(OnboardingPhase.intro.tourStep)
-        XCTAssertNil(OnboardingPhase.tourRecap.tourStep)
+        XCTAssertNil(OnboardingPhase.getStarted.tourStep)
     }
 
     // MARK: - Sample Vehicle IDs

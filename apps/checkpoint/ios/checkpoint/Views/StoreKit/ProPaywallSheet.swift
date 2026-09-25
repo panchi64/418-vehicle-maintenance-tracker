@@ -92,7 +92,7 @@ struct ProPaywallSheet: View {
 
                             // Restore button
                             Button {
-                                Task { await storeManager.restorePurchases() }
+                                Task { await RestorePurchasesAction.run() }
                             } label: {
                                 Text(L10n.settingsRestorePurchases)
                                     .font(.brutalistSecondary)
