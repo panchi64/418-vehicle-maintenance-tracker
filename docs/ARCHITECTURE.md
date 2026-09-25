@@ -24,12 +24,13 @@ checkpoint-app/
 │   │   └── SeasonalReminder.swift      # Seasonal maintenance reminder definitions
 │   ├── Views/
 │   │   ├── Tabs/
-│   │   │   ├── HomeTab.swift
-│   │   │   ├── HomeTab+Helpers.swift       # Helper methods extracted from HomeTab
-│   │   │   ├── HomeTab+EmptyStates.swift   # Empty state views for HomeTab
-│   │   │   ├── ServicesTab.swift
-│   │   │   ├── CostsTab.swift
-│   │   │   └── CostsTab+Analytics.swift
+│   │   │   ├── HomeTab.swift               # Fixed five blocks: band, Next Up, Suggestions, Upcoming, Recent
+│   │   │   ├── HomeTab+Helpers.swift / +EmptyStates.swift
+│   │   │   ├── HomeTab+Marbete.swift       # Mark Renewed for the marbete Next Up
+│   │   │   ├── ServicesTab.swift           # One List: status groups, then month groups of history
+│   │   │   ├── ServicesTab+Selection.swift # Select mode: bulk Mark Done / Delete
+│   │   │   ├── CostsTab.swift              # Hero total, Trend/Category chart, year comparison, month groups
+│   │   │   └── CostsTab+Analytics.swift    # `CostsMetrics`, derived once per body
 │   │   ├── Vehicle/
 │   │   │   ├── AddVehicleView.swift
 │   │   │   ├── EditVehicleView.swift
@@ -296,6 +297,10 @@ StoreKit 2 purchase engine for Pro unlock and tip jar:
 - **Settings integration:** Syncs Pro status to `PurchaseSettings.shared.isPro`
 - **UI:** `TipJarView` in Settings for tip purchases
 
+### Delete and stop-tracking actions
+- `ServiceLogDeleteAction` — Deletes one log: recomputes the service's last-performed values, re-anchors a reminder derived from it, removes an emptied visit, and offers Undo
+- `ServiceDeleteAction` — `delete(_:vehicle:in:)` (cascades to history; callers confirm first) and `stopTracking(_:vehicle:)` (clears the schedule without writing a log, with Undo). Every UI path — Services rows, bulk select, Service Detail, Edit Service — goes through it
+
 ### Sync/
 - `SyncStatusService` — Consolidated iCloud sync status, network monitoring, remote change observation, and retry with backoff (`.synced`, `.syncing`, `.error`, `.disabled`, `.noAccount`)
 
@@ -405,11 +410,11 @@ struct WidgetColors {
 | `AttachmentGrid.swift` | Grid display of service log attachments |
 | `AttachmentPicker.swift` | Photo picker with camera/library options |
 | `AttachmentThumbnail.swift` | Individual attachment thumbnail |
-| `ReceiptTextView.swift` | Display extracted receipt text |
 
 ### Components/Camera/
 | Component | Purpose |
 |-----------|---------|
+| `CameraPermissionGate.swift` | Shows capture UI only once camera access is granted; explains a denial instead of a black viewfinder |
 | `ConfidenceIndicator.swift` | OCR confidence level display |
 | `OCRConfirmationView.swift` | Confirm/edit OCR results |
 | `OCRProcessingIndicator.swift` | Processing state during OCR |
@@ -420,24 +425,22 @@ struct WidgetColors {
 ### Components/Cards/
 | Component | Purpose |
 |-----------|---------|
-| `CategoryBreakdownCard.swift` | Cost breakdown by category |
-| `ChartPlaceholderCard.swift` | ⚠️ Full-size "no data" card. Being replaced by `InsufficientDataNote` (Readout rule 3 — a card must never advertise an absence) |
-| `InsufficientDataNote.swift` | One quiet line for "not enough data yet" |
+| `CostCategoryBars.swift` | Costs' Category chart: one row per bucket, largest first, with a proportional bar |
+| `CostChartDescriptors.swift` | Audio Graph descriptors so VoiceOver can explore the Costs charts |
+| `CostTrendChart.swift` | Costs' Trend chart: one bar per month, empty months kept, scrub callout |
+| `HomeSuggestion.swift` | Home's single Suggestions slot (service cluster or seasonal advisory, at most one) |
+| `InsufficientDataNote.swift` | One quiet line for "not enough data yet" — sections never advertise an absence with a card |
+| `MileageContextRow.swift` | Current estimate and last confirmed reading above the Update Mileage field |
+| `MileageUpdateSheet.swift` | Update Mileage sheet |
+| `NextUpCard.swift` | Home hero: closer trigger, status tag, due line, and a filled Mark Done (marbete: Mark Renewed) |
+| `NextUpReadout.swift` | Decides what the Next Up hero says (miles vs days, whichever is closer at pace) |
+| `QuickSpecsCard.swift` | Vehicle specs panel |
 | `ReadoutSection.swift` | Section shell for readout surfaces: header + one required primary slot + supporting slot. Makes "one primary per section" the default |
-| `CostSummaryCard.swift` | Total spent hero card |
-| `CumulativeCostChartCard.swift` | Area chart of cumulative spending |
-| `MileageUpdateSheet.swift` | Full mileage update sheet (extracted from QuickMileageUpdateCard) |
-| `MonthlyBreakdownCard.swift` | Monthly cost breakdown |
-| `MonthlyTrendChartCard.swift` | Vertical bar chart of monthly spending |
-| `NextUpCard.swift` | Hero card for most urgent service |
-| `QuickMileageUpdateCard.swift` | Inline mileage entry card |
-| `QuickSpecsCard.swift` | Vehicle specs display |
-| `QuickStatsBar.swift` | Summary statistics bar |
-| `RecallAlertCard.swift` | NHTSA recall warning |
-| `SeasonalReminderCard.swift` | Climate-aware seasonal maintenance card |
-| `ServiceClusterCard.swift` | Bundled services suggestion card |
-| `StatsCard.swift` | Compact stat display |
-| `YearlyCostRoundupCard.swift` | Annual cost summary |
+| `RecallAlertCard.swift` | NHTSA recall warning on Home |
+| `RecallCardStyle.swift` | Shared recall border/background treatment |
+| `RecallRowCard.swift` | One expandable recall in `RecallSheetView` |
+| `RecallSheetView.swift` | Recall list grouped by severity |
+| `VehicleSummaryBand.swift` | Odometer + specs band at the top of Home (stale tag on the odometer cell) |
 
 ### Components/Export/
 | Component | Purpose |
@@ -456,31 +459,39 @@ struct WidgetColors {
 ### Components/Inputs/
 | Component | Purpose |
 |-----------|---------|
-| `ErrorMessageRow.swift` | ⚠️ Inline error message. Superseded by `FormAdvisory` (`.blocking` / `.caution`) |
+| `ChipRow.swift` | Plain one-of-N chips (13 sentence case, wrap at large type) |
+| `CollapsibleDetailsSection.swift` | "More details" disclosure for completeness-only fields; expansion remembered per form |
+| `DestructiveFormButton.swift` | Delete/Stop Tracking at the end of an edit form or detail screen, never beside Save |
+| `ErrorMessageRow.swift` | ⚠️ Inline error message, still used by the vehicle VIN/odometer sections. Superseded by `FormAdvisory` |
 | `FieldRequirement.swift` | The single required/optional vocabulary (F5), plus `RequiredFieldMarker` |
+| `FormSection.swift` | Titled band of a Decision surface |
 | `FormToolbar.swift` | `.formToolbar(...)`: Cancel + prominent Save in the sheet's toolbar on every data-entry form (F1), dim-not-disabled Save (F2), dismiss protection |
+| `InlinePicker.swift` / `OptionList.swift` | Field-shaped one-of-N picker (e.g. cost category) that expands an inline option band |
 | `InstrumentSegmentedControl.swift` | Styled segmented control |
 | `InstrumentTextField.swift` | Styled text/number/date fields (`prefix`, `autoFocus`) |
+| `LabeledInstrumentToggle.swift` | Unboxed labelled toggle |
 | `MarbetePicker.swift` | Month/year picker for PR registration |
+| `OriginalValueHint.swift` | "Was …" hint while an edited field differs from its original (F6) |
+| `ReminderImpactRow.swift` | How an edit shifts the next reminder, before Save (F9) |
+| `RichNotesEditor.swift` | Markdown-aware notes editor |
 | `ServicePresetPickerSheet.swift` | "Browse all services": searchable preset list by category |
 
 ### Components/Lists/
 | Component | Purpose |
 |-----------|---------|
-| `ExpenseRow.swift` | Service log expense item |
+| `ServiceEventRow.swift` | The one row for "something happened" — history, recent activity, expenses |
+| `ExpenseRow.swift` / `VisitExpenseRow.swift` | Map a `ServiceLog` / `ServiceVisit` onto `ServiceEventRow` |
+| `ServiceRow.swift` | Two-line service row: name + remaining; status tag + due line |
+| `Service+DueLine.swift` | "Due 32,500 mi or Oct 4", shared by `ServiceRow` and the Service Detail hero |
+| `ServiceLogDeleteMenu.swift` | Long-press delete (with Undo) for log rows outside a `List` |
 | `ListDivider.swift` | Consistent list divider |
-| `RecentActivityFeed.swift` | Recent actions list |
-| `ServiceRow.swift` | Service list item with status |
 
 ### Components/Navigation/
 | Component | Purpose |
 |-----------|---------|
 | `TabRootStack.swift` | A tab's `NavigationStack`, its root chrome (vehicle title menu, Settings, add service), and the `AppRoute` destinations |
 | `EmptyStateView.swift` | Standardized empty state |
-| `FilterControl.swift` | Pinned mode + filter row (`FilterControlRow`, `ControlRow`) |
 | `StepIndicator.swift` | Step progress indicator |
-
-`VehicleSummaryBand.swift` (Components/Cards/) is the odometer + specs band at the top of Home.
 
 ## Shell Architecture
 
@@ -492,7 +503,7 @@ ContentView
 ├── ToastWindowInstaller         toasts in a passthrough window above sheets
 └── TabView(selection: appState.selectedTab)   .tabBarMinimizeBehavior(.onScrollDown), tinted accent
     ├── Home      → TabRootStack → HomeTab     (VehicleSummaryBand, Next Up, …)
-    ├── Services  → TabRootStack → ServicesTab (.searchable, pinned mode/filter row)
+    ├── Services  → TabRootStack → ServicesTab (.searchable, status groups, Select mode)
     └── Costs     → TabRootStack → CostsTab
 ```
 
@@ -538,10 +549,10 @@ ContentView
 
 ### View Tests
 - **HomeTabTests** — Home tab rendering and data display
-- **ServicesTabTests** — Services tab rendering
-- **CostsTabTests** — Costs tab rendering
+- **HomeReadoutTests** — Next Up readout (closer trigger) and marbete renewal
+- **ServicesTabTests** — Status groups, month groups, search, selection
+- **CostsMetricsTests** / **CostsTabInsightsTests** — Period totals, monthly average, trend, categories, year comparison
 - **SettingsViewTests** — Settings toggle states
-- **AddVehicleViewTests** — Vehicle creation form
 - **EditVehicleViewTests** — Vehicle edit form
 - **AddServiceViewTests** — Service creation form
 - **ServiceDetailViewTests** — Service detail display
@@ -553,11 +564,9 @@ ContentView
 
 ### Component Tests
 - **OdometerCaptureViewTests** — OCR capture flow
-- **YearlyCostRoundupCardTests** — Annual summary card
 - **OCRConfirmationViewTests** — OCR result confirmation
 - **RecallAlertCardTests** — Recall card display
 - **QuickSpecsCardTests** — Vehicle specs card
-- **MileageInputFieldTests** — Mileage input validation
 - **ServiceTypePickerTests** — Service type selection
 
 ### Design System Tests

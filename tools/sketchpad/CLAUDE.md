@@ -165,7 +165,7 @@ Harness chrome is styled deliberately unlike Checkpoint. The controls around the
 
 ## Screens model the target
 
-**The iOS 26 overhaul (Sep 2026) put the sketchpad ahead of the app again** for Home, Services, Costs, the unified service form, and `FormToolbar`. Until those are ported, the sketchpad leads on them; [`PORT_NOTES.md`](PORT_NOTES.md) lists what the port must change. Everything else below ships, and disagreement there is drift.
+**The iOS 26 overhaul (Sep 2026) has shipped**: Home, Services, Costs, the unified service form, and `FormToolbar` are ported, so disagreement on them is now drift. [`PORT_NOTES.md`](PORT_NOTES.md) lists the few items still open. (Two deliberate divergences: the app shows cost per mile under the Costs hero, and the service form has no shop field — shops are not stored.)
 
 Each screen file opens with a comment stating the problem it solves. Those comments are the durable part: they record what was tried and why it failed, and several of them were expensive to learn. The SwiftUI files carry the same reasoning at their own call sites, so the rationale survives even if this directory is eventually retired.
 

@@ -34,7 +34,8 @@ v1.0 features are tracked throughout this document. Future versions are outlined
 
 | Feature              | Priority | Status | Notes                                                                                                   |
 | -------------------- | -------- | ------ | ------------------------------------------------------------------------------------------------------- |
-| "Next Up" card       | High     | ✅     | Single most important upcoming service, smart prioritization: overdue > safety-critical > mileage-based |
+| "Next Up" card       | High     | ✅     | Single most important upcoming service, smart prioritization: overdue > safety-critical > mileage-based. Hero shows whichever trigger is closer; ends in a filled Mark Done. Tests: `HomeReadoutTests` |
+| Mark Renewed (marbete) | High   | ✅     | When the marbete is Next Up, one tap renews it to the next year's same month — a confirmation, not a trip through Edit Vehicle. Tests: `HomeReadoutTests` |
 | Quick-add button     | High     | ✅     | One tap to log a service                                                                                |
 | Vehicle selector     | High     | ✅     | Easy switching for multi-vehicle households                                                             |
 | Maintenance timeline | Medium   | ✅     | Visual timeline of past/upcoming services                                                               |
@@ -52,12 +53,16 @@ v1.0 features are tracked throughout this document. Future versions are outlined
 | Attachments            | Medium   | ✅     | Photos, PDFs, receipts                               |
 | Service log detail     | Medium   | ✅     | Tap any history/activity/expense row to view full log details |
 | Edit service log       | Medium   | ✅     | Edit notes and add attachments to existing service logs. Save enables only on a real change; the odometer reading is required (it anchors mileage reminders). Tests: `ServiceLogEditValuesTests` |
-| Delete service log     | High     | ✅     | Delete from the log detail, its edit form, or a long-press on any log row. Recomputes the service's last-performed values and re-anchors a reminder derived from the deleted log; an emptied visit goes with it. Undo toast where the toast is visible, confirmation inside sheets. Tests: `ServiceLogDeletionTests` |
+| Delete service log     | High     | ✅     | Delete from the log detail, its edit form, a Services swipe, or a long-press on any log row, with an Undo toast (toasts show above sheets). Recomputes the service's last-performed values and re-anchors a reminder derived from the deleted log; an emptied visit goes with it. Tests: `ServiceLogDeletionTests` |
+| Duplicate service log  | Medium   | ✅     | Services row action: a new entry prefilled with the service, cost, category, notes and cadence, dated today |
 | One-off service logging| Medium   | ✅     | "Schedule Recurring" toggle — log without creating a recurring schedule |
-| Forms usability overhaul | High   | ✅     | Essentials-first layout, shared action bar, history reference card, draft autosave/resume, and edit-form change transparency across Add Service, Edit Service, Edit Service Log, Update Mileage, and Vehicle forms. Tests: `ReminderImpactCalculatorTests`, `ServiceFormDraftStoreTests`, `EditServiceViewRescheduleTests`, extended `AddServiceViewTests`/`EditServiceLogViewTests` |
-| Unified service form   | High     | ✅     | One form with **derived intent** — the Record/Remind fork and the tab bar's `[LOG]`/`[SCHEDULE]` expansion are gone. The user answers "when"; a past answer logs, a future one schedules. Repeat interval moves onto the default path, the fire-time projection becomes a readout, and backfill no longer inherits a preset's cadence. Draft schema is versioned (v2). Tests: extended `AddServiceViewTests`, `ServiceFormDraftStoreTests` |
+| Forms usability overhaul | High   | ✅     | Essentials-first layout, Save in the sheet's toolbar (dim, never disabled), discard protection, history reference card, and edit-form change transparency across the service, Edit Service, Update Mileage, and Vehicle forms. Tests: `ReminderImpactCalculatorTests`, `ServiceFormDraftStoreTests`, `EditServiceViewRescheduleTests`, extended `AddServiceViewTests`/`EditServiceLogViewTests` |
+| Unified service form   | High     | ✅     | One `ServiceLogForm` for logging, Mark Done, editing a history entry, duplicating, and scheduling, with **derived intent**: the user answers "when"; a past answer logs, a future one schedules. Repeat interval is on the default path, the fire-time projection is a readout, and backfill no longer inherits a preset's cadence. Tests: extended `AddServiceViewTests`, `ServiceFormDraftStoreTests` |
+| Drafts on every service-form door | Medium | ✅ | New entry, Mark Done, and edit-entry each keep their own autosaved draft with a resume banner; Discard clears it. Draft schema is versioned (v2). Tests: `ServiceFormDraftStoreTests` |
 | Single-scroll Add Vehicle | High  | ✅     | Two-step wizard deleted. VIN sits above the fields it fills, the odometer is required (it used to default to zero, making every mileage reminder fiction), year is not, and the nine-state VIN block collapses into the advisory ladder |
-| One control row per tab | Medium  | ✅     | Services and Costs collapse two-to-four rows of chrome into one: a segmented control plus a `FilterControl` whose options carry counts. Documents stops being a Services view mode and becomes a destination |
+| Services status groups | Medium   | ✅     | One list: Overdue, Due Soon, On Track groups (empty ones omitted), then history by month, with search. No mode switch or filter row. Documents is a destination, not a view mode. Tests: `ServicesTabTests` |
+| Bulk select in Services | Medium  | ✅     | Select mode with a bottom toolbar: Mark Done (n) completes the picked services as one visit; Delete (n) confirms once |
+| Stop tracking a service | Medium  | ✅     | Takes a service off the schedule without fabricating a log, from a Services row or Service Detail, with Undo |
 
 #### On-Device Document Intelligence
 
@@ -267,8 +272,8 @@ v1.0 features are tracked throughout this document. Future versions are outlined
 | ------------------------- | -------- | ------ | ---------------------- |
 | Per-service costs         | High     | ✅     | Track what you spend   |
 | Cost categorization       | Medium   | ✅     | Maintenance vs repairs vs upgrades |
-| Monthly/yearly summaries  | Medium   | ✅     | Spending trends with monthly breakdown |
-| Cost-per-mile calculation | Medium   | ✅     | True cost of ownership with period filtering |
+| Monthly/yearly summaries  | Medium   | ✅     | Period total (30D / YTD / 12M / All) with monthly average, Trend and Category charts, a same-span year comparison, and expenses grouped by month. Tests: `CostsMetricsTests` |
+| Cost-per-mile calculation | Medium   | ✅     | Supporting figure under the Costs hero: period spend over miles (or km) driven between the period's oldest and newest odometer readings; a quiet note when there are too few. Tests: `CostsMetricsTests` |
 
 ---
 
@@ -278,7 +283,7 @@ v1.0 features are tracked throughout this document. Future versions are outlined
 | ------------------------ | -------- | ------ | -------------------------------------------------------- |
 | Service history PDF      | High     | ✅   | Complete maintenance history for resale, warranty claims; shareable via iOS share sheet |
 | iCloud Sync              | High     | ✅     | Free native sync across iOS devices via CloudKit         |
-| Maintenance cost reports | Medium   | ✅   | Graphs and breakdowns (proportion bar, monthly trend, spending pace) |
+| Maintenance cost reports | Medium   | ✅   | Monthly trend and category breakdown charts, each with a written summary |
 | CSV import               | Medium   | ✅     | Import from Fuelly, Drivvo, Simply Auto — reduces switching cost |
 
 #### iCloud Sync (Free Feature)
@@ -591,47 +596,43 @@ Surface meaningful context alongside existing data to help users understand tren
 
 | Tab | Purpose | Key Content | Status |
 |-----|---------|-------------|--------|
-| **Home** | Glanceable "what's next" | Next Up card, quick stats, recent activity summary (last 3) | ✅ |
-| **Services** | Maintenance timeline & logging | Full service history, timeline view, search/filter, service details | ✅ |
-| **Costs** | Expense tracking & analytics | Cost history, categories, monthly/yearly summaries, cost-per-mile | ✅ |
+| **Home** | Glanceable "what's next" | Odometer/specs band, Next Up, one suggestion, upcoming (3), recent activity (3) | ✅ |
+| **Services** | Maintenance schedule & history | Status groups, history by month, search, row actions, Select mode | ✅ |
+| **Costs** | Expense tracking & analytics | Period total, monthly average, cost per mile, Trend/Category chart, year comparison, expenses by month | ✅ |
 
 **Navigation Principles:**
 
 | Element | Behavior | Status |
 |---------|----------|--------|
-| **Vehicle header** | Persistent at top of ALL tabs — vehicle selector always accessible | ✅ |
-| **Quick-add button (+)** | Floating action button visible on ALL tabs — supersedes all views for consistent access | ✅ |
+| **Vehicle switcher** | The vehicle name is every tab root's title, with a title menu to switch | ✅ |
+| **Add service (+)** | The one prominent toolbar action on every tab root | ✅ |
 | **Tab switching** | Should feel fluid and intuitive, not disruptive to user flow | ✅ |
-| **Recent Activity (Home)** | Glanceable summary only (last 3 items) — tapping opens service log detail sheet | ✅ |
+| **Recent Activity (Home)** | Glanceable summary only (last 3 items) — tapping pushes the log detail | ✅ |
 
 **Tab Content Details:**
 
-**Home Tab:**
-- Vehicle header with mileage and specs
-- "Next Up" hero card (most urgent service)
-- Quick stats bar (year-to-date summary)
-- Recent Activity feed (last 3 completed services, tappable to view log details)
-- Minimal, focused — answer "what needs attention?" at a glance
+**Home Tab** — a fixed order, so the screen reads the same every day:
+- Odometer and specs band
+- "Next Up" hero (most urgent item) ending in Mark Done, or Mark Renewed for the marbete
+- Suggestions: at most one (service cluster or seasonal)
+- Upcoming (3) and Recent Activity (3); an empty block is one quiet line
 
 **Services Tab:**
-- Vehicle header (same as Home)
-- Full maintenance timeline (past and upcoming)
-- Complete service history with search/filter capabilities
-- Service logging and scheduling
-- Detailed service views with full completion history
+- Overdue / Due Soon / On Track groups, then history by month
+- Search across services and past logs
+- Row actions: Edit, Mark Done, Stop Tracking; on logs Duplicate, Edit, Delete with Undo
+- Select mode for bulk Mark Done / Delete
 
 **Costs Tab:**
-- Vehicle header (same as Home)
-- Expense history list
-- Cost categorization (maintenance vs repairs)
-- Monthly/yearly spending summaries
-- Cost-per-mile calculation
-- Spending trends and analytics
+- Period control: 30D / YTD / 12M / All
+- Hero total with monthly average and cost per mile beneath it
+- One chart section, Trend ↔ Category, with a written summary
+- This year vs last year to the same date
+- Expenses grouped by month with totals
 
 **Implementation Considerations:**
-- ✅ Use native iOS TabView for familiar navigation patterns
-- ✅ Consider swipe gestures between tabs for fluid transitions (using `.page` style TabView)
-- ✅ Custom BrutalistTabBar for consistent brutalist design aesthetic
+- ✅ System TabView and per-tab NavigationStack (Liquid Glass chrome; brand lives in the content)
+- ✅ Details push, tasks present as sheets through one router
 - ✅ AppState with @Observable for centralized state management
 
 ---
