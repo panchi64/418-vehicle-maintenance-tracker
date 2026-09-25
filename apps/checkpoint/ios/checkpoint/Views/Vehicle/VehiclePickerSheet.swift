@@ -21,9 +21,10 @@ struct VehiclePickerSheet: View {
     /// tick as dismissing this one can silently drop it.
     let onAddVehicle: () -> Void
 
-    // Delete is confirmed, not undone. The Undo toast renders at the app root,
-    // beneath this sheet, so it could not be seen — and it restored only the
-    // vehicle row, not the services and history the cascade had deleted.
+    // Delete is confirmed, not undone. The Undo toast used to render beneath
+    // this sheet; it now renders in its own window above sheets
+    // (`ToastWindow`), so Undo is viable here once it can restore the cascade
+    // (services and history), not only the vehicle row.
     @State private var vehicleToDelete: Vehicle?
     @State private var showDeleteConfirmation = false
 
@@ -93,8 +94,6 @@ struct VehiclePickerSheet: View {
             }
             .navigationTitle("Select Vehicle")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") {
@@ -107,7 +106,6 @@ struct VehiclePickerSheet: View {
         .trackScreen(.vehiclePicker)
         .presentationDetents([.medium])
         .presentationDragIndicator(.visible)
-        .applyGlassBackground()
         .alert(L10n.vehicleDeleteConfirmTitle, isPresented: $showDeleteConfirmation, presenting: vehicleToDelete) { vehicle in
             Button(L10n.commonCancel, role: .cancel) {
                 vehicleToDelete = nil
@@ -225,14 +223,6 @@ struct VehiclePickerSheet: View {
             .padding(.trailing, Spacing.xs)
             .accessibilityLabel(L10n.a11yVehicleOptions(vehicle.displayName))
         }
-    }
-}
-
-// MARK: - Glass Background Modifier
-
-extension View {
-    func applyGlassBackground() -> some View {
-        presentationBackground(.regularMaterial)
     }
 }
 

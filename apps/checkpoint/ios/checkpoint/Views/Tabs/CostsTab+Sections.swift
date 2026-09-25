@@ -171,8 +171,8 @@ extension CostsTab {
         if metrics.topExpenses.count >= 2 {
             TopExpensesCard(
                 events: metrics.topExpenses,
-                onSelectLog: { log in appState.selectedServiceLog = log },
-                onSelectVisit: { visit in appState.selectedServiceVisit = visit }
+                onSelectLog: { log in appState.push(.serviceLog(log)) },
+                onSelectVisit: { visit in appState.push(.visit(visit)) }
             )
             .revealAnimation(delay: 0.30)
         }
@@ -229,7 +229,7 @@ extension CostsTab {
                 isAnomalous: isAnomalous,
                 isHighlighted: isHighlighted
             ) {
-                appState.selectedServiceLog = log
+                appState.push(.serviceLog(log))
             }
             .serviceLogDeleteMenu { ServiceLogDeleteAction.perform(log, offerUndo: true) }
         case .visit(let visit):
@@ -238,7 +238,7 @@ extension CostsTab {
                 isAnomalous: isAnomalous,
                 isHighlighted: isHighlighted
             ) {
-                appState.selectedServiceVisit = visit
+                appState.push(.visit(visit))
             }
         }
     }

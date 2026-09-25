@@ -4,10 +4,10 @@
 //
 //  Phase 2 of onboarding — anchor-driven spotlight overlay.
 //
-//  The host (ContentView) resolves component anchors via
-//  `overlayPreferenceValue(SpotlightAnchorPreferenceKey.self)` and hands them
-//  to this view alongside a coordinating `GeometryProxy`. The spotlight is
-//  composed from the existing brutalist primitives:
+//  The host (ContentView) resolves the current step's target frame from the
+//  `TourSpotlightRegistry` (window space), converts it into the overlay's
+//  space, and hands it in alongside a coordinating `GeometryProxy`. The
+//  spotlight is composed from the existing brutalist primitives:
 //
 //      • Off-white underglow (a stronger variant of `StatusGlowModifier`)
 //      • Subtle diagonal `shimmer` sweep
@@ -33,11 +33,17 @@
 import SwiftUI
 
 struct OnboardingTourOverlay: View {
-    let appState: AppState
     @Bindable var onboardingState: OnboardingState
-    let anchors: [AnyHashable: Anchor<CGRect>]
+    /// The current step's target, in this view's coordinate space. nil until
+    /// the target has laid out, or if it is not on screen.
+    let spotlight: CGRect?
     let geometry: GeometryProxy
     let onSkipTour: () -> Void
+
+    /// Set when a step's target has not appeared within a beat. The card then
+    /// shows without a spotlight rather than staying invisible — a step whose
+    /// target is missing must still be readable and skippable.
+    @State private var spotlightTimedOut = false
 
     private var currentStep: Int {
         onboardingState.currentPhase.tourStep ?? 0
@@ -70,16 +76,7 @@ struct OnboardingTourOverlay: View {
         return L10n.commonNext
     }
 
-    private func resolvedSpotlight() -> CGRect? {
-        guard let target = currentTourStep?.target,
-              let anchor = anchors.anchor(target) else { return nil }
-        return geometry[anchor]
-    }
-
     var body: some View {
-        // Resolve once per body pass — body, placement, and visuals all reuse it.
-        let spotlight = resolvedSpotlight()
-
         ZStack {
             // Spotlight visuals (only when target's anchor has resolved).
             // Animation scoped to the rect so phase-exit doesn't trigger
@@ -94,10 +91,16 @@ struct OnboardingTourOverlay: View {
             tourCard(spotlight: spotlight)
         }
         .onboardingModalBackdrop()
-        // Fade in once the target anchor is available; fade out if it
+        // Fade in once the target frame is available; fade out if it
         // disappears mid-tour (e.g. brief one-frame race during a tab swap).
-        .opacity(spotlight != nil ? 1 : 0)
-        .animation(.easeOut(duration: 0.25), value: spotlight != nil)
+        .opacity(spotlight != nil || spotlightTimedOut ? 1 : 0)
+        .animation(.easeOut(duration: 0.25), value: spotlight != nil || spotlightTimedOut)
+        .task(id: currentStep) {
+            spotlightTimedOut = false
+            try? await Task.sleep(for: .seconds(0.8))
+            guard !Task.isCancelled else { return }
+            spotlightTimedOut = true
+        }
     }
 
     // MARK: - Spotlight visuals
@@ -279,9 +282,8 @@ struct OnboardingSkipTourButton: View {
             AtmosphericBackground()
 
             OnboardingTourOverlay(
-                appState: AppState(),
                 onboardingState: OnboardingState(),
-                anchors: [:],
+                spotlight: CGRect(x: 20, y: 160, width: geo.size.width - 40, height: 120),
                 geometry: geo,
                 onSkipTour: {}
             )

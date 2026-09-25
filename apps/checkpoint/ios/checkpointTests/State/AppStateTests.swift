@@ -2,7 +2,7 @@
 //  AppStateTests.swift
 //  checkpointTests
 //
-//  Tests for AppState, the shared state management for tab navigation
+//  Tests for AppState: tab navigation, per-tab paths, and the root sheet router
 //
 
 import XCTest
@@ -13,19 +13,16 @@ final class AppStateTests: XCTestCase {
 
     // MARK: - Tab Enum Tests (No MainActor needed)
 
-    func testTab_AllCases() {
-        // Then
-        XCTAssertEqual(Tab.allCases.count, 3)
-        XCTAssertTrue(Tab.allCases.contains(.home))
-        XCTAssertTrue(Tab.allCases.contains(.services))
-        XCTAssertTrue(Tab.allCases.contains(.costs))
+    func testTab_AllCases_AreInTabBarOrder() {
+        // Home leads: it is the default selection.
+        XCTAssertEqual(Tab.allCases, [.home, .services, .costs])
     }
 
-    func testTab_Titles() {
-        // Then
-        XCTAssertEqual(Tab.home.title, "HOME")
-        XCTAssertEqual(Tab.services.title, "SERVICES")
-        XCTAssertEqual(Tab.costs.title, "COSTS")
+    func testTab_Titles_AreLocalized() {
+        XCTAssertEqual(Tab.home.title, L10n.tabHome)
+        XCTAssertEqual(Tab.services.title, L10n.tabServices)
+        XCTAssertEqual(Tab.costs.title, L10n.tabCosts)
+        XCTAssertFalse(Tab.home.title.isEmpty)
     }
 
     func testTab_Icons() {
@@ -45,109 +42,127 @@ final class AppStateTests: XCTestCase {
         // Then
         XCTAssertNil(appState.selectedVehicle)
         XCTAssertEqual(appState.selectedTab, .home)
-        XCTAssertFalse(appState.showVehiclePicker)
-        XCTAssertFalse(appState.showAddVehicle)
-        XCTAssertFalse(appState.showAddService)
-        XCTAssertFalse(appState.showEditVehicle)
-        XCTAssertNil(appState.selectedService)
-        XCTAssertNil(appState.selectedServiceLog)
+        XCTAssertNil(appState.activeSheet)
+        XCTAssertNil(appState.presentedSheet)
+        XCTAssertNil(appState.queuedSheet)
+        XCTAssertTrue(appState.paths.isEmpty)
     }
 
-    // MARK: - Selected Service Log Tests
+    // MARK: - Navigation Path Tests
 
     @MainActor
-    func testSelectedServiceLog_DefaultsToNil() async {
-        // Given/When
-        let appState = AppState()
-
-        // Then
-        XCTAssertNil(appState.selectedServiceLog)
-    }
-
-    @MainActor
-    func testSelectedServiceLog_CanBeSet() async throws {
-        // Given
+    func testPush_AppendsToTheVisibleTabsStack() async throws {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let modelContainer = try ModelContainer(
             for: Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self, ServiceAttachment.self, ServicePreset.self,
             configurations: config
         )
-        let modelContext = modelContainer.mainContext
+        let log = ServiceLog(performedDate: .now, mileageAtService: 32000, cost: 45.99)
+        modelContainer.mainContext.insert(log)
 
         let appState = AppState()
-        let log = ServiceLog(
-            performedDate: Date.now,
-            mileageAtService: 32000,
-            cost: 45.99
-        )
-        modelContext.insert(log)
+        appState.selectedTab = .costs
 
-        // When
-        appState.selectedServiceLog = log
+        appState.push(.serviceLog(log))
 
-        // Then
-        XCTAssertNotNil(appState.selectedServiceLog)
-        XCTAssertEqual(appState.selectedServiceLog?.mileageAtService, 32000)
-
-        // Cleanup
-        appState.selectedServiceLog = nil
+        XCTAssertEqual(appState.paths[.costs], [.serviceLog(log)])
+        XCTAssertNil(appState.paths[.home])
     }
 
     @MainActor
-    func testSelectedServiceLog_CanBeCleared() async throws {
-        // Given
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let modelContainer = try ModelContainer(
-            for: Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self, ServiceAttachment.self, ServicePreset.self,
-            configurations: config
-        )
-        let modelContext = modelContainer.mainContext
-
+    func testShowDetail_ClosesTheSheetAndPushes() async throws {
+        let service = Service(name: "Oil Change")
         let appState = AppState()
-        let log = ServiceLog(
-            performedDate: Date.now,
-            mileageAtService: 32000
-        )
-        modelContext.insert(log)
-        appState.selectedServiceLog = log
+        appState.present(.settings)
+        appState.sheetDidAppear(.settings)
 
-        // When
-        appState.selectedServiceLog = nil
+        appState.showDetail(.service(service))
 
-        // Then
-        XCTAssertNil(appState.selectedServiceLog)
+        XCTAssertNil(appState.activeSheet)
+        XCTAssertEqual(appState.paths[.home], [.service(service)])
     }
 
-    // MARK: - Sheet State Tests
+    @MainActor
+    func testSelectVehicle_PopsEveryStack() async {
+        let service = Service(name: "Oil Change")
+        let appState = AppState()
+        appState.paths[.services] = [.service(service)]
+
+        appState.selectVehicle(Vehicle(name: "Other", make: "Honda", model: "Civic", year: 2020))
+
+        XCTAssertTrue(appState.paths.isEmpty)
+    }
+
+    // MARK: - Sheet Router Tests
 
     @MainActor
-    func testSheetStates_CanBeToggled() async {
-        // Given
+    func testPresent_WithNothingOnScreen_PresentsImmediately() async {
         let appState = AppState()
 
-        // When/Then - Vehicle Picker
-        appState.showVehiclePicker = true
-        XCTAssertTrue(appState.showVehiclePicker)
-        appState.showVehiclePicker = false
-        XCTAssertFalse(appState.showVehiclePicker)
+        appState.present(.addService())
 
-        // When/Then - Add Vehicle
-        appState.showAddVehicle = true
-        XCTAssertTrue(appState.showAddVehicle)
-        appState.showAddVehicle = false
-        XCTAssertFalse(appState.showAddVehicle)
+        XCTAssertEqual(appState.activeSheet?.id, ActiveSheet.addService().id)
+        XCTAssertNil(appState.queuedSheet)
+    }
 
-        // When/Then - Add Service
-        appState.showAddService = true
-        XCTAssertTrue(appState.showAddService)
-        appState.showAddService = false
-        XCTAssertFalse(appState.showAddService)
+    @MainActor
+    func testPresent_WhileASheetIsOnScreen_WaitsForItsDismissal() async {
+        // The "dismiss then present in the same tick" bug: the second sheet
+        // must not be requested until the first has finished closing.
+        let appState = AppState()
+        appState.present(.vehiclePicker)
+        appState.sheetDidAppear(.vehiclePicker)
 
-        // When/Then - Edit Vehicle
-        appState.showEditVehicle = true
-        XCTAssertTrue(appState.showEditVehicle)
-        appState.showEditVehicle = false
-        XCTAssertFalse(appState.showEditVehicle)
+        appState.present(.addVehicle)
+
+        XCTAssertNil(appState.activeSheet)
+        XCTAssertEqual(appState.queuedSheet?.id, ActiveSheet.addVehicle.id)
+
+        let dismissed = appState.sheetDidDismiss()
+
+        XCTAssertEqual(dismissed?.id, ActiveSheet.vehiclePicker.id)
+        XCTAssertEqual(appState.activeSheet?.id, ActiveSheet.addVehicle.id)
+        XCTAssertNil(appState.queuedSheet)
+    }
+
+    @MainActor
+    func testPresentWhenIdle_DoesNotCloseTheSheetOnScreen() async {
+        let appState = AppState()
+        appState.present(.addService())
+        appState.sheetDidAppear(.addService())
+
+        appState.presentWhenIdle(.tipModal)
+
+        XCTAssertEqual(appState.activeSheet?.id, ActiveSheet.addService().id)
+        XCTAssertEqual(appState.queuedSheet?.id, ActiveSheet.tipModal.id)
+
+        appState.activeSheet = nil
+        appState.sheetDidDismiss()
+
+        XCTAssertEqual(appState.activeSheet?.id, ActiveSheet.tipModal.id)
+    }
+
+    @MainActor
+    func testDismissSheet_DropsTheQueue() async {
+        let appState = AppState()
+        appState.present(.settings)
+        appState.sheetDidAppear(.settings)
+        appState.present(.proPaywall)
+
+        appState.dismissSheet()
+        appState.sheetDidDismiss()
+
+        XCTAssertNil(appState.activeSheet)
+        XCTAssertNil(appState.queuedSheet)
+    }
+
+    @MainActor
+    func testRequestAddVehicle_UnderTheLimit_PresentsAddVehicle() async {
+        let appState = AppState()
+
+        appState.requestAddVehicle(vehicleCount: 0)
+
+        XCTAssertEqual(appState.activeSheet?.id, ActiveSheet.addVehicle.id)
     }
 
     // MARK: - Vehicle Selection Tests
@@ -234,10 +249,9 @@ final class AppStateTests: XCTestCase {
 
         let appState = AppState()
         appState.selectedVehicle = vehicle
-        appState.selectedService = service
-        appState.selectedServiceLog = log
-        appState.selectedServiceVisit = visit
-        appState.selectedDocument = doc
+        appState.paths[.home] = [.service(service), .serviceLog(log)]
+        appState.paths[.costs] = [.visit(visit)]
+        appState.paths[.services] = [.document(doc)]
         let cluster = ServiceCluster(
             services: [service],
             anchorService: service,
@@ -245,43 +259,39 @@ final class AppStateTests: XCTestCase {
             mileageWindow: 500,
             daysWindow: 30
         )
-        appState.selectedCluster = cluster
-        appState.clusterToMarkDone = cluster
+        appState.present(.clusterDetail(cluster))
 
         // When
         appState.prepareForContainerSwap()
 
         // Then — every SwiftData-backed reference is released
         XCTAssertNil(appState.selectedVehicle)
-        XCTAssertNil(appState.selectedService)
-        XCTAssertNil(appState.selectedServiceLog)
-        XCTAssertNil(appState.selectedServiceVisit)
-        XCTAssertNil(appState.selectedDocument)
-        XCTAssertNil(appState.selectedCluster)
-        XCTAssertNil(appState.clusterToMarkDone)
+        XCTAssertTrue(appState.paths.isEmpty)
+        XCTAssertNil(appState.activeSheet)
     }
 
-    // MARK: - Consolidated Sheet State Tests
+    @MainActor
+    func testPrepareForContainerSwap_KeepsSheetsThatHoldNoModels() async {
+        let appState = AppState()
+        appState.present(.addVehicle)
+
+        appState.prepareForContainerSwap()
+
+        XCTAssertEqual(appState.activeSheet?.id, ActiveSheet.addVehicle.id)
+    }
+
+    // MARK: - Sheet Payload Tests
 
     @MainActor
-    func testMileageAndSettingsSheetFlags_DefaultAndToggle() async {
-        // Given — flags moved off ContentView's local @State onto AppState
+    func testMileageUpdateSheet_CarriesTheSiriReading() async {
         let appState = AppState()
 
-        // Then — sane defaults
-        XCTAssertFalse(appState.showMileageUpdate)
-        XCTAssertFalse(appState.showSettings)
-        XCTAssertNil(appState.siriPrefilledMileage)
+        appState.present(.mileageUpdate(prefilled: 42_000))
 
-        // When
-        appState.showMileageUpdate = true
-        appState.showSettings = true
-        appState.siriPrefilledMileage = 42_000
-
-        // Then
-        XCTAssertTrue(appState.showMileageUpdate)
-        XCTAssertTrue(appState.showSettings)
-        XCTAssertEqual(appState.siriPrefilledMileage, 42_000)
+        guard case .mileageUpdate(let prefilled) = appState.activeSheet else {
+            return XCTFail("Expected the mileage update sheet")
+        }
+        XCTAssertEqual(prefilled, 42_000)
     }
 
     // MARK: - Recall State Storage Tests

@@ -4,20 +4,15 @@
 //
 //  Vehicle reference detail — plate, VIN, tires, oil, marbete, notes, documents.
 //
-//  Presented as a panel hanging directly off `VehicleHeader`, not as a card in
-//  Home's scroll flow. Two reasons:
+//  Presented as a panel expanding from `VehicleSummaryBand`'s SPECS cell at the
+//  top of Home, collapsed by default. This is *identity* data, not maintenance
+//  state: tire size and oil type never need doing; they are lookup values you
+//  want at a parts counter. Home's job is answering "what needs doing", so the
+//  panel stays one tap away rather than occupying Home's flow.
 //
-//    - This is *identity* data, not maintenance state. Tire size and oil type
-//      never need doing; they are lookup values you want at a parts counter.
-//      Home's job is answering "what needs doing", so reference data was
-//      occupying its most valuable space.
-//    - Living in the persistent shell makes it reachable from Services and
-//      Costs too, not only Home.
-//
-//  The disclosure trigger lives in `VehicleHeader` beneath the vehicle name, so
-//  all vehicle identity reads as one block. This type owns only the expanded
-//  detail — it has no header row of its own, and no border, so it reads as a
-//  continuation of the header rather than a second competing card.
+//  This type owns only the expanded detail — it has no header row of its own,
+//  and no border, so it reads as a continuation of the band rather than a
+//  second competing card.
 //
 
 import SwiftUI
@@ -53,7 +48,7 @@ struct QuickSpecsCard: View {
         return notes.count > 50
     }
 
-    // No header row of its own: the disclosure trigger lives in VehicleHeader.
+    // No header row of its own: the disclosure trigger lives in VehicleSummaryBand.
     var body: some View {
         VStack(spacing: 0) {
                     // Specs grid - values first, labels below
@@ -169,9 +164,9 @@ struct QuickSpecsCard: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
-                    // Horizontal inset matches VehicleHeader and the tabs
+                    // Horizontal inset matches VehicleSummaryBand and the tabs
                     // (Spacing.screenHorizontal), so the panel's values line up
-                    // with the vehicle name above them rather than sitting 4pt
+                    // with the cells above them rather than sitting 4pt
                     // inboard.
                     .padding(.horizontal, Spacing.screenHorizontal)
                     .padding(.vertical, Spacing.md)
@@ -377,8 +372,6 @@ struct FullNotesView: View {
                     .accessibilityLabel(L10n.readoutClose)
                 }
             }
-            .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
         }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)

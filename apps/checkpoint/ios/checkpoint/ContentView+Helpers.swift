@@ -337,13 +337,12 @@ extension ContentView {
 
         // Select the vehicle if it's not already selected
         if currentVehicle?.id != vehicleID {
-            appState.selectedVehicle = vehicle
+            appState.selectVehicle(vehicle)
         }
 
         // Navigate to home and show mileage update with prefilled value
         appState.selectedTab = .home
-        appState.siriPrefilledMileage = mileage
-        appState.showMileageUpdate = true
+        appState.present(.mileageUpdate(prefilled: mileage))
     }
 
     // MARK: - Widget Completions
@@ -375,7 +374,8 @@ extension ContentView {
             try? await Task.sleep(for: .seconds(1.5))
             guard appState.tipPromptQueued else { return }
             appState.tipPromptQueued = false
-            appState.showTipModal = true
+            // Waits for any sheet the user is in rather than closing it.
+            appState.presentWhenIdle(.tipModal)
             PurchaseSettings.shared.recordTipPromptShown()
             AnalyticsService.shared.capture(.tipModalShown(
                 actionCount: PurchaseSettings.shared.completedActionCount,

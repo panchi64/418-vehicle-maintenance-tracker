@@ -2,7 +2,8 @@
 //  ContentView.swift
 //  checkpoint
 //
-//  Root TabView container with persistent vehicle header and FAB
+//  Root shell: the system TabView, one NavigationStack per tab
+//  (`TabRootStack`), the single root sheet router, and the onboarding surfaces.
 //
 
 import SwiftUI
@@ -16,11 +17,8 @@ struct ContentView: View {
 
     @State var appState = AppState()
     @State var onboardingState = OnboardingState()
+    @State var tourSpotlights = TourSpotlightRegistry()
     @State var delayedTask: Task<Void, Never>?
-
-    /// Vehicle-specs disclosure. Lives here rather than inside `VehicleHeader`
-    /// because the trigger is in the header but the panel renders beneath it.
-    @State var isSpecsExpanded = false
 
     /// Guards the per-activation foreground work so it runs once each time the
     /// app becomes active (cold launch or return from background/interruption)
@@ -29,14 +27,6 @@ struct ContentView: View {
     /// (`.inactive`, which precedes `.background`) so the next return to
     /// `.active` re-runs it.
     @State var isForegroundActive = false
-
-    /// Actions requested from inside a root sheet that must wait for the
-    /// sheet to finish dismissing: presenting a second sheet in the same tick
-    /// as dismissing the first can drop it, and a log deleted while its detail
-    /// sheet is still animating away can be read after deletion. Each is
-    /// consumed in that sheet's `onDismiss`.
-    @State var addVehicleAfterPickerDismiss = false
-    @State var logPendingDeletion: ServiceLog?
 
     // MARK: - Vehicle Selection Persistence
 
@@ -55,8 +45,8 @@ struct ContentView: View {
     var body: some View {
         notificationHandlers(
             onboardingSurfaces(
-                centralizedSheets(
-                    rootLayout
+                sheetRouter(
+                    tabs
                         .onAppear { performLaunchSetup() }
                         .onChange(of: onboardingState.currentPhase) { _, newPhase in
                             handleOnboardingPhaseChange(newPhase)
@@ -76,143 +66,36 @@ struct ContentView: View {
                 )
             )
         )
-    }
-
-    // MARK: - Root Layout
-
-    /// The persistent visual shell: atmospheric background, vehicle header,
-    /// swipeable tab content, bottom fade, floating tab bar, and toast overlay.
-    ///
-    /// Owns the specs disclosure state so the panel can render below the header
-    /// rather than inside it — the trigger lives in `VehicleHeader`, the content
-    /// hangs beneath it, and both stay outside the tabs' scroll views.
-    private var rootLayout: some View {
-        ZStack {
-            AtmosphericBackground()
-
-            VStack(spacing: 0) {
-                // Persistent vehicle header
-                VehicleHeader(
-                    vehicle: currentVehicle,
-                    onTap: { appState.showVehiclePicker = true },
-                    onMileageTap: { appState.showMileageUpdate = true },
-                    onSettingsTap: { appState.showSettings = true },
-                    isSpecsExpanded: $isSpecsExpanded
-                )
-                .tourTarget(.vehicleHeader, active: onboardingState.currentPhase.isTour)
-                .padding(.top, Spacing.sm)
-                .revealAnimation(delay: 0.1)
-
-                // Vehicle reference data hangs off the header rather than living
-                // in Home's scroll flow: it is identity, not maintenance state,
-                // and Home's job is answering "what needs doing". Sitting in the
-                // shell also makes it reachable from Services and Costs.
-                //
-                // Collapsed by default, so it costs nothing until asked for.
-                if isSpecsExpanded, let vehicle = currentVehicle {
-                    QuickSpecsCard(
-                        vehicle: vehicle,
-                        onEdit: { appState.showEditVehicle = true },
-                        onDocumentsTap: { appState.showDocuments = true }
-                    )
-                    .tourTarget(.dashboardSpecs, active: onboardingState.currentPhase.isTour)
-                }
-
-                tabContent
-            }
-
-            bottomFade
-        }
-        // Tab bar overlay - floats over content with glass effect
-        .overlay(alignment: .bottom) {
-            BrutalistTabBar(
-                selectedTab: $appState.selectedTab,
-                onAddTapped: currentVehicle != nil ? {
-                    appState.showAddService = true
-                } : nil
-            )
-            .revealAnimation(delay: 0.3)
-        }
-        .overlay(alignment: .bottom) {
-            if let toast = ToastService.shared.currentToast {
-                ToastView(toast: toast)
-                    .transition(.opacity)
-                    .padding(.bottom, 72 + Spacing.lg)
-                    .padding(.horizontal, Spacing.screenHorizontal)
-                    .animation(.easeOut(duration: Theme.animationMedium), value: ToastService.shared.currentToast?.id)
-            }
-        }
-    }
-
-    /// Swipeable tab switch. Tabs read `appState` from the environment and take
-    /// the selected vehicle so each scopes its SwiftData queries to that vehicle.
-    @ViewBuilder
-    private var tabContent: some View {
-        Group {
-            switch appState.selectedTab {
-            case .home:
-                HomeTab(vehicle: appState.selectedVehicle, onboardingState: onboardingState)
-            case .services:
-                ServicesTab(vehicle: appState.selectedVehicle, onboardingState: onboardingState)
-            case .costs:
-                CostsTab(vehicle: appState.selectedVehicle, onboardingState: onboardingState)
-            }
-        }
         .environment(appState)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 50)
-                .onEnded { value in
-                    // Tab swipes are disabled while any onboarding surface is up —
-                    // the tour overlay's tap blocker only catches taps, so without
-                    // this guard a horizontal drag would desync the spotlighted
-                    // anchor from the visible tab.
-                    guard !onboardingState.currentPhase.isActiveOnboarding else { return }
-
-                    let horizontalSwipe = value.translation.width
-                    let verticalSwipe = abs(value.translation.height)
-
-                    // Only trigger if horizontal movement dominates
-                    guard abs(horizontalSwipe) > verticalSwipe else { return }
-
-                    // Soft haptic feedback for tab switch
-                    HapticService.shared.tabChanged()
-
-                    withAnimation(.easeOut(duration: Theme.animationMedium)) {
-                        if horizontalSwipe > 0 {
-                            // Swipe right -> go to previous tab
-                            appState.selectedTab = appState.selectedTab.previous
-                        } else {
-                            // Swipe left -> go to next tab
-                            appState.selectedTab = appState.selectedTab.next
-                        }
-                    }
-                }
-        )
-        // Reserve space at bottom for floating tab bar
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            Color.clear.frame(height: 72)
-        }
+        .environment(tourSpotlights)
+        // Toasts render in their own window above sheets (`ToastWindow`).
+        .background { ToastWindowInstaller() }
     }
 
-    /// Subtle bottom fade so content peeks through the glass tab bar.
-    private var bottomFade: some View {
-        VStack(spacing: 0) {
-            Spacer()
-            LinearGradient(
-                colors: [
-                    Theme.backgroundPrimary.opacity(0),
-                    Theme.backgroundPrimary.opacity(0.7)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .frame(height: 40)
-            Theme.backgroundPrimary.opacity(0.7)
-                .frame(height: 34)
+    // MARK: - Tabs
+
+    /// Tabs read `appState` from the environment and take the selected vehicle
+    /// so each scopes its SwiftData queries to that vehicle.
+    private var tabs: some View {
+        TabView(selection: $appState.selectedTab) {
+            SwiftUI.Tab(Tab.home.title, systemImage: Tab.home.icon, value: Tab.home) {
+                TabRootStack(tab: .home, vehicles: vehicles) {
+                    HomeTab(vehicle: appState.selectedVehicle, onboardingState: onboardingState)
+                }
+            }
+            SwiftUI.Tab(Tab.services.title, systemImage: Tab.services.icon, value: Tab.services) {
+                TabRootStack(tab: .services, vehicles: vehicles) {
+                    ServicesTab(vehicle: appState.selectedVehicle, onboardingState: onboardingState)
+                }
+            }
+            SwiftUI.Tab(Tab.costs.title, systemImage: Tab.costs.icon, value: Tab.costs) {
+                TabRootStack(tab: .costs, vehicles: vehicles) {
+                    CostsTab(vehicle: appState.selectedVehicle, onboardingState: onboardingState)
+                }
+            }
         }
-        .ignoresSafeArea()
-        .allowsHitTesting(false)
+        .tabBarMinimizeBehavior(.onScrollDown)
+        .tint(Theme.accent)
     }
 }
 

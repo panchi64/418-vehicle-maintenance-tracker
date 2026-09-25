@@ -58,7 +58,7 @@ extension HomeTab {
             icon: "wrench.and.screwdriver",
             title: "SET UP MAINTENANCE",
             message: "Add your first service to start\ntracking maintenance schedules",
-            action: { appState.showAddService = true },
+            action: { appState.present(.addService()) },
             actionLabel: "ADD SERVICE"
         )
     }

@@ -2,7 +2,8 @@
 //  AppState.swift
 //  checkpoint
 //
-//  Shared application state for tab navigation and sheet management
+//  Shared application state: the selected vehicle and tab, each tab's
+//  navigation path, and the one root sheet.
 //
 
 import SwiftUI
@@ -16,49 +17,107 @@ final class AppState {
     var selectedVehicle: Vehicle?
     var selectedTab: Tab = .home
 
-    // MARK: - Sheet States
+    /// Each tab's NavigationStack path. Held here, not in the tabs, so a
+    /// notification route can switch tab and push in one state change.
+    var paths: [Tab: [AppRoute]] = [:]
 
-    var showVehiclePicker = false
-    var showAddVehicle = false
-    var showAddService = false
-    var showEditVehicle = false
-    var showDocuments = false
-    var showProPaywall = false
-    var showTipModal = false
-    var unlockedTheme: ThemeDefinition?
-    var selectedService: Service?
-    var selectedServiceLog: ServiceLog?
-    var selectedServiceVisit: ServiceVisit?
-    var selectedDocument: Document?
-    var showMileageUpdate = false
-    var showSettings = false
+    /// Switch vehicle from the UI. Every stack is popped to its root, since the
+    /// details on them belong to the previous vehicle.
+    func selectVehicle(_ vehicle: Vehicle?) {
+        guard vehicle?.id != selectedVehicle?.id else { return }
+        selectedVehicle = vehicle
+        paths = [:]
+    }
 
-    /// Mileage value prefilled by a Siri intent, consumed by the mileage
-    /// update sheet. A scalar (not a model reference), so it does not need
-    /// clearing in `prepareForContainerSwap()`.
-    var siriPrefilledMileage: Int?
+    /// Push a detail onto a tab's stack — the visible tab unless one is named.
+    func push(_ route: AppRoute, on tab: Tab? = nil) {
+        paths[tab ?? selectedTab, default: []].append(route)
+    }
 
-    // MARK: - Cluster States
+    /// Close whatever sheet is up and push a detail onto the visible tab. For a
+    /// detail opened from inside a root sheet (a cluster's service row): the
+    /// push lands on the stack underneath while the sheet animates away.
+    func showDetail(_ route: AppRoute) {
+        dismissSheet()
+        push(route)
+    }
 
-    var selectedCluster: ServiceCluster?
-    var clusterToMarkDone: ServiceCluster?
+    /// Replace a tab's stack with one destination and bring that tab forward.
+    func navigate(to route: AppRoute, on tab: Tab) {
+        dismissSheet()
+        selectedTab = tab
+        paths[tab] = [route]
+    }
 
-    /// Services a notification's "Mark as Done" asked to complete. Presented
-    /// from `ContentView` rather than a tab, so it opens whichever tab is up.
-    var markDoneRequest: MarkDoneRequest?
+    // MARK: - Root Sheet
 
-    // MARK: - Seasonal Reminder Pre-fill
+    /// The sheet the root is asked to show. Bound to ContentView's single
+    /// `.sheet(item:)`; a swipe-down sets it back to nil.
+    var activeSheet: ActiveSheet?
 
-    var seasonalPrefill: SeasonalPrefill?
+    /// The sheet that is actually on screen, from its content's first
+    /// appearance until its `onDismiss`. Distinct from `activeSheet`, which goes
+    /// nil the moment a dismissal *starts* — presenting in that window is what
+    /// silently dropped sheets before.
+    private(set) var presentedSheet: ActiveSheet?
 
-    /// Set by the "SCHEDULE NEXT" toast action after a record-mode save.
-    /// Consumed by the next AddServiceView presentation to anchor the
-    /// remind form on the just-recorded service's data.
-    var postRecordPrefill: PostRecordPrefill?
+    /// Waiting for the on-screen sheet to finish dismissing.
+    private(set) var queuedSheet: ActiveSheet?
 
-    // `addServiceMode` was deleted with the Record/Remind fork. Prefills now
-    // carry a `ServiceTiming` instead of a mode, and the form derives its
-    // intent from that.
+    /// Present `sheet`, replacing any sheet already up: that one dismisses
+    /// first, and this one follows from its `onDismiss`.
+    func present(_ sheet: ActiveSheet) {
+        if presentedSheet == nil {
+            queuedSheet = nil
+            activeSheet = sheet
+        } else {
+            queuedSheet = sheet
+            activeSheet = nil
+        }
+    }
+
+    /// Present `sheet` once nothing is on screen, without closing what is.
+    /// For app-initiated prompts (the tip modal) that must not interrupt a
+    /// task the user is in the middle of.
+    func presentWhenIdle(_ sheet: ActiveSheet) {
+        if presentedSheet == nil && activeSheet == nil {
+            activeSheet = sheet
+        } else {
+            queuedSheet = queuedSheet ?? sheet
+        }
+    }
+
+    /// Close the root sheet and drop anything queued behind it.
+    func dismissSheet() {
+        queuedSheet = nil
+        activeSheet = nil
+    }
+
+    /// Called from the sheet content's `onAppear`.
+    func sheetDidAppear(_ sheet: ActiveSheet) {
+        presentedSheet = sheet
+    }
+
+    /// Called from the root `.sheet`'s `onDismiss`. Presents whatever was
+    /// queued, and returns the sheet that closed so the view layer can run its
+    /// cleanup.
+    @discardableResult
+    func sheetDidDismiss() -> ActiveSheet? {
+        let dismissed = presentedSheet
+        presentedSheet = nil
+        if let next = queuedSheet {
+            queuedSheet = nil
+            activeSheet = next
+        }
+        return dismissed
+    }
+
+    // MARK: - Cluster Refresh
+
+    /// Bumped when a cluster is marked done from the root sheet, so Home
+    /// re-detects clusters — completing them changes due dates, not the
+    /// service count Home otherwise watches.
+    var clusterRefreshToken = 0
 
     // MARK: - Domain State
 
@@ -76,13 +135,13 @@ final class AppState {
     /// the swap (`.enableCloudSyncAfterOnboarding`).
     func prepareForContainerSwap() {
         selectedVehicle = nil
-        selectedService = nil
-        selectedServiceLog = nil
-        selectedServiceVisit = nil
-        selectedDocument = nil
-        selectedCluster = nil
-        clusterToMarkDone = nil
-        markDoneRequest = nil
+        paths = [:]
+        if activeSheet?.retainsModels == true {
+            activeSheet = nil
+        }
+        if queuedSheet?.retainsModels == true {
+            queuedSheet = nil
+        }
     }
 
     // MARK: - Recall Convenience
@@ -114,10 +173,10 @@ final class AppState {
 
     func requestAddVehicle(vehicleCount: Int) {
         if vehicleCount >= 3 && !StoreManager.shared.isPro {
-            showProPaywall = true
+            present(.proPaywall)
             AnalyticsService.shared.capture(.vehicleLimitReached(vehicleCount: vehicleCount))
         } else {
-            showAddVehicle = true
+            present(.addVehicle)
         }
     }
 

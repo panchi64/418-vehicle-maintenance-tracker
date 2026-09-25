@@ -2,11 +2,11 @@
 //  DocumentsView.swift
 //  checkpoint
 //
-//  Full-screen sheet listing every Document linked to a single vehicle.
+//  Pushed screen listing every Document linked to a single vehicle.
 //
 //  Documents are grouped by DocumentType.listOrder, support search across
 //  filename / notes / extractedText / type, and offer multi-select
-//  share + delete. Tapping a row presents DocumentDetailView; long-press
+//  share + delete. Tapping a row pushes DocumentDetailView; long-press
 //  opens a context menu with the same actions plus a destination-aware
 //  "Edit Notes" shortcut.
 //
@@ -19,7 +19,6 @@ import os
 private let documentsViewLogger = Logger(category: "Documents")
 
 struct DocumentsView: View {
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Environment(AppState.self) private var appState
 
@@ -31,7 +30,6 @@ struct DocumentsView: View {
     @State private var selectedIDs: Set<UUID> = []
 
     @State private var showAddSheet = false
-    @State private var documentForDetail: Document?
     @State private var documentToDelete: Document?
     @State private var showBulkDeleteConfirmation = false
     @State private var shareItems: [URL] = []
@@ -71,80 +69,75 @@ struct DocumentsView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                AtmosphericBackground()
+        ZStack {
+            AtmosphericBackground()
 
-                if allDocuments.isEmpty && searchText.isEmpty {
-                    EmptyStateView(
-                        icon: "doc.text",
-                        title: L10n.documentsEmptyTitle,
-                        message: L10n.documentsEmptyMessage,
-                        action: { showAddSheet = true },
-                        actionLabel: L10n.documentsEmptyAction
-                    )
-                } else {
-                    contentScroll
-                }
-            }
-            .navigationTitle(L10n.documentsTitle)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
-            .toolbar { toolbarItems }
-            .safeAreaInset(edge: .bottom) {
-                if isSelectionMode {
-                    selectionToolbar
-                }
-            }
-            .sheet(isPresented: $showAddSheet) {
-                DocumentPickerSheet(
-                    currentVehicle: vehicle,
-                    availableVehicles: allVehicles,
-                    serviceLog: nil,
-                    onSave: { _ in
-                        // No-op: SwiftData relationship update propagates the
-                        // new Document into vehicle.documents automatically.
-                    }
+            if allDocuments.isEmpty && searchText.isEmpty {
+                EmptyStateView(
+                    icon: "doc.text",
+                    title: L10n.documentsEmptyTitle,
+                    message: L10n.documentsEmptyMessage,
+                    action: { showAddSheet = true },
+                    actionLabel: L10n.documentsEmptyAction
                 )
+            } else {
+                contentScroll
             }
-            .sheet(item: $documentForDetail) { doc in
-                DocumentDetailView(document: doc)
+        }
+        .navigationTitle(L10n.documentsTitle)
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(isSelectionMode)
+        .searchable(text: $searchText, prompt: L10n.documentsSearchPlaceholder)
+        .toolbar { toolbarItems }
+        .safeAreaInset(edge: .bottom) {
+            if isSelectionMode {
+                selectionToolbar
             }
-            .sheet(isPresented: $showShareSheet, onDismiss: cleanupShareItems) {
-                ShareSheet(items: shareItems)
-            }
-            .confirmationDialog(
-                L10n.documentsDeleteConfirmTitle,
-                isPresented: Binding(
-                    get: { documentToDelete != nil },
-                    set: { newValue in
-                        if !newValue { documentToDelete = nil }
-                    }
-                ),
-                titleVisibility: .visible,
-                presenting: documentToDelete
-            ) { doc in
-                Button(L10n.documentsDeleteAction, role: .destructive) {
-                    deleteDocument(doc)
+        }
+        .sheet(isPresented: $showAddSheet) {
+            DocumentPickerSheet(
+                currentVehicle: vehicle,
+                availableVehicles: allVehicles,
+                serviceLog: nil,
+                onSave: { _ in
+                    // No-op: SwiftData relationship update propagates the
+                    // new Document into vehicle.documents automatically.
                 }
-                Button(L10n.commonCancel, role: .cancel) {
-                    documentToDelete = nil
+            )
+        }
+        .sheet(isPresented: $showShareSheet, onDismiss: cleanupShareItems) {
+            ShareSheet(items: shareItems)
+        }
+        .confirmationDialog(
+            L10n.documentsDeleteConfirmTitle,
+            isPresented: Binding(
+                get: { documentToDelete != nil },
+                set: { newValue in
+                    if !newValue { documentToDelete = nil }
                 }
-            } message: { _ in
-                Text(L10n.documentsDeleteConfirmMessage)
+            ),
+            titleVisibility: .visible,
+            presenting: documentToDelete
+        ) { doc in
+            Button(L10n.documentsDeleteAction, role: .destructive) {
+                deleteDocument(doc)
             }
-            .alert(
-                L10n.documentsDeleteBulkConfirmTitle(selectedIDs.count),
-                isPresented: $showBulkDeleteConfirmation
-            ) {
-                Button(L10n.documentsDeleteAction, role: .destructive) {
-                    deleteSelected()
-                }
-                Button(L10n.commonCancel, role: .cancel) { }
-            } message: {
-                Text(L10n.documentsDeleteBulkConfirmMessage)
+            Button(L10n.commonCancel, role: .cancel) {
+                documentToDelete = nil
             }
+        } message: { _ in
+            Text(L10n.documentsDeleteConfirmMessage)
+        }
+        .alert(
+            L10n.documentsDeleteBulkConfirmTitle(selectedIDs.count),
+            isPresented: $showBulkDeleteConfirmation
+        ) {
+            Button(L10n.documentsDeleteAction, role: .destructive) {
+                deleteSelected()
+            }
+            Button(L10n.commonCancel, role: .cancel) { }
+        } message: {
+            Text(L10n.documentsDeleteBulkConfirmMessage)
         }
     }
 
@@ -152,25 +145,18 @@ struct DocumentsView: View {
 
     @ToolbarContentBuilder
     private var toolbarItems: some ToolbarContent {
-        ToolbarItem(placement: .cancellationAction) {
-            Button {
-                if isSelectionMode {
+        // Pushed, so the back button leaves. Selection mode swaps it for Done,
+        // which only exits selection.
+        if isSelectionMode {
+            ToolbarItem(placement: .cancellationAction) {
+                Button {
                     exitSelectionMode()
-                } else {
-                    appState.showDocuments = false
-                    dismiss()
-                }
-            } label: {
-                if isSelectionMode {
+                } label: {
                     Text(L10n.documentsSelectionDoneAction)
                         .font(.brutalistBody)
-                } else {
-                    Image(systemName: "xmark")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Theme.textSecondary)
                 }
+                .accessibilityLabel(L10n.documentsSelectionDoneAction)
             }
-            .accessibilityLabel(isSelectionMode ? L10n.documentsSelectionDoneAction : L10n.commonClose)
         }
 
         if !isSelectionMode && !allDocuments.isEmpty {
@@ -270,8 +256,6 @@ struct DocumentsView: View {
             let groups = groupedDocuments
 
             VStack(spacing: Spacing.lg) {
-                searchField
-
                 if groups.isEmpty {
                     filteredEmptyState
                 } else {
@@ -284,19 +268,9 @@ struct DocumentsView: View {
             .padding(.vertical, Spacing.lg)
         }
         // Search filters as you type, so the keyboard is in the way of the
-        // results the moment you stop typing. Return dismisses it; so does
-        // dragging the list, which is what a reader reaches for first.
+        // results the moment you stop typing. Dragging the list dismisses it,
+        // which is what a reader reaches for first.
         .scrollDismissesKeyboard(.interactively)
-    }
-
-    /// Was a byte-for-byte copy of `BrutalistSearchField` differing only in its
-    /// placeholder — so the Return-key behavior would have had to be written
-    /// twice, and the two copies would have drifted from there.
-    private var searchField: some View {
-        BrutalistSearchField(
-            text: $searchText,
-            placeholder: L10n.documentsSearchPlaceholder
-        )
     }
 
     private var filteredEmptyState: some View {
@@ -427,7 +401,7 @@ struct DocumentsView: View {
                 }
 
                 Button {
-                    documentForDetail = doc
+                    appState.push(.document(doc))
                 } label: {
                     Label("Edit", systemImage: "pencil")
                 }
@@ -452,7 +426,7 @@ struct DocumentsView: View {
             }
             HapticService.shared.selectionChanged()
         } else {
-            documentForDetail = doc
+            appState.push(.document(doc))
         }
     }
 
@@ -540,7 +514,7 @@ struct DocumentsView: View {
 #Preview {
     let vehicle = Vehicle(name: "Daily", make: "Toyota", model: "Camry", year: 2022, currentMileage: 32500)
 
-    return DocumentsView(vehicle: vehicle)
+    return NavigationStack { DocumentsView(vehicle: vehicle) }
         .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self, ServiceAttachment.self], inMemory: true)
         .environment(AppState())
         .preferredColorScheme(.dark)

@@ -6157,6 +6157,42 @@
     "NOTES" : {
 
     },
+    "nav.manageVehicles" : {
+      "comment" : "Navigation title menu item that opens the vehicle picker to edit, delete, or reorder vehicles.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage Vehicles…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gestionar vehículos…"
+          }
+        }
+      }
+    },
+    "nav.switchVehicleHint" : {
+      "comment" : "VoiceOver hint on the navigation title, which opens the vehicle menu.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens a menu to switch vehicles"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre un menú para cambiar de vehículo"
+          }
+        }
+      }
+    },
     "notification.marbete.body.1" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7561,13 +7597,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tap the name to switch vehicles. Tap the amber mileage when the odometer changes. Your vehicle tracks the rest."
+            "value" : "Tap the vehicle name at the top to switch vehicles. Tap the amber mileage when the odometer changes. Your vehicle tracks the rest."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toca el nombre para cambiar de vehículo. Toca el kilometraje ámbar cuando cambie el odómetro. Tu vehículo lleva el resto."
+            "value" : "Toca el nombre del vehículo arriba para cambiar de vehículo. Toca el kilometraje ámbar cuando cambie el odómetro. Tu vehículo lleva el resto."
           }
         }
       }
@@ -9899,6 +9935,24 @@
         }
       }
     },
+    "servicesTab.searchPrompt" : {
+      "comment" : "Placeholder of the Services tab's system search field. States what the search covers.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Services, notes, receipts"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servicios, notas, recibos"
+          }
+        }
+      }
+    },
     "servicesTab.statusDimension" : {
       "comment" : "Names the status filter dimension on the Services tab.",
       "extractionState" : "manual",
@@ -10461,8 +10515,62 @@
     "Syncs your vehicles and maintenance data across your Apple devices via iCloud." : {
 
     },
+    "tab.costs" : {
+      "comment" : "System tab bar label for the Costs tab.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Costs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Costos"
+          }
+        }
+      }
+    },
+    "tab.home" : {
+      "comment" : "System tab bar label for the Home tab.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicio"
+          }
+        }
+      }
+    },
+    "tab.services" : {
+      "comment" : "System tab bar label for the Services tab.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Services"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servicios"
+          }
+        }
+      }
+    },
     "tabBar.addService" : {
-      "comment" : "VoiceOver label for the tab bar's [+] button.",
+      "comment" : "VoiceOver label for the toolbar's add-service button.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {

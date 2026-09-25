@@ -57,8 +57,6 @@ struct AddVehicleFlowView: View {
                 .trackScreen(.addVehicleBasics)
                 .navigationTitle(L10n.vehicleAdd)
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
-                .toolbarBackground(.visible, for: .navigationBar)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button(L10n.commonCancel) {
@@ -233,7 +231,7 @@ struct AddVehicleFlowView: View {
         }
 
         modelContext.insert(vehicle)
-        appState.selectedVehicle = vehicle
+        appState.selectVehicle(vehicle)
         HapticService.shared.success()
         ToastService.shared.show(L10n.toastVehicleSaved, icon: "checkmark.circle", style: .success)
         dismiss()

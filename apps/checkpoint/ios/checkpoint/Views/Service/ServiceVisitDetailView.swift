@@ -19,12 +19,9 @@ import SwiftUI
 import SwiftData
 
 struct ServiceVisitDetailView: View {
-    @Environment(\.dismiss) private var dismiss
     @Environment(AppState.self) private var appState
 
     @Bindable var visit: ServiceVisit
-
-    @State private var attachmentForDetail: Document?
 
     private var sortedLogs: [ServiceLog] {
         (visit.logs ?? []).sorted { ($0.service?.name ?? "") < ($1.service?.name ?? "") }
@@ -50,7 +47,7 @@ struct ServiceVisitDetailView: View {
                 if !allAttachments.isEmpty {
                     AttachmentSection(
                         attachments: allAttachments,
-                        onSelect: { attachmentForDetail = $0 }
+                        onSelect: { appState.push(.document($0)) }
                     )
                 }
             }
@@ -60,22 +57,6 @@ struct ServiceVisitDetailView: View {
         .background(Theme.backgroundPrimary)
         .navigationTitle("Service Visit")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(Theme.textSecondary)
-                }
-                .accessibilityLabel(L10n.a11yClose)
-            }
-        }
-        .sheet(item: $attachmentForDetail) { document in
-            DocumentDetailView(document: document)
-                .environment(appState)
-        }
     }
 
     // MARK: - Header

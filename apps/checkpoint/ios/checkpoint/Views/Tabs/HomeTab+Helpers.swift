@@ -49,8 +49,7 @@ extension HomeTab {
     func scheduleSeasonalService(_ reminder: SeasonalReminder) {
         let year = Calendar.current.component(.year, from: Date())
         SeasonalSettings.shared.dismissForYear(reminder.id, year: year)
-        appState.seasonalPrefill = reminder.toPrefill()
-        appState.showAddService = true
+        appState.present(.addService(seasonal: reminder.toPrefill()))
         refreshSeasonalReminders()
     }
 
@@ -106,7 +105,7 @@ extension HomeTab {
             // Spoken in full ("June 6, 2026"); the visible short date would
             // be read as numbers.
             accessibilityLabelText: L10n.rowCompletedAccessibility(name, L10n.spokenDate(log.performedDate)),
-            onTap: { appState.selectedServiceLog = log }
+            onTap: { appState.push(.serviceLog(log)) }
         )
         .serviceLogDeleteMenu { ServiceLogDeleteAction.perform(log, offerUndo: true) }
     }

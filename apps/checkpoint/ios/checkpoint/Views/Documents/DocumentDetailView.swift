@@ -2,7 +2,7 @@
 //  DocumentDetailView.swift
 //  checkpoint
 //
-//  Full-screen sheet detail for a single Document. QuickLook viewer on
+//  Pushed detail for a single Document. QuickLook viewer on
 //  top, then filename, document type, notes, linked vehicles, and (if the
 //  document came from a service log) a footer link back to that log.
 //
@@ -20,8 +20,12 @@ struct DocumentDetailView: View {
     @Environment(AppState.self) private var appState
 
     @Bindable var document: Document
+    /// False where the linked log is the one already on screen (the log's own
+    /// edit form), which would make the footer link circular.
+    var showsServiceLogLink = true
     @Query private var allVehicles: [Vehicle]
 
+    @State private var didOpenPreview = false
     @State private var notesDraft: String = ""
     @State private var previewURL: URL?
     @State private var shareURL: URL?
@@ -34,121 +38,112 @@ struct DocumentDetailView: View {
     @State private var isExtractedTextExpanded = false
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                AtmosphericBackground()
+        ZStack {
+            AtmosphericBackground()
 
-                ScrollView {
-                    VStack(spacing: Spacing.lg) {
-                        previewArea
+            ScrollView {
+                VStack(spacing: Spacing.lg) {
+                    previewArea
 
-                        Text(document.fileName)
-                            .font(.brutalistTitle)
-                            .foregroundStyle(Theme.textPrimary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                    Text(document.fileName)
+                        .font(.brutalistTitle)
+                        .foregroundStyle(Theme.textPrimary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
-                        typeSection
+                    typeSection
 
-                        notesSection
+                    notesSection
 
-                        if let text = document.extractedText,
-                           !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            extractedTextSection(text: text)
-                        }
-
-                        linkedVehiclesSection
-
-                        if let log = document.serviceLog {
-                            serviceLogFooter(for: log)
-                        }
+                    if let text = document.extractedText,
+                       !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        extractedTextSection(text: text)
                     }
-                    .padding(.horizontal, Spacing.screenHorizontal)
-                    .padding(.vertical, Spacing.lg)
+
+                    linkedVehiclesSection
+
+                    if showsServiceLogLink, let log = document.serviceLog {
+                        serviceLogFooter(for: log)
+                    }
                 }
+                .padding(.horizontal, Spacing.screenHorizontal)
+                .padding(.vertical, Spacing.lg)
             }
-            .navigationTitle(L10n.documentsTitle)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
+        }
+        .navigationTitle(L10n.documentsTitle)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
                     Button {
-                        commitNotesIfChanged()
-                        dismiss()
+                        shareDocument()
                     } label: {
-                        Image(systemName: "xmark")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(Theme.textSecondary)
+                        Label(L10n.documentsShareAction, systemImage: "square.and.arrow.up")
                     }
-                    .accessibilityLabel(L10n.commonClose)
-                }
-                ToolbarItem(placement: .primaryAction) {
-                    Menu {
-                        Button {
-                            shareDocument()
-                        } label: {
-                            Label(L10n.documentsShareAction, systemImage: "square.and.arrow.up")
-                        }
 
-                        Button(role: .destructive) {
-                            showDeleteConfirmation = true
-                        } label: {
-                            Label(L10n.documentsDeleteAction, systemImage: "trash")
-                        }
+                    Button(role: .destructive) {
+                        showDeleteConfirmation = true
                     } label: {
-                        Image(systemName: "ellipsis.circle")
+                        Label(L10n.documentsDeleteAction, systemImage: "trash")
                     }
-                    .toolbarButtonStyle()
-                    .accessibilityLabel(L10n.documentsMoreActions)
+                } label: {
+                    Image(systemName: "ellipsis.circle")
                 }
+                .toolbarButtonStyle()
+                .accessibilityLabel(L10n.documentsMoreActions)
             }
-            .quickLookPreview($previewURL)
-            .sheet(isPresented: $showShareSheet) {
-                if let url = shareURL {
-                    ShareSheet(items: [url])
+        }
+        .quickLookPreview($previewURL)
+        .sheet(isPresented: $showShareSheet) {
+            if let url = shareURL {
+                ShareSheet(items: [url])
+            }
+        }
+        .sheet(isPresented: $showVehiclePicker, onDismiss: applyPendingVehicleSelection) {
+            VehicleMultiPicker(
+                allVehicles: allVehicles,
+                selection: $pendingVehicleSelection,
+                lockedVehicleIDs: serviceLogVehicleLock
+            )
+        }
+        .confirmationDialog(
+            L10n.documentsDeleteConfirmTitle,
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button(L10n.documentsDeleteAction, role: .destructive) { deleteDocument() }
+            Button(L10n.commonCancel, role: .cancel) { }
+        } message: {
+            Text(L10n.documentsDeleteConfirmMessage)
+        }
+        .alert(
+            L10n.documentsRemoveLastVehicleConfirmTitle,
+            isPresented: $showRemoveLastVehicleConfirmation
+        ) {
+            Button(L10n.documentsDeleteAction, role: .destructive) {
+                if let selection = pendingRemovalSelection {
+                    commitVehicleSelection(selection)
                 }
+                pendingRemovalSelection = nil
             }
-            .sheet(isPresented: $showVehiclePicker, onDismiss: applyPendingVehicleSelection) {
-                VehicleMultiPicker(
-                    allVehicles: allVehicles,
-                    selection: $pendingVehicleSelection,
-                    lockedVehicleIDs: serviceLogVehicleLock
-                )
+            Button(L10n.commonCancel, role: .cancel) {
+                pendingRemovalSelection = nil
             }
-            .confirmationDialog(
-                L10n.documentsDeleteConfirmTitle,
-                isPresented: $showDeleteConfirmation,
-                titleVisibility: .visible
-            ) {
-                Button(L10n.documentsDeleteAction, role: .destructive) { deleteDocument() }
-                Button(L10n.commonCancel, role: .cancel) { }
-            } message: {
-                Text(L10n.documentsDeleteConfirmMessage)
-            }
-            .alert(
-                L10n.documentsRemoveLastVehicleConfirmTitle,
-                isPresented: $showRemoveLastVehicleConfirmation
-            ) {
-                Button(L10n.documentsDeleteAction, role: .destructive) {
-                    if let selection = pendingRemovalSelection {
-                        commitVehicleSelection(selection)
-                    }
-                    pendingRemovalSelection = nil
-                }
-                Button(L10n.commonCancel, role: .cancel) {
-                    pendingRemovalSelection = nil
-                }
-            } message: {
-                Text(L10n.documentsRemoveLastVehicleConfirmMessage)
-            }
-            .onAppear {
-                notesDraft = document.notes ?? ""
-                openPreview()
-            }
-            .onDisappear {
-                commitNotesIfChanged()
-                cleanupTempFiles()
-            }
+        } message: {
+            Text(L10n.documentsRemoveLastVehicleConfirmMessage)
+        }
+        .onAppear {
+            notesDraft = document.notes ?? ""
+            // Once per visit, not on every return to this screen: popping
+            // back from the service log pushed above it re-fires onAppear.
+            guard !didOpenPreview else { return }
+            didOpenPreview = true
+            openPreview()
+        }
+        // Back, or a push on top, both leave this screen with the draft
+        // saved — there is no close button to hang the save on.
+        .onDisappear {
+            commitNotesIfChanged()
+            cleanupTempFiles()
         }
     }
 
@@ -319,12 +314,7 @@ struct DocumentDetailView: View {
     private func serviceLogFooter(for log: ServiceLog) -> some View {
         Button {
             commitNotesIfChanged()
-            // Dismiss any documents-library sheet that may be covering
-            // ContentView so the service-log sheet has somewhere to present.
-            appState.showDocuments = false
-            appState.selectedDocument = nil
-            appState.selectedServiceLog = log
-            dismiss()
+            appState.push(.serviceLog(log))
         } label: {
             HStack(spacing: Spacing.sm) {
                 Image(systemName: "wrench.and.screwdriver")
@@ -440,7 +430,6 @@ struct DocumentDetailView: View {
         modelContext.delete(document)
         try? modelContext.save()
         Document.purgeOrphans(in: modelContext)
-        appState.selectedDocument = nil
         dismiss()
     }
 
@@ -483,8 +472,27 @@ struct DocumentDetailView: View {
 
         if nextVehicles.isEmpty && document.serviceLog == nil {
             Document.purgeOrphans(in: modelContext)
-            appState.selectedDocument = nil
             dismiss()
+        }
+    }
+}
+
+// MARK: - Sheet host
+
+/// `DocumentDetailView` presented from inside a form sheet, where there is no
+/// navigation stack to push onto. Everywhere else the detail is pushed.
+struct DocumentDetailSheet: View {
+    let document: Document
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            DocumentDetailView(document: document, showsServiceLogLink: false)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button(role: .close) { dismiss() }
+                    }
+                }
         }
     }
 }
@@ -501,7 +509,7 @@ struct DocumentDetailView: View {
         vehicles: [vehicle]
     )
 
-    return DocumentDetailView(document: doc)
+    return NavigationStack { DocumentDetailView(document: doc) }
         .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self, ServiceAttachment.self], inMemory: true)
         .environment(AppState())
         .preferredColorScheme(.dark)

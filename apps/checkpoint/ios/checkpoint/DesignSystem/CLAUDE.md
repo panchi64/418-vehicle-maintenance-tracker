@@ -96,9 +96,10 @@ For readouts and forms, the usable range is:
 | `lg` | 24 | Section separation |
 | `xl` | 32 | Major sections |
 | `xxl` | 48 | Hero spacing |
-| `tabBarOffset` | 56 | Bottom clearance under the tab bar |
 
-⚠️ **Known inconsistency:** `Theme.screenHorizontalPadding` is **16** while `Spacing.screenHorizontal` is **20**. `VehicleHeader` uses the former and the tabs use the latter, so the persistent header is inset 4pt tighter than the content beneath it. Prefer `Spacing.screenHorizontal`; the `Theme` constant should be retired.
+No tab-bar clearance token: the system `TabView` insets scroll content itself.
+
+⚠️ **Known inconsistency:** `Theme.screenHorizontalPadding` is **16** while `Spacing.screenHorizontal` is **20**. Prefer `Spacing.screenHorizontal`; the `Theme` constant should be retired.
 
 ## Layout constants (`Theme`)
 

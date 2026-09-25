@@ -818,6 +818,12 @@ enum L10n {
     static var formFewerDetails: String { localized("form.fewerDetails") }
     static var formDepthContents: String { localized("form.depthContents") }
     static var tabBarAddService: String { localized("tabBar.addService") }
+    static var tabHome: String { localized("tab.home") }
+    static var tabServices: String { localized("tab.services") }
+    static var tabCosts: String { localized("tab.costs") }
+    static var navManageVehicles: String { localized("nav.manageVehicles") }
+    static var navSwitchVehicleHint: String { localized("nav.switchVehicleHint") }
+    static var servicesSearchPrompt: String { localized("servicesTab.searchPrompt") }
     static func toastReminderSetFor(_ date: String) -> String {
         String(format: localized("toast.reminderSetFor"), date)
     }
