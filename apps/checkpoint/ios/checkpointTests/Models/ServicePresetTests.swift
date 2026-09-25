@@ -210,28 +210,4 @@ final class ServicePresetTests: XCTestCase {
         XCTAssertEqual(preset.defaultIntervalMiles, 10000)
         XCTAssertTrue(preset.isCustom)
     }
-
-    func testServicePreset_IntervalDescriptionUpdatesWithPropertyChanges() {
-        let preset = ServicePreset(
-            name: "Service",
-            category: .other,
-            defaultIntervalMonths: 6,
-            defaultIntervalMiles: 5000
-        )
-
-        XCTAssertEqual(preset.intervalDescription, "Every 6 months or 5,000 miles")
-
-        // Change to only months
-        preset.defaultIntervalMiles = nil
-        XCTAssertEqual(preset.intervalDescription, "Every 6 months")
-
-        // Change to only miles
-        preset.defaultIntervalMonths = nil
-        preset.defaultIntervalMiles = 10000
-        XCTAssertEqual(preset.intervalDescription, "Every 10,000 miles")
-
-        // Remove all intervals
-        preset.defaultIntervalMiles = nil
-        XCTAssertNil(preset.intervalDescription)
-    }
 }

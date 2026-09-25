@@ -42,6 +42,16 @@ nonisolated struct PendingWidgetRoute: Codable, Equatable, Sendable {
         defaults.set(data, forKey: WidgetAppGroup.pendingWidgetRouteKey)
     }
 
+    /// Store a route from raw intent parameters. They are untrusted input:
+    /// only well-formed UUIDs become a route. Returns whether one was stored.
+    @discardableResult
+    static func queue(serviceID: String, vehicleID: String, now: Date = Date()) -> Bool {
+        guard let service = UUID(uuidString: serviceID),
+              let vehicle = UUID(uuidString: vehicleID) else { return false }
+        save(PendingWidgetRoute(vehicleID: vehicle, serviceID: service, createdAt: now))
+        return true
+    }
+
     /// Remove and return the stored route, or nil when there is none or it has
     /// expired. Consuming clears it so one tap navigates once.
     static func take(now: Date = Date()) -> PendingWidgetRoute? {
@@ -81,9 +91,7 @@ struct OpenServiceIntent: AppIntent {
     /// Main actor so the app's `.onReceive` observer runs on the main thread.
     @MainActor
     func perform() async throws -> some IntentResult {
-        // Parameters are untrusted input: only well-formed UUIDs become a route.
-        if let service = UUID(uuidString: serviceID), let vehicle = UUID(uuidString: vehicleID) {
-            PendingWidgetRoute.save(PendingWidgetRoute(vehicleID: vehicle, serviceID: service, createdAt: Date()))
+        if PendingWidgetRoute.queue(serviceID: serviceID, vehicleID: vehicleID) {
             NotificationCenter.default.post(name: PendingWidgetRoute.queuedNotification, object: nil)
         }
         return .result()

@@ -43,13 +43,17 @@ final class PendingWidgetRouteTests: XCTestCase {
         XCTAssertEqual(PendingWidgetRoute.take(), latest)
     }
 
-    func test_openServiceIntent_malformedIDs_storeNothing() async throws {
-        _ = try await OpenServiceIntent(serviceID: "not-a-uuid", vehicleID: vehicleID.uuidString).perform()
+    // `queue` rather than `OpenServiceIntent.perform()`: running an AppIntent
+    // outside the system's intent runtime hung the test host intermittently,
+    // and perform's notification post would drive the host app's navigation.
+
+    func test_queue_malformedIDs_storeNothing() {
+        XCTAssertFalse(PendingWidgetRoute.queue(serviceID: "not-a-uuid", vehicleID: vehicleID.uuidString))
         XCTAssertNil(PendingWidgetRoute.take())
     }
 
-    func test_openServiceIntent_validIDs_storeRoute() async throws {
-        _ = try await OpenServiceIntent(serviceID: serviceID.uuidString, vehicleID: vehicleID.uuidString).perform()
+    func test_queue_validIDs_storeRoute() {
+        XCTAssertTrue(PendingWidgetRoute.queue(serviceID: serviceID.uuidString, vehicleID: vehicleID.uuidString))
         let route = PendingWidgetRoute.take()
         XCTAssertEqual(route?.serviceID, serviceID)
         XCTAssertEqual(route?.vehicleID, vehicleID)
