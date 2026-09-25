@@ -15,7 +15,7 @@ import AVFoundation
 struct OdometerCaptureView: UIViewControllerRepresentable {
     let onImageCaptured: (UIImage) -> Void
     let onCancel: () -> Void
-    var guideText: String = "ALIGN ODOMETER HERE"
+    var guideText: String = L10n.cameraAlignOdometer
     var viewfinderAspectRatio: CGFloat = 3.0  // width / height
 
     func makeUIViewController(context: Context) -> OdometerCaptureViewController {
@@ -37,7 +37,7 @@ class OdometerCaptureViewController: UIViewController {
 
     var onImageCaptured: ((UIImage) -> Void)?
     var onCancel: (() -> Void)?
-    var guideText: String = "ALIGN ODOMETER HERE"
+    var guideText: String = L10n.cameraAlignOdometer
     var viewfinderAspectRatio: CGFloat = 3.0  // width / height
 
     private let captureSession = AVCaptureSession()

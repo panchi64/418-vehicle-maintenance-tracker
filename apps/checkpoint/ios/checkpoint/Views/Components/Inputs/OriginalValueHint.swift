@@ -30,7 +30,7 @@ extension OriginalValueHint {
     }
 
     static func value(forMonths months: Int?) -> String {
-        months.map { "\($0) mo" } ?? L10n.impactNone
+        months.map { L10n.impactMonths($0) } ?? L10n.impactNone
     }
 }
 

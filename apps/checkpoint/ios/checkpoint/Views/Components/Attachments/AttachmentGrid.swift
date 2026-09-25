@@ -26,7 +26,7 @@ struct AttachmentGrid: View {
                             // Label comes from the thumbnail: "Photo
                             // attachment" / "PDF attachment" says which one
                             // this is, where "Open document" said it of all.
-                            .accessibilityHint("Opens the document detail view")
+                            .accessibilityHint(L10n.attachOpenDetailHint)
                         }
                     }
                 }

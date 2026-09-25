@@ -31,14 +31,20 @@ enum DistanceUnit: String, CaseIterable, Codable {
         abbreviation.uppercased()
     }
 
-    /// Full name: "miles" or "kilometers"
+    /// Localized lowercase name for running text: "miles" / "millas"
     var fullName: String {
-        rawValue
+        switch self {
+        case .miles: return L10n.unitMilesLower
+        case .kilometers: return L10n.unitKilometersLower
+        }
     }
 
-    /// Capitalized full name: "Miles" or "Kilometers"
+    /// Localized name for pickers and settings rows: "Miles" / "Millas"
     var displayName: String {
-        rawValue.capitalized
+        switch self {
+        case .miles: return L10n.unitMiles
+        case .kilometers: return L10n.unitKilometers
+        }
     }
 
     // MARK: - Conversion Methods

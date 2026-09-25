@@ -18,16 +18,16 @@ struct CSVImportConfigureStep: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.lg) {
             // Source detection
-            InstrumentSectionHeader(title: "Source Format")
+            InstrumentSectionHeader(title: L10n.importSourceFormat)
 
             // The detected format is named in words beside it, not only
             // tinted.
             SettingsOptionList(
                 options: CSVImportSource.allCases,
                 selection: selectedSource,
-                title: { $0.rawValue },
+                title: { $0.displayName },
                 subtitle: { source in
-                    source == importService.detectedSource && source != .custom ? "Detected" : nil
+                    source == importService.detectedSource && source != .custom ? L10n.importSourceDetected : nil
                 }
             ) { source in
                 selectedSource = source
@@ -39,11 +39,11 @@ struct CSVImportConfigureStep: View {
             }
 
             // Column mapping
-            InstrumentSectionHeader(title: "Column Mapping")
+            InstrumentSectionHeader(title: L10n.importColumnMapping)
 
             VStack(spacing: 0) {
                 columnMappingRow(
-                    label: "DATE",
+                    label: L10n.importColumnDate,
                     selectedColumn: Binding(
                         get: { importService.columnMapping.dateColumn },
                         set: { importService.columnMapping.dateColumn = $0 }
@@ -53,7 +53,7 @@ struct CSVImportConfigureStep: View {
                 SettingsRowDivider()
 
                 columnMappingRow(
-                    label: "SERVICE NAME",
+                    label: L10n.importColumnServiceName,
                     selectedColumn: Binding(
                         get: { importService.columnMapping.descriptionColumn },
                         set: { importService.columnMapping.descriptionColumn = $0 }
@@ -63,7 +63,7 @@ struct CSVImportConfigureStep: View {
                 SettingsRowDivider()
 
                 columnMappingRow(
-                    label: "ODOMETER",
+                    label: L10n.importColumnOdometer,
                     selectedColumn: Binding(
                         get: { importService.columnMapping.odometerColumn },
                         set: { importService.columnMapping.odometerColumn = $0 }
@@ -73,7 +73,7 @@ struct CSVImportConfigureStep: View {
                 SettingsRowDivider()
 
                 columnMappingRow(
-                    label: "COST",
+                    label: L10n.importColumnCost,
                     selectedColumn: Binding(
                         get: { importService.columnMapping.costColumn },
                         set: { importService.columnMapping.costColumn = $0 }
@@ -83,7 +83,7 @@ struct CSVImportConfigureStep: View {
                 SettingsRowDivider()
 
                 columnMappingRow(
-                    label: "NOTES",
+                    label: L10n.importColumnNotes,
                     selectedColumn: Binding(
                         get: { importService.columnMapping.notesColumn },
                         set: { importService.columnMapping.notesColumn = $0 }
@@ -95,7 +95,7 @@ struct CSVImportConfigureStep: View {
 
             // Data preview (first 3 rows)
             if !importService.previewRows.isEmpty {
-                InstrumentSectionHeader(title: "Data Preview")
+                InstrumentSectionHeader(title: L10n.importDataPreview)
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     VStack(spacing: 0) {
@@ -161,14 +161,14 @@ struct CSVImportConfigureStep: View {
                     )
 
                     if preview.logCount == 0 {
-                        errorMessage = "No valid rows could be parsed. Check your column mapping."
+                        errorMessage = L10n.importNoValidRows
                     } else {
                         errorMessage = nil
                         currentStep = .preview
                     }
                 }
             } label: {
-                Text("Preview Import")
+                Text(L10n.importPreviewButton)
             }
             .buttonStyle(.primary)
 
@@ -201,7 +201,7 @@ struct CSVImportConfigureStep: View {
             // The picker carries the field name itself so VoiceOver says
             // which column it maps.
             Picker(label, selection: selectedColumn) {
-                Text("None")
+                Text(L10n.importColumnNone)
                     .tag(nil as Int?)
                 ForEach(Array(importService.headers.enumerated()), id: \.offset) { index, header in
                     Text(header)

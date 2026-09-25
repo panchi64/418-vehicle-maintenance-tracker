@@ -151,7 +151,7 @@ struct OCRConfirmationView: View {
             // The unit sits beside the number until accessibility sizes, where
             // a seven-digit hero no longer leaves room for it.
             heroLayout {
-                TextField("", text: $mileageText)
+                TextField(text: $mileageText) { EmptyView() }
                     .font(.brutalistHero)
                     // Hero numeral: capped so seven digits still fit the width.
                     .dynamicTypeSize(...DynamicTypeSize.accessibility2)

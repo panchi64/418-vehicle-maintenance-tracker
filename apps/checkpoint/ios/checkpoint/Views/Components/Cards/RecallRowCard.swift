@@ -119,7 +119,7 @@ struct RecallRowCard: View {
 
     private var expandedDetail: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("SUMMARY")
+            Text(L10n.recallCardSummary)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1)
@@ -130,7 +130,7 @@ struct RecallRowCard: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             if !recall.consequence.isEmpty {
-                Text("RISK")
+                Text(L10n.recallCardRisk)
                     .font(.brutalistLabel)
                     .foregroundStyle(Theme.statusOverdue)
                     .tracking(1)
@@ -143,7 +143,7 @@ struct RecallRowCard: View {
             }
 
             if !recall.remedy.isEmpty {
-                Text("REMEDY")
+                Text(L10n.recallCardRemedy)
                     .font(.brutalistLabel)
                     .foregroundStyle(Theme.statusGood)
                     .tracking(1)
@@ -156,7 +156,7 @@ struct RecallRowCard: View {
             }
 
             AdaptiveStack {
-                Text("NHTSA #\(recall.campaignNumber)")
+                Text(L10n.recallCardCampaign(recall.campaignNumber))
                     .font(.brutalistLabel)
                     .foregroundStyle(Theme.textTertiary)
                     .tracking(1)
@@ -267,7 +267,7 @@ struct RecallRowCard: View {
                 Image(systemName: "ellipsis.circle")
                     .font(.caption2.weight(.bold))
                     .accessibilityHidden(true)
-                Text("UPDATE STATUS")
+                Text(L10n.recallCardUpdateStatus)
                     .font(.brutalistLabel)
                     .tracking(1.5)
             }

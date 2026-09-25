@@ -30,7 +30,7 @@ struct MarbeteUpcomingItem: UpcomingItem {
     let id: UUID
     let vehicle: Vehicle
 
-    var itemName: String { "Marbete Renewal" }
+    var itemName: String { L10n.descMarbeteRenewal }
 
     var itemStatus: ServiceStatus { vehicle.marbeteStatus }
 

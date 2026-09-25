@@ -39,11 +39,11 @@ struct ServiceClusterDetailSheet: View {
                     .padding(.vertical, Spacing.lg)
                 }
             }
-            .navigationTitle("Service Visit")
+            .navigationTitle(L10n.clusterTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button(L10n.commonDone) { dismiss() }
                         .font(.brutalistBody)
                         .foregroundStyle(Theme.accent)
                 }
@@ -55,23 +55,23 @@ struct ServiceClusterDetailSheet: View {
 
     private var clusterSummarySection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "Summary")
+            InstrumentSectionHeader(title: L10n.clusterSummary)
 
             VStack(spacing: 0) {
-                summaryRow(label: "SERVICES", value: "\(cluster.serviceCount)")
+                summaryRow(label: L10n.clusterRowServices, value: "\(cluster.serviceCount)")
 
                 Rectangle()
                     .fill(Theme.gridLine)
                     .frame(height: 1)
 
-                summaryRow(label: "WINDOW", value: cluster.windowDescription)
+                summaryRow(label: L10n.clusterRowWindow, value: cluster.windowDescription)
 
                 if let mileage = cluster.suggestedMileage {
                     Rectangle()
                         .fill(Theme.gridLine)
                         .frame(height: 1)
 
-                    summaryRow(label: "TARGET", value: Formatters.mileageDisplay(mileage), highlight: true)
+                    summaryRow(label: L10n.clusterRowTarget, value: Formatters.mileageDisplay(mileage), highlight: true)
                 }
 
                 if let date = cluster.suggestedDate {
@@ -79,7 +79,7 @@ struct ServiceClusterDetailSheet: View {
                         .fill(Theme.gridLine)
                         .frame(height: 1)
 
-                    summaryRow(label: "DUE", value: Formatters.shortDate.string(from: date))
+                    summaryRow(label: L10n.clusterRowDue, value: Formatters.shortDate.string(from: date))
                 }
             }
             .background(Theme.surfaceInstrument)
@@ -109,7 +109,7 @@ struct ServiceClusterDetailSheet: View {
 
     private var servicesSection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "Services")
+            InstrumentSectionHeader(title: L10n.clusterServices)
 
             VStack(spacing: 0) {
                 ForEach(Array(cluster.services.enumerated()), id: \.element.id) { index, service in
@@ -186,7 +186,7 @@ struct ServiceClusterDetailSheet: View {
                         .font(.body.weight(.semibold))
                         .accessibilityHidden(true)
 
-                    Text("MARK ALL DONE")
+                    Text(L10n.clusterMarkAllDone)
                         .font(.brutalistBody)
                         .tracking(1)
                 }
@@ -197,7 +197,7 @@ struct ServiceClusterDetailSheet: View {
             }
             .buttonStyle(.plain)
 
-            Text("LOG ALL \(cluster.serviceCount) SERVICES AT CURRENT MILEAGE")
+            Text(L10n.clusterLogAll(cluster.serviceCount))
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1)
@@ -209,18 +209,18 @@ struct ServiceClusterDetailSheet: View {
     private var tipSection: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             HStack(spacing: Spacing.xs) {
-                Text("TIP")
+                Text(L10n.clusterTipLabel)
                     .font(.brutalistLabel)
                     .foregroundStyle(Theme.accent)
                     .tracking(1.5)
 
-                Text("SCHEDULE TOGETHER")
+                Text(L10n.clusterTipTitle)
                     .font(.brutalistLabel)
                     .foregroundStyle(Theme.textTertiary)
                     .tracking(1)
             }
 
-            Text("Handling multiple services in one visit reduces trips and may lower labor costs.")
+            Text(L10n.clusterTipBody)
                 .font(.brutalistSecondary)
                 .foregroundStyle(Theme.textTertiary)
                 .lineSpacing(4)

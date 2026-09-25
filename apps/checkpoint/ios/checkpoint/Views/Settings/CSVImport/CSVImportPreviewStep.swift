@@ -29,17 +29,17 @@ struct CSVImportPreviewStep: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.lg) {
-            InstrumentSectionHeader(title: "Import Summary")
+            InstrumentSectionHeader(title: L10n.importSummary)
 
             // Stats row
             CSVImportStatTiles(stats: [
-                .init(value: "\(preview.serviceCount)", label: "SERVICES"),
-                .init(value: "\(preview.logCount)", label: "LOGS"),
-                .init(value: Formatters.currencyWhole(preview.totalCost), label: "TOTAL COST"),
+                .init(value: "\(preview.serviceCount)", label: L10n.importStatServices),
+                .init(value: "\(preview.logCount)", label: L10n.importStatLogs),
+                .init(value: Formatters.currencyWhole(preview.totalCost), label: L10n.importStatTotalCost),
             ])
 
             // Service names
-            InstrumentSectionHeader(title: "Services to Create")
+            InstrumentSectionHeader(title: L10n.importServicesToCreate)
 
             VStack(spacing: 0) {
                 ForEach(Array(preview.serviceNames.enumerated()), id: \.offset) { index, name in
@@ -52,7 +52,7 @@ struct CSVImportPreviewStep: View {
 
                         Spacer(minLength: Spacing.sm)
 
-                        Text("\(count) LOGS")
+                        Text(L10n.importLogCount(count))
                             .font(.brutalistLabel)
                             .foregroundStyle(Theme.textTertiary)
                             .tracking(1)
@@ -69,7 +69,7 @@ struct CSVImportPreviewStep: View {
             .brutalistBorder()
 
             // Vehicle assignment
-            InstrumentSectionHeader(title: "Assign to Vehicle")
+            InstrumentSectionHeader(title: L10n.importAssignVehicle)
 
             VStack(spacing: 0) {
                 ForEach(vehicles) { vehicle in
@@ -86,7 +86,7 @@ struct CSVImportPreviewStep: View {
 
                 // Create new vehicle option
                 SettingsOptionRow(
-                    title: "Create New Vehicle",
+                    title: L10n.importCreateVehicle,
                     isSelected: createNewVehicle
                 ) {
                     createNewVehicle = true
@@ -97,7 +97,7 @@ struct CSVImportPreviewStep: View {
                     SettingsRowDivider()
 
                     HStack {
-                        TextField("Vehicle Name", text: $newVehicleName)
+                        TextField(L10n.importVehicleNamePlaceholder, text: $newVehicleName)
                             .font(.brutalistBody)
                             .foregroundStyle(Theme.textPrimary)
                             .textFieldStyle(.plain)
@@ -113,7 +113,7 @@ struct CSVImportPreviewStep: View {
 
             // Warnings
             if !preview.warnings.isEmpty {
-                InstrumentSectionHeader(title: "Warnings (\(preview.warnings.count))")
+                InstrumentSectionHeader(title: L10n.importWarningsHeader(preview.warnings.count))
 
                 VStack(alignment: .leading, spacing: Spacing.sm) {
                     ForEach(preview.warnings.prefix(10)) { warning in
@@ -123,7 +123,7 @@ struct CSVImportPreviewStep: View {
                             .tracking(1)
                     }
                     if preview.warnings.count > 10 {
-                        Text("AND \(preview.warnings.count - 10) MORE...")
+                        Text(L10n.importMoreWarnings(preview.warnings.count - 10))
                             .font(.brutalistLabel)
                             .foregroundStyle(Theme.textTertiary)
                             .tracking(1)
@@ -145,14 +145,14 @@ struct CSVImportPreviewStep: View {
                 Button {
                     currentStep = .configure
                 } label: {
-                    Text("Back")
+                    Text(L10n.commonBack)
                 }
                 .buttonStyle(.secondary)
 
                 Button {
                     onImport(preview)
                 } label: {
-                    Text("Import")
+                    Text(L10n.importConfirmAction)
                 }
                 .buttonStyle(.primary)
                 .disabled(!canImport)

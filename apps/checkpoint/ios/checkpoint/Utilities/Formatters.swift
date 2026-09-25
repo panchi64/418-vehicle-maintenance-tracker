@@ -162,7 +162,7 @@ enum Formatters {
     static func serviceInterval(months: Int?, miles: Int?, distanceUnit: DistanceUnit) -> String? {
         var parts: [String] = []
         if let months = months {
-            parts.append("\(months) mo")
+            parts.append(L10n.impactMonths(months))
         }
         if let miles = miles {
             let displayValue = distanceUnit.fromMiles(miles)

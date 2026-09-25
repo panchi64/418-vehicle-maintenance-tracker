@@ -40,12 +40,12 @@ enum CostValidation {
 
         // Must contain at least one digit
         guard cost.contains(where: { $0.isNumber }) else {
-            return "INVALID AMOUNT"
+            return L10n.validationInvalidAmount
         }
 
         // Check for valid decimal number
         guard Decimal(string: cost) != nil else {
-            return "INVALID AMOUNT"
+            return L10n.validationInvalidAmount
         }
 
         return nil

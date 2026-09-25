@@ -44,17 +44,14 @@ struct CheckNextDueIntent: AppIntent {
     }
 
     private func formatServiceDialog(service: SiriService, vehicleName: String) -> String {
-        let statusText: String
-        switch service.status {
-        case .overdue: statusText = "is overdue"
-        case .dueSoon: statusText = "is due soon"
-        case .good: statusText = "is coming up"
-        case .neutral: statusText = "is scheduled"
-        }
-
         // dueDescription already reads as an abstracted period ("Due mid May")
         // for date-based items, or miles remaining for mileage-tracked services.
-        // Format: "Oil change on Daily Driver is due soon. Due mid May."
-        return "\(service.name) on \(vehicleName) \(statusText). \(service.dueDescription.capitalized)."
+        // Format: "Oil change on Daily Driver is due soon. Due Mid May."
+        L10n.siriNextDue(
+            service.status,
+            service: service.name,
+            vehicle: vehicleName,
+            due: service.dueDescription.capitalized
+        )
     }
 }

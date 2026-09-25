@@ -91,13 +91,13 @@ nonisolated enum CSVImportError: Error, LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .fileReadFailed: return "Could not read the CSV file."
-        case .emptyFile: return "The file is empty."
-        case .noHeaderRow: return "No header row found."
-        case .noDataRows: return "No data rows found."
-        case .noDateColumn: return "Could not identify a date column."
-        case .noDescriptionColumn: return "Could not identify a description column."
-        case .invalidFormat: return "The file format is not recognized."
+        case .fileReadFailed: return L10n.importErrorFileReadFailed
+        case .emptyFile: return L10n.importErrorEmptyFile
+        case .noHeaderRow: return L10n.importErrorNoHeaderRow
+        case .noDataRows: return L10n.importErrorNoDataRows
+        case .noDateColumn: return L10n.importErrorNoDateColumn
+        case .noDescriptionColumn: return L10n.importErrorNoDescriptionColumn
+        case .invalidFormat: return L10n.importErrorInvalidFormat
         }
     }
 }
@@ -500,7 +500,7 @@ final class CSVImportService {
             }
 
             guard let name = serviceName, !name.isEmpty else {
-                warnings.append(CSVImportWarning(row: rowNumber, message: "Row \(rowNumber): Missing service name, skipped"))
+                warnings.append(CSVImportWarning(row: rowNumber, message: L10n.importWarningMissingName(row: rowNumber)))
                 continue
             }
 
@@ -510,7 +510,7 @@ final class CSVImportService {
                 let raw = row[col].trimmingCharacters(in: .whitespaces)
                 date = parseDate(raw, slashOrder: slashOrder)
                 if date == nil && !raw.isEmpty {
-                    warnings.append(CSVImportWarning(row: rowNumber, message: "Row \(rowNumber): Could not parse date '\(raw)'"))
+                    warnings.append(CSVImportWarning(row: rowNumber, message: L10n.importWarningBadDate(row: rowNumber, value: raw)))
                 }
             }
 

@@ -30,14 +30,14 @@ struct MarbetePicker: View {
 
     private var monthPicker: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("EXPIRATION MONTH")
+            Text(L10n.marbeteExpirationMonth)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1.5)
                 .textCase(.uppercase)
 
             Menu {
-                Button("Not Set") {
+                Button(L10n.marbeteNotSet) {
                     month = nil
                     HapticService.shared.selectionChanged()
                 }
@@ -55,7 +55,7 @@ struct MarbetePicker: View {
                             .font(.brutalistBody)
                             .foregroundStyle(Theme.textPrimary)
                     } else {
-                        Text("Not Set")
+                        Text(L10n.marbeteNotSet)
                             .font(.brutalistBody)
                             .foregroundStyle(Theme.textTertiary)
                     }
@@ -78,14 +78,14 @@ struct MarbetePicker: View {
         let yearRange = currentYear...(currentYear + 2)
 
         return VStack(alignment: .leading, spacing: 6) {
-            Text("EXPIRATION YEAR")
+            Text(L10n.marbeteExpirationYear)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1.5)
                 .textCase(.uppercase)
 
             Menu {
-                Button("Not Set") {
+                Button(L10n.marbeteNotSet) {
                     year = nil
                     HapticService.shared.selectionChanged()
                 }
@@ -103,7 +103,7 @@ struct MarbetePicker: View {
                             .font(.brutalistBody)
                             .foregroundStyle(Theme.textPrimary)
                     } else {
-                        Text("Not Set")
+                        Text(L10n.marbeteNotSet)
                             .font(.brutalistBody)
                             .foregroundStyle(Theme.textTertiary)
                     }
@@ -150,7 +150,7 @@ struct MarbetePicker: View {
                 .strokeBorder(status.color.opacity(0.3), lineWidth: Theme.borderWidth)
         )
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Marbete status: \(statusText)")
+        .accessibilityLabel(L10n.marbeteStatusLabel(statusText))
         .accessibilityValue(formattedExpiration() ?? "")
     }
 
@@ -183,9 +183,9 @@ struct MarbetePicker: View {
 
     private func statusText(for status: ServiceStatus) -> String {
         switch status {
-        case .overdue: return "EXPIRED"
-        case .dueSoon: return "EXPIRES SOON"
-        case .good: return "VALID"
+        case .overdue: return L10n.marbeteExpired
+        case .dueSoon: return L10n.marbeteExpiresSoon
+        case .good: return L10n.marbeteValid
         case .neutral: return ""
         }
     }
@@ -194,7 +194,7 @@ struct MarbetePicker: View {
         guard let month = month,
               let year = year else { return nil }
         let monthName = Calendar.current.monthSymbols[month - 1]
-        return "\(monthName) \(year)"
+        return L10n.marbeteMonthYear(monthName, year)
     }
 }
 

@@ -82,7 +82,7 @@ struct OdometerCameraSheet: View {
     let onImageCaptured: (UIImage) -> Void
 
     /// Guide text shown below the viewfinder
-    var guideText: String = "ALIGN ODOMETER HERE"
+    var guideText: String = L10n.cameraAlignOdometer
 
     /// Viewfinder aspect ratio (width / height)
     var viewfinderAspectRatio: CGFloat = 3.0

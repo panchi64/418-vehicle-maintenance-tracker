@@ -59,7 +59,7 @@ struct QuickSpecsCard: View {
                                 if let licensePlate = vehicle.licensePlate {
                                     specBlock(
                                         value: licensePlate,
-                                        label: "PLATE",
+                                        label: L10n.specsPlate,
                                         isMonospace: false
                                     )
                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -68,7 +68,7 @@ struct QuickSpecsCard: View {
                                 if let vin = vehicle.vin {
                                     specBlock(
                                         value: vin,
-                                        label: "VIN",
+                                        label: L10n.specsVIN,
                                         isMonospace: true
                                     )
                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -82,7 +82,7 @@ struct QuickSpecsCard: View {
                                 if let tireSize = vehicle.tireSize {
                                     specBlock(
                                         value: tireSize,
-                                        label: "TIRES",
+                                        label: L10n.specsTires,
                                         isMonospace: false
                                     )
                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -91,7 +91,7 @@ struct QuickSpecsCard: View {
                                 if let oilType = vehicle.oilType {
                                     specBlock(
                                         value: oilType,
-                                        label: "OIL",
+                                        label: L10n.specsOil,
                                         isMonospace: false
                                     )
                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -114,7 +114,7 @@ struct QuickSpecsCard: View {
                                     .padding(.bottom, Spacing.sm)
 
                                 // Notes label
-                                Text("NOTES")
+                                Text(L10n.specsNotes)
                                     .font(.brutalistLabel)
                                     .foregroundStyle(Theme.textTertiary)
                                     .tracking(1)
@@ -132,7 +132,7 @@ struct QuickSpecsCard: View {
                                                 .lineLimit(3)
                                                 .multilineTextAlignment(.leading)
 
-                                            Text("TAP TO READ MORE")
+                                            Text(L10n.specsReadMore)
                                                 .font(.brutalistLabel)
                                                 .foregroundStyle(Theme.accent)
                                                 .tracking(1)
@@ -158,7 +158,7 @@ struct QuickSpecsCard: View {
 
                         // Empty state
                         if !hasAnySpecs {
-                            Text("No specifications added")
+                            Text(L10n.specsEmpty)
                                 .font(.brutalistSecondary)
                                 .foregroundStyle(Theme.textTertiary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -184,7 +184,7 @@ struct QuickSpecsCard: View {
                         HStack(spacing: Spacing.xs) {
                             Image(systemName: "pencil")
                                 .font(.caption2.weight(.medium))
-                            Text(hasAnySpecs ? "EDIT" : "ADD SPECS")
+                            Text(hasAnySpecs ? L10n.specsEdit : L10n.specsAdd)
                                 .font(.brutalistLabel)
                                 .tracking(1)
                         }
@@ -214,7 +214,7 @@ struct QuickSpecsCard: View {
         } label: {
             HStack(alignment: .center, spacing: Spacing.sm) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(count == 0 ? "—" : "\(count)")
+                    Text(verbatim: count == 0 ? "—" : "\(count)")
                         .font(.brutalistHeading)
                         .foregroundStyle(Theme.textPrimary)
                     Text(L10n.documentsRowQuickSpecs.uppercased())
@@ -291,7 +291,7 @@ struct QuickSpecsCard: View {
     /// Marbete block with status-colored expiration display. Tap to copy the expiration string.
     private func marbeteBlock(expiration: String, status: ServiceStatus) -> some View {
         Button {
-            copySpec(value: expiration, fieldLabel: "Marbete")
+            copySpec(value: expiration, fieldLabel: L10n.vehicleMarbete)
         } label: {
             HStack(spacing: Spacing.sm) {
                 // Status indicator
@@ -307,7 +307,7 @@ struct QuickSpecsCard: View {
                         .foregroundStyle(status.color)
 
                     // Label
-                    Text("MARBETE")
+                    Text(L10n.specsMarbete)
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
                         .tracking(1)
@@ -357,7 +357,7 @@ struct FullNotesView: View {
                     .padding(Spacing.md)
             }
             .background(Theme.backgroundPrimary)
-            .navigationTitle("Notes")
+            .navigationTitle(L10n.vehicleNotes)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

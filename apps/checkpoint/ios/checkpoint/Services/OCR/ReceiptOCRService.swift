@@ -33,9 +33,9 @@ actor ReceiptOCRService {
         var errorDescription: String? {
             switch self {
             case .noTextFound:
-                return "No text could be recognized in the image"
+                return L10n.cameraReceiptNoText
             case .imageProcessingFailed:
-                return "Failed to process the image"
+                return L10n.cameraReceiptProcessingFailed
             }
         }
     }

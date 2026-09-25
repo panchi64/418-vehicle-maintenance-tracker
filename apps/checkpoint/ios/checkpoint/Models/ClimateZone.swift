@@ -16,21 +16,21 @@ enum ClimateZone: String, CaseIterable, Codable {
 
     var displayName: String {
         switch self {
-        case .coldWinter: return "Cold Winters"
-        case .mildFourSeason: return "Mild Four-Season"
-        case .hotDry: return "Hot & Dry"
-        case .hotHumid: return "Hot & Humid"
-        case .tropical: return "Tropical"
+        case .coldWinter: return L10n.climateColdWinterName
+        case .mildFourSeason: return L10n.climateMildFourSeasonName
+        case .hotDry: return L10n.climateHotDryName
+        case .hotHumid: return L10n.climateHotHumidName
+        case .tropical: return L10n.climateTropicalName
         }
     }
 
     var description: String {
         switch self {
-        case .coldWinter: return "Northeast, Midwest, Mountain — harsh winters, road salt"
-        case .mildFourSeason: return "Mid-Atlantic, Pacific NW — moderate winters"
-        case .hotDry: return "Southwest, desert — extreme heat, minimal rain"
-        case .hotHumid: return "Southeast, Gulf Coast — heat, humidity, heavy rain"
-        case .tropical: return "Hawaii, PR, USVI — year-round warm"
+        case .coldWinter: return L10n.climateColdWinterDetail
+        case .mildFourSeason: return L10n.climateMildFourSeasonDetail
+        case .hotDry: return L10n.climateHotDryDetail
+        case .hotHumid: return L10n.climateHotHumidDetail
+        case .tropical: return L10n.climateTropicalDetail
         }
     }
 }

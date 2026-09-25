@@ -18,4 +18,6 @@ extension L10n {
         String(format: documents("documents.toast.deletedCount"), count)
     }
     static var documentsEditNotes: String { documents("documents.editNotes") }
+    static var documentsFileNameLabel: String { documents("documents.fileNameLabel") }
+    static var documentsFileNamePlaceholder: String { documents("documents.fileNamePlaceholder") }
 }

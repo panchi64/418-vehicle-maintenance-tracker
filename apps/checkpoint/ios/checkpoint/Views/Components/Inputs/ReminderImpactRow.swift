@@ -38,7 +38,7 @@ struct ReminderImpactRow: View {
 
             AdaptiveSpacer()
 
-            Text("\(label(for: impact.before)) → \(label(for: impact.after))")
+            Text(L10n.impactChange(label(for: impact.before), label(for: impact.after)))
                 .font(.brutalistBody)
                 .foregroundStyle(Theme.accent)
         }

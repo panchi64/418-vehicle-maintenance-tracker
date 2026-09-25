@@ -57,23 +57,24 @@ struct ListUpcomingServicesIntent: AppIntent {
             parts.append(formatServiceItem(service))
         }
 
-        let intro = "Here's what's coming up for \(vehicleName): "
-        let list = parts.joined(separator: ". ")
-
-        return intro + list + "."
+        return L10n.siriListIntro(vehicle: vehicleName, list: parts.joined(separator: ". "))
     }
 
     private func formatSingleService(_ service: SiriService, vehicleName: String) -> String {
-        let statusText = service.status.dialogPrefix.lowercased()
-        return "For \(vehicleName), \(service.name) is \(statusText). \(service.dueDescription)."
+        L10n.siriSingle(
+            service.status,
+            vehicle: vehicleName,
+            service: service.name,
+            due: service.dueDescription
+        )
     }
 
     private func formatServiceItem(_ service: SiriService) -> String {
         // dueDescription already reads as an abstracted period ("Due mid May")
         // for date-based items, or miles remaining for mileage-tracked services.
         if service.status == .overdue {
-            return "\(service.name) is overdue"
+            return L10n.siriListItemOverdue(service.name)
         }
-        return "\(service.name): \(service.dueDescription.lowercased())"
+        return L10n.siriListItem(service.name, due: service.dueDescription.lowercased())
     }
 }

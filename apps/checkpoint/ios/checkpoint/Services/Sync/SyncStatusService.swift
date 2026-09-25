@@ -23,11 +23,11 @@ enum SyncError: Equatable {
     var userMessage: String {
         switch self {
         case .notSignedIn:
-            return "Sign in to iCloud to sync across devices"
+            return L10n.syncErrorNotSignedIn
         case .quotaExceeded:
-            return "iCloud storage full. Data safe locally."
+            return L10n.syncErrorQuotaExceeded
         case .networkUnavailable:
-            return "Offline. Changes sync when connected."
+            return L10n.syncErrorOffline
         case .unknown(let message):
             return message
         }
@@ -36,9 +36,9 @@ enum SyncError: Equatable {
     var actionLabel: String? {
         switch self {
         case .notSignedIn:
-            return "Open Settings"
+            return L10n.syncActionOpenSettings
         case .quotaExceeded:
-            return "Manage Storage"
+            return L10n.syncActionManageStorage
         case .networkUnavailable:
             return nil
         case .unknown:
@@ -95,17 +95,17 @@ enum SyncState: Equatable {
     var displayText: String {
         switch self {
         case .idle:
-            return "Synced"
+            return L10n.syncStateSynced
         case .syncing:
-            return "Syncing..."
+            return L10n.syncStateSyncing
         case .synced:
-            return "Synced"
+            return L10n.syncStateSynced
         case .error(let syncError):
             return syncError.userMessage
         case .disabled:
-            return "Sync disabled"
+            return L10n.syncDisabled
         case .noAccount:
-            return "Sign in to iCloud"
+            return L10n.syncStateSignIn
         }
     }
 
@@ -260,7 +260,7 @@ final class SyncStatusService {
                 }
             @unknown default:
                 hasICloudAccount = false
-                syncState = .error(.unknown("Unable to determine iCloud status"))
+                syncState = .error(.unknown(L10n.syncErrorUnknownStatus))
             }
         } catch {
             hasICloudAccount = false
@@ -424,10 +424,10 @@ final class SyncStatusService {
             case .serverResponseLost, .serviceUnavailable, .zoneBusy:
                 return .unknown(ckError.localizedDescription)
             default:
-                return .unknown("Sync error")
+                return .unknown(L10n.syncErrorGeneric)
             }
         }
-        return .unknown("Sync error")
+        return .unknown(L10n.syncErrorGeneric)
     }
 
     // MARK: - Network Monitoring

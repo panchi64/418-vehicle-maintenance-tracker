@@ -26,9 +26,9 @@ enum ConfidenceLevel {
 
     var label: String {
         switch self {
-        case .high: return "HIGH"
-        case .medium: return "MEDIUM"
-        case .low: return "LOW"
+        case .high: return L10n.cameraConfidenceHigh
+        case .medium: return L10n.cameraConfidenceMedium
+        case .low: return L10n.cameraConfidenceLow
         }
     }
 

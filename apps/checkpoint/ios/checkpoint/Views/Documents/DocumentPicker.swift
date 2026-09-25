@@ -441,9 +441,9 @@ private struct DocumentReviewForm: View {
         ScrollView {
             VStack(spacing: Spacing.lg) {
                 InstrumentTextField(
-                    label: "File Name",
+                    label: L10n.documentsFileNameLabel,
                     text: $fileName,
-                    placeholder: "document.pdf",
+                    placeholder: L10n.documentsFileNamePlaceholder,
                     requirement: .required(reason: L10n.documentsFileNameRequired)
                 )
 

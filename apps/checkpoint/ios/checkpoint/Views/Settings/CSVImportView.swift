@@ -16,15 +16,6 @@ enum CSVImportStep: Int, CaseIterable {
     case configure = 1
     case preview = 2
     case success = 3
-
-    var title: String {
-        switch self {
-        case .pickFile: return "SELECT FILE"
-        case .configure: return "CONFIGURE"
-        case .preview: return "PREVIEW"
-        case .success: return "COMPLETE"
-        }
-    }
 }
 
 // MARK: - CSV Import View
@@ -97,12 +88,12 @@ struct CSVImportView: View {
                 }
             }
             .keyboardDismissToolbar()
-            .navigationTitle("Import")
+            .navigationTitle(L10n.importNavTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     if currentStep != .success {
-                        Button("CANCEL") {
+                        Button(L10n.commonCancel) {
                             importService.reset()
                             dismiss()
                         }
@@ -111,7 +102,7 @@ struct CSVImportView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     if currentStep == .success {
-                        Button("DONE") {
+                        Button(L10n.commonDone) {
                             importService.reset()
                             dismiss()
                         }
@@ -126,11 +117,11 @@ struct CSVImportView: View {
             ) { result in
                 handleFileSelection(result)
             }
-            .alert("CONFIRM IMPORT", isPresented: $showImportConfirmation) {
-                Button("CANCEL", role: .cancel) {
+            .alert(L10n.importConfirmTitle, isPresented: $showImportConfirmation) {
+                Button(L10n.commonCancel, role: .cancel) {
                     pendingImportPreview = nil
                 }
-                Button("IMPORT") {
+                Button(L10n.importConfirmAction) {
                     if let preview = pendingImportPreview {
                         performImport(preview: preview)
                         pendingImportPreview = nil
@@ -138,8 +129,14 @@ struct CSVImportView: View {
                 }
             } message: {
                 if let preview = pendingImportPreview {
-                    let vehicleName = createNewVehicle ? newVehicleName : (selectedVehicle?.displayName ?? "vehicle")
-                    Text("Import \(preview.serviceCount) services with \(preview.logCount) logs to \(vehicleName)?")
+                    let vehicleName = createNewVehicle
+                        ? newVehicleName
+                        : (selectedVehicle?.displayName ?? L10n.importConfirmFallbackVehicle)
+                    Text(L10n.importConfirmMessage(
+                        services: preview.serviceCount,
+                        logs: preview.logCount,
+                        vehicle: vehicleName
+                    ))
                 }
             }
         }
@@ -152,7 +149,7 @@ struct CSVImportView: View {
             ForEach(CSVImportStep.allCases, id: \.rawValue) { step in
                 HStack(spacing: Spacing.xs) {
                     // Step number
-                    Text("\(step.rawValue + 1)")
+                    Text(verbatim: "\(step.rawValue + 1)")
                         .font(.brutalistLabel)
                         .foregroundStyle(
                             step.rawValue <= currentStep.rawValue
@@ -221,7 +218,7 @@ struct CSVImportView: View {
         } else if let selected = selectedVehicle {
             vehicle = selected
         } else {
-            errorMessage = "Please select a vehicle."
+            errorMessage = L10n.importSelectVehicleError
             return
         }
 
