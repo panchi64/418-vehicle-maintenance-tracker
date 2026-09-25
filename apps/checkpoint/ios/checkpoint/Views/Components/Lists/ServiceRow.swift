@@ -17,16 +17,6 @@ struct ServiceRow: View {
         service.status(currentMileage: currentMileage)
     }
 
-    private var daysUntilDue: Int? {
-        guard let dueDate = service.dueDate else { return nil }
-        return Calendar.current.dateComponents([.day], from: .now, to: dueDate).day
-    }
-
-    private var milesRemaining: Int? {
-        guard let dueMileage = service.dueMileage else { return nil }
-        return dueMileage - currentMileage
-    }
-
     private var isUrgent: Bool {
         status == .overdue || status == .dueSoon
     }
@@ -40,25 +30,9 @@ struct ServiceRow: View {
         return min(max(elapsed / total, 0), 1)
     }
 
-    /// The row's reason for existing: how urgent is this, in the unit the user
-    /// actually tracks. Mileage leads when the service has a mileage trigger,
-    /// since that's what the odometer answers; otherwise the date does.
+    /// The row's reason for existing: how urgent is this.
     private var urgencyText: String? {
-        if let miles = milesRemaining {
-            if miles < 0 {
-                return L10n.rowDistanceOverdue(formattedDistance(abs(miles)))
-            } else if miles == 0 {
-                return L10n.rowDueNow
-            }
-            return L10n.rowDistanceLeft(formattedDistance(miles))
-        }
-        if let days = daysUntilDue {
-            if days < 0 { return L10n.rowDaysOverdue(-days) }
-            if days == 0 { return L10n.rowDueToday }
-            if days == 1 { return L10n.rowDueTomorrow }
-            return L10n.rowDaysLeft(days)
-        }
-        return nil
+        service.urgencyText(currentMileage: currentMileage)
     }
 
     /// Two channels, not one: urgent rows differ from healthy rows in both
@@ -164,18 +138,6 @@ struct ServiceRow: View {
             }
         }
         .frame(width: 40, height: 2)
-    }
-
-    // MARK: - Helpers
-
-    /// Distance with its unit, converted to the user's preference. Returned as
-    /// one string so the surrounding sentence stays a single format key and
-    /// translators control word order.
-    private func formattedDistance(_ miles: Int) -> String {
-        let unit = DistanceSettings.shared.unit
-        let displayValue = unit.fromMiles(miles)
-        let formatted = Formatters.decimal.string(from: NSNumber(value: displayValue)) ?? "\(displayValue)"
-        return "\(formatted) \(unit.abbreviation)"
     }
 }
 

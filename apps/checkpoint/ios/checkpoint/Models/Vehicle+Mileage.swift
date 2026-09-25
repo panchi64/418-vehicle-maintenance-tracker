@@ -51,6 +51,21 @@ extension Vehicle {
         }
         return shouldCreateSnapshot
     }
+
+    /// Put the odometer back exactly as it was before a commit that is being
+    /// undone. The only writer of `currentMileage` besides `recordMileage`.
+    ///
+    /// Undo is a revert, not an observation, so it deliberately does not go
+    /// through `recordMileage`: recording the old number again would stamp it
+    /// with a new `mileageUpdatedAt` and a new snapshot — a lower reading at a
+    /// later time, which the pace engine reads as the car driving backwards.
+    /// Restoring both fields together keeps the pair consistent (F11); the
+    /// caller deletes the snapshot the undone commit inserted.
+    /// See `MileageCommit.Revert`.
+    func revertMileage(to mileage: Int, updatedAt: Date?) {
+        currentMileage = mileage
+        mileageUpdatedAt = updatedAt
+    }
 }
 
 extension Vehicle {

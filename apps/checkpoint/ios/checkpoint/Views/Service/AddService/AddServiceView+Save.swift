@@ -23,8 +23,11 @@ extension AddServiceView {
                 category: category,
                 hasInterval: hasInterval
             ))
-            let undo = saveLoggedService()
-            if model.isRecurring {
+            // Completing a matched service reschedules inside
+            // `ServiceCompletionService`; only a created one needs it here.
+            let target = logTarget
+            let undo = LoggedServiceWriter.save(model, completing: target, in: modelContext)
+            if target == nil, model.isRecurring {
                 ServiceNotificationScheduler.rescheduleNotifications(for: vehicle)
             }
             finish(keepOpen: keepOpen) { showLoggedToast(undo: undo) }
@@ -77,17 +80,17 @@ extension AddServiceView {
         return L10n.toastReminderSet
     }
 
-    private func showLoggedToast(undo: RecordedServiceUndo?) {
+    private func showLoggedToast(undo: RecordedServiceUndo) {
         let context = modelContext
-        let toastAction: ToastService.ToastAction?
+        let toastAction: ToastService.ToastAction
 
-        if !model.isRecurring {
-            // No future Service was spawned — offer a one-tap way to schedule
-            // one from the completion's anchors.
+        if !undo.leftFutureReminder {
+            // No future Service was left behind — offer a one-tap way to
+            // schedule one from the completion's anchors.
             let prefill = PostRecordPrefill(
                 serviceName: model.serviceName,
                 performedDate: model.performedDate,
-                performedMileage: model.mileageAtService ?? vehicle.currentMileage,
+                performedMileage: model.logAnchorMileage,
                 intervalMonths: model.intervalMonths,
                 intervalMiles: model.intervalMiles
             )
@@ -98,12 +101,15 @@ extension AddServiceView {
                 HapticService.shared.selectionChanged()
             }
         } else {
-            toastAction = undo.map { snapshot in
-                ToastService.ToastAction(label: L10n.commonUndo.uppercased()) {
-                    snapshot.perform(in: context)
-                    HapticService.shared.selectionChanged()
-                    AnalyticsService.shared.capture(.serviceLogUndone)
-                }
+            let vehicle = vehicle
+            toastAction = ToastService.ToastAction(label: L10n.commonUndo.uppercased()) {
+                undo.perform(in: context)
+                // The undone save changed what is due; reminders and the
+                // widget must follow it back.
+                ServiceNotificationScheduler.rescheduleNotifications(for: vehicle)
+                WidgetDataService.shared.updateWidget(for: vehicle)
+                HapticService.shared.selectionChanged()
+                AnalyticsService.shared.capture(.serviceLogUndone)
             }
         }
 
@@ -116,82 +122,6 @@ extension AddServiceView {
     }
 
     // MARK: - Persistence
-
-    private func saveLoggedService() -> RecordedServiceUndo {
-        let mileage = model.mileageAtService ?? vehicle.currentMileage
-        let priorMileage = vehicle.currentMileage
-
-        let service = Service(
-            name: model.serviceName,
-            lastPerformed: model.performedDate,
-            lastMileage: mileage,
-            intervalMonths: model.isRecurring ? model.intervalMonths : nil,
-            intervalMiles: model.isRecurring ? model.intervalMiles : nil,
-            isRecurring: model.isRecurring
-        )
-        service.vehicle = vehicle
-
-        if model.isRecurring {
-            service.deriveDueFromIntervals(anchorDate: model.performedDate, anchorMileage: mileage)
-        }
-
-        modelContext.insert(service)
-
-        let costDecimal = Decimal(string: model.cost)
-        let log = ServiceLog(
-            service: service,
-            vehicle: vehicle,
-            performedDate: model.performedDate,
-            mileageAtService: mileage,
-            cost: costDecimal,
-            costCategory: costDecimal != nil ? model.costCategory : nil,
-            notes: model.notes.isEmpty ? nil : model.notes
-        )
-        modelContext.insert(log)
-
-        var insertedAttachments: [ServiceAttachment] = []
-        for attachmentData in model.pendingAttachments {
-            let thumbnailData = ServiceAttachment.generateThumbnailData(
-                from: attachmentData.data,
-                mimeType: attachmentData.mimeType
-            )
-            let attachment = ServiceAttachment(
-                serviceLog: log,
-                data: attachmentData.data,
-                thumbnailData: thumbnailData,
-                fileName: attachmentData.fileName,
-                mimeType: attachmentData.mimeType,
-                extractedText: attachmentData.extractedText
-            )
-            modelContext.insert(attachment)
-            insertedAttachments.append(attachment)
-        }
-
-        // F11: one commit path. Gated on the reading being the *newest* rather
-        // than merely the highest, so backfilling an old service can't
-        // overwrite a current odometer — and routed through `recordMileage` so
-        // `mileageUpdatedAt` and the snapshot move with it.
-        //
-        // `keepCurrent` is the user's explicit answer to the one contradiction
-        // the app cannot settle, so it wins over the automatic rule.
-        if model.mileageResolution != .keepCurrent {
-            MileageCommit.commitIfNewest(
-                reading: mileage,
-                observedAt: model.performedDate,
-                source: .serviceCompletion,
-                for: vehicle,
-                in: modelContext
-            )
-        }
-
-        return RecordedServiceUndo(
-            service: service,
-            log: log,
-            attachments: insertedAttachments,
-            vehicle: vehicle,
-            priorVehicleMileage: priorMileage
-        )
-    }
 
     private func saveScheduledService() {
         // When the user has not enabled "Repeats", drop any interval values

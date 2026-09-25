@@ -103,6 +103,68 @@ final class AddServiceFormModel {
         selectedPreset?.name ?? customServiceName
     }
 
+    // MARK: - Logged recurrence (F4)
+
+    /// The odometer a logged entry is anchored to. A blank field means "at
+    /// the reading on file".
+    var logAnchorMileage: Int {
+        mileageAtService ?? vehicle.currentMileage
+    }
+
+    /// The reminder a log will leave behind, or nil when it leaves none.
+    ///
+    /// Picking a preset turns recurrence on, but the repeat controls live on
+    /// the scheduling branch — so logging an oil change silently created a
+    /// 6-month / 5,000-mile reminder. This is what the log path shows instead.
+    /// Uses `ReminderImpactCalculator.projected`, the calculation the save
+    /// path's `deriveDueFromIntervals` runs, with the same anchors — whether
+    /// the save creates a service or completes a matched one, the successor
+    /// is derived from `performedDate` and `logAnchorMileage`.
+    var nextReminderAfterLog: ReminderImpactCalculator.Schedule? {
+        guard isLogging, isRecurringSchedule else { return nil }
+        let schedule = ReminderImpactCalculator.projected(
+            intervalMonths: intervalMonths,
+            intervalMiles: intervalMiles,
+            anchorDate: performedDate,
+            anchorMileage: logAnchorMileage,
+            explicitDueDate: nil,
+            explicitDueMileage: nil
+        )
+        guard schedule.dueDate != nil || schedule.dueMileage != nil else { return nil }
+        return schedule
+    }
+
+    /// Seed the recurrence policy when the service type, or the tracked
+    /// service a log would complete, changes.
+    ///
+    /// A matched service carries the user's own cadence, which wins over a
+    /// preset's generic one — otherwise completing a 3-month oil change from
+    /// [+] would quietly re-cadence it to the preset's 6. A backfilled entry
+    /// with no match must not inherit a preset's recurrence and spawn
+    /// reminders for a service done years ago.
+    func applyScheduleDefaults(preset: PresetData?, match: Service?) {
+        if let match, match.hasIntervalPolicy {
+            intervalMonths = match.intervalMonths
+            intervalMiles = match.intervalMiles
+            isRecurring = match.isRecurring
+            return
+        }
+        if let preset {
+            if let months = preset.defaultIntervalMonths { intervalMonths = months }
+            if let miles = preset.defaultIntervalMiles { intervalMiles = miles }
+        }
+        if timing?.isBackfill == true {
+            isRecurring = false
+            return
+        }
+        if let preset, Service.hasIntervalPolicy(
+            intervalMonths: preset.defaultIntervalMonths,
+            intervalMiles: preset.defaultIntervalMiles
+        ) {
+            isRecurring = true
+        }
+    }
+
     // MARK: - Mileage reasoning (F11)
 
     /// Whether saving would also advance the vehicle's odometer. Mirrors

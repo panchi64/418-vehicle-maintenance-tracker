@@ -133,7 +133,10 @@ struct MarkServiceVisitDoneSheet: View {
             }
             .trackScreen(.markServiceDone)
             .onAppear {
-                mileage = vehicle.effectiveMileage
+                // The last *confirmed* reading, never the estimate. Prefilling
+                // the projection meant an untouched Save committed a guess as
+                // an odometer reading — permanently, snapshot and all.
+                mileage = vehicle.currentMileage
             }
         }
     }
@@ -212,12 +215,37 @@ struct MarkServiceVisitDoneSheet: View {
                 date: $performedDate
             )
 
+            // A past observation, so it carries the past-observation label —
+            // never the same words as a "remind me at" target.
             InstrumentNumberField(
-                label: "Mileage",
+                label: L10n.formOdometerAtService,
                 value: $mileage,
-                placeholder: "Required",
+                placeholder: Formatters.mileageNumber(vehicle.currentMileage),
                 suffix: DistanceSettings.shared.unit.abbreviation
             )
+
+            mileageNotes
+        }
+    }
+
+    /// The estimate is a hint to type from, not a value. Adoption of a newer
+    /// reading is stated before save, never silent (F11).
+    @ViewBuilder
+    private var mileageNotes: some View {
+        let estimate = vehicle.mileageEstimate
+        if estimate.isEstimated, mileage != estimate.effective {
+            Text(L10n.markDoneEstimateHint(Formatters.mileage(estimate.effective)))
+                .font(.brutalistSecondary)
+                .foregroundStyle(Theme.textTertiary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+
+        if let summary = MileageCommit.adoptionSummary(
+            reading: mileage,
+            observedAt: performedDate,
+            for: vehicle
+        ) {
+            FormAdvisory.info(summary)
         }
     }
 
@@ -295,7 +323,7 @@ struct MarkServiceVisitDoneSheet: View {
     private func save() {
         HapticService.shared.success()
         let costDecimal = Decimal(string: costInput)
-        let mileageInt = mileage ?? vehicle.effectiveMileage
+        let mileageInt = mileage ?? vehicle.currentMileage
         let trimmedNotes = notes.isEmpty ? nil : notes
 
         switch origin {
@@ -354,22 +382,19 @@ struct MarkServiceVisitDoneSheet: View {
             attachmentCount: pendingAttachments.count
         ))
 
-        let log = ServiceLog(
-            service: service,
+        // Shared with the add form's log path, which completes a matched
+        // service through the same call.
+        ServiceCompletionService.recordCompletion(
+            of: service,
             vehicle: vehicle,
-            performedDate: performedDate,
-            mileageAtService: mileageInt,
-            cost: costDecimal,
-            costCategory: costDecimal != nil ? costCategory : nil,
-            notes: trimmedNotes
-        )
-        modelContext.insert(log)
-
-        attachAttachments(to: log)
-        ServiceCompletionService.completeService(
-            service,
-            performedDate: performedDate,
-            mileage: mileageInt,
+            entry: .init(
+                performedDate: performedDate,
+                mileage: mileageInt,
+                cost: costDecimal,
+                costCategory: costCategory,
+                notes: trimmedNotes,
+                attachments: pendingAttachments
+            ),
             in: modelContext
         )
     }
@@ -423,25 +448,7 @@ struct MarkServiceVisitDoneSheet: View {
         }
 
         if let firstLog {
-            attachAttachments(to: firstLog)
-        }
-    }
-
-    private func attachAttachments(to log: ServiceLog) {
-        for data in pendingAttachments {
-            let thumbnailData = ServiceAttachment.generateThumbnailData(
-                from: data.data,
-                mimeType: data.mimeType
-            )
-            let attachment = ServiceAttachment(
-                serviceLog: log,
-                data: data.data,
-                thumbnailData: thumbnailData,
-                fileName: data.fileName,
-                mimeType: data.mimeType,
-                extractedText: data.extractedText
-            )
-            modelContext.insert(attachment)
+            ServiceCompletionService.insertAttachments(pendingAttachments, on: firstLog, in: modelContext)
         }
     }
 }

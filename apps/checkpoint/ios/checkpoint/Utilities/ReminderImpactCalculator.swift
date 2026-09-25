@@ -3,10 +3,11 @@
 //  checkpoint
 //
 //  Pure projection of a service's next due date/mileage, used to preview
-//  reminder scheduling changes before an edit is saved (F9). Mirrors
-//  Service.deriveDueFromIntervals exactly: a positive interval projects a
-//  deadline from the anchor; a nil/zero interval clears it. Explicit values
-//  always win over derived ones.
+//  reminder scheduling changes before an edit is saved (F9). It is also the
+//  save path's calculation — `Service.deriveDueFromIntervals` calls it — so a
+//  preview built on it cannot disagree with what gets scheduled (F4): a
+//  positive interval projects a deadline from the anchor; a nil/zero interval
+//  clears it. Explicit values always win over derived ones.
 //
 
 import Foundation

@@ -64,6 +64,27 @@ struct AddServiceView: View {
         return serviceLogs.mostRecent(serviceName: model.serviceName, vehicle: vehicle) ?? lastLogForVehicle
     }
 
+    /// The tracked service this log completes instead of duplicating. Nil on
+    /// the scheduling branch and for entries that stand on their own.
+    var logTarget: Service? {
+        guard model.isLogging else { return nil }
+        return services.activeMatch(
+            named: model.serviceName,
+            for: vehicle,
+            performedDate: model.performedDate,
+            logs: serviceLogs
+        )
+    }
+
+    /// What reseeds the recurrence policy. One key, one handler: separate
+    /// `onChange`s for the preset, the match, and backfill raced each other
+    /// over the same three fields.
+    private struct ScheduleDefaultsKey: Equatable {
+        let presetName: String?
+        let matchID: UUID?
+        let isBackfill: Bool
+    }
+
     var quickChips: [PresetData] {
         serviceLogs.topPresetChips(for: vehicle, from: model.presets, limit: 4)
     }
@@ -105,6 +126,7 @@ struct AddServiceView: View {
     }
 
     var body: some View {
+        let target = logTarget
         NavigationStack {
             ScrollViewReader { proxy in
                 ZStack {
@@ -131,11 +153,12 @@ struct AddServiceView: View {
                                 .id("top")
                             }
 
-                            serviceSection
+                            serviceSection(completing: target)
                             whenSection
 
                             if model.isLogging {
                                 ServiceVisitFields(model: model, anchors: anchors)
+                                LoggedReminderFields(model: model)
                             }
 
                             if model.isScheduling {
@@ -215,15 +238,14 @@ struct AddServiceView: View {
                         successFlash: $saveAndAddAnotherFlash
                     )
                 }
-                .onChange(of: model.selectedPreset) { _, newPreset in
-                    applyPresetDefaults(newPreset)
+                .onChange(of: ScheduleDefaultsKey(
+                    presetName: model.selectedPreset?.name,
+                    matchID: target?.id,
+                    isBackfill: model.timing?.isBackfill == true
+                )) { _, _ in
+                    model.applyScheduleDefaults(preset: model.selectedPreset, match: target)
                 }
                 .onChange(of: model.timing) { _, _ in
-                    // A backfilled entry must not inherit a preset's recurrence
-                    // and quietly spawn reminders for a service done years ago.
-                    if model.timing?.isBackfill == true {
-                        model.isRecurring = false
-                    }
                     model.mileageResolution = nil
                 }
                 .onChange(of: model.mileageAtService) { _, _ in
@@ -263,7 +285,7 @@ struct AddServiceView: View {
 
     /// The section header IS this field's label, so the picker carries none.
     /// Labelling both "SERVICE" stacked two identical labels on one input.
-    private var serviceSection: some View {
+    private func serviceSection(completing target: Service?) -> some View {
         FormSection(title: L10n.formServiceType, trailing: L10n.formRequiredTag) {
             ServiceTypePicker(
                 selectedPreset: $model.selectedPreset,
@@ -291,11 +313,26 @@ struct AddServiceView: View {
                 }
             }
 
+            // Stated, not asked: logging a service that is already on the
+            // schedule completes it, exactly as Mark Done would.
+            if let target {
+                FormAdvisory.info(Self.completesAdvisory(for: target, vehicle: vehicle))
+            }
+
             if showBlockingReason, let reason = model.blockingReason {
                 FormAdvisory.blocking(reason)
             }
         }
         .id("serviceType")
+    }
+
+    /// "Completes Oil Change — 400 mi overdue". Urgency is judged against the
+    /// same effective mileage the Services list uses, so the two agree.
+    static func completesAdvisory(for service: Service, vehicle: Vehicle) -> String {
+        guard let urgency = service.urgencyText(currentMileage: vehicle.mileageEstimate.effective) else {
+            return L10n.formCompletesService(service.name)
+        }
+        return L10n.formCompletesServiceWithStatus(service.name, urgency)
     }
 
     // MARK: - 2. When — the control that derives intent
@@ -332,22 +369,6 @@ struct AddServiceView: View {
     private func select(_ timing: ServiceTiming) {
         model.timing = timing
         HapticService.shared.selectionChanged()
-    }
-
-    /// A preset carries a default cadence. Adopting it is right for anything
-    /// current, and wrong for a backfill — combined, they generated dozens of
-    /// bogus future reminders from a history import.
-    private func applyPresetDefaults(_ preset: PresetData?) {
-        guard let preset else { return }
-        if let months = preset.defaultIntervalMonths { model.intervalMonths = months }
-        if let miles = preset.defaultIntervalMiles { model.intervalMiles = miles }
-        guard model.timing?.isBackfill != true else { return }
-        if Service.hasIntervalPolicy(
-            intervalMonths: preset.defaultIntervalMonths,
-            intervalMiles: preset.defaultIntervalMiles
-        ) {
-            model.isRecurring = true
-        }
     }
 }
 

@@ -72,4 +72,86 @@ struct ServiceCompletionService {
 
         return next
     }
+
+    // MARK: - Logged completion
+
+    /// What the user entered about a performed service.
+    struct Entry {
+        let performedDate: Date
+        let mileage: Int
+        let cost: Decimal?
+        let costCategory: CostCategory?
+        let notes: String?
+        let attachments: [AttachmentPicker.AttachmentData]
+    }
+
+    struct Completion {
+        let log: ServiceLog
+        let attachments: [ServiceAttachment]
+        /// The next occurrence, when the completed service was recurring.
+        let successor: Service?
+    }
+
+    /// Log `entry` against an existing tracked `service` and close it — the
+    /// single "this service was done" path shared by Mark Done and by the add
+    /// form when a logged entry matches a service already on the schedule.
+    /// It was previously only reachable from Mark Done, so logging the same
+    /// service from [+] created a duplicate beside the one still counting down.
+    ///
+    /// Performs only model mutation for the log. The odometer is the
+    /// caller's (`MileageCommit`), because callers differ on whether the
+    /// reading may be adopted.
+    @MainActor
+    @discardableResult
+    static func recordCompletion(
+        of service: Service,
+        vehicle: Vehicle,
+        entry: Entry,
+        in context: ModelContext
+    ) -> Completion {
+        let log = ServiceLog(
+            service: service,
+            vehicle: vehicle,
+            performedDate: entry.performedDate,
+            mileageAtService: entry.mileage,
+            cost: entry.cost,
+            costCategory: entry.cost != nil ? entry.costCategory : nil,
+            notes: entry.notes
+        )
+        context.insert(log)
+
+        let attachments = insertAttachments(entry.attachments, on: log, in: context)
+        let successor = completeService(
+            service,
+            performedDate: entry.performedDate,
+            mileage: entry.mileage,
+            in: context
+        )
+        return Completion(log: log, attachments: attachments, successor: successor)
+    }
+
+    /// Persist picked attachments onto `log`, generating thumbnails.
+    @MainActor
+    @discardableResult
+    static func insertAttachments(
+        _ pending: [AttachmentPicker.AttachmentData],
+        on log: ServiceLog,
+        in context: ModelContext
+    ) -> [ServiceAttachment] {
+        pending.map { data in
+            let attachment = ServiceAttachment(
+                serviceLog: log,
+                data: data.data,
+                thumbnailData: ServiceAttachment.generateThumbnailData(
+                    from: data.data,
+                    mimeType: data.mimeType
+                ),
+                fileName: data.fileName,
+                mimeType: data.mimeType,
+                extractedText: data.extractedText
+            )
+            context.insert(attachment)
+            return attachment
+        }
+    }
 }

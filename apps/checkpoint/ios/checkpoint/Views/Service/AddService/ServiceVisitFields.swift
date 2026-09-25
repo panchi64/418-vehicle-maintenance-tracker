@@ -18,7 +18,12 @@ struct ServiceVisitFields: View {
     let anchors: ServiceFormAnchors
 
     var body: some View {
-        FormSection(title: L10n.formTheVisit, trailing: L10n.formOptionalTag) {
+        // No OPTIONAL tag. The tag is a promise of no side effects, and the
+        // odometer here can advance the vehicle's current mileage — so this
+        // section is not optional in that sense. Nothing in it is required
+        // either (required-ness is marked per field), and the one side effect
+        // is stated as `.info` before save, beside the field that causes it.
+        FormSection(title: L10n.formTheVisit) {
             odometerField
             costField
 
@@ -53,13 +58,12 @@ struct ServiceVisitFields: View {
         // Adoption is STATED, never prompted. The app knows what it will do; a
         // modal question would be the app asking the user to make its decision
         // for it (F11).
-        if model.wouldAdoptMileage, let reading = model.mileageAtService {
-            FormAdvisory.info(
-                L10n.mileageAlsoUpdates(
-                    Formatters.mileage(model.vehicle.currentMileage),
-                    Formatters.mileage(reading)
-                )
-            )
+        if model.wouldAdoptMileage, let summary = MileageCommit.adoptionSummary(
+            reading: model.mileageAtService,
+            observedAt: model.performedDate,
+            for: model.vehicle
+        ) {
+            FormAdvisory.info(summary)
         }
 
         // Reserved for the case the app genuinely cannot resolve: a backfilled

@@ -154,6 +154,67 @@ enum MileageCommit {
     }
 }
 
+// MARK: - Undo
+
+extension MileageCommit {
+    /// Everything needed to take back an adoption: the prior odometer pair and
+    /// the snapshot the commit inserted.
+    ///
+    /// Undo *restores* rather than *records*. Recording the prior number again
+    /// would leave the undone reading's snapshot behind and add a second,
+    /// lower one at a later timestamp — both corrupt the pace estimate. See
+    /// `Vehicle.revertMileage(to:updatedAt:)`.
+    struct Revert {
+        let vehicle: Vehicle
+        let previousMileage: Int
+        let previousUpdatedAt: Date?
+        let adoptedMileage: Int
+        let insertedSnapshots: [MileageSnapshot]
+
+        /// No-op when a newer reading has replaced the adopted one since —
+        /// undoing a service log must not clobber an odometer the user has
+        /// updated in the meantime.
+        func perform(in context: ModelContext) {
+            guard vehicle.currentMileage == adoptedMileage else { return }
+            for snapshot in insertedSnapshots {
+                context.delete(snapshot)
+            }
+            vehicle.revertMileage(to: previousMileage, updatedAt: previousUpdatedAt)
+        }
+    }
+
+    /// `commitIfNewest`, plus a `Revert` that undoes it. Nil when the reading
+    /// was not adopted — there is nothing to take back.
+    @discardableResult
+    static func commitIfNewestRevertibly(
+        reading: Int,
+        observedAt: Date,
+        source: MileageSource,
+        for vehicle: Vehicle,
+        in context: ModelContext
+    ) -> Revert? {
+        let previousUpdatedAt = vehicle.mileageUpdatedAt
+        let priorSnapshotIDs = Set((vehicle.mileageSnapshots ?? []).map(\.id))
+
+        let outcome = commitIfNewest(
+            reading: reading,
+            observedAt: observedAt,
+            source: source,
+            for: vehicle,
+            in: context
+        )
+        guard outcome.didAdopt else { return nil }
+
+        return Revert(
+            vehicle: vehicle,
+            previousMileage: outcome.previousMileage,
+            previousUpdatedAt: previousUpdatedAt,
+            adoptedMileage: reading,
+            insertedSnapshots: (vehicle.mileageSnapshots ?? []).filter { !priorSnapshotIDs.contains($0.id) }
+        )
+    }
+}
+
 // MARK: - Advisory copy
 
 extension MileageCommit.Outcome {
@@ -161,7 +222,22 @@ extension MileageCommit.Outcome {
     /// nothing else changes. Rendered as `FormAdvisory.info`.
     var adoptionSummary: String? {
         guard didAdopt else { return nil }
-        return L10n.mileageAlsoUpdates(
+        return MileageCommit.adoptionSummary(previousMileage: previousMileage, reading: reading)
+    }
+}
+
+extension MileageCommit {
+    /// The pre-save `.info` line for a reading that *would* be adopted, or nil
+    /// when saving leaves the odometer alone. Pure — for view bodies.
+    static func adoptionSummary(reading: Int?, observedAt: Date, for vehicle: Vehicle) -> String? {
+        guard let reading, wouldAdopt(reading: reading, observedAt: observedAt, for: vehicle) else {
+            return nil
+        }
+        return adoptionSummary(previousMileage: vehicle.currentMileage, reading: reading)
+    }
+
+    fileprivate static func adoptionSummary(previousMileage: Int, reading: Int) -> String {
+        L10n.mileageAlsoUpdates(
             Formatters.mileage(previousMileage),
             Formatters.mileage(reading)
         )

@@ -40,4 +40,41 @@ extension Array where Element: Service {
     func forVehicleUpcoming(_ vehicle: Vehicle) -> [Service] {
         forVehicle(vehicle).filter { $0.hasDueTracking }
     }
+
+    /// The tracked service a newly logged entry named `name` completes, or nil
+    /// when the entry should stand on its own.
+    ///
+    /// A log matches when the vehicle has a service of the same name
+    /// (case-insensitive) still on the schedule. Without this, logging an oil
+    /// change from [+] created a second "Oil Change" beside the one counting
+    /// down — which stayed overdue forever, because nothing completed it.
+    ///
+    /// Backfill never matches: an entry older than the newest record of that
+    /// service is history, and completing the live occurrence with it would
+    /// move its schedule backwards. When several occurrences match, the most
+    /// urgent is the one the user is resolving.
+    func activeMatch(
+        named name: String,
+        for vehicle: Vehicle,
+        performedDate: Date,
+        logs: [ServiceLog]
+    ) -> Service? {
+        let needle = name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !needle.isEmpty else { return nil }
+
+        if let newest = logs.mostRecent(serviceName: needle, vehicle: vehicle),
+           newest.performedDate > performedDate {
+            return nil
+        }
+
+        let vehicleID = vehicle.id
+        let candidates = filter { service in
+            service.vehicle?.id == vehicleID
+                && service.hasDueTracking
+                && service.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == needle
+                && (service.lastPerformed ?? .distantPast) <= performedDate
+        }
+        guard !candidates.isEmpty else { return nil }
+        return candidates.sortedByUrgency(vehicle.mileageEstimate).first
+    }
 }

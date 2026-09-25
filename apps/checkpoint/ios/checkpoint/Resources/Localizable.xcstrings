@@ -3539,6 +3539,42 @@
         }
       }
     },
+    "form.completesService" : {
+      "comment" : "Info advisory before saving a log that matches a service already on the schedule. %@ is the service name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Completes %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Completa %@"
+          }
+        }
+      }
+    },
+    "form.completesServiceWithStatus" : {
+      "comment" : "Info advisory before saving a log that matches a service already on the schedule. %1$@ is the service name, %2$@ its urgency (e.g. \"400 mi overdue\").",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Completes %1$@ — %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Completa %1$@ — %2$@"
+          }
+        }
+      }
+    },
     "form.correctItUpward" : {
       "comment" : "Outcome button: adopt the entered reading despite the older date.",
       "extractionState" : "manual",
@@ -4153,6 +4189,60 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Próximo vencimiento: %@"
+          }
+        }
+      }
+    },
+    "form.nextReminderDate" : {
+      "comment" : "Info advisory on the log path: the reminder saving will create. %@ is a date.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next reminder %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo recordatorio el %@"
+          }
+        }
+      }
+    },
+    "form.nextReminderDateOrMileage" : {
+      "comment" : "Info advisory on the log path: the reminder saving will create. %1$@ is a date, %2$@ a distance with its unit.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next reminder %1$@ or at %2$@, whichever comes first"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo recordatorio el %1$@ o a los %2$@, lo que ocurra primero"
+          }
+        }
+      }
+    },
+    "form.nextReminderMileage" : {
+      "comment" : "Info advisory on the log path: the reminder saving will create. %@ is a distance with its unit.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next reminder at %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo recordatorio a los %@"
           }
         }
       }
@@ -5163,6 +5253,24 @@
     },
     "MILEAGE WINDOW" : {
 
+    },
+    "markDone.estimateHint" : {
+      "comment" : "Hint under Mark Done's odometer field. The prefill is the last confirmed reading; %@ is the estimated current mileage, with its unit.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimated now: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimado ahora: %@"
+          }
+        }
+      }
     },
     "mileage.alsoUpdates" : {
       "comment" : "Shown before saving when a service's odometer reading will also become the vehicle's current mileage. %1$@ is the previous reading, %2$@ the new one.",

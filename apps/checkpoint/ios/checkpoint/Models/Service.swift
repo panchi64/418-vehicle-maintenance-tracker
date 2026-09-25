@@ -83,16 +83,19 @@ extension Service {
 /// - For nil/zero intervals: clears the corresponding deadline.
 extension Service {
     func deriveDueFromIntervals(anchorDate: Date, anchorMileage: Int) {
-        if let months = intervalMonths, months > 0 {
-            dueDate = Calendar.current.date(byAdding: .month, value: months, to: anchorDate)
-        } else {
-            dueDate = nil
-        }
-        if let miles = intervalMiles, miles > 0 {
-            dueMileage = anchorMileage + miles
-        } else {
-            dueMileage = nil
-        }
+        // One calculation for saves and previews (F4): the form's
+        // next-reminder preview calls the same `projected`, so the two cannot
+        // disagree. This was a hand-kept mirror of it.
+        let schedule = ReminderImpactCalculator.projected(
+            intervalMonths: intervalMonths,
+            intervalMiles: intervalMiles,
+            anchorDate: anchorDate,
+            anchorMileage: anchorMileage,
+            explicitDueDate: nil,
+            explicitDueMileage: nil
+        )
+        dueDate = schedule.dueDate
+        dueMileage = schedule.dueMileage
     }
 }
 

@@ -8,6 +8,32 @@
 import Foundation
 
 extension Service {
+    /// How urgent this service is, in the unit the user actually tracks:
+    /// "400 mi overdue", "12 days left". Mileage leads when the service has a
+    /// mileage trigger, since that's what the odometer answers; otherwise the
+    /// date does. Nil when the service has no due tracking.
+    ///
+    /// Shared by the list row and the add form's "Completes …" advisory, so
+    /// both describe a service identically. Pass the vehicle's *effective*
+    /// mileage, the value its status is judged by.
+    @MainActor
+    func urgencyText(currentMileage: Int, now: Date = .now) -> String? {
+        if let dueMileage {
+            let miles = dueMileage - currentMileage
+            if miles < 0 { return L10n.rowDistanceOverdue(Formatters.mileage(-miles)) }
+            if miles == 0 { return L10n.rowDueNow }
+            return L10n.rowDistanceLeft(Formatters.mileage(miles))
+        }
+        if let dueDate {
+            let days = Calendar.current.dateComponents([.day], from: now, to: dueDate).day ?? 0
+            if days < 0 { return L10n.rowDaysOverdue(-days) }
+            if days == 0 { return L10n.rowDueToday }
+            if days == 1 { return L10n.rowDueTomorrow }
+            return L10n.rowDaysLeft(days)
+        }
+        return nil
+    }
+
     var dueDescription: String? {
         if let dueDate = dueDate {
             let days = Calendar.current.dateComponents([.day], from: .now, to: dueDate).day ?? 0

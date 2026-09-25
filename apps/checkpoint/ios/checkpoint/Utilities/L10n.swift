@@ -698,6 +698,30 @@ enum L10n {
     static func formOdometerStaysAt(_ current: String) -> String {
         String(format: localized("form.odometerStaysAt"), current)
     }
+
+    // Logging a service already on the schedule completes it.
+    static func formCompletesService(_ name: String) -> String {
+        String(format: localized("form.completesService"), name)
+    }
+    static func formCompletesServiceWithStatus(_ name: String, _ status: String) -> String {
+        String(format: localized("form.completesServiceWithStatus"), name, status)
+    }
+
+    // The reminder a logged service leaves behind (F4).
+    static func formNextReminderDateOrMileage(_ date: String, _ mileage: String) -> String {
+        String(format: localized("form.nextReminderDateOrMileage"), date, mileage)
+    }
+    static func formNextReminderDate(_ date: String) -> String {
+        String(format: localized("form.nextReminderDate"), date)
+    }
+    static func formNextReminderMileage(_ mileage: String) -> String {
+        String(format: localized("form.nextReminderMileage"), mileage)
+    }
+
+    // Mark Done: the estimate is a hint, never the prefilled reading.
+    static func markDoneEstimateHint(_ mileage: String) -> String {
+        String(format: localized("markDone.estimateHint"), mileage)
+    }
     static var formRemindsOnceThenStops: String { localized("form.remindsOnceThenStops") }
     static var formWhicheverFirstFromCompletion: String {
         localized("form.whicheverFirstFromCompletion")
