@@ -88,6 +88,8 @@ Then add the key to `COLOR_KEYS` in [`tools/sketchpad/src/theme/themes.ts`](../.
 
 Monospaced themes use bundled JetBrains Mono via DesignKit; other themes fall back to `.system(textStyle, design:)` with the theme's `fontDesign`. All accessors are `@MainActor` because they read `ThemeManager`.
 
+**Bold Text** (Settings › Accessibility) steps JetBrains Mono to a heavier face (light → medium, everything else → bold); SF themes get it from the system.
+
 **Every token scales with Dynamic Type.** The size below holds at the default text setting and follows the listed text style's curve from there (`Font.custom(_:size:relativeTo:)`). SF themes use the text style directly, so their sizes are Apple's. Never use `.system(size:)` or a fixed `.custom(size:)` for UI text or SF Symbols — map to a token or a text style.
 
 | Font | Size / Weight | Scales as | Role |

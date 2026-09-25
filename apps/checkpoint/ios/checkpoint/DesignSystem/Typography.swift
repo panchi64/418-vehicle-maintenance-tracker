@@ -29,9 +29,22 @@ extension Font {
     ) -> Font {
         let design = ThemeManager.shared.current.fontDesign.toSwiftUI()
         if design == .monospaced {
-            return DesignKitFonts.jetBrainsMono(jetBrains, size: size, relativeTo: textStyle)
+            let face = UIAccessibility.isBoldTextEnabled ? boldTextFace(for: jetBrains) : jetBrains
+            return DesignKitFonts.jetBrainsMono(face, size: size, relativeTo: textStyle)
         }
         return .system(textStyle, design: design, weight: weight)
+    }
+
+    /// Settings › Accessibility › Bold Text. SF picks it up on its own; a
+    /// bundled face doesn't, so JetBrains Mono steps to a heavier file —
+    /// regular text to bold, as Bold Text moves SF regular to semibold.
+    /// Read when a token is built, so a mid-session toggle lands on the next
+    /// render of each view rather than instantly everywhere.
+    private static func boldTextFace(for weight: DesignKitFonts.Weight) -> DesignKitFonts.Weight {
+        switch weight {
+        case .light: .medium
+        case .regular, .medium, .bold: .bold
+        }
     }
 
     /// 56pt Light - Hero data displays
