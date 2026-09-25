@@ -39,12 +39,7 @@ final class AppIconSettings {
     // MARK: - Initialization
 
     private init() {
-        // Check if the key has been explicitly set; default to true
-        if Self.standardDefaults.object(forKey: Self.autoChangeIconKey) != nil {
-            self.autoChangeEnabled = Self.standardDefaults.bool(forKey: Self.autoChangeIconKey)
-        } else {
-            self.autoChangeEnabled = true
-        }
+        self.autoChangeEnabled = Self.standardDefaults.bool(forKey: Self.autoChangeIconKey)
     }
 
     // MARK: - Persistence
@@ -57,13 +52,22 @@ final class AppIconSettings {
     // MARK: - Default Registration
 
     /// Register default values for UserDefaults.
-    /// Call this in app initialization.
+    /// Call this in app initialization, before `shared` is first read.
+    ///
+    /// Off by default: every icon switch makes iOS show a "You have changed the
+    /// icon" alert the user never asked for — at launch, mid-tour, or over the
+    /// test host. Users who installed before this default changed (onboarding
+    /// already complete, preference never touched) keep the behavior they had,
+    /// pinned once so it doesn't flip when a new user finishes onboarding.
     static func registerDefaults() {
-        standardDefaults.register(defaults: [
-            autoChangeIconKey: true
-        ])
-        sharedDefaults?.register(defaults: [
-            autoChangeIconKey: true
-        ])
+        let explicitlySet = standardDefaults.persistentDomain(
+            forName: Bundle.main.bundleIdentifier ?? ""
+        )?[autoChangeIconKey] != nil
+        if !explicitlySet && OnboardingState.hasCompletedOnboarding {
+            standardDefaults.set(true, forKey: autoChangeIconKey)
+            sharedDefaults?.set(true, forKey: autoChangeIconKey)
+        }
+        standardDefaults.register(defaults: [autoChangeIconKey: false])
+        sharedDefaults?.register(defaults: [autoChangeIconKey: false])
     }
 }

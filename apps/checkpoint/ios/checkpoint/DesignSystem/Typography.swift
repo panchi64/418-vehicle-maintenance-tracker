@@ -15,36 +15,43 @@ extension Font {
     // Monospaced themes use bundled JetBrains Mono (shared via DesignKit).
     // Rounded/serif/system themes fall back to SF + the matching design.
 
+    //
+    // Every step scales with Dynamic Type (AESTHETIC.md [REQUIREMENT]): the
+    // brand size holds at the default text setting and follows `textStyle`'s
+    // curve from there. SF themes use the text style itself, so they get
+    // Apple's native sizes and scaling.
+
     @MainActor private static func brutalist(
         size: CGFloat,
         weight: Font.Weight,
-        jetBrains: DesignKitFonts.Weight
+        jetBrains: DesignKitFonts.Weight,
+        relativeTo textStyle: Font.TextStyle
     ) -> Font {
         let design = ThemeManager.shared.current.fontDesign.toSwiftUI()
         if design == .monospaced {
-            return DesignKitFonts.jetBrainsMono(jetBrains, size: size)
+            return DesignKitFonts.jetBrainsMono(jetBrains, size: size, relativeTo: textStyle)
         }
-        return .system(size: size, weight: weight, design: design)
+        return .system(textStyle, design: design, weight: weight)
     }
 
     /// 56pt Light - Hero data displays
     @MainActor static var brutalistHero: Font {
-        brutalist(size: 56, weight: .light, jetBrains: .light)
+        brutalist(size: 56, weight: .light, jetBrains: .light, relativeTo: .largeTitle)
     }
 
     /// 32pt Medium - Primary headings
     @MainActor static var brutalistTitle: Font {
-        brutalist(size: 32, weight: .medium, jetBrains: .medium)
+        brutalist(size: 32, weight: .medium, jetBrains: .medium, relativeTo: .title)
     }
 
     /// 20pt Medium - Section titles, service names
     @MainActor static var brutalistHeading: Font {
-        brutalist(size: 20, weight: .medium, jetBrains: .medium)
+        brutalist(size: 20, weight: .medium, jetBrains: .medium, relativeTo: .title3)
     }
 
     /// 15pt Regular - Body text
     @MainActor static var brutalistBody: Font {
-        brutalist(size: 15, weight: .regular, jetBrains: .regular)
+        brutalist(size: 15, weight: .regular, jetBrains: .regular, relativeTo: .body)
     }
 
     /// 15pt Medium - The *primary* datum in a section or form.
@@ -55,22 +62,22 @@ extension Font {
     /// semantics. Without this step, hierarchy in a readout or a form is not
     /// expressible. See `docs/SURFACE_DOCTRINE.md` (Part 1, "Visual hierarchy").
     @MainActor static var brutalistBodyEmphasis: Font {
-        brutalist(size: 15, weight: .medium, jetBrains: .medium)
+        brutalist(size: 15, weight: .medium, jetBrains: .medium, relativeTo: .body)
     }
 
     /// 13pt Regular - Secondary content
     @MainActor static var brutalistSecondary: Font {
-        brutalist(size: 13, weight: .regular, jetBrains: .regular)
+        brutalist(size: 13, weight: .regular, jetBrains: .regular, relativeTo: .footnote)
     }
 
     /// 11pt Medium - Labels, all caps
     @MainActor static var brutalistLabel: Font {
-        brutalist(size: 11, weight: .medium, jetBrains: .medium)
+        brutalist(size: 11, weight: .medium, jetBrains: .medium, relativeTo: .caption2)
     }
 
     /// 11pt Bold - Emphasized labels
     @MainActor static var brutalistLabelBold: Font {
-        brutalist(size: 11, weight: .bold, jetBrains: .bold)
+        brutalist(size: 11, weight: .bold, jetBrains: .bold, relativeTo: .caption2)
     }
 }
 

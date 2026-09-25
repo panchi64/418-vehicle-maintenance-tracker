@@ -242,13 +242,15 @@ extension View {
 struct PulseAnimationModifier: ViewModifier {
     let isActive: Bool
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var opacity: Double = 1.0
 
     func body(content: Content) -> some View {
         content
             .opacity(isActive ? opacity : 1.0)
             .onAppear {
-                if isActive {
+                // A perpetual blink is motion the user asked not to see.
+                if isActive && !reduceMotion {
                     withAnimation(
                         .easeInOut(duration: Theme.pulseAnimationDuration)
                         .repeatForever(autoreverses: true)
@@ -272,12 +274,14 @@ struct RevealAnimationModifier: ViewModifier {
     let delay: Double
     let animation: Animation
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isVisible = false
 
     func body(content: Content) -> some View {
         content
-            .opacity(isVisible ? 1 : 0)
+            .opacity(isVisible || reduceMotion ? 1 : 0)
             .onAppear {
+                guard !reduceMotion else { return }
                 withAnimation(animation.delay(delay)) {
                     isVisible = true
                 }

@@ -30,6 +30,9 @@ final class AppIconService {
     ///   - services: All services to evaluate
     func updateIcon(for vehicle: Vehicle?, services: [Service]) {
         guard UIApplication.shared.supportsAlternateIcons else { return }
+        // The system's icon-change alert is modal over the unit-test host and
+        // stalls the whole run until someone dismisses it by hand.
+        guard ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else { return }
 
         // When auto-change is disabled, always revert to the default icon
         guard AppIconSettings.shared.autoChangeEnabled else {

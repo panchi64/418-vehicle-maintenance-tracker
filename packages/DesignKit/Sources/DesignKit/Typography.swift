@@ -31,8 +31,14 @@ public extension DesignKitFonts {
 
     /// Dynamic-Type JetBrains Mono. Scales with the user's text size preference.
     static func jetBrainsMono(_ weight: Weight, textStyle: Font.TextStyle) -> Font {
+        jetBrainsMono(weight, size: textStyle.defaultSize, relativeTo: textStyle)
+    }
+
+    /// Dynamic-Type JetBrains Mono at a brand size: `size` at the default text
+    /// setting, scaled by `textStyle`'s curve as the user's preference changes.
+    static func jetBrainsMono(_ weight: Weight, size: CGFloat, relativeTo textStyle: Font.TextStyle) -> Font {
         registerAll()
-        return .custom(weight.postScriptName, size: textStyle.defaultSize, relativeTo: textStyle)
+        return .custom(weight.postScriptName, size: size, relativeTo: textStyle)
     }
 }
 

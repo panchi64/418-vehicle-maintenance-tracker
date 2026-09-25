@@ -32,20 +32,30 @@ final class AppIconSettingsTests: XCTestCase {
 
     // MARK: - Default Value Tests
 
-    func testDefaultValueIsEnabled() {
+    func testDefaultValueIsDisabledForNewInstall() {
+        let hadOnboarded = OnboardingState.hasCompletedOnboarding
+        defer { OnboardingState.hasCompletedOnboarding = hadOnboarded }
+        OnboardingState.hasCompletedOnboarding = false
+
         AppIconSettings.registerDefaults()
 
-        // The registered default should be true
+        // Each switch raises an unrequested system alert, so a new install is off.
         let value = UserDefaults.standard.bool(forKey: autoChangeKey)
-        XCTAssertTrue(value, "Default value should be true (auto-change enabled)")
+        XCTAssertFalse(value, "New installs should default to auto-change disabled")
     }
 
-    func testSharedInstanceDefaultsToEnabled() {
-        // When no value has been explicitly set, shared instance should default to true
-        // Note: shared is a singleton so this tests the initial state
-        // Reset to true for deterministic testing
-        AppIconSettings.shared.autoChangeEnabled = true
-        XCTAssertTrue(AppIconSettings.shared.autoChangeEnabled, "Shared instance should default to enabled")
+    func testExistingUserKeepsAutoChangeEnabled() {
+        let hadOnboarded = OnboardingState.hasCompletedOnboarding
+        defer { OnboardingState.hasCompletedOnboarding = hadOnboarded }
+        OnboardingState.hasCompletedOnboarding = true
+
+        AppIconSettings.registerDefaults()
+
+        // Pinned explicitly, so it survives the registered default being false.
+        let explicit = UserDefaults.standard.persistentDomain(
+            forName: Bundle.main.bundleIdentifier ?? ""
+        )?[autoChangeKey] as? Bool
+        XCTAssertEqual(explicit, true, "An onboarded user who never chose should keep the old default")
     }
 
     // MARK: - Persistence Tests

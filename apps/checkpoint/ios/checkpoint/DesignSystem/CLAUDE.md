@@ -53,18 +53,22 @@ Then add the key to `COLOR_KEYS` in [`tools/sketchpad/src/theme/themes.ts`](../.
 
 ## Typography
 
-Monospaced themes use bundled JetBrains Mono via DesignKit; other themes fall back to `.system` with the theme's `fontDesign`. All accessors are `@MainActor` because they read `ThemeManager`.
+Monospaced themes use bundled JetBrains Mono via DesignKit; other themes fall back to `.system(textStyle, design:)` with the theme's `fontDesign`. All accessors are `@MainActor` because they read `ThemeManager`.
 
-| Font | Size / Weight | Role |
-|---|---|---|
-| `brutalistHero` | 56 Light | Hero data displays |
-| `brutalistTitle` | 32 Medium | Primary headings (uppercased by its style modifier) |
-| `brutalistHeading` | 20 Medium | Section titles, service names |
-| `brutalistBodyEmphasis` | 15 Medium | **The one primary datum** of a section or form |
-| `brutalistBody` | 15 Regular | Ordinary values, body text |
-| `brutalistSecondary` | 13 Regular | Supporting text |
-| `brutalistLabel` | 11 Medium | Labels, uppercased + tracked |
-| `brutalistLabelBold` | 11 Bold | Emphasized labels |
+**Every token scales with Dynamic Type.** The size below holds at the default text setting and follows the listed text style's curve from there (`Font.custom(_:size:relativeTo:)`). SF themes use the text style directly, so their sizes are Apple's. Never use `.system(size:)` or a fixed `.custom(size:)` for UI text or SF Symbols — map to a token or a text style.
+
+| Font | Size / Weight | Scales as | Role |
+|---|---|---|---|
+| `brutalistHero` | 56 Light | `.largeTitle` | Hero data displays |
+| `brutalistTitle` | 32 Medium | `.title` | Primary headings (uppercased by its style modifier) |
+| `brutalistHeading` | 20 Medium | `.title3` | Section titles, service names |
+| `brutalistBodyEmphasis` | 15 Medium | `.body` | **The one primary datum** of a section or form |
+| `brutalistBody` | 15 Regular | `.body` | Ordinary values, body text |
+| `brutalistSecondary` | 13 Regular | `.footnote` | Supporting text |
+| `brutalistLabel` | 11 Medium | `.caption2` | Labels, uppercased + tracked |
+| `brutalistLabelBold` | 11 Bold | `.caption2` | Emphasized labels |
+
+Horizontal arrangements of text must survive accessibility sizes: switch `HStack` → `VStack` under `dynamicTypeSize.isAccessibilitySize` (`AnyLayout`) or use `ViewThatFits`.
 
 ### The four-step working hierarchy
 
