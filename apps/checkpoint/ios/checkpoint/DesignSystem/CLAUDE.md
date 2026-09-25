@@ -140,7 +140,7 @@ Already adopted by the header odometer, `QuickMileageUpdateCard`, `CostHeadlineC
 - **Formatting stays the caller's job.** It takes a finished string, so `Formatters` and locale rules remain the only place a number's appearance is decided.
 - **`.minimumScaleFactor` is a parameter, not a modifier** — each digit is its own `Text`, so the modifier would scale neighbours independently. Passing it also makes the view width-greedy; it has to know the width to pick a scale.
 - **`.tracking()` does not carry across cells.** Readouts don't track; labels do, and labels don't roll.
-- **Use it only for quantities.** Identifiers that happen to contain digits — a plate, `0W-20`, a VIN — must stay plain `Text`. `VehicleHeader.HeaderCell` gates this behind `rollsDigits:` for exactly that reason.
+- **Use it only for quantities.** Identifiers that happen to contain digits — a plate, `0W-20`, a VIN — must stay plain `Text`. `VehicleSummaryBand`'s `SummaryCell` gates this behind `rollsDigits:` for exactly that reason.
 - **Pass `resetToken:` wherever one readout is reused across subjects.** Rolling asserts *this number moved*. The header and both tabs are reused across vehicles, so without a token, selecting a different car spins the odometer 120,000 → 8,000 as though it had un-driven 112,000 miles. When the token changes the next value is set, not rolled; a same-subject change still rolls. Every adopter passes one (`vehicle.id`, `service.id`, or a `subjectID:` parameter threaded from `CostsTab`).
 - Reduce Motion falls back to `.contentTransition(.numericText())`, as does any value with no ASCII digits in it; the first appearance sets rather than rolls.
 

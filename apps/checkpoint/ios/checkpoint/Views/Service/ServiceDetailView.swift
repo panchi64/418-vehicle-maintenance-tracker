@@ -91,7 +91,15 @@ struct ServiceDetailView: View {
                 .accessibilityLabel("Edit service")
             }
         }
-        .sheet(isPresented: $showEditSheet, onDismiss: { updateAppIcon(); updateWidgetData() }) {
+        .sheet(isPresented: $showEditSheet, onDismiss: {
+            updateAppIcon()
+            updateWidgetData()
+            // Deleted from the edit form: this pushed screen has nothing left
+            // to show, so pop it rather than render a deleted model.
+            if service.modelContext == nil || service.isDeleted {
+                dismiss()
+            }
+        }) {
             EditServiceView(service: service, vehicle: vehicle)
         }
         .sheet(isPresented: $showMarkDoneSheet, onDismiss: {

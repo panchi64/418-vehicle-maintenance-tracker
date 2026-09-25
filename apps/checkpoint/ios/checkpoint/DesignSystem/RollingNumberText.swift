@@ -69,8 +69,8 @@ struct RollingNumberText: View {
     ///     changes, the next value is set rather than rolled.
     ///
     ///     Pass this wherever one readout is reused across subjects. The
-    ///     header's odometer is the case that forced it: `VehicleHeader` is
-    ///     persistent chrome, so picking a different vehicle changes the text,
+    ///     odometer is the case that forced it: `VehicleSummaryBand` stays on
+    ///     screen across a vehicle switch, so picking a different vehicle changes the text,
     ///     and without a token the wheels spin 120,000 → 8,000 as though a car
     ///     had un-driven 112,000 miles. Rolling means "this number moved"; a
     ///     different subject's number did not move.

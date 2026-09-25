@@ -4,7 +4,7 @@ All SwiftUI views, organized by feature area.
 
 **Before designing or changing any screen, read [`docs/SURFACE_DOCTRINE.md`](../../../../../docs/SURFACE_DOCTRINE.md).** It defines the three surface classes (Readout / Switchboard / Decision), the hierarchy and disclosure rules, the advisory severity ladder, the required/optional vocabulary, and the `F*` invariants that this directory's components cite in their comments. Available tokens and modifiers are catalogued in [`DesignSystem/CLAUDE.md`](../DesignSystem/CLAUDE.md).
 
-**Non-trivial layout changes start in [`tools/sketchpad/`](../../../../../tools/sketchpad/CLAUDE.md), not here.** It mirrors these views in SolidJS against the real themes and fonts, so an arrangement can be tried in a second instead of a 40-second rebuild — and it audits the one-primary rule mechanically. Port the settled design into this directory, then verify on the Simulator. The sketchpad's resolved screens — the unified service form, the single-`[+]` tab bar, the collapsed Services and Costs chrome, the banded vehicle header, the single-scroll Add Vehicle — **now all ship here**. Where the two disagree, that is drift: fix whichever is wrong rather than assuming the sketchpad leads.
+**Non-trivial layout changes start in [`tools/sketchpad/`](../../../../../tools/sketchpad/CLAUDE.md), not here.** It mirrors these views in SolidJS against the real themes and fonts, so an arrangement can be tried in a second instead of a 40-second rebuild — and it audits the one-primary rule mechanically. Port the settled design into this directory, then verify on the Simulator. The sketchpad's resolved screens — the unified service form, the collapsed Services and Costs chrome, the single-scroll Add Vehicle — **now all ship here**. Its custom tab bar and banded vehicle header do not: the shell is now the system's (see Navigation patterns), and only the header's odometer/specs band survives, as Home content. Where the two disagree on content, that is drift: fix whichever is wrong rather than assuming the sketchpad leads.
 
 Every `#Preview` in this directory hot-reloads in roughly a second in Xcode. Reach for that before a full rebuild — a full `xcodebuild` cycle is only needed to verify an integrated screen end to end.
 
@@ -30,9 +30,14 @@ For component inventories, see [`docs/ARCHITECTURE.md`](../../../../../docs/ARCH
 
 ## Navigation patterns
 
-- **Sheets** for create/edit operations (modal, cancelable)
-- **Push navigation** for detail views (back navigation)
-- Vehicle selector persists at the top of all tabs via `AppState`
+**System shell, brand content.** Tab bar, navigation bars, toolbar, search and sheets are native (Liquid Glass) — never add `.toolbarBackground(...)` or `.presentationBackground(...)`; put the theme background behind *content* (`AtmosphericBackground`, `.background(Theme.backgroundPrimary)`). Brand lives in the content: fonts, themes, sharp corners, readouts.
+
+- **Details push, tasks present.** Anything read and backed out of is an `AppRoute` pushed with `appState.push(_:)` onto the visible tab's stack (`AppState.paths`). Anything filled in and saved/cancelled is a sheet. Pushed screens get a navigation title and put Edit in the toolbar — no close buttons.
+- **Root sheets go through the router.** Present with `appState.present(.someCase)` (`ActiveSheet`), never a new root `.sheet(isPresented:)`. It queues a sheet requested while another is up until that one has dismissed, so chaining sheets needs no delays or `onDismiss` flags. A sheet *inside* a sheet (Settings → paywall, a form's attachment viewer) stays local to that sheet.
+- **Tab roots share `TabRootStack`**: vehicle name as the title with a `.toolbarTitleMenu` switcher, Settings leading, add service as the single prominent trailing action. Don't add per-tab headers above content.
+- **Switch vehicles with `appState.selectVehicle(_:)`**, which pops every stack (their details belong to the old vehicle).
+- **Toasts show above sheets** (`ToastWindow`), so an Undo toast from inside a sheet is visible.
+- **Tour spotlights target content**, via `.tourTarget(_:)`. System chrome (title menu, toolbar items, search field, tab bar) exposes no frame to spotlight.
 
 ## State patterns
 
