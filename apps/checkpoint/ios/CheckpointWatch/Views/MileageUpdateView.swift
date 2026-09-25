@@ -13,11 +13,12 @@ struct MileageUpdateView: View {
     @Environment(WatchConnectivityService.self) private var connectivity
     @Environment(\.dismiss) private var dismiss
 
+    /// Dial value in the user's distance unit; converted to miles on save
     @State private var mileage: Double = 0
     @State private var isSaving = false
     @State private var showSaved = false
 
-    private var distanceUnit: WatchDistanceUnit {
+    private var distanceUnit: DistanceUnit {
         dataStore.vehicleData?.resolvedDistanceUnit ?? .miles
     }
 
@@ -34,7 +35,7 @@ struct MileageUpdateView: View {
                     // The screen's one job: the dial takes the Crown on arrival.
                     MileageDial(
                         mileage: $mileage,
-                        unit: distanceUnit.abbreviation,
+                        unit: distanceUnit.uppercaseAbbreviation,
                         tint: WatchColors.accent,
                         autofocus: true
                     )
@@ -62,7 +63,7 @@ struct MileageUpdateView: View {
         }
         .navigationTitle(Text("Mileage"))
         .onAppear {
-            mileage = Double(dataStore.vehicleData?.currentMileage ?? 0)
+            mileage = Double(distanceUnit.fromMiles(dataStore.vehicleData?.currentMileage ?? 0))
         }
     }
 
@@ -74,7 +75,7 @@ struct MileageUpdateView: View {
 
         connectivity.sendMileageUpdate(
             vehicleID: vehicleID,
-            newMileage: Int(mileage)
+            newMileage: distanceUnit.toMiles(Int(mileage))
         )
 
         // The confirmation plays the haptic and announces itself.

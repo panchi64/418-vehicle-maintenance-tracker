@@ -85,7 +85,7 @@ struct ServicesListView: View {
                 HStack(spacing: WatchSpacing.sm) {
                     let displayMileage = vehicle.estimatedMileage ?? vehicle.currentMileage
                     let unit = vehicle.resolvedDistanceUnit
-                    Text(verbatim: "\(unit.fromMiles(displayMileage).formatted()) \(unit.abbreviation)")
+                    Text(verbatim: "\(unit.fromMiles(displayMileage).formatted()) \(unit.uppercaseAbbreviation)")
                         .font(.watchBody)
                         .foregroundStyle(WatchColors.textPrimary)
 

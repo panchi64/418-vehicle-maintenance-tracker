@@ -3,6 +3,8 @@
 //  checkpoint
 //
 //  Distance unit enum with conversion logic for miles/kilometers support
+//  Also compiled into the Watch app — keep it free of iOS-only dependencies
+//  (localized names live in DistanceUnit+Localized.swift)
 //
 
 import Foundation
@@ -29,22 +31,6 @@ enum DistanceUnit: String, CaseIterable, Codable {
     /// Uppercase abbreviation: "MI" or "KM"
     var uppercaseAbbreviation: String {
         abbreviation.uppercased()
-    }
-
-    /// Localized lowercase name for running text: "miles" / "millas"
-    var fullName: String {
-        switch self {
-        case .miles: return L10n.unitMilesLower
-        case .kilometers: return L10n.unitKilometersLower
-        }
-    }
-
-    /// Localized name for pickers and settings rows: "Miles" / "Millas"
-    var displayName: String {
-        switch self {
-        case .miles: return L10n.unitMiles
-        case .kilometers: return L10n.unitKilometers
-        }
     }
 
     // MARK: - Conversion Methods

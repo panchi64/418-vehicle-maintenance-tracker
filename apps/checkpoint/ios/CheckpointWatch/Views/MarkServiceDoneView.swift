@@ -15,11 +15,12 @@ struct MarkServiceDoneView: View {
 
     let service: WatchService
 
+    /// Dial value in the user's distance unit; converted to miles on confirm
     @State private var mileage: Double = 0
     @State private var isConfirming = false
     @State private var showSuccess = false
 
-    private var distanceUnit: WatchDistanceUnit {
+    private var distanceUnit: DistanceUnit {
         dataStore.vehicleData?.resolvedDistanceUnit ?? .miles
     }
 
@@ -45,7 +46,7 @@ struct MarkServiceDoneView: View {
                             .foregroundStyle(WatchColors.textSecondary)
                         MileageDial(
                             mileage: $mileage,
-                            unit: distanceUnit.abbreviation,
+                            unit: distanceUnit.uppercaseAbbreviation,
                             tint: WatchColors.textPrimary
                         )
                     }
@@ -86,7 +87,7 @@ struct MarkServiceDoneView: View {
         }
         .navigationTitle(Text("Complete"))
         .onAppear {
-            mileage = Double(dataStore.vehicleData?.currentMileage ?? 0)
+            mileage = Double(distanceUnit.fromMiles(dataStore.vehicleData?.currentMileage ?? 0))
         }
     }
 
@@ -117,7 +118,7 @@ struct MarkServiceDoneView: View {
             vehicleID: vehicleID,
             serviceID: service.serviceID,
             serviceName: service.name,
-            mileageAtService: Int(mileage)
+            mileageAtService: distanceUnit.toMiles(Int(mileage))
         )
 
         // The confirmation plays the haptic and announces itself.

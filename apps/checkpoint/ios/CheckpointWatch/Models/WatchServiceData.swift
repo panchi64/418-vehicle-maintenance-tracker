@@ -10,7 +10,7 @@ import Foundation
 
 // MARK: - Vehicle Data (iPhone → Watch)
 
-struct WatchVehicleData: Codable, Sendable {
+nonisolated struct WatchVehicleData: Codable, Sendable {
     let vehicleID: String
     let vehicleName: String
     let currentMileage: Int
@@ -26,8 +26,8 @@ struct WatchVehicleData: Codable, Sendable {
     }
 
     /// Resolved distance unit with fallback for cached data without this field
-    var resolvedDistanceUnit: WatchDistanceUnit {
-        WatchDistanceUnit(rawValue: distanceUnit) ?? .miles
+    var resolvedDistanceUnit: DistanceUnit {
+        DistanceUnit(rawValue: distanceUnit) ?? .miles
     }
 
     init(vehicleID: String, vehicleName: String, currentMileage: Int, estimatedMileage: Int?, isEstimated: Bool, services: [WatchService], updatedAt: Date, distanceUnit: String = "miles") {
@@ -59,33 +59,9 @@ struct WatchVehicleData: Codable, Sendable {
     }
 }
 
-// MARK: - Watch Distance Unit
-
-enum WatchDistanceUnit: String, Codable, Sendable {
-    case miles
-    case kilometers
-
-    static let kmPerMile = 1.60934
-
-    var abbreviation: String {
-        switch self {
-        case .miles: return "MI"
-        case .kilometers: return "KM"
-        }
-    }
-
-    /// Convert stored miles to display value
-    func fromMiles(_ miles: Int) -> Int {
-        switch self {
-        case .miles: return miles
-        case .kilometers: return Int(round(Double(miles) * Self.kmPerMile))
-        }
-    }
-}
-
 // MARK: - Service Data
 
-struct WatchService: Codable, Identifiable, Sendable {
+nonisolated struct WatchService: Codable, Identifiable, Sendable {
     /// Uses serviceID (iPhone-side UUID) when available, falls back to composite ID
     var id: String { serviceID ?? "\(vehicleID)_\(name)" }
 
@@ -100,14 +76,14 @@ struct WatchService: Codable, Identifiable, Sendable {
 
 // MARK: - Service Status
 
-enum WatchServiceStatus: String, Codable, Sendable {
+nonisolated enum WatchServiceStatus: String, Codable, Sendable {
     case overdue, dueSoon, good, neutral
 }
 
 // MARK: - Watch → iPhone Messages
 
 /// Message sent from Watch to iPhone to update mileage
-struct WatchMileageUpdate: Codable, Sendable {
+nonisolated struct WatchMileageUpdate: Codable, Sendable {
     let vehicleID: String
     let newMileage: Int
     let timestamp: Date
@@ -116,7 +92,7 @@ struct WatchMileageUpdate: Codable, Sendable {
 }
 
 /// Message sent from Watch to iPhone to mark a service as done
-struct WatchMarkServiceDone: Codable, Sendable {
+nonisolated struct WatchMarkServiceDone: Codable, Sendable {
     /// Per-tap identifier so the phone can discard a message that arrives twice
     /// (a `sendMessage` whose reply timed out but was delivered, then retried via
     /// `transferUserInfo`). One tap → one id → one `ServiceLog`.
@@ -158,7 +134,7 @@ struct WatchMarkServiceDone: Codable, Sendable {
 // MARK: - iPhone → Watch Context
 
 /// Application context sent from iPhone to Watch
-struct WatchApplicationContext: Codable, Sendable {
+nonisolated struct WatchApplicationContext: Codable, Sendable {
     let vehicleData: WatchVehicleData?
     let lastUpdated: Date
 
