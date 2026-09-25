@@ -8,7 +8,7 @@ import DesignKit
 
 // MARK: - Theme Font Design
 
-enum ThemeFontDesign: String, Codable {
+nonisolated enum ThemeFontDesign: String, Codable {
     case monospaced
     case rounded
     case serif
@@ -26,7 +26,7 @@ enum ThemeFontDesign: String, Codable {
 
 // MARK: - Theme Tier
 
-enum ThemeTier: String, Codable {
+nonisolated enum ThemeTier: String, Codable {
     case free
     case pro
     case rare
@@ -36,7 +36,7 @@ enum ThemeTier: String, Codable {
 
 /// The sixteen color tokens every theme defines, once per appearance. The raw
 /// values are the JSON keys in `Themes.json`.
-enum ThemeToken: String, CaseIterable, Sendable {
+nonisolated enum ThemeToken: String, CaseIterable, Sendable {
     case backgroundPrimary
     case backgroundElevated
     case backgroundSubtle
@@ -63,7 +63,7 @@ enum ThemeToken: String, CaseIterable, Sendable {
 /// `lightHighContrast` / `darkHighContrast` are **overrides** layered on their
 /// base appearance, so they only list what Increase Contrast changes. Decoding
 /// merges them, so every appearance here is complete.
-struct ThemeAppearances: Decodable, Equatable {
+nonisolated struct ThemeAppearances: Decodable, Equatable {
     private let sets: [ThemeAppearance: [ThemeToken: String]]
 
     func hex(_ token: ThemeToken, in appearance: ThemeAppearance) -> String {
@@ -125,7 +125,7 @@ struct ThemeAppearances: Decodable, Equatable {
 
 // MARK: - Theme Definition
 
-struct ThemeDefinition: Identifiable, Decodable, Equatable {
+nonisolated struct ThemeDefinition: Identifiable, Decodable, Equatable {
     let id: String
     let displayName: String
     let description: String

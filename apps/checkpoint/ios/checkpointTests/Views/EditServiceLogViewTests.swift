@@ -452,7 +452,7 @@ final class EditServiceLogViewTests: XCTestCase {
 
         XCTAssertEqual(model.blocker?.field, .odometer)
         XCTAssertEqual(model.blockingReason, L10n.editLogMileageRequired)
-        XCTAssertNil(model.originalMileage, "A cleared field is a blocked save, not a change")
+        XCTAssertEqual(model.originalMileage, .none, "A cleared field is a blocked save, not a change")
     }
 
     func testEditDoor_EquivalentCostIsNotAChange() {

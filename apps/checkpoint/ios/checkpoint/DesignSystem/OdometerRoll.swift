@@ -14,7 +14,7 @@
 
 import Foundation
 
-enum OdometerRoll {
+nonisolated enum OdometerRoll {
 
     // MARK: - Cells
 

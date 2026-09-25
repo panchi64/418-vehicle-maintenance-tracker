@@ -116,7 +116,7 @@ enum TipTier {
     }
 
     static func label(for product: Product) -> String {
-        StoreManager.ProductID(rawValue: product.id).flatMap(label(for:))
+        StoreManager.ProductID(rawValue: product.id).flatMap { label(for: $0) }
             ?? product.displayName
     }
 

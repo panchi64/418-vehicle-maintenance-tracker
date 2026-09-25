@@ -109,7 +109,7 @@ final class EditVehicleViewTests: XCTestCase {
         modelContext.insert(vehicle)
 
         // When
-        let view = EditVehicleView(vehicle: vehicle)
+        _ = EditVehicleView(vehicle: vehicle)
 
         // Then
         // Form should be valid when make, model, and year are present

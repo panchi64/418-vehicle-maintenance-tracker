@@ -38,7 +38,7 @@ enum NHTSAError: LocalizedError {
 
 // MARK: - Response Models
 
-struct VINDecodeResult: Sendable {
+nonisolated struct VINDecodeResult: Sendable {
     let make: String
     let model: String
     let modelYear: Int?
@@ -49,7 +49,7 @@ struct VINDecodeResult: Sendable {
     let errorCode: String
 }
 
-struct RecallInfo: Identifiable, Codable, Sendable {
+nonisolated struct RecallInfo: Identifiable, Codable, Sendable {
     let campaignNumber: String
     let component: String
     let summary: String

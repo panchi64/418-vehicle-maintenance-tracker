@@ -223,7 +223,7 @@ extension NextUpCard {
             title: marbete.itemName,
             status: marbete.itemStatus,
             readout: .marbete(daysUntilExpiration: marbete.daysRemaining),
-            dueLine: expires.map(L10n.homeExpires) ?? "",
+            dueLine: expires.map { L10n.homeExpires($0) } ?? "",
             actionLabel: L10n.homeMarkRenewed,
             onOpen: onOpen,
             onAction: onMarkRenewed

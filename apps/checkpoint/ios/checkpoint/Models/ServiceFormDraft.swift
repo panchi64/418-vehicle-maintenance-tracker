@@ -19,7 +19,7 @@
 
 import Foundation
 
-struct ServiceFormDraft: Codable, Equatable {
+nonisolated struct ServiceFormDraft: Codable, Equatable {
     /// Bump whenever a field's meaning changes in a way that would silently
     /// misread an older payload.
     static let currentVersion = 3

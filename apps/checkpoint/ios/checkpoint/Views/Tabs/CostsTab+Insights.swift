@@ -44,7 +44,7 @@ extension CostsMetrics {
     /// The amount inside `averageLine`, so the view can set it in a heavier
     /// face without concatenating a sentence.
     var formattedMonthlyAverage: String? {
-        monthlyAverage.map(Formatters.currencyWhole)
+        monthlyAverage.map { Formatters.currencyWhole($0) }
     }
 
     // MARK: - Cost per distance

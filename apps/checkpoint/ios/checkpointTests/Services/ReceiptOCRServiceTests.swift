@@ -14,7 +14,7 @@ final class ReceiptOCRServiceTests: XCTestCase {
     // MARK: - Singleton Tests
 
     func testSharedInstanceExists() async {
-        let service = await ReceiptOCRService.shared
+        let service = ReceiptOCRService.shared
         XCTAssertNotNil(service, "Shared instance should exist")
     }
 
@@ -92,7 +92,7 @@ final class ReceiptOCRServiceTests: XCTestCase {
     // MARK: - OCR Recognition Tests
 
     func testExtractTextThrowsForBlankImage() async {
-        let service = await ReceiptOCRService.shared
+        let service = ReceiptOCRService.shared
 
         // Create a tiny blank image that won't have recognizable text
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: 1, height: 1))
@@ -110,7 +110,7 @@ final class ReceiptOCRServiceTests: XCTestCase {
     }
 
     func testExtractTextWithValidReceiptImage() async {
-        let service = await ReceiptOCRService.shared
+        let service = ReceiptOCRService.shared
         let testImage = createTestReceiptImage()
 
         do {
@@ -126,7 +126,7 @@ final class ReceiptOCRServiceTests: XCTestCase {
     }
 
     func testExtractTextPreservesReadingOrder() async {
-        let service = await ReceiptOCRService.shared
+        let service = ReceiptOCRService.shared
         let testImage = createTestReceiptImageWithOrderedText()
 
         do {
@@ -143,7 +143,7 @@ final class ReceiptOCRServiceTests: XCTestCase {
     // MARK: - Confidence Validation Tests
 
     func testConfidenceIsNormalized() async {
-        let service = await ReceiptOCRService.shared
+        let service = ReceiptOCRService.shared
         let testImage = createTestReceiptImage()
 
         do {

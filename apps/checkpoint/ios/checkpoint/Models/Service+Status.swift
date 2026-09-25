@@ -7,12 +7,14 @@
 
 import SwiftUI
 
-enum ServiceStatus {
+nonisolated enum ServiceStatus {
     case overdue
     case dueSoon
     case good
     case neutral
 
+    /// Resolves through the active theme, which lives on the main actor.
+    @MainActor
     var color: Color {
         switch self {
         case .overdue: return Theme.statusOverdue
