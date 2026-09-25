@@ -2,59 +2,36 @@
 //  ServicesTabState.swift
 //  checkpoint
 //
-//  Services tab filter, search, and view mode state
+//  Services tab search and selection state.
+//
+//  There is no view mode and no status filter any more. The tab is one list —
+//  status groups, then history by month — so grouping by status gives for free
+//  what the filter re-derived, and the timeline mode only re-drew the history
+//  the list now carries.
 //
 
 import Foundation
 
 struct ServicesTabState {
     var searchText = ""
-    var statusFilter: StatusFilter = .all
-    var viewMode: ViewMode = .list
 
-    /// Raw values are **storage** — they persist in analytics events and must
-    /// stay stable. `displayName` is what reaches the screen (rule 10).
-    enum StatusFilter: String, CaseIterable {
-        case all = "All"
-        case overdue = "Overdue"
-        case dueSoon = "Due Soon"
-        case good = "Good"
+    /// Edit mode, entered from the toolbar's Select. Lives here rather than in
+    /// the tab so the shared toolbar (`TabRootStack`) can toggle it.
+    var isSelecting = false
+    var selection: Set<ServicesSelectionID> = []
 
-        /// Reuses `ServiceStatus.label` for the three status cases so a filter
-        /// chip and the row it filters can never disagree on wording.
-        var displayName: String {
-            switch self {
-            case .all: return L10n.filterAll
-            case .overdue: return ServiceStatus.overdue.label
-            case .dueSoon: return ServiceStatus.dueSoon.label
-            case .good: return ServiceStatus.good.label
-            }
-        }
+    /// Whether the list has anything to select. Select is hidden otherwise.
+    var hasSelectableContent = false
 
-        /// The status this filter selects, or nil for `all`.
-        var serviceStatus: ServiceStatus? {
-            switch self {
-            case .all: return nil
-            case .overdue: return .overdue
-            case .dueSoon: return .dueSoon
-            case .good: return .good
-            }
-        }
+    mutating func setSelecting(_ selecting: Bool) {
+        isSelecting = selecting
+        selection = []
     }
+}
 
-    /// `documents` is deliberately absent. It was a third view mode that then
-    /// offered "OPEN LIBRARY" to leave for the real documents screen — a content
-    /// type masquerading as a view of services. The library is now a destination
-    /// reachable from the bottom of the tab, which is what it always was.
-    enum ViewMode: String, CaseIterable {
-        case list = "List"
-        case timeline = "Timeline"
-
-        var displayName: String {
-            switch self {
-            case .list: return L10n.servicesViewList
-            case .timeline: return L10n.servicesViewTimeline
-            }
-        }
-    }
+/// A row the user can select in edit mode. The list mixes schedules and
+/// history, so a selection has to say which it is.
+enum ServicesSelectionID: Hashable {
+    case service(UUID)
+    case log(UUID)
 }

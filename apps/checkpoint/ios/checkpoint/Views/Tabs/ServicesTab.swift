@@ -2,7 +2,25 @@
 //  ServicesTab.swift
 //  checkpoint
 //
-//  Services tab showing full timeline, search, and history
+//  Services — Readout. "What's due, and what have I done?"
+//
+//  ONE LIST, NO MODE SWITCH. The tab used to keep a List/Timeline segmented
+//  control plus a status filter — a row of chrome that hid half the tab behind
+//  a mode, and a filter that re-derived what grouping by status gives for
+//  free. Now it opens on what matters first and continues into history:
+//
+//    Overdue            1      status groups, most urgent first; the header
+//    Due Soon           2      IS the status word, so rows show only the shape
+//    On Track           2
+//    July 2026                 history, by month
+//    June 2026
+//    Reference                 Document library › (a destination, not a mode)
+//
+//  An empty status group is omitted; the order of those that remain is fixed.
+//  Search (`.searchable`) narrows the whole list. Row actions are swipes with
+//  the same actions in the context menu (ServicesTab+Rows.swift). Select in
+//  the toolbar enters edit mode, whose bottom bar carries the bulk actions
+//  (ServicesTab+Selection.swift).
 //
 
 import SwiftUI
@@ -10,26 +28,24 @@ import SwiftData
 
 struct ServicesTab: View {
     @Environment(AppState.self) var appState
+    @Environment(\.modelContext) var modelContext
     let onboardingState: OnboardingState
     @Query private var services: [Service]
-    @Query private var serviceLogs: [ServiceLog]
+    @Query var serviceLogs: [ServiceLog]
 
-    @State private var showExportOptions = false
-    @State private var exportPDFURL: URL? = nil
-    @State private var isExporting = false
-
-    // Type aliases for cleaner code
-    private typealias ViewMode = ServicesTabState.ViewMode
-    private typealias StatusFilter = ServicesTabState.StatusFilter
+    /// Tasks started from a row. Local, like Service Detail's: the root
+    /// router has no case for editing a particular service or log.
+    @State var sheet: ServicesTabSheet?
+    /// A log whose edit form asked for it to be deleted, deleted once the form
+    /// has dismissed (so the Undo toast isn't raised under a closing sheet).
+    @State var logPendingDeletion: ServiceLog?
+    @State var pendingDelete: ServicesPendingDelete?
+    @State var exportPDFURL: URL?
+    @State var isExporting = false
 
     /// Scopes the service + log fetches to `vehicle` at the database level, and
-    /// lets the store return the history newest-first. `appState` arrives through
-    /// the environment.
-    ///
-    /// Because the predicate already scopes the fetch, nothing downstream
-    /// re-filters by vehicle: `$0.vehicle?.id` faults the relationship for every
-    /// row it touches, which is pure cost once the store has answered the same
-    /// question.
+    /// lets the store return the history newest-first. Nothing downstream
+    /// re-filters by vehicle: `$0.vehicle?.id` faults the relationship per row.
     init(vehicle: Vehicle?, onboardingState: OnboardingState) {
         self.onboardingState = onboardingState
         if let vehicleID = vehicle?.id {
@@ -45,390 +61,206 @@ struct ServicesTab: View {
         }
     }
 
-    private var vehicle: Vehicle? {
+    var vehicle: Vehicle? {
         appState.selectedVehicle
     }
 
-    /// Everything this screen displays, derived in a single pass.
-    ///
-    /// These were computed properties, and SwiftUI reads each one several times
-    /// per body evaluation — a count for the header, the array for the `ForEach`,
-    /// the count again for the divider test. Every read re-ran the whole chain:
-    /// urgency sort, status classification per row, search across notes and OCR
-    /// text. Derived once and passed down, per the "derive a value once" rule.
-    private struct Content {
-        /// Every service matching the search, urgency-sorted — the timeline
-        /// shows log-only ones too, and is not status-filtered.
-        let timelineServices: [Service]
-        let filteredServices: [Service]
-        let filteredLogs: [ServiceLog]
-        let statusOptions: [PickerOption<StatusFilter>]
-        let mileage: MileageEstimate
+    private var searchText: String {
+        appState.servicesTab.searchText
     }
 
-    private func makeContent() -> Content {
-        guard let vehicle else {
-            return Content(
-                timelineServices: [],
-                filteredServices: [],
-                filteredLogs: [],
-                statusOptions: [],
-                mileage: MileageEstimate(pace: nil, effective: 0, isEstimated: false)
-            )
-        }
-
-        let mileage = vehicle.mileageEstimate
-        let searchText = appState.servicesTab.searchText
-
-        let allServices = services.sortedByUrgency(mileage)
-
-        // Only services with due tracking have a status, so only they can be
-        // status-filtered or counted.
-        let tracked = allServices.filter { $0.hasDueTracking }
-
-        // One status classification per service, reused by both the filter below
-        // and the option counts. It used to be recomputed per row per pass.
-        let statuses = tracked.map { $0.status(currentMileage: mileage.effective) }
-        func count(_ status: ServiceStatus) -> Int {
-            statuses.filter { $0 == status }.count
-        }
-
-        var filteredServices = tracked
-        if let wanted = appState.servicesTab.statusFilter.serviceStatus {
-            filteredServices = zip(tracked, statuses).filter { $0.1 == wanted }.map(\.0)
-        }
-
-        // The search field sits above both modes, so it narrows both. The
-        // timeline used to receive the unfiltered lists — typing did nothing.
-        let timelineServices = Self.services(allServices, matching: searchText)
-        filteredServices = Self.services(filteredServices, matching: searchText)
-
-        return Content(
-            timelineServices: timelineServices,
-            filteredServices: filteredServices,
-            filteredLogs: Self.logs(serviceLogs, matching: searchText),
-            statusOptions: [
-                PickerOption(value: .all, label: StatusFilter.all.displayName, count: tracked.count),
-                PickerOption(value: .overdue, label: StatusFilter.overdue.displayName, count: count(.overdue)),
-                PickerOption(value: .dueSoon, label: StatusFilter.dueSoon.displayName, count: count(.dueSoon)),
-                PickerOption(value: .good, label: StatusFilter.good.displayName, count: count(.good))
-            ],
-            mileage: mileage
+    private func makeContent() -> ServicesTabContent {
+        guard let vehicle else { return .empty }
+        return .make(
+            services: services,
+            logs: serviceLogs,
+            mileage: vehicle.mileageEstimate,
+            searchText: searchText
         )
-    }
-
-    private static func services(_ services: [Service], matching searchText: String) -> [Service] {
-        guard !searchText.isEmpty else { return services }
-        return services.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
-    }
-
-    /// Search across service name, notes, and receipt OCR text. The logs arrive
-    /// newest-first from the query, so there is no sort here.
-    private static func logs(_ logs: [ServiceLog], matching searchText: String) -> [ServiceLog] {
-        guard !searchText.isEmpty else { return logs }
-        return logs.filter { log in
-            // Search service name
-            if log.service?.name.localizedCaseInsensitiveContains(searchText) ?? false {
-                return true
-            }
-            // Search notes
-            if log.notes?.localizedCaseInsensitiveContains(searchText) ?? false {
-                return true
-            }
-            // Search extracted text from attachments (receipt OCR)
-            if let attachments = log.attachments {
-                for attachment in attachments {
-                    if attachment.extractedText?.localizedCaseInsensitiveContains(searchText) ?? false {
-                        return true
-                    }
-                }
-            }
-            return false
-        }
     }
 
     var body: some View {
         @Bindable var appState = appState
         let content = makeContent()
 
-        // ONE row of pinned chrome, not four. Mode is the segmented control
-        // because it changes what the screen *is*; status is a FilterControl
-        // because filtering is refinement and does not deserve permanent real
-        // estate. Search is the system's (`.searchable`), in the navigation
-        // bar — reached deliberately, not glanced at.
-        VStack(spacing: 0) {
-            controls(content)
-                .tourTarget(.servicesControls, active: onboardingState.currentPhase.isTour)
-
-            scrollContent(content)
+        Group {
+            if let vehicle {
+                if !content.isEmpty {
+                    list(content, vehicle: vehicle)
+                } else if !searchText.isEmpty {
+                    ContentUnavailableView.search(text: searchText)
+                } else {
+                    emptyState
+                }
+            } else {
+                ContentUnavailableView(
+                    L10n.emptyNoVehicleTitle,
+                    systemImage: "car.side.fill",
+                    description: Text(L10n.emptyNoVehicleMessage)
+                )
+            }
         }
-        // The search covers both modes: the list's rows and the timeline.
         .searchable(text: $appState.servicesTab.searchText, prompt: L10n.servicesSearchPrompt)
         .onChange(of: appState.servicesTab.searchText) { oldValue, newValue in
             if oldValue.isEmpty && !newValue.isEmpty {
                 AnalyticsService.shared.capture(.servicesSearchUsed)
             }
         }
+        // Select only exists while there is something to select.
+        .onChange(of: content.isEmpty, initial: true) { _, isEmpty in
+            appState.servicesTab.hasSelectableContent = !isEmpty
+            if isEmpty { appState.servicesTab.setSelecting(false) }
+        }
+        .onChange(of: vehicle?.id) {
+            appState.servicesTab.setSelecting(false)
+        }
+        .toolbar { selectionToolbar(content) }
+        .toolbar(appState.servicesTab.isSelecting ? .hidden : .automatic, for: .tabBar)
         .trackScreen(.services)
-        .onChange(of: appState.servicesTab.viewMode) { _, newMode in
-            AnalyticsService.shared.capture(.servicesViewModeChanged(mode: newMode.rawValue))
-        }
-        .onChange(of: appState.servicesTab.statusFilter) { _, newFilter in
-            AnalyticsService.shared.capture(.servicesFilterChanged(filter: newFilter.rawValue))
-        }
-        .sheet(isPresented: $showExportOptions) {
-            if let vehicle = vehicle {
-                ExportOptionsSheet(
-                    vehicle: vehicle,
-                    // The whole history, not the search-narrowed list — and
-                    // already newest-first from the query.
-                    serviceLogs: serviceLogs,
-                    isExporting: $isExporting
-                ) { url in
-                    AnalyticsService.shared.capture(.serviceHistoryExported)
-                    exportPDFURL = url
-                    ToastService.shared.show(L10n.toastPDFReady, icon: "doc.text", style: .info)
-                }
-                .presentationDetents([.medium])
-                .presentationDragIndicator(.visible)
-            }
+        .sheet(item: $sheet, onDismiss: sheetDismissed) { sheet in
+            sheetContent(sheet)
         }
         .sheet(item: $exportPDFURL) { url in
             ShareSheet(items: [url])
         }
-    }
-
-    /// Status only exists for scheduled items, so the filter only exists there
-    /// too. A no-op control in Timeline mode costs a target and answers nothing.
-    @ViewBuilder
-    private func controls(_ content: Content) -> some View {
-        @Bindable var appState = appState
-        if appState.servicesTab.viewMode == .list {
-            FilterControlRow(
-                name: L10n.servicesStatusDimension,
-                options: content.statusOptions,
-                selection: $appState.servicesTab.statusFilter,
-                defaultValue: .all
-            ) {
-                modeControl
+        .confirmationDialog(
+            pendingDelete?.title ?? "",
+            isPresented: Binding(
+                get: { pendingDelete != nil },
+                set: { if !$0 { pendingDelete = nil } }
+            ),
+            titleVisibility: .visible,
+            presenting: pendingDelete
+        ) { pending in
+            Button(L10n.commonDelete, role: .destructive) {
+                confirmDelete(pending, content: content)
             }
-        } else {
-            ControlRow { modeControl }
+            Button(L10n.commonCancel, role: .cancel) {}
+        } message: { pending in
+            Text(pending.message)
         }
     }
 
-    private var modeControl: some View {
+    // MARK: - List
+
+    private func list(_ content: ServicesTabContent, vehicle: Vehicle) -> some View {
         @Bindable var appState = appState
-        return InstrumentSegmentedControl(
-            options: ViewMode.allCases,
-            selection: $appState.servicesTab.viewMode
-        ) { mode in
-            mode.displayName
-        }
-    }
 
-    private func scrollContent(_ content: Content) -> some View {
-        ScrollView {
-            VStack(spacing: Spacing.xl) {
-                // Content based on view mode
-                if appState.servicesTab.viewMode == .timeline, let vehicle = vehicle {
-                    if serviceLogs.isEmpty {
-                        EmptyStateView(
-                            icon: "clock.arrow.circlepath",
-                            title: L10n.emptyTimelineTitle,
-                            message: L10n.emptyTimelineMessage
-                        )
-                        .revealAnimation(delay: 0.2)
-                    } else if content.filteredLogs.isEmpty && !content.timelineServices.contains(where: \.hasDueTracking) {
-                        // A search that matches nothing is not an empty history.
-                        EmptyStateView(
-                            icon: "magnifyingglass",
-                            title: L10n.emptyNoResultsTitle,
-                            message: L10n.emptyNoResultsMessage
-                        )
-                    } else {
-                        MaintenanceTimeline(
-                            services: content.timelineServices,
-                            serviceLogs: content.filteredLogs,
-                            vehicle: vehicle,
-                            onServiceTap: { service in
-                                appState.push(.service(service))
-                            },
-                            onLogTap: { log in
-                                appState.push(.serviceLog(log))
-                            },
-                            onLogDelete: { log in
-                                ServiceLogDeleteAction.perform(log, offerUndo: true)
-                            }
-                        )
-                        .revealAnimation(delay: 0.2)
+        return List(selection: $appState.servicesTab.selection) {
+            ForEach(Array(content.statusGroups.enumerated()), id: \.element.id) { index, group in
+                Section {
+                    ForEach(group.services) { service in
+                        serviceRow(service, mileage: content.mileage, vehicle: vehicle)
                     }
-                }
-
-                // Upcoming services (list mode). The bordered container is gone:
-                // rows separated by dividers inside a titled section already
-                // read as one group, and the box was one more enclosure
-                // competing with the cards above it.
-                if appState.servicesTab.viewMode == .list && !content.filteredServices.isEmpty {
-                    ReadoutSection(title: L10n.servicesScheduledCount(content.filteredServices.count)) {
-                        VStack(spacing: 0) {
-                            ForEach(Array(content.filteredServices.enumerated()), id: \.element.id) { index, service in
-                                ServiceRow(
-                                    service: service,
-                                    // From the pass computed once above: reading
-                                    // `vehicle.effectiveMileage` here re-derived
-                                    // the driving pace on every row.
-                                    currentMileage: content.mileage.effective,
-                                    isEstimatedMileage: content.mileage.isEstimated
-                                ) {
-                                    appState.push(.service(service))
-                                }
-                                .staggeredReveal(index: index, baseDelay: 0.2)
-
-                                if index < content.filteredServices.count - 1 {
-                                    ListDivider()
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Service History section (list mode only)
-                if appState.servicesTab.viewMode == .list && !content.filteredLogs.isEmpty {
-                    ReadoutSection(title: L10n.servicesHistoryCount(content.filteredLogs.count)) {
-                        VStack(spacing: 0) {
-                            ForEach(Array(content.filteredLogs.enumerated()), id: \.element.id) { index, log in
-                                // ServiceEventRow owns its own tap target.
-                                historyRow(log: log)
-                                    .staggeredReveal(index: index, baseDelay: 0.3)
-
-                                if index < content.filteredLogs.count - 1 {
-                                    ListDivider()
-                                }
-                            }
-                        }
-                    } action: {
-                        ReadoutSectionAction(
-                            label: L10n.servicesExport,
-                            systemImage: "square.and.arrow.up"
-                        ) {
-                            showExportOptions = true
-                        }
-                    }
-                }
-
-                // Empty state (only in list mode when no content)
-                if appState.servicesTab.viewMode == .list && content.filteredServices.isEmpty && content.filteredLogs.isEmpty && vehicle != nil {
-                    emptyState
-                        .revealAnimation(delay: 0.2)
-                }
-
-                // No vehicle state
-                if vehicle == nil {
-                    noVehicleState
-                        .revealAnimation(delay: 0.2)
-                }
-
-                if vehicle != nil {
-                    referenceSection
+                } header: {
+                    sectionHeader(L10n.servicesGroupTitle(group.status), count: group.services.count)
+                        .tourTarget(.servicesControls, active: index == 0 && onboardingState.currentPhase.isTour)
                 }
             }
-            .padding(.horizontal, Spacing.screenHorizontal)
-            .padding(.top, Spacing.md)
-            .padding(.bottom, Spacing.xxl)
+
+            ForEach(content.months) { month in
+                Section {
+                    ForEach(month.logs) { log in
+                        logRow(log, vehicle: vehicle)
+                    }
+                } header: {
+                    sectionHeader(Self.monthTitle(month.month))
+                }
+            }
+
+            // A destination, not a match — it would read as a search result.
+            if searchText.isEmpty {
+                referenceSection(vehicle: vehicle)
+            }
         }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .environment(\.editMode, Binding(
+            get: { appState.servicesTab.isSelecting ? .active : .inactive },
+            set: { appState.servicesTab.setSelecting($0.isEditing) }
+        ))
+        .animation(.default, value: appState.servicesTab.isSelecting)
+    }
+
+    /// "July 2026" — a header, so its first letter is capitalized even where
+    /// the locale writes month names in lower case.
+    static func monthTitle(_ month: Date) -> String {
+        let title = month.formatted(.dateTime.month(.wide).year())
+        return title.prefix(1).localizedUppercase + title.dropFirst()
+    }
+
+    func sectionHeader(_ title: String, count: Int? = nil) -> some View {
+        InstrumentSectionHeader(title: title) {
+            if let count {
+                Text(verbatim: "\(count)")
+                    .font(.brutalistSecondary)
+                    .foregroundStyle(Theme.textTertiary)
+            }
+        }
+        .servicesListHeader()
     }
 
     // MARK: - Reference
 
-    /// The documents library, as a destination rather than a view mode. It was a
-    /// third segment of the mode control that, once selected, offered "OPEN
-    /// LIBRARY" to leave for the real screen — so the mode existed only to host
-    /// a link.
-    private var referenceSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text(L10n.servicesReference.uppercased())
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1.5)
-
-            Button {
-                if let vehicle {
-                    appState.push(.documents(vehicle))
-                }
-            } label: {
-                Text("[\(L10n.servicesDocumentLibrary.uppercased())]")
-                    .font(.brutalistLabel)
-                    .foregroundStyle(Theme.accent)
-                    .tracking(1)
+    /// The documents library and the history export: destinations reachable
+    /// from the bottom of the tab, which is what they always were.
+    private func referenceSection(vehicle: Vehicle) -> some View {
+        Section {
+            NavigationLink(value: AppRoute.documents(vehicle)) {
+                Label(L10n.servicesDocumentLibrary, systemImage: "doc.on.doc")
+                    .font(.brutalistBodyEmphasis)
+                    .foregroundStyle(Theme.textPrimary)
                     .frame(minHeight: TouchTarget.minimum, alignment: .leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel(L10n.servicesDocumentLibrary)
+            .selectionDisabled()
+            .servicesListRow()
+        } header: {
+            InstrumentSectionHeader(title: L10n.servicesReference) {
+                if !serviceLogs.isEmpty {
+                    ReadoutSectionAction(label: L10n.servicesExport, systemImage: "square.and.arrow.up") {
+                        sheet = .export
+                    }
+                }
+            }
+            .servicesListHeader()
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    // MARK: - History Row
+    // MARK: - Empty
 
-    /// Uses the shared `ServiceEventRow`. This was previously a hand-built
-    /// HStack that had drifted from the otherwise-identical rows on Home and in
-    /// Costs — different cost styling, different date format, hardcoded strings.
-    private func historyRow(log: ServiceLog) -> some View {
-        let name = log.service?.name ?? L10n.rowServiceFallback
-        let date = Formatters.mediumDate.string(from: log.performedDate)
-
-        return ServiceEventRow(
-            indicator: .completed(),
-            title: name,
-            metadata: [
-                .detail(date),
-                .detail(Formatters.mileage(log.mileageAtService))
-            ],
-            amount: log.formattedCost.map { .init(text: $0, color: Theme.accent) },
-            accessibilityLabelText: L10n.readoutEvent(name, date),
-            onTap: { appState.push(.serviceLog(log)) }
-        )
-        .serviceLogDeleteMenu { ServiceLogDeleteAction.perform(log, offerUndo: true) }
-    }
-
-    // MARK: - Empty States
-
-    /// "No services" and "nothing matches" are different facts, and saying the
-    /// first when the second is true tells the user their data is gone. A status
-    /// filter counts as narrowing just as much as a search term does — before
-    /// filtering took one tap this was rarely wrong, and now it would be.
-    private var isNarrowed: Bool {
-        !appState.servicesTab.searchText.isEmpty || appState.servicesTab.statusFilter != .all
-    }
-
+    /// First run: one message, one action.
     private var emptyState: some View {
-        EmptyStateView(
-            icon: isNarrowed ? "magnifyingglass" : "wrench.and.screwdriver",
-            title: isNarrowed ? L10n.emptyNoResultsTitle : L10n.emptyNoServicesTitle,
-            message: isNarrowed ? L10n.emptyNoResultsMessage : L10n.emptyNoServicesMessage
-        )
+        ContentUnavailableView {
+            Label(L10n.servicesEmptyTitle, systemImage: "wrench.and.screwdriver")
+        } description: {
+            Text(L10n.servicesEmptyMessage)
+        } actions: {
+            Button(L10n.servicesEmptyAdd) {
+                appState.present(.addService())
+            }
+            .buttonStyle(.glassProminent)
+            .tint(Theme.accent)
+        }
     }
 
-    private var noVehicleState: some View {
-        EmptyStateView(
-            icon: "car.side.fill",
-            title: L10n.emptyNoVehicleTitle,
-            message: L10n.emptyNoVehicleMessage
-        )
-    }
+    // MARK: - Sheets
 
+    /// Deleted from the edit-log form: delete now the form is gone, with Undo.
+    /// (The edit forms refresh reminders, icon and widget on their own save.)
+    private func sheetDismissed() {
+        guard let log = logPendingDeletion else { return }
+        logPendingDeletion = nil
+        ServiceLogDeleteAction.perform(log, offerUndo: true)
+    }
 }
 
 #Preview {
     let appState = AppState()
     appState.selectedVehicle = Vehicle.sampleVehicle
 
-    return ZStack {
-        AtmosphericBackground()
+    return NavigationStack {
         ServicesTab(vehicle: appState.selectedVehicle, onboardingState: OnboardingState())
+            .background { AtmosphericBackground() }
     }
     .environment(appState)
     .modelContainer(for: [Vehicle.self, Service.self, ServiceLog.self], inMemory: true)

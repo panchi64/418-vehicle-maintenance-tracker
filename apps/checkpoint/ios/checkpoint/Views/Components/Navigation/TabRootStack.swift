@@ -102,6 +102,13 @@ struct TabRootStack<Root: View>: View {
             .accessibilityIdentifier("toolbar.settings")
         }
 
+        // Services only: Select enters its list's edit mode, before [+].
+        if tab == .services && appState.servicesTab.hasSelectableContent {
+            ToolbarItem(placement: .topBarTrailing) {
+                ServicesSelectButton()
+            }
+        }
+
         // ONE add action, going straight to the unified form: the form derives
         // record-vs-schedule from its date, so there is nothing to choose first.
         ToolbarItem(placement: .topBarTrailing) {

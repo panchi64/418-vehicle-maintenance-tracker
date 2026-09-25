@@ -54,7 +54,7 @@ relationship (`log.vehicle`, `log.visit`, `vehicle.services`) faults it again on
 each pass. This was the cause of the pause when switching tabs.
 
 Each tab resolves its data in **one** value up front and passes it down:
-`HomeTab.Content`, `ServicesTab.Content`, `CostsMetrics`. Follow that shape for
+`HomeTab.Content`, `ServicesTabContent`, `CostsMetrics`. Follow that shape for
 any new screen with derived collections:
 
 - Compute it once at the top of `body` (`let content = makeContent()`), hand it to

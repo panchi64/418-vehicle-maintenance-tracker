@@ -2,20 +2,25 @@
 //  ServicesTabTests.swift
 //  checkpointTests
 //
-//  Tests for ServicesTab view content and functionality
+//  The Services list's grouping and search (`ServicesTabContent`), its
+//  selection state, and Stop Tracking.
 //
 
 import XCTest
-import SwiftUI
 import SwiftData
 @testable import checkpoint
 
+@MainActor
 final class ServicesTabTests: XCTestCase {
 
     var modelContainer: ModelContainer!
     var modelContext: ModelContext!
+    var vehicle: Vehicle!
 
-    @MainActor
+    private var mileage: MileageEstimate {
+        MileageEstimate(pace: nil, effective: 30_000, isEstimated: false)
+    }
+
     override func setUp() {
         super.setUp()
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
@@ -24,288 +29,178 @@ final class ServicesTabTests: XCTestCase {
             configurations: config
         )
         modelContext = modelContainer.mainContext
+        vehicle = Vehicle(name: "Test Car", make: "Toyota", model: "Camry", year: 2022, currentMileage: 30_000)
+        modelContext.insert(vehicle)
     }
 
     override func tearDown() {
+        vehicle = nil
         modelContainer = nil
         modelContext = nil
         super.tearDown()
     }
 
-    // MARK: - View Mode Tests
-
-    func testViewMode_AllCases() {
-        // Given
-        let allModes = ServicesTabState.ViewMode.allCases
-
-        // Then: two modes. `documents` was removed — it was a content type
-        // masquerading as a view of services, whose only content was a link out
-        // to the real documents screen.
-        XCTAssertEqual(allModes.count, 2)
-        XCTAssertTrue(allModes.contains(.list))
-        XCTAssertTrue(allModes.contains(.timeline))
-    }
-
-    func testViewMode_RawValues() {
-        // Raw values are storage — they persist in analytics events.
-        XCTAssertEqual(ServicesTabState.ViewMode.list.rawValue, "List")
-        XCTAssertEqual(ServicesTabState.ViewMode.timeline.rawValue, "Timeline")
-    }
-
-    // MARK: - Status Filter Tests
-
-    func testStatusFilter_AllCases() {
-        // Given
-        let allFilters = ServicesTabState.StatusFilter.allCases
-
-        // Then
-        XCTAssertEqual(allFilters.count, 4)
-        XCTAssertTrue(allFilters.contains(.all))
-        XCTAssertTrue(allFilters.contains(.overdue))
-        XCTAssertTrue(allFilters.contains(.dueSoon))
-        XCTAssertTrue(allFilters.contains(.good))
-    }
-
-    func testStatusFilter_RawValues() {
-        // Then
-        XCTAssertEqual(ServicesTabState.StatusFilter.all.rawValue, "All")
-        XCTAssertEqual(ServicesTabState.StatusFilter.overdue.rawValue, "Overdue")
-        XCTAssertEqual(ServicesTabState.StatusFilter.dueSoon.rawValue, "Due Soon")
-        XCTAssertEqual(ServicesTabState.StatusFilter.good.rawValue, "Good")
-    }
-
-    // MARK: - Search Filter Tests
+    // MARK: - Helpers
 
     @MainActor
-    func testSearchFilter_FiltersServicesByName() {
-        // Given
-        let vehicle = Vehicle(
-            name: "Test Car",
-            make: "Toyota",
-            model: "Camry",
-            year: 2022,
-            currentMileage: 30000
-        )
-        modelContext.insert(vehicle)
-
-        let oilChange = Service(name: "Oil Change", dueMileage: 35000)
-        oilChange.vehicle = vehicle
-
-        let tireRotation = Service(name: "Tire Rotation", dueMileage: 36000)
-        tireRotation.vehicle = vehicle
-
-        let brakeInspection = Service(name: "Brake Inspection", dueMileage: 37000)
-        brakeInspection.vehicle = vehicle
-
-        modelContext.insert(oilChange)
-        modelContext.insert(tireRotation)
-        modelContext.insert(brakeInspection)
-
-        let searchText = "oil"
-        let services = [oilChange, tireRotation, brakeInspection]
-
-        // When
-        let filtered = services.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
-
-        // Then
-        XCTAssertEqual(filtered.count, 1)
-        XCTAssertEqual(filtered.first?.name, "Oil Change")
-    }
-
-    @MainActor
-    func testSearchFilter_CaseInsensitive() {
-        // Given
-        let vehicle = Vehicle(
-            name: "Test Car",
-            make: "Toyota",
-            model: "Camry",
-            year: 2022,
-            currentMileage: 30000
-        )
-        modelContext.insert(vehicle)
-
-        let service = Service(name: "OIL CHANGE", dueMileage: 35000)
+    private func service(_ name: String, dueMileage: Int?) -> Service {
+        let service = Service(name: name, dueMileage: dueMileage)
         service.vehicle = vehicle
         modelContext.insert(service)
-
-        let searchText = "oil change"
-        let services = [service]
-
-        // When
-        let filtered = services.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
-
-        // Then
-        XCTAssertEqual(filtered.count, 1)
+        return service
     }
 
     @MainActor
-    func testSearchFilter_EmptySearch_ReturnsAll() {
-        // Given
-        let vehicle = Vehicle(
-            name: "Test Car",
-            make: "Toyota",
-            model: "Camry",
-            year: 2022,
-            currentMileage: 30000
-        )
-        modelContext.insert(vehicle)
-
-        let service1 = Service(name: "Oil Change", dueMileage: 35000)
-        service1.vehicle = vehicle
-        let service2 = Service(name: "Tire Rotation", dueMileage: 36000)
-        service2.vehicle = vehicle
-
-        modelContext.insert(service1)
-        modelContext.insert(service2)
-
-        let searchText = ""
-        let services = [service1, service2]
-
-        // When
-        let filtered = searchText.isEmpty ? services : services.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
-
-        // Then
-        XCTAssertEqual(filtered.count, 2)
+    private func log(_ service: Service?, on date: Date, notes: String? = nil) -> ServiceLog {
+        let log = ServiceLog(service: service, vehicle: vehicle, performedDate: date, mileageAtService: 29_000)
+        log.notes = notes
+        modelContext.insert(log)
+        return log
     }
 
-    // MARK: - Status Filter Application Tests
+    private func date(_ year: Int, _ month: Int, _ day: Int) -> Date {
+        Calendar.current.date(from: DateComponents(year: year, month: month, day: day, hour: 12))!
+    }
+
+    // MARK: - Status groups
 
     @MainActor
-    func testStatusFilter_Overdue() {
-        // Given
-        let vehicle = Vehicle(
-            name: "Test Car",
-            make: "Toyota",
-            model: "Camry",
-            year: 2022,
-            currentMileage: 30000
+    func testStatusGroups_OrderedOverdueDueSoonOnTrack() {
+        let good = service("Tire Rotation", dueMileage: 45_000)
+        let overdue = service("Oil Change", dueMileage: 29_000)
+        let dueSoon = service("Air Filter", dueMileage: 30_050)
+
+        let content = ServicesTabContent.make(
+            services: [good, overdue, dueSoon], logs: [], mileage: mileage, searchText: ""
         )
-        modelContext.insert(vehicle)
 
-        let overdueService = Service(name: "Overdue", dueMileage: 29000)
-        overdueService.vehicle = vehicle
-
-        let goodService = Service(name: "Good", dueMileage: 40000)
-        goodService.vehicle = vehicle
-
-        modelContext.insert(overdueService)
-        modelContext.insert(goodService)
-
-        let services = [overdueService, goodService]
-
-        // When
-        let filtered = services.filter { $0.status(currentMileage: vehicle.currentMileage) == .overdue }
-
-        // Then
-        XCTAssertEqual(filtered.count, 1)
-        XCTAssertEqual(filtered.first?.name, "Overdue")
+        XCTAssertEqual(content.statusGroups.map(\.status), [.overdue, .dueSoon, .good])
+        XCTAssertEqual(content.statusGroups.map { $0.services.map(\.name) }, [["Oil Change"], ["Air Filter"], ["Tire Rotation"]])
     }
 
     @MainActor
-    func testStatusFilter_DueSoon() {
-        // Given
-        let vehicle = Vehicle(
-            name: "Test Car",
-            make: "Toyota",
-            model: "Camry",
-            year: 2022,
-            currentMileage: 30000
-        )
-        modelContext.insert(vehicle)
+    func testStatusGroups_EmptyGroupsOmitted() {
+        let good = service("Tire Rotation", dueMileage: 45_000)
 
-        let dueSoonService = Service(name: "Due Soon", dueMileage: 30200) // Within 500 miles
-        dueSoonService.vehicle = vehicle
+        let content = ServicesTabContent.make(services: [good], logs: [], mileage: mileage, searchText: "")
 
-        let goodService = Service(name: "Good", dueMileage: 40000)
-        goodService.vehicle = vehicle
-
-        modelContext.insert(dueSoonService)
-        modelContext.insert(goodService)
-
-        let services = [dueSoonService, goodService]
-
-        // When
-        let filtered = services.filter { $0.status(currentMileage: vehicle.currentMileage) == .dueSoon }
-
-        // Then
-        XCTAssertEqual(filtered.count, 1)
-        XCTAssertEqual(filtered.first?.name, "Due Soon")
+        XCTAssertEqual(content.statusGroups.map(\.status), [.good])
     }
 
     @MainActor
-    func testStatusFilter_Good() {
-        // Given
-        let vehicle = Vehicle(
-            name: "Test Car",
-            make: "Toyota",
-            model: "Camry",
-            year: 2022,
-            currentMileage: 30000
-        )
-        modelContext.insert(vehicle)
+    func testStatusGroups_ExcludeUntrackedServices() {
+        let logOnly = service("Wiper Blades", dueMileage: nil)
 
-        let goodService = Service(name: "Good", dueMileage: 40000) // Well ahead
-        goodService.vehicle = vehicle
+        let content = ServicesTabContent.make(services: [logOnly], logs: [], mileage: mileage, searchText: "")
 
-        let overdueService = Service(name: "Overdue", dueMileage: 29000)
-        overdueService.vehicle = vehicle
-
-        modelContext.insert(goodService)
-        modelContext.insert(overdueService)
-
-        let services = [goodService, overdueService]
-
-        // When
-        let filtered = services.filter { $0.status(currentMileage: vehicle.currentMileage) == .good }
-
-        // Then
-        XCTAssertEqual(filtered.count, 1)
-        XCTAssertEqual(filtered.first?.name, "Good")
+        XCTAssertTrue(content.statusGroups.isEmpty)
+        XCTAssertTrue(content.isEmpty)
     }
 
-    // MARK: - Service History Tests
+    // MARK: - History months
 
     @MainActor
-    func testServiceHistory_FilteredByVehicle() {
-        // Given
-        let vehicle1 = Vehicle(
-            name: "Car 1",
-            make: "Toyota",
-            model: "Camry",
-            year: 2022,
-            currentMileage: 30000
+    func testMonthGroups_KeepNewestFirstOrderAndSplitByMonth() {
+        let oil = service("Oil Change", dueMileage: 35_000)
+        let a = log(oil, on: date(2026, 7, 20))
+        let b = log(oil, on: date(2026, 7, 2))
+        let c = log(oil, on: date(2026, 5, 14))
+
+        let content = ServicesTabContent.make(services: [], logs: [a, b, c], mileage: mileage, searchText: "")
+
+        XCTAssertEqual(content.months.count, 2)
+        XCTAssertEqual(content.months[0].logs.map(\.id), [a.id, b.id])
+        XCTAssertEqual(content.months[1].logs.map(\.id), [c.id])
+        XCTAssertEqual(
+            content.months[0].month,
+            Calendar.current.dateInterval(of: .month, for: date(2026, 7, 20))?.start
         )
-        let vehicle2 = Vehicle(
-            name: "Car 2",
-            make: "Honda",
-            model: "Civic",
-            year: 2023,
-            currentMileage: 20000
-        )
-        modelContext.insert(vehicle1)
-        modelContext.insert(vehicle2)
+    }
 
-        let log1 = ServiceLog(
-            vehicle: vehicle1,
-            performedDate: .now,
-            mileageAtService: 30000
-        )
-        let log2 = ServiceLog(
-            vehicle: vehicle2,
-            performedDate: .now,
-            mileageAtService: 20000
+    // MARK: - Search
+
+    @MainActor
+    func testSearch_NarrowsServicesAndHistory() {
+        let oil = service("Oil Change", dueMileage: 35_000)
+        let tires = service("Tire Rotation", dueMileage: 36_000)
+        let oilLog = log(oil, on: date(2026, 6, 1))
+        let tireLog = log(tires, on: date(2026, 6, 2))
+
+        let content = ServicesTabContent.make(
+            services: [oil, tires], logs: [tireLog, oilLog], mileage: mileage, searchText: "OIL"
         )
 
-        modelContext.insert(log1)
-        modelContext.insert(log2)
+        XCTAssertEqual(content.services.map(\.name), ["Oil Change"])
+        XCTAssertEqual(content.logs.map(\.id), [oilLog.id])
+    }
 
-        let allLogs = [log1, log2]
+    @MainActor
+    func testSearch_MatchesLogNotes() {
+        let tires = service("Tire Rotation", dueMileage: 36_000)
+        let noted = log(tires, on: date(2026, 6, 2), notes: "Costco, balanced all four")
 
-        // When - filter for vehicle1
-        let vehicle1Logs = allLogs.filter { $0.vehicle?.id == vehicle1.id }
+        let content = ServicesTabContent.make(
+            services: [], logs: [noted], mileage: mileage, searchText: "costco"
+        )
 
-        // Then
-        XCTAssertEqual(vehicle1Logs.count, 1)
-        XCTAssertEqual(vehicle1Logs.first?.mileageAtService, 30000)
+        XCTAssertEqual(content.logs.map(\.id), [noted.id])
+    }
+
+    @MainActor
+    func testSearch_NoMatchIsEmpty() {
+        let oil = service("Oil Change", dueMileage: 35_000)
+
+        let content = ServicesTabContent.make(services: [oil], logs: [], mileage: mileage, searchText: "brakes")
+
+        XCTAssertTrue(content.isEmpty)
+    }
+
+    // MARK: - Selection state
+
+    func testSetSelecting_ClearsSelection() {
+        var state = ServicesTabState()
+        state.setSelecting(true)
+        state.selection = [.service(UUID()), .log(UUID())]
+
+        state.setSelecting(false)
+
+        XCTAssertFalse(state.isSelecting)
+        XCTAssertTrue(state.selection.isEmpty)
+    }
+
+    // MARK: - Stop tracking
+
+    @MainActor
+    func testStopTracking_ClearsScheduleWithoutWritingALog() {
+        let oil = Service(name: "Oil Change", dueDate: date(2025, 1, 1), dueMileage: 29_000,
+                          intervalMonths: 6, intervalMiles: 5_000, isRecurring: true)
+        oil.vehicle = vehicle
+        modelContext.insert(oil)
+
+        oil.stopTracking()
+
+        XCTAssertFalse(oil.hasDueTracking)
+        XCTAssertFalse(oil.isRecurring)
+        XCTAssertTrue((oil.logs ?? []).isEmpty)
+        // The policy survives, so the service can be re-armed from it.
+        XCTAssertEqual(oil.intervalMonths, 6)
+        XCTAssertEqual(oil.intervalMiles, 5_000)
+        // And it leaves the status groups.
+        let content = ServicesTabContent.make(services: [oil], logs: [], mileage: mileage, searchText: "")
+        XCTAssertTrue(content.statusGroups.isEmpty)
+    }
+
+    @MainActor
+    func testStopTracking_RestoreUndoesIt() {
+        let due = date(2025, 1, 1)
+        let oil = Service(name: "Oil Change", dueDate: due, dueMileage: 29_000, isRecurring: true)
+        modelContext.insert(oil)
+
+        let snapshot = oil.stopTracking()
+        oil.restoreTracking(snapshot)
+
+        XCTAssertEqual(oil.dueDate, due)
+        XCTAssertEqual(oil.dueMileage, 29_000)
+        XCTAssertTrue(oil.isRecurring)
     }
 }
