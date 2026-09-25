@@ -13647,23 +13647,6 @@
         }
       }
     },
-    "sync.action.manageStorage" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manage Storage"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Administrar almacenamiento"
-          }
-        }
-      }
-    },
     "sync.action.openSettings" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13681,70 +13664,19 @@
         }
       }
     },
-    "sync.disabled" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sync disabled"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sincronización desactivada"
-          }
-        }
-      }
-    },
-    "sync.error.generic" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sync error"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Error de sincronización"
-          }
-        }
-      }
-    },
-    "sync.error.notSignedIn" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sign in to iCloud to sync across devices"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inicia sesión en iCloud para sincronizar entre dispositivos"
-          }
-        }
-      }
-    },
     "sync.error.offline" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Offline. Changes sync when connected."
+            "value" : "No connection"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sin conexión. Los cambios se sincronizan al conectarte."
+            "value" : "Sin conexión"
           }
         }
       }
@@ -13755,30 +13687,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iCloud storage full. Data safe locally."
+            "value" : "iCloud storage is full"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El almacenamiento de iCloud está lleno. Tus datos están seguros en el dispositivo."
-          }
-        }
-      }
-    },
-    "sync.error.unknownStatus" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unable to determine iCloud status"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No se pudo determinar el estado de iCloud"
+            "value" : "El almacenamiento de iCloud está lleno"
           }
         }
       }
@@ -13834,70 +13749,104 @@
         }
       }
     },
-    "sync.sign_in_prompt" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sign in to iCloud in Settings"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inicia sesión en iCloud en Ajustes"
-          }
-        }
-      }
-    },
-    "sync.state.signIn" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sign in to iCloud"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inicia sesión en iCloud"
-          }
-        }
-      }
-    },
-    "sync.state.synced" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Synced"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sincronizado"
-          }
-        }
-      }
-    },
     "sync.state.syncing" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Syncing..."
+            "value" : "Syncing…"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sincronizando..."
+            "value" : "Sincronizando…"
+          }
+        }
+      }
+    },
+    "sync.status.a11y" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud sync, %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronización con iCloud, %@"
+          }
+        }
+      }
+    },
+    "sync.status.a11y.reason" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud sync, %1$@, %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronización con iCloud, %1$@, %2$@"
+          }
+        }
+      }
+    },
+    "sync.status.failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't sync — will retry"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo sincronizar — se reintentará"
+          }
+        }
+      }
+    },
+    "sync.status.neverSynced" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting for the first sync"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esperando la primera sincronización"
+          }
+        }
+      }
+    },
+    "sync.status.unavailable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud unavailable — sign in to iCloud in Settings"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud no disponible — inicia sesión en iCloud en Ajustes"
           }
         }
       }

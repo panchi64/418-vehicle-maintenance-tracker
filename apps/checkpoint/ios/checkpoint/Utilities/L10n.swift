@@ -232,9 +232,7 @@ enum L10n {
     static var syncSectionTitle: String { localized("sync.section_title") }
     static var syncToggleTitle: String { localized("sync.toggle_title") }
     static var syncToggleSubtitle: String { localized("sync.toggle_subtitle") }
-    static var syncSignInPrompt: String { localized("sync.sign_in_prompt") }
     static var syncFooter: String { localized("sync.footer") }
-    static var syncDisabled: String { localized("sync.disabled") }
     static func syncLastSynced(_ relative: String) -> String {
         String(format: localized("sync.last_synced"), relative)
     }

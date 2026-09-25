@@ -12,6 +12,10 @@ import Foundation
 final class SyncSettings {
     static let shared = SyncSettings()
 
+    /// The app's CloudKit container — the store's `cloudKitDatabase` and the
+    /// account-status checks must name the same one.
+    nonisolated static let cloudKitContainerID = "iCloud.com.418-studio.checkpoint"
+
     private let defaults = UserDefaults.standard
 
     // MARK: - Keys
@@ -35,7 +39,7 @@ final class SyncSettings {
     /// from it — so a toggle that disagrees with this takes effect next launch.
     var isSyncActiveThisLaunch = false
 
-    /// Last successful sync date
+    /// Last completed CloudKit import or export, so "Last synced" survives relaunch
     var lastSyncDate: Date? {
         get { defaults.object(forKey: Keys.lastSyncDate) as? Date }
         set { defaults.set(newValue, forKey: Keys.lastSyncDate) }

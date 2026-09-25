@@ -301,7 +301,7 @@ StoreKit 2 purchase engine for Pro unlock and tip jar:
 - `ServiceDeleteAction` — `delete(_:vehicle:in:)` (cascades to history; callers confirm first) and `stopTracking(_:vehicle:)` (clears the schedule without writing a log, with Undo). Every UI path — Services rows, bulk select, Service Detail, Edit Service — goes through it
 
 ### Sync/
-- `SyncStatusService` — Consolidated iCloud sync status, network monitoring, remote change observation, and retry with backoff (`.synced`, `.syncing`, `.error`, `.disabled`, `.noAccount`)
+- `SyncStatusService` — Observes `NSPersistentCloudKitContainer` events, the iCloud account (`.CKAccountChanged`) and the network path; started only when the launch store is CloudKit-backed. The pure mappings (`SyncError`, `SyncActivity`, `SyncStatusDisplay.resolve`) live in `SyncStatus.swift`
 
 ### Utilities/
 - `NHTSAService` — VIN decoding and recall alerts via NHTSA API
@@ -532,7 +532,7 @@ ContentView
 - **OdometerImagePreprocessorTests** — Image preprocessing pipeline
 - **ReceiptOCRServiceTests** — Receipt text extraction
 - **OCRErrorTests** — Error type handling
-- **SyncStatusServiceTests** — Consolidated sync status, SyncError properties, retry logic
+- **SyncStatusTests** — CloudKit error/account/event mapping and the Settings sync status resolution
 - **ServiceHistoryPDFServiceTests** — PDF generation
 - **WidgetDataServiceTests** — Widget data serialization
 - **StoreManagerTests** — StoreKit purchase flow, entitlements

@@ -2,121 +2,17 @@
 //  SyncStatusService.swift
 //  checkpoint
 //
-//  Consolidated service for tracking iCloud sync status, network monitoring,
-//  and remote change observation.
+//  Observes iCloud sync — the iCloud account, `NSPersistentCloudKitContainer`
+//  events, and the network path — and holds the result as plain state. The
+//  mapping from those inputs to what Settings shows lives in `SyncStatus.swift`.
 //
 
 import Foundation
-import SwiftUI
 import CloudKit
 import CoreData
 import Network
 import Combine
 
-/// Represents a sync error with user-facing messaging and UI properties
-enum SyncError: Equatable {
-    case notSignedIn
-    case quotaExceeded
-    case networkUnavailable
-    case unknown(String)
-
-    var userMessage: String {
-        switch self {
-        case .notSignedIn:
-            return L10n.syncErrorNotSignedIn
-        case .quotaExceeded:
-            return L10n.syncErrorQuotaExceeded
-        case .networkUnavailable:
-            return L10n.syncErrorOffline
-        case .unknown(let message):
-            return message
-        }
-    }
-
-    var actionLabel: String? {
-        switch self {
-        case .notSignedIn:
-            return L10n.syncActionOpenSettings
-        case .quotaExceeded:
-            return L10n.syncActionManageStorage
-        case .networkUnavailable:
-            return nil
-        case .unknown:
-            return nil
-        }
-    }
-
-    var systemImage: String {
-        switch self {
-        case .notSignedIn:
-            return "icloud.slash"
-        case .quotaExceeded:
-            return "exclamationmark.icloud"
-        case .networkUnavailable:
-            return "wifi.slash"
-        case .unknown:
-            return "exclamationmark.icloud"
-        }
-    }
-
-    var iconColor: Color {
-        switch self {
-        case .notSignedIn:
-            return Theme.textTertiary
-        case .quotaExceeded:
-            return Theme.statusOverdue
-        case .networkUnavailable:
-            return Theme.textTertiary
-        case .unknown:
-            return Theme.statusOverdue
-        }
-    }
-
-    /// Whether this error is transient and eligible for automatic retry
-    var isTransient: Bool {
-        switch self {
-        case .networkUnavailable, .unknown:
-            return true
-        case .notSignedIn, .quotaExceeded:
-            return false
-        }
-    }
-}
-
-/// Represents the current state of iCloud sync
-enum SyncState: Equatable {
-    case idle
-    case syncing
-    case synced
-    case error(SyncError)
-    case disabled
-    case noAccount
-
-    var displayText: String {
-        switch self {
-        case .idle:
-            return L10n.syncStateSynced
-        case .syncing:
-            return L10n.syncStateSyncing
-        case .synced:
-            return L10n.syncStateSynced
-        case .error(let syncError):
-            return syncError.userMessage
-        case .disabled:
-            return L10n.syncDisabled
-        case .noAccount:
-            return L10n.syncStateSignIn
-        }
-    }
-
-    var isError: Bool {
-        if case .error = self { return true }
-        if case .noAccount = self { return true }
-        return false
-    }
-}
-
-/// Consolidated service for monitoring and reporting iCloud sync status
 @Observable
 @MainActor
 final class SyncStatusService {
@@ -124,150 +20,87 @@ final class SyncStatusService {
 
     // MARK: - Observable State
 
-    /// Current sync state
-    private(set) var syncState: SyncState = .idle
+    private(set) var account: SyncAccountStatus = .unknown
 
-    /// Last successful sync date
-    private(set) var lastSyncDate: Date?
-
-    /// Whether the user has an iCloud account available
-    private(set) var hasICloudAccount: Bool = false
+    private(set) var activity: SyncActivity
 
     /// Whether existing Checkpoint data was found in iCloud (from a previous install)
     private(set) var hasExistingCloudData: Bool = false
 
-    // MARK: - Private State
+    // MARK: - Derived
 
-    private let container = CKContainer(identifier: "iCloud.com.418-studio.checkpoint")
-    private var networkMonitor: NWPathMonitor?
-    private var cancellables = Set<AnyCancellable>()
-    private var isNetworkAvailable = true
-    private var retryState = RetryState()
-    private let isTestInstance: Bool
+    var syncState: SyncState { activity.state }
 
-    // MARK: - Retry State
+    /// Last completed import or export; persisted so it survives relaunch.
+    var lastSyncDate: Date? { activity.lastSuccess }
 
-    private struct RetryState {
-        var attempts: Int = 0
-        var task: Task<Void, Never>?
-
-        static let maxRetries = 3
-        static let baseDelay: TimeInterval = 2
-
-        var nextDelay: TimeInterval {
-            RetryState.baseDelay * pow(2, Double(attempts))
-        }
-
-        var canRetry: Bool {
-            attempts < RetryState.maxRetries
-        }
-
-        mutating func reset() {
-            attempts = 0
-            task?.cancel()
-            task = nil
-        }
-    }
-
-    // MARK: - Computed Properties
-
-    /// Human-readable last sync description
-    var lastSyncDescription: String? {
-        guard let date = lastSyncDate else { return nil }
-
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .abbreviated
-        return formatter.localizedString(for: date, relativeTo: Date())
-    }
-
-    /// Whether sync is currently enabled in settings
-    var isSyncEnabled: Bool {
-        SyncSettings.shared.iCloudSyncEnabled
-    }
-
-    /// Whether the current state is an error
-    var hasError: Bool {
-        if case .error = syncState {
-            return true
-        }
-        return false
-    }
+    var hasICloudAccount: Bool { account == .available }
 
     /// The current error, if any
     var currentError: SyncError? {
-        if case .error(let error) = syncState {
-            return error
-        }
+        if case .error(let error) = syncState { return error }
         return nil
     }
 
-    // MARK: - Initialization
+    // MARK: - Private
+
+    private let container = CKContainer(identifier: SyncSettings.cloudKitContainerID)
+    private let persistsLastSync: Bool
+    private var networkMonitor: NWPathMonitor?
+    private var cancellables = Set<AnyCancellable>()
 
     private init() {
-        isTestInstance = false
-        lastSyncDate = SyncSettings.shared.lastSyncDate
-
-        setupNetworkMonitor()
-        setupRemoteChangeObserver()
-        setupCloudKitEventObserver()
-
-        Task {
-            await checkAccountStatus()
-        }
+        persistsLastSync = true
+        activity = SyncActivity(lastSuccess: SyncSettings.shared.lastSyncDate)
     }
 
-    /// For testing - allows creating instances without starting monitors
+    /// A detached instance for tests: never starts observers, never persists.
     init(forTesting: Bool) {
-        isTestInstance = true
-        // Don't start monitors during testing
+        persistsLastSync = false
+        activity = SyncActivity()
+    }
+
+    // MARK: - Monitoring
+
+    /// Start observing container events, account changes and the network.
+    /// Called once the running store is CloudKit-backed; idempotent. Without
+    /// it (sync off, onboarding, the unit-test host) nothing is observed.
+    func startMonitoring() {
+        guard cancellables.isEmpty else { return }
+
+        NotificationCenter.default.publisher(for: NSPersistentCloudKitContainer.eventChangedNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] notification in
+                self?.handleCloudKitEvent(notification)
+            }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: .CKAccountChanged)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                Task { await self?.checkAccountStatus() }
+            }
+            .store(in: &cancellables)
+
+        let monitor = NWPathMonitor()
+        monitor.pathUpdateHandler = { [weak self] path in
+            let offline = path.status != .satisfied
+            Task { @MainActor in
+                self?.activity.isOffline = offline
+            }
+        }
+        monitor.start(queue: DispatchQueue.global(qos: .utility))
+        networkMonitor = monitor
     }
 
     // MARK: - Account Status
 
-    /// Check if user has an iCloud account and update state accordingly
+    /// Read (never request) the iCloud account status.
     func checkAccountStatus() async {
         do {
-            let accountStatus = try await container.accountStatus()
-
-            switch accountStatus {
-            case .available:
-                hasICloudAccount = true
-                if !isSyncEnabled {
-                    syncState = .disabled
-                } else if isNetworkAvailable {
-                    // Clear transient errors when account is available
-                    if case .error(let error) = syncState, error != .quotaExceeded {
-                        syncState = .idle
-                    } else if case .noAccount = syncState {
-                        syncState = .idle
-                    } else if case .syncing = syncState {
-                        // Keep syncing
-                    } else if case .error(.quotaExceeded) = syncState {
-                        // Keep quota error - requires user action
-                    } else {
-                        syncState = .idle
-                    }
-                }
-            case .noAccount, .restricted, .couldNotDetermine:
-                hasICloudAccount = false
-                if isSyncEnabled {
-                    syncState = .noAccount
-                }
-            case .temporarilyUnavailable:
-                hasICloudAccount = true
-                if !isNetworkAvailable {
-                    syncState = .error(.networkUnavailable)
-                }
-            @unknown default:
-                hasICloudAccount = false
-                syncState = .error(.unknown(L10n.syncErrorUnknownStatus))
-            }
+            account = SyncAccountStatus(try await container.accountStatus())
         } catch {
-            hasICloudAccount = false
-            if isSyncEnabled {
-                syncState = .error(.unknown(error.localizedDescription))
-                scheduleRetryIfNeeded(for: .unknown(error.localizedDescription))
-            }
+            account = .unknown
         }
     }
 
@@ -303,224 +136,35 @@ final class SyncStatusService {
         }
     }
 
-    // MARK: - Sync Status Updates
+    // MARK: - Events
 
-    /// Called when remote changes are received from CloudKit
-    func didReceiveRemoteChanges() {
-        lastSyncDate = Date()
-        SyncSettings.shared.lastSyncDate = lastSyncDate
-        syncState = .synced
-        retryState.reset()
-
-        // Reset to idle after a short delay
-        Task {
-            try? await Task.sleep(for: .seconds(2))
-            if syncState == .synced {
-                syncState = .idle
-            }
+    /// Fold one event into the activity tally, persisting a new sync date.
+    func apply(_ event: SyncEvent) {
+        let previous = activity.lastSuccess
+        activity.apply(event)
+        if persistsLastSync, activity.lastSuccess != previous {
+            SyncSettings.shared.lastSyncDate = activity.lastSuccess
         }
-    }
-
-    /// Called when a sync operation starts
-    func didStartSync() {
-        guard isSyncEnabled else {
-            syncState = .disabled
-            return
-        }
-        syncState = .syncing
-    }
-
-    /// Called when a sync operation completes successfully
-    func didCompleteSync() {
-        lastSyncDate = Date()
-        SyncSettings.shared.lastSyncDate = lastSyncDate
-        syncState = .synced
-        retryState.reset()
-
-        // Reset to idle after a short delay
-        Task {
-            try? await Task.sleep(for: .seconds(2))
-            if syncState == .synced {
-                syncState = .idle
-            }
-        }
-    }
-
-    /// Called when a sync operation fails
-    func didFailSync(with error: Error) {
-        let syncError = mapError(from: error)
-        syncState = .error(syncError)
-        scheduleRetryIfNeeded(for: syncError)
-    }
-
-    /// Update state when sync is toggled
-    func syncSettingChanged(enabled: Bool) {
-        if enabled {
-            Task {
-                await checkAccountStatus()
-            }
-        } else {
-            syncState = .disabled
-            retryState.reset()
-        }
-    }
-
-    // MARK: - Settings Actions
-
-    /// Open iOS Settings app
-    func openSettings() {
-        #if os(iOS)
-        if let url = URL(string: UIApplication.openSettingsURLString) {
-            UIApplication.shared.open(url)
-        }
-        #endif
-    }
-
-    /// Open iCloud Storage management
-    func openStorageSettings() {
-        #if os(iOS)
-        if let url = URL(string: "App-prefs:CASTLE") {
-            UIApplication.shared.open(url)
-        }
-        #endif
-    }
-
-    /// Stop monitoring (call before deallocation if needed)
-    func stopMonitoring() {
-        networkMonitor?.cancel()
-        networkMonitor = nil
-        retryState.reset()
-    }
-
-    // MARK: - Retry Logic
-
-    /// Schedule a retry attempt for transient errors
-    private func scheduleRetryIfNeeded(for error: SyncError) {
-        guard error.isTransient, retryState.canRetry else { return }
-
-        let delay = retryState.nextDelay
-        retryState.attempts += 1
-
-        retryState.task?.cancel()
-        retryState.task = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(delay))
-            guard !Task.isCancelled else { return }
-            await self?.checkAccountStatus()
-        }
-    }
-
-    // MARK: - Error Mapping
-
-    /// Convert CloudKit errors to structured SyncError
-    private func mapError(from error: Error) -> SyncError {
-        if let ckError = error as? CKError {
-            switch ckError.code {
-            case .networkUnavailable, .networkFailure:
-                return .networkUnavailable
-            case .quotaExceeded:
-                return .quotaExceeded
-            case .notAuthenticated:
-                return .notSignedIn
-            case .serverResponseLost, .serviceUnavailable, .zoneBusy:
-                return .unknown(ckError.localizedDescription)
-            default:
-                return .unknown(L10n.syncErrorGeneric)
-            }
-        }
-        return .unknown(L10n.syncErrorGeneric)
-    }
-
-    // MARK: - Network Monitoring
-
-    private func setupNetworkMonitor() {
-        networkMonitor = NWPathMonitor()
-        networkMonitor?.pathUpdateHandler = { [weak self] path in
-            guard let self else { return }
-            Task { @MainActor in
-                self.handleNetworkChange(path)
-            }
-        }
-        networkMonitor?.start(queue: DispatchQueue.global(qos: .utility))
-    }
-
-    private func handleNetworkChange(_ path: NWPath) {
-        let wasAvailable = isNetworkAvailable
-        isNetworkAvailable = path.status == .satisfied
-
-        if !isNetworkAvailable && wasAvailable {
-            // Network just went offline
-            syncState = .error(.networkUnavailable)
-        } else if isNetworkAvailable && !wasAvailable {
-            // Network just came back online
-            if case .error(.networkUnavailable) = syncState {
-                syncState = .idle
-            }
-            retryState.reset()
-            // Re-check iCloud status
-            Task {
-                await checkAccountStatus()
-            }
-        }
-    }
-
-    // MARK: - Remote Change Observer
-
-    private func setupRemoteChangeObserver() {
-        NotificationCenter.default.publisher(
-            for: .NSPersistentStoreRemoteChange
-        )
-        .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
-        .sink { [weak self] _ in
-            self?.didReceiveRemoteChanges()
-        }
-        .store(in: &cancellables)
-    }
-
-    // MARK: - CloudKit Sync Event Observer
-
-    /// Observe `NSPersistentCloudKitContainer` setup/import/export events and drive
-    /// the sync state machine from them. Without this the didStart/didComplete/
-    /// didFail hooks are never called, so the status is cosmetic and real failures
-    /// (e.g. iCloud quota) never surface.
-    private func setupCloudKitEventObserver() {
-        NotificationCenter.default.publisher(
-            for: NSPersistentCloudKitContainer.eventChangedNotification
-        )
-        .receive(on: DispatchQueue.main)
-        .sink { [weak self] notification in
-            self?.handleCloudKitEvent(notification)
-        }
-        .store(in: &cancellables)
     }
 
     private func handleCloudKitEvent(_ notification: Notification) {
         guard let event = notification.userInfo?[NSPersistentCloudKitContainer.eventNotificationUserInfoKey]
             as? NSPersistentCloudKitContainer.Event else { return }
 
-        switch Self.outcome(endDate: event.endDate, succeeded: event.succeeded) {
-        case .started:
-            didStartSync()
-        case .succeeded:
-            didCompleteSync()
-        case .failed:
-            // A finished-but-failed event should always carry an error; fall back
-            // to a generic one so the failure still surfaces instead of being lost.
-            didFailSync(with: event.error ?? NSError(domain: "CloudKitSync", code: -1))
+        let kind: SyncEvent.Kind
+        switch event.type {
+        case .setup: kind = .setup
+        case .import: kind = .import
+        case .export: kind = .export
+        @unknown default: return
         }
-    }
 
-    /// Map a CloudKit event's raw fields onto a sync outcome. An event with no
-    /// `endDate` is still in flight (start); a finished event is a success or a
-    /// failure per `succeeded`. Kept static and pure so it's unit-testable without
-    /// constructing a non-public `NSPersistentCloudKitContainer.Event`.
-    enum SyncEventOutcome: Equatable {
-        case started
-        case succeeded
-        case failed
-    }
-
-    nonisolated static func outcome(endDate: Date?, succeeded: Bool) -> SyncEventOutcome {
-        guard endDate != nil else { return .started }
-        return succeeded ? .succeeded : .failed
+        apply(SyncEvent(
+            id: event.identifier,
+            kind: kind,
+            endDate: event.endDate,
+            succeeded: event.succeeded,
+            error: event.error.map(SyncError.init)
+        ))
     }
 }
