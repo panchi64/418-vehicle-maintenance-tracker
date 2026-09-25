@@ -78,6 +78,22 @@ struct EditVehicleView: View {
             && isYearAcceptable
     }
 
+    /// Whether any field differs from the vehicle — what Cancel would discard.
+    private var isDirty: Bool {
+        name != vehicle.name
+            || make != vehicle.make
+            || model != vehicle.model
+            || year != (vehicle.hasModelYear ? vehicle.year : nil)
+            || currentMileage != vehicle.currentMileage
+            || vin != (vehicle.vin ?? "")
+            || licensePlate != (vehicle.licensePlate ?? "")
+            || tireSize != (vehicle.tireSize ?? "")
+            || oilType != (vehicle.oilType ?? "")
+            || notes != (vehicle.notes ?? "")
+            || marbeteExpirationMonth != vehicle.marbeteExpirationMonth
+            || marbeteExpirationYear != vehicle.marbeteExpirationYear
+    }
+
     private var isYearAcceptable: Bool {
         year.map { Vehicle.isPlausibleModelYear($0) } ?? true
     }
@@ -106,9 +122,7 @@ struct EditVehicleView: View {
                             InstrumentSectionHeader(title: L10n.vehicleDetails)
 
                             if showBasicsError, !isFormValid {
-                                ErrorMessageRow(message: isYearAcceptable ? L10n.formVehicleBasicsRequired : L10n.vehicleYearOutOfRange) {
-                                    showBasicsError = false
-                                }
+                                FormAdvisory.blocking(isYearAcceptable ? L10n.formVehicleBasicsRequired : L10n.vehicleYearOutOfRange)
                             }
 
                             VStack(spacing: Spacing.md) {
@@ -234,24 +248,19 @@ struct EditVehicleView: View {
                 }
             }
             .keyboardDismissToolbar()
-            .navigationTitle(L10n.vehicleEditTitle)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L10n.commonCancel) { dismiss() }
-                        .toolbarButtonStyle()
+            .formToolbar(
+                title: L10n.vehicleEditTitle,
+                subtitle: vehicle.displayName,
+                canSave: isFormValid,
+                isDirty: isDirty,
+                onSave: saveChanges,
+                onBlocked: {
+                    showBasicsError = true
+                    withAnimation { proxy.scrollTo("vehicleDetails", anchor: .top) }
                 }
-            }
-            .safeAreaInset(edge: .bottom) {
-                FormActionBar(
-                    primaryTitle: L10n.commonSave,
-                    isPrimaryEnabled: isFormValid,
-                    onPrimary: { saveChanges() },
-                    onDisabledPrimaryTap: {
-                        showBasicsError = true
-                        withAnimation { proxy.scrollTo("vehicleDetails", anchor: .top) }
-                    }
-                )
+            )
+            .onChange(of: isFormValid) { _, valid in
+                if valid { showBasicsError = false }
             }
             .trackScreen(.editVehicle)
             .confirmationDialog(

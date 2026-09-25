@@ -24,17 +24,12 @@ extension L10n {
     static var a11yScanWithCamera: String { a11y("a11y.scanWithCamera") }
     static var a11yDistanceUnit: String { a11y("a11y.distanceUnit") }
 
-    /// "Warning: <message>" — the icon and color that mark a warning visually.
-    static func a11yWarning(_ message: String) -> String {
-        String(format: a11y("a11y.warning"), message)
-    }
-
     /// "Error: <message>"
     static func a11yError(_ message: String) -> String {
         String(format: a11y("a11y.error"), message)
     }
 
-    // MARK: - Form action bar (F2)
+    // MARK: - Dim Save (F2)
 
     static var a11ySaveUnavailable: String { a11y("a11y.saveUnavailable") }
     static var a11ySaveUnavailableHint: String { a11y("a11y.saveUnavailableHint") }
@@ -44,14 +39,6 @@ extension L10n {
     static var a11yFormatBold: String { a11y("a11y.format.bold") }
     static var a11yFormatBulletedList: String { a11y("a11y.format.bulletedList") }
     static var a11yFormatNumberedList: String { a11y("a11y.format.numberedList") }
-
-    // MARK: - Service type picker
-
-    static var a11yServiceType: String { a11y("a11y.serviceType") }
-    static var a11yChangeServiceTypeHint: String { a11y("a11y.serviceType.changeHint") }
-    static var a11yClearServiceType: String { a11y("a11y.serviceType.clear") }
-    static var a11yUseCustomServiceHint: String { a11y("a11y.serviceType.useCustomHint") }
-    static var a11yBrowseServicePresets: String { a11y("a11y.serviceType.browsePresets") }
 
     // MARK: - Attachments
 

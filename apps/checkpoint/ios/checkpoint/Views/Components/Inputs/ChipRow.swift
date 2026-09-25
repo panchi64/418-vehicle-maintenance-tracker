@@ -24,7 +24,7 @@ struct Chip: View {
         /// defines as "the one primary datum". A timing chip IS that datum.
         case decision
 
-        /// A shortcut that fills a field. No enclosure, 11 Medium caps.
+        /// A shortcut that fills a field. No enclosure, 13 Regular sentence case.
         case plain
     }
 
@@ -66,10 +66,16 @@ struct Chip: View {
             // rule — so the input and the shortcuts beneath it read as the same
             // kind of control, and since tapping a chip copies its text into the
             // field, the same words appeared twice in the same treatment.
-            Text(label.uppercased())
-                .font(isSelected ? .brutalistLabelBold : .brutalistLabel)
-                .tracking(1.5)
+            //
+            // 13pt sentence case, not 11pt tracked caps: caps made a shortcut
+            // read as a field label, and shouted a phrase that is on offer.
+            // Wraps rather than truncates at large type.
+            Text(label)
+                .font(.brutalistSecondary)
+                .bold(isSelected)
                 .foregroundStyle(isSelected ? Theme.accent : Theme.textSecondary)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
         } else {
             // No line limit: `FlowLayout` only narrows a chip that can't fit
             // the row, and then the label must wrap rather than truncate.

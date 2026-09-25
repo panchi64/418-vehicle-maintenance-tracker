@@ -2,7 +2,12 @@
 //  MileageUpdateSheet.swift
 //  checkpoint
 //
-//  Mileage update sheet with manual entry and camera-based OCR
+//  Mileage update sheet with manual entry and camera-based OCR.
+//
+//  The sheet's whole job is one number, so the field takes focus on appear and
+//  Update lives in the toolbar (`formToolbar`) where it never competes with the
+//  number pad. A scanned reading goes through `OCRConfirmationView`, whose own
+//  toolbar confirm commits it.
 //
 
 import SwiftUI
@@ -29,6 +34,7 @@ struct MileageUpdateSheet: View {
     @State private var isProcessingOCR = false
     @State private var ocrError: String?
     @State private var mileageWarning: String?
+    @State private var showBlocker = false
 
     /// Delay before the "below previous reading" warning appears while typing.
     /// Why: the comparison fires per keystroke, so "32500" would flash the
@@ -40,15 +46,7 @@ struct MileageUpdateSheet: View {
         UIImagePickerController.isSourceTypeAvailable(.camera)
     }
 
-    /// Whether to show estimates (from settings)
-    private var showEstimates: Bool {
-        MileageEstimateSettings.shared.showEstimates
-    }
-
-    /// Whether we have an estimate to show
-    private var hasEstimate: Bool {
-        showEstimates && vehicle.isUsingEstimatedMileage && vehicle.estimatedMileage != nil
-    }
+    private var hasReading: Bool { (newMileage ?? 0) > 0 }
 
     var body: some View {
         NavigationStack {
@@ -56,55 +54,50 @@ struct MileageUpdateSheet: View {
                 Theme.backgroundPrimary
                     .ignoresSafeArea()
 
-                VStack(spacing: Spacing.lg) {
-                    // Context row: estimate + last confirmed
-                    contextRow
+                ScrollView {
+                    VStack(spacing: Spacing.lg) {
+                        MileageContextRow(vehicle: vehicle)
 
-                    // Mileage input with camera button
-                    mileageInputSection
+                        mileageInputSection
 
-                    if let mileageWarning {
-                        SanityWarningRow(message: mileageWarning)
+                        // F2: at the field that resolves it.
+                        if showBlocker, !hasReading {
+                            FormAdvisory.blocking(L10n.formEnterReading)
+                        }
+
+                        if let mileageWarning {
+                            FormAdvisory.caution(mileageWarning)
+                        }
+
+                        if let error = ocrError {
+                            FormAdvisory.caution(error) { ocrError = nil }
+                        }
+
+                        if isProcessingOCR {
+                            processingView
+                        }
                     }
-
-                    // OCR error message
-                    if let error = ocrError {
-                        ocrErrorView(error)
-                    }
-
-                    // Processing indicator
-                    if isProcessingOCR {
-                        processingView
-                    }
-
-                    Spacer()
+                    .padding(Spacing.screenHorizontal)
+                    .padding(.top, Spacing.lg)
                 }
-                .padding(Spacing.screenHorizontal)
-                .padding(.top, Spacing.lg)
             }
             .keyboardDismissToolbar()
-            .navigationTitle(L10n.mileageUpdateTitle)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L10n.commonCancel) { dismiss() }
-                        .toolbarButtonStyle()
-                }
-            }
-            .safeAreaInset(edge: .bottom) {
-                FormActionBar(
-                    primaryTitle: L10n.commonUpdate,
-                    isPrimaryEnabled: (newMileage ?? 0) > 0 && !isProcessingOCR,
-                    onPrimary: { commit(newMileage ?? 0) }
-                )
-            }
+            .formToolbar(
+                title: L10n.mileageUpdateTitle,
+                subtitle: vehicle.displayName,
+                saveTitle: L10n.commonUpdate,
+                canSave: hasReading && !isProcessingOCR,
+                isDirty: newMileage != nil && newMileage != prefilledMileage,
+                onSave: { commit(newMileage ?? 0) },
+                onBlocked: { showBlocker = true }
+            )
         }
         .onAppear {
-            // Use prefilled mileage from Siri if available, otherwise start empty
+            // A Siri reading prefills; otherwise the field starts empty so the
+            // user enters the actual reading rather than accepting a guess.
             if let prefilled = prefilledMileage {
                 newMileage = prefilled
             }
-            // Otherwise leave newMileage nil so user enters actual reading
         }
         .task(id: newMileage) {
             let warning = ServiceFormValidation.mileageWarning(
@@ -122,7 +115,7 @@ struct MileageUpdateSheet: View {
                 try await Task.sleep(for: Self.lowerWarningDebounce)
                 mileageWarning = warning
             } catch {
-                // Task cancelled because the user typed another digit — keep the warning hidden.
+                // Cancelled because the user typed another digit — keep it hidden.
             }
         }
         .fullScreenCover(isPresented: $showCamera) {
@@ -146,128 +139,7 @@ struct MileageUpdateSheet: View {
         }
     }
 
-    // MARK: - Context Row
-
-    @ViewBuilder
-    private var contextRow: some View {
-        if hasEstimate {
-            // Show both estimate and last confirmed
-            AdaptiveStack(spacing: Spacing.sm) {
-                // Current estimate card
-                estimateContextCard
-
-                // Last confirmed card
-                lastConfirmedContextCard
-            }
-        } else if vehicle.mileageUpdatedAt != nil {
-            // No estimate, just show last confirmed
-            lastConfirmedOnlyCard
-        } else {
-            // No estimate and never updated - show hint
-            noEstimateHint
-        }
-    }
-
-    private var estimateContextCard: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text(L10n.mileageCurrentEstimate)
-                .textCase(.uppercase)
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1)
-
-            if let estimate = vehicle.estimatedMileage {
-                Text(Formatters.estimatedMileage(estimate) + " " + DistanceSettings.shared.unit.uppercaseAbbreviation)
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.accent)
-            }
-
-            if let confidence = vehicle.paceConfidence {
-                HStack(spacing: Spacing.xs) {
-                    CompactConfidenceBar(level: confidence)
-                    Text(confidence.label)
-                        .font(.brutalistLabel)
-                        .foregroundStyle(confidence.color)
-                        .tracking(1)
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(Spacing.md)
-        .background(Theme.surfaceInstrument)
-        .brutalistBorder()
-    }
-
-    private var lastConfirmedContextCard: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text(L10n.mileageLastConfirmed)
-                .textCase(.uppercase)
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1)
-
-            Text(Formatters.mileageNumber(vehicle.currentMileage) + " " + DistanceSettings.shared.unit.uppercaseAbbreviation)
-                .font(.brutalistBody)
-                .foregroundStyle(Theme.textPrimary)
-
-            Text(vehicle.mileageUpdateDescription)
-                .font(.brutalistSecondary)
-                .foregroundStyle(Theme.textTertiary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(Spacing.md)
-        .background(Theme.surfaceInstrument)
-        .brutalistBorder()
-    }
-
-    private var lastConfirmedOnlyCard: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text(L10n.mileageLastConfirmed)
-                .textCase(.uppercase)
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1)
-
-            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text(Formatters.mileageNumber(vehicle.currentMileage))
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textPrimary)
-
-                Text(DistanceSettings.shared.unit.uppercaseAbbreviation)
-                    .font(.brutalistLabel)
-                    .foregroundStyle(Theme.textTertiary)
-                    .tracking(1)
-            }
-
-            Text(vehicle.mileageUpdateDescription)
-                .font(.brutalistSecondary)
-                .foregroundStyle(Theme.textTertiary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(Spacing.md)
-        .background(Theme.surfaceInstrument)
-        .brutalistBorder()
-    }
-
-    private var noEstimateHint: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text(L10n.mileageNoEstimate)
-                .textCase(.uppercase)
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1)
-
-            Text(L10n.mileageNoEstimateHint)
-                .font(.brutalistSecondary)
-                .foregroundStyle(Theme.textTertiary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(Spacing.md)
-        .background(Theme.surfaceInstrument)
-        .brutalistBorder()
-    }
-
-    // MARK: - Mileage Input Section
+    // MARK: - Mileage Input
 
     private var mileageInputSection: some View {
         InstrumentNumberField(
@@ -279,41 +151,8 @@ struct MileageUpdateSheet: View {
             onCameraTap: isCameraAvailable ? {
                 ocrError = nil
                 showCamera = true
-            } : nil
-        )
-    }
-
-    // MARK: - OCR Error View
-
-    private func ocrErrorView(_ error: String) -> some View {
-        HStack(spacing: Spacing.sm) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(Theme.statusOverdue)
-                .accessibilityHidden(true)
-
-            Text(error.uppercased())
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.statusOverdue)
-                .tracking(1)
-
-            Spacer()
-
-            Button {
-                ocrError = nil
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(Theme.textTertiary)
-                    .minimumTouchTarget()
-            }
-            .accessibilityLabel(L10n.mileageDismissError)
-        }
-        .padding(Spacing.md)
-        .background(Theme.statusOverdue.opacity(0.1))
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.statusOverdue.opacity(0.5), lineWidth: Theme.borderWidth)
+            } : nil,
+            autoFocus: true
         )
     }
 

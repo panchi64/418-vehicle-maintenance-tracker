@@ -2,7 +2,7 @@
 //  LoggedServiceWriter.swift
 //  checkpoint
 //
-//  Persists the add form's log path. Separate from the view so the two
+//  Persists the service form's log path ([+] and Mark Done). Separate from the view so the two
 //  outcomes — completing a tracked service, or creating a standalone one — are
 //  testable without a view hierarchy.
 //
@@ -20,7 +20,7 @@ enum LoggedServiceWriter {
     ///   Done — instead of creating a duplicate service.
     /// - Returns: an undo that reverses exactly what was written.
     static func save(
-        _ model: AddServiceFormModel,
+        _ model: ServiceLogFormModel,
         completing target: Service?,
         in context: ModelContext
     ) -> RecordedServiceUndo {

@@ -2,42 +2,33 @@
 //  ServiceVisitFields.swift
 //  checkpoint
 //
-//  The past branch of the unified form: what the visit cost and what the
-//  odometer read. Shown when the chosen timing is in the past.
+//  "Details" — what the visit recorded: the odometer and the cost. Shown when
+//  the entry happened (any past timing, and always when editing).
 //
-//  Replaces `RecordServiceFields`, which also owned the date picker (now in the
-//  timing section), the recurrence toggle (now in the reminder branch, because
-//  it is a scheduling decision), and a `CollapsibleDetailsSection` (now the
-//  shared `ServiceDepthSection`).
+//  No OPTIONAL tag. The tag is a promise of no side effects, and the odometer
+//  here can advance the vehicle's current mileage — so the section is not
+//  optional in that sense. The one side effect is stated as `.info` before
+//  save, beside the field that causes it (F11).
+//
+//  Category moved to More details: it has a working default and is rarely
+//  changed, so it makes an entry complete rather than making it work.
 //
 
 import SwiftUI
 
 struct ServiceVisitFields: View {
-    @Bindable var model: AddServiceFormModel
+    @Bindable var model: ServiceLogFormModel
     let anchors: ServiceFormAnchors
+    /// F2: shown after a tap on the dim Save.
+    let blocker: String?
+
+    /// Edit: an un-itemized visit's shared total is what the cost field edits.
+    private var sharedCostVisit: ServiceVisit? { model.mode.editing?.sharedCostVisit }
 
     var body: some View {
-        // No OPTIONAL tag. The tag is a promise of no side effects, and the
-        // odometer here can advance the vehicle's current mileage — so this
-        // section is not optional in that sense. Nothing in it is required
-        // either (required-ness is marked per field), and the one side effect
-        // is stated as `.info` before save, beside the field that causes it.
-        FormSection(title: L10n.formTheVisit) {
+        FormSection(title: L10n.formDetails) {
             odometerField
             costField
-
-            // A picker, not six chips. Category has a working default and is
-            // rarely changed, so a permanent option set spent six enclosures on
-            // a decision most users never make — while the timing chips, which
-            // every user must answer, looked exactly the same.
-            InlinePicker(
-                label: L10n.formCategory,
-                options: CostCategory.allCases.map {
-                    PickerOption(value: $0, label: $0.displayName)
-                },
-                selection: $model.costCategory
-            )
         }
     }
 
@@ -45,19 +36,28 @@ struct ServiceVisitFields: View {
 
     @ViewBuilder
     private var odometerField: some View {
-        // "Odometer at service", distinct from the reminder branch's "Remind me
-        // at". Identical labels across the two branches are what made "should
-        // this update current mileage?" ambiguous in the first place.
+        // "Odometer at service", distinct from the reminder's "Remind me at".
+        // Identical labels are what made "should this update current mileage?"
+        // ambiguous in the first place.
         InstrumentNumberField(
             label: L10n.formOdometerAtService,
             value: $model.mileageAtService,
             placeholder: Formatters.mileageNumber(model.vehicle.currentMileage),
-            suffix: DistanceSettings.shared.unit.abbreviation
+            suffix: DistanceSettings.shared.unit.abbreviation,
+            requirement: model.mode.isEdit ? .required(reason: L10n.editLogMileageRequired) : .optional
         )
 
-        // Adoption is STATED, never prompted. The app knows what it will do; a
-        // modal question would be the app asking the user to make its decision
-        // for it (F11).
+        if let blocker {
+            FormAdvisory.blocking(blocker)
+        }
+
+        if let original = model.originalMileage {
+            OriginalValueHint(text: L10n.editWas(OriginalValueHint.value(forMileage: original)))
+        }
+
+        estimateHint
+
+        // Adoption is STATED, never prompted (F11).
         if model.wouldAdoptMileage, let summary = MileageCommit.adoptionSummary(
             reading: model.mileageAtService,
             observedAt: model.performedDate,
@@ -72,31 +72,44 @@ struct ServiceVisitFields: View {
             FormAdvisory.contradiction(
                 L10n.formOdometerContradiction(Formatters.mileage(model.vehicle.currentMileage)),
                 outcomes: [
-                    .init(label: L10n.formKeepMyOdometer) {
-                        model.mileageResolution = .keepCurrent
-                    },
-                    .init(label: L10n.formCorrectItUpward) {
-                        model.mileageResolution = .correctUpward
-                    }
+                    .init(label: L10n.formKeepMyOdometer) { model.mileageResolution = .keepCurrent },
+                    .init(label: L10n.formCorrectItUpward) { model.mileageResolution = .correctUpward }
                 ]
             )
         }
 
         if model.mileageResolution == .keepCurrent {
-            FormAdvisory.info(
-                L10n.formOdometerStaysAt(Formatters.mileage(model.vehicle.currentMileage))
-            )
-        }
-
-        if model.mileageAtService == nil {
-            Text(L10n.formMileageBlankHint)
-                .font(.brutalistSecondary)
-                .foregroundStyle(Theme.textTertiary)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            FormAdvisory.info(L10n.formOdometerStaysAt(Formatters.mileage(model.vehicle.currentMileage)))
         }
 
         if let warning = anchors.mileageWarning {
-            SanityWarningRow(message: warning)
+            FormAdvisory.caution(warning)
+        }
+    }
+
+    /// The field holds the last CONFIRMED reading; the estimate is a hint to
+    /// adopt in one tap, never a default (Mark Done once committed the
+    /// estimate as fact).
+    @ViewBuilder
+    private var estimateHint: some View {
+        let estimate = model.vehicle.mileageEstimate
+        if !model.mode.isEdit, estimate.isEstimated, model.mileageAtService != estimate.effective {
+            HStack(alignment: .firstTextBaseline, spacing: Spacing.sm) {
+                Text(L10n.markDoneEstimateHint(Formatters.mileage(estimate.effective)))
+                    .font(.brutalistSecondary)
+                    .foregroundStyle(Theme.textTertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Button(L10n.formUse) {
+                    model.mileageAtService = estimate.effective
+                    HapticService.shared.selectionChanged()
+                }
+                .font(.brutalistBody)
+                .foregroundStyle(Theme.accent)
+                .buttonStyle(.plain)
+                .frame(minHeight: TouchTarget.minimum)
+                .accessibilityLabel(L10n.formUseEstimate(Formatters.mileage(estimate.effective)))
+            }
         }
     }
 
@@ -105,32 +118,41 @@ struct ServiceVisitFields: View {
     @ViewBuilder
     private var costField: some View {
         InstrumentTextField(
-            label: L10n.formCost,
+            label: sharedCostVisit != nil ? L10n.editVisitTotal : L10n.formCost,
             text: $model.cost,
             placeholder: "0.00",
-            keyboardType: .decimalPad
+            keyboardType: .decimalPad,
+            prefix: Formatters.currency.currencySymbol
         )
         .onChange(of: model.cost) { _, newValue in
             model.cost = CostValidation.filterCostInput(newValue)
             model.costError = CostValidation.validate(model.cost)
         }
 
-        if let hint = anchors.priorCostHint {
-            Text(hint)
-                .font(.brutalistSecondary)
-                .foregroundStyle(Theme.textTertiary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .accessibilityLabel(hint)
+        if let original = model.originalCost {
+            OriginalValueHint(text: L10n.editWas(original.map { Formatters.currency.string(from: $0 as NSDecimalNumber) ?? "" } ?? L10n.impactNone))
         }
 
-        if let warning = anchors.costWarning {
-            SanityWarningRow(message: warning)
+        // A visit total isn't comparable to this service's past single-service
+        // costs, so the price anchor gives way to what the number covers.
+        if let visit = sharedCostVisit {
+            if visit.serviceCount > 1 {
+                FormAdvisory.info(L10n.editVisitTotalHint(visit.serviceCount))
+            }
+        } else {
+            if let hint = anchors.priorCostHint {
+                Text(hint)
+                    .font(.brutalistSecondary)
+                    .foregroundStyle(Theme.textTertiary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            if let warning = anchors.costWarning {
+                FormAdvisory.caution(warning)
+            }
         }
 
         if let costError = model.costError {
-            ErrorMessageRow(message: costError) {
-                model.costError = nil
-            }
+            FormAdvisory.caution(costError) { model.costError = nil }
         }
     }
 }

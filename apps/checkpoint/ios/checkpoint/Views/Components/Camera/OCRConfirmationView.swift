@@ -92,41 +92,43 @@ struct OCRConfirmationView: View {
                 Theme.backgroundPrimary
                     .ignoresSafeArea()
 
-                VStack(spacing: Spacing.lg) {
-                    // Extracted mileage display (directly editable)
-                    mileageDisplay
+                ScrollView {
+                    VStack(spacing: Spacing.lg) {
+                        // Extracted mileage display (directly editable)
+                        mileageDisplay
 
-                    if confidenceLevel == .low {
-                        warningBanner("LOW CONFIDENCE - VERIFY VALUE")
+                        if parsedMileage == nil {
+                            FormAdvisory.blocking(L10n.formEnterReading)
+                        }
+
+                        if confidenceLevel == .low {
+                            FormAdvisory.caution(L10n.formOCRLowConfidence)
+                        }
+
+                        if isLowerThanCurrent {
+                            FormAdvisory.caution(L10n.formOCRBelowPrevious(Formatters.mileage(currentMileage)))
+                        }
+
+                        // Debug: raw OCR text and cropped image preview
+                        // Uncomment to diagnose camera/OCR issues:
+                        // #if DEBUG
+                        // rawTextDebugView
+                        // #endif
                     }
-
-                    if isLowerThanCurrent {
-                        warningBanner("BELOW PREVIOUS READING (\(previousMileageText))")
-                    }
-
-                    // Debug: raw OCR text and cropped image preview
-                    // Uncomment to diagnose camera/OCR issues:
-                    // #if DEBUG
-                    // rawTextDebugView
-                    // #endif
-
-                    Spacer()
-
-                    // Action button (single "USE THIS" button)
-                    actionButtons
+                    .padding(Spacing.screenHorizontal)
+                    .padding(.top, Spacing.lg)
                 }
-                .padding(Spacing.screenHorizontal)
-                .padding(.top, Spacing.lg)
             }
             .keyboardDismissToolbar()
-            .navigationTitle("Extracted Mileage")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                        .toolbarButtonStyle()
-                }
-            }
+            // The confirm is the toolbar's, like every other form: the scanned
+            // value is a proposal the user accepts, not a second Save button.
+            .formToolbar(
+                title: L10n.formOCRTitle,
+                saveTitle: L10n.formUse,
+                canSave: parsedMileage != nil,
+                isDirty: false,
+                onSave: confirm
+            )
         }
         .onAppear {
             // Initialize sourceUnit from detected unit or user preference
@@ -141,7 +143,7 @@ struct OCRConfirmationView: View {
 
     private var mileageDisplay: some View {
         VStack(spacing: Spacing.sm) {
-            Text("DETECTED VALUE")
+            Text(L10n.formOCRDetectedValue.uppercased())
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(2)
@@ -188,47 +190,15 @@ struct OCRConfirmationView: View {
                 .accessibilityValue(sourceUnit.uppercaseAbbreviation)
             }
 
-            Text("TAP TO EDIT")
+            Text(L10n.formOCRTapToEdit.uppercased())
                 .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary.opacity(0.6))
+                .foregroundStyle(Theme.textTertiary)
                 .tracking(1)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, Spacing.xl)
         .background(Theme.surfaceInstrument)
         .brutalistBorder()
-    }
-
-    // MARK: - Warning Banner
-
-    private var previousMileageText: String {
-        "\(Formatters.mileageNumber(currentMileage)) \(DistanceSettings.shared.unit.uppercaseAbbreviation)"
-    }
-
-    private func warningBanner(_ text: String) -> some View {
-        HStack(spacing: Spacing.sm) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.footnote.weight(.medium))
-                .foregroundStyle(Theme.statusOverdue)
-                .accessibilityHidden(true)
-
-            Text(text)
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.statusOverdue)
-                .tracking(1)
-                .fixedSize(horizontal: false, vertical: true)
-                .multilineTextAlignment(.leading)
-                .accessibilityLabel(L10n.a11yWarning(text))
-
-            Spacer(minLength: 0)
-        }
-        .padding(Spacing.md)
-        .frame(maxWidth: .infinity)
-        .background(Theme.statusOverdue.opacity(0.1))
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.statusOverdue.opacity(0.5), lineWidth: Theme.borderWidth)
-        )
     }
 
     // MARK: - Debug: Raw OCR Text
@@ -278,26 +248,16 @@ struct OCRConfirmationView: View {
     }
     #endif
 
-    // MARK: - Action Buttons
+    // MARK: - Confirm
 
-    private var actionButtons: some View {
-        Button {
-            let userValue = parsedMileage ?? extractedMileage
-            AnalyticsService.shared.capture(.ocrConfirmed(
-                ocrType: .odometer,
-                valueEdited: userValue != extractedMileage
-            ))
-            onConfirm(finalMileageInMiles)
-            dismiss()
-        } label: {
-            Text("USE THIS")
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.surfaceInstrument)
-                .tracking(1.5)
-                .frame(maxWidth: .infinity)
-                .frame(height: Theme.buttonHeight)
-                .background(Theme.accent)
-        }
+    private func confirm() {
+        let userValue = parsedMileage ?? extractedMileage
+        AnalyticsService.shared.capture(.ocrConfirmed(
+            ocrType: .odometer,
+            valueEdited: userValue != extractedMileage
+        ))
+        onConfirm(finalMileageInMiles)
+        dismiss()
     }
 }
 

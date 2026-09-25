@@ -16,6 +16,8 @@ final class ServiceFormDraftStoreTests: XCTestCase {
             version: ServiceFormDraft.currentVersion,
             timing: .today,
             customDate: .now,
+            dueKind: nil,
+            dueDate: nil,
             serviceName: "Oil Change",
             presetName: "oil_change",
             costText: "48",
@@ -102,5 +104,19 @@ final class ServiceFormDraftStoreTests: XCTestCase {
         XCTAssertNil(ServiceFormDraftStore.load(for: vehicleB))
 
         ServiceFormDraftStore.clear(for: vehicleA)
+    }
+
+    func testDrafts_AreIsolatedPerDoor() {
+        // A Mark Done draft must not resurface in [+] for the same vehicle, or
+        // in another service's completion.
+        let id = UUID()
+        ServiceFormDraftStore.save(makeDraft(), .completion(serviceID: id))
+
+        XCTAssertNotNil(ServiceFormDraftStore.load(.completion(serviceID: id)))
+        XCTAssertNil(ServiceFormDraftStore.load(.newEntry(vehicleID: id)))
+        XCTAssertNil(ServiceFormDraftStore.load(.edit(logID: id)))
+
+        ServiceFormDraftStore.clear(.completion(serviceID: id))
+        XCTAssertNil(ServiceFormDraftStore.load(.completion(serviceID: id)))
     }
 }

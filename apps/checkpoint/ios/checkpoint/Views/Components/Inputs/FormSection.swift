@@ -14,7 +14,7 @@
 //
 //  The three levels now differ on at least two channels each:
 //
-//    section   11 Bold caps, secondary, + a full-width rule    FormSection
+//    section   15 Bold Title Case, primary, + a full-width rule FormSection
 //    field     11 Medium caps, tertiary, no rule               InstrumentTextField
 //    subgroup  13 Regular sentence case, tertiary              FormSubgroup
 //
@@ -57,19 +57,20 @@ struct FormSection<Content: View>: View {
         // the extra separation costs almost no height.
         VStack(alignment: .leading, spacing: Spacing.sm) {
             HStack(spacing: Spacing.sm) {
-                Text(title.uppercased())
-                    .font(.brutalistLabelBold)
-                    .foregroundStyle(Theme.textSecondary)
-                    .tracking(1.5)
+                // The section tier: 15 Bold Title Case, primary, untracked —
+                // two steps above an 11pt caps field label (size and case),
+                // so the two can no longer be confused.
+                Text(title)
+                    .font(.brutalistSectionTitle)
+                    .foregroundStyle(Theme.textPrimary)
                     // Priority, not `fixedSize`: the rule gives way first, and
                     // at accessibility sizes a title wider than the screen
                     // wraps instead of running off the edge.
                     .layoutPriority(1)
 
-                // Theme.borderWidth (2), not a hairline. The section title is
-                // 11pt Bold caps and a field label is 11pt Medium caps — the
-                // same size — so the RULE is what actually marks the boundary,
-                // and it should be as heavy as any other structural border.
+                // Theme.borderWidth (2), not a hairline: the rule marks the
+                // boundary across the full width, as heavy as any other
+                // structural border.
                 Rectangle()
                     .fill(Theme.gridLine)
                     .frame(height: Theme.borderWidth)

@@ -66,8 +66,8 @@ final class LoggedServiceWriterTests: XCTestCase {
         return service
     }
 
-    private func makeLogModel(for vehicle: Vehicle, name: String = "Oil Change") -> AddServiceFormModel {
-        let model = AddServiceFormModel(vehicle: vehicle, initialTiming: .today)
+    private func makeLogModel(for vehicle: Vehicle, name: String = "Oil Change") -> ServiceLogFormModel {
+        let model = ServiceLogFormModel(vehicle: vehicle, timing: .today)
         model.customServiceName = name
         return model
     }
@@ -75,8 +75,8 @@ final class LoggedServiceWriterTests: XCTestCase {
     /// `.today` resolves `performedDate` to `Date.now` on every read, so a
     /// preview and a save a few microseconds apart would differ for reasons
     /// unrelated to F4. A fixed explicit date isolates the calculation.
-    private func makeFixedDateLogModel(for vehicle: Vehicle, name: String) -> AddServiceFormModel {
-        let model = AddServiceFormModel(vehicle: vehicle, initialTiming: .earlier)
+    private func makeFixedDateLogModel(for vehicle: Vehicle, name: String) -> ServiceLogFormModel {
+        let model = ServiceLogFormModel(vehicle: vehicle, timing: .earlier)
         model.customDate = Date(timeIntervalSinceNow: -86400)
         model.customServiceName = name
         return model
@@ -173,7 +173,7 @@ final class LoggedServiceWriterTests: XCTestCase {
 
     func testApplyScheduleDefaults_BackfillWithoutMatch_DoesNotRecur() {
         let vehicle = makeVehicle()
-        let model = AddServiceFormModel(vehicle: vehicle, initialTiming: .earlier)
+        let model = ServiceLogFormModel(vehicle: vehicle, timing: .earlier)
         let preset = PresetData(name: "Oil Change", category: "Engine", defaultIntervalMonths: 6, defaultIntervalMiles: 5000)
 
         model.applyScheduleDefaults(preset: preset, match: nil)
@@ -186,7 +186,7 @@ final class LoggedServiceWriterTests: XCTestCase {
         let vehicle = makeVehicle(mileage: 30000)
         let tracked = makeTrackedService(on: vehicle, dueMileage: 29600)
 
-        let text = AddServiceView.completesAdvisory(for: tracked, vehicle: vehicle)
+        let text = ServicePickerSection.completesAdvisory(for: tracked, vehicle: vehicle)
 
         XCTAssertTrue(text.contains("Oil Change"))
         XCTAssertEqual(

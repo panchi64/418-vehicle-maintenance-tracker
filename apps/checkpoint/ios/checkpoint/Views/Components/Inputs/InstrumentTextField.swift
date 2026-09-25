@@ -32,6 +32,9 @@ struct InstrumentTextField: View {
     var textContentType: UITextContentType?
     var autocapitalization: TextInputAutocapitalization = .sentences
     var requirement: FieldRequirement = .optional
+    /// A unit that leads the value — the currency symbol on a cost field. Set
+    /// at 13pt like a suffix, so it annotates the number without competing.
+    var prefix: String?
 
     @FocusState private var isFocused: Bool
 
@@ -40,27 +43,39 @@ struct InstrumentTextField: View {
             FieldLabel(label: label, requirement: requirement)
 
             FieldLine(isFocused: isFocused) {
-                TextField(placeholder, text: $text)
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textPrimary)
-                    .keyboardType(keyboardType)
-                    .textContentType(textContentType)
-                    .textInputAutocapitalization(autocapitalization)
-                    .focused($isFocused)
-                    // VoiceOver otherwise names the field by its placeholder —
-                    // an example value, not what the field is for.
-                    .accessibilityLabel(label ?? placeholder)
-                    // Return means "done" on a single-line field — there is
-                    // nothing to submit to and no next field to advance to, so
-                    // the only reading of Return a user could intend is that
-                    // they have finished. Without this the key is inert and the
-                    // keyboard has to be dismissed some other way.
-                    .submitLabel(.done)
-                    .onSubmit { isFocused = false }
+                HStack(spacing: Spacing.xs) {
+                    if let prefix {
+                        Text(prefix)
+                            .font(.brutalistSecondary)
+                            .foregroundStyle(Theme.textTertiary)
+                            .accessibilityHidden(true)
+                    }
+                    field
+                }
             }
 
             FieldEffectNote(requirement: requirement)
         }
+    }
+
+    private var field: some View {
+        TextField(placeholder, text: $text)
+            .font(.brutalistBody)
+            .foregroundStyle(Theme.textPrimary)
+            .keyboardType(keyboardType)
+            .textContentType(textContentType)
+            .textInputAutocapitalization(autocapitalization)
+            .focused($isFocused)
+            // VoiceOver otherwise names the field by its placeholder —
+            // an example value, not what the field is for.
+            .accessibilityLabel(label ?? placeholder)
+            // Return means "done" on a single-line field — there is
+            // nothing to submit to and no next field to advance to, so
+            // the only reading of Return a user could intend is that
+            // they have finished. Without this the key is inert and the
+            // keyboard has to be dismissed some other way.
+            .submitLabel(.done)
+            .onSubmit { isFocused = false }
     }
 }
 
@@ -140,6 +155,10 @@ struct InstrumentNumberField: View {
     /// Callback when camera button is tapped
     var onCameraTap: (() -> Void)?
 
+    /// Take focus when the field appears — for a sheet whose whole job is
+    /// this one number (Update Mileage), so typing starts without a tap.
+    var autoFocus: Bool = false
+
     @State private var textValue: String = ""
     @FocusState private var isFocused: Bool
 
@@ -167,6 +186,13 @@ struct InstrumentNumberField: View {
                                 if let value = value {
                                     textValue = String(value)
                                 }
+                            }
+                            .task {
+                                guard autoFocus else { return }
+                                // After the sheet's presentation settles; focusing
+                                // mid-transition is dropped by the system.
+                                try? await Task.sleep(for: .milliseconds(350))
+                                isFocused = true
                             }
                             .onChange(of: value) { _, newValue in
                                 let newText = newValue.map { String($0) } ?? ""

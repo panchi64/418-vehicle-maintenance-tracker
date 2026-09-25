@@ -404,4 +404,69 @@ final class EditServiceLogViewTests: XCTestCase {
             enteredMileage: 52_000, loadedMileage: 48_000
         ))
     }
+
+    // MARK: - The unified form's edit door
+
+    private func makeEditModel() -> (ServiceLogFormModel, ServiceLog) {
+        let vehicle = Vehicle(make: "Toyota", model: "Corolla", year: 2020, currentMileage: 52_000)
+        let service = Service(name: "Oil Change", dueDate: nil)
+        let log = ServiceLog(
+            service: service,
+            vehicle: vehicle,
+            performedDate: date(-30),
+            mileageAtService: 48_000,
+            cost: Decimal(string: "45.99"),
+            costCategory: .maintenance,
+            notes: "Synthetic"
+        )
+        return (ServiceLogFormModel(vehicle: vehicle, mode: .edit(log)), log)
+    }
+
+    func testEditDoor_LoadsTheEntryAndStartsUnchanged() {
+        let (model, log) = makeEditModel()
+
+        XCTAssertEqual(model.serviceName, "Oil Change")
+        XCTAssertEqual(model.timing, .earlier)
+        XCTAssertEqual(model.performedDate, log.performedDate)
+        XCTAssertEqual(model.mileageAtService, 48_000)
+        XCTAssertEqual(model.cost, "45.99")
+        XCTAssertFalse(model.hasEditChanges)
+        XCTAssertFalse(model.canSave, "Save stays dim until something changes")
+        XCTAssertNil(model.blocker, "…but nothing blocks it, so a dim tap points nowhere")
+        XCTAssertFalse(model.isDirty)
+        XCTAssertTrue(model.mode.isServiceLocked)
+    }
+
+    func testEditDoor_ChangeEnablesSaveAndShowsWasHint() {
+        let (model, _) = makeEditModel()
+        model.mileageAtService = 48_500
+
+        XCTAssertTrue(model.canSave)
+        XCTAssertEqual(model.originalMileage, .some(48_000))
+        XCTAssertNil(model.originalDate)
+    }
+
+    func testEditDoor_ClearedOdometerBlocksAtTheOdometer() {
+        let (model, _) = makeEditModel()
+        model.mileageAtService = nil
+
+        XCTAssertEqual(model.blocker?.field, .odometer)
+        XCTAssertEqual(model.blockingReason, L10n.editLogMileageRequired)
+        XCTAssertNil(model.originalMileage, "A cleared field is a blocked save, not a change")
+    }
+
+    func testEditDoor_EquivalentCostIsNotAChange() {
+        let (model, _) = makeEditModel()
+        model.cost = "45.990"
+        XCTAssertFalse(model.hasEditChanges)
+    }
+
+    func testEditDoor_NeverAdoptsOrContradictsTheOdometer() {
+        // Editing history doesn't commit mileage, so neither advisory applies.
+        let (model, _) = makeEditModel()
+        model.mileageAtService = 60_000
+
+        XCTAssertFalse(model.wouldAdoptMileage)
+        XCTAssertFalse(model.hasUnresolvedMileageContradiction)
+    }
 }

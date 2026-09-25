@@ -580,8 +580,6 @@ enum L10n {
         String(format: localized("form.detailsCount"), count)
     }
     static var formOptionalTag: String { localized("form.optionalTag") }
-    static var formSaveAndAddAnother: String { localized("form.saveAndAddAnother") }
-    static var formSavedAddNext: String { localized("form.savedAddNext") }
     static var formServiceTypeRequired: String { localized("form.serviceTypeRequired") }
     static var formVehicleBasicsRequired: String { localized("form.vehicleBasicsRequired") }
     static var formDraftResumeTitle: String { localized("form.draftResumeTitle") }
@@ -590,13 +588,10 @@ enum L10n {
     }
     static var formDraftResume: String { localized("form.draftResume") }
     static var formDraftDiscard: String { localized("form.draftDiscard") }
-    static var formServiceType: String { localized("form.serviceType") }
     static var formDatePerformed: String { localized("form.datePerformed") }
     static var formCost: String { localized("form.cost") }
-    static var formAmount: String { localized("form.amount") }
     static var formCategory: String { localized("form.category") }
     static var formMileage: String { localized("form.mileage") }
-    static var formMileageBlankHint: String { localized("form.mileageBlankHint") }
     static var formReminder: String { localized("form.reminder") }
     static var formRemindNextTime: String { localized("form.remindNextTime") }
     static var formNotes: String { localized("form.notes") }
@@ -614,16 +609,7 @@ enum L10n {
     static var formSetDueDate: String { localized("form.setDueDate") }
     static var formDueDate: String { localized("form.dueDate") }
     static var formDueMileage: String { localized("form.dueMileage") }
-    static func formSuggestValue(_ value: String) -> String {
-        String(format: localized("form.suggestValue"), value)
-    }
-    static func formSuggestMonths(_ months: Int) -> String {
-        String(format: localized("form.suggestMonths"), months)
-    }
     static var formUse: String { localized("form.use") }
-    static func formUseSuggestedValue(_ value: String) -> String {
-        String(format: localized("form.useSuggestedValue"), value)
-    }
     static var formDatePastWarning: String { localized("form.datePastWarning") }
     static var formRepeats: String { localized("form.repeats") }
     static var formRequiredTag: String { localized("form.requiredTag") }
@@ -632,7 +618,6 @@ enum L10n {
     static var formEvery: String { localized("form.every") }
     static var formOrEvery: String { localized("form.orEvery") }
     static var formMonthsSuffix: String { localized("form.monthsSuffix") }
-    static var formMilesSuffix: String { localized("form.milesSuffix") }
     static var formWhicheverFirst: String { localized("form.whicheverFirst") }
     static func formDaysOverdue(_ days: Int) -> String {
         String(format: localized("form.daysOverdue"), days)
@@ -653,37 +638,19 @@ enum L10n {
     static func formEveryMileage(_ mileage: String) -> String {
         String(format: localized("form.everyMileage"), mileage)
     }
-    static var formEditingTag: String { localized("form.editingTag") }
 
     // MARK: - Unified service form
     //
-    // The sheet title and the save button are the only places the DERIVED
-    // intent surfaces. There is no mode control, and the words "record" and
-    // "remind" no longer appear on screen.
-
-    static var addServiceTitleNeutral: String { localized("addservice.titleNeutral") }
-    static var addServiceTitleLog: String { localized("addservice.titleLog") }
-    static var addServiceTitleSchedule: String { localized("addservice.titleSchedule") }
-    static var addServiceSaveLog: String { localized("addservice.saveLog") }
-    static var addServiceSaveSchedule: String { localized("addservice.saveSchedule") }
+    // Titles and the rest of the form's newer strings: `L10n+Forms.swift`.
 
     static var timingToday: String { localized("timing.today") }
     static var timingYesterday: String { localized("timing.yesterday") }
-    static var timingEarlier: String { localized("timing.earlier") }
-    static var timingInThreeMonths: String { localized("timing.inThreeMonths") }
-    static var timingInSixMonths: String { localized("timing.inSixMonths") }
     static var timingAtMileage: String { localized("timing.atMileage") }
     static var timingOnDate: String { localized("timing.onDate") }
 
     static var formWhen: String { localized("form.when") }
-    static var formAlreadyDone: String { localized("form.alreadyDone") }
-    static var formComingUp: String { localized("form.comingUp") }
-    static var formCommon: String { localized("form.common") }
-    static var formTheVisit: String { localized("form.theVisit") }
-    static var formTheReminder: String { localized("form.theReminder") }
     static var formOdometerAtService: String { localized("form.odometerAtService") }
     static var formRemindMeAt: String { localized("form.remindMeAt") }
-    static var formTimingRequired: String { localized("form.timingRequired") }
     static var formRemindMileageRequired: String { localized("form.remindMileageRequired") }
     static var formResolveOdometerConflict: String { localized("form.resolveOdometerConflict") }
     static func formOdometerContradiction(_ current: String) -> String {
@@ -703,24 +670,9 @@ enum L10n {
         String(format: localized("form.completesServiceWithStatus"), name, status)
     }
 
-    // The reminder a logged service leaves behind (F4).
-    static func formNextReminderDateOrMileage(_ date: String, _ mileage: String) -> String {
-        String(format: localized("form.nextReminderDateOrMileage"), date, mileage)
-    }
-    static func formNextReminderDate(_ date: String) -> String {
-        String(format: localized("form.nextReminderDate"), date)
-    }
-    static func formNextReminderMileage(_ mileage: String) -> String {
-        String(format: localized("form.nextReminderMileage"), mileage)
-    }
-
-    // Mark Done: the estimate is a hint, never the prefilled reading.
+    // The estimate is a hint, never the prefilled reading.
     static func markDoneEstimateHint(_ mileage: String) -> String {
         String(format: localized("markDone.estimateHint"), mileage)
-    }
-    static var formRemindsOnceThenStops: String { localized("form.remindsOnceThenStops") }
-    static var formWhicheverFirstFromCompletion: String {
-        localized("form.whicheverFirstFromCompletion")
     }
     static var formFires: String { localized("form.fires") }
     static var formFiresOnceYouEnterMileage: String { localized("form.firesOnceYouEnterMileage") }
@@ -733,7 +685,6 @@ enum L10n {
     }
     static var formMoreDetails: String { localized("form.moreDetails") }
     static var formFewerDetails: String { localized("form.fewerDetails") }
-    static var formDepthContents: String { localized("form.depthContents") }
     static var tabBarAddService: String { localized("tabBar.addService") }
     static var tabHome: String { localized("tab.home") }
     static var tabServices: String { localized("tab.services") }
@@ -747,17 +698,6 @@ enum L10n {
         String(format: localized("toast.reminderSetAt"), mileage)
     }
 
-    // MARK: - Service Form Chips
-
-    static var chipNextWeek: String { localized("chip.nextWeek") }
-    static var chipMonths1Approx: String { localized("chip.months1Approx") }
-    static var chipMonths3Approx: String { localized("chip.months3Approx") }
-    static var chipMonths6Approx: String { localized("chip.months6Approx") }
-    static var chipMonths3: String { localized("chip.months3") }
-    static var chipMonths6: String { localized("chip.months6") }
-    static var chipYears1: String { localized("chip.years1") }
-    static var chipYears2: String { localized("chip.years2") }
-
     // MARK: - Mileage Update Sheet
 
     static var mileageUpdateTitle: String { localized("mileage.update_title") }
@@ -767,12 +707,6 @@ enum L10n {
     static var mileageNoEstimateHint: String { localized("mileage.no_estimate_hint") }
     static var mileageEnterLabel: String { localized("mileage.enter_label") }
     static var mileageEnterPlaceholder: String { localized("mileage.enter_placeholder") }
-    static var mileageDismissError: String { localized("mileage.dismiss_error") }
-
-    static func refCardLast(_ serviceName: String) -> String {
-        String(format: localized("refCard.last"), serviceName)
-    }
-    static var refCardUseValues: String { localized("refCard.useValues") }
 
     static func editWas(_ value: String) -> String {
         String(format: localized("edit.was"), value)
@@ -825,7 +759,6 @@ enum L10n {
         String(format: localized("tip.purchase_label"), name, price)
     }
     static var remindNoScheduleWarning: String { localized("remind.noScheduleWarning") }
-    static var recordSetIntervalHint: String { localized("record.setIntervalHint") }
 
     // MARK: - Service reminder notifications
     //
