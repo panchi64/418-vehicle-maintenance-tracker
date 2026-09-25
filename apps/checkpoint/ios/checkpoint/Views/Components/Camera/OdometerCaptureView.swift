@@ -66,6 +66,11 @@ class OdometerCaptureViewController: UIViewController {
         setupCamera()
         setupViewfinderOverlay()
         setupControls()
+        // The guide label is laid out by frame, so re-run layout when the
+        // text size changes under it.
+        registerForTraitChanges([UITraitPreferredContentSizeCategory.self]) { (self: Self, _) in
+            self.view.setNeedsLayout()
+        }
     }
 
     override func viewDidLayoutSubviews() {
@@ -130,7 +135,9 @@ class OdometerCaptureViewController: UIViewController {
         // Guide label
         guideLabel.text = guideText
         guideLabel.textColor = themeAccent
-        guideLabel.font = .systemFont(ofSize: 13, weight: .bold)
+        guideLabel.font = Self.scaledFont(size: 13, weight: .bold, textStyle: .footnote)
+        guideLabel.adjustsFontForContentSizeCategory = true
+        guideLabel.numberOfLines = 0
         guideLabel.textAlignment = .center
         guideLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(guideLabel)
@@ -156,46 +163,67 @@ class OdometerCaptureViewController: UIViewController {
         // Update border
         viewfinderBorder.path = UIBezierPath(rect: viewfinderRect).cgPath
 
-        // Update label position
+        // Update label position. Height follows the text, which scales with
+        // Dynamic Type and may wrap.
+        let labelHeight = guideLabel.sizeThatFits(
+            CGSize(width: viewfinderRect.width, height: .greatestFiniteMagnitude)
+        ).height
         guideLabel.frame = CGRect(
             x: viewfinderRect.origin.x,
             y: viewfinderRect.maxY + 12,
             width: viewfinderRect.width,
-            height: 20
+            height: labelHeight
         )
+    }
+
+    /// A fixed brand size that follows `textStyle`'s Dynamic Type curve — the
+    /// UIKit counterpart of the `Font.brutalist*` tokens.
+    private static func scaledFont(
+        size: CGFloat,
+        weight: UIFont.Weight,
+        textStyle: UIFont.TextStyle
+    ) -> UIFont {
+        UIFontMetrics(forTextStyle: textStyle)
+            .scaledFont(for: .systemFont(ofSize: size, weight: weight))
     }
 
     // MARK: - Controls
 
     private func setupControls() {
         // Capture button
-        captureButton.setTitle("CAPTURE", for: .normal)
+        captureButton.setTitle(L10n.cameraCapture, for: .normal)
         captureButton.setTitleColor(themePrimary, for: .normal)
-        captureButton.titleLabel?.font = .systemFont(ofSize: 15, weight: .bold)
+        captureButton.titleLabel?.font = Self.scaledFont(size: 15, weight: .bold, textStyle: .body)
+        captureButton.titleLabel?.adjustsFontForContentSizeCategory = true
         captureButton.backgroundColor = themeAccent
         captureButton.translatesAutoresizingMaskIntoConstraints = false
         captureButton.addTarget(self, action: #selector(capturePhoto), for: .touchUpInside)
-        captureButton.accessibilityLabel = "Capture odometer reading"
+        captureButton.accessibilityLabel = L10n.a11yCaptureOdometer
         view.addSubview(captureButton)
 
         // Cancel button
-        cancelButton.setTitle("Cancel", for: .normal)
+        cancelButton.setTitle(L10n.commonCancel, for: .normal)
         cancelButton.setTitleColor(themeAccent, for: .normal)
-        cancelButton.titleLabel?.font = .systemFont(ofSize: 17, weight: .medium)
+        cancelButton.titleLabel?.font = Self.scaledFont(size: 17, weight: .medium, textStyle: .body)
+        cancelButton.titleLabel?.adjustsFontForContentSizeCategory = true
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
         cancelButton.addTarget(self, action: #selector(cancelCapture), for: .touchUpInside)
         view.addSubview(cancelButton)
 
+        // Minimums, not fixed sizes: the titles grow with Dynamic Type.
         NSLayoutConstraint.activate([
             // Capture button: bottom center
             captureButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             captureButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -32),
-            captureButton.widthAnchor.constraint(equalToConstant: 160),
-            captureButton.heightAnchor.constraint(equalToConstant: 52),
+            captureButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 160),
+            captureButton.widthAnchor.constraint(lessThanOrEqualTo: view.widthAnchor, constant: -32),
+            captureButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 52),
 
             // Cancel button: top-left
             cancelButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             cancelButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            cancelButton.heightAnchor.constraint(greaterThanOrEqualToConstant: TouchTarget.minimum),
+            cancelButton.widthAnchor.constraint(greaterThanOrEqualToConstant: TouchTarget.minimum),
         ])
     }
 

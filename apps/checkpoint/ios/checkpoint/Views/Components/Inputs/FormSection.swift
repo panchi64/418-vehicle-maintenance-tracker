@@ -61,7 +61,10 @@ struct FormSection<Content: View>: View {
                     .font(.brutalistLabelBold)
                     .foregroundStyle(Theme.textSecondary)
                     .tracking(1.5)
-                    .fixedSize(horizontal: true, vertical: false)
+                    // Priority, not `fixedSize`: the rule gives way first, and
+                    // at accessibility sizes a title wider than the screen
+                    // wraps instead of running off the edge.
+                    .layoutPriority(1)
 
                 // Theme.borderWidth (2), not a hairline. The section title is
                 // 11pt Bold caps and a field label is 11pt Medium caps — the
@@ -76,7 +79,7 @@ struct FormSection<Content: View>: View {
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
                         .tracking(1)
-                        .fixedSize(horizontal: true, vertical: false)
+                        .layoutPriority(1)
                 }
             }
             .accessibilityElement(children: .combine)

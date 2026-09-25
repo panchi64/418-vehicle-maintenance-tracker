@@ -62,7 +62,9 @@ struct FormActionBar: View {
                 .transition(.opacity)
                 .accessibilityLabel(flashMessage)
         } else {
-            HStack(spacing: Spacing.sm) {
+            // Two long titles can't share a row at accessibility sizes; the
+            // primary stacks under the secondary, staying nearest the thumb.
+            AccessibilityAdaptiveStack(verticalSpacing: Spacing.sm) {
                 if let secondaryTitle, let onSecondary {
                     Button(secondaryTitle, action: onSecondary)
                         .buttonStyle(.secondary)
@@ -82,6 +84,11 @@ struct FormActionBar: View {
                 }
                 .buttonStyle(.primary)
                 .opacity(isPrimaryEnabled ? 1.0 : 0.4)
+                // Not `.disabled`: that would swallow the F2 tap. VoiceOver
+                // still needs to hear that Save won't save yet, and that
+                // activating it takes you to what's missing.
+                .accessibilityValue(isPrimaryEnabled ? "" : L10n.a11ySaveUnavailable)
+                .accessibilityHint(isPrimaryEnabled ? "" : L10n.a11ySaveUnavailableHint)
             }
         }
     }

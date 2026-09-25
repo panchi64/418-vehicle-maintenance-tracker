@@ -160,6 +160,7 @@ struct ServiceDetailView: View {
                     .fill(status.color)
                     .frame(width: 8, height: 8)
                     .statusGlow(color: status.color, isActive: status == .overdue || status == .dueSoon)
+                    .accessibilityHidden(true)
                 Text(status.label)
                     .font(.brutalistLabel)
                     .foregroundStyle(status.color)
@@ -301,39 +302,43 @@ struct ServiceDetailView: View {
 
     private func historyRow(log: ServiceLog) -> some View {
         HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: Spacing.xs) {
-                    Text(formatDate(log.performedDate))
-                        .font(.brutalistBody)
-                        .foregroundStyle(Theme.textPrimary)
+            AccessibilityAdaptiveStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: Spacing.xs) {
+                        Text(formatDate(log.performedDate))
+                            .font(.brutalistBody)
+                            .foregroundStyle(Theme.textPrimary)
 
-                    if !(log.attachments ?? []).isEmpty {
-                        Image(systemName: "paperclip")
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundStyle(Theme.textTertiary)
+                        if !(log.attachments ?? []).isEmpty {
+                            Image(systemName: "paperclip")
+                                .font(.caption2.weight(.medium))
+                                .foregroundStyle(Theme.textTertiary)
+                        }
                     }
+
+                    Text("\(formatMileage(log.mileageAtService))")
+                        .font(.brutalistLabel)
+                        .foregroundStyle(Theme.textTertiary)
                 }
 
-                Text("\(formatMileage(log.mileageAtService))")
-                    .font(.brutalistLabel)
-                    .foregroundStyle(Theme.textTertiary)
+                AdaptiveSpacer()
+
+                if log.visit != nil {
+                    Text("PART OF VISIT")
+                        .font(.brutalistLabel)
+                        .tracking(1)
+                        .foregroundStyle(Theme.textTertiary)
+                } else if let cost = log.formattedCost {
+                    Text(cost)
+                        .font(.brutalistBody)
+                        .foregroundStyle(Theme.textSecondary)
+                }
             }
 
-            Spacer()
-
-            if log.visit != nil {
-                Text("PART OF VISIT")
-                    .font(.brutalistLabel)
-                    .tracking(1)
-                    .foregroundStyle(Theme.textTertiary)
-            } else if let cost = log.formattedCost {
-                Text(cost)
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textSecondary)
-            }
+            Spacer(minLength: 0)
 
             Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .semibold))
+                .font(.caption.weight(.semibold))
                 .foregroundStyle(Theme.textTertiary)
         }
         .padding(Spacing.md)

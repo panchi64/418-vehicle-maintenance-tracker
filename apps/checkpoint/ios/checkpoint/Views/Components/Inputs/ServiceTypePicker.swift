@@ -6,6 +6,7 @@ struct ServiceTypePicker: View {
     @State private var showingPicker = false
     @State private var selectedCategory: ServiceCategory = .engine
     @FocusState private var isFocused: Bool
+    @ScaledMetric(relativeTo: .body) private var iconColumnWidth: CGFloat = 24
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
@@ -54,10 +55,12 @@ struct ServiceTypePicker: View {
                     HStack {
                         Image(systemName: ServiceCategory(rawValue: preset.category)?.icon ?? "wrench.and.screwdriver")
                             .foregroundStyle(Theme.accent)
-                            .frame(width: 24)
+                            .frame(width: iconColumnWidth)
+                            .accessibilityHidden(true)
 
                         VStack(alignment: .leading, spacing: Spacing.xs) {
                             Text(preset.name)
+                                .font(.brutalistBody)
                                 .foregroundStyle(Theme.textPrimary)
                             if let interval = Formatters.serviceInterval(months: preset.defaultIntervalMonths, miles: preset.defaultIntervalMiles) {
                                 Text(interval.uppercased())
@@ -70,14 +73,16 @@ struct ServiceTypePicker: View {
                         Spacer()
 
                         Image(systemName: "chevron.right")
-                            .font(.system(size: 12))
+                            .font(.caption)
                             .foregroundStyle(Theme.textTertiary)
                     }
                     .padding(Spacing.md)
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Change service type. Currently \(preset.name)")
+                .accessibilityLabel(L10n.a11yServiceType)
+                .accessibilityValue(preset.name)
+                .accessibilityHint(L10n.a11yChangeServiceTypeHint)
 
                 Divider()
                     .frame(width: Theme.borderWidth)
@@ -88,13 +93,13 @@ struct ServiceTypePicker: View {
                     HapticService.shared.selectionChanged()
                 } label: {
                     Image(systemName: "xmark")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.footnote.weight(.semibold))
                         .foregroundStyle(Theme.textSecondary)
-                        .frame(width: 48, height: 48)
+                        .frame(minWidth: 48, minHeight: 48)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Clear service type")
+                .accessibilityLabel(L10n.a11yClearServiceType)
             }
             .background(Theme.surfaceInstrument)
             .clipShape(Rectangle())
@@ -107,9 +112,11 @@ struct ServiceTypePicker: View {
                     .font(.brutalistLabel)
                     .foregroundStyle(Theme.textTertiary)
                     .tracking(1.5)
+                    .frame(minHeight: TouchTarget.minimum)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityHint("Clears the selected preset and lets you type any service name")
+            .accessibilityHint(L10n.a11yUseCustomServiceHint)
         }
     }
 
@@ -117,7 +124,7 @@ struct ServiceTypePicker: View {
         Button { showingPicker = true } label: {
             HStack(spacing: Spacing.sm) {
                 Image(systemName: "list.bullet")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.footnote.weight(.medium))
                     .foregroundStyle(Theme.accent)
 
                 Text("BROWSE ALL PRESETS")
@@ -128,7 +135,7 @@ struct ServiceTypePicker: View {
                 Spacer()
 
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12))
+                    .font(.caption)
                     .foregroundStyle(Theme.textTertiary)
             }
             .padding(Spacing.md)
@@ -137,7 +144,7 @@ struct ServiceTypePicker: View {
             .brutalistBorder(color: Theme.accent.opacity(0.4))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Browse all service presets")
+        .accessibilityLabel(L10n.a11yBrowseServicePresets)
     }
 }
 
@@ -213,12 +220,15 @@ private struct PresetRow: View {
     let isSelected: Bool
     let action: () -> Void
 
+    @ScaledMetric(relativeTo: .body) private var iconColumnWidth: CGFloat = 24
+
     var body: some View {
         Button(action: action) {
             HStack {
                 Image(systemName: icon)
                     .foregroundStyle(Theme.accent)
-                    .frame(width: 24)
+                    .frame(width: iconColumnWidth)
+                    .accessibilityHidden(true)
 
                 VStack(alignment: .leading, spacing: Spacing.xs) {
                     Text(preset.name)
@@ -238,14 +248,18 @@ private struct PresetRow: View {
                 if isSelected {
                     Image(systemName: "checkmark")
                         .foregroundStyle(Theme.accent)
+                        .accessibilityHidden(true)
                 }
             }
             .padding(Spacing.md)
             .background(Theme.surfaceInstrument)
             .clipShape(Rectangle())
             .brutalistBorder(color: isSelected ? Theme.accent : Theme.gridLine)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 
@@ -260,17 +274,20 @@ struct CategoryChip: View {
         Button(action: action) {
             HStack(spacing: Spacing.xs) {
                 Image(systemName: category.icon)
-                    .font(.system(size: 12))
+                    .font(.caption)
+                    .accessibilityHidden(true)
                 Text(category.rawValue)
             }
             .font(.brutalistBody)
             .padding(.horizontal, Spacing.md)
             .padding(.vertical, Spacing.sm)
+            .frame(minHeight: TouchTarget.minimum)
             .background(isSelected ? Theme.accent : Theme.backgroundSubtle)
             .foregroundStyle(isSelected ? Theme.backgroundPrimary : Theme.textSecondary)
             .clipShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 

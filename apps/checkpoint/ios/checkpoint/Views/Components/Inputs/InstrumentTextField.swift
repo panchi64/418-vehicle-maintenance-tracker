@@ -47,6 +47,9 @@ struct InstrumentTextField: View {
                     .textContentType(textContentType)
                     .textInputAutocapitalization(autocapitalization)
                     .focused($isFocused)
+                    // VoiceOver otherwise names the field by its placeholder —
+                    // an example value, not what the field is for.
+                    .accessibilityLabel(label ?? placeholder)
                     // Return means "done" on a single-line field — there is
                     // nothing to submit to and no next field to advance to, so
                     // the only reading of Return a user could intend is that
@@ -96,7 +99,7 @@ private struct FieldLine<Content: View>: View {
 
     var body: some View {
         content
-            .frame(minHeight: 40)
+            .frame(minHeight: TouchTarget.minimum)
             .overlay(alignment: .bottom) {
                 Rectangle()
                     .fill(isFocused ? Theme.accent : Theme.borderSubtle)
@@ -152,6 +155,7 @@ struct InstrumentNumberField: View {
                             .foregroundStyle(Theme.textPrimary)
                             .keyboardType(.numberPad)
                             .focused($isFocused)
+                            .accessibilityLabel(label ?? placeholder)
                             .onChange(of: textValue) { _, newValue in
                                 let filtered = newValue.filter { $0.isNumber }
                                 if filtered != newValue {
@@ -189,13 +193,12 @@ struct InstrumentNumberField: View {
                         onCameraTap()
                     } label: {
                         Image(systemName: "camera.fill")
-                            .font(.system(size: 18, weight: .medium))
+                            .font(.body.weight(.medium))
                             .foregroundStyle(Theme.accent)
-                            .frame(width: 44, height: 44)
-                            .contentShape(Rectangle())
+                            .minimumTouchTarget()
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Scan with camera")
+                    .accessibilityLabel(L10n.a11yScanWithCamera)
                 }
             }
 
@@ -222,8 +225,8 @@ struct InstrumentDatePicker: View {
                 // Only override when there IS a label — `accessibilityLabel("")`
                 // strips the DatePicker's own description and leaves VoiceOver
                 // announcing a bare date with no idea what it sets.
-                .accessibilityLabel(label ?? "Date")
-                .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
+                .accessibilityLabel(label ?? L10n.a11yDate)
+                .frame(maxWidth: .infinity, minHeight: TouchTarget.minimum, alignment: .leading)
                 .overlay(alignment: .bottom) {
                     Rectangle()
                         .fill(Theme.borderSubtle)
@@ -298,12 +301,14 @@ struct InstrumentTextEditor: View {
                         .foregroundStyle(Theme.textTertiary)
                         .padding(.horizontal, Spacing.listItem)
                         .padding(.vertical, Spacing.md)
+                        .accessibilityHidden(true)
                 }
 
                 TextEditor(text: $text)
                     .font(.brutalistBody)
                     .foregroundStyle(Theme.textPrimary)
                     .focused($isFocused)
+                    .accessibilityLabel(label ?? placeholder)
                     .scrollContentBackground(.hidden)
                     .padding(Spacing.listItem)
             }

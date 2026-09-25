@@ -31,6 +31,16 @@ enum ConfidenceLevel {
         case .low: return "LOW"
         }
     }
+
+    /// What VoiceOver hears. The bar's color and fill carry the level visually;
+    /// this carries it in words.
+    var accessibilityLabel: String {
+        switch self {
+        case .high: return L10n.a11yConfidenceHigh
+        case .medium: return L10n.a11yConfidenceMedium
+        case .low: return L10n.a11yConfidenceLow
+        }
+    }
 }
 
 // MARK: - Confidence Bar
@@ -57,8 +67,8 @@ struct ConfidenceBar: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Confidence: \(level.label)")
-        .accessibilityValue("\(Int(confidence * 100)) percent")
+        .accessibilityLabel(level.accessibilityLabel)
+        .accessibilityValue(Double(confidence).formatted(.percent.precision(.fractionLength(0))))
     }
 }
 
@@ -87,7 +97,7 @@ struct CompactConfidenceBar: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Confidence: \(level.label)")
+        .accessibilityLabel(level.accessibilityLabel)
     }
 }
 

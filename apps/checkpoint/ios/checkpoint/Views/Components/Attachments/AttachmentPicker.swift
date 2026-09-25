@@ -32,23 +32,14 @@ struct AttachmentPicker: View {
     }
 
     var body: some View {
-        let labelFont: Font = .brutalistLabel
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            // Buttons row
-            HStack(spacing: Spacing.sm) {
+            // Three sources side by side; stacked at accessibility sizes,
+            // where they no longer fit one row.
+            AccessibilityAdaptiveStack(verticalSpacing: Spacing.sm) {
+                // Opens the photo LIBRARY, so a library glyph — a camera icon
+                // promised a viewfinder this button never opens.
                 PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "camera.fill")
-                            .font(.system(size: 14, weight: .medium))
-                        Text("PHOTO")
-                            .font(labelFont)
-                            .tracking(1)
-                    }
-                    .foregroundStyle(Theme.textPrimary)
-                    .padding(.horizontal, Spacing.md)
-                    .padding(.vertical, Spacing.sm)
-                    .background(Theme.surfaceInstrument)
-                    .brutalistBorder()
+                    AttachmentSourceLabel(icon: "photo.on.rectangle", title: "PHOTO")
                 }
                 .onChange(of: selectedPhotoItem) { _, newItem in
                     Task {
@@ -59,19 +50,9 @@ struct AttachmentPicker: View {
                 Button {
                     showDocumentPicker = true
                 } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "doc.fill")
-                            .font(.system(size: 14, weight: .medium))
-                        Text("PDF")
-                            .font(.brutalistLabel)
-                            .tracking(1)
-                    }
-                    .foregroundStyle(Theme.textPrimary)
-                    .padding(.horizontal, Spacing.md)
-                    .padding(.vertical, Spacing.sm)
-                    .background(Theme.surfaceInstrument)
-                    .brutalistBorder()
+                    AttachmentSourceLabel(icon: "doc.fill", title: "PDF")
                 }
+                .buttonStyle(.plain)
                 .sheet(isPresented: $showDocumentPicker) {
                     DocumentPicker(onDocumentPicked: { url in
                         loadDocument(from: url)
@@ -81,25 +62,9 @@ struct AttachmentPicker: View {
                 Button {
                     showReceiptScanner = true
                 } label: {
-                    HStack(spacing: 6) {
-                        if isProcessingOCR {
-                            ProgressView()
-                                .tint(Theme.textPrimary)
-                                .scaleEffect(0.8)
-                        } else {
-                            Image(systemName: "receipt")
-                                .font(.system(size: 14, weight: .medium))
-                        }
-                        Text("RECEIPT")
-                            .font(.brutalistLabel)
-                            .tracking(1)
-                    }
-                    .foregroundStyle(Theme.textPrimary)
-                    .padding(.horizontal, Spacing.md)
-                    .padding(.vertical, Spacing.sm)
-                    .background(Theme.surfaceInstrument)
-                    .brutalistBorder()
+                    AttachmentSourceLabel(icon: "receipt", title: "RECEIPT", isBusy: isProcessingOCR)
                 }
+                .buttonStyle(.plain)
                 .disabled(isProcessingOCR)
                 .sheet(isPresented: $showReceiptScanner) {
                     ReceiptScannerView(
@@ -116,7 +81,7 @@ struct AttachmentPicker: View {
                     )
                 }
 
-                Spacer()
+                AdaptiveSpacer()
 
                 if !attachments.isEmpty {
                     Text("\(attachments.count)")
@@ -125,6 +90,7 @@ struct AttachmentPicker: View {
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(Theme.accent.opacity(0.2))
+                        .accessibilityLabel(L10n.attachmentCount(attachments.count))
                 }
             }
 
@@ -235,6 +201,39 @@ struct AttachmentPicker: View {
     }
 }
 
+// MARK: - Source Button Label
+
+/// One attachment source (photo library, PDF, receipt scan). Shared so the
+/// three can't drift apart in size — they used to be three hand-copied stacks.
+private struct AttachmentSourceLabel: View {
+    let icon: String
+    let title: String
+    var isBusy: Bool = false
+
+    var body: some View {
+        HStack(spacing: 6) {
+            if isBusy {
+                ProgressView()
+                    .tint(Theme.textPrimary)
+            } else {
+                Image(systemName: icon)
+                    .font(.footnote.weight(.medium))
+                    .accessibilityHidden(true)
+            }
+            Text(title)
+                .font(.brutalistLabel)
+                .tracking(1)
+        }
+        .foregroundStyle(Theme.textPrimary)
+        .padding(.horizontal, Spacing.md)
+        .padding(.vertical, Spacing.sm)
+        .frame(minHeight: TouchTarget.minimum)
+        .background(Theme.surfaceInstrument)
+        .brutalistBorder()
+        .contentShape(Rectangle())
+    }
+}
+
 // MARK: - Attachment Preview Grid
 
 struct AttachmentPreviewGrid: View {
@@ -268,41 +267,30 @@ struct AttachmentPreviewItem: View {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 60, height: 60)
+                    .frame(width: attachmentThumbnailSize, height: attachmentThumbnailSize)
                     .clipped()
+                    .accessibilityLabel(L10n.a11yPhotoAttachment)
             } else {
-                // PDF placeholder
-                ZStack {
-                    Rectangle()
-                        .fill(Theme.surfaceInstrument)
-
-                    VStack(spacing: 2) {
-                        Image(systemName: "doc.fill")
-                            .font(.system(size: 20))
-                            .foregroundStyle(Theme.accent)
-
-                        Text("PDF")
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.textTertiary)
-                    }
-                }
-                .frame(width: 60, height: 60)
+                AttachmentPlaceholderTile(isPDF: true)
             }
 
-            // Remove button
+            // Remove button. The red square stays small; the target doesn't.
             Button {
                 onRemove()
             } label: {
                 Image(systemName: "xmark")
-                    .font(.system(size: 10, weight: .bold))
+                    .font(.caption2.weight(.bold))
                     .foregroundStyle(Theme.surfaceInstrument)
                     .padding(4)
                     .background(Theme.statusOverdue)
+                    .frame(minWidth: TouchTarget.minimum, minHeight: TouchTarget.minimum, alignment: .topTrailing)
+                    .contentShape(Rectangle())
             }
-            .frame(minWidth: 44, minHeight: 44)
-            .contentShape(Rectangle())
+            .buttonStyle(.plain)
+            .accessibilityLabel(L10n.a11yRemoveAttachment)
             .offset(x: 4, y: -4)
         }
+        .accessibilityElement(children: .contain)
         .overlay(
             Rectangle()
                 .strokeBorder(Theme.gridLine, lineWidth: 1)

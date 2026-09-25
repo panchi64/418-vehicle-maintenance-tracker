@@ -58,10 +58,9 @@ struct VehicleVINSection: View {
                         formState.showVINCamera = true
                     } label: {
                         Image(systemName: "camera.fill")
-                            .font(.system(size: 18, weight: .medium))
+                            .font(.body.weight(.medium))
                             .foregroundStyle(Theme.accent)
-                            .frame(width: TouchTarget.minimum, height: TouchTarget.minimum)
-                            .contentShape(Rectangle())
+                            .minimumTouchTarget()
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel(L10n.addVehicleScanVIN)

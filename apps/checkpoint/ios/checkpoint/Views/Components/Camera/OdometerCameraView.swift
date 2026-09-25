@@ -102,18 +102,20 @@ struct OdometerCameraSheet: View {
         .ignoresSafeArea()
         #else
         // Device: use custom capture view with viewfinder guide
-        OdometerCaptureView(
-            onImageCaptured: { image in
-                onImageCaptured(image)
-                dismiss()
-            },
-            onCancel: {
-                dismiss()
-            },
-            guideText: guideText,
-            viewfinderAspectRatio: viewfinderAspectRatio
-        )
-        .ignoresSafeArea()
+        CameraPermissionGate(onCancel: { dismiss() }) {
+            OdometerCaptureView(
+                onImageCaptured: { image in
+                    onImageCaptured(image)
+                    dismiss()
+                },
+                onCancel: {
+                    dismiss()
+                },
+                guideText: guideText,
+                viewfinderAspectRatio: viewfinderAspectRatio
+            )
+            .ignoresSafeArea()
+        }
         #endif
     }
 }

@@ -17,12 +17,14 @@ struct DestructiveFormButton: View {
         Button(action: action) {
             HStack {
                 Image(systemName: "trash")
+                    .accessibilityHidden(true)
                 Text(title)
             }
-            .font(.system(size: 16, weight: .semibold))
+            .font(.body.weight(.semibold))
             .foregroundStyle(Theme.statusOverdue)
+            .padding(.vertical, Spacing.sm)
             .frame(maxWidth: .infinity)
-            .frame(height: Theme.buttonHeight)
+            .frame(minHeight: Theme.buttonHeight)
             .background(Theme.statusOverdue.opacity(0.1))
             .clipShape(Rectangle())
             .overlay(

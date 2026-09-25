@@ -23,22 +23,26 @@ struct ReminderImpactRow: View {
     }
 
     var body: some View {
-        HStack(spacing: Spacing.sm) {
-            Image(systemName: "arrow.right.circle")
-                .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(Theme.accent)
+        AccessibilityAdaptiveStack {
+            HStack(spacing: Spacing.sm) {
+                Image(systemName: "arrow.right.circle")
+                    .font(.footnote.weight(.medium))
+                    .foregroundStyle(Theme.accent)
+                    .accessibilityHidden(true)
 
-            Text(L10n.impactNextReminder.uppercased())
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1)
+                Text(L10n.impactNextReminder.uppercased())
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.textTertiary)
+                    .tracking(1)
+            }
 
-            Spacer()
+            AdaptiveSpacer()
 
             Text("\(label(for: impact.before)) → \(label(for: impact.after))")
                 .font(.brutalistBody)
                 .foregroundStyle(Theme.accent)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Spacing.md)
         .background(Theme.accent.opacity(0.08))
         .overlay(

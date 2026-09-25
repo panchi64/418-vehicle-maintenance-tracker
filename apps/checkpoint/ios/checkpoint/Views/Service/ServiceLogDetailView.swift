@@ -71,10 +71,10 @@ struct ServiceLogDetailView: View {
                     dismiss()
                 } label: {
                     Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.footnote.weight(.semibold))
                         .foregroundStyle(Theme.textSecondary)
                 }
-                .accessibilityLabel("Close")
+                .accessibilityLabel(L10n.a11yClose)
             }
             ToolbarItem(placement: .primaryAction) {
                 Button {
@@ -134,16 +134,7 @@ struct ServiceLogDetailView: View {
 
     private var serviceHeader: some View {
         VStack(spacing: Spacing.sm) {
-            // Category icon
-            if let category = log.editableCostCategory {
-                Image(systemName: category.icon)
-                    .font(.system(size: 28, weight: .medium))
-                    .foregroundStyle(category.color)
-            } else {
-                Image(systemName: "wrench.and.screwdriver")
-                    .font(.system(size: 28, weight: .medium))
-                    .foregroundStyle(Theme.accent)
-            }
+            ServiceCategoryIcon(category: log.editableCostCategory)
 
             Text(log.service?.name ?? L10n.serviceFallbackName)
                 .font(.brutalistTitle)

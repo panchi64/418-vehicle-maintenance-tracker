@@ -217,7 +217,6 @@ struct AddServiceView: View {
                                 .tracking(1)
                         }
                         .accessibilityElement(children: .combine)
-                        .accessibilityLabel("\(vehicle.displayName), \(sheetTitle)")
                     }
                 }
                 .safeAreaInset(edge: .bottom) {

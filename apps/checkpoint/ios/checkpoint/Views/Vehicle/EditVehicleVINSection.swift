@@ -49,6 +49,7 @@ struct EditVehicleVINSection: View {
                             .autocorrectionDisabled()
                             .padding(16)
                             .background(Theme.surfaceInstrument)
+                            .accessibilityLabel(L10n.vehicleVIN)
                             .onChange(of: vin) {
                                 vinLookupError = nil
                             }
@@ -60,24 +61,27 @@ struct EditVehicleVINSection: View {
                                 showVINCamera = true
                             } label: {
                                 Image(systemName: "camera.fill")
-                                    .font(.system(size: 18, weight: .medium))
+                                    .font(.body.weight(.medium))
                                     .foregroundStyle(Theme.accent)
-                                    .frame(width: 52, height: 52)
+                                    .frame(minWidth: 52, minHeight: 52)
                                     .background(Theme.surfaceInstrument)
+                                    .contentShape(Rectangle())
                             }
+                            .buttonStyle(.plain)
                             .brutalistBorder()
+                            .accessibilityLabel(L10n.addVehicleScanVIN)
                         }
                     }
                     .brutalistBorder()
                 }
 
-                HStack {
+                AccessibilityAdaptiveStack {
                     Text("17-CHARACTER VEHICLE IDENTIFICATION NUMBER")
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
                         .tracking(1.5)
 
-                    Spacer()
+                    AdaptiveSpacer()
 
                     if !vin.isEmpty {
                         Text("\(vin.count)/17")

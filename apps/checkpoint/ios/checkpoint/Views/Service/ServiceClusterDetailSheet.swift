@@ -88,19 +88,21 @@ struct ServiceClusterDetailSheet: View {
     }
 
     private func summaryRow(label: String, value: String, highlight: Bool = false) -> some View {
-        HStack {
+        AccessibilityAdaptiveStack {
             Text(label)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(1)
 
-            Spacer()
+            AdaptiveSpacer()
 
             Text(value)
                 .font(.brutalistBody)
                 .foregroundStyle(highlight ? Theme.accent : Theme.textSecondary)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Spacing.md)
+        .accessibilityElement(children: .combine)
     }
 
     // MARK: - Services Section
@@ -137,33 +139,41 @@ struct ServiceClusterDetailSheet: View {
             Rectangle()
                 .fill(status.color)
                 .frame(width: 8, height: 8)
+                .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(service.name.uppercased())
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textPrimary)
-                    .lineLimit(1)
+            // The status word stacks under the name at accessibility sizes
+            // rather than squeezing it to a sliver.
+            AccessibilityAdaptiveStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(service.name.uppercased())
+                        .font(.brutalistBody)
+                        .foregroundStyle(Theme.textPrimary)
 
-                if let desc = service.primaryDescription {
-                    Text(desc)
-                        .font(.brutalistSecondary)
-                        .foregroundStyle(Theme.textTertiary)
+                    if let desc = service.primaryDescription {
+                        Text(desc)
+                            .font(.brutalistSecondary)
+                            .foregroundStyle(Theme.textTertiary)
+                    }
                 }
+
+                AdaptiveSpacer()
+
+                Text(status.label)
+                    .font(.brutalistLabel)
+                    .foregroundStyle(status.color)
+                    .tracking(1)
             }
 
-            Spacer()
-
-            Text(status.label)
-                .font(.brutalistLabel)
-                .foregroundStyle(status.color)
-                .tracking(1)
+            Spacer(minLength: 0)
 
             Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .semibold))
+                .font(.caption.weight(.semibold))
                 .foregroundStyle(Theme.textTertiary)
+                .accessibilityHidden(true)
         }
         .padding(Spacing.md)
         .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
     }
 
     // MARK: - Mark All Done Section
@@ -173,7 +183,8 @@ struct ServiceClusterDetailSheet: View {
             Button(action: onMarkAllDone) {
                 HStack {
                     Image(systemName: "checkmark.circle")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.body.weight(.semibold))
+                        .accessibilityHidden(true)
 
                     Text("MARK ALL DONE")
                         .font(.brutalistBody)

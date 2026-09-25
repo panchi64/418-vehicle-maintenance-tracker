@@ -51,11 +51,11 @@ struct InlinePicker<Value: Hashable>: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
 
                     Image(systemName: "chevron.down")
-                        .font(.system(size: 9, weight: .semibold))
+                        .font(.caption2.weight(.semibold))
                         .foregroundStyle(Theme.accent)
                         .rotationEffect(.degrees(isExpanded ? 180 : 0))
                 }
-                .frame(minHeight: 40)
+                .frame(minHeight: TouchTarget.minimum)
                 .overlay(alignment: .bottom) {
                     Rectangle()
                         .fill(isExpanded ? Theme.accent : Theme.borderSubtle)

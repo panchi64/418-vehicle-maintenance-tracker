@@ -14,24 +14,27 @@ struct ErrorMessageRow: View {
     var body: some View {
         HStack(spacing: Spacing.sm) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 14, weight: .medium))
+                .font(.footnote.weight(.medium))
                 .foregroundStyle(Theme.statusOverdue)
+                .accessibilityHidden(true)
 
             Text(message.uppercased())
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.statusOverdue)
                 .tracking(1)
-
-            Spacer()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityLabel(L10n.a11yError(message))
 
             Button {
                 onDismiss()
             } label: {
                 Image(systemName: "xmark")
-                    .font(.system(size: 12, weight: .bold))
+                    .font(.caption.weight(.bold))
                     .foregroundStyle(Theme.textTertiary)
                     .minimumTouchTarget()
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel(L10n.commonDismiss)
         }
         .padding(Spacing.md)
         .background(Theme.statusOverdue.opacity(0.1))

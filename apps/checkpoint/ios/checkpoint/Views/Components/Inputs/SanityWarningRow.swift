@@ -6,8 +6,9 @@ struct SanityWarningRow: View {
     var body: some View {
         HStack(spacing: Spacing.sm) {
             Image(systemName: "exclamationmark.circle")
-                .font(.system(size: 14, weight: .medium))
+                .font(.footnote.weight(.medium))
                 .foregroundStyle(Theme.statusDueSoon)
+                .accessibilityHidden(true)
 
             Text(message.uppercased())
                 .font(.brutalistLabel)
@@ -21,7 +22,8 @@ struct SanityWarningRow: View {
             Rectangle()
                 .strokeBorder(Theme.statusDueSoon.opacity(0.4), lineWidth: Theme.borderWidth)
         )
-        .accessibilityLabel(message)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(L10n.a11yWarning(message))
     }
 }
 

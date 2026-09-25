@@ -24,8 +24,9 @@ struct BrutalistSearchField: View {
     var body: some View {
         HStack(spacing: Spacing.sm) {
             Image(systemName: "magnifyingglass")
-                .font(.system(size: 16, weight: .medium))
+                .font(.body.weight(.medium))
                 .foregroundStyle(Theme.textTertiary)
+                .accessibilityHidden(true)
 
             TextField(placeholder, text: $text)
                 .font(.brutalistBody)
@@ -48,12 +49,11 @@ struct BrutalistSearchField: View {
                     text = ""
                 } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 16))
+                        .font(.body)
                         .foregroundStyle(Theme.textTertiary)
-                        .frame(minWidth: Theme.tapTarget, minHeight: Theme.tapTarget)
-                        .contentShape(Rectangle())
+                        .minimumTouchTarget()
                 }
-                .accessibilityLabel("Clear search")
+                .accessibilityLabel(L10n.a11yClearSearch)
             }
         }
         // The row reserves the tap target whether or not the clear button is

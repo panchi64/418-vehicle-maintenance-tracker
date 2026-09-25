@@ -40,8 +40,14 @@ struct RichNotesEditor: View {
                     .foregroundStyle(Theme.textTertiary)
                     .padding(.horizontal, Spacing.listItem)
                     .padding(.vertical, Spacing.md)
+                    .accessibilityHidden(true)
             }
-            MarkdownTextView(text: $text, selection: $selection, isFocused: $isFocused)
+            MarkdownTextView(
+                text: $text,
+                selection: $selection,
+                isFocused: $isFocused,
+                accessibilityName: label ?? placeholder
+            )
                 .frame(minHeight: minHeight)
                 .padding(.horizontal, Spacing.sm)
         }
@@ -49,15 +55,15 @@ struct RichNotesEditor: View {
 
     private var toolbar: some View {
         HStack(spacing: Spacing.sm) {
-            FormatButton(label: "BOLD", accessibility: "Bold") {
+            FormatButton(label: "BOLD", accessibility: L10n.a11yFormatBold) {
                 apply(MarkdownNotesEditing.applyBold)
             }
 
-            FormatButton(label: "BULLETS", accessibility: "Bulleted list") {
+            FormatButton(label: "BULLETS", accessibility: L10n.a11yFormatBulletedList) {
                 apply(MarkdownNotesEditing.applyBulletList)
             }
 
-            FormatButton(label: "NUMBERED", accessibility: "Numbered list") {
+            FormatButton(label: "NUMBERED", accessibility: L10n.a11yFormatNumberedList) {
                 apply(MarkdownNotesEditing.applyNumberedList)
             }
 
@@ -89,7 +95,7 @@ private struct FormatButton: View {
                 .tracking(1.5)
                 .foregroundStyle(Theme.accent)
                 .padding(.horizontal, Spacing.sm)
-                .frame(minHeight: 32)
+                .frame(minHeight: TouchTarget.minimum)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -101,6 +107,9 @@ private struct MarkdownTextView: UIViewRepresentable {
     @Binding var text: String
     @Binding var selection: NSRange
     @Binding var isFocused: Bool
+    /// What VoiceOver calls the editor. A UITextView otherwise announces only
+    /// "text field", with no idea what it is for.
+    let accessibilityName: String
 
     func makeUIView(context: Context) -> UITextView {
         let view = UITextView()
@@ -108,7 +117,12 @@ private struct MarkdownTextView: UIViewRepresentable {
         view.backgroundColor = .clear
         view.textColor = UIColor(Theme.textPrimary)
         view.tintColor = UIColor(Theme.accent)
-        view.font = UIFont.monospacedSystemFont(ofSize: 15, weight: .regular)
+        // 15pt at the default text size, following `.body` from there — the
+        // same curve as `Font.brutalistBody`.
+        view.font = UIFontMetrics(forTextStyle: .body)
+            .scaledFont(for: UIFont.monospacedSystemFont(ofSize: 15, weight: .regular))
+        view.adjustsFontForContentSizeCategory = true
+        view.accessibilityLabel = accessibilityName
         view.autocapitalizationType = .sentences
         view.autocorrectionType = .yes
         view.textContainerInset = UIEdgeInsets(top: 8, left: 4, bottom: 8, right: 4)

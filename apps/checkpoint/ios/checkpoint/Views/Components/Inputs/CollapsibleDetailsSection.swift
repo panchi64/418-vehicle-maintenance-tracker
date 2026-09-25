@@ -49,15 +49,16 @@ struct CollapsibleDetailsSection<Content: View>: View {
                         .frame(height: Theme.borderWidth)
 
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.caption.weight(.semibold))
                         .foregroundStyle(Theme.textTertiary)
                         .rotationEffect(.degrees(isExpanded ? 90 : 0))
                 }
+                .frame(minHeight: TouchTarget.minimum)
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel(headerTitle)
-            .accessibilityHint(isExpanded ? "Collapses details" : "Expands details")
+            .accessibilityValue(isExpanded ? L10n.a11yExpanded : L10n.a11yCollapsed)
 
             if isExpanded {
                 content

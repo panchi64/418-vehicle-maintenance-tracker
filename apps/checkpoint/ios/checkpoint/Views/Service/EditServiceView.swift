@@ -173,22 +173,8 @@ struct EditServiceView: View {
                             }
 
                             // Delete Button
-                            Button {
+                            DestructiveFormButton(title: L10n.serviceDeleteAction) {
                                 showDeleteConfirmation = true
-                            } label: {
-                                HStack {
-                                    Image(systemName: "trash")
-                                    Text(L10n.serviceDeleteAction)
-                                }
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundStyle(Theme.statusOverdue)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: Theme.buttonHeight)
-                                .background(Theme.statusOverdue.opacity(0.1))
-                                .overlay(
-                                    Rectangle()
-                                        .strokeBorder(Theme.statusOverdue.opacity(0.3), lineWidth: Theme.borderWidth)
-                                )
                             }
                             .padding(.top, Spacing.md)
                         }

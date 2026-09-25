@@ -23,7 +23,9 @@ struct AttachmentGrid: View {
                                 AttachmentThumbnail(attachment: attachment)
                             }
                             .buttonStyle(.plain)
-                            .accessibilityLabel("Open document")
+                            // Label comes from the thumbnail: "Photo
+                            // attachment" / "PDF attachment" says which one
+                            // this is, where "Open document" said it of all.
                             .accessibilityHint("Opens the document detail view")
                         }
                     }
@@ -47,10 +49,11 @@ struct AttachmentSection: View {
                 VStack(alignment: .leading, spacing: Spacing.sm) {
                     HStack(spacing: Spacing.xs) {
                         Image(systemName: "paperclip")
-                            .font(.system(size: 12, weight: .medium))
+                            .font(.caption.weight(.medium))
                             .foregroundStyle(Theme.textTertiary)
+                            .accessibilityHidden(true)
 
-                        Text("\(attachments.count) attachment\(attachments.count == 1 ? "" : "s")")
+                        Text(L10n.attachmentCount(attachments.count))
                             .font(.brutalistSecondary)
                             .foregroundStyle(Theme.textTertiary)
                     }

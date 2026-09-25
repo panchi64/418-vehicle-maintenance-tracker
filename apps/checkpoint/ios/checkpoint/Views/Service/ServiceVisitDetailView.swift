@@ -66,10 +66,10 @@ struct ServiceVisitDetailView: View {
                     dismiss()
                 } label: {
                     Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.footnote.weight(.semibold))
                         .foregroundStyle(Theme.textSecondary)
                 }
-                .accessibilityLabel("Close")
+                .accessibilityLabel(L10n.a11yClose)
             }
         }
         .sheet(item: $attachmentForDetail) { document in
@@ -82,15 +82,7 @@ struct ServiceVisitDetailView: View {
 
     private var header: some View {
         VStack(spacing: Spacing.sm) {
-            if let category = visit.costCategory {
-                Image(systemName: category.icon)
-                    .font(.system(size: 28, weight: .medium))
-                    .foregroundStyle(category.color)
-            } else {
-                Image(systemName: "wrench.and.screwdriver")
-                    .font(.system(size: 28, weight: .medium))
-                    .foregroundStyle(Theme.accent)
-            }
+            ServiceCategoryIcon(category: visit.costCategory)
 
             Text("SERVICE VISIT")
                 .font(.brutalistLabel)
@@ -163,7 +155,7 @@ struct ServiceVisitDetailView: View {
     }
 
     private func serviceRow(log: ServiceLog) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: Spacing.sm) {
+        AccessibilityAdaptiveStack(horizontalAlignment: .firstTextBaseline) {
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(log.service?.name.uppercased() ?? "—")
                     .font(.brutalistBody)
@@ -177,14 +169,16 @@ struct ServiceVisitDetailView: View {
                 }
             }
 
-            Spacer()
+            AdaptiveSpacer()
 
             Text(perServiceLabel(for: log))
                 .font(.brutalistLabel)
                 .tracking(1)
                 .foregroundStyle(Theme.textTertiary)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Spacing.md)
+        .accessibilityElement(children: .combine)
     }
 
     /// Per-service amount label.

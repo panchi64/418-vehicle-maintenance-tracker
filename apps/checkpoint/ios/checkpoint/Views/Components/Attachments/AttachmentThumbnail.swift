@@ -7,6 +7,11 @@
 
 import SwiftUI
 
+/// Fixed thumbnail edge. The tile is an image slot, not text, so it stays put
+/// under Dynamic Type — which is why the placeholders inside it are glyphs
+/// rather than captions.
+let attachmentThumbnailSize: CGFloat = 60
+
 struct AttachmentThumbnail: View {
     let attachment: ServiceAttachment
 
@@ -16,42 +21,41 @@ struct AttachmentThumbnail: View {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 60, height: 60)
+                    .frame(width: attachmentThumbnailSize, height: attachmentThumbnailSize)
                     .clipped()
+                    .accessibilityLabel(L10n.a11yPhotoAttachment)
             } else if attachment.isPDF {
-                // PDF placeholder
-                ZStack {
-                    Rectangle()
-                        .fill(Theme.surfaceInstrument)
-
-                    VStack(spacing: 2) {
-                        Image(systemName: "doc.fill")
-                            .font(.system(size: 20))
-                            .foregroundStyle(Theme.accent)
-
-                        Text("PDF")
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.textTertiary)
-                    }
-                }
-                .frame(width: 60, height: 60)
+                AttachmentPlaceholderTile(isPDF: true)
             } else {
-                // Generic file placeholder
-                ZStack {
-                    Rectangle()
-                        .fill(Theme.surfaceInstrument)
-
-                    Image(systemName: "doc")
-                        .font(.system(size: 24))
-                        .foregroundStyle(Theme.textTertiary)
-                }
-                .frame(width: 60, height: 60)
+                AttachmentPlaceholderTile(isPDF: false)
             }
         }
         .overlay(
             Rectangle()
                 .strokeBorder(Theme.gridLine, lineWidth: 1)
         )
+    }
+}
+
+/// The tile shown when an attachment has no image thumbnail.
+///
+/// Glyph only: a scaling caption would overflow the fixed 60pt tile at larger
+/// text sizes. VoiceOver gets the word from the label instead.
+struct AttachmentPlaceholderTile: View {
+    let isPDF: Bool
+
+    var body: some View {
+        ZStack {
+            Rectangle()
+                .fill(Theme.surfaceInstrument)
+
+            Image(systemName: isPDF ? "doc.fill" : "doc")
+                .font(.title3)
+                .foregroundStyle(isPDF ? Theme.accent : Theme.textTertiary)
+        }
+        .frame(width: attachmentThumbnailSize, height: attachmentThumbnailSize)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(isPDF ? L10n.a11yPDFAttachment : L10n.a11yFileAttachment)
     }
 }
 
@@ -79,27 +83,8 @@ struct AttachmentThumbnail: View {
 
         HStack(spacing: Spacing.sm) {
             AttachmentThumbnail(attachment: attachment)
-
-            // PDF placeholder demo
-            ZStack {
-                Rectangle()
-                    .fill(Theme.surfaceInstrument)
-                    .frame(width: 60, height: 60)
-
-                VStack(spacing: 2) {
-                    Image(systemName: "doc.fill")
-                        .font(.system(size: 20))
-                        .foregroundStyle(Theme.accent)
-
-                    Text("PDF")
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
-                }
-            }
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.gridLine, lineWidth: 1)
-            )
+            AttachmentPlaceholderTile(isPDF: true)
+            AttachmentPlaceholderTile(isPDF: false)
         }
         .padding(Spacing.screenHorizontal)
     }

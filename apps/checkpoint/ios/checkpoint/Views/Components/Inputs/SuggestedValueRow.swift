@@ -9,18 +9,20 @@ struct SuggestedValueRow: View {
     let onUse: () -> Void
 
     var body: some View {
-        HStack(spacing: Spacing.sm) {
-            Image(systemName: "wand.and.stars")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(Theme.accent.opacity(0.7))
-                .accessibilityHidden(true)
+        AccessibilityAdaptiveStack {
+            HStack(spacing: Spacing.sm) {
+                Image(systemName: "wand.and.stars")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(Theme.accent.opacity(0.7))
+                    .accessibilityHidden(true)
 
-            Text(label.uppercased())
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1)
+                Text(label.uppercased())
+                    .font(.brutalistLabel)
+                    .foregroundStyle(Theme.textTertiary)
+                    .tracking(1)
+            }
 
-            Spacer()
+            AdaptiveSpacer()
 
             Button(action: onUse) {
                 Text(L10n.formUse)
@@ -34,6 +36,8 @@ struct SuggestedValueRow: View {
                         Rectangle()
                             .strokeBorder(Theme.accent.opacity(0.5), lineWidth: Theme.borderWidth)
                     )
+                    // The outline stays tight; the tappable area doesn't.
+                    .minimumTouchTarget()
             }
             .buttonStyle(.plain)
             .accessibilityLabel(L10n.formUseSuggestedValue(label))

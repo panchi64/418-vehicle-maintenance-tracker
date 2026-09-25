@@ -81,13 +81,12 @@ struct ServiceDepthSection: View {
                              : L10n.formDetailsCount(filledCount))
                             .font(.brutalistSecondary)
                             .foregroundStyle(Theme.textTertiary)
-                            .lineLimit(1)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.caption2.weight(.semibold))
                     .foregroundStyle(Theme.accent)
                     .rotationEffect(.degrees(isExpanded ? 180 : 0))
             }

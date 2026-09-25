@@ -36,6 +36,13 @@ struct OCRConfirmationView: View {
 
     @State private var mileageText: String = ""
     @State private var sourceUnit: DistanceUnit = .miles
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    private var heroLayout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(spacing: Spacing.sm))
+            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: Spacing.sm))
+    }
 
     private var parsedMileage: Int? {
         Int(mileageText)
@@ -139,13 +146,20 @@ struct OCRConfirmationView: View {
                 .foregroundStyle(Theme.textTertiary)
                 .tracking(2)
 
-            HStack(alignment: .firstTextBaseline, spacing: Spacing.sm) {
+            // The unit sits beside the number until accessibility sizes, where
+            // a seven-digit hero no longer leaves room for it.
+            heroLayout {
                 TextField("", text: $mileageText)
                     .font(.brutalistHero)
+                    // Hero numeral: capped so seven digits still fit the width.
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility2)
                     .foregroundStyle(Theme.accent)
                     .keyboardType(.numberPad)
                     .multilineTextAlignment(.center)
-                    .fixedSize()
+                    // Hug the digits so the unit sits beside them; when stacked,
+                    // take the full width instead so a long reading can't clip.
+                    .fixedSize(horizontal: !dynamicTypeSize.isAccessibilitySize, vertical: true)
+                    .accessibilityLabel(L10n.a11yDetectedMileage)
                     .onChange(of: mileageText) { _, newValue in
                         let filtered = String(newValue.filter(\.isNumber).prefix(7))
                         if filtered != newValue {
@@ -167,7 +181,11 @@ struct OCRConfirmationView: View {
                             Rectangle()
                                 .strokeBorder(Theme.accent.opacity(0.5), lineWidth: 1)
                         )
+                        .minimumTouchTarget()
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel(L10n.a11yDistanceUnit)
+                .accessibilityValue(sourceUnit.uppercaseAbbreviation)
             }
 
             Text("TAP TO EDIT")
@@ -190,15 +208,17 @@ struct OCRConfirmationView: View {
     private func warningBanner(_ text: String) -> some View {
         HStack(spacing: Spacing.sm) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 14, weight: .medium))
+                .font(.footnote.weight(.medium))
                 .foregroundStyle(Theme.statusOverdue)
+                .accessibilityHidden(true)
 
             Text(text)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.statusOverdue)
                 .tracking(1)
-                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
                 .multilineTextAlignment(.leading)
+                .accessibilityLabel(L10n.a11yWarning(text))
 
             Spacer(minLength: 0)
         }
@@ -233,7 +253,7 @@ struct OCRConfirmationView: View {
                     UIPasteboard.general.string = rawText
                 } label: {
                     Image(systemName: "doc.on.doc")
-                        .font(.system(size: 14))
+                        .font(.footnote)
                         .foregroundStyle(Theme.accent)
                 }
             }

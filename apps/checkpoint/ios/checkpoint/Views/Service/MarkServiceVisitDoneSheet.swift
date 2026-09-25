@@ -169,6 +169,7 @@ struct MarkServiceVisitDoneSheet: View {
                             Rectangle()
                                 .fill(Theme.statusGood)
                                 .frame(width: 4, height: 4)
+                                .accessibilityHidden(true)
 
                             Text(service.name.uppercased())
                                 .font(.brutalistBody)

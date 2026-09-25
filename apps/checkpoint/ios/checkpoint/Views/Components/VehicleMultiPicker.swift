@@ -18,6 +18,9 @@ struct VehicleMultiPicker: View {
     @Binding var selection: Set<UUID>
     var lockedVehicleIDs: Set<UUID> = []
 
+    /// Grows with the checkmark inside it.
+    @ScaledMetric(relativeTo: .caption) private var checkboxSize: CGFloat = 22
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -72,27 +75,28 @@ struct VehicleMultiPicker: View {
                     Text(vehicle.displayName)
                         .font(.brutalistBody)
                         .foregroundStyle(Theme.textPrimary)
-                        .lineLimit(1)
 
                     Text(vehicleSubtitle(for: vehicle))
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
-                        .lineLimit(1)
                 }
 
                 Spacer(minLength: Spacing.sm)
 
                 checkbox(isSelected: isSelected, isLocked: isLocked)
+                    .accessibilityHidden(true)
             }
             .padding(.horizontal, Spacing.md)
             .padding(.vertical, Spacing.listItem)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            // The whole row is the target, not just the checkbox.
+            .frame(maxWidth: .infinity, minHeight: TouchTarget.minimum, alignment: .leading)
             .contentShape(Rectangle())
             .opacity(isLocked ? 0.6 : 1.0)
         }
         .buttonStyle(.plain)
         .disabled(isLocked)
         .accessibilityLabel(vehicle.displayName)
+        .accessibilityValue(vehicleSubtitle(for: vehicle))
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
@@ -108,11 +112,11 @@ struct VehicleMultiPicker: View {
         ZStack {
             Rectangle()
                 .strokeBorder(isSelected ? Theme.accent : Theme.gridLine, lineWidth: 2)
-                .frame(width: 22, height: 22)
+                .frame(width: checkboxSize, height: checkboxSize)
 
             if isSelected {
                 Image(systemName: "checkmark")
-                    .font(.system(size: 12, weight: .bold))
+                    .font(.caption.weight(.bold))
                     .foregroundStyle(isLocked ? Theme.textTertiary : Theme.accent)
             }
         }

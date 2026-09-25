@@ -42,18 +42,7 @@ struct VehiclePickerSheet: View {
                             ForEach(vehicles) { vehicle in
                                 vehicleRow(vehicle)
                                     .contextMenu {
-                                        Button {
-                                            vehicleToEdit = vehicle
-                                        } label: {
-                                            Label("Edit", systemImage: "pencil")
-                                        }
-
-                                        Button(role: .destructive) {
-                                            vehicleToDelete = vehicle
-                                            showDeleteConfirmation = true
-                                        } label: {
-                                            Label("Delete", systemImage: "trash")
-                                        }
+                                        vehicleActions(vehicle)
                                     }
 
                                 if vehicle.id != vehicles.last?.id {
@@ -78,8 +67,9 @@ struct VehiclePickerSheet: View {
                         } label: {
                             HStack(spacing: Spacing.sm) {
                                 Image(systemName: "plus.circle.fill")
-                                    .font(.system(size: 20))
+                                    .font(.title3)
                                     .foregroundStyle(Theme.accent)
+                                    .accessibilityHidden(true)
 
                                 Text(L10n.vehicleAdd)
                                     .font(.brutalistBody)
@@ -96,7 +86,6 @@ struct VehiclePickerSheet: View {
                             )
                         }
                         .buttonStyle(.instrument)
-                        .accessibilityLabel("Add new vehicle")
                     }
                     .padding(Spacing.screenHorizontal)
                     .padding(.top, Spacing.md)
@@ -167,73 +156,83 @@ struct VehiclePickerSheet: View {
         vehicleToDelete = nil
     }
 
-    private func vehicleRow(_ vehicle: Vehicle) -> some View {
+    @ViewBuilder
+    private func vehicleActions(_ vehicle: Vehicle) -> some View {
         Button {
-            selectedVehicle = vehicle
-            dismiss()
+            vehicleToEdit = vehicle
         } label: {
-            HStack(spacing: Spacing.md) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(vehicle.displayName.uppercased())
-                        .font(.custom("Barlow-SemiBold", size: 16))
-                        .foregroundStyle(Theme.textPrimary)
-                        .tracking(0.5)
-
-                    Text(vehicle.identityLine)
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
-                }
-
-                Spacer()
-
-                if selectedVehicle?.id == vehicle.id {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 22))
-                        .foregroundStyle(Theme.accent)
-                }
-
-                // Options menu button
-                Menu {
-                    Button {
-                        vehicleToEdit = vehicle
-                    } label: {
-                        Label("Edit", systemImage: "pencil")
-                    }
-
-                    Button(role: .destructive) {
-                        vehicleToDelete = vehicle
-                        showDeleteConfirmation = true
-                    } label: {
-                        Label("Delete", systemImage: "trash")
-                    }
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
-                        .frame(width: 44, height: 44)
-                        .contentShape(Rectangle())
-                }
-                .accessibilityLabel("Vehicle options")
-            }
-            .padding(Spacing.md)
-            .contentShape(Rectangle())
+            Label(L10n.vehicleEditTitle, systemImage: "pencil")
         }
-        .buttonStyle(ServiceRowButtonStyle())
-        .accessibilityLabel(vehicle.displayName)
-        .accessibilityHint(selectedVehicle?.id == vehicle.id ? "Currently selected" : "Double tap to select")
+
+        Button(role: .destructive) {
+            vehicleToDelete = vehicle
+            showDeleteConfirmation = true
+        } label: {
+            Label(L10n.commonDelete, systemImage: "trash")
+        }
+    }
+
+    /// Select and options are siblings, not nested: a Menu inside the select
+    /// Button's label was swallowed into the row's single VoiceOver element,
+    /// so Edit and Delete could not be reached without the context menu.
+    private func vehicleRow(_ vehicle: Vehicle) -> some View {
+        let isSelected = selectedVehicle?.id == vehicle.id
+
+        return HStack(spacing: 0) {
+            Button {
+                selectedVehicle = vehicle
+                dismiss()
+            } label: {
+                HStack(spacing: Spacing.md) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(vehicle.displayName.uppercased())
+                            .font(.brutalistBodyEmphasis)
+                            .foregroundStyle(Theme.textPrimary)
+                            .tracking(0.5)
+
+                        Text(vehicle.identityLine)
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+
+                    Spacer(minLength: Spacing.sm)
+
+                    if isSelected {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.title3)
+                            .foregroundStyle(Theme.accent)
+                            .accessibilityHidden(true)
+                    }
+                }
+                .padding([.leading, .vertical], Spacing.md)
+                .frame(minHeight: TouchTarget.minimum)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(ServiceRowButtonStyle())
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(vehicle.displayName)
+            .accessibilityValue(vehicle.identityLine)
+            .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
+
+            Menu {
+                vehicleActions(vehicle)
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.body)
+                    .foregroundStyle(Theme.textTertiary)
+                    .minimumTouchTarget()
+            }
+            .padding(.trailing, Spacing.xs)
+            .accessibilityLabel(L10n.a11yVehicleOptions(vehicle.displayName))
+        }
     }
 }
 
-// MARK: - Glass Background Modifier (iOS 26+)
+// MARK: - Glass Background Modifier
 
 extension View {
-    @ViewBuilder
     func applyGlassBackground() -> some View {
-        if #available(iOS 26, *) {
-            self.presentationBackground(.regularMaterial)
-        } else {
-            self
-        }
+        presentationBackground(.regularMaterial)
     }
 }
 

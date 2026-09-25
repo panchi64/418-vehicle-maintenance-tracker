@@ -13,13 +13,25 @@ struct InstrumentSegmentedControl<T: Hashable>: View {
     let labelFor: (T) -> String
 
     @Namespace private var namespace
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    /// Side by side until accessibility sizes, where even two short labels
+    /// can't share a row — the segments stack instead of truncating.
+    private var layout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(spacing: 0))
+            : AnyLayout(HStackLayout(spacing: 0))
+    }
 
     var body: some View {
-        HStack(spacing: 0) {
+        layout {
             ForEach(options, id: \.self) { option in
                 segmentButton(for: option)
             }
         }
+        // Every segment takes the tallest one's height, so a label that wraps
+        // doesn't leave its neighbours' highlights short.
+        .fixedSize(horizontal: false, vertical: true)
         .padding(Spacing.xs)
         .background(Theme.surfaceInstrument)
         .brutalistBorder()
@@ -38,10 +50,11 @@ struct InstrumentSegmentedControl<T: Hashable>: View {
                 .font(.brutalistLabel)
                 .foregroundStyle(isSelected ? Theme.surfaceInstrument : Theme.textSecondary)
                 .tracking(1)
-                .lineLimit(1)
+                .multilineTextAlignment(.center)
                 .padding(.horizontal, Spacing.listItem)
                 .padding(.vertical, Spacing.listItem)
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, minHeight: TouchTarget.minimum, maxHeight: .infinity)
+                .contentShape(Rectangle())
                 .background {
                     if isSelected {
                         Rectangle()
@@ -53,31 +66,6 @@ struct InstrumentSegmentedControl<T: Hashable>: View {
         .buttonStyle(.plain)
         .accessibilityLabel(labelFor(option))
         .accessibilityAddTraits(isSelected ? .isSelected : [])
-    }
-}
-
-// MARK: - Labeled Instrument Segmented Control
-
-struct LabeledInstrumentSegmentedControl<T: Hashable>: View {
-    let label: String
-    let options: [T]
-    @Binding var selection: T
-    let labelFor: (T) -> String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            // Label
-            Text(label.uppercased())
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1.5)
-
-            InstrumentSegmentedControl(
-                options: options,
-                selection: $selection,
-                labelFor: labelFor
-            )
-        }
     }
 }
 
@@ -106,14 +94,6 @@ extension InstrumentSegmentedControl where T == String {
 
                 VStack(spacing: Spacing.lg) {
                     InstrumentSegmentedControl(
-                        options: Mode.allCases,
-                        selection: $mode
-                    ) { option in
-                        option.rawValue
-                    }
-
-                    LabeledInstrumentSegmentedControl(
-                        label: "Entry Type",
                         options: Mode.allCases,
                         selection: $mode
                     ) { option in

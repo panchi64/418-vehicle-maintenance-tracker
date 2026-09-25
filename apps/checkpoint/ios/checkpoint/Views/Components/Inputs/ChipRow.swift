@@ -70,12 +70,12 @@ struct Chip: View {
                 .font(isSelected ? .brutalistLabelBold : .brutalistLabel)
                 .tracking(1.5)
                 .foregroundStyle(isSelected ? Theme.accent : Theme.textSecondary)
-                .lineLimit(1)
         } else {
+            // No line limit: `FlowLayout` only narrows a chip that can't fit
+            // the row, and then the label must wrap rather than truncate.
             Text(label)
                 .font(.brutalistBodyEmphasis)
                 .foregroundStyle(isSelected ? Theme.backgroundPrimary : Theme.textPrimary)
-                .lineLimit(1)
         }
     }
 }
@@ -165,7 +165,7 @@ struct FlowLayout: Layout {
         for row in rows {
             var x = bounds.minX
             for index in row.indices {
-                let size = subviews[index].sizeThatFits(.unspecified)
+                let size = fittedSize(of: subviews[index], maxWidth: bounds.width)
                 subviews[index].place(
                     at: CGPoint(x: x, y: y),
                     proposal: ProposedViewSize(size)
@@ -182,12 +182,22 @@ struct FlowLayout: Layout {
         var height: CGFloat = 0
     }
 
+    /// A chip's single-line size, unless that is wider than the row — then it is
+    /// offered the row's width and wraps its label. At accessibility sizes one
+    /// long chip can exceed the screen, and an unbounded proposal drew it off
+    /// the edge.
+    private func fittedSize(of subview: LayoutSubview, maxWidth: CGFloat) -> CGSize {
+        let ideal = subview.sizeThatFits(.unspecified)
+        guard ideal.width > maxWidth, maxWidth.isFinite else { return ideal }
+        return subview.sizeThatFits(ProposedViewSize(width: maxWidth, height: nil))
+    }
+
     private func arrange(subviews: Subviews, maxWidth: CGFloat) -> [Row] {
         var rows: [Row] = []
         var current = Row()
 
         for index in subviews.indices {
-            let size = subviews[index].sizeThatFits(.unspecified)
+            let size = fittedSize(of: subviews[index], maxWidth: maxWidth)
             let needed = current.indices.isEmpty ? size.width : current.width + spacing + size.width
 
             if needed > maxWidth, !current.indices.isEmpty {

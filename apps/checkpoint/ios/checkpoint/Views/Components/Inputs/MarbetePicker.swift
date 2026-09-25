@@ -61,7 +61,7 @@ struct MarbetePicker: View {
                     }
                     Spacer()
                     Image(systemName: "chevron.down")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.caption.weight(.semibold))
                         .foregroundStyle(Theme.accent)
                 }
                 .padding(Spacing.md)
@@ -109,7 +109,7 @@ struct MarbetePicker: View {
                     }
                     Spacer()
                     Image(systemName: "chevron.down")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.caption.weight(.semibold))
                         .foregroundStyle(Theme.accent)
                 }
                 .padding(Spacing.md)
