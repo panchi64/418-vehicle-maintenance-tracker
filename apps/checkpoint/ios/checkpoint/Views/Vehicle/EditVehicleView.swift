@@ -366,7 +366,12 @@ struct EditVehicleView: View {
         vehicle.make = make
         vehicle.model = model
         vehicle.year = year ?? vehicle.year
-        vehicle.currentMileage = currentMileage ?? vehicle.currentMileage
+        // F11: an edited odometer is a manual reading — record it (timestamp +
+        // snapshot) rather than overwrite the number and leave the estimate
+        // engine measuring from a stale date. Unchanged means no new reading.
+        if let currentMileage, currentMileage != vehicle.currentMileage {
+            vehicle.recordMileage(currentMileage, source: .manual, in: modelContext)
+        }
         vehicle.vin = vin.isEmpty ? nil : vin
         vehicle.licensePlate = licensePlate.isEmpty ? nil : licensePlate
         vehicle.tireSize = tireSize.isEmpty ? nil : tireSize

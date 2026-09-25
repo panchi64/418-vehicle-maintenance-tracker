@@ -168,17 +168,15 @@ final class WatchSessionService: NSObject {
                 return
             }
 
-            // Update mileage
-            vehicle.currentMileage = update.newMileage
-            vehicle.mileageUpdatedAt = update.timestamp
-
-            // Create mileage snapshot
-            let snapshot = MileageSnapshot(
-                mileage: update.newMileage,
+            // A manual reading typed on the Watch: authoritative, so it goes
+            // straight to `recordMileage` like phone-side manual entry (F11),
+            // which also throttles snapshots to one per day.
+            vehicle.recordMileage(
+                update.newMileage,
                 recordedAt: update.timestamp,
-                source: .manual
+                source: .manual,
+                in: context
             )
-            snapshot.vehicle = vehicle
 
             try context.save()
             WatchLog.logger.info("Updated mileage from Watch: \(update.newMileage) for \(vehicle.displayName)")

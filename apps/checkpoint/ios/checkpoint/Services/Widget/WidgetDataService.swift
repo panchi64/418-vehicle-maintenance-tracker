@@ -424,19 +424,16 @@ final class WidgetDataService {
                     in: context
                 )
 
-                // Update vehicle mileage if widget mileage is higher
-                if completion.mileageAtService > vehicle.currentMileage {
-                    vehicle.currentMileage = completion.mileageAtService
-                    vehicle.mileageUpdatedAt = completion.performedDate
-
-                    // Create mileage snapshot
-                    let snapshot = MileageSnapshot(
-                        mileage: completion.mileageAtService,
-                        recordedAt: completion.performedDate,
-                        source: .serviceCompletion
-                    )
-                    snapshot.vehicle = vehicle
-                }
+                // F11: the shared commit path. Replaces a hand-rolled
+                // magnitude-only bump that had no date guard and built a
+                // snapshot it never inserted into the context.
+                MileageCommit.commitIfNewest(
+                    reading: completion.mileageAtService,
+                    observedAt: completion.performedDate,
+                    source: .serviceCompletion,
+                    for: vehicle,
+                    in: context
+                )
 
                 widgetLogger.info("Processed widget completion: \(service.name) for \(vehicle.displayName)")
                 processedServiceIDs.insert(completion.serviceID)
