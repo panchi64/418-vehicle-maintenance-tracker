@@ -20,7 +20,7 @@ struct RepairClusterWarningCard: View {
                 Text(L10n.costsClusterBody(count, formattedTotal))
                     .font(.brutalistSecondary)
                     .foregroundStyle(Theme.textPrimary)
-                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             Spacer()
@@ -28,8 +28,8 @@ struct RepairClusterWarningCard: View {
         .padding(Spacing.md)
         .background(Theme.surfaceInstrument)
         .brutalistBorder(color: Theme.statusOverdue.opacity(0.4))
+        // Reads the title, then the body.
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(L10n.costsClusterTitle): \(L10n.costsClusterBody(count, formattedTotal))")
     }
 }
 

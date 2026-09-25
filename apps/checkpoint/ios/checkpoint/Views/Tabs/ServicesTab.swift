@@ -383,7 +383,7 @@ struct ServicesTab: View {
                 .detail(Formatters.mileage(log.mileageAtService))
             ],
             amount: log.formattedCost.map { .init(text: $0, color: Theme.accent) },
-            accessibilityLabelText: "\(name), \(date)",
+            accessibilityLabelText: L10n.readoutEvent(name, date),
             onTap: { appState.selectedServiceLog = log }
         )
         .serviceLogDeleteMenu { ServiceLogDeleteAction.perform(log, offerUndo: true) }

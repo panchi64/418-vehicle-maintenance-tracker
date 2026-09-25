@@ -103,7 +103,9 @@ extension HomeTab {
             title: name,
             metadata: [.detail(date)],
             amount: log.formattedCost.map { .init(text: $0, color: Theme.accent) },
-            accessibilityLabelText: L10n.rowCompletedAccessibility(name, date),
+            // Spoken in full ("June 6, 2026"); the visible short date would
+            // be read as numbers.
+            accessibilityLabelText: L10n.rowCompletedAccessibility(name, L10n.spokenDate(log.performedDate)),
             onTap: { appState.selectedServiceLog = log }
         )
         .serviceLogDeleteMenu { ServiceLogDeleteAction.perform(log, offerUndo: true) }

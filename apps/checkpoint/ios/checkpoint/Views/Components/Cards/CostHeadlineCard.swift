@@ -20,42 +20,47 @@ struct CostHeadlineCard: View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             topRow
 
-            // Rolls when the period selector changes the total. The scale
-            // factor is a parameter rather than a modifier because each digit
-            // is its own Text — see RollingNumberText.
-            RollingNumberText(
-                formattedTotal,
-                minimumScaleFactor: 0.5,
-                resetToken: subjectID
-            )
-                .font(.brutalistHero)
-                .foregroundStyle(Theme.accent)
+            // The readout is one VoiceOver element (total, period, delta,
+            // split, projection, in reading order). The share link above stays
+            // separate so combining doesn't swallow it.
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                // Rolls when the period selector changes the total. The scale
+                // factor is a parameter rather than a modifier because each
+                // digit is its own Text — see RollingNumberText.
+                RollingNumberText(
+                    formattedTotal,
+                    minimumScaleFactor: 0.5,
+                    resetToken: subjectID
+                )
+                    .font(.brutalistHero)
+                    .foregroundStyle(Theme.accent)
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility2)
 
-            Text(periodLabel)
-                .font(.brutalistSecondary)
-                .foregroundStyle(Theme.textTertiary)
+                Text(periodLabel)
+                    .font(.brutalistSecondary)
+                    .foregroundStyle(Theme.textTertiary)
 
-            if let delta = deltaAmount {
-                deltaRow(delta: delta)
-                    .padding(.top, Spacing.xs)
+                if let delta = deltaAmount {
+                    deltaRow(delta: delta)
+                        .padding(.top, Spacing.xs)
+                }
+
+                if hasSplit {
+                    splitRow
+                        .padding(.top, Spacing.xs)
+                }
+
+                if let projection {
+                    projectionRow(projection: projection)
+                        .padding(.top, Spacing.xs)
+                }
             }
-
-            if hasSplit {
-                splitRow
-                    .padding(.top, Spacing.xs)
-            }
-
-            if let projection {
-                projectionRow(projection: projection)
-                    .padding(.top, Spacing.xs)
-            }
+            .accessibilityElement(children: .combine)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Spacing.lg)
         .background(Theme.surfaceInstrument)
         .brutalistBorder()
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Total spent \(formattedTotal), \(periodLabel)")
     }
 
     // MARK: - Subviews
@@ -79,9 +84,11 @@ struct CostHeadlineCard: View {
                     .foregroundStyle(Theme.textPrimary)
                     .tracking(1.5)
                     .underline(true, color: Theme.textPrimary)
+                    .frame(minHeight: TouchTarget.minimum)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Share cost summary")
+            .accessibilityLabel(L10n.readoutShareCostSummary)
         }
     }
 

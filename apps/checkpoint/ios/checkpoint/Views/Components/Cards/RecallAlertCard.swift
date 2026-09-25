@@ -32,8 +32,7 @@ struct RecallAlertCard: View {
     private var hasParkIt: Bool { worstSeverity == .parkIt }
 
     private var countText: String {
-        let count = recalls.count
-        return "\(count) \(count == 1 ? "RECALL" : "RECALLS")"
+        L10n.readoutRecallCount(recalls.count)
     }
 
     private var severityLabel: String { worstSeverity.label.uppercased() }
@@ -45,8 +44,9 @@ struct RecallAlertCard: View {
         } label: {
             HStack(spacing: Spacing.sm) {
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: 16, weight: .bold))
+                    .font(.callout.weight(.bold))
                     .foregroundStyle(Theme.statusOverdue)
+                    .accessibilityHidden(true)
 
                 if hasParkIt {
                     Text("PARK IT")
@@ -63,7 +63,7 @@ struct RecallAlertCard: View {
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.statusOverdue)
                         .tracking(1.5)
-                    Text(countText)
+                    Text(countText.uppercased())
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.statusOverdue.opacity(0.8))
                         .tracking(1)
@@ -72,8 +72,9 @@ struct RecallAlertCard: View {
                 Spacer()
 
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .bold))
+                    .font(.caption.weight(.bold))
                     .foregroundStyle(Theme.statusOverdue)
+                    .accessibilityHidden(true)
             }
             .padding(Spacing.md)
             .contentShape(Rectangle())
@@ -81,7 +82,9 @@ struct RecallAlertCard: View {
         .buttonStyle(.plain)
         .recallCardStyle()
         .contextMenu { snoozeMenu }
-        .accessibilityLabel("\(severityLabel), \(countText). Tap for details.")
+        .accessibilityLabel(worstSeverity.label)
+        .accessibilityValue(countText)
+        .accessibilityHint(L10n.rowViewDetailsHint)
         .sheet(isPresented: $showSheet, onDismiss: presentPendingAddServiceIfNeeded) {
             RecallSheetView(
                 vehicle: vehicle,

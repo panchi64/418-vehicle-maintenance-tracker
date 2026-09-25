@@ -13,7 +13,7 @@ struct ChartPlaceholderCard: View {
     var body: some View {
         VStack(spacing: Spacing.sm) {
             Image(systemName: "chart.line.uptrend.xyaxis")
-                .font(.system(size: 24))
+                .font(.title2)
                 .foregroundStyle(Theme.textTertiary)
                 .accessibilityHidden(true)
 
@@ -23,7 +23,7 @@ struct ChartPlaceholderCard: View {
                 .tracking(1.5)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: ChartConstants.chartHeight)
+        .frame(minHeight: ChartConstants.chartHeight)
         .cardStyle()
         .accessibilityElement(children: .combine)
         .accessibilityLabel(message)

@@ -128,7 +128,6 @@ struct YearlyCostRoundupCard: View {
         .background(Theme.surfaceInstrument)
         .brutalistBorder()
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("\(year) yearly cost roundup, total spent \(formatCurrency(totalSpent))")
     }
 
     // MARK: - Header Section
@@ -143,7 +142,7 @@ struct YearlyCostRoundupCard: View {
             Spacer()
 
             Image(systemName: "calendar")
-                .font(.system(size: 14, weight: .medium))
+                .font(.subheadline.weight(.medium))
                 .foregroundStyle(Theme.textTertiary)
                 .accessibilityHidden(true)
         }
@@ -164,18 +163,24 @@ struct YearlyCostRoundupCard: View {
                 .foregroundStyle(Theme.accent)
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
+                .dynamicTypeSize(...DynamicTypeSize.accessibility2)
 
             if let change = yearOverYearChange {
                 HStack(spacing: 4) {
                     Image(systemName: change >= 0 ? "arrow.up" : "arrow.down")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.caption.weight(.bold))
                         .accessibilityHidden(true)
 
-                    Text(String(format: "%.0f%% from %d", abs(change), year - 1))
+                    Text(L10n.readoutYearChange(Int(abs(change).rounded()), String(year - 1)))
                         .font(.brutalistSecondary)
                 }
                 .foregroundStyle(change >= 0 ? Theme.statusOverdue : Theme.statusGood)
-                .accessibilityLabel("\(change >= 0 ? "Up" : "Down") \(String(format: "%.0f", abs(change))) percent from \(year - 1)")
+                // The arrow's direction is the only visual cue besides color;
+                // VoiceOver says it in words.
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(change >= 0
+                    ? L10n.readoutYearChangeUp(Int(abs(change).rounded()), String(year - 1))
+                    : L10n.readoutYearChangeDown(Int(abs(change).rounded()), String(year - 1)))
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -193,27 +198,37 @@ struct YearlyCostRoundupCard: View {
                 .padding(.bottom, Spacing.xs)
 
             ForEach(categoryBreakdown, id: \.category) { item in
-                HStack(spacing: Spacing.sm) {
-                    Image(systemName: item.category.icon)
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(item.category.color)
-                        .frame(width: 16)
+                AdaptiveStack(spacing: Spacing.sm) {
+                    HStack(spacing: Spacing.sm) {
+                        Image(systemName: item.category.icon)
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(item.category.color)
+                            .accessibilityHidden(true)
 
-                    Text(item.category.displayName)
-                        .font(.brutalistBody)
-                        .foregroundStyle(Theme.textPrimary)
+                        Text(item.category.displayName)
+                            .font(.brutalistBody)
+                            .foregroundStyle(Theme.textPrimary)
+                    }
 
                     Spacer()
 
-                    Text(formatCurrency(item.amount))
-                        .font(.brutalistBody)
-                        .foregroundStyle(item.category.color)
+                    HStack(spacing: Spacing.sm) {
+                        Text(formatCurrency(item.amount))
+                            .font(.brutalistBody)
+                            .foregroundStyle(item.category.color)
 
-                    Text(String(format: "%.0f%%", item.percentage))
-                        .font(.brutalistSecondary)
-                        .foregroundStyle(Theme.textTertiary)
-                        .frame(width: 36, alignment: .trailing)
+                        Text(item.percentage / 100, format: .percent.precision(.fractionLength(0)))
+                            .font(.brutalistSecondary)
+                            .foregroundStyle(Theme.textTertiary)
+                            .frame(minWidth: 36, alignment: .trailing)
+                    }
                 }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(L10n.readoutCategoryShare(
+                    item.category.displayName,
+                    formatCurrency(item.amount),
+                    Int(item.percentage.rounded())
+                ))
             }
         }
         .padding(Spacing.md)
@@ -222,7 +237,7 @@ struct YearlyCostRoundupCard: View {
     // MARK: - Footer Section
 
     private var footerSection: some View {
-        HStack(spacing: Spacing.lg) {
+        AdaptiveStack(spacing: Spacing.lg) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("SERVICES")
                     .font(.brutalistLabel)
@@ -233,6 +248,7 @@ struct YearlyCostRoundupCard: View {
                     .font(.brutalistHeading)
                     .foregroundStyle(Theme.textPrimary)
             }
+            .accessibilityElement(children: .combine)
 
             Spacer()
 
@@ -252,6 +268,7 @@ struct YearlyCostRoundupCard: View {
                         .foregroundStyle(Theme.textTertiary)
                 }
             }
+            .accessibilityElement(children: .combine)
         }
         .padding(Spacing.md)
     }

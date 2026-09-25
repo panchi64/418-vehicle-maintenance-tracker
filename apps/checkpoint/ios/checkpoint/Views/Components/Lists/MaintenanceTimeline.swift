@@ -17,6 +17,8 @@ struct MaintenanceTimeline: View {
     var onLogTap: ((ServiceLog) -> Void)?
     var onLogDelete: ((ServiceLog) -> Void)?
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     private var calendar: Calendar { Calendar.current }
 
     /// Delete applies to completed rows only — an upcoming row is a service.
@@ -141,9 +143,11 @@ struct MaintenanceTimeline: View {
             // Spine with node
             VStack(spacing: 0) {
                 // Node (8x8 square)
+                // Decorative: the COMPLETED / UPCOMING badge says it in words.
                 Rectangle()
                     .fill(item.type == .completed ? Theme.statusGood : Theme.statusDueSoon)
                     .frame(width: 8, height: 8)
+                    .accessibilityHidden(true)
 
                 // Spine line (2px width, continues down unless last)
                 if !isLast {
@@ -169,20 +173,22 @@ struct MaintenanceTimeline: View {
                     Text(service.name)
                         .font(.brutalistBody)
                         .foregroundStyle(Theme.textPrimary)
-                        .lineLimit(1)
                 }
 
-                // Details row
-                HStack(spacing: Spacing.xs) {
+                // Details row — date and cost stack at accessibility sizes.
+                AdaptiveStack(spacing: Spacing.xs) {
                     if item.type == .completed, let log = item.serviceLog {
                         Text(Formatters.mediumDate.string(from: log.performedDate))
                             .font(.brutalistSecondary)
                             .foregroundStyle(Theme.textTertiary)
 
                         if let cost = log.formattedCost {
-                            Text("//")
-                                .font(.brutalistSecondary)
-                                .foregroundStyle(Theme.gridLine)
+                            if !dynamicTypeSize.isAccessibilitySize {
+                                Text(verbatim: "//")
+                                    .font(.brutalistSecondary)
+                                    .foregroundStyle(Theme.gridLine)
+                                    .accessibilityHidden(true)
+                            }
 
                             Text(cost)
                                 .font(.brutalistSecondary)
@@ -216,9 +222,10 @@ struct MaintenanceTimeline: View {
                 }
             }
             .serviceLogDeleteMenu(deleteAction(for: item))
+            // Reads badge, name, then date and cost (or due) from the children.
             .accessibilityElement(children: .combine)
-            .accessibilityLabel("\(item.type == .completed ? "Completed" : "Upcoming"): \(item.service?.name ?? "Service")")
-            .accessibilityHint("Double tap to view details")
+            .accessibilityAddTraits(.isButton)
+            .accessibilityHint(L10n.rowViewDetailsHint)
         }
         .padding(.leading, 4)
     }
@@ -230,12 +237,15 @@ struct MaintenanceTimeline: View {
             ZStack {
                 Rectangle()
                     .fill(Theme.accent.opacity(0.1))
-                    .frame(width: 100, height: 100)
+                    .frame(minWidth: 100, minHeight: 100)
 
                 Image(systemName: "calendar.badge.clock")
-                    .font(.system(size: 40, weight: .light))
+                    .font(.largeTitle.weight(.light))
                     .foregroundStyle(Theme.accent)
+                    .padding(Spacing.md)
             }
+            .fixedSize()
+            .accessibilityHidden(true)
 
             VStack(spacing: Spacing.xs) {
                 Text("NO TIMELINE DATA")
@@ -254,10 +264,9 @@ struct MaintenanceTimeline: View {
 
     // MARK: - Helpers
 
+    /// Locale-ordered month and year ("June 2026", "junio de 2026").
     private func formatMonthYear(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM yyyy"
-        return formatter.string(from: date)
+        date.formatted(.dateTime.month(.wide).year())
     }
 }
 

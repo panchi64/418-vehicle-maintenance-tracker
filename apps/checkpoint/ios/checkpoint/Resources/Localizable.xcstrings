@@ -7767,6 +7767,852 @@
     "Preview Import" : {
 
     },
+    "readout.addVehicleSpecs" : {
+      "comment" : "VoiceOver label for the specs panel's add button.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add vehicle specs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añadir especificaciones del vehículo"
+          }
+        }
+      }
+    },
+    "readout.advisory" : {
+      "comment" : "VoiceOver label for a form advisory. %1$@ spoken severity, %2$@ message.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@"
+          }
+        }
+      }
+    },
+    "readout.categoryShare" : {
+      "comment" : "VoiceOver label for a cost category row. %1$@ category, %2$@ amount, %3$d percent of total.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@, %3$d percent"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@, %3$d por ciento"
+          }
+        }
+      }
+    },
+    "readout.chartAxisAmount" : {
+      "comment" : "Audio Graph y-axis title for amount spent per month.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amount spent"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monto gastado"
+          }
+        }
+      }
+    },
+    "readout.chartAxisDate" : {
+      "comment" : "Audio Graph x-axis title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fecha"
+          }
+        }
+      }
+    },
+    "readout.chartAxisMonth" : {
+      "comment" : "Audio Graph x-axis title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Month"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes"
+          }
+        }
+      }
+    },
+    "readout.chartAxisTotal" : {
+      "comment" : "Audio Graph y-axis and series title for the running total.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total spent"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total gastado"
+          }
+        }
+      }
+    },
+    "readout.chartMonthlySummary" : {
+      "comment" : "Audio Graph summary. %1$@ total, %2$d months, %3$@ highest month, %4$@ its amount.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ across %2$d months. Highest: %3$@, %4$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ en %2$d meses. Mes más alto: %3$@, %4$@."
+          }
+        }
+      }
+    },
+    "readout.chartMonthlyTitle" : {
+      "comment" : "Title of the monthly spending chart.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monthly Trend"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tendencia mensual"
+          }
+        }
+      }
+    },
+    "readout.chartPaceSummary" : {
+      "comment" : "Audio Graph summary. %1$@ running total, %2$@ date reached, %3$d expense count.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ spent by %2$@, across %3$d expenses."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ gastados hasta el %2$@, en %3$d gastos."
+          }
+        }
+      }
+    },
+    "readout.chartPaceTitle" : {
+      "comment" : "Title of the cumulative spending chart.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spending Pace"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ritmo de gasto"
+          }
+        }
+      }
+    },
+    "readout.chartSeriesSpending" : {
+      "comment" : "Audio Graph series name for monthly spending.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spending"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gasto"
+          }
+        }
+      }
+    },
+    "readout.close" : {
+      "comment" : "VoiceOver label for a close (X) button.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerrar"
+          }
+        }
+      }
+    },
+    "readout.collapsed" : {
+      "comment" : "VoiceOver value for a collapsed disclosure row.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collapsed"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contraído"
+          }
+        }
+      }
+    },
+    "readout.copyHint" : {
+      "comment" : "VoiceOver hint: activating copies the value.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copies to the clipboard"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copia al portapapeles"
+          }
+        }
+      }
+    },
+    "readout.dismissHint" : {
+      "comment" : "VoiceOver label for the GOT IT button on a feature hint.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dismiss hint"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descartar consejo"
+          }
+        }
+      }
+    },
+    "readout.dismissVisitSuggestion" : {
+      "comment" : "VoiceOver label for the dismiss button on the service visit suggestion card.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dismiss service visit suggestion"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descartar sugerencia de visita"
+          }
+        }
+      }
+    },
+    "readout.distanceLeft" : {
+      "comment" : "VoiceOver: distance remaining until due. %@ is a spoken distance ('1,200 miles').",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ left"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faltan %@"
+          }
+        }
+      }
+    },
+    "readout.distanceOverdue" : {
+      "comment" : "VoiceOver: distance past due. %@ is a spoken distance.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ overdue"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ de retraso"
+          }
+        }
+      }
+    },
+    "readout.documentsNone" : {
+      "comment" : "VoiceOver value: no documents saved.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ninguno"
+          }
+        }
+      }
+    },
+    "readout.documentsSaved" : {
+      "comment" : "VoiceOver value: number of saved documents. %d is the count.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d saved"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d guardados"
+          }
+        }
+      }
+    },
+    "readout.editVehicleSpecs" : {
+      "comment" : "VoiceOver label for the specs panel's edit button.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit vehicle specs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar especificaciones del vehículo"
+          }
+        }
+      }
+    },
+    "readout.event" : {
+      "comment" : "VoiceOver label for a history or expense row. %1$@ service name, %2$@ date.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "readout.eventOutlier" : {
+      "comment" : "As readout.event, for an amount that is a statistical outlier.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@, outlier"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@, atípico"
+          }
+        }
+      }
+    },
+    "readout.expanded" : {
+      "comment" : "VoiceOver value for an expanded disclosure row.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expanded"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expandido"
+          }
+        }
+      }
+    },
+    "readout.marbeteExpires" : {
+      "comment" : "VoiceOver value for the marbete Next Up card. %1$@ status, %2$@ full expiration date.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@. Expires %2$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@. Vence el %2$@."
+          }
+        }
+      }
+    },
+    "readout.mileageUpdateDue" : {
+      "comment" : "VoiceOver: the header's odometer reading is stale and should be updated.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odometer update due"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualización del odómetro pendiente"
+          }
+        }
+      }
+    },
+    "readout.nextUpDate" : {
+      "comment" : "VoiceOver value for a date-only Next Up card. %1$@ status, %2$@ full due date.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@. Due %2$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@. Vence el %2$@."
+          }
+        }
+      }
+    },
+    "readout.nextUpMileage" : {
+      "comment" : "VoiceOver value for the Next Up card. %1$@ status, %2$@ distance phrase ('1,200 miles left'), %3$@ due-at distance.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@. %2$@. Due at %3$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@. %2$@. Vence a los %3$@."
+          }
+        }
+      }
+    },
+    "readout.nextUpMileageEstimate" : {
+      "comment" : "As readout.nextUpMileage, plus %4$@, the projected due period ('mid June').",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@. %2$@. Due at %3$@, estimated %4$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@. %2$@. Vence a los %3$@, estimado para %4$@."
+          }
+        }
+      }
+    },
+    "readout.odometer" : {
+      "comment" : "VoiceOver label for an odometer reading. %@ is a spoken distance.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odometer, %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odómetro, %@"
+          }
+        }
+      }
+    },
+    "readout.odometerEstimated" : {
+      "comment" : "VoiceOver label for an estimated odometer reading. %@ is a spoken distance.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odometer, about %@, estimated"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odómetro, aproximadamente %@, estimado"
+          }
+        }
+      }
+    },
+    "readout.opensSettingsHint" : {
+      "comment" : "VoiceOver hint: activating this opens Settings.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens Settings"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre Ajustes"
+          }
+        }
+      }
+    },
+    "readout.readFullNotesHint" : {
+      "comment" : "VoiceOver hint: opens the full vehicle notes.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens the full notes"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre las notas completas"
+          }
+        }
+      }
+    },
+    "readout.recallCountOne" : {
+      "comment" : "Recall count on the Home alert, singular.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 recall"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 retiro"
+          }
+        }
+      }
+    },
+    "readout.recallCountOther" : {
+      "comment" : "Recall count on the Home alert, plural. %d is the count.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d recalls"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d retiros"
+          }
+        }
+      }
+    },
+    "readout.shareCostSummary" : {
+      "comment" : "VoiceOver label for the Costs headline share link.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share cost summary"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartir resumen de costos"
+          }
+        }
+      }
+    },
+    "readout.statusDueSoon" : {
+      "comment" : "Spoken status word.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Due soon"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo"
+          }
+        }
+      }
+    },
+    "readout.statusGood" : {
+      "comment" : "Spoken status word.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Good"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Al día"
+          }
+        }
+      }
+    },
+    "readout.statusOverdue" : {
+      "comment" : "Spoken status word.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overdue"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vencido"
+          }
+        }
+      }
+    },
+    "readout.statusScheduled" : {
+      "comment" : "Spoken status word for a service with no due status yet.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scheduled"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programado"
+          }
+        }
+      }
+    },
+    "readout.updateRecallStatus" : {
+      "comment" : "VoiceOver label for the recall status menu.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update recall status"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizar estado del retiro"
+          }
+        }
+      }
+    },
+    "readout.valueWithStatus" : {
+      "comment" : "VoiceOver: a value followed by its status. %1$@ value, %2$@ status word.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "readout.vehicleNotes" : {
+      "comment" : "VoiceOver label for the vehicle notes preview.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vehicle notes"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notas del vehículo"
+          }
+        }
+      }
+    },
+    "readout.yearChange" : {
+      "comment" : "Year-over-year change on the yearly roundup. %1$d percent, %2$@ prior year.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$d%% from %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$d%% respecto a %2$@"
+          }
+        }
+      }
+    },
+    "readout.yearChangeDown" : {
+      "comment" : "VoiceOver: spending fell. %1$d percent, %2$@ prior year.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Down %1$d percent from %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$d por ciento menos que en %2$@"
+          }
+        }
+      }
+    },
+    "readout.yearChangeUp" : {
+      "comment" : "VoiceOver: spending rose. %1$d percent, %2$@ prior year.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up %1$d percent from %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$d por ciento más que en %2$@"
+          }
+        }
+      }
+    },
     "recall.action.add_planned_service" : {
       "extractionState" : "manual",
       "localizations" : {

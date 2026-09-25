@@ -10,7 +10,6 @@ import SwiftUI
 struct NextUpCard: View {
     let service: Service
     let currentMileage: Int
-    let vehicleName: String
     var dailyMilesPace: Double? = nil
     var isEstimatedMileage: Bool = false
     let onTap: () -> Void
@@ -33,10 +32,6 @@ struct NextUpCard: View {
     private var milesUntilDue: Int? {
         guard let dueMileage = service.dueMileage else { return nil }
         return dueMileage - currentMileage
-    }
-
-    private var isUrgent: Bool {
-        status == .overdue || status == .dueSoon
     }
 
     var body: some View {
@@ -67,6 +62,9 @@ struct NextUpCard: View {
                             .font(.brutalistHeading)
                             .foregroundStyle(status.color)
                     }
+                    // Hero numerals stop growing at AX2: past that a six-digit
+                    // reading no longer fits the card at any scale factor.
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility2)
 
                     Text(miles < 0 ? "OVERDUE" : "REMAINING")
                         .font(.brutalistLabel)
@@ -103,7 +101,7 @@ struct NextUpCard: View {
             // Data rows
             VStack(spacing: Spacing.sm) {
                 if let dueMileage = service.dueMileage {
-                    HStack {
+                    AdaptiveStack {
                         Text("CURRENT")
                             .font(.brutalistLabel)
                             .foregroundStyle(Theme.textTertiary)
@@ -128,7 +126,7 @@ struct NextUpCard: View {
                         }
                     }
 
-                    HStack {
+                    AdaptiveStack {
                         Text("DUE AT")
                             .font(.brutalistLabel)
                             .foregroundStyle(Theme.textTertiary)
@@ -143,7 +141,7 @@ struct NextUpCard: View {
 
                     // Last service date
                     if let lastPerformed = service.lastPerformed {
-                        HStack {
+                        AdaptiveStack {
                             Text("LAST_SERVICE")
                                 .font(.brutalistLabel)
                                 .foregroundStyle(Theme.textTertiary)
@@ -166,9 +164,33 @@ struct NextUpCard: View {
         }
         .glassCardStyle(intensity: .subtle)
         .tappableCard(action: onTap)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(service.name), \(status.label)")
-        .accessibilityHint(service.dueDescription ?? "")
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(service.name)
+        .accessibilityValue(accessibilityValue)
+        .accessibilityHint(L10n.rowViewDetailsHint)
+        .accessibilityAddTraits(.isButton)
+    }
+
+    /// The card's datum in words: status, distance left or overdue, where it
+    /// falls due, and when the pace projects it — or the due date for
+    /// date-only services.
+    private var accessibilityValue: String {
+        let statusWord = L10n.readoutStatus(status)
+        if let miles = milesUntilDue, let dueMileage = service.dueMileage {
+            let distance = L10n.spokenDistance(abs(miles))
+            let distancePhrase = miles < 0
+                ? L10n.readoutDistanceOverdue(distance)
+                : L10n.readoutDistanceLeft(distance)
+            let dueAt = L10n.spokenDistance(dueMileage)
+            if status != .overdue, let period = estimatedDuePeriod {
+                return L10n.readoutNextUpMileageEstimate(statusWord, distancePhrase, dueAt, period)
+            }
+            return L10n.readoutNextUpMileage(statusWord, distancePhrase, dueAt)
+        }
+        if let dueDate = service.dueDate {
+            return L10n.readoutNextUpDate(statusWord, L10n.spokenDate(dueDate))
+        }
+        return statusWord
     }
 
     // MARK: - Progress Bar
@@ -295,14 +317,9 @@ struct CardButtonStyle: ButtonStyle {
 /// Specialized NextUpCard for marbete renewal display
 struct MarbeteNextUpCard: View {
     let marbeteItem: MarbeteUpcomingItem
-    let vehicleName: String
     let onTap: () -> Void
 
     private var status: ServiceStatus { marbeteItem.itemStatus }
-
-    private var isUrgent: Bool {
-        status == .overdue || status == .dueSoon
-    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -333,7 +350,7 @@ struct MarbeteNextUpCard: View {
 
             // Expiration info
             VStack(spacing: Spacing.sm) {
-                HStack {
+                AdaptiveStack {
                     Text("EXPIRES")
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
@@ -352,9 +369,16 @@ struct MarbeteNextUpCard: View {
         }
         .glassCardStyle(intensity: .subtle)
         .tappableCard(action: onTap)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(String(localized: "Marbete renewal")), \(status.label)")
-        .accessibilityHint(marbeteItem.expirationFormatted ?? "")
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(marbeteItem.itemName)
+        .accessibilityValue(accessibilityValue)
+        .accessibilityAddTraits(.isButton)
+    }
+
+    private var accessibilityValue: String {
+        let statusWord = L10n.readoutStatus(status)
+        guard let expiration = marbeteItem.vehicle.marbeteExpirationDate else { return statusWord }
+        return L10n.readoutMarbeteExpires(statusWord, L10n.spokenDate(expiration))
     }
 }
 
@@ -370,7 +394,6 @@ struct MarbeteNextUpCard: View {
                 NextUpCard(
                     service: service,
                     currentMileage: vehicle.currentMileage,
-                    vehicleName: vehicle.displayName,
                     dailyMilesPace: 40.0  // ~40 miles per day
                 ) {
                     print("Tapped \(service.name)")

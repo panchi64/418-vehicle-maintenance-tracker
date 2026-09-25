@@ -14,39 +14,44 @@ struct SeasonalReminderCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header row: icon + label
-            HStack(alignment: .top) {
-                Image(systemName: reminder.icon)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(Theme.accent)
-                    .frame(width: 20)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("SEASONAL ADVISORY")
-                        .font(.brutalistLabel)
+            // Header and description read as one element; the two action
+            // buttons below stay separate so VoiceOver can reach each.
+            VStack(alignment: .leading, spacing: 0) {
+                // Header row: icon + label
+                HStack(alignment: .top) {
+                    Image(systemName: reminder.icon)
+                        .font(.subheadline.weight(.medium))
                         .foregroundStyle(Theme.accent)
-                        .tracking(1.5)
+                        .accessibilityHidden(true)
 
-                    Text(reminder.name.uppercased())
-                        .font(.brutalistHeading)
-                        .foregroundStyle(Theme.textPrimary)
-                        .textCase(.uppercase)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("SEASONAL ADVISORY")
+                            .font(.brutalistLabel)
+                            .foregroundStyle(Theme.accent)
+                            .tracking(1.5)
+
+                        Text(reminder.name.uppercased())
+                            .font(.brutalistHeading)
+                            .foregroundStyle(Theme.textPrimary)
+                            .textCase(.uppercase)
+                    }
+
+                    Spacer()
                 }
+                .padding(.bottom, Spacing.listItem)
 
-                Spacer()
+                // Divider
+                Rectangle()
+                    .fill(Theme.gridLine)
+                    .frame(height: 1)
+
+                // Description
+                Text(reminder.description)
+                    .font(.brutalistSecondary)
+                    .foregroundStyle(Theme.textSecondary)
+                    .padding(.vertical, Spacing.listItem)
             }
-            .padding(.bottom, Spacing.listItem)
-
-            // Divider
-            Rectangle()
-                .fill(Theme.gridLine)
-                .frame(height: 1)
-
-            // Description
-            Text(reminder.description)
-                .font(.brutalistSecondary)
-                .foregroundStyle(Theme.textSecondary)
-                .padding(.vertical, Spacing.listItem)
+            .accessibilityElement(children: .combine)
 
             // Divider
             Rectangle()
@@ -54,7 +59,7 @@ struct SeasonalReminderCard: View {
                 .frame(height: 1)
 
             // Action buttons
-            HStack(spacing: Spacing.sm) {
+            AdaptiveStack(spacing: Spacing.sm) {
                 Button {
                     onScheduleService()
                 } label: {
@@ -79,9 +84,6 @@ struct SeasonalReminderCard: View {
                 Label("Don't Show Again", systemImage: "eye.slash")
             }
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Seasonal advisory, \(reminder.name)")
-        .accessibilityHint("Schedule this service or dismiss until next year")
     }
 }
 

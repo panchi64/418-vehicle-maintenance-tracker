@@ -86,7 +86,13 @@ struct ServiceEventRow: View {
     var accessibilityLabelText: String?
     var onTap: (() -> Void)?
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    /// Indicator column width, scaled with its glyph so titles stay aligned
+    /// down the list without the glyph overflowing its column at large sizes.
+    @ScaledMetric(relativeTo: .subheadline) private var indicatorWidth: CGFloat = 20
+
     private var hasAmount: Bool { amount != nil }
+    private var isAccessibilitySize: Bool { dynamicTypeSize.isAccessibilitySize }
 
     var body: some View {
         if let onTap {
@@ -100,36 +106,41 @@ struct ServiceEventRow: View {
     private var content: some View {
         HStack(spacing: Spacing.sm) {
             Image(systemName: indicator.systemImage)
-                .font(.system(size: 14, weight: .medium))
+                .font(.subheadline.weight(.medium))
                 .foregroundStyle(indicator.color)
-                .frame(width: 20)
+                .frame(width: indicatorWidth)
                 .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: Spacing.xs) {
-                Text(title)
-                    // Primary only when there's no amount to outrank it.
-                    .font(hasAmount ? .brutalistBody : .brutalistBodyEmphasis)
-                    .foregroundStyle(Theme.textPrimary)
-                    .lineLimit(1)
+            // Title block and amount sit side by side; at accessibility
+            // sizes the amount drops beneath the title instead of squeezing
+            // it to a few characters.
+            AdaptiveStack(spacing: Spacing.sm) {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    Text(title)
+                        // Primary only when there's no amount to outrank it.
+                        .font(hasAmount ? .brutalistBody : .brutalistBodyEmphasis)
+                        .foregroundStyle(Theme.textPrimary)
+                        .lineLimit(isAccessibilitySize ? nil : 1)
 
-                if !metadata.isEmpty {
-                    metadataLine
+                    if !metadata.isEmpty {
+                        metadataLine
+                    }
                 }
-            }
 
-            Spacer(minLength: Spacing.sm)
+                Spacer(minLength: Spacing.sm)
 
-            if let amount {
-                Text(amount.text)
-                    .font(.brutalistHeading)
-                    .foregroundStyle(amount.color)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                if let amount {
+                    Text(amount.text)
+                        .font(.brutalistHeading)
+                        .foregroundStyle(amount.color)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
             }
 
             if onTap != nil {
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.caption.weight(.semibold))
                     .foregroundStyle(Theme.textTertiary)
                     .accessibilityHidden(true)
             }
@@ -145,10 +156,13 @@ struct ServiceEventRow: View {
         .accessibilityHint(onTap != nil ? L10n.rowViewDetailsHint : "")
     }
 
+    /// One line of `//`-separated details at standard sizes; one detail per
+    /// line at accessibility sizes, where the separators have nothing left
+    /// to separate.
     private var metadataLine: some View {
-        HStack(spacing: Spacing.xs) {
+        AdaptiveStack(spacing: Spacing.xs) {
             ForEach(Array(metadata.enumerated()), id: \.element.id) { index, datum in
-                if index > 0 {
+                if index > 0 && !isAccessibilitySize {
                     Text(verbatim: "//")
                         .font(.brutalistSecondary)
                         .foregroundStyle(Theme.gridLine)
@@ -159,7 +173,7 @@ struct ServiceEventRow: View {
                     .font(datum.isTagged ? .brutalistLabel : .brutalistSecondary)
                     .foregroundStyle(datum.color)
                     .tracking(datum.isTagged ? 0.5 : 0)
-                    .lineLimit(1)
+                    .lineLimit(isAccessibilitySize ? nil : 1)
             }
         }
     }

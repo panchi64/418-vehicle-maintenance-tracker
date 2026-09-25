@@ -106,28 +106,31 @@ struct FormAdvisory: View {
         .overlay(alignment: .leading) { leadingRule }
         .overlay { border }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("\(accessibilityPrefix): \(message)")
     }
 
     private var messageRow: some View {
         HStack(alignment: .top, spacing: Spacing.sm) {
             if let iconName {
                 Image(systemName: iconName)
-                    .font(.system(size: iconSize, weight: .semibold))
+                    .font(iconFont)
                     .foregroundStyle(tint)
                     .accessibilityHidden(true)
             }
 
+            // The severity prefix goes on the message itself, not the
+            // container: a label on a `.contain` container is read in place
+            // of nothing useful, and the message was then read a second time.
             Text(message)
                 .font(messageFont)
                 .foregroundStyle(messageColor)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityLabel(L10n.readoutAdvisory(accessibilityPrefix, message))
 
             if let onDismiss {
                 Button(action: onDismiss) {
                     Image(systemName: "xmark")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.caption.weight(.bold))
                         .foregroundStyle(Theme.textTertiary)
                         .minimumTouchTarget()
                 }
@@ -140,7 +143,7 @@ struct FormAdvisory: View {
     /// Outcomes are equal-width so neither reads as the safe default — the
     /// point of a contradiction is that the app genuinely doesn't know.
     private var outcomeRow: some View {
-        HStack(spacing: Spacing.sm) {
+        AdaptiveStack(spacing: Spacing.sm) {
             ForEach(outcomes) { outcome in
                 Button(outcome.label, action: outcome.action)
                     .buttonStyle(.secondary)
@@ -187,10 +190,11 @@ struct FormAdvisory: View {
         }
     }
 
-    private var iconSize: CGFloat {
+    /// Tracks the message's text style so the icon scales with it.
+    private var iconFont: Font {
         switch severity {
-        case .blocking, .contradiction: return 15
-        case .caution, .info: return 13
+        case .blocking, .contradiction: return .subheadline.weight(.semibold)
+        case .caution, .info: return .footnote.weight(.semibold)
         }
     }
 

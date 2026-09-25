@@ -13,13 +13,16 @@ extension HomeTab {
             ZStack {
                 Rectangle()
                     .fill(Theme.accent.opacity(0.1))
-                    .frame(width: 100, height: 100)
+                    .frame(minWidth: 100, minHeight: 100)
 
                 Image(systemName: "icloud.and.arrow.down")
-                    .font(.system(size: 40, weight: .light))
+                    .font(.largeTitle.weight(.light))
                     .foregroundStyle(Theme.accent)
                     .symbolEffect(.pulse, options: .repeating)
+                    .padding(Spacing.md)
             }
+            .fixedSize()
+            .accessibilityHidden(true)
 
             VStack(spacing: Spacing.xs) {
                 Text("Syncing Your Data")

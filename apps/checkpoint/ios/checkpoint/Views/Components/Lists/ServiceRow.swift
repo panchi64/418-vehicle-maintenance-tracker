@@ -58,11 +58,24 @@ struct ServiceRow: View {
                 // of upcoming work, the user is looking for *which service*;
                 // urgency qualifies it. Position plus color make the qualifier
                 // unmissable without it competing for the same rank.
-                if let urgencyText {
-                    Text(urgencyText.uppercased())
-                        .font(.brutalistLabel)
-                        .foregroundStyle(urgencyColor)
-                        .tracking(1.5)
+                // "Due soon" and "good" both read "N MI LEFT"; only the tint
+                // told them apart. The word carries it for color-blind users
+                // and in sunlight. (Overdue already says so in the text.)
+                if status == .dueSoon || urgencyText != nil {
+                    AdaptiveStack(spacing: Spacing.sm) {
+                        if status == .dueSoon {
+                            Text(status.label)
+                                .font(.brutalistLabelBold)
+                                .foregroundStyle(status.color)
+                                .tracking(1.5)
+                        }
+                        if let urgencyText {
+                            Text(urgencyText.uppercased())
+                                .font(.brutalistLabel)
+                                .foregroundStyle(urgencyColor)
+                                .tracking(1.5)
+                        }
+                    }
                 }
 
                 // Primary: which service this is. Differs from the eyebrow on
@@ -73,7 +86,6 @@ struct ServiceRow: View {
                 Text(service.name)
                     .font(.brutalistHeading)
                     .foregroundStyle(Theme.textPrimary)
-                    .lineLimit(2)
 
                 // Supporting: progress + history, at the quietest level.
                 HStack(spacing: Spacing.sm) {
@@ -85,7 +97,6 @@ struct ServiceRow: View {
                         Text(L10n.rowLastPerformed(TimeSinceFormatter.abbreviated(from: lastPerformed)))
                             .font(.brutalistSecondary)
                             .foregroundStyle(Theme.textTertiary)
-                            .lineLimit(1)
                     }
                 }
             }
@@ -93,8 +104,9 @@ struct ServiceRow: View {
             Spacer(minLength: Spacing.sm)
 
             Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .semibold))
+                .font(.caption.weight(.semibold))
                 .foregroundStyle(Theme.textTertiary.opacity(0.5))
+                .accessibilityHidden(true)
         }
         // Vertical padding only. The 16pt horizontal inset existed because this
         // row lived inside a bordered card that needed interior padding — with
@@ -102,12 +114,25 @@ struct ServiceRow: View {
         // above it, so the list read as hanging off the screen's left edge.
         .padding(.vertical, Spacing.listItem)
         .tappableCard(action: onTap)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel(service.name)
         // VoiceOver gets the urgency as the value, matching the visual
         // hierarchy — weight and color don't survive a screen reader.
-        .accessibilityValue(urgencyText ?? service.dueDescription ?? L10n.rowNoDueDate)
+        .accessibilityValue(accessibilityValue)
         .accessibilityHint(L10n.rowViewDetailsHint)
+        .accessibilityAddTraits(.isButton)
+    }
+
+    /// Urgency, led by the status word wherever the text alone doesn't
+    /// carry it ("300 mi left" is due soon or good depending on thresholds).
+    private var accessibilityValue: String {
+        guard let urgencyText else { return L10n.rowNoDueDate }
+        switch status {
+        case .dueSoon, .good:
+            return L10n.readoutValueWithStatus(urgencyText, L10n.readoutStatus(status))
+        case .overdue, .neutral:
+            return urgencyText
+        }
     }
 
     /// Replaces the 8×8 dot inside a 32×32 tint. A vertical bar the height of

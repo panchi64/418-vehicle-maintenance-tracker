@@ -25,7 +25,7 @@ struct CumulativeCostChartCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            InstrumentSectionHeader(title: "Spending Pace")
+            InstrumentSectionHeader(title: L10n.readoutChartPaceTitle)
 
             ZStack(alignment: .topLeading) {
                 Chart(data, id: \.date) { entry in
@@ -98,6 +98,7 @@ struct CumulativeCostChartCard: View {
                     plotArea.background(Color.clear)
                 }
                 .frame(height: ChartConstants.chartHeight)
+                .accessibilityChartDescriptor(chartDescriptor)
 
                 // Selection overlay
                 if let entry = selectedEntry {
@@ -108,8 +109,9 @@ struct CumulativeCostChartCard: View {
             .background(Theme.surfaceInstrument)
             .brutalistBorder()
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Spending pace chart showing cumulative costs over time")
+        // Contain, not combine: combining flattened the chart into one
+        // sentence and hid its Audio Graph.
+        .accessibilityElement(children: .contain)
         .onChange(of: selectedEntry?.date) { _, newDate in
             onSelectionChange?(newDate)
         }
@@ -134,9 +136,49 @@ struct CumulativeCostChartCard: View {
 
     private static let dateFormatter: DateFormatter = {
         let f = DateFormatter()
-        f.dateFormat = "MMM d"
+        f.setLocalizedDateFormatFromTemplate("MMMd")
         return f
     }()
+
+    /// Spoken date for VoiceOver: "June 6", not "Jun 6" or "6/6". Carries the
+    /// year only when the data crosses one, where "June 6" would be ambiguous.
+    private static func spokenDate(_ date: Date, withYear: Bool) -> String {
+        withYear
+            ? date.formatted(.dateTime.month(.wide).day().year())
+            : date.formatted(.dateTime.month(.wide).day())
+    }
+
+    /// Audio Graph description: the running total at each expense, with the
+    /// final total and its date as the summary.
+    private var chartDescriptor: CostChartDescriptor {
+        let calendar = Calendar.current
+        let years = Set(data.map { calendar.component(.year, from: $0.date) })
+        let withYear = years.count > 1
+        let points = data.map {
+            SpokenChartPoint(label: Self.spokenDate($0.date, withYear: withYear), amount: $0.cumulativeAmount)
+        }
+        let summary = data.last.map {
+            L10n.readoutChartPaceSummary(
+                Formatters.currencyWhole($0.cumulativeAmount),
+                Self.spokenDate($0.date, withYear: withYear),
+                data.count
+            )
+        } ?? ""
+
+        // Two expenses on one day share a label; the axis lists it once.
+        var seen = Set<String>()
+        let categories = points.map(\.label).filter { seen.insert($0).inserted }
+
+        return CostChartDescriptor(
+            title: L10n.readoutChartPaceTitle,
+            summary: summary,
+            xAxisTitle: L10n.readoutChartAxisDate,
+            yAxisTitle: L10n.readoutChartAxisTotal,
+            categories: categories,
+            series: [SpokenChartSeries(name: L10n.readoutChartAxisTotal, points: points)],
+            currencyCode: Formatters.currencyWhole.currencyCode ?? "USD"
+        )
+    }
 }
 
 #Preview {

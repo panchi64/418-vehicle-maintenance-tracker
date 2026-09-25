@@ -28,6 +28,7 @@ struct QuickSpecsCard: View {
     let onDocumentsTap: () -> Void
 
     @State private var showFullNotes = false
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private var hasAnySpecs: Bool {
         vehicle.vin != nil || vehicle.licensePlate != nil || vehicle.tireSize != nil || vehicle.oilType != nil || !(vehicle.notes ?? "").isEmpty || vehicle.hasMarbeteExpiration
@@ -59,7 +60,7 @@ struct QuickSpecsCard: View {
                     VStack(spacing: Spacing.lg) {
                         // License Plate and VIN
                         if vehicle.licensePlate != nil || vehicle.vin != nil {
-                            HStack(alignment: .top, spacing: Spacing.lg) {
+                            AdaptiveStack(verticalAlignment: .top, spacing: Spacing.lg) {
                                 if let licensePlate = vehicle.licensePlate {
                                     specBlock(
                                         value: licensePlate,
@@ -82,7 +83,7 @@ struct QuickSpecsCard: View {
 
                         // Tire and Oil side by side
                         if vehicle.tireSize != nil || vehicle.oilType != nil {
-                            HStack(alignment: .top, spacing: Spacing.lg) {
+                            AdaptiveStack(verticalAlignment: .top, spacing: Spacing.lg) {
                                 if let tireSize = vehicle.tireSize {
                                     specBlock(
                                         value: tireSize,
@@ -144,8 +145,9 @@ struct QuickSpecsCard: View {
                                         .contentShape(Rectangle())
                                     }
                                     .buttonStyle(.plain)
-                                    .accessibilityLabel("Vehicle notes")
-                                    .accessibilityHint("Double tap to read full notes")
+                                    .accessibilityLabel(L10n.readoutVehicleNotes)
+                                    .accessibilityValue(truncatedNotes ?? "")
+                                    .accessibilityHint(L10n.readoutReadFullNotesHint)
                                 } else {
                                     Text(truncatedNotes ?? "")
                                         .font(.brutalistBody)
@@ -186,7 +188,7 @@ struct QuickSpecsCard: View {
                     } label: {
                         HStack(spacing: Spacing.xs) {
                             Image(systemName: "pencil")
-                                .font(.system(size: 11, weight: .medium))
+                                .font(.caption2.weight(.medium))
                             Text(hasAnySpecs ? "EDIT" : "ADD SPECS")
                                 .font(.brutalistLabel)
                                 .tracking(1)
@@ -196,7 +198,7 @@ struct QuickSpecsCard: View {
                         .frame(minHeight: 44)
                         .contentShape(Rectangle())
                     }
-                    .accessibilityLabel(hasAnySpecs ? "Edit vehicle specs" : "Add vehicle specs")
+                    .accessibilityLabel(hasAnySpecs ? L10n.readoutEditVehicleSpecs : L10n.readoutAddVehicleSpecs)
         }
         .background(Theme.surfaceInstrument)
         // No border: this reads as a continuation of the header above it, not a
@@ -228,15 +230,16 @@ struct QuickSpecsCard: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
 
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.caption.weight(.semibold))
                     .foregroundStyle(Theme.accent)
+                    .accessibilityHidden(true)
             }
+            .frame(minHeight: TouchTarget.minimum)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Documents")
-        .accessibilityValue(count == 0 ? "None" : "\(count) saved")
-        .accessibilityHint("Double tap to open documents library")
+        .accessibilityLabel(L10n.documentsTitle)
+        .accessibilityValue(count == 0 ? L10n.readoutDocumentsNone : L10n.readoutDocumentsSaved(count))
     }
 
     /// Copy a spec value to the pasteboard, with haptic + toast feedback naming the field.
@@ -261,7 +264,9 @@ struct QuickSpecsCard: View {
                     Text(value)
                         .font(isMonospace ? .brutalistBody : .brutalistHeading)
                         .foregroundStyle(Theme.textPrimary)
-                        .lineLimit(1)
+                        // One line at standard sizes; at accessibility sizes a
+                        // 17-character VIN can't fit at any scale, so it wraps.
+                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
                         .minimumScaleFactor(0.8)
 
                     // Label - secondary
@@ -274,17 +279,18 @@ struct QuickSpecsCard: View {
 
                 // Copy affordance
                 Image(systemName: "doc.on.doc")
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.caption2.weight(.medium))
                     .foregroundStyle(Theme.textTertiary)
                     .padding(.top, 3)
                     .accessibilityHidden(true)
             }
+            .frame(minHeight: TouchTarget.minimum, alignment: .top)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Copy \(label)")
+        .accessibilityLabel(label)
         .accessibilityValue(value)
-        .accessibilityHint("Double tap to copy to clipboard")
+        .accessibilityHint(L10n.readoutCopyHint)
     }
 
     /// Marbete block with status-colored expiration display. Tap to copy the expiration string.
@@ -297,6 +303,7 @@ struct QuickSpecsCard: View {
                 Rectangle()
                     .fill(status.color)
                     .frame(width: 8, height: 8)
+                    .accessibilityHidden(true)
 
                 VStack(alignment: .leading, spacing: 2) {
                     // Expiration date in status color
@@ -313,7 +320,7 @@ struct QuickSpecsCard: View {
 
                 // Copy affordance
                 Image(systemName: "doc.on.doc")
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.caption2.weight(.medium))
                     .foregroundStyle(Theme.textTertiary)
                     .accessibilityHidden(true)
 
@@ -331,9 +338,11 @@ struct QuickSpecsCard: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Copy marbete expiration")
-        .accessibilityValue(expiration)
-        .accessibilityHint("Double tap to copy to clipboard")
+        .accessibilityLabel(L10n.vehicleMarbete)
+        .accessibilityValue(status == .neutral
+            ? expiration
+            : L10n.readoutValueWithStatus(expiration, L10n.readoutStatus(status)))
+        .accessibilityHint(L10n.readoutCopyHint)
     }
 }
 
@@ -361,12 +370,11 @@ struct FullNotesView: View {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(.subheadline.weight(.semibold))
                             .foregroundStyle(Theme.textSecondary)
-                            .frame(minWidth: 44, minHeight: 44)
-                            .contentShape(Rectangle())
+                            .minimumTouchTarget()
                     }
-                    .accessibilityLabel("Close")
+                    .accessibilityLabel(L10n.readoutClose)
                 }
             }
             .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)

@@ -83,7 +83,8 @@ struct ReadoutSectionAction: View {
             HStack(spacing: Spacing.xs) {
                 if let systemImage {
                     Image(systemName: systemImage)
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.caption2.weight(.medium))
+                        .accessibilityHidden(true)
                 }
                 Text(label.uppercased())
                     .font(.brutalistLabel)

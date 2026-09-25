@@ -57,9 +57,13 @@ struct VehicleHeader: View {
     /// shell (ContentView) so the panel can render outside this view's bounds.
     var isSpecsExpanded: Binding<Bool>?
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     private var syncService: SyncStatusService {
         SyncStatusService.shared
     }
+
+    private var isAccessibilitySize: Bool { dynamicTypeSize.isAccessibilitySize }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -100,33 +104,34 @@ struct VehicleHeader: View {
                     onSettingsTap?()
                 } label: {
                     Image(systemName: error.systemImage)
-                        .font(.system(size: 16, weight: .medium))
+                        .font(.callout.weight(.medium))
                         .foregroundStyle(error.iconColor)
-                        .frame(width: TouchTarget.minimum, height: TouchTarget.minimum)
-                        .contentShape(Rectangle())
+                        .minimumTouchTarget()
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Sync error")
-                .accessibilityHint("Double tap to open settings")
+                .accessibilityLabel(L10n.toastSyncError)
+                .accessibilityHint(L10n.readoutOpensSettingsHint)
             }
 
             if let onSettingsTap {
                 Button(action: onSettingsTap) {
                     Image(systemName: "gearshape.fill")
-                        .font(.system(size: 18, weight: .medium))
+                        .font(.body.weight(.medium))
                         .foregroundStyle(Theme.textTertiary)
-                        .frame(width: TouchTarget.minimum, height: TouchTarget.minimum)
-                        .contentShape(Rectangle())
+                        .minimumTouchTarget()
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Settings")
+                .accessibilityLabel(L10n.settingsTitle)
                 // Pulls the icon's trailing edge out to the screen inset, so the
                 // glyph aligns with the text below it rather than sitting 12pt
                 // inboard of it.
                 .padding(.trailing, -(TouchTarget.minimum - 18) / 2)
             }
         }
-        .frame(height: 28)
+        // The band is drawn 28pt tall with its 44pt targets overhanging it.
+        // At accessibility sizes "[SELECT]" alone outgrows 28pt, so the band
+        // takes its natural height instead of letting the text overlap the name.
+        .frame(height: isAccessibilitySize ? nil : 28)
         .padding(.horizontal, Spacing.screenHorizontal)
     }
 
@@ -152,14 +157,16 @@ struct VehicleHeader: View {
                 Text(vehicle?.displayName.uppercased() ?? L10n.headerSelectVehicle)
                     .font(.brutalistTitle)
                     .foregroundStyle(Theme.textPrimary)
-                    .lineLimit(1)
+                    // One line at standard sizes; wraps at accessibility
+                    // sizes, where 0.7× of a 32pt-and-up name still overflows.
+                    .lineLimit(isAccessibilitySize ? nil : 1)
                     .minimumScaleFactor(0.7)
 
                 if let specLine {
                     Text(specLine)
                         .font(.brutalistSecondary)
                         .foregroundStyle(Theme.textTertiary)
-                        .lineLimit(1)
+                        .lineLimit(isAccessibilitySize ? nil : 1)
                         .minimumScaleFactor(0.7)
                 }
             }
@@ -195,7 +202,7 @@ struct VehicleHeader: View {
     @ViewBuilder
     private var dataBand: some View {
         if let vehicle {
-            HStack(spacing: 0) {
+            AdaptiveStack(spacing: 0) {
                 // The trailing glyphs differ on purpose: `chevron.right` opens a
                 // sheet, `chevron.down` expands in place. One glyph for both
                 // would promise the same behavior from two controls that behave
@@ -212,12 +219,15 @@ struct VehicleHeader: View {
                     isFlagged: vehicle.shouldDisplayMileageUpdatePrompt(
                         isInteractive: onMileageTap != nil
                     ),
+                    growsToFill: isAccessibilitySize,
                     action: onMileageTap
                 )
 
+                // Vertical rule between side-by-side cells; horizontal once
+                // they stack at accessibility sizes.
                 Rectangle()
                     .fill(Theme.gridLine)
-                    .frame(width: 1)
+                    .frame(width: isAccessibilitySize ? nil : 1, height: isAccessibilitySize ? 1 : nil)
                     .accessibilityHidden(true)
 
                 if let isSpecsExpanded {
@@ -300,9 +310,10 @@ private struct HeaderCell: View {
                         .frame(maxWidth: growsToFill ? .infinity : nil, alignment: .leading)
 
                     Image(systemName: glyph)
-                        .font(.system(size: 9, weight: .semibold))
+                        .font(.caption2.weight(.semibold))
                         .foregroundStyle(Theme.accent)
                         .rotationEffect(.degrees(isGlyphRotated ? 180 : 0))
+                        .accessibilityHidden(true)
                 }
 
                 Group {
@@ -330,7 +341,8 @@ private struct HeaderCell: View {
         .animation(.easeOut(duration: Theme.animationFast), value: isActive)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(label)
-        .accessibilityValue(value)
+        // The flag square is color and shape only; say it aloud too.
+        .accessibilityValue(isFlagged ? L10n.readoutValueWithStatus(value, L10n.readoutMileageUpdateDue) : value)
         .accessibilityAddTraits(isExpanded == true ? [.isButton, .isSelected] : .isButton)
     }
 }

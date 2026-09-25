@@ -21,6 +21,9 @@ extension View {
                     Label(L10n.logDeleteAction, systemImage: "trash")
                 }
             }
+            // A long-press is hard to find with VoiceOver; the same action
+            // is offered in the Actions rotor.
+            .accessibilityAction(named: L10n.logDeleteAction, onDelete)
         } else {
             self
         }
