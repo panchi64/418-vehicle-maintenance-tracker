@@ -37,13 +37,12 @@ checkpoint-app/
 │   │   │   ├── EditVehicleOdometerSection.swift  # Odometer section extracted from EditVehicleView
 │   │   │   └── VehiclePickerSheet.swift
 │   │   ├── Service/
-│   │   │   ├── AddServiceView.swift
+│   │   │   ├── AddService/                    # ServiceLogForm: the one log/complete/edit/schedule form
 │   │   │   ├── EditServiceView.swift
 │   │   │   ├── ServiceDetailView.swift
 │   │   │   ├── ServiceLogDetailView.swift
-│   │   │   ├── EditServiceLogView.swift
-│   │   │   ├── MarkServiceDoneSheet.swift
-│   │   │   ├── MarkClusterDoneSheet.swift
+│   │   │   ├── MarkServiceVisitDoneSheet.swift  # Mark Done router: one service → ServiceLogForm, cluster → ClusterDoneForm
+│   │   │   ├── ClusterDoneForm.swift
 │   │   │   └── ServiceClusterDetailSheet.swift
 │   │   ├── Settings/
 │   │   │   ├── SettingsView.swift
@@ -459,12 +458,11 @@ struct WidgetColors {
 |-----------|---------|
 | `ErrorMessageRow.swift` | ⚠️ Inline error message. Superseded by `FormAdvisory` (`.blocking` / `.caution`) |
 | `FieldRequirement.swift` | The single required/optional vocabulary (F5), plus `RequiredFieldMarker` |
-| `FormActionBar.swift` | The only place Save lives (F1–F3) |
+| `FormToolbar.swift` | `.formToolbar(...)`: Cancel + prominent Save in the sheet's toolbar on every data-entry form (F1), dim-not-disabled Save (F2), dismiss protection |
 | `InstrumentSegmentedControl.swift` | Styled segmented control |
-| `InstrumentTextField.swift` | Styled text field |
+| `InstrumentTextField.swift` | Styled text/number/date fields (`prefix`, `autoFocus`) |
 | `MarbetePicker.swift` | Month/year picker for PR registration |
-| `MileageInputField.swift` | Formatted mileage input |
-| `ServiceTypePicker.swift` | Service preset selector |
+| `ServicePresetPickerSheet.swift` | "Browse all services": searchable preset list by category |
 
 ### Components/Lists/
 | Component | Purpose |
