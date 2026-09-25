@@ -20,6 +20,9 @@ struct SettingsView: View {
     /// SwiftData query context that lives there.
     var onReplayTour: (() -> Void)?
 
+    @State private var showRecallSheet = false
+    @State private var showCSVImport = false
+
     var body: some View {
         @Bindable var appState = appState
         return NavigationStack {
@@ -53,8 +56,6 @@ struct SettingsView: View {
                         #if DEBUG
                         debugSection
                         #endif
-
-                        Spacer()
                     }
                     .padding(Spacing.screenHorizontal)
                     .padding(.top, Spacing.lg)
@@ -72,344 +73,265 @@ struct SettingsView: View {
             .sheet(isPresented: $appState.showProPaywall) {
                 ProPaywallSheet()
             }
+            .sheet(isPresented: $showRecallSheet) {
+                if let vehicle = appState.selectedVehicle {
+                    RecallSheetView(vehicle: vehicle, recalls: appState.currentRecalls)
+                }
+            }
+            .sheet(isPresented: $showCSVImport) {
+                CSVImportView()
+            }
         }
     }
 
     // MARK: - Display Section
 
     private var displaySection: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text(L10n.settingsDisplay)
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(2)
-
-            VStack(spacing: 0) {
-                // Theme
-                NavigationLink {
-                    ThemePickerView()
-                } label: {
-                    settingRow(
-                        title: "Theme",
-                        value: ThemeManager.shared.current.displayName
-                    )
-                }
-                .buttonStyle(.plain)
-
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
-
-                // Distance Unit
-                NavigationLink {
-                    DistanceUnitPickerView()
-                } label: {
-                    settingRow(
-                        title: L10n.settingsDistanceUnit,
-                        value: DistanceSettings.shared.unit.displayName
-                    )
-                }
-                .buttonStyle(.plain)
-
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
-
-                // Mileage Estimation
-                MileageEstimatesToggle()
-
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
-
-                // App Icon Auto-change (moved from Alerts — it's a display preference)
-                AppIconToggle()
+        SettingsGroup(title: L10n.settingsDisplay) {
+            NavigationLink {
+                ThemePickerView()
+            } label: {
+                SettingsValueRow(
+                    title: L10n.settingsTheme,
+                    value: ThemeManager.shared.current.displayName
+                )
             }
-            .background(Theme.surfaceInstrument)
-            .brutalistBorder()
+            .buttonStyle(.plain)
+
+            SettingsRowDivider()
+
+            NavigationLink {
+                DistanceUnitPickerView()
+            } label: {
+                SettingsValueRow(
+                    title: L10n.settingsDistanceUnit,
+                    value: DistanceSettings.shared.unit.displayName
+                )
+            }
+            .buttonStyle(.plain)
+
+            SettingsRowDivider()
+
+            SettingToggle(
+                title: L10n.settingsMileageEstimation,
+                subtitle: L10n.settingsMileageEstimationDesc,
+                read: { MileageEstimateSettings.shared.showEstimates },
+                write: { MileageEstimateSettings.shared.showEstimates = $0 }
+            )
+
+            SettingsRowDivider()
+
+            // App Icon Auto-change (moved from Alerts — it's a display preference)
+            SettingToggle(
+                title: L10n.settingsAutomaticIcon,
+                subtitle: L10n.settingsAutomaticIconDesc,
+                read: { AppIconSettings.shared.autoChangeEnabled },
+                write: { isOn in
+                    AppIconSettings.shared.autoChangeEnabled = isOn
+                    if !isOn {
+                        AppIconService.shared.resetToDefaultIcon()
+                    }
+                }
+            )
         }
     }
 
     // MARK: - Reminders Section
 
     private var remindersSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text(L10n.settingsReminders)
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(2)
-
-            VStack(spacing: 0) {
-                // Due Soon Mileage Threshold
-                NavigationLink {
-                    DueSoonMileageThresholdPicker()
-                } label: {
-                    settingRow(
-                        title: L10n.settingsDueSoonMileage,
-                        value: "\(Formatters.mileageNumber(DueSoonSettings.shared.mileageThreshold)) \(DistanceSettings.shared.unit.abbreviation)"
-                    )
-                }
-                .buttonStyle(.plain)
-
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
-
-                // Due Soon Days Threshold
-                NavigationLink {
-                    DueSoonDaysThresholdPicker()
-                } label: {
-                    settingRow(
-                        title: L10n.settingsDueSoonDays,
-                        value: "\(DueSoonSettings.shared.daysThreshold) \(L10n.commonDays)"
-                    )
-                }
-                .buttonStyle(.plain)
-
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
-
-                // Seasonal Alerts Toggle
-                SeasonalRemindersToggle()
-
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
-
-                // Climate Zone Picker (only active when Seasonal Alerts is on)
-                NavigationLink {
-                    ClimateZonePickerView()
-                } label: {
-                    settingRow(
-                        title: "Climate Zone",
-                        value: SeasonalSettings.shared.climateZone?.displayName ?? "Not Set"
-                    )
-                }
-                .buttonStyle(.plain)
-                .disabled(!SeasonalSettings.shared.isEnabled)
-                .opacity(SeasonalSettings.shared.isEnabled ? 1.0 : 0.5)
+        SettingsGroup(title: L10n.settingsReminders) {
+            NavigationLink {
+                DueSoonMileageThresholdPicker()
+            } label: {
+                SettingsValueRow(
+                    title: L10n.settingsDueSoonMileage,
+                    value: L10n.settingsDistanceValue(DueSoonSettings.shared.mileageThreshold)
+                )
             }
-            .background(Theme.surfaceInstrument)
-            .brutalistBorder()
+            .buttonStyle(.plain)
+
+            SettingsRowDivider()
+
+            NavigationLink {
+                DueSoonDaysThresholdPicker()
+            } label: {
+                SettingsValueRow(
+                    title: L10n.settingsDueSoonDays,
+                    value: L10n.settingsDaysCount(DueSoonSettings.shared.daysThreshold)
+                )
+            }
+            .buttonStyle(.plain)
+
+            SettingsRowDivider()
+
+            SettingToggle(
+                title: L10n.settingsSeasonalAlerts,
+                subtitle: L10n.settingsSeasonalAlertsDesc,
+                read: { SeasonalSettings.shared.isEnabled },
+                write: { SeasonalSettings.shared.isEnabled = $0 }
+            )
+
+            SettingsRowDivider()
+
+            // Climate Zone Picker (only active when Seasonal Alerts is on)
+            NavigationLink {
+                ClimateZonePickerView()
+            } label: {
+                SettingsValueRow(
+                    title: L10n.settingsClimateZone,
+                    value: SeasonalSettings.shared.climateZone?.displayName ?? L10n.settingsNotSet
+                )
+            }
+            .buttonStyle(.plain)
+            .disabled(!SeasonalSettings.shared.isEnabled)
+            .opacity(SeasonalSettings.shared.isEnabled ? 1.0 : 0.5)
         }
     }
 
     // MARK: - Safety Section
 
-    @State private var showRecallSheet = false
-
     private var safetySection: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text(L10n.settingsSafety)
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(2)
+        let recalls = appState.currentRecalls
+        let hasRecalls = appState.selectedVehicle != nil && !recalls.isEmpty
 
-            VStack(spacing: 0) {
-                let recalls = appState.currentRecalls
-                let hasRecalls = appState.selectedVehicle != nil && !recalls.isEmpty
-
-                Button {
-                    showRecallSheet = true
-                } label: {
-                    settingRow(
-                        title: L10n.recallSettingsRowTitle,
-                        value: hasRecalls ? L10n.recallSettingsCount(recalls.count) : L10n.recallSettingsNoneOnFile
-                    )
-                }
-                .buttonStyle(.plain)
-                .disabled(!hasRecalls)
-                .opacity(hasRecalls ? 1.0 : 0.5)
+        return SettingsGroup(title: L10n.settingsSafety) {
+            Button {
+                showRecallSheet = true
+            } label: {
+                SettingsValueRow(
+                    title: L10n.recallSettingsRowTitle,
+                    value: hasRecalls ? L10n.recallSettingsCount(recalls.count) : L10n.recallSettingsNoneOnFile
+                )
             }
-            .background(Theme.surfaceInstrument)
-            .brutalistBorder()
-        }
-        .sheet(isPresented: $showRecallSheet) {
-            if let vehicle = appState.selectedVehicle {
-                RecallSheetView(vehicle: vehicle, recalls: appState.currentRecalls)
-            }
+            .buttonStyle(.plain)
+            .disabled(!hasRecalls)
+            .opacity(hasRecalls ? 1.0 : 0.5)
         }
     }
 
     // MARK: - Smart Features Section
 
     private var smartFeaturesSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text(L10n.settingsSmartFeatures)
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(2)
+        let bundlingEnabled = ClusteringSettings.shared.isEnabled
 
-            VStack(spacing: 0) {
-                // Service Bundling Toggle
-                ServiceBundlingToggle()
+        return SettingsGroup(title: L10n.settingsSmartFeatures) {
+            SettingToggle(
+                title: L10n.settingsBundleSuggestions,
+                subtitle: L10n.settingsBundleSuggestionsDesc,
+                read: { ClusteringSettings.shared.isEnabled },
+                write: { ClusteringSettings.shared.isEnabled = $0 }
+            )
 
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
+            SettingsRowDivider()
 
-                // Mileage Window (only active when Service Bundling is on)
-                NavigationLink {
-                    ClusteringMileageWindowPicker()
-                } label: {
-                    settingRow(
-                        title: L10n.settingsMileageWindow,
-                        value: "\(Formatters.mileageNumber(ClusteringSettings.shared.mileageWindow)) \(DistanceSettings.shared.unit.abbreviation)"
-                    )
-                }
-                .buttonStyle(.plain)
-                .disabled(!ClusteringSettings.shared.isEnabled)
-                .opacity(ClusteringSettings.shared.isEnabled ? 1.0 : 0.5)
-
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
-
-                // Days Window (only active when Service Bundling is on)
-                NavigationLink {
-                    ClusteringDaysWindowPicker()
-                } label: {
-                    settingRow(
-                        title: L10n.settingsDaysWindow,
-                        value: "\(ClusteringSettings.shared.daysWindow) \(L10n.commonDays)"
-                    )
-                }
-                .buttonStyle(.plain)
-                .disabled(!ClusteringSettings.shared.isEnabled)
-                .opacity(ClusteringSettings.shared.isEnabled ? 1.0 : 0.5)
+            // Windows only apply when Service Bundling is on
+            NavigationLink {
+                ClusteringMileageWindowPicker()
+            } label: {
+                SettingsValueRow(
+                    title: L10n.settingsMileageWindow,
+                    value: L10n.settingsDistanceValue(ClusteringSettings.shared.mileageWindow)
+                )
             }
-            .background(Theme.surfaceInstrument)
-            .brutalistBorder()
+            .buttonStyle(.plain)
+            .disabled(!bundlingEnabled)
+            .opacity(bundlingEnabled ? 1.0 : 0.5)
+
+            SettingsRowDivider()
+
+            NavigationLink {
+                ClusteringDaysWindowPicker()
+            } label: {
+                SettingsValueRow(
+                    title: L10n.settingsDaysWindow,
+                    value: L10n.settingsDaysCount(ClusteringSettings.shared.daysWindow)
+                )
+            }
+            .buttonStyle(.plain)
+            .disabled(!bundlingEnabled)
+            .opacity(bundlingEnabled ? 1.0 : 0.5)
         }
     }
 
     // MARK: - Data Section
 
-    @State private var showCSVImport = false
-
     private var dataSection: some View {
         VStack(alignment: .leading, spacing: Spacing.lg) {
-            VStack(alignment: .leading, spacing: Spacing.sm) {
-                Text("DATA & SYNC")
-                    .font(.brutalistLabel)
-                    .foregroundStyle(Theme.textTertiary)
-                    .tracking(2)
-
-                VStack(spacing: 0) {
-                    Button {
-                        showCSVImport = true
-                    } label: {
-                        HStack {
-                            Text("Import Service History")
-                                .font(.brutalistBody)
-                                .foregroundStyle(Theme.textPrimary)
-
-                            Spacer()
-
-                            Image(systemName: "square.and.arrow.down")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundStyle(Theme.textTertiary)
-                        }
-                        .padding(Spacing.md)
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
+            SettingsGroup(title: L10n.settingsDataSync) {
+                SettingsActionRow(
+                    title: L10n.settingsImportHistory,
+                    systemImage: "square.and.arrow.down",
+                    iconColor: Theme.textTertiary
+                ) {
+                    showCSVImport = true
                 }
-                .background(Theme.surfaceInstrument)
-                .brutalistBorder()
             }
 
             SyncSettingsSection()
-        }
-        .sheet(isPresented: $showCSVImport) {
-            CSVImportView()
         }
     }
 
     // MARK: - Support Section
 
     private var supportSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("SUPPORT")
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.accent)
-                .tracking(2)
-
-            VStack(spacing: 0) {
-                NavigationLink {
-                    TipJarView()
-                        .environment(appState)
-                } label: {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Support Checkpoint")
-                                .font(.brutalistBody)
-                                .foregroundStyle(Theme.textPrimary)
-                            Text("Every tip unlocks a rare theme")
-                                .font(.brutalistLabel)
-                                .foregroundStyle(Theme.textTertiary)
-                        }
-                        Spacer()
-                        Image(systemName: "heart.fill")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(Theme.accent)
-                    }
-                    .padding(Spacing.md)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
-
-                SettingsActionRow(
-                    title: "Replay Tour",
-                    subtitle: "See the guided walkthrough again",
-                    systemImage: "play.circle",
-                    iconColor: Theme.textTertiary
-                ) {
-                    onReplayTour?()
-                    dismiss()
-                }
-
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
-
-                SettingsActionRow(
-                    title: "Restore Purchases",
-                    systemImage: "arrow.counterclockwise",
-                    iconColor: Theme.textTertiary
-                ) {
-                    Task { await StoreManager.shared.restorePurchases() }
-                }
-
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
-
-                SettingsActionRow(
-                    title: "Find Gas Prices",
-                    subtitle: "Opens Biombo — our PR gas-price companion",
-                    systemImage: "fuelpump.fill"
-                ) {
-                    CompanionAppLauncher.openBiombo()
-                }
+        SettingsGroup(title: L10n.settingsSupport, titleColor: Theme.accent, borderColor: Theme.accent) {
+            NavigationLink {
+                TipJarView()
+                    .environment(appState)
+            } label: {
+                SettingsRowLabel(
+                    title: L10n.tipSupportCheckpoint,
+                    subtitle: L10n.tipEveryTipUnlocks,
+                    systemImage: "heart.fill"
+                )
             }
-            .background(Theme.surfaceInstrument)
-            .overlay(
-                Rectangle()
-                    .strokeBorder(Theme.accent, lineWidth: Theme.borderWidth)
-            )
+            .buttonStyle(.plain)
+
+            SettingsRowDivider()
+
+            SettingsActionRow(
+                title: L10n.settingsReplayTour,
+                subtitle: L10n.settingsReplayTourDesc,
+                systemImage: "play.circle",
+                iconColor: Theme.textTertiary
+            ) {
+                onReplayTour?()
+                dismiss()
+            }
+
+            SettingsRowDivider()
+
+            SettingsActionRow(
+                title: L10n.settingsRestorePurchases,
+                systemImage: "arrow.counterclockwise",
+                iconColor: Theme.textTertiary
+            ) {
+                Task { await StoreManager.shared.restorePurchases() }
+            }
+
+            SettingsRowDivider()
+
+            SettingsActionRow(
+                title: L10n.settingsFindGasPrices,
+                subtitle: L10n.settingsFindGasPricesDesc,
+                systemImage: "fuelpump.fill"
+            ) {
+                CompanionAppLauncher.openBiombo()
+            }
         }
     }
 
     // MARK: - Privacy Section
 
     private var privacySection: some View {
-        AnalyticsSettingsSection(sectionTitle: L10n.settingsPrivacy)
+        SettingsGroup(title: L10n.settingsPrivacy) {
+            SettingToggle(
+                title: L10n.settingsUsageAnalytics,
+                subtitle: L10n.settingsUsageAnalyticsDesc,
+                read: { AnalyticsSettings.shared.isEnabled },
+                write: { AnalyticsService.shared.setEnabled($0) }
+            )
+        }
     }
 
     // MARK: - Debug Section
@@ -417,135 +339,68 @@ struct SettingsView: View {
     #if DEBUG
     @State private var showTipModal = false
 
+    // Developer-only rows: English, never localized.
     private var debugSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("DEBUG")
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.statusOverdue)
-                .tracking(2)
-
-            VStack(spacing: 0) {
-                Button {
-                    onboardingState?.replayOnboarding()
-                    dismiss()
-                } label: {
-                    HStack {
-                        Text("Replay Onboarding")
-                            .font(.brutalistBody)
-                            .foregroundStyle(Theme.textPrimary)
-
-                        Spacer()
-
-                        Image(systemName: "arrow.counterclockwise")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(Theme.textTertiary)
-                    }
-                    .padding(Spacing.md)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
-
-                Button {
-                    showTipModal = true
-                } label: {
-                    HStack {
-                        Text("Show Tip Prompt")
-                            .font(.brutalistBody)
-                            .foregroundStyle(Theme.textPrimary)
-
-                        Spacer()
-
-                        Image(systemName: "heart")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(Theme.textTertiary)
-                    }
-                    .padding(Spacing.md)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .sheet(isPresented: $showTipModal) {
-                    TipModalView()
-                        .environment(appState)
-                }
-
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: Theme.borderWidth)
-
-                Button {
-                    Task {
-                        let center = UNUserNotificationCenter.current()
-                        let content = UNMutableNotificationContent()
-                        let messages: [(title: String, body: String)] = [
-                            ("Odometer Sync Requested", "It's been a while. How far have we gone?"),
-                            ("Marbete Status: 30 Days", "Would prefer not to be impounded."),
-                            ("Marbete Status: 7 Days", "Starting to worry about that marbete."),
-                            ("Marbete Status: URGENT", "Expires tomorrow. Legally speaking."),
-                            ("Oil Change Due in 1 Week", "The oil is aging. So are we all."),
-                            ("Tire Rotation Reminder", "The tires asked me to ask you."),
-                            ("Brake Inspection Due", "Stopping is optional. Until it isn't."),
-                            ("Coolant Flush Due Soon", "Running a little warm. Thought you should know."),
-                            ("2025 Expense Report", "You spent a lot last year. You're welcome."),
-                            ("Marbete Status: 60 Days", "Requesting registration renewal. No rush. Yet."),
-                        ]
-                        let pick = messages.randomElement()!
-                        content.title = pick.title
-                        content.body = pick.body
-                        content.sound = .default
-                        content.categoryIdentifier = NotificationService.serviceDueCategoryID
-                        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
-                        let request = UNNotificationRequest(identifier: "debug-test-notification", content: content, trigger: trigger)
-                        try? await center.add(request)
-                    }
-                } label: {
-                    HStack {
-                        Text("Fire Test Notification (3s)")
-                            .font(.brutalistBody)
-                            .foregroundStyle(Theme.textPrimary)
-
-                        Spacer()
-
-                        Image(systemName: "bell")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(Theme.textTertiary)
-                    }
-                    .padding(Spacing.md)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
+        SettingsGroup(title: "DEBUG", titleColor: Theme.statusOverdue) {
+            SettingsActionRow(
+                title: "Replay Onboarding",
+                systemImage: "arrow.counterclockwise",
+                iconColor: Theme.textTertiary
+            ) {
+                onboardingState?.replayOnboarding()
+                dismiss()
             }
-            .background(Theme.surfaceInstrument)
-            .brutalistBorder()
+
+            SettingsRowDivider()
+
+            SettingsActionRow(
+                title: "Show Tip Prompt",
+                systemImage: "heart",
+                iconColor: Theme.textTertiary
+            ) {
+                showTipModal = true
+            }
+            .sheet(isPresented: $showTipModal) {
+                TipModalView()
+                    .environment(appState)
+            }
+
+            SettingsRowDivider()
+
+            SettingsActionRow(
+                title: "Fire Test Notification (3s)",
+                systemImage: "bell",
+                iconColor: Theme.textTertiary
+            ) {
+                Task { await Self.fireTestNotification() }
+            }
         }
+    }
+
+    private static func fireTestNotification() async {
+        let messages: [(title: String, body: String)] = [
+            ("Odometer Sync Requested", "It's been a while. How far have we gone?"),
+            ("Marbete Status: 30 Days", "Would prefer not to be impounded."),
+            ("Marbete Status: 7 Days", "Starting to worry about that marbete."),
+            ("Marbete Status: URGENT", "Expires tomorrow. Legally speaking."),
+            ("Oil Change Due in 1 Week", "The oil is aging. So are we all."),
+            ("Tire Rotation Reminder", "The tires asked me to ask you."),
+            ("Brake Inspection Due", "Stopping is optional. Until it isn't."),
+            ("Coolant Flush Due Soon", "Running a little warm. Thought you should know."),
+            ("2025 Expense Report", "You spent a lot last year. You're welcome."),
+            ("Marbete Status: 60 Days", "Requesting registration renewal. No rush. Yet."),
+        ]
+        guard let pick = messages.randomElement() else { return }
+        let content = UNMutableNotificationContent()
+        content.title = pick.title
+        content.body = pick.body
+        content.sound = .default
+        content.categoryIdentifier = NotificationService.serviceDueCategoryID
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
+        let request = UNNotificationRequest(identifier: "debug-test-notification", content: content, trigger: trigger)
+        try? await UNUserNotificationCenter.current().add(request)
     }
     #endif
-
-    private func settingRow(title: String, value: String) -> some View {
-        HStack {
-            Text(title)
-                .font(.brutalistBody)
-                .foregroundStyle(Theme.textPrimary)
-
-            Spacer()
-
-            Text(value)
-                .font(.brutalistSecondary)
-                .foregroundStyle(Theme.textTertiary)
-
-            Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(Theme.textTertiary)
-                .accessibilityHidden(true)
-        }
-        .padding(Spacing.md)
-        .frame(minHeight: 44)
-        .contentShape(Rectangle())
-        .accessibilityElement(children: .combine)
-    }
 }
 
 #Preview {

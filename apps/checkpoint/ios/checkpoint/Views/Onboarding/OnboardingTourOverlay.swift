@@ -25,10 +25,9 @@
 //      • A Back affordance on every step after the first, mirroring forward
 //        motion. Back across a tab boundary is a direct rewind — the
 //        transition card only narrates forward.
-//      • Skip carries a per-step cooldown (tracked in `OnboardingState.seenTourSteps`
-//        so a previously-glanced step doesn't make the user wait again), and
-//        the dismissal goes through a confirmation alert that names where the
-//        tour can be replayed.
+//      • Skip is available immediately on every step, with no confirmation:
+//        leaving a tour destroys nothing, and Settings → Replay Tour brings
+//        it back.
 //
 
 import SwiftUI
@@ -39,13 +38,6 @@ struct OnboardingTourOverlay: View {
     let anchors: [AnyHashable: Anchor<CGRect>]
     let geometry: GeometryProxy
     let onSkipTour: () -> Void
-
-    /// Per-step cooldown before Skip is enabled (seconds). Keeps a
-    /// reflexive tapper from dismissing the tour without seeing each card.
-    private let skipCooldownSeconds: Double = 2.0
-
-    @State private var isSkipEnabled = false
-    @State private var showSkipConfirm = false
 
     private var currentStep: Int {
         onboardingState.currentPhase.tourStep ?? 0
@@ -106,31 +98,6 @@ struct OnboardingTourOverlay: View {
         // disappears mid-tour (e.g. brief one-frame race during a tab swap).
         .opacity(spotlight != nil ? 1 : 0)
         .animation(.easeOut(duration: 0.25), value: spotlight != nil)
-        // Re-arm the Skip cooldown each time the user lands on a step.
-        // If they've already glanced at this step before (set membership),
-        // skip is enabled immediately — no double-cooldown on Back.
-        .task(id: currentStep) {
-            if onboardingState.seenTourSteps.contains(currentStep) {
-                isSkipEnabled = true
-                return
-            }
-            isSkipEnabled = false
-            try? await Task.sleep(for: .seconds(skipCooldownSeconds))
-            guard !Task.isCancelled else { return }
-            onboardingState.seenTourSteps.insert(currentStep)
-            withAnimation(.easeOut(duration: 0.2)) { isSkipEnabled = true }
-        }
-        .alert(
-            L10n.onboardingTourSkipConfirmTitle,
-            isPresented: $showSkipConfirm
-        ) {
-            Button(L10n.onboardingSkipTour, role: .destructive) {
-                onSkipTour()
-            }
-            Button(L10n.onboardingTourSkipConfirmCancel, role: .cancel) { }
-        } message: {
-            Text(L10n.onboardingTourSkipConfirmMessage)
-        }
     }
 
     // MARK: - Spotlight visuals
@@ -192,23 +159,29 @@ struct OnboardingTourOverlay: View {
                 if placeCardBelow(for: rect) {
                     Color.clear.frame(height: rect.maxY + Spacing.lg)
                     Spacer(minLength: 0)
-                    cardContent
+                    fittedCardContent
                     Spacer(minLength: 0)
                     Color.clear.frame(height: geometry.safeAreaInsets.bottom)
                 } else {
                     Color.clear.frame(height: geometry.safeAreaInsets.top)
                     Spacer(minLength: 0)
-                    cardContent
+                    fittedCardContent
                     Spacer(minLength: 0)
                     Color.clear.frame(height: geometry.size.height - rect.minY + Spacing.lg)
                 }
             } else {
                 Spacer()
-                cardContent
+                fittedCardContent
                 Spacer()
             }
         }
         .padding(.horizontal, Spacing.screenHorizontal)
+    }
+
+    /// At accessibility text sizes the card can outgrow the room beside the
+    /// spotlight; it scrolls then instead of clipping its buttons.
+    private var fittedCardContent: some View {
+        cardContent.scrollingWhenTooTall()
     }
 
     /// True when there's more usable space below the spotlight than above.
@@ -247,13 +220,11 @@ struct OnboardingTourOverlay: View {
             // Primary advance on its own row so the foreshadow label
             // ("Next: Servicios →") never has to compete with Back + Skip
             // for horizontal room on narrow devices.
+            // `.primary` owns wrapping and scaling of the label.
             Button {
                 onboardingState.advanceTour()
             } label: {
                 Text(nextButtonTitle)
-                    .frame(maxWidth: .infinity)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
             }
             .buttonStyle(.primary)
 
@@ -266,33 +237,39 @@ struct OnboardingTourOverlay: View {
                     } label: {
                         Text(L10n.commonBack)
                             .brutalistLabelStyle(color: Theme.textTertiary)
-                            .frame(minWidth: 44, minHeight: 44)
-                            .contentShape(Rectangle())
+                            .minimumTouchTarget()
                     }
                 }
 
                 Spacer()
 
-                Button {
-                    // Fire the "user wants to skip" signal on tap so the
-                    // funnel captures intent — the alert then gives them
-                    // a chance to back out without firing again.
-                    AnalyticsService.shared.capture(
-                        .onboardingTourSkipped(atStep: currentStep)
-                    )
-                    showSkipConfirm = true
-                } label: {
-                    Text(L10n.onboardingSkipTour)
-                        .brutalistLabelStyle(color: Theme.textTertiary)
-                        .opacity(isSkipEnabled ? 1.0 : 0.35)
-                }
-                .disabled(!isSkipEnabled)
+                OnboardingSkipTourButton(step: currentStep, onSkipTour: onSkipTour)
             }
         }
         // The tour card floats over live colored app UI, so use the
         // near-solid `.opaque` intensity to keep the text fully legible
         // regardless of what's spotlighted behind it.
         .glassCardStyle(intensity: .opaque)
+    }
+}
+
+/// Leaves the guided tour. Available immediately and unconfirmed: skipping
+/// destroys nothing, and Settings → Replay Tour brings the tour back. Shared
+/// by the spotlight card and the between-tab transition card so the two
+/// can't drift apart again.
+struct OnboardingSkipTourButton: View {
+    let step: Int
+    let onSkipTour: () -> Void
+
+    var body: some View {
+        Button {
+            AnalyticsService.shared.capture(.onboardingTourSkipped(atStep: step))
+            onSkipTour()
+        } label: {
+            Text(L10n.onboardingSkipTour)
+                .brutalistLabelStyle(color: Theme.textTertiary)
+                .minimumTouchTarget()
+        }
     }
 }
 

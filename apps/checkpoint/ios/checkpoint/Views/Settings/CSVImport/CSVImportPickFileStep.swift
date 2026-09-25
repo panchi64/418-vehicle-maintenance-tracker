@@ -31,6 +31,7 @@ struct CSVImportPickFileStep: View {
             } label: {
                 HStack {
                     Image(systemName: "doc.badge.plus")
+                        .accessibilityHidden(true)
                     Text("Select CSV File")
                 }
             }

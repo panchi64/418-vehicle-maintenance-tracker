@@ -14,6 +14,8 @@ struct OnboardingTourRecapCard: View {
     let onBack: () -> Void
     let onDone: () -> Void
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     var body: some View {
         VStack {
             Spacer()
@@ -21,34 +23,43 @@ struct OnboardingTourRecapCard: View {
             Spacer()
         }
         .padding(.horizontal, Spacing.screenHorizontal)
+        .scrollingWhenTooTall()
         .onboardingModalBackdrop()
+    }
+
+    /// Done beside Back at standard sizes; stacked full-width at
+    /// accessibility sizes, where a fixed-width Done can't hold its label.
+    private var actionLayout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: Spacing.sm))
+            : AnyLayout(HStackLayout(spacing: Spacing.md))
     }
 
     private var cardContent: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             Text(L10n.onboardingTourRecapTitle)
                 .brutalistLabelStyle(color: Theme.accent)
+                .accessibilityAddTraits(.isHeader)
 
             Text(L10n.onboardingTourRecapBody)
                 .font(.brutalistBody)
                 .foregroundStyle(Theme.textPrimary)
+                .fixedSize(horizontal: false, vertical: true)
 
-            HStack {
+            actionLayout {
                 Button {
                     onDone()
                 } label: {
                     Text(L10n.onboardingTourRecapDone)
                 }
                 .buttonStyle(.primary)
-                .frame(width: 140)
-
-                Spacer()
 
                 Button {
                     onBack()
                 } label: {
                     Text(L10n.commonBack)
                         .brutalistLabelStyle(color: Theme.textTertiary)
+                        .minimumTouchTarget()
                 }
             }
         }

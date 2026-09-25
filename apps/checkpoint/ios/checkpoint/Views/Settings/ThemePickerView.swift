@@ -32,7 +32,7 @@ struct ThemePickerView: View {
                     }
 
                     // Hint for locked rare themes
-                    Text("Tip to unlock exclusive rare themes")
+                    Text(L10n.settingsThemeRareHint)
                         .font(.brutalistSecondary)
                         .foregroundStyle(Theme.textTertiary)
                         .padding(.top, Spacing.sm)
@@ -41,7 +41,7 @@ struct ThemePickerView: View {
                 .padding(.top, Spacing.lg)
             }
         }
-        .navigationTitle("Theme")
+        .navigationTitle(L10n.settingsTheme)
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -55,7 +55,7 @@ struct ThemePickerView: View {
         } else if theme.tier == .rare {
             // Rare locked themes: show toast directing user to Tip Jar
             ToastService.shared.show(
-                "Unlock in Tip Jar",
+                L10n.settingsThemeUnlockInTipJar,
                 icon: "lock.open.fill",
                 style: .info
             )

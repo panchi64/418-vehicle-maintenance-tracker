@@ -15,7 +15,6 @@ struct OnboardingTourTransitionCard: View {
     let onContinue: () -> Void
 
     @State private var isVisible = false
-    @State private var showSkipConfirm = false
 
     private var sectionName: String {
         TourStep.at(targetStep)?.transitionLabel?() ?? ""
@@ -23,8 +22,11 @@ struct OnboardingTourTransitionCard: View {
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.9)
+            // Themed scrim rather than black, so light themes don't flash to
+            // a dark screen between tabs.
+            Theme.backgroundPrimary.opacity(0.95)
                 .ignoresSafeArea()
+                .accessibilityHidden(true)
 
             VStack(spacing: Spacing.md) {
                 Spacer()
@@ -36,64 +38,49 @@ struct OnboardingTourTransitionCard: View {
                     .font(.brutalistHeading)
                     .foregroundStyle(Theme.textPrimary)
                     .tracking(3)
+                    .multilineTextAlignment(.center)
+                    .accessibilityAddTraits(.isHeader)
                     .opacity(isVisible ? 1 : 0)
 
                 Spacer()
 
-                // Tap-to-continue affordance — the card is tap-anywhere to
-                // advance; this is the visible cue. Static, no pulse: a
-                // repeating animation with no clean teardown was leaking
-                // a frame on rapid step changes.
-                HStack(spacing: Spacing.sm) {
-                    Text(L10n.onboardingTransitionTapToContinue.uppercased())
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
-                        .tracking(2)
+                // The card is tap-anywhere to advance; this is the visible
+                // cue, and a real button so VoiceOver and Switch Control have
+                // something to activate. Static, no pulse: a repeating
+                // animation with no clean teardown was leaking a frame on
+                // rapid step changes.
+                Button(action: onContinue) {
+                    HStack(spacing: Spacing.sm) {
+                        Text(L10n.onboardingTransitionTapToContinue.uppercased())
+                            .font(.brutalistLabel)
+                            .tracking(2)
+                            .multilineTextAlignment(.center)
 
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(Theme.textTertiary)
+                        Image(systemName: "chevron.right")
+                            .font(.caption2.weight(.semibold))
+                            .accessibilityHidden(true)
+                    }
+                    .foregroundStyle(Theme.textTertiary)
+                    .minimumTouchTarget()
                 }
+                .buttonStyle(.plain)
                 .opacity(isVisible ? 0.7 : 0)
 
-                // Skip Tour — same confirmation guard as the spotlight card
-                // so the easier-to-fat-finger surface doesn't bypass it.
-                Button {
-                    AnalyticsService.shared.capture(
-                        .onboardingTourSkipped(atStep: targetStep)
-                    )
-                    showSkipConfirm = true
-                } label: {
-                    Text(L10n.onboardingSkipTour)
-                        .brutalistLabelStyle(color: Theme.textTertiary)
-                }
-                .padding(.top, Spacing.lg)
-                .padding(.bottom, Spacing.xl)
-                .opacity(isVisible ? 1 : 0)
+                OnboardingSkipTourButton(step: targetStep, onSkipTour: onSkipTour)
+                    .padding(.top, Spacing.lg)
+                    .padding(.bottom, Spacing.xl)
+                    .opacity(isVisible ? 1 : 0)
             }
+            .padding(.horizontal, Spacing.screenHorizontal)
         }
         .contentShape(Rectangle())
-        .onTapGesture {
-            // Skip the tap-to-continue if the Skip alert is up — the
-            // alert owns the user's attention.
-            guard !showSkipConfirm else { return }
-            onContinue()
-        }
+        .onTapGesture(perform: onContinue)
+        .accessibilityElement(children: .contain)
+        .accessibilityAddTraits(.isModal)
         .onAppear {
             withAnimation(.easeOut(duration: 0.25)) {
                 isVisible = true
             }
-        }
-        .alert(
-            L10n.onboardingTourSkipConfirmTitle,
-            isPresented: $showSkipConfirm
-        ) {
-            Button(L10n.onboardingSkipTour, role: .destructive) {
-                onSkipTour()
-            }
-            Button(L10n.onboardingTourSkipConfirmCancel, role: .cancel) { }
-        } message: {
-            Text(L10n.onboardingTourSkipConfirmMessage)
         }
     }
 }

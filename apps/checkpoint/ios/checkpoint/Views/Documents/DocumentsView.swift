@@ -37,6 +37,12 @@ struct DocumentsView: View {
     @State private var shareItems: [URL] = []
     @State private var showShareSheet = false
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    private var rowLineLimit: Int {
+        dynamicTypeSize.isAccessibilitySize ? 3 : 1
+    }
+
     private var allDocuments: [Document] {
         vehicle.documents ?? []
     }
@@ -122,7 +128,7 @@ struct DocumentsView: View {
                 Button(L10n.documentsDeleteAction, role: .destructive) {
                     deleteDocument(doc)
                 }
-                Button("Cancel", role: .cancel) {
+                Button(L10n.commonCancel, role: .cancel) {
                     documentToDelete = nil
                 }
             } message: { _ in
@@ -135,7 +141,7 @@ struct DocumentsView: View {
                 Button(L10n.documentsDeleteAction, role: .destructive) {
                     deleteSelected()
                 }
-                Button("Cancel", role: .cancel) { }
+                Button(L10n.commonCancel, role: .cancel) { }
             } message: {
                 Text(L10n.documentsDeleteBulkConfirmMessage)
             }
@@ -160,11 +166,11 @@ struct DocumentsView: View {
                         .font(.brutalistBody)
                 } else {
                     Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.subheadline.weight(.semibold))
                         .foregroundStyle(Theme.textSecondary)
                 }
             }
-            .accessibilityLabel(isSelectionMode ? "Done" : "Close")
+            .accessibilityLabel(isSelectionMode ? L10n.documentsSelectionDoneAction : L10n.commonClose)
         }
 
         if !isSelectionMode && !allDocuments.isEmpty {
@@ -196,6 +202,7 @@ struct DocumentsView: View {
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
                     .background(Theme.accent.opacity(0.2))
+                    .accessibilityLabel(L10n.documentsSelectedCount(selectedIDs.count))
             }
         }
     }
@@ -203,12 +210,19 @@ struct DocumentsView: View {
     // MARK: - Selection Bottom Bar
 
     private var selectionToolbar: some View {
-        HStack(spacing: Spacing.sm) {
+        // Share and Delete side by side at standard sizes; stacked at
+        // accessibility sizes so each keeps its count legible.
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(spacing: Spacing.sm))
+            : AnyLayout(HStackLayout(spacing: Spacing.sm))
+
+        return layout {
             Button {
                 shareSelected()
             } label: {
                 HStack(spacing: 6) {
                     Image(systemName: "square.and.arrow.up")
+                        .accessibilityHidden(true)
                     Text(L10n.documentsShareCount(selectedIDs.count))
                 }
             }
@@ -220,14 +234,16 @@ struct DocumentsView: View {
             } label: {
                 HStack(spacing: 6) {
                     Image(systemName: "trash")
-                    Text("\(L10n.documentsDeleteAction) (\(selectedIDs.count))")
+                        .accessibilityHidden(true)
+                    Text(L10n.documentsDeleteCount(selectedIDs.count))
+                        .multilineTextAlignment(.center)
                 }
                 .font(.brutalistBody)
                 .tracking(1)
                 .textCase(.uppercase)
                 .foregroundStyle(Theme.statusOverdue)
                 .frame(maxWidth: .infinity)
-                .frame(height: Theme.buttonHeight)
+                .frame(minHeight: Theme.buttonHeight)
                 .background(Theme.statusOverdue.opacity(0.1))
                 .overlay(
                     Rectangle()
@@ -251,13 +267,15 @@ struct DocumentsView: View {
 
     private var contentScroll: some View {
         ScrollView {
+            let groups = groupedDocuments
+
             VStack(spacing: Spacing.lg) {
                 searchField
 
-                if filteredDocuments.isEmpty {
+                if groups.isEmpty {
                     filteredEmptyState
                 } else {
-                    ForEach(groupedDocuments, id: \.type) { group in
+                    ForEach(groups, id: \.type) { group in
                         section(for: group.type, docs: group.docs)
                     }
                 }
@@ -284,14 +302,15 @@ struct DocumentsView: View {
     private var filteredEmptyState: some View {
         VStack(spacing: Spacing.md) {
             Image(systemName: "magnifyingglass")
-                .font(.system(size: 36, weight: .light))
+                .font(.largeTitle.weight(.light))
                 .foregroundStyle(Theme.textTertiary)
+                .accessibilityHidden(true)
 
-            Text("No Results")
+            Text(L10n.documentsNoResultsTitle)
                 .font(.brutalistHeading)
                 .foregroundStyle(Theme.textPrimary)
 
-            Text("Try a different search term")
+            Text(L10n.documentsNoResultsMessage)
                 .font(.brutalistSecondary)
                 .foregroundStyle(Theme.textSecondary)
         }
@@ -305,17 +324,18 @@ struct DocumentsView: View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             HStack(spacing: Spacing.sm) {
                 Image(systemName: type.icon)
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.caption2.weight(.medium))
                     .foregroundStyle(type.accentColor)
+                    .accessibilityHidden(true)
 
-                Text("\(type.displayName.uppercased()) (\(docs.count))")
+                Text(L10n.documentsSectionTitle(type.displayName, docs.count))
                     .font(.brutalistLabel)
                     .foregroundStyle(Theme.textTertiary)
+                    .textCase(.uppercase)
                     .tracking(1.5)
+                    .accessibilityAddTraits(.isHeader)
 
-                Rectangle()
-                    .fill(Theme.gridLine)
-                    .frame(height: 1)
+                ListDivider()
             }
 
             VStack(spacing: 0) {
@@ -323,9 +343,7 @@ struct DocumentsView: View {
                     documentRow(doc)
 
                     if index < docs.count - 1 {
-                        Rectangle()
-                            .fill(Theme.gridLine)
-                            .frame(height: 1)
+                        ListDivider()
                     }
                 }
             }
@@ -347,16 +365,18 @@ struct DocumentsView: View {
                 AttachmentThumbnail(attachment: doc)
 
                 VStack(alignment: .leading, spacing: 4) {
+                    // One line at standard sizes; at accessibility sizes a
+                    // single line holds a handful of characters, so allow more.
                     Text(doc.fileName)
                         .font(.brutalistBody)
                         .foregroundStyle(Theme.textPrimary)
-                        .lineLimit(1)
+                        .lineLimit(rowLineLimit)
                         .truncationMode(.middle)
 
                     Text(doc.documentType.displayName)
                         .font(.brutalistSecondary)
                         .foregroundStyle(Theme.textSecondary)
-                        .lineLimit(1)
+                        .lineLimit(rowLineLimit)
 
                     if let notes = doc.notes,
                        let firstLine = notes.split(whereSeparator: \.isNewline).first,
@@ -364,7 +384,7 @@ struct DocumentsView: View {
                         Text(String(firstLine))
                             .font(.brutalistLabel)
                             .foregroundStyle(Theme.textTertiary)
-                            .lineLimit(1)
+                            .lineLimit(rowLineLimit)
                     }
 
                     if linkedCount > 1 {
@@ -381,12 +401,14 @@ struct DocumentsView: View {
 
                 if isSelectionMode {
                     Image(systemName: isSelected ? "checkmark.square.fill" : "square")
-                        .font(.system(size: 20, weight: .medium))
+                        .font(.title3.weight(.medium))
                         .foregroundStyle(isSelected ? Theme.accent : Theme.textTertiary)
+                        .accessibilityHidden(true)
                 } else {
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.subheadline.weight(.semibold))
                         .foregroundStyle(Theme.textTertiary)
+                        .accessibilityHidden(true)
                 }
             }
             .padding(Spacing.md)
@@ -394,8 +416,8 @@ struct DocumentsView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        // The trait speaks "Selected"; a value saying it again was doubled.
         .accessibilityAddTraits(isSelectionMode && isSelected ? .isSelected : [])
-        .accessibilityValue(isSelectionMode ? (isSelected ? "Selected" : "Not selected") : "")
         .contextMenu {
             if !isSelectionMode {
                 Button {

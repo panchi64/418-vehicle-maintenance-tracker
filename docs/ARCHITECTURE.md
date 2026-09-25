@@ -46,11 +46,10 @@ checkpoint-app/
 │   │   │   └── ServiceClusterDetailSheet.swift
 │   │   ├── Settings/
 │   │   │   ├── SettingsView.swift
-│   │   │   ├── SeasonalRemindersToggle.swift    # Extracted setting toggle
+│   │   │   ├── SettingsOptionList.swift         # Single-choice picker list, group + divider
+│   │   │   ├── SettingsToggleRow.swift          # Toggle row + stored-setting toggle
+│   │   │   ├── SettingsActionRow.swift          # Action and value rows
 │   │   │   ├── DistanceUnitPickerView.swift     # Extracted setting picker
-│   │   │   ├── AppIconToggle.swift              # Extracted setting toggle
-│   │   │   ├── ServiceBundlingToggle.swift      # Extracted setting toggle
-│   │   │   ├── MileageEstimatesToggle.swift     # Extracted setting toggle
 │   │   │   ├── ClimateZonePickerView.swift
 │   │   │   ├── ClusteringMileageWindowPicker.swift
 │   │   │   ├── ClusteringDaysWindowPicker.swift
@@ -59,7 +58,6 @@ checkpoint-app/
 │   │   │   ├── ThemePickerView.swift
 │   │   │   ├── ThemePreviewCard.swift
 │   │   │   ├── SyncSettingsSection.swift
-│   │   │   ├── AnalyticsSettingsSection.swift
 │   │   │   ├── TipJarView.swift
 │   │   │   ├── CSVImportView.swift
 │   │   │   └── CSVImport/                      # Multi-step CSV import flow

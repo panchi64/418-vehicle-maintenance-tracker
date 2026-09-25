@@ -185,6 +185,10 @@ struct CSVImportView: View {
         .padding(Spacing.md)
         .background(Theme.surfaceInstrument)
         .brutalistBorder()
+        // Progress is drawn with accent color; say it in words instead.
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(L10n.stepOfTotal(currentStep.rawValue + 1, CSVImportStep.allCases.count))
+        .accessibilityValue(currentStep.title)
     }
 
     // MARK: - Helpers

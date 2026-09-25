@@ -68,12 +68,6 @@ final class OnboardingState {
     /// IDs of sample vehicles created during tour so we can clean them up
     var sampleVehicleIDs: [UUID] = []
 
-    /// Tour steps whose Skip cooldown has already elapsed once. Used to
-    /// keep Skip immediately available when the user navigates Back to a
-    /// step they have already glanced at — the cooldown's purpose
-    /// (force-glance before bailing) is already satisfied for those.
-    var seenTourSteps: Set<Int> = []
-
     // MARK: - Init
 
     init() {
@@ -139,7 +133,6 @@ final class OnboardingState {
     /// data first so the spotlight anchors resolve against something.
     func replayTour() {
         Self.hasCompletedOnboarding = false
-        seenTourSteps = []
         animate { currentPhase = .tour(step: 0) }
     }
 
@@ -148,7 +141,6 @@ final class OnboardingState {
     /// `replayTour()` to skip the preferences re-prompt.
     func replayOnboarding() {
         Self.hasCompletedOnboarding = false
-        seenTourSteps = []
         animate { currentPhase = .intro }
     }
 

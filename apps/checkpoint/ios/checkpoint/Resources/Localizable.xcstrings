@@ -7555,57 +7555,6 @@
         }
       }
     },
-    "onboarding.tour.skip_confirm_cancel" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Continue Tour"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Continuar recorrido"
-          }
-        }
-      }
-    },
-    "onboarding.tour.skip_confirm_message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You can replay it anytime from Settings."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Puedes verlo de nuevo en Ajustes cuando quieras."
-          }
-        }
-      }
-    },
-    "onboarding.tour.skip_confirm_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Skip the tour?"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¿Omitir el recorrido?"
-          }
-        }
-      }
-    },
     "onboarding.tour.vehicle.body" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9557,6 +9506,71 @@
         }
       }
     },
+    "settings.days_window_desc" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Services due within this many days of each other will be suggested for bundling." } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Se sugerirá agrupar los servicios que venzan con esta cantidad de días de diferencia." } } } },
+    "settings.mileage_window_desc" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Services within this distance of each other will be suggested for bundling." } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Se sugerirá agrupar los servicios que estén a esta distancia o menos entre sí." } } } },
+    "settings.theme" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Theme" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Tema" } } } },
+    "settings.theme_rare_hint" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Tip to unlock exclusive rare themes" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Deja una propina para desbloquear temas raros exclusivos" } } } },
+    "settings.theme_unlock_in_tip_jar" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Unlock in Tip Jar" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Desbloquéalo en Propinas" } } } },
+    "settings.theme_locked" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Locked" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Bloqueado" } } } },
+    "settings.theme_tier_free" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Free" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Gratis" } } } },
+    "settings.theme_tier_pro" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Pro" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Pro" } } } },
+    "settings.theme_tier_rare" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Rare" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Raro" } } } },
+    "settings.climate_zone" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Climate Zone" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Zona climática" } } } },
+    "settings.climate_zone_desc" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose the climate zone that best matches where you drive most often." } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Elige la zona climática que mejor corresponda a donde más conduces." } } } },
+    "settings.not_set" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Not Set" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin definir" } } } },
+    "settings.seasonal_alerts" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Seasonal Alerts" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Alertas estacionales" } } } },
+    "settings.seasonal_alerts_desc" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Show seasonal maintenance tips on the dashboard" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Muestra consejos de mantenimiento de temporada en el panel" } } } },
+    "settings.data_sync" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "DATA & SYNC" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "DATOS Y SINCRONIZACIÓN" } } } },
+    "settings.import_history" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Import Service History" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Importar historial de servicios" } } } },
+    "settings.support" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "SUPPORT" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "APOYO" } } } },
+    "settings.replay_tour" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Replay Tour" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Repetir recorrido" } } } },
+    "settings.replay_tour_desc" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "See the guided walkthrough again" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Vuelve a ver el recorrido guiado" } } } },
+    "settings.restore_purchases" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Restore Purchases" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Restaurar compras" } } } },
+    "settings.find_gas_prices" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Find Gas Prices" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Buscar precios de gasolina" } } } },
+    "settings.find_gas_prices_desc" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Opens Biombo, our PR gas-price companion" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Abre Biombo, nuestra app de precios de gasolina en PR" } } } },
+    "settings.usage_analytics" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Usage Analytics" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Analíticas de uso" } } } },
+    "settings.usage_analytics_desc" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Helps us improve Checkpoint. No personal data is ever collected." } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Nos ayuda a mejorar Checkpoint. Nunca recopilamos datos personales." } } } },
+    "settings.days_count" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld days" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "%lld días" } } } },
+    "settings.distance_value" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ %2$@" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ %2$@" } } } },
+    "sync.section_title" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "ICLOUD SYNC" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "SINCRONIZACIÓN CON ICLOUD" } } } },
+    "sync.toggle_title" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "iCloud Sync" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Sincronizar con iCloud" } } } },
+    "sync.toggle_subtitle" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Free • No account required" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Gratis • No requiere cuenta" } } } },
+    "sync.sign_in_prompt" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Sign in to iCloud in Settings" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Inicia sesión en iCloud en Ajustes" } } } },
+    "sync.footer" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Syncs your vehicles and maintenance data across your Apple devices via iCloud." } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Sincroniza tus vehículos y datos de mantenimiento entre tus dispositivos Apple mediante iCloud." } } } },
+    "sync.disabled" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Sync disabled" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Sincronización desactivada" } } } },
+    "sync.restart_title" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Restart Required" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Reinicio necesario" } } } },
+    "sync.restart_message" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Please restart the app for sync changes to take effect." } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Reinicia la app para que se apliquen los cambios de sincronización." } } } },
+    "sync.restart_ok" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "OK" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Aceptar" } } } },
+    "sync.last_synced" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Last synced %@" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Última sincronización: %@" } } } },
+    "common.close" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Close" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Cerrar" } } } },
+    "disclosure.expanded" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Expanded" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Expandido" } } } },
+    "disclosure.collapsed" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Collapsed" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Contraído" } } } },
+    "onboarding.getstarted.registration_tag" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Registration Tag" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Marbete de registro" } } } },
+    "onboarding.getstarted.marbete_help" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Track your yearly vehicle registration expiration and get reminders before it lapses." } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Lleva el control del vencimiento anual del registro de tu vehículo y recibe recordatorios antes de que expire." } } } },
+    "documents.more_actions" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "More actions" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Más acciones" } } } },
+    "documents.no_linked_vehicles" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "No linked vehicles" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin vehículos vinculados" } } } },
+    "documents.no_results.title" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "No Results" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin resultados" } } } },
+    "documents.no_results.message" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Try a different search term" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Prueba con otro término de búsqueda" } } } },
+    "documents.open_badge" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Open" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Abrir" } } } },
+    "documents.open_full.label" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Open full document" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Abrir documento completo" } } } },
+    "documents.open_full.hint" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Opens the document in the system viewer" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Abre el documento en el visor del sistema" } } } },
+    "documents.service_fallback" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Service" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Servicio" } } } },
+    "documents.service_log_summary" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ • %2$@" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ • %2$@" } } } },
+    "documents.section_title" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ (%2$lld)" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ (%2$lld)" } } } },
+    "documents.selected_count" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld selected" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "%lld seleccionados" } } } },
+    "documents.delete_count" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Delete (%lld)" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Eliminar (%lld)" } } } },
+    "tip.support_checkpoint" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Support Checkpoint" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Apoya a Checkpoint" } } } },
+    "tip.every_tip_unlocks" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Every tip unlocks a rare theme" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Cada propina desbloquea un tema raro" } } } },
+    "tip.jar_title" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Tip Jar" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Propinas" } } } },
+    "tip.jar_body" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Help keep Checkpoint free and actively developed. Every tip unlocks an exclusive rare theme." } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Ayuda a mantener Checkpoint gratis y en desarrollo activo. Cada propina desbloquea un tema raro exclusivo." } } } },
+    "tip.not_now" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Not now" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Ahora no" } } } },
+    "tip.purchasing" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Purchasing" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Comprando" } } } },
+    "tip.all_rare_collected" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "All rare themes collected" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Todos los temas raros coleccionados" } } } },
+    "tip.rare_progress" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$lld/%2$lld rare themes collected" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$lld/%2$lld temas raros coleccionados" } } } },
+    "tip.tier.small" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Snack" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Merienda" } } } },
+    "tip.tier.medium" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Coffee Run" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Un cafecito" } } } },
+    "tip.tier.large" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Lunch" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Almuerzo" } } } },
+    "tip.purchase_label" : { "extractionState" : "manual", "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Tip: %1$@, %2$@" } }, "es" : { "stringUnit" : { "state" : "translated", "value" : "Propina: %1$@, %2$@" } } } },
     "Share cost summary" : {
 
     },

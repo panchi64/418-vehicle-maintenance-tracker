@@ -16,50 +16,25 @@ struct CSVImportSuccessStep: View {
                 Spacer()
                     .frame(height: Spacing.xl)
 
-                // Success icon
+                // Success icon — decorative; the heading below says it.
                 Image(systemName: "checkmark")
-                    .font(.system(size: 48, weight: .bold))
+                    .font(.largeTitle.weight(.bold))
                     .foregroundStyle(Theme.statusGood)
+                    .accessibilityHidden(true)
 
                 Text("IMPORT COMPLETE")
                     .font(.brutalistLabel)
                     .foregroundStyle(Theme.statusGood)
                     .tracking(2)
+                    .accessibilityAddTraits(.isHeader)
 
-                // Stats
-                HStack(spacing: Spacing.md) {
-                    statCard(
-                        value: "\(result.servicesCreated)",
-                        label: "SERVICES"
-                    )
-                    statCard(
-                        value: "\(result.logsCreated)",
-                        label: "LOGS"
-                    )
-                    statCard(
-                        value: Formatters.currencyWhole(result.totalCost),
-                        label: "TOTAL"
-                    )
-                }
+                CSVImportStatTiles(stats: [
+                    .init(value: "\(result.servicesCreated)", label: "SERVICES"),
+                    .init(value: "\(result.logsCreated)", label: "LOGS"),
+                    .init(value: Formatters.currencyWhole(result.totalCost), label: "TOTAL"),
+                ])
             }
             .frame(maxWidth: .infinity)
         }
-    }
-
-    private func statCard(value: String, label: String) -> some View {
-        VStack(spacing: Spacing.xs) {
-            Text(value)
-                .font(.brutalistBody)
-                .foregroundStyle(Theme.textPrimary)
-
-            Text(label)
-                .font(.brutalistLabel)
-                .foregroundStyle(Theme.textTertiary)
-                .tracking(1)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(Spacing.md)
-        .background(Theme.surfaceInstrument)
-        .brutalistBorder()
     }
 }

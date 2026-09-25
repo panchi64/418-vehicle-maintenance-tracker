@@ -72,7 +72,7 @@ struct DocumentPickerSheet: View {
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button(L10n.commonCancel) { dismiss() }
                         .toolbarButtonStyle()
                 }
             }
@@ -135,9 +135,10 @@ struct DocumentPickerSheet: View {
         Button(action: action) {
             HStack(spacing: Spacing.md) {
                 Image(systemName: icon)
-                    .font(.system(size: 22, weight: .medium))
+                    .font(.title2.weight(.medium))
                     .foregroundStyle(Theme.accent)
-                    .frame(width: 32)
+                    .frame(minWidth: 32)
+                    .accessibilityHidden(true)
 
                 Text(label.uppercased())
                     .font(.brutalistBody)
@@ -147,11 +148,13 @@ struct DocumentPickerSheet: View {
                 Spacer()
 
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Theme.textTertiary)
+                    .accessibilityHidden(true)
             }
             .padding(Spacing.md)
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, minHeight: TouchTarget.minimum)
+            .contentShape(Rectangle())
             .background(Theme.surfaceInstrument)
             .brutalistBorder()
         }
@@ -423,8 +426,17 @@ private struct DocumentReviewForm: View {
         _linkedVehicleIDs = State(initialValue: payload.linkedVehicleIDs)
     }
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     private var canShowLinkPicker: Bool {
         showsLinkingControls && availableVehicles.count > 1
+    }
+
+    /// Back and Save side by side; stacked at accessibility sizes.
+    private var actionLayout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(spacing: Spacing.sm))
+            : AnyLayout(HStackLayout(spacing: Spacing.sm))
     }
 
     var body: some View {
@@ -437,42 +449,7 @@ private struct DocumentReviewForm: View {
                     requirement: .required(reason: L10n.documentsFileNameRequired)
                 )
 
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(L10n.documentsTypeLabel.uppercased())
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
-                        .tracking(1.5)
-
-                    Menu {
-                        ForEach(DocumentType.listOrder) { type in
-                            Button {
-                                documentType = type
-                            } label: {
-                                Label(type.displayName, systemImage: type.icon)
-                            }
-                        }
-                    } label: {
-                        HStack(spacing: Spacing.sm) {
-                            Image(systemName: documentType.icon)
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundStyle(documentType.accentColor)
-
-                            Text(documentType.displayName.uppercased())
-                                .font(.brutalistBody)
-                                .tracking(1)
-                                .foregroundStyle(Theme.textPrimary)
-
-                            Spacer()
-
-                            Image(systemName: "chevron.up.chevron.down")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundStyle(Theme.textTertiary)
-                        }
-                        .padding(Spacing.md)
-                        .background(Theme.surfaceInstrument)
-                        .brutalistBorder()
-                    }
-                }
+                DocumentTypeMenu(selection: $documentType)
 
                 RichNotesEditor(
                     label: L10n.documentsNotesLabel,
@@ -492,27 +469,28 @@ private struct DocumentReviewForm: View {
                                 Text(linkedVehicleSummary)
                                     .font(.brutalistBody)
                                     .foregroundStyle(Theme.textPrimary)
-                                    .lineLimit(1)
-
-                                Spacer()
+                                    .frame(maxWidth: .infinity, alignment: .leading)
 
                                 Image(systemName: "chevron.right")
-                                    .font(.system(size: 14, weight: .semibold))
+                                    .font(.subheadline.weight(.semibold))
                                     .foregroundStyle(Theme.textTertiary)
+                                    .accessibilityHidden(true)
                             }
                             .padding(Spacing.md)
+                            .frame(minHeight: TouchTarget.minimum)
                             .background(Theme.surfaceInstrument)
                             .brutalistBorder()
+                            .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
                     }
                 }
 
-                HStack(spacing: Spacing.sm) {
-                    Button("Back") { onCancel() }
+                actionLayout {
+                    Button(L10n.commonBack) { onCancel() }
                         .buttonStyle(.secondary)
 
-                    Button("Save") {
+                    Button(L10n.commonSave) {
                         var updated = payload
                         updated.fileName = fileName.isEmpty ? payload.fileName : fileName
                         updated.documentType = documentType

@@ -28,18 +28,12 @@ struct ProPaywallSheet: View {
 
                             // Price display
                             if let product = storeManager.proProduct() {
-                                HStack(spacing: Spacing.sm) {
-                                    // Hardcoded "original" price for strikethrough marketing display;
-                                    // StoreKit does not expose a pre-discount price for introductory offers
-                                    Text("$14.99")
-                                        .font(.brutalistBody)
-                                        .foregroundStyle(Theme.textTertiary)
-                                        .strikethrough()
-
-                                    Text("\(product.displayPrice) LAUNCH PRICE")
-                                        .font(.brutalistHeading)
-                                        .foregroundStyle(Theme.textPrimary)
+                                ViewThatFits(in: .horizontal) {
+                                    HStack(spacing: Spacing.sm) { priceLine(product) }
+                                    VStack(spacing: Spacing.xs) { priceLine(product) }
                                 }
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, Spacing.screenHorizontal)
                             }
                         }
                         .padding(.top, Spacing.lg)
@@ -100,9 +94,10 @@ struct ProPaywallSheet: View {
                             Button {
                                 Task { await storeManager.restorePurchases() }
                             } label: {
-                                Text("Restore Purchases")
+                                Text(L10n.settingsRestorePurchases)
                                     .font(.brutalistSecondary)
                                     .foregroundStyle(Theme.textTertiary)
+                                    .minimumTouchTarget()
                             }
                         }
                         .padding(.top, Spacing.md)
@@ -113,7 +108,7 @@ struct ProPaywallSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button(L10n.commonCancel) { dismiss() }
                         .toolbarButtonStyle()
                 }
             }
@@ -121,21 +116,34 @@ struct ProPaywallSheet: View {
                 AnalyticsService.shared.capture(.paywallShown(trigger: "vehicle_limit"))
             }
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.medium, .large])
+    }
+
+    // Hardcoded "original" price for strikethrough marketing display;
+    // StoreKit does not expose a pre-discount price for introductory offers
+    @ViewBuilder
+    private func priceLine(_ product: Product) -> some View {
+        Text("$14.99")
+            .font(.brutalistBody)
+            .foregroundStyle(Theme.textTertiary)
+            .strikethrough()
+
+        Text("\(product.displayPrice) LAUNCH PRICE")
+            .font(.brutalistHeading)
+            .foregroundStyle(Theme.textPrimary)
     }
 
     private func featureRow(icon: String, text: String) -> some View {
-        HStack(spacing: Spacing.sm) {
-            Image(systemName: icon)
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(Theme.accent)
-                .frame(width: 24)
-
+        Label {
             Text(text)
                 .font(.brutalistBody)
                 .foregroundStyle(Theme.textPrimary)
-
-            Spacer()
+                .frame(maxWidth: .infinity, alignment: .leading)
+        } icon: {
+            Image(systemName: icon)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Theme.accent)
+                .accessibilityHidden(true)
         }
         .padding(.vertical, 4)
     }

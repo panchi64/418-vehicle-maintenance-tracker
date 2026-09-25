@@ -28,8 +28,7 @@ struct OnboardingIntroView: View {
                     } label: {
                         Text(L10n.onboardingSkip)
                             .brutalistLabelStyle(color: Theme.textTertiary)
-                            .frame(minWidth: 44, minHeight: 44)
-                            .contentShape(Rectangle())
+                            .minimumTouchTarget()
                     }
                 }
                 .padding(.horizontal, Spacing.screenHorizontal)
@@ -48,17 +47,27 @@ struct OnboardingIntroView: View {
                 // Fixed bottom area — step indicator always in same position
                 VStack(spacing: Spacing.md) {
                     if currentPage == 0 {
-                        HStack(spacing: Spacing.xs) {
-                            Text(L10n.onboardingSwipeNext)
-                                .font(.brutalistLabel)
-                                .foregroundStyle(Theme.textTertiary)
-                                .tracking(1.5)
-                                .textCase(.uppercase)
+                        // The swipe cue doubles as a button: VoiceOver and
+                        // Switch Control users can't swipe a page view, and
+                        // a tap is a fine way to advance for anyone.
+                        Button {
+                            withAnimation { currentPage = 1 }
+                        } label: {
+                            HStack(spacing: Spacing.xs) {
+                                Text(L10n.onboardingSwipeNext)
+                                    .font(.brutalistLabel)
+                                    .tracking(1.5)
+                                    .textCase(.uppercase)
 
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 9, weight: .bold))
-                                .foregroundStyle(Theme.textTertiary)
+                                Image(systemName: "chevron.right")
+                                    .font(.caption2.weight(.bold))
+                                    .accessibilityHidden(true)
+                            }
+                            .foregroundStyle(Theme.textTertiary)
+                            .minimumTouchTarget()
                         }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(L10n.commonNext)
                     } else {
                         Button {
                             onStartTour()
@@ -131,6 +140,7 @@ struct OnboardingIntroView: View {
             Spacer()
         }
         .padding(.horizontal, Spacing.screenHorizontal)
+        .scrollingWhenTooTall()
     }
 
     // MARK: - Page 2: Preferences (Distance Unit + Climate Zone)
@@ -164,55 +174,21 @@ struct OnboardingIntroView: View {
                         .font(.brutalistSecondary)
                         .foregroundStyle(Theme.textSecondary)
 
-                    VStack(spacing: 0) {
-                        ForEach(ClimateZone.allCases, id: \.self) { zone in
-                            climateZoneRow(for: zone)
-
-                            if zone != ClimateZone.allCases.last {
-                                Rectangle()
-                                    .fill(Theme.gridLine)
-                                    .frame(height: Theme.borderWidth)
-                            }
-                        }
+                    SettingsOptionList(
+                        options: ClimateZone.allCases,
+                        selection: selectedClimateZone,
+                        title: { $0.displayName },
+                        subtitle: { $0.description }
+                    ) { zone in
+                        selectedClimateZone = zone
+                        SeasonalSettings.shared.climateZone = zone
+                        HapticService.shared.selectionChanged()
                     }
-                    .background(Theme.surfaceInstrument)
-                    .brutalistBorder()
                 }
             }
             .padding(.horizontal, Spacing.screenHorizontal)
             .padding(.vertical, Spacing.xl)
         }
-    }
-
-    private func climateZoneRow(for zone: ClimateZone) -> some View {
-        Button {
-            selectedClimateZone = zone
-            SeasonalSettings.shared.climateZone = zone
-            HapticService.shared.selectionChanged()
-        } label: {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(zone.displayName)
-                        .font(.brutalistBody)
-                        .foregroundStyle(Theme.textPrimary)
-
-                    Text(zone.description)
-                        .font(.brutalistSecondary)
-                        .foregroundStyle(Theme.textTertiary)
-                }
-
-                Spacer()
-
-                if selectedClimateZone == zone {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(Theme.accent)
-                }
-            }
-            .padding(Spacing.md)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
     }
 
     // MARK: - Feature Row

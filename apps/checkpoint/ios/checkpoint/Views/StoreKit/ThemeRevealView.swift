@@ -44,6 +44,7 @@ struct ThemeRevealView: View {
                                     )
                             }
                         }
+                        .accessibilityHidden(true)
 
                         Text(theme.description)
                             .font(.brutalistSecondary)
@@ -72,22 +73,24 @@ struct ThemeRevealView: View {
                             Text("Later")
                                 .font(.brutalistSecondary)
                                 .foregroundStyle(Theme.textTertiary)
+                                .minimumTouchTarget()
                         }
                     }
                     .padding(.horizontal, Spacing.screenHorizontal)
                     .padding(.bottom, Spacing.lg)
                     .opacity(isRevealed ? 1 : 0)
                 }
+                .scrollingWhenTooTall()
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") { dismiss() }
+                    Button(L10n.commonClose) { dismiss() }
                         .toolbarButtonStyle()
                 }
             }
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.medium, .large])
         .onAppear {
             withAnimation(.easeOut(duration: 0.5)) {
                 isRevealed = true
