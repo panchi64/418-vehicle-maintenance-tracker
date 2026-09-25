@@ -155,8 +155,11 @@ struct ServicesTab: View {
                         serviceRow(service, mileage: content.mileage, vehicle: vehicle)
                     }
                 } header: {
-                    sectionHeader(L10n.servicesGroupTitle(group.status), count: group.services.count)
-                        .tourTarget(.servicesStatusGroup, active: index == 0 && onboardingState.currentPhase.isTour)
+                    sectionHeader(
+                        L10n.servicesGroupTitle(group.status),
+                        count: group.services.count,
+                        isTourTarget: index == 0 && onboardingState.currentPhase.isTour
+                    )
                 }
             }
 
@@ -191,7 +194,10 @@ struct ServicesTab: View {
         return title.prefix(1).localizedUppercase + title.dropFirst()
     }
 
-    func sectionHeader(_ title: String, count: Int? = nil) -> some View {
+    /// The tour target goes inside `servicesListHeader()`: wrapped around it,
+    /// its stateful modifier kept the header's row insets from reaching the
+    /// List, and the first group's header sat off the others' leading edge.
+    func sectionHeader(_ title: String, count: Int? = nil, isTourTarget: Bool = false) -> some View {
         InstrumentSectionHeader(title: title) {
             if let count {
                 Text(verbatim: "\(count)")
@@ -199,6 +205,7 @@ struct ServicesTab: View {
                     .foregroundStyle(Theme.textTertiary)
             }
         }
+        .tourTarget(.servicesStatusGroup, active: isTourTarget)
         .servicesListHeader()
     }
 
