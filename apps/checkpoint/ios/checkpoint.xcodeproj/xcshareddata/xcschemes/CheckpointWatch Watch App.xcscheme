@@ -84,7 +84,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "5ACB1F732F37C5C900714E55"
             BuildableName = "CheckpointWatch Watch App.app"
-            BlueprintName = "CheckpointWatch Watch App"
             ReferencedContainer = "container:checkpoint.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -101,7 +100,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "5ACB1F732F37C5C900714E55"
             BuildableName = "CheckpointWatch Watch App.app"
-            BlueprintName = "CheckpointWatch Watch App"
             ReferencedContainer = "container:checkpoint.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

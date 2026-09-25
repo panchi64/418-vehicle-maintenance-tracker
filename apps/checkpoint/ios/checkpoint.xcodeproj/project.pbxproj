@@ -8,9 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		233723FFB1C83A005BF41AA9 /* DesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = BE9845272C4CFCF14D65E3A6 /* DesignKit */; };
-		5A11AA0000000000000000A3 /* VehicleSharing in Frameworks */ = {isa = PBXBuildFile; productRef = 5A11AA0000000000000000A2 /* VehicleSharing */; };
 		35EAF4409A656AD01A1033BA /* DesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = EB06FB0A7CC3A382CE061002 /* DesignKit */; };
 		4990276752C961C629471AA9 /* DesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = 72A7D215AA9F0416060B11E5 /* DesignKit */; };
+		5A11AA0000000000000000A3 /* VehicleSharing in Frameworks */ = {isa = PBXBuildFile; productRef = 5A11AA0000000000000000A2 /* VehicleSharing */; };
 		5A409E922F36F7DD0010D306 /* PostHog in Frameworks */ = {isa = PBXBuildFile; productRef = 5APH00022F4000000036D71B /* PostHog */; };
 		5AB669662F2687FC0036D71B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5AB669652F2687FC0036D71B /* WidgetKit.framework */; };
 		5AB669682F2687FC0036D71B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5AB669672F2687FC0036D71B /* SwiftUI.framework */; };
@@ -25,19 +25,19 @@
 		5ACB201A2F37C7BF00714E55 /* MileageUpdateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ACB200D2F37C7BF00714E55 /* MileageUpdateView.swift */; };
 		5ACB201B2F37C7BF00714E55 /* MarkServiceDoneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ACB200C2F37C7BF00714E55 /* MarkServiceDoneView.swift */; };
 		5ACB201C2F37C7BF00714E55 /* ServiceRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ACB200E2F37C7BF00714E55 /* ServiceRowView.swift */; };
-		5AWMLC0012F3000000036D71B /* WatchMileageControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AWMLC0022F3000000036D71B /* WatchMileageControls.swift */; };
 		5ACB201D2F37C7BF00714E55 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ACB20142F37C7BF00714E55 /* ContentView.swift */; };
 		5ACB201E2F37C7BF00714E55 /* WatchDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ACB20072F37C7BF00714E55 /* WatchDataStore.swift */; };
 		5ACB201F2F37C7BF00714E55 /* WatchServiceData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ACB20082F37C7BF00714E55 /* WatchServiceData.swift */; };
 		5ACB20202F37C7BF00714E55 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5ACB20112F37C7BF00714E55 /* Assets.xcassets */; };
-		5ASIRI0012F3000000036D71B /* VehicleEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ASIRI0022F3000000036D71B /* VehicleEntity.swift */; };
-		5ASIRI0032F3000000036D71B /* VehicleEntityQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ASIRI0042F3000000036D71B /* VehicleEntityQuery.swift */; };
 		5ADSTU0012F3000000036D71B /* DistanceUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADSTU0022F3000000036D71B /* DistanceUnit.swift */; };
 		5ADUEP0012F3000000036D71B /* DuePeriodFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADUEP0022F3000000036D71B /* DuePeriodFormatter.swift */; };
 		5APWCP0012F3000000036D71B /* PendingWidgetCompletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5APWCP0022F3000000036D71B /* PendingWidgetCompletion.swift */; };
-		5AWAGR0012F3000000036D71B /* WidgetAppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AWAGR0022F3000000036D71B /* WidgetAppGroup.swift */; };
 		5APWRT0012F3000000036D71B /* PendingWidgetRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5APWRT0022F3000000036D71B /* PendingWidgetRoute.swift */; };
+		5ASIRI0012F3000000036D71B /* VehicleEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ASIRI0022F3000000036D71B /* VehicleEntity.swift */; };
+		5ASIRI0032F3000000036D71B /* VehicleEntityQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ASIRI0042F3000000036D71B /* VehicleEntityQuery.swift */; };
+		5AWAGR0012F3000000036D71B /* WidgetAppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AWAGR0022F3000000036D71B /* WidgetAppGroup.swift */; };
 		5AWLOC0012F3000000036D71B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5AWLOC0022F3000000036D71B /* Localizable.xcstrings */; };
+		5AWMLC0012F3000000036D71B /* WatchMileageControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AWMLC0022F3000000036D71B /* WatchMileageControls.swift */; };
 		F424A22B574B2CAB7D7CECB0 /* DesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = 25127F8914D55F849FB69D80 /* DesignKit */; };
 /* End PBXBuildFile section */
 
@@ -130,20 +130,20 @@
 		5ACB200C2F37C7BF00714E55 /* MarkServiceDoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkServiceDoneView.swift; sourceTree = "<group>"; };
 		5ACB200D2F37C7BF00714E55 /* MileageUpdateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MileageUpdateView.swift; sourceTree = "<group>"; };
 		5ACB200E2F37C7BF00714E55 /* ServiceRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceRowView.swift; sourceTree = "<group>"; };
-		5AWMLC0022F3000000036D71B /* WatchMileageControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchMileageControls.swift; sourceTree = "<group>"; };
 		5ACB200F2F37C7BF00714E55 /* ServicesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServicesListView.swift; sourceTree = "<group>"; };
 		5ACB20112F37C7BF00714E55 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5ACB20122F37C7BF00714E55 /* CheckpointWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CheckpointWatch.entitlements; sourceTree = "<group>"; };
 		5ACB20132F37C7BF00714E55 /* CheckpointWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckpointWatchApp.swift; sourceTree = "<group>"; };
 		5ACB20142F37C7BF00714E55 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		5ASIRI0022F3000000036D71B /* VehicleEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VehicleEntity.swift; path = CheckpointWidget/VehicleEntity.swift; sourceTree = SOURCE_ROOT; };
-		5ASIRI0042F3000000036D71B /* VehicleEntityQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VehicleEntityQuery.swift; path = CheckpointWidget/VehicleEntityQuery.swift; sourceTree = SOURCE_ROOT; };
 		5ADSTU0022F3000000036D71B /* DistanceUnit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DistanceUnit.swift; path = checkpoint/Utilities/DistanceUnit.swift; sourceTree = SOURCE_ROOT; };
 		5ADUEP0022F3000000036D71B /* DuePeriodFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DuePeriodFormatter.swift; path = checkpoint/Utilities/DuePeriodFormatter.swift; sourceTree = SOURCE_ROOT; };
 		5APWCP0022F3000000036D71B /* PendingWidgetCompletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PendingWidgetCompletion.swift; path = CheckpointWidget/Shared/PendingWidgetCompletion.swift; sourceTree = SOURCE_ROOT; };
-		5AWAGR0022F3000000036D71B /* WidgetAppGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WidgetAppGroup.swift; path = CheckpointWidget/Shared/WidgetAppGroup.swift; sourceTree = SOURCE_ROOT; };
 		5APWRT0022F3000000036D71B /* PendingWidgetRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PendingWidgetRoute.swift; path = CheckpointWidget/Shared/PendingWidgetRoute.swift; sourceTree = SOURCE_ROOT; };
+		5ASIRI0022F3000000036D71B /* VehicleEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VehicleEntity.swift; path = CheckpointWidget/VehicleEntity.swift; sourceTree = SOURCE_ROOT; };
+		5ASIRI0042F3000000036D71B /* VehicleEntityQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VehicleEntityQuery.swift; path = CheckpointWidget/VehicleEntityQuery.swift; sourceTree = SOURCE_ROOT; };
+		5AWAGR0022F3000000036D71B /* WidgetAppGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WidgetAppGroup.swift; path = CheckpointWidget/Shared/WidgetAppGroup.swift; sourceTree = SOURCE_ROOT; };
 		5AWLOC0022F3000000036D71B /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		5AWMLC0022F3000000036D71B /* WatchMileageControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchMileageControls.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -1482,13 +1482,13 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "../../../packages/DesignKit" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../../../packages/DesignKit;
-		};
 		5A11AA0000000000000000A1 /* XCLocalSwiftPackageReference "../../../packages/VehicleSharing" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../../packages/VehicleSharing;
+		};
+		E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "../../../packages/DesignKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../../packages/DesignKit;
 		};
 /* End XCLocalSwiftPackageReference section */
 
@@ -1509,6 +1509,11 @@
 			package = E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "../../../packages/DesignKit" */;
 			productName = DesignKit;
 		};
+		5A11AA0000000000000000A2 /* VehicleSharing */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5A11AA0000000000000000A1 /* XCLocalSwiftPackageReference "../../../packages/VehicleSharing" */;
+			productName = VehicleSharing;
+		};
 		5APH00022F4000000036D71B /* PostHog */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 5APH00012F4000000036D71B /* XCRemoteSwiftPackageReference "posthog-ios" */;
@@ -1528,11 +1533,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E3B048536478CB757F923BE3 /* XCLocalSwiftPackageReference "../../../packages/DesignKit" */;
 			productName = DesignKit;
-		};
-		5A11AA0000000000000000A2 /* VehicleSharing */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 5A11AA0000000000000000A1 /* XCLocalSwiftPackageReference "../../../packages/VehicleSharing" */;
-			productName = VehicleSharing;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

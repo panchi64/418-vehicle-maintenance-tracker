@@ -111,7 +111,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "5ACB1FDA2F37C75800714E55"
             BuildableName = "CheckpointWatchWidgetExtension.appex"
-            BlueprintName = "CheckpointWatchWidgetExtension"
             ReferencedContainer = "container:checkpoint.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
