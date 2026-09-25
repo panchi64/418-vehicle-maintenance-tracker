@@ -3,11 +3,10 @@
 //  CheckpointWatch
 //
 //  Confirm service completion from Watch — sends to iPhone for processing
-//  Brutalist: monospace, ALL CAPS, status-colored accents
+//  Brutalist: monospace, ALL CAPS, status as shape + word
 //
 
 import SwiftUI
-import WatchKit
 
 struct MarkServiceDoneView: View {
     @Environment(WatchDataStore.self) private var dataStore
@@ -25,71 +24,47 @@ struct MarkServiceDoneView: View {
     }
 
     var body: some View {
+        // The Crown scrolls this screen; tap the mileage dial to hand it the
+        // Crown instead.
         ScrollView {
             VStack(spacing: WatchSpacing.lg) {
                 if showSuccess {
-                    // Success confirmation overlay
-                    Spacer()
-                    VStack(spacing: WatchSpacing.md) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 36, weight: .semibold))
-                            .foregroundStyle(WatchColors.statusGood)
-                        Text("LOGGED")
-                            .font(.watchHeadline)
-                            .foregroundStyle(WatchColors.statusGood)
-                    }
-                    Spacer()
+                    WatchConfirmation(
+                        title: String(localized: "SERVICE LOGGED"),
+                        tint: WatchColors.statusGood,
+                        onFinish: { dismiss() }
+                    )
                 } else {
-                    // Service info
-                    VStack(spacing: WatchSpacing.sm) {
-                        StatusSquare(status: service.status)
-
-                        Text(service.name.uppercased())
-                            .font(.watchTitle)
-                            .foregroundStyle(WatchColors.textPrimary)
-                            .multilineTextAlignment(.center)
-
-                        Text(service.dueDescription.uppercased())
-                            .font(.watchCaption)
-                            .foregroundStyle(service.status.color)
-                    }
+                    serviceHeader
 
                     WatchDivider()
 
-                    // Mileage at service
                     VStack(spacing: WatchSpacing.xs) {
                         Text("MILEAGE AT SERVICE")
                             .font(.watchCaption)
-                            .foregroundStyle(WatchColors.textTertiary)
-
-                        Text("\(Int(mileage).formatted()) \(distanceUnit.abbreviation)")
-                            .font(.watchHeadline)
-                            .foregroundStyle(WatchColors.textPrimary)
-                            .monospacedDigit()
+                            .foregroundStyle(WatchColors.textSecondary)
+                        MileageDial(
+                            mileage: $mileage,
+                            unit: distanceUnit.abbreviation,
+                            tint: WatchColors.textPrimary
+                        )
                     }
 
-                    // Quick-adjust buttons
-                    HStack(spacing: WatchSpacing.md) {
-                        adjustButton(delta: -100, label: "-100")
-                        adjustButton(delta: -10, label: "-10")
-                        adjustButton(delta: +10, label: "+10")
-                        adjustButton(delta: +100, label: "+100")
-                    }
+                    MileageStepButtons(mileage: $mileage)
 
                     // Date: today (no picker — keep simple)
                     VStack(spacing: WatchSpacing.xs) {
                         Text("DATE")
                             .font(.watchCaption)
-                            .foregroundStyle(WatchColors.textTertiary)
-
+                            .foregroundStyle(WatchColors.textSecondary)
                         Text(Date().formatted(date: .abbreviated, time: .omitted).uppercased())
                             .font(.watchLabel)
-                            .foregroundStyle(WatchColors.textSecondary)
+                            .foregroundStyle(WatchColors.textPrimary)
                     }
+                    .accessibilityElement(children: .combine)
 
                     WatchDivider()
 
-                    // Confirm button
                     Button {
                         confirm()
                     } label: {
@@ -102,43 +77,34 @@ struct MarkServiceDoneView: View {
                     .tint(WatchColors.statusGood)
                     .disabled(isConfirming)
 
-                    // Unreachable warning
                     if !connectivity.isPhoneReachable {
-                        Text("WILL SYNC WHEN\nPHONE IS NEARBY")
-                            .font(.watchCaption)
-                            .foregroundStyle(WatchColors.textTertiary)
-                            .multilineTextAlignment(.center)
+                        PhoneUnreachableNote()
                     }
                 }
             }
             .padding(.horizontal, WatchSpacing.md)
         }
-        .focusable()
-        .digitalCrownRotation(
-            $mileage,
-            from: 0,
-            through: 999999,
-            by: 10,
-            sensitivity: .medium
-        )
-        .navigationTitle("COMPLETE")
+        .navigationTitle(Text("Complete"))
         .onAppear {
             mileage = Double(dataStore.vehicleData?.currentMileage ?? 0)
         }
     }
 
-    // MARK: - Quick Adjust Button
+    private var serviceHeader: some View {
+        VStack(spacing: WatchSpacing.sm) {
+            Text(service.name.uppercased())
+                .font(.watchTitle)
+                .foregroundStyle(WatchColors.textPrimary)
+                .multilineTextAlignment(.center)
 
-    private func adjustButton(delta: Int, label: String) -> some View {
-        Button {
-            mileage = max(0, mileage + Double(delta))
-        } label: {
-            Text(label)
+            WatchStatusTag(status: service.status)
+
+            Text(service.dueDescription.uppercased())
                 .font(.watchCaption)
                 .foregroundStyle(WatchColors.textSecondary)
-                .frame(minWidth: 32)
+                .multilineTextAlignment(.center)
         }
-        .buttonStyle(.bordered)
+        .accessibilityElement(children: .combine)
     }
 
     // MARK: - Confirm
@@ -154,19 +120,9 @@ struct MarkServiceDoneView: View {
             mileageAtService: Int(mileage)
         )
 
-        // Haptic feedback
-        WKInterfaceDevice.current().play(.success)
-
-        // Show success state, then dismiss
+        // The confirmation plays the haptic and announces itself.
         withAnimation(.easeIn(duration: 0.2)) {
             showSuccess = true
-        }
-        Task {
-            try? await Task.sleep(for: .milliseconds(800))
-            await MainActor.run {
-                isConfirming = false
-                dismiss()
-            }
         }
     }
 }

@@ -31,11 +31,13 @@ enum WidgetAppGroup {
     nonisolated static let appSelectedVehicleIDKey = "appSelectedVehicleID"
     /// Queue of service completions tapped from the widget "Done" button.
     nonisolated static let pendingWidgetCompletionsKey = "pendingWidgetCompletions"
+    /// The service a widget row tap asked the app to open (`PendingWidgetRoute`).
+    nonisolated static let pendingWidgetRouteKey = "pendingWidgetRoute"
 
     /// Shared defaults for the App Group. Logs a one-time warning per process
     /// when the suite is nil so silent misconfiguration doesn't masquerade as
     /// a working read/write.
-    static func defaults() -> UserDefaults? {
+    nonisolated static func defaults() -> UserDefaults? {
         if let defaults = UserDefaults(suiteName: identifier) {
             return defaults
         }
@@ -44,7 +46,7 @@ enum WidgetAppGroup {
     }
 }
 
-private enum WidgetAppGroupWarning {
+private nonisolated enum WidgetAppGroupWarning {
     private static let warned = Mutex<Bool>(false)
     private static let logger = Logger(
         subsystem: "com.418-studio.checkpoint.widget",

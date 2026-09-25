@@ -19,25 +19,28 @@ struct ServiceEntry: TimelineEntry {
     let services: [WidgetService]
     let configuration: CheckpointWidgetConfigurationIntent
     let distanceUnit: WidgetDistanceUnit
+    /// When the app last wrote this snapshot; nil when there is no data.
+    let updatedAt: Date?
 
     static var placeholder: ServiceEntry {
         ServiceEntry(
             date: Date(),
             vehicleID: nil,
-            vehicleName: "My Vehicle",
+            vehicleName: String(localized: "My Vehicle"),
             currentMileage: 34500,
             services: [
-                WidgetService(serviceID: nil, name: "Oil Change", status: .dueSoon, dueDescription: "or 1,200 miles", dueMileage: 35000, daysRemaining: 5, duePeriod: "This week"),
-                WidgetService(serviceID: nil, name: "Tire Rotation", status: .good, dueDescription: "or 3,800 miles", dueMileage: 38000, daysRemaining: 30, duePeriod: "Early Jul"),
-                WidgetService(serviceID: nil, name: "Brake Inspection", status: .overdue, dueDescription: "500 miles overdue", dueMileage: 32000, daysRemaining: -5, duePeriod: "Overdue")
+                WidgetService(serviceID: nil, name: String(localized: "Oil Change"), status: .dueSoon, dueDescription: "", dueMileage: 35000, daysRemaining: 5, duePeriod: nil),
+                WidgetService(serviceID: nil, name: String(localized: "Tire Rotation"), status: .good, dueDescription: "", dueMileage: 38000, daysRemaining: 30, duePeriod: nil),
+                WidgetService(serviceID: nil, name: String(localized: "Brake Inspection"), status: .overdue, dueDescription: "", dueMileage: 32000, daysRemaining: -5, duePeriod: nil)
             ],
             configuration: CheckpointWidgetConfigurationIntent(),
-            distanceUnit: WidgetDistanceUnit.current()
+            distanceUnit: WidgetDistanceUnit.current(),
+            updatedAt: Date()
         )
     }
 
     static var empty: ServiceEntry {
-        ServiceEntry(date: Date(), vehicleID: nil, vehicleName: "No Vehicle", currentMileage: 0, services: [], configuration: CheckpointWidgetConfigurationIntent(), distanceUnit: WidgetDistanceUnit.current())
+        ServiceEntry(date: Date(), vehicleID: nil, vehicleName: String(localized: "No Vehicle"), currentMileage: 0, services: [], configuration: CheckpointWidgetConfigurationIntent(), distanceUnit: WidgetDistanceUnit.current(), updatedAt: nil)
     }
 }
 
@@ -63,16 +66,6 @@ enum WidgetServiceStatus: String, Codable {
         case .dueSoon: return WidgetColors.statusDueSoon
         case .good: return WidgetColors.statusGood
         case .neutral: return WidgetColors.statusNeutral
-        }
-    }
-
-    /// Color for accessory (lock screen) widgets - uses system colors for tinting
-    var accessoryColor: Color {
-        switch self {
-        case .overdue: return .red
-        case .dueSoon: return .yellow
-        case .good: return .green
-        case .neutral: return .gray
         }
     }
 }
@@ -245,7 +238,8 @@ struct WidgetProvider: AppIntentTimelineProvider {
             currentMileage: snapshot.data.currentMileage,
             services: widgetServices,
             configuration: configuration,
-            distanceUnit: snapshot.distanceUnit
+            distanceUnit: snapshot.distanceUnit,
+            updatedAt: snapshot.data.updatedAt
         )
     }
 
@@ -301,11 +295,12 @@ struct WidgetProvider: AppIntentTimelineProvider {
         ServiceEntry(
             date: Date(),
             vehicleID: nil,
-            vehicleName: "No Vehicle",
+            vehicleName: String(localized: "No Vehicle"),
             currentMileage: 0,
             services: [],
             configuration: configuration,
-            distanceUnit: .miles
+            distanceUnit: .miles,
+            updatedAt: nil
         )
     }
 }

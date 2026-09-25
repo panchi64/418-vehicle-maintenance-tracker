@@ -2,8 +2,8 @@
 //  WatchCornerView.swift
 //  CheckpointWatchWidget
 //
-//  Corner Watch complication (accessoryCorner): gauge-style display
-//  watchOS-only corner complication with status-colored gauge
+//  Corner Watch complication (accessoryCorner): status shape with the
+//  service's first word curved along the bezel
 //
 
 import SwiftUI
@@ -15,27 +15,31 @@ struct WatchCornerView: View {
     var body: some View {
         if let service = entry.service {
             ZStack {
-                // Corner gauge showing urgency
                 AccessoryWidgetBackground()
-                Image(systemName: service.status.icon)
-                    .font(.system(size: 20, weight: .semibold))
+                WatchWidgetStatusMark(status: service.status, size: 14)
                     .widgetAccentable()
             }
             .widgetLabel {
-                Text(abbreviate(service.name))
+                Text(verbatim: cornerLabel(for: service))
                     .font(.system(.caption, design: .monospaced))
             }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text(verbatim: "\(service.name), \(service.status.label)"))
         } else {
             ZStack {
                 AccessoryWidgetBackground()
-                Text("—")
-                    .font(.system(size: 14, weight: .medium, design: .monospaced))
+                Image(systemName: "checkmark")
+                    .font(.body.weight(.semibold))
+                    .widgetAccentable()
             }
+            .accessibilityLabel(Text("No services due"))
         }
     }
 
-    /// Returns first word: "Oil Change" → "OIL"
-    private func abbreviate(_ name: String) -> String {
-        String(name.uppercased().split(separator: " ").first ?? "")
+    /// "OIL · OVERDUE" — the word travels with the shape.
+    private func cornerLabel(for service: WatchWidgetService) -> String {
+        let name = WatchWidgetDisplay.abbreviate(service.name)
+        let word = service.status.label
+        return word.isEmpty ? name : "\(name) \u{00B7} \(word)"
     }
 }

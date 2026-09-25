@@ -65,6 +65,9 @@ extension ContentView {
         handlePendingSiriMileageUpdate()
         // Process pending widget service completions
         processPendingWidgetCompletions()
+        // Open a service tapped on the widget (after completions, so a row the
+        // widget also marked done opens with its log in place)
+        consumePendingWidgetRoute()
         // Analytics
         AnalyticsService.shared.capture(.appOpened)
     }
@@ -335,6 +338,14 @@ extension ContentView {
     /// Process pending service completions from the widget "Done" button
     func processPendingWidgetCompletions() {
         WidgetDataService.shared.processPendingWidgetCompletions(context: modelContext)
+    }
+
+    /// Open the service a widget row tap asked for (`OpenServiceIntent`) by
+    /// handing it to the notification-route navigation, which already opens a
+    /// single service's detail and ignores vehicles deleted since.
+    func consumePendingWidgetRoute() {
+        guard let route = PendingWidgetRoute.take() else { return }
+        NotificationService.shared.pendingRoute = .services(vehicleID: route.vehicleID, serviceIDs: [route.serviceID])
     }
 
     // MARK: - Mileage Update

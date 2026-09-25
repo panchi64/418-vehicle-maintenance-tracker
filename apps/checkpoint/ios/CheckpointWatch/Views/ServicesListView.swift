@@ -32,7 +32,7 @@ struct ServicesListView: View {
 
             // Stale data indicator
             if dataStore.isStale {
-                staleIndicator
+                staleIndicator(updatedAt: vehicle.updatedAt)
                     .listRowBackground(Color.clear)
             }
 
@@ -65,7 +65,7 @@ struct ServicesListView: View {
             }
         }
         .listStyle(.plain)
-        .navigationTitle("CHECKPOINT")
+        .navigationTitle(Text(verbatim: "CHECKPOINT"))
         .navigationDestination(for: WatchService.self) { service in
             MarkServiceDoneView(service: service)
         }
@@ -85,7 +85,7 @@ struct ServicesListView: View {
                 HStack(spacing: WatchSpacing.sm) {
                     let displayMileage = vehicle.estimatedMileage ?? vehicle.currentMileage
                     let unit = vehicle.resolvedDistanceUnit
-                    Text("\(unit.fromMiles(displayMileage).formatted()) \(unit.abbreviation)")
+                    Text(verbatim: "\(unit.fromMiles(displayMileage).formatted()) \(unit.abbreviation)")
                         .font(.watchBody)
                         .foregroundStyle(WatchColors.textPrimary)
 
@@ -96,8 +96,9 @@ struct ServicesListView: View {
                     }
 
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 9))
+                        .font(.watchCaption)
                         .foregroundStyle(WatchColors.textTertiary)
+                        .accessibilityHidden(true)
                 }
             }
             .buttonStyle(.plain)
@@ -122,27 +123,32 @@ struct ServicesListView: View {
 
     // MARK: - Indicators
 
-    private var staleIndicator: some View {
-        HStack(spacing: WatchSpacing.sm) {
-            Rectangle()
-                .fill(WatchColors.statusDueSoon)
-                .frame(width: 4, height: 4)
-            Text("DATA MAY BE OUTDATED")
+    /// How old the figures are, once the last sync is over an hour back.
+    private func staleIndicator(updatedAt: Date) -> some View {
+        let stamp = Calendar.current.isDateInToday(updatedAt)
+            ? updatedAt.formatted(date: .omitted, time: .shortened)
+            : updatedAt.formatted(.dateTime.month(.abbreviated).day())
+        return Label {
+            Text("AS OF \(stamp)")
                 .font(.watchCaption)
-                .foregroundStyle(WatchColors.textTertiary)
+                .foregroundStyle(WatchColors.textSecondary)
+        } icon: {
+            Image(systemName: "clock")
+                .font(.watchCaption)
+                .foregroundStyle(WatchColors.textSecondary)
         }
     }
 
     private func syncErrorIndicator(_ error: String) -> some View {
         Text(error.uppercased())
             .font(.watchCaption)
-            .foregroundStyle(WatchColors.textTertiary)
+            .foregroundStyle(WatchColors.textSecondary)
     }
 
     private var noServicesRow: some View {
-        Text("— NO SERVICES DUE —")
+        Text("NO SERVICES DUE")
             .font(.watchLabel)
-            .foregroundStyle(WatchColors.textTertiary)
+            .foregroundStyle(WatchColors.textSecondary)
     }
 }
 

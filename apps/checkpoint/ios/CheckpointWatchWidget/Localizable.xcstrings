@@ -1,0 +1,22 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%@ %@ OVER" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ %2$@ OVER" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ %2$@ DE RETRASO" } }
+      }
+    },
+    "AS OF %@" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "ACTUALIZADO %@" } } } },
+    "Checkpoint" : { "shouldTranslate" : false },
+    "DUE SOON" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "PRÓXIMO" } } } },
+    "MY VEHICLE" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "MI VEHÍCULO" } } } },
+    "Next vehicle maintenance at a glance." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "El próximo mantenimiento de tu vehículo, de un vistazo." } } } },
+    "NO SERVICES DUE" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "NINGÚN SERVICIO PENDIENTE" } } } },
+    "No services due" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Ningún servicio pendiente" } } } },
+    "Oil Change" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Cambio de aceite" } } } },
+    "ON TRACK" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "AL DÍA" } } } },
+    "OVERDUE" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "VENCIDO" } } } }
+  },
+  "version" : "1.0"
+}

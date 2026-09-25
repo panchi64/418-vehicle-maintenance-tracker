@@ -2,7 +2,7 @@
 //  AccessoryInlineView.swift
 //  CheckpointWidget
 //
-//  Inline lock screen widget showing next service
+//  Inline Lock Screen widget: "■ OVERDUE OIL CHANGE • 500 MI OVER"
 //  Brutalist-Tech-Modernist aesthetic: uppercase monospace
 //
 
@@ -14,48 +14,28 @@ struct AccessoryInlineView: View {
 
     var body: some View {
         if let service = entry.services.first {
-            Label {
-                Text("\(service.name.uppercased()) \u{2022} \(formatDue(service.dueDescription))")
-                    .font(.system(.caption, design: .monospaced))
-            } icon: {
-                Image(systemName: statusIcon(for: service.status))
+            let name = service.name.uppercased()
+            let due = WidgetDisplayHelpers.compactDue(for: service, currentMileage: entry.currentMileage, distanceUnit: entry.distanceUnit)
+            // Inline renders only text and one image. The SF Symbol mirrors the
+            // status shape; the word leads when there is room for it.
+            let nameAndDue = "\(name) \u{2022} \(due)"
+            let word = service.status.label
+            ViewThatFits {
+                line(word.isEmpty ? nameAndDue : "\(word) \(nameAndDue)", status: service.status)
+                line(nameAndDue, status: service.status)
+                line(name, status: service.status)
             }
         } else {
-            Text("— —")
-                .font(.system(.caption, design: .monospaced))
+            Text(entry.vehicleID == nil ? "TAP TO SET UP" : "NO SERVICES DUE")
         }
     }
 
-    /// Abbreviate due description for inline: "500 miles remaining" → "500 MI" or "500 KM"
-    private func formatDue(_ description: String) -> String {
-        let unit = entry.distanceUnit
-        let upper = description.uppercased()
-        if upper.contains("MILES") || upper.contains("KILOMETERS") {
-            // Extract number
-            let number = upper.components(separatedBy: CharacterSet.decimalDigits.inverted)
-                .filter { !$0.isEmpty }
-                .first ?? ""
-            if upper.contains("OVERDUE") {
-                return "\(number) \(unit.uppercaseAbbreviation) OVER"
-            } else if upper.contains("REMAINING") {
-                return "\(number) \(unit.uppercaseAbbreviation)"
-            } else {
-                return "\(number) \(unit.uppercaseAbbreviation)"
-            }
-        }
-        // Date-based items read as an abstracted period ("DUE MID MAY"); drop the
-        // leading verb so the compact inline slot shows just "MID MAY".
-        return upper
-            .replacingOccurrences(of: "DUE ", with: "")
-            .replacingOccurrences(of: "EXPIRES ", with: "")
-    }
-
-    private func statusIcon(for status: WidgetServiceStatus) -> String {
-        switch status {
-        case .overdue: return "exclamationmark.triangle"
-        case .dueSoon: return "clock"
-        case .good: return "checkmark.circle"
-        case .neutral: return "minus.circle"
+    private func line(_ text: String, status: WidgetServiceStatus) -> some View {
+        Label {
+            Text(verbatim: text)
+                .font(.system(.body, design: .monospaced))
+        } icon: {
+            Image(systemName: status.symbolName)
         }
     }
 }
