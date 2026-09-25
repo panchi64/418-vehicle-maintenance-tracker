@@ -35,11 +35,7 @@ extension ThemeManager: DesignKit.ThemeProviding {
     var statusNeutral: Color { palette.statusNeutral }
 
     var fontDesign: Font.Design { current.fontDesign.toSwiftUI() }
-    var colorScheme: ColorScheme? {
-        switch current.colorScheme {
-        case .dark: return .dark
-        case .light: return .light
-        case .system: return nil
-        }
-    }
+    // `colorScheme` takes the protocol default (nil): every theme defines
+    // light, dark, and Increase Contrast palettes, so the app follows the
+    // system appearance instead of forcing one per theme.
 }

@@ -27,7 +27,59 @@ final class ThemeDefinitionTests: XCTestCase {
         XCTAssertEqual(defaultTheme?.displayName, "Checkpoint")
         XCTAssertEqual(defaultTheme?.tier, .free)
         XCTAssertEqual(defaultTheme?.fontDesign, .monospaced)
-        XCTAssertEqual(defaultTheme?.colorScheme, .dark)
+    }
+
+    /// AESTHETIC.md's identity pair, in both orders: cerulean ground with
+    /// off-white ink in dark, off-white ground with cerulean ink in light.
+    func testDefaultThemeInvertsAcrossAppearances() throws {
+        let url = Bundle.main.url(forResource: "Themes", withExtension: "json")!
+        let data = try Data(contentsOf: url)
+        let themes = try JSONDecoder().decode([ThemeDefinition].self, from: data)
+        let colors = try XCTUnwrap(themes.first(where: { $0.id == "default" })).colors
+
+        XCTAssertEqual(colors.hex(.backgroundPrimary, in: .dark), "#0033BE")
+        XCTAssertEqual(colors.hex(.textPrimary, in: .dark), "#F5F0DC")
+        XCTAssertEqual(colors.hex(.backgroundPrimary, in: .light), "#F5F0DC")
+        XCTAssertEqual(colors.hex(.textPrimary, in: .light), "#0033BE")
+    }
+
+    func testHighContrastOverridesLayerOnTheirBaseAppearance() throws {
+        let json = """
+        {
+            "light": \(Self.tokens(fill: "#FFFFFF")),
+            "dark": \(Self.tokens(fill: "#000000")),
+            "darkHighContrast": { "textPrimary": "#FFFFFF" }
+        }
+        """
+        let colors = try JSONDecoder().decode(ThemeAppearances.self, from: Data(json.utf8))
+
+        XCTAssertEqual(colors.hex(.textPrimary, in: .darkHighContrast), "#FFFFFF")
+        XCTAssertEqual(colors.hex(.accent, in: .darkHighContrast), "#000000")
+        // An absent high-contrast set falls back to its base entirely.
+        XCTAssertEqual(colors.hex(.textPrimary, in: .lightHighContrast), "#FFFFFF")
+    }
+
+    func testIncompleteBaseAppearanceFailsToDecode() {
+        let json = """
+        { "light": { "textPrimary": "#000000" }, "dark": \(Self.tokens(fill: "#000000")) }
+        """
+        XCTAssertThrowsError(try JSONDecoder().decode(ThemeAppearances.self, from: Data(json.utf8)))
+    }
+
+    func testUnknownTokenFailsToDecode() {
+        let json = """
+        {
+            "light": \(Self.tokens(fill: "#FFFFFF")),
+            "dark": \(Self.tokens(fill: "#000000")),
+            "lightHighContrast": { "textPrimry": "#000000" }
+        }
+        """
+        XCTAssertThrowsError(try JSONDecoder().decode(ThemeAppearances.self, from: Data(json.utf8)))
+    }
+
+    /// A complete color set with every token set to `fill`, as a JSON object.
+    private static func tokens(fill: String) -> String {
+        "{" + ThemeToken.allCases.map { "\"\($0.rawValue)\": \"\(fill)\"" }.joined(separator: ", ") + "}"
     }
 
     func testThemeTierDistribution() throws {
@@ -55,21 +107,13 @@ final class ThemeDefinitionTests: XCTestCase {
         }
     }
 
-    func testEquatable() {
-        let theme1 = ThemeDefinition(
-            id: "test", displayName: "Test", description: "Test theme",
-            tier: .free, fontDesign: .monospaced, colorScheme: .dark,
-            previewColors: ["#000000"],
-            backgroundPrimary: "#000000", backgroundElevated: "#111111",
-            backgroundSubtle: "#0A0A0A", surfaceInstrument: "#111111",
-            glow: "#000000", gridLine: "#333333",
-            textPrimary: "#FFFFFF", textSecondary: "#CCCCCC",
-            textTertiary: "#999999", borderSubtle: "#333333",
-            accent: "#FF0000", accentMuted: "#FF000080",
-            statusOverdue: "#FF0000", statusDueSoon: "#FFAA00",
-            statusGood: "#00FF00", statusNeutral: "#888888"
-        )
-        let theme2 = theme1
-        XCTAssertEqual(theme1, theme2)
+    func testEquatable() throws {
+        let url = Bundle.main.url(forResource: "Themes", withExtension: "json")!
+        let data = try Data(contentsOf: url)
+        let themes = try JSONDecoder().decode([ThemeDefinition].self, from: data)
+        let again = try JSONDecoder().decode([ThemeDefinition].self, from: data)
+
+        XCTAssertEqual(themes, again)
+        XCTAssertNotEqual(themes[0], themes[1])
     }
 }

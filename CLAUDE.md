@@ -17,6 +17,7 @@
 
 **Internal tooling:**
 - `tools/sketchpad/` — **SolidJS recreation of Checkpoint's UI, for settling layouts before writing SwiftUI.** Reads the real `Themes.json` and JetBrains Mono, so it renders what the app renders. Ships nothing. Run `tools/sketchpad/dev.sh`. See `tools/sketchpad/CLAUDE.md`.
+- `tools/theme-contrast/` — WCAG contrast gate for `Themes.json` across every theme × light/dark × Increase Contrast. Run `uv run tools/theme-contrast/check_contrast.py` after any palette change; it exits non-zero on failure.
 - `tools/depth-backdrops/` — Local web app (Python/FastAPI + React/WebGL) that generates the cerulean depth-map backdrops behind device mockups in App Store screenshots. Run `tools/depth-backdrops/dev.sh`. See `tools/depth-backdrops/CLAUDE.md`.
 
 **Docs:**

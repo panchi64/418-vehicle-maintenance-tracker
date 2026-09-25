@@ -2,7 +2,7 @@ import { createEffect, createSignal, For, Match, onCleanup, Show, Switch } from 
 import './styles/base.css'
 import './harness/harness.css'
 
-import { applyTheme, defaultTheme, themes } from './theme/themes'
+import { applyTheme, defaultTheme, systemAppearance, themes, type ColorScheme } from './theme/themes'
 import { AuditPanel, useAudit } from './harness/Inspector'
 import { VehicleHeader } from './components/VehicleHeader'
 import { QuickSpecsPanel } from './components/Cards'
@@ -42,6 +42,10 @@ const DEVICES = [
 
 export function App() {
   const [themeId, setThemeId] = createSignal(defaultTheme.id)
+  // Starts from the browser's own setting, as the app starts from the system's.
+  const initialAppearance = systemAppearance()
+  const [scheme, setScheme] = createSignal<ColorScheme>(initialAppearance.scheme)
+  const [highContrast, setHighContrast] = createSignal(initialAppearance.highContrast)
   const [deviceId, setDeviceId] = createSignal<(typeof DEVICES)[number]['id']>('17')
   const [screen, setScreen] = createSignal<ScreenId>('home')
   const [tab, setTab] = createSignal<TabId>('home')
@@ -61,7 +65,7 @@ export function App() {
   // Theme and type scale live on :root, matching how Swift resolves colors
   // through ThemeManager at render time rather than baking them into views.
   createEffect(() => {
-    applyTheme(theme())
+    applyTheme(theme(), { scheme: scheme(), highContrast: highContrast() })
     document.documentElement.style.setProperty('--type-scale', String(typeScale()))
   })
 
@@ -121,14 +125,38 @@ export function App() {
             <For each={themes}>
               {(t) => (
                 <option value={t.id}>
-                  {t.displayName} — {t.colorScheme}, {t.fontDesign}
+                  {t.displayName} — {t.fontDesign}
                 </option>
               )}
             </For>
           </select>
           <p class="hz-hint">
-            Eight ship. A layout is not verified until it holds in a light-scheme theme
-            and a non-monospaced one.
+            Eight ship. A layout is not verified until it holds in a non-monospaced theme.
+          </p>
+        </div>
+
+        <div class="hz-group">
+          <span class="hz-legend">Appearance</span>
+          <div class="hz-segmented" role="radiogroup" aria-label="Appearance">
+            <For each={['light', 'dark'] as const}>
+              {(s) => (
+                <button role="radio" aria-checked={scheme() === s} onClick={() => setScheme(s)}>
+                  {s}
+                </button>
+              )}
+            </For>
+          </div>
+          <label class="hz-check">
+            <input
+              type="checkbox"
+              checked={highContrast()}
+              onChange={(e) => setHighContrast(e.currentTarget.checked)}
+            />
+            Increase Contrast
+          </label>
+          <p class="hz-hint">
+            The app follows the system appearance, and every theme ships all four. Check
+            light and dark before calling a layout resolved.
           </p>
         </div>
 
