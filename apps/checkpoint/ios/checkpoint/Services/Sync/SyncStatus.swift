@@ -28,6 +28,10 @@ enum SyncError: Equatable {
         self = Self.classify(error as NSError, depth: 0) ?? .unknown
     }
 
+    /// `NSCloudKitMirroringDelegate`'s "no iCloud account" code. No public
+    /// constant exists for it.
+    nonisolated static let coreDataNoAccountCode = 134400
+
     private static func classify(_ error: NSError, depth: Int) -> SyncError? {
         guard depth < 3 else { return nil }
 
@@ -49,6 +53,13 @@ enum SyncError: Equatable {
             default:
                 break
             }
+        }
+
+        // Core Data+CloudKit reports a missing account in its own domain
+        // ("Unable to initialize without an iCloud account"), not as a
+        // CKError; left unclassified it read as an unknown failure.
+        if error.domain == NSCocoaErrorDomain && error.code == Self.coreDataNoAccountCode {
+            return .notSignedIn
         }
 
         if error.domain == NSURLErrorDomain {

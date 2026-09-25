@@ -85,8 +85,11 @@ final class SyncStatusService {
         let monitor = NWPathMonitor()
         monitor.pathUpdateHandler = { [weak self] path in
             let offline = path.status != .satisfied
+            // A `let` copy: the Task may not capture the weak `var` itself,
+            // since this handler runs on the monitor's queue.
+            let service = self
             Task { @MainActor in
-                self?.activity.isOffline = offline
+                service?.activity.isOffline = offline
             }
         }
         monitor.start(queue: DispatchQueue.global(qos: .utility))

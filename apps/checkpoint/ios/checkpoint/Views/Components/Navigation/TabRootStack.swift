@@ -27,8 +27,16 @@ struct TabRootStack<Root: View>: View {
 
     @Environment(AppState.self) private var appState
 
+    /// Only failures worth interrupting every tab for. Not being signed in to
+    /// iCloud is a choice, and being offline passes on its own; both are
+    /// explained in Settings' sync row, and flagging them here put a red alarm
+    /// on every screen for users who simply don't use iCloud.
     private var syncError: SyncError? {
-        SyncStatusService.shared.currentError
+        guard let error = SyncStatusService.shared.currentError else { return nil }
+        switch error {
+        case .notSignedIn, .networkUnavailable: return nil
+        case .quotaExceeded, .unknown: return error
+        }
     }
 
     var body: some View {

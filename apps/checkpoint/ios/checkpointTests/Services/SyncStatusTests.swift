@@ -126,6 +126,17 @@ final class SyncStatusTests: XCTestCase {
         XCTAssertEqual(SyncError(URLError(.notConnectedToInternet)), .networkUnavailable)
     }
 
+    /// What the mirroring delegate actually reports on a device with no
+    /// iCloud account — a Core Data error, not a CKError.
+    func testSyncError_coreDataNoAccountIsNotSignedIn() {
+        let error = NSError(domain: NSCocoaErrorDomain, code: SyncError.coreDataNoAccountCode)
+        XCTAssertEqual(SyncError(error), .notSignedIn)
+    }
+
+    func testSyncError_otherCoreDataErrorIsUnknown() {
+        XCTAssertEqual(SyncError(NSError(domain: NSCocoaErrorDomain, code: 134060)), .unknown)
+    }
+
     func testSyncError_unwrapsUnderlyingError() {
         let wrapped = NSError(domain: NSCocoaErrorDomain, code: 134_400, userInfo: [
             NSUnderlyingErrorKey: CKError(.quotaExceeded) as NSError
