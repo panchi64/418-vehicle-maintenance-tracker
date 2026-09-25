@@ -33,6 +33,20 @@ enum ServiceStatus {
 }
 
 extension Service {
+    /// Status against the vehicle's canonical mileage — the estimate where
+    /// one exists, otherwise the last reading. This is the value every list
+    /// passes as `mileage.effective`; a screen that judged status from raw
+    /// `currentMileage` instead could call a service GOOD on its detail page
+    /// while the row that opened it said OVERDUE.
+    ///
+    /// Lists that already hold a `MileageEstimate` should keep passing its
+    /// `.effective` to `status(currentMileage:)` rather than calling this per
+    /// row — each call re-walks the vehicle's snapshots.
+    @MainActor
+    func status(on vehicle: Vehicle, currentDate: Date = .now) -> ServiceStatus {
+        status(currentMileage: vehicle.mileageEstimate.effective, currentDate: currentDate)
+    }
+
     @MainActor
     func status(currentMileage: Int, currentDate: Date = .now) -> ServiceStatus {
         // Check if overdue by date

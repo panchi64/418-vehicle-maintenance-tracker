@@ -59,14 +59,15 @@ final class AppIconService {
         // Filter services for this vehicle and find the most urgent
         let vehicleServices = services.filter { $0.vehicle?.id == vehicle.id }
 
-        guard let mostUrgentService = vehicleServices
-            .sorted(by: { $0.urgencyScore(currentMileage: vehicle.currentMileage) < $1.urgencyScore(currentMileage: vehicle.currentMileage) })
-            .first
-        else {
+        // The effective (estimated-if-available) mileage every list judges
+        // status by — raw `currentMileage` let the icon say nominal while the
+        // Services tab said overdue.
+        let mileage = vehicle.mileageEstimate
+        guard let mostUrgentService = vehicleServices.sortedByUrgency(mileage).first else {
             return nil
         }
 
-        switch mostUrgentService.status(currentMileage: vehicle.currentMileage) {
+        switch mostUrgentService.status(currentMileage: mileage.effective) {
         case .overdue:
             return AppIconName.critical.rawValue
         case .dueSoon:

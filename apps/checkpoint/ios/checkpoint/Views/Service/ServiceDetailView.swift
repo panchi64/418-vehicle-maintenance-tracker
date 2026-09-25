@@ -23,8 +23,10 @@ struct ServiceDetailView: View {
     @State private var selectedVisit: ServiceVisit?
     @State private var attachmentForDetail: Document?
 
+    /// Judged by the same effective mileage as the list row that opened this
+    /// screen — raw `currentMileage` here let the two disagree.
     private var status: ServiceStatus {
-        service.status(currentMileage: vehicle.currentMileage)
+        service.status(on: vehicle)
     }
 
     private var allAttachments: [ServiceAttachment] {

@@ -56,7 +56,7 @@ extension Service: UpcomingItem {
 
     var itemStatus: ServiceStatus {
         guard let vehicle = vehicle else { return .neutral }
-        return status(currentMileage: vehicle.effectiveMileage)
+        return status(on: vehicle)
     }
 
     var daysRemaining: Int? {

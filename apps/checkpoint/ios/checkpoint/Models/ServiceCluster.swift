@@ -43,7 +43,7 @@ struct ServiceCluster: Identifiable {
 
     /// Most urgent status in the cluster (from anchor)
     var mostUrgentStatus: ServiceStatus {
-        anchorService.status(currentMileage: vehicle.effectiveMileage)
+        anchorService.status(on: vehicle)
     }
 
     /// Total estimated cost if available
