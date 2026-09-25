@@ -2,8 +2,8 @@
 //  ContentView+Modifiers.swift
 //  checkpoint
 //
-//  Grouped modifier chains extracted from ContentView's body: the centralized
-//  sheet presentations, the onboarding full-screen surfaces, and the
+//  Grouped modifier chains extracted from ContentView's body: the root sheet
+//  router, the onboarding full-screen surfaces and tour overlay, and the
 //  notification-routing handlers. Each takes the content it decorates and
 //  returns it with the group applied, keeping the root body scannable.
 //
@@ -13,137 +13,18 @@ import SwiftData
 
 extension ContentView {
 
-    // MARK: - Centralized Sheets
+    // MARK: - Sheet Router
 
-    func centralizedSheets(_ content: some View) -> some View {
+    /// Every root task sheet, through one `.sheet(item:)`. `AppState.present`
+    /// queues a sheet requested while another is on screen and this
+    /// `onDismiss` presents it, so "dismiss one, present the next" can no
+    /// longer drop the second.
+    func sheetRouter(_ content: some View) -> some View {
         content
-            .sheet(isPresented: $appState.showVehiclePicker, onDismiss: {
-                guard addVehicleAfterPickerDismiss else { return }
-                addVehicleAfterPickerDismiss = false
-                appState.requestAddVehicle(vehicleCount: vehicles.count)
-            }) {
-                VehiclePickerSheet(
-                    selectedVehicle: $appState.selectedVehicle,
-                    onAddVehicle: { addVehicleAfterPickerDismiss = true }
-                )
-            }
-            .sheet(isPresented: $appState.showAddVehicle, onDismiss: {
-                appState.onboarding.marbeteMonth = nil
-                appState.onboarding.marbeteYear = nil
-                appState.onboarding.vinLookupResult = nil
-            }) {
-                AddVehicleFlowView()
+            .sheet(item: $appState.activeSheet, onDismiss: handleSheetDismiss) { sheet in
+                sheetContent(for: sheet)
                     .environment(appState)
-            }
-            .sheet(isPresented: $appState.showAddService, onDismiss: {
-                appState.seasonalPrefill = nil
-                appState.postRecordPrefill = nil
-            }) {
-                if let vehicle = currentVehicle {
-                    AddServiceView(
-                        vehicle: vehicle,
-                        seasonalPrefill: appState.seasonalPrefill,
-                        postRecordPrefill: appState.postRecordPrefill
-                    )
-                    .environment(appState)
-                }
-            }
-            .sheet(item: $appState.selectedService) { service in
-                if let vehicle = currentVehicle {
-                    NavigationStack {
-                        ServiceDetailView(service: service, vehicle: vehicle)
-                    }
-                    .environment(appState)
-                }
-            }
-            // The root sheet dismisses onto the root, where the toast renders,
-            // so deleting from here is immediate with Undo — no confirmation.
-            .sheet(item: $appState.selectedServiceLog, onDismiss: {
-                guard let log = logPendingDeletion else { return }
-                logPendingDeletion = nil
-                ServiceLogDeleteAction.perform(log, offerUndo: true)
-            }) { log in
-                NavigationStack {
-                    ServiceLogDetailView(log: log, onDelete: { logPendingDeletion = $0 })
-                }
-                .environment(appState)
-            }
-            .sheet(item: $appState.selectedServiceVisit) { visit in
-                NavigationStack {
-                    ServiceVisitDetailView(visit: visit)
-                }
-                .environment(appState)
-            }
-            .sheet(isPresented: $appState.showEditVehicle) {
-                if let vehicle = currentVehicle {
-                    EditVehicleView(vehicle: vehicle)
-                }
-            }
-            .sheet(isPresented: $appState.showDocuments) {
-                if let vehicle = currentVehicle {
-                    DocumentsView(vehicle: vehicle)
-                        .environment(appState)
-                } else {
-                    // currentVehicle can resolve to nil if the selected vehicle is
-                    // deleted (locally or by an arriving iCloud delete) while the
-                    // sheet is in flight. Render a dismissible fallback rather
-                    // than an empty sheet the user can only swipe away.
-                    NavigationStack {
-                        EmptyStateView(
-                            icon: "car.side.fill",
-                            title: "No Vehicle",
-                            message: "Select a vehicle to view its documents.",
-                            action: { appState.showDocuments = false },
-                            actionLabel: "Close"
-                        )
-                    }
-                }
-            }
-            .sheet(item: $appState.selectedDocument) { document in
-                DocumentDetailView(document: document)
-                    .environment(appState)
-            }
-            .sheet(isPresented: $appState.showMileageUpdate, onDismiss: {
-                // Clear Siri prefilled mileage after sheet is dismissed
-                appState.siriPrefilledMileage = nil
-            }) {
-                if let vehicle = currentVehicle {
-                    MileageUpdateSheet(
-                        vehicle: vehicle,
-                        prefilledMileage: appState.siriPrefilledMileage,
-                        onSave: { newMileage in
-                            AnalyticsService.shared.capture(.mileageUpdated(source: .manual))
-                            updateMileage(newMileage, for: vehicle)
-                            ToastService.shared.show(L10n.toastMileageUpdated, icon: "gauge.medium", style: .success)
-                        }
-                    )
-                    .trackScreen(.mileageUpdate)
-                    .presentationDetents([.medium, .large])
-                }
-            }
-            .sheet(isPresented: $appState.showSettings) {
-                SettingsView(
-                    onboardingState: onboardingState,
-                    onReplayTour: {
-                        // Skip the intro re-prompt — the user already set their
-                        // preferences. Seed sample data (same hook the intro's
-                        // onStartTour uses) and jump straight to step 0.
-                        AnalyticsService.shared.capture(.onboardingTourStarted)
-                        seedSampleDataForTour()
-                        onboardingState.replayTour()
-                    }
-                )
-                .environment(appState)
-                .onAppear {
-                    AnalyticsService.shared.capture(.settingsOpened)
-                }
-            }
-            .sheet(isPresented: $appState.showProPaywall) {
-                ProPaywallSheet()
-            }
-            .sheet(isPresented: $appState.showTipModal) {
-                TipModalView(isPrompt: true)
-                    .environment(appState)
+                    .onAppear { appState.sheetDidAppear(sheet) }
             }
             // AppState only queues the tip prompt (pure state); the delayed
             // presentation effect belongs to the view layer, so it lives here.
@@ -151,9 +32,134 @@ extension ContentView {
                 guard queued else { return }
                 presentQueuedTipPrompt()
             }
-            .sheet(item: $appState.unlockedTheme) { theme in
-                ThemeRevealView(theme: theme)
+    }
+
+    @ViewBuilder
+    private func sheetContent(for sheet: ActiveSheet) -> some View {
+        switch sheet {
+        case .vehiclePicker:
+            VehiclePickerSheet(
+                selectedVehicle: Binding(
+                    get: { appState.selectedVehicle },
+                    set: { appState.selectVehicle($0) }
+                ),
+                // Queued by `present` until the picker has closed.
+                onAddVehicle: { appState.requestAddVehicle(vehicleCount: vehicles.count) }
+            )
+
+        case .addVehicle:
+            AddVehicleFlowView()
+
+        case .editVehicle:
+            if let vehicle = currentVehicle {
+                EditVehicleView(vehicle: vehicle)
+            } else {
+                noVehicleFallback
             }
+
+        case .addService(let seasonal, let postRecord):
+            if let vehicle = currentVehicle {
+                AddServiceView(
+                    vehicle: vehicle,
+                    seasonalPrefill: seasonal,
+                    postRecordPrefill: postRecord
+                )
+            } else {
+                noVehicleFallback
+            }
+
+        case .mileageUpdate(let prefilled):
+            if let vehicle = currentVehicle {
+                MileageUpdateSheet(
+                    vehicle: vehicle,
+                    prefilledMileage: prefilled,
+                    onSave: { newMileage in
+                        AnalyticsService.shared.capture(.mileageUpdated(source: .manual))
+                        updateMileage(newMileage, for: vehicle)
+                        ToastService.shared.show(L10n.toastMileageUpdated, icon: "gauge.medium", style: .success)
+                    }
+                )
+                .trackScreen(.mileageUpdate)
+                .presentationDetents([.medium, .large])
+            } else {
+                noVehicleFallback
+            }
+
+        case .settings:
+            SettingsView(
+                onboardingState: onboardingState,
+                onReplayTour: {
+                    // Skip the intro re-prompt — the user already set their
+                    // preferences. Seed sample data (same hook the intro's
+                    // onStartTour uses) and jump straight to step 0.
+                    AnalyticsService.shared.capture(.onboardingTourStarted)
+                    seedSampleDataForTour()
+                    onboardingState.replayTour()
+                }
+            )
+            .onAppear {
+                AnalyticsService.shared.capture(.settingsOpened)
+            }
+
+        case .proPaywall:
+            ProPaywallSheet()
+
+        case .tipModal:
+            TipModalView(isPrompt: true)
+
+        case .themeReveal(let theme):
+            ThemeRevealView(theme: theme)
+
+        case .markDone(let request):
+            MarkServiceVisitDoneSheet(origin: markDoneOrigin(for: request))
+
+        case .clusterDetail(let cluster):
+            ServiceClusterDetailSheet(
+                cluster: cluster,
+                onServiceTap: { service in
+                    appState.showDetail(.service(service))
+                },
+                onMarkAllDone: {
+                    AnalyticsService.shared.capture(.serviceClusterMarkAllDone)
+                    appState.present(.clusterMarkDone(cluster))
+                }
+            )
+
+        case .clusterMarkDone(let cluster):
+            MarkClusterDoneSheet(cluster: cluster) {
+                appState.clusterRefreshToken += 1
+            }
+        }
+    }
+
+    /// `currentVehicle` can resolve to nil if the selected vehicle is deleted
+    /// (locally or by an arriving iCloud delete) while a sheet is in flight.
+    /// A dismissible fallback rather than an empty sheet the user can only
+    /// swipe away.
+    private var noVehicleFallback: some View {
+        NavigationStack {
+            EmptyStateView(
+                icon: "car.side.fill",
+                title: L10n.emptyNoVehicleTitle,
+                message: L10n.emptyNoVehicleMessage,
+                action: { appState.dismissSheet() },
+                actionLabel: L10n.commonClose
+            )
+        }
+    }
+
+    /// Per-sheet cleanup once a sheet has finished closing, after which any
+    /// queued sheet is already on its way up.
+    private func handleSheetDismiss() {
+        guard let dismissed = appState.sheetDidDismiss() else { return }
+        switch dismissed {
+        case .addVehicle:
+            appState.onboarding.marbeteMonth = nil
+            appState.onboarding.marbeteYear = nil
+            appState.onboarding.vinLookupResult = nil
+        default:
+            break
+        }
     }
 
     // MARK: - Onboarding Surfaces
@@ -177,53 +183,9 @@ extension ContentView {
                     }
                 )
             }
-            .overlayPreferenceValue(SpotlightAnchorPreferenceKey.self) { anchors in
+            .overlay {
                 GeometryReader { geo in
-                    if onboardingState.currentPhase.isTour {
-                        if case .tourTransition(let toStep) = onboardingState.currentPhase {
-                            OnboardingTourTransitionCard(
-                                targetStep: toStep,
-                                // Analytics for the skip-intent fire from the
-                                // button itself; this closure handles state only.
-                                onSkipTour: {
-                                    clearSampleData()
-                                    onboardingState.complete()
-                                    appState.selectedTab = .home
-                                },
-                                onContinue: {
-                                    onboardingState.resolveTransition()
-                                }
-                            )
-                            .transition(.opacity)
-                        } else {
-                            OnboardingTourOverlay(
-                                appState: appState,
-                                onboardingState: onboardingState,
-                                anchors: anchors,
-                                geometry: geo,
-                                // Analytics fire from the Skip button itself.
-                                onSkipTour: {
-                                    clearSampleData()
-                                    onboardingState.complete()
-                                    appState.selectedTab = .home
-                                }
-                            )
-                            .transition(.opacity)
-                        }
-                    } else if onboardingState.currentPhase.isTourRecap {
-                        OnboardingTourRecapCard(
-                            onBack: {
-                                onboardingState.goBackTour()
-                            },
-                            // onboardingTourCompleted analytics already fired
-                            // on entering .tourRecap via the onChange handler.
-                            onDone: {
-                                appState.selectedTab = .home
-                                onboardingState.finishTour()
-                            }
-                        )
-                        .transition(.opacity)
-                    }
+                    tourOverlay(in: geo)
                 }
             }
             .fullScreenCover(isPresented: Binding(
@@ -262,6 +224,64 @@ extension ContentView {
             }
     }
 
+    /// The tour's spotlight, transition, and recap cards, over the whole
+    /// shell — tab bar and navigation bar included.
+    @ViewBuilder
+    private func tourOverlay(in geo: GeometryProxy) -> some View {
+        if onboardingState.currentPhase.isTour {
+            if case .tourTransition(let toStep) = onboardingState.currentPhase {
+                OnboardingTourTransitionCard(
+                    targetStep: toStep,
+                    // Analytics for the skip-intent fire from the
+                    // button itself; this closure handles state only.
+                    onSkipTour: skipTour,
+                    onContinue: {
+                        onboardingState.resolveTransition()
+                    }
+                )
+                .transition(.opacity)
+            } else {
+                OnboardingTourOverlay(
+                    onboardingState: onboardingState,
+                    spotlight: tourSpotlight(in: geo),
+                    geometry: geo,
+                    // Analytics fire from the Skip button itself.
+                    onSkipTour: skipTour
+                )
+                .transition(.opacity)
+            }
+        } else if onboardingState.currentPhase.isTourRecap {
+            OnboardingTourRecapCard(
+                onBack: {
+                    onboardingState.goBackTour()
+                },
+                // onboardingTourCompleted analytics already fired
+                // on entering .tourRecap via the onChange handler.
+                onDone: {
+                    appState.selectedTab = .home
+                    onboardingState.finishTour()
+                }
+            )
+            .transition(.opacity)
+        }
+    }
+
+    /// The current step's target, converted from window space (where the
+    /// targets report it) into the overlay's space.
+    private func tourSpotlight(in geo: GeometryProxy) -> CGRect? {
+        guard let step = onboardingState.currentPhase.tourStep,
+              let target = TourStep.at(step)?.target,
+              let frame = tourSpotlights.frames[target] else { return nil }
+        let origin = geo.frame(in: .global).origin
+        return frame.offsetBy(dx: -origin.x, dy: -origin.y)
+    }
+
+    private func skipTour() {
+        clearSampleData()
+        onboardingState.complete()
+        appState.selectedTab = .home
+    }
+
     // MARK: - Notification Routing
 
     func notificationHandlers(_ content: some View) -> some View {
@@ -272,10 +292,6 @@ extension ContentView {
                 guard let route else { return }
                 NotificationService.shared.pendingRoute = nil
                 appState.apply(route, vehicles: vehicles)
-            }
-            .sheet(item: $appState.markDoneRequest) { request in
-                MarkServiceVisitDoneSheet(origin: markDoneOrigin(for: request))
-                    .environment(appState)
             }
             // Clear AppState's retained SwiftData references before the App swaps
             // the ModelContainer on this notification (onboarding → CloudKit).
@@ -297,7 +313,8 @@ extension ContentView {
     /// Shared exit path for the "get started" onboarding surface when the user
     /// chooses to add a vehicle (VIN lookup or manual entry): clear the sample
     /// tour data, mark onboarding complete, and present the Add Vehicle sheet a
-    /// beat later so the onboarding cover has finished dismissing first.
+    /// beat later so the onboarding cover has finished dismissing first. (The
+    /// cover is not a router sheet, so the router's queue cannot wait on it.)
     private func completeOnboardingAndPresentAddVehicle() {
         clearSampleData()
         onboardingState.complete()
@@ -305,7 +322,7 @@ extension ContentView {
         delayedTask = Task {
             try? await Task.sleep(for: .seconds(0.4))
             guard !Task.isCancelled else { return }
-            appState.showAddVehicle = true
+            appState.present(.addVehicle)
         }
     }
 }

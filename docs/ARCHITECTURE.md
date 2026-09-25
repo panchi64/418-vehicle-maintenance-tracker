@@ -7,8 +7,9 @@ Detailed architecture reference for the Checkpoint iOS app. For development guid
 ```
 checkpoint-app/
 ├── checkpoint/
-│   ├── ContentView.swift           # Root view with TabView
-│   ├── ContentView+Helpers.swift   # Sheet presentation & helper methods
+│   ├── ContentView.swift           # Root shell: system TabView, one NavigationStack per tab
+│   ├── ContentView+Modifiers.swift # Root sheet router, onboarding surfaces, notification routing
+│   ├── ContentView+Helpers.swift   # Lifecycle, persistence & helper methods
 │   ├── Models/                     # SwiftData entities & enums
 │   │   ├── Vehicle.swift
 │   │   ├── Service.swift
@@ -103,7 +104,7 @@ checkpoint-app/
 │   │   ├── Utilities/        # Single-purpose services
 │   │   ├── WatchConnectivity/ # iPhone-side WCSession delegate
 │   │   └── Widget/           # Widget data sharing
-│   ├── State/               # AppState (@Observable)
+│   ├── State/               # AppState (@Observable), Tab, AppRoute, ActiveSheet
 │   ├── Utilities/           # Formatters, Settings, helpers, AppGroupConstants
 │   └── Resources/           # ServicePresets.json
 ├── CheckpointWatch/         # watchOS app
@@ -451,6 +452,7 @@ struct WidgetColors {
 | `FeatureHintView.swift` | Feature discovery hints |
 | `FormAdvisory.swift` | **The** advisory component for data-entry surfaces (F12). Four-rung severity ladder — `.blocking` / `.contradiction` / `.caution` / `.info` — differentiated on type, enclosure, and color |
 | `ToastView.swift` | In-app toast notification |
+| `ToastWindow.swift` | Hosts the toast in a passthrough `UIWindow` above the app's, so toasts show over sheets |
 
 ### Components/Inputs/
 | Component | Purpose |
@@ -476,37 +478,32 @@ struct WidgetColors {
 ### Components/Navigation/
 | Component | Purpose |
 |-----------|---------|
-| `BrutalistTabBar.swift` | Custom tab bar |
+| `TabRootStack.swift` | A tab's `NavigationStack`, its root chrome (vehicle title menu, Settings, add service), and the `AppRoute` destinations |
 | `EmptyStateView.swift` | Standardized empty state |
-| `FloatingActionButton.swift` | FAB for quick add |
-| `StatusDot.swift` | Colored status indicator |
-| `VehicleHeader.swift` | Vehicle info header |
-| `VehicleSelector.swift` | Vehicle picker button |
+| `FilterControl.swift` | Pinned mode + filter row (`FilterControlRow`, `ControlRow`) |
+| `StepIndicator.swift` | Step progress indicator |
 
-## Tab Architecture
+`VehicleSummaryBand.swift` (Components/Cards/) is the odometer + specs band at the top of Home.
+
+## Shell Architecture
+
+System shell, brand content: navigation chrome is native (tab bar, navigation bars, toolbar, search, sheets — Liquid Glass, no custom bar backgrounds); JetBrains Mono, themes, sharp corners and readout styling stay in the content.
 
 ```
 ContentView
-├── ContentView+Helpers.swift (sheet presentation logic)
-└── TabView (BrutalistTabBar)
-    ├── HomeTab
-    │   ├── HomeTab+Helpers.swift (helper methods)
-    │   ├── HomeTab+EmptyStates.swift (empty state views)
-    │   ├── VehicleHeader
-    │   ├── NextUpCard
-    │   ├── SeasonalReminderCard (climate-zone filtered)
-    │   ├── ServiceClusterCard (bundled services)
-    │   ├── QuickStatsBar
-    │   └── RecentActivityFeed
-    ├── ServicesTab
-    │   ├── VehicleHeader
-    │   └── List of ServiceRow
-    └── CostsTab
-        ├── CostsTab+Analytics.swift (chart logic)
-        ├── VehicleHeader
-        ├── YearlyCostRoundupCard
-        └── Cost breakdown
+├── ContentView+Modifiers.swift  sheet router · onboarding covers + tour overlay · notification routing
+├── ToastWindowInstaller         toasts in a passthrough window above sheets
+└── TabView(selection: appState.selectedTab)   .tabBarMinimizeBehavior(.onScrollDown), tinted accent
+    ├── Home      → TabRootStack → HomeTab     (VehicleSummaryBand, Next Up, …)
+    ├── Services  → TabRootStack → ServicesTab (.searchable, pinned mode/filter row)
+    └── Costs     → TabRootStack → CostsTab
 ```
+
+- **Tab roots** share one chrome (`TabRootStack`): the vehicle name is the inline navigation title, with `.toolbarTitleMenu` to switch vehicle (checkmark on current), add a vehicle, or manage vehicles (the picker sheet). Settings is the leading toolbar item (it shows the sync-error glyph when there is one); add service is the one prominent trailing item.
+- **Details are pushed, tasks are sheets.** `AppRoute` (service, service log, visit, document, documents library) is pushed onto the visible tab's path in `AppState.paths`; `appState.push(_:)`. Add/edit forms, mileage update, vehicle picker/add/edit, paywall, tip modal and theme reveal are sheets.
+- **One root sheet.** `AppState.activeSheet: ActiveSheet?` drives a single `.sheet(item:)`. `present(_:)` replaces whatever is up — if a sheet is on screen, it dismisses and the new one is queued until that sheet's `onDismiss` — so "dismiss then present in the same tick" cannot drop a sheet. `presentWhenIdle(_:)` waits instead of interrupting (tip prompt). Onboarding's full-screen covers stay separate, driven by `OnboardingState`.
+- **Notification routes** (`AppState+NotificationRoute`) close any sheet, switch tab, and push or present. Switching vehicle (`selectVehicle`) pops every stack.
+- **Tour spotlights** are content only. Targets report window-space frames through `TourSpotlightRegistry` in the environment — preferences don't cross the system `TabView`/`NavigationStack` — and the root overlay converts them.
 
 ## Test Coverage
 
@@ -554,14 +551,14 @@ ContentView
 - **ServiceLogDetailViewTests** — Log detail display
 - **EditServiceLogViewTests** — Log editing
 - **VehiclePickerSheetTests** — Vehicle selection
-- **VehicleHeaderTests** — Header display
+- **VehicleHeaderTests** — Odometer formatting and mileage update (now `VehicleSummaryBand`)
+- **AppStateTests** / **NotificationRouteTests** — Per-tab paths, the sheet router's queue, notification routing
 
 ### Component Tests
 - **MaintenanceTimelineTests** — Timeline rendering
 - **OdometerCaptureViewTests** — OCR capture flow
 - **YearlyCostRoundupCardTests** — Annual summary card
 - **OCRConfirmationViewTests** — OCR result confirmation
-- **BrutalistTabBarTests** — Tab bar rendering
 - **RecallAlertCardTests** — Recall card display
 - **QuickSpecsCardTests** — Vehicle specs card
 - **MileageInputFieldTests** — Mileage input validation

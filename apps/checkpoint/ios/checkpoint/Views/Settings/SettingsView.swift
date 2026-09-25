@@ -24,8 +24,7 @@ struct SettingsView: View {
     @State private var showCSVImport = false
 
     var body: some View {
-        @Bindable var appState = appState
-        return NavigationStack {
+        NavigationStack {
             ZStack {
                 Theme.backgroundPrimary
                     .ignoresSafeArea()
@@ -69,9 +68,6 @@ struct SettingsView: View {
                     Button(L10n.commonDone) { dismiss() }
                         .toolbarButtonStyle()
                 }
-            }
-            .sheet(isPresented: $appState.showProPaywall) {
-                ProPaywallSheet()
             }
             .sheet(isPresented: $showRecallSheet) {
                 if let vehicle = appState.selectedVehicle {

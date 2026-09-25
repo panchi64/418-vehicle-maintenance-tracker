@@ -154,26 +154,20 @@ struct ServicesTab: View {
         // ONE row of pinned chrome, not four. Mode is the segmented control
         // because it changes what the screen *is*; status is a FilterControl
         // because filtering is refinement and does not deserve permanent real
-        // estate. Search scrolls with the content rather than pinning a second
-        // row above it — it is reached deliberately, not glanced at.
+        // estate. Search is the system's (`.searchable`), in the navigation
+        // bar — reached deliberately, not glanced at.
         VStack(spacing: 0) {
-            // Status only exists for scheduled items, so the filter only exists
-            // there too. A no-op control in Timeline mode costs a target and
-            // answers nothing.
-            if appState.servicesTab.viewMode == .list {
-                FilterControlRow(
-                    name: L10n.servicesStatusDimension,
-                    options: content.statusOptions,
-                    selection: $appState.servicesTab.statusFilter,
-                    defaultValue: .all
-                ) {
-                    modeControl
-                }
-            } else {
-                ControlRow { modeControl }
-            }
+            controls(content)
+                .tourTarget(.servicesControls, active: onboardingState.currentPhase.isTour)
 
             scrollContent(content)
+        }
+        // The search covers both modes: the list's rows and the timeline.
+        .searchable(text: $appState.servicesTab.searchText, prompt: L10n.servicesSearchPrompt)
+        .onChange(of: appState.servicesTab.searchText) { oldValue, newValue in
+            if oldValue.isEmpty && !newValue.isEmpty {
+                AnalyticsService.shared.capture(.servicesSearchUsed)
+            }
         }
         .trackScreen(.services)
         .onChange(of: appState.servicesTab.viewMode) { _, newMode in
@@ -204,6 +198,25 @@ struct ServicesTab: View {
         }
     }
 
+    /// Status only exists for scheduled items, so the filter only exists there
+    /// too. A no-op control in Timeline mode costs a target and answers nothing.
+    @ViewBuilder
+    private func controls(_ content: Content) -> some View {
+        @Bindable var appState = appState
+        if appState.servicesTab.viewMode == .list {
+            FilterControlRow(
+                name: L10n.servicesStatusDimension,
+                options: content.statusOptions,
+                selection: $appState.servicesTab.statusFilter,
+                defaultValue: .all
+            ) {
+                modeControl
+            }
+        } else {
+            ControlRow { modeControl }
+        }
+    }
+
     private var modeControl: some View {
         @Bindable var appState = appState
         return InstrumentSegmentedControl(
@@ -215,18 +228,8 @@ struct ServicesTab: View {
     }
 
     private func scrollContent(_ content: Content) -> some View {
-        @Bindable var appState = appState
-        return ScrollView {
+        ScrollView {
             VStack(spacing: Spacing.xl) {
-                BrutalistSearchField(
-                    text: $appState.servicesTab.searchText,
-                    onSearchStarted: {
-                        AnalyticsService.shared.capture(.servicesSearchUsed)
-                    }
-                )
-                .tourTarget(.servicesSearch, active: onboardingState.currentPhase.isTour)
-                .revealAnimation(delay: 0.1)
-
                 // Content based on view mode
                 if appState.servicesTab.viewMode == .timeline, let vehicle = vehicle {
                     if serviceLogs.isEmpty {
@@ -249,10 +252,10 @@ struct ServicesTab: View {
                             serviceLogs: content.filteredLogs,
                             vehicle: vehicle,
                             onServiceTap: { service in
-                                appState.selectedService = service
+                                appState.push(.service(service))
                             },
                             onLogTap: { log in
-                                appState.selectedServiceLog = log
+                                appState.push(.serviceLog(log))
                             },
                             onLogDelete: { log in
                                 ServiceLogDeleteAction.perform(log, offerUndo: true)
@@ -278,7 +281,7 @@ struct ServicesTab: View {
                                     currentMileage: content.mileage.effective,
                                     isEstimatedMileage: content.mileage.isEstimated
                                 ) {
-                                    appState.selectedService = service
+                                    appState.push(.service(service))
                                 }
                                 .staggeredReveal(index: index, baseDelay: 0.2)
 
@@ -332,7 +335,7 @@ struct ServicesTab: View {
             }
             .padding(.horizontal, Spacing.screenHorizontal)
             .padding(.top, Spacing.md)
-            .padding(.bottom, Spacing.xxl + Spacing.tabBarOffset)
+            .padding(.bottom, Spacing.xxl)
         }
     }
 
@@ -350,7 +353,9 @@ struct ServicesTab: View {
                 .tracking(1.5)
 
             Button {
-                appState.showDocuments = true
+                if let vehicle {
+                    appState.push(.documents(vehicle))
+                }
             } label: {
                 Text("[\(L10n.servicesDocumentLibrary.uppercased())]")
                     .font(.brutalistLabel)
@@ -384,7 +389,7 @@ struct ServicesTab: View {
             ],
             amount: log.formattedCost.map { .init(text: $0, color: Theme.accent) },
             accessibilityLabelText: L10n.readoutEvent(name, date),
-            onTap: { appState.selectedServiceLog = log }
+            onTap: { appState.push(.serviceLog(log)) }
         )
         .serviceLogDeleteMenu { ServiceLogDeleteAction.perform(log, offerUndo: true) }
     }

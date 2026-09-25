@@ -129,18 +129,24 @@ struct HomeTab: View {
     }
 
     var body: some View {
-        @Bindable var appState = appState
         let content = makeContent()
         ScrollView {
+            // Odometer + specs, full-bleed under the navigation bar. It was the
+            // bottom band of the custom header above every tab; the system bar
+            // took the rest of that header, and this part is Home's.
+            if let vehicle {
+                VehicleSummaryBand(
+                    vehicle: vehicle,
+                    onMileageTap: { appState.present(.mileageUpdate()) },
+                    onEdit: { appState.present(.editVehicle) },
+                    onDocumentsTap: { appState.push(.documents(vehicle)) }
+                )
+                .tourTarget(.vehicleSummary, active: onboardingState.currentPhase.isTour)
+            }
+
             VStack(spacing: Spacing.xl) {
                 // Recall alert is safety-critical and outranks everything else,
                 // so it stays first.
-                //
-                // It used to share a tighter-spaced wrapper VStack with
-                // QuickSpecsCard. With specs moved to the persistent shell in
-                // ContentView, that wrapper was left empty whenever there was no
-                // recall — still consuming Spacing.xl above and below, so the
-                // screen opened with ~64pt of dead space.
                 if let vehicle = vehicle, !visibleRecalls.isEmpty {
                     RecallAlertCard(
                         vehicle: vehicle,
@@ -166,18 +172,19 @@ struct HomeTab: View {
                                     dailyMilesPace: content.mileage.pace,
                                     isEstimatedMileage: content.mileage.isEstimated
                                 ) {
-                                    appState.selectedService = service
+                                    appState.push(.service(service))
                                 }
                             }
                         case .marbete:
                             if let marbeteItem = nextUp as? MarbeteUpcomingItem {
                                 MarbeteNextUpCard(marbeteItem: marbeteItem) {
                                     // Navigate to EditVehicleView to update marbete
-                                    appState.showEditVehicle = true
+                                    appState.present(.editVehicle)
                                 }
                             }
                         }
                     }
+                    .tourTarget(.homeNextUp, active: onboardingState.currentPhase.isTour)
                     .revealAnimation(delay: 0.15)
                 }
 
@@ -204,7 +211,7 @@ struct HomeTab: View {
                         cluster: cluster,
                         onTap: {
                             AnalyticsService.shared.capture(.serviceClusterTapped)
-                            appState.selectedCluster = cluster
+                            appState.present(.clusterDetail(cluster))
                         },
                         onDismiss: {
                             dismissCluster(cluster)
@@ -243,7 +250,7 @@ struct HomeTab: View {
                                     currentMileage: content.mileage.effective,
                                     isEstimatedMileage: content.mileage.isEstimated
                                 ) {
-                                    appState.selectedService = service
+                                    appState.push(.service(service))
                                 }
                                 .staggeredReveal(index: index, baseDelay: 0.25)
 
@@ -304,7 +311,7 @@ struct HomeTab: View {
             }
             .padding(.horizontal, Spacing.screenHorizontal)
             .padding(.top, Spacing.lg)
-            .padding(.bottom, Spacing.xxl + Spacing.tabBarOffset)
+            .padding(.bottom, Spacing.xxl)
         }
         .task(id: vehicle?.id) {
             detectClusters()
@@ -323,25 +330,10 @@ struct HomeTab: View {
         .onAppear {
             loadDismissedClusters()
         }
-        .sheet(item: $appState.selectedCluster) { cluster in
-            ServiceClusterDetailSheet(
-                cluster: cluster,
-                onServiceTap: { service in
-                    appState.selectedCluster = nil
-                    appState.selectedService = service
-                },
-                onMarkAllDone: {
-                    AnalyticsService.shared.capture(.serviceClusterMarkAllDone)
-                    appState.selectedCluster = nil
-                    appState.clusterToMarkDone = cluster
-                }
-            )
-        }
-        .sheet(item: $appState.clusterToMarkDone) { cluster in
-            MarkClusterDoneSheet(cluster: cluster) {
-                detectClusters()
-            }
-            .environment(appState)
+        // The cluster sheets present from the root router (`ActiveSheet`);
+        // marking one done bumps this token.
+        .onChange(of: appState.clusterRefreshToken) { _, _ in
+            detectClusters()
         }
     }
 }

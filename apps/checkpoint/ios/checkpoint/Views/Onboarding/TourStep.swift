@@ -25,21 +25,28 @@ struct TourStep {
 
     static let all: [TourStep] = [
         TourStep(
-            target: .dashboardSpecs,
+            // "The most urgent item surfaces first" — which is Next Up. This
+            // spotlighted the specs panel, which was collapsed by default.
+            target: .homeNextUp,
             tab: .home,
             title: { L10n.onboardingTourDashboardTitle },
             body: { L10n.onboardingTourDashboardBody },
             transitionLabel: nil
         ),
         TourStep(
-            target: .vehicleHeader,
+            // The switcher is the navigation title's menu, which exposes no
+            // frame; the step spotlights the odometer band and its copy points
+            // at the title.
+            target: .vehicleSummary,
             tab: .home,
             title: { L10n.onboardingTourVehicleTitle },
             body: { L10n.onboardingTourVehicleBody },
             transitionLabel: nil
         ),
         TourStep(
-            target: .servicesSearch,
+            // Search is the system field, which exposes no frame; the mode and
+            // filter row is the content the step describes.
+            target: .servicesControls,
             tab: .services,
             title: { L10n.onboardingTourServicesTitle },
             body: { L10n.onboardingTourServicesBody },

@@ -231,8 +231,6 @@ struct EditServiceLogView: View {
             .keyboardDismissToolbar()
             .navigationTitle(L10n.serviceEditTitle)
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(L10n.commonCancel) { dismiss() }
@@ -256,7 +254,7 @@ struct EditServiceLogView: View {
             .trackScreen(.editServiceLog)
             .onAppear(perform: loadFromLog)
             .sheet(item: $attachmentForDetail) { document in
-                DocumentDetailView(document: document)
+                DocumentDetailSheet(document: document)
                     .environment(appState)
             }
             }

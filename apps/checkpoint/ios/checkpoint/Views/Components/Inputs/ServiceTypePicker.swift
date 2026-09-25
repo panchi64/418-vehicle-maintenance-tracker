@@ -199,8 +199,6 @@ struct ServicePresetPickerSheet: View {
             }
             .navigationTitle("Select Service Type")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }

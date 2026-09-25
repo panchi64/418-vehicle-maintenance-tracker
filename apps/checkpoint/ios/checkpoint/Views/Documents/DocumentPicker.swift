@@ -68,8 +68,6 @@ struct DocumentPickerSheet: View {
             }
             .navigationTitle(L10n.documentsAdd)
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(L10n.commonCancel) { dismiss() }

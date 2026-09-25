@@ -112,7 +112,6 @@ extension L10n {
     static var readoutDismissVisitSuggestion: String { readout("readout.dismissVisitSuggestion") }
     static var readoutDismissHint: String { readout("readout.dismissHint") }
     static var readoutClose: String { readout("readout.close") }
-    static var readoutOpensSettingsHint: String { readout("readout.opensSettingsHint") }
 
     /// Visible recall count on the Home alert: "1 recall" / "3 recalls".
     static func readoutRecallCount(_ count: Int) -> String {

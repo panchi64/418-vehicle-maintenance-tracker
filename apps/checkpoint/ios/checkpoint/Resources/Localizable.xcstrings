@@ -385,23 +385,6 @@
         }
       }
     },
-    "a11y.close" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Close"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cerrar"
-          }
-        }
-      }
-    },
     "a11y.collapsed" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5545,26 +5528,8 @@
     "Handling multiple services in one visit reduces trips and may lower labor costs." : {
 
     },
-    "header.makeModelYear" : {
-      "comment" : "Support line under the vehicle nickname. Args: make, model, year.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ %2$@ · %3$@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ %2$@ · %3$@"
-          }
-        }
-      }
-    },
     "header.odometer" : {
-      "comment" : "Label on the header's odometer cell.",
+      "comment" : "Label on Home's odometer cell.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -5581,25 +5546,8 @@
         }
       }
     },
-    "header.selectVehicle" : {
-      "comment" : "Vehicle header placeholder when no vehicle is selected. Displayed uppercase.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SELECT VEHICLE"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ELEGIR VEHÍCULO"
-          }
-        }
-      }
-    },
     "header.selectVehicleAccessibility" : {
+      "comment" : "Navigation title when no vehicle is selected.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -5616,25 +5564,8 @@
         }
       }
     },
-    "header.selectVehicleHint" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Double tap to choose a vehicle"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toca dos veces para elegir un vehículo"
-          }
-        }
-      }
-    },
     "header.specs" : {
-      "comment" : "Disclosure trigger beneath the vehicle name that reveals reference data (plate, VIN, tires, oil).",
+      "comment" : "Label on Home's specs cell, which expands reference data (plate, VIN, tires, oil).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -5647,57 +5578,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "FICHA"
-          }
-        }
-      }
-    },
-    "header.specsAccessibility" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vehicle specs"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ficha del vehículo"
-          }
-        }
-      }
-    },
-    "header.specsCollapsed" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Collapsed"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Contraído"
-          }
-        }
-      }
-    },
-    "header.specsExpanded" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Expanded"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Expandido"
           }
         }
       }
@@ -6156,6 +6036,24 @@
     },
     "NOTES" : {
 
+    },
+    "nav.manageVehicles" : {
+      "comment" : "Navigation title menu item that opens the vehicle picker to edit, delete, or reorder vehicles.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage Vehicles…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gestionar vehículos…"
+          }
+        }
+      }
     },
     "notification.marbete.body.1" : {
       "extractionState" : "manual",
@@ -7561,13 +7459,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tap the name to switch vehicles. Tap the amber mileage when the odometer changes. Your vehicle tracks the rest."
+            "value" : "Tap the vehicle name at the top to switch vehicles. Tap the amber mileage when the odometer changes. Your vehicle tracks the rest."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toca el nombre para cambiar de vehículo. Toca el kilometraje ámbar cuando cambie el odómetro. Tu vehículo lleva el resto."
+            "value" : "Toca el nombre del vehículo arriba para cambiar de vehículo. Toca el kilometraje ámbar cuando cambie el odómetro. Tu vehículo lleva el resto."
           }
         }
       }
@@ -8339,24 +8237,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Odómetro, aproximadamente %@, estimado"
-          }
-        }
-      }
-    },
-    "readout.opensSettingsHint" : {
-      "comment" : "VoiceOver hint: activating this opens Settings.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens Settings"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abre Ajustes"
           }
         }
       }
@@ -9899,6 +9779,24 @@
         }
       }
     },
+    "servicesTab.searchPrompt" : {
+      "comment" : "Placeholder of the Services tab's system search field. States what the search covers.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Services, notes, receipts"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servicios, notas, recibos"
+          }
+        }
+      }
+    },
     "servicesTab.statusDimension" : {
       "comment" : "Names the status filter dimension on the Services tab.",
       "extractionState" : "manual",
@@ -10461,8 +10359,62 @@
     "Syncs your vehicles and maintenance data across your Apple devices via iCloud." : {
 
     },
+    "tab.costs" : {
+      "comment" : "System tab bar label for the Costs tab.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Costs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Costos"
+          }
+        }
+      }
+    },
+    "tab.home" : {
+      "comment" : "System tab bar label for the Home tab.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicio"
+          }
+        }
+      }
+    },
+    "tab.services" : {
+      "comment" : "System tab bar label for the Services tab.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Services"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servicios"
+          }
+        }
+      }
+    },
     "tabBar.addService" : {
-      "comment" : "VoiceOver label for the tab bar's [+] button.",
+      "comment" : "VoiceOver label for the toolbar's add-service button.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {

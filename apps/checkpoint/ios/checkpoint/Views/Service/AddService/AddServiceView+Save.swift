@@ -96,8 +96,7 @@ extension AddServiceView {
             )
             let state = appState
             toastAction = ToastService.ToastAction(label: L10n.toastScheduleNext.uppercased()) {
-                state.postRecordPrefill = prefill
-                state.showAddService = true
+                state.present(.addService(postRecord: prefill))
                 HapticService.shared.selectionChanged()
             }
         } else {

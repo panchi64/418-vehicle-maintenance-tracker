@@ -8,7 +8,10 @@
 import SwiftUI
 
 struct ThemePickerView: View {
-    @Environment(AppState.self) private var appState
+    /// Local rather than the root router's `.proPaywall`: this screen lives
+    /// inside the Settings sheet, and the root can show one sheet at a time —
+    /// routing it there would close Settings to make room.
+    @State private var showProPaywall = false
 
     private var themeManager: ThemeManager { ThemeManager.shared }
 
@@ -43,6 +46,9 @@ struct ThemePickerView: View {
         }
         .navigationTitle(L10n.settingsTheme)
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showProPaywall) {
+            ProPaywallSheet()
+        }
     }
 
     private func handleThemeTap(_ theme: ThemeDefinition) {
@@ -51,7 +57,7 @@ struct ThemePickerView: View {
             AnalyticsService.shared.capture(.themeActivated(themeID: theme.id))
             HapticService.shared.selectionChanged()
         } else if theme.tier == .pro {
-            appState.showProPaywall = true
+            showProPaywall = true
         } else if theme.tier == .rare {
             // Rare locked themes: show toast directing user to Tip Jar
             ToastService.shared.show(

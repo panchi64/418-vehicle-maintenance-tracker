@@ -56,7 +56,7 @@ enum Theme {
     /// It is a LAYOUT floor as much as a hit area — an icon button carrying it
     /// is the tallest thing in most rows, so a row that shows one conditionally
     /// has to reserve the same floor or it changes height when the button
-    /// appears. See `BrutalistSearchField`.
+    /// appears.
     static let tapTarget: CGFloat = 44
     static let instrumentCornerRadius: CGFloat = 0
     static let borderWidth: CGFloat = 2           // 2px architectural dividers

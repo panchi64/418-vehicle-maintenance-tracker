@@ -212,8 +212,8 @@ struct TipModalView: View {
             dismiss()
             if let theme = ThemeManager.shared.unlockRandomRareTheme() {
                 AnalyticsService.shared.capture(.themeUnlocked(themeID: theme.id, tier: "rare"))
-                try? await Task.sleep(for: .seconds(0.5))
-                appState.unlockedTheme = theme
+                // Queued by the router until this sheet has closed.
+                appState.present(.themeReveal(theme))
             }
             return
         }
@@ -229,8 +229,8 @@ struct TipModalView: View {
                 dismiss()
                 if let theme = ThemeManager.shared.unlockRandomRareTheme() {
                     AnalyticsService.shared.capture(.themeUnlocked(themeID: theme.id, tier: "rare"))
-                    try? await Task.sleep(for: .seconds(0.5))
-                    appState.unlockedTheme = theme
+                    // Queued by the router until this sheet has closed.
+                    appState.present(.themeReveal(theme))
                 }
             } else if let storeError = storeManager.purchaseError {
                 // No transaction and no throw: the store could not offer the

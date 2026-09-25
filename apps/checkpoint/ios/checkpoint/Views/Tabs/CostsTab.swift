@@ -146,7 +146,7 @@ struct CostsTab: View {
                 }
                 .padding(.horizontal, Spacing.screenHorizontal)
                 .padding(.top, Spacing.md)
-                .padding(.bottom, Spacing.xxl + Spacing.tabBarOffset)
+                .padding(.bottom, Spacing.xxl)
             }
         }
         .trackScreen(.costs)

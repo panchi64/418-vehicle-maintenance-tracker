@@ -55,7 +55,41 @@ final class NotificationRouteTests: XCTestCase {
         appState.apply(.editVehicle(vehicleID: UUID()), vehicles: [vehicle, other])
 
         XCTAssertEqual(appState.selectedVehicle?.id, other.id)
-        XCTAssertFalse(appState.showEditVehicle)
+        XCTAssertNil(appState.activeSheet)
+    }
+
+    func test_apply_otherVehicle_popsEveryStack() {
+        let services = addServices(dueInDays: [3])
+        appState.paths[.costs] = [.service(services[0])]
+
+        appState.apply(.costs(vehicleID: vehicle.id), vehicles: [vehicle, other])
+
+        XCTAssertTrue(appState.paths.values.allSatisfy(\.isEmpty))
+    }
+
+    // MARK: - Open sheets
+
+    func test_apply_withSheetOnScreen_dismissesItBeforeNavigating() {
+        appState.present(.settings)
+        appState.sheetDidAppear(.settings)
+
+        appState.apply(.costs(vehicleID: vehicle.id), vehicles: [vehicle])
+
+        XCTAssertNil(appState.activeSheet)
+        XCTAssertEqual(appState.selectedTab, .costs)
+    }
+
+    func test_apply_withSheetOnScreen_queuesTheRoutesSheetUntilItCloses() {
+        appState.present(.settings)
+        appState.sheetDidAppear(.settings)
+
+        appState.apply(.editVehicle(vehicleID: vehicle.id), vehicles: [vehicle])
+
+        // The open sheet is dismissing; the editor waits for its onDismiss.
+        XCTAssertNil(appState.activeSheet)
+        let dismissed = appState.sheetDidDismiss()
+        XCTAssertEqual(dismissed?.id, ActiveSheet.settings.id)
+        XCTAssertEqual(appState.activeSheet?.id, ActiveSheet.editVehicle.id)
     }
 
     // MARK: - Mileage, costs, marbete
@@ -65,43 +99,52 @@ final class NotificationRouteTests: XCTestCase {
         appState.apply(.updateMileage(vehicleID: vehicle.id), vehicles: [vehicle])
 
         XCTAssertEqual(appState.selectedTab, .home)
-        XCTAssertTrue(appState.showMileageUpdate)
+        XCTAssertEqual(appState.activeSheet?.id, ActiveSheet.mileageUpdate().id)
     }
 
     func test_apply_editVehicle_opensVehicleEditor() {
         appState.apply(.editVehicle(vehicleID: vehicle.id), vehicles: [vehicle])
 
-        XCTAssertTrue(appState.showEditVehicle)
+        XCTAssertEqual(appState.activeSheet?.id, ActiveSheet.editVehicle.id)
     }
 
     // MARK: - Service tap
 
-    func test_apply_servicesTap_singleService_opensIt() {
+    func test_apply_servicesTap_singleService_pushesItOnServices() {
         let services = addServices(dueInDays: [3])
 
         appState.apply(.services(vehicleID: vehicle.id, serviceIDs: [services[0].id]), vehicles: [vehicle])
 
-        XCTAssertEqual(appState.selectedService?.id, services[0].id)
+        XCTAssertEqual(appState.selectedTab, .services)
+        XCTAssertEqual(appState.paths[.services], [.service(services[0])])
+        XCTAssertNil(appState.activeSheet)
     }
 
     func test_apply_servicesTap_bundle_opensServicesTab() {
         let services = addServices(dueInDays: [3, 5])
+        appState.selectVehicle(vehicle)
+        appState.paths[.services] = [.service(services[0])]
 
         appState.apply(.services(vehicleID: vehicle.id, serviceIDs: services.map(\.id)), vehicles: [vehicle])
 
-        XCTAssertNil(appState.selectedService)
         XCTAssertEqual(appState.selectedTab, .services)
+        XCTAssertEqual(appState.paths[.services], [])
     }
 
     // MARK: - Mark as Done
+
+    private var markDoneRequest: MarkDoneRequest? {
+        guard case .markDone(let request) = appState.activeSheet else { return nil }
+        return request
+    }
 
     func test_apply_markDone_requestsEveryStillDueService() {
         let services = addServices(dueInDays: [0, 4])
 
         appState.apply(.markDone(vehicleID: vehicle.id, serviceIDs: services.map(\.id)), vehicles: [vehicle])
 
-        XCTAssertEqual(Set(appState.markDoneRequest?.services.map(\.id) ?? []), Set(services.map(\.id)))
-        XCTAssertEqual(appState.markDoneRequest?.vehicle.id, vehicle.id)
+        XCTAssertEqual(Set(markDoneRequest?.services.map(\.id) ?? []), Set(services.map(\.id)))
+        XCTAssertEqual(markDoneRequest?.vehicle.id, vehicle.id)
     }
 
     func test_apply_markDone_skipsServicesAlreadyCompleted() {
@@ -110,7 +153,7 @@ final class NotificationRouteTests: XCTestCase {
 
         appState.apply(.markDone(vehicleID: vehicle.id, serviceIDs: services.map(\.id)), vehicles: [vehicle])
 
-        XCTAssertEqual(appState.markDoneRequest?.services.map(\.id), [services[0].id])
+        XCTAssertEqual(markDoneRequest?.services.map(\.id), [services[0].id])
     }
 
     func test_apply_markDone_allAlreadyCompleted_showsServicesInstead() {
@@ -118,7 +161,7 @@ final class NotificationRouteTests: XCTestCase {
 
         appState.apply(.markDone(vehicleID: vehicle.id, serviceIDs: services.map(\.id)), vehicles: [vehicle])
 
-        XCTAssertNil(appState.markDoneRequest)
+        XCTAssertNil(markDoneRequest)
         XCTAssertEqual(appState.selectedTab, .services)
     }
 

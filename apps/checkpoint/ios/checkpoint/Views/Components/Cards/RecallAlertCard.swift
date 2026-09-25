@@ -138,8 +138,7 @@ struct RecallAlertCard: View {
         guard let prefill = pendingAddServicePrefill else { return }
         // The prefill carries a due date, so the form lands on `.onDate` and
         // derives the scheduling intent from that — no mode to set.
-        appState.seasonalPrefill = prefill
-        appState.showAddService = true
+        appState.present(.addService(seasonal: prefill))
         pendingAddServicePrefill = nil
     }
 

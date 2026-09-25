@@ -236,8 +236,6 @@ struct EditVehicleView: View {
             .keyboardDismissToolbar()
             .navigationTitle(L10n.vehicleEditTitle)
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Theme.surfaceInstrument, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(L10n.commonCancel) { dismiss() }

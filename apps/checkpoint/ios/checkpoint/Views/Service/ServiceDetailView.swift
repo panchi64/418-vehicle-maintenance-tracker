@@ -19,13 +19,11 @@ struct ServiceDetailView: View {
     @State private var showEditSheet = false
     @State private var showMarkDoneSheet = false
     @State private var didCompleteMark = false
-    @State private var selectedLog: ServiceLog?
-    @State private var selectedVisit: ServiceVisit?
-    @State private var attachmentForDetail: Document?
 
-    // Log deletion from inside this sheet is confirmed rather than undone: the
-    // Undo toast renders at the app root, beneath this sheet.
-    @State private var logPendingDeletion: ServiceLog?
+    // The history row's context-menu delete is confirmed rather than undone.
+    // That dates from this screen being a sheet, with the Undo toast rendering
+    // beneath it; toasts now render above everything, so this could switch to
+    // `ServiceLogDeleteAction.perform(_, offerUndo: true)` like the tabs.
     @State private var logToConfirmDelete: ServiceLog?
 
     /// Judged by the same effective mileage as the list row that opened this
@@ -71,7 +69,7 @@ struct ServiceDetailView: View {
                 if !allAttachments.isEmpty {
                     AttachmentSection(
                         attachments: allAttachments,
-                        onSelect: { attachmentForDetail = $0 }
+                        onSelect: { appState.push(.document($0)) }
                     )
                 }
             }
@@ -93,7 +91,15 @@ struct ServiceDetailView: View {
                 .accessibilityLabel("Edit service")
             }
         }
-        .sheet(isPresented: $showEditSheet, onDismiss: { updateAppIcon(); updateWidgetData() }) {
+        .sheet(isPresented: $showEditSheet, onDismiss: {
+            updateAppIcon()
+            updateWidgetData()
+            // Deleted from the edit form: this pushed screen has nothing left
+            // to show, so pop it rather than render a deleted model.
+            if service.modelContext == nil || service.isDeleted {
+                dismiss()
+            }
+        }) {
             EditServiceView(service: service, vehicle: vehicle)
         }
         .sheet(isPresented: $showMarkDoneSheet, onDismiss: {
@@ -107,20 +113,6 @@ struct ServiceDetailView: View {
             MarkServiceDoneSheet(service: service, vehicle: vehicle, onSaved: {
                 didCompleteMark = true
             })
-        }
-        .sheet(item: $selectedLog, onDismiss: {
-            guard let log = logPendingDeletion else { return }
-            logPendingDeletion = nil
-            ServiceLogDeleteAction.perform(log, offerUndo: false)
-        }) { log in
-            NavigationStack {
-                ServiceLogDetailView(
-                    log: log,
-                    onDelete: { logPendingDeletion = $0 },
-                    confirmsDelete: true
-                )
-            }
-            .environment(appState)
         }
         .confirmationDialog(
             L10n.logDeleteConfirmTitle,
@@ -137,16 +129,6 @@ struct ServiceDetailView: View {
             Button(L10n.commonCancel, role: .cancel) { }
         } message: { _ in
             Text(L10n.logDeleteConfirmMessage)
-        }
-        .sheet(item: $selectedVisit) { visit in
-            NavigationStack {
-                ServiceVisitDetailView(visit: visit)
-            }
-            .environment(appState)
-        }
-        .sheet(item: $attachmentForDetail) { document in
-            DocumentDetailView(document: document)
-                .environment(appState)
         }
     }
 
@@ -282,9 +264,9 @@ struct ServiceDetailView: View {
                 ForEach(sortedLogs) { log in
                     Button {
                         if let visit = log.visit {
-                            selectedVisit = visit
+                            appState.push(.visit(visit))
                         } else {
-                            selectedLog = log
+                            appState.push(.serviceLog(log))
                         }
                     } label: {
                         historyRow(log: log)

@@ -14,20 +14,18 @@ struct ServiceLogDetailView: View {
 
     @Bindable var log: ServiceLog
 
-    /// Hands the log to the presenter for deletion. The presenter deletes it in
-    /// its sheet's `onDismiss`, not here: a model deleted while this sheet is
-    /// still animating away can be read by a view that no longer has it. nil
-    /// hides Delete.
+    /// Hands the log to the presenter for deletion. The presenter deletes it
+    /// once this screen has popped (`ServiceLogDestination`), not here: a model
+    /// deleted while this screen is still animating away can be read by a view
+    /// that no longer has it. nil hides Delete.
+    ///
+    /// Deletion is unconfirmed — the presenter offers Undo. That used to be
+    /// true only when this was a root sheet; opened from Service Detail's sheet
+    /// the Undo toast rendered beneath it, so delete was confirmed instead.
+    /// This screen is now always pushed, and toasts render above everything.
     var onDelete: ((ServiceLog) -> Void)? = nil
 
-    /// Whether to confirm before deleting. True when the presenter is itself a
-    /// sheet, where the Undo toast (rendered at the app root) would be hidden —
-    /// an Undo nobody can see is not a safety net, so ask instead.
-    var confirmsDelete = false
-
     @State private var showEditSheet = false
-    @State private var attachmentForDetail: Document?
-    @State private var showDeleteConfirmation = false
     @State private var deleteRequestedFromEdit = false
 
     var body: some View {
@@ -48,7 +46,7 @@ struct ServiceLogDetailView: View {
                 if !(log.attachments ?? []).isEmpty {
                     AttachmentSection(
                         attachments: log.attachments ?? [],
-                        onSelect: { attachmentForDetail = $0 }
+                        onSelect: { appState.push(.document($0)) }
                     )
                 }
 
@@ -66,16 +64,6 @@ struct ServiceLogDetailView: View {
         .navigationTitle("Service Log")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(Theme.textSecondary)
-                }
-                .accessibilityLabel(L10n.a11yClose)
-            }
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     showEditSheet = true
@@ -99,33 +87,11 @@ struct ServiceLogDetailView: View {
             )
             .environment(appState)
         }
-        .sheet(item: $attachmentForDetail) { document in
-            DocumentDetailView(document: document)
-                .environment(appState)
-        }
-        .confirmationDialog(
-            L10n.logDeleteConfirmTitle,
-            isPresented: $showDeleteConfirmation,
-            titleVisibility: .visible
-        ) {
-            Button(L10n.commonDelete, role: .destructive) { commitDelete() }
-            Button(L10n.commonCancel, role: .cancel) { }
-        } message: {
-            Text(L10n.logDeleteConfirmMessage)
-        }
     }
 
     // MARK: - Delete
 
     private func requestDelete() {
-        if confirmsDelete {
-            showDeleteConfirmation = true
-        } else {
-            commitDelete()
-        }
-    }
-
-    private func commitDelete() {
         onDelete?(log)
         dismiss()
     }
