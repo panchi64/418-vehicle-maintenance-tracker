@@ -38,6 +38,11 @@ struct CostsMetrics {
     let monthlyAverage: Decimal?
     var averageIsTwelveMonth: Bool { period == .last30Days }
 
+    /// Stored miles between the period's oldest and newest costed odometer
+    /// readings — the denominator of cost per mile. nil when the period can't
+    /// say (see `milesDriven(events:)`).
+    let milesDriven: Int?
+
     /// One bar per calendar month in the period, oldest first, zero months
     /// kept (a gap is information). Capped at 24 bars.
     let trend: [CostMonth]
@@ -106,6 +111,7 @@ struct CostsMetrics {
         } else {
             self.monthlyAverage = events.isEmpty ? nil : totalSpent / Decimal(monthsSpanned)
         }
+        self.milesDriven = Self.milesDriven(events: events)
 
         // MARK: Trend
 
@@ -185,6 +191,21 @@ struct CostsMetrics {
         // A visit's date can differ from the log that pulled it in, so arrival
         // order doesn't guarantee the events are sorted.
         return built.sorted { $0.date > $1.date }
+    }
+
+    /// The distance cost per mile divides by: from the oldest to the newest
+    /// costed event's odometer reading (the calculation the stats grid used).
+    /// Needs two events and forward motion between them — a single reading, or
+    /// an odometer that went backwards, measures nothing.
+    ///
+    /// - Parameter events: newest first.
+    private static func milesDriven(events: [ExpenseEvent]) -> Int? {
+        guard events.count >= 2,
+              let newest = events.first,
+              let oldest = events.last
+        else { return nil }
+        let miles = newest.mileage - oldest.mileage
+        return miles > 0 ? miles : nil
     }
 
     private static func monthStart(of date: Date, calendar: Calendar) -> Date {

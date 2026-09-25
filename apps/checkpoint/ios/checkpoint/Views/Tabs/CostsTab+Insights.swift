@@ -47,6 +47,24 @@ extension CostsMetrics {
         monthlyAverage.map(Formatters.currencyWhole)
     }
 
+    // MARK: - Cost per distance
+
+    /// Period spend per mile (or kilometer) driven. nil when the period has too
+    /// little odometer data to measure a distance.
+    func costPerDistance(in unit: DistanceUnit) -> Decimal? {
+        guard let milesDriven else { return nil }
+        let distance = unit.fromMiles(Double(milesDriven))
+        guard distance > 0 else { return nil }
+        return totalSpent / Decimal(distance)
+    }
+
+    /// "$0.12" — cents matter at this scale.
+    func formattedCostPerDistance(in unit: DistanceUnit) -> String? {
+        costPerDistance(in: unit).flatMap {
+            Formatters.currency.string(from: $0 as NSDecimalNumber)
+        }
+    }
+
     // MARK: - Chart
 
     func chartTitle(_ mode: CostsTab.ChartMode) -> String {

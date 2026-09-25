@@ -40,6 +40,29 @@ extension L10n {
     }
     static var costsShareAction: String { costs("costs.share.action") }
 
+    // MARK: - Cost per distance
+
+    /// "$0.12 per mile driven"
+    static func costsCostPerDistance(_ amount: String, unit: DistanceUnit) -> String {
+        switch unit {
+        case .miles: return String(format: costs("costs.costPerMile"), amount)
+        case .kilometers: return String(format: costs("costs.costPerKilometer"), amount)
+        }
+    }
+    /// "Cost per mile" — the VoiceOver label's name half.
+    static func costsCostPerDistanceLabel(_ unit: DistanceUnit) -> String {
+        switch unit {
+        case .miles: return costs("costs.costPerMile.label")
+        case .kilometers: return costs("costs.costPerKilometer.label")
+        }
+    }
+    static func costsNoteCostPerDistance(_ unit: DistanceUnit) -> String {
+        switch unit {
+        case .miles: return costs("costs.note.costPerMile")
+        case .kilometers: return costs("costs.note.costPerKilometer")
+        }
+    }
+
     // MARK: - Chart
 
     static var costsChartTrend: String { costs("costs.chart.trend") }

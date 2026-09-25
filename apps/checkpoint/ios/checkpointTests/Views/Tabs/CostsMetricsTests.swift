@@ -358,4 +358,64 @@ final class CostsMetricsTests: XCTestCase {
         XCTAssertFalse(result.chartSummary(.category).isEmpty)
         XCTAssertNotNil(result.averageLine)
     }
+
+    // MARK: - Cost per distance
+
+    @MainActor
+    private func log(daysAgo: Int, cost: Decimal?, mileage: Int) -> ServiceLog {
+        let entry = log(daysAgo: daysAgo, cost: cost)
+        entry.mileageAtService = mileage
+        return entry
+    }
+
+    @MainActor
+    func test_costPerDistance_isPeriodSpendOverMilesBetweenOldestAndNewestReadings() {
+        let result = metrics([
+            log(daysAgo: 60, cost: 100, mileage: 29000),
+            log(daysAgo: 30, cost: 30, mileage: 29600),
+            log(daysAgo: 10, cost: 20, mileage: 30000),
+        ])
+
+        XCTAssertEqual(result.milesDriven, 1000)
+        XCTAssertEqual(result.costPerDistance(in: .miles), Decimal(string: "0.15"))
+        XCTAssertEqual(result.formattedCostPerDistance(in: .miles), "$0.15")
+    }
+
+    @MainActor
+    func test_costPerDistance_kilometersDividesByConvertedDistance() {
+        let result = metrics([
+            log(daysAgo: 60, cost: 100, mileage: 29000),
+            log(daysAgo: 10, cost: 50, mileage: 30000),
+        ])
+
+        let perKm = result.costPerDistance(in: .kilometers).map { NSDecimalNumber(decimal: $0).doubleValue }
+        XCTAssertEqual(perKm ?? 0, 150 / (1000 * DistanceUnit.kmPerMile), accuracy: 0.0001)
+    }
+
+    @MainActor
+    func test_costPerDistance_nilWithASingleReading() {
+        let result = metrics([log(daysAgo: 10, cost: 50, mileage: 30000)])
+        XCTAssertNil(result.milesDriven)
+        XCTAssertNil(result.costPerDistance(in: .miles))
+        XCTAssertNil(result.formattedCostPerDistance(in: .miles))
+    }
+
+    @MainActor
+    func test_costPerDistance_nilWithoutForwardMotion() {
+        let result = metrics([
+            log(daysAgo: 60, cost: 100, mileage: 30000),
+            log(daysAgo: 10, cost: 50, mileage: 30000),
+        ])
+        XCTAssertNil(result.costPerDistance(in: .miles))
+    }
+
+    /// A reading outside the period must not stretch the period's distance.
+    @MainActor
+    func test_costPerDistance_onlyReadingsInsideThePeriodCount() {
+        let result = metrics([
+            log(daysAgo: 200, cost: 100, mileage: 25000),
+            log(daysAgo: 10, cost: 50, mileage: 30000),
+        ], period: .last30Days)
+        XCTAssertNil(result.costPerDistance(in: .miles))
+    }
 }

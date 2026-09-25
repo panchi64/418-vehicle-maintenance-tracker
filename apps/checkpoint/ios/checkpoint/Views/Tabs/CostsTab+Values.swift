@@ -38,6 +38,14 @@ enum ExpenseEvent: Identifiable {
         }
     }
 
+    /// Odometer reading at the time, in stored miles.
+    var mileage: Int {
+        switch self {
+        case .standalone(let log): return log.mileageAtService
+        case .visit(let visit): return visit.mileageAtVisit
+        }
+    }
+
     var amount: Decimal {
         switch self {
         case .standalone(let log): return log.cost ?? 0

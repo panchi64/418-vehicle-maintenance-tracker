@@ -1532,6 +1532,78 @@
         }
       }
     },
+    "costs.costPerKilometer" : {
+      "comment" : "Costs tab hero, supporting figure when the distance unit is kilometers. %@ = period spend per kilometer, e.g. $0.08.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ per km driven"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ por km recorrido"
+          }
+        }
+      }
+    },
+    "costs.costPerKilometer.label" : {
+      "comment" : "Costs tab: VoiceOver name for the cost-per-kilometer figure.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cost per kilometer"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Costo por kilómetro"
+          }
+        }
+      }
+    },
+    "costs.costPerMile" : {
+      "comment" : "Costs tab hero, supporting figure. %@ = period spend per mile, e.g. $0.12.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ per mile driven"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ por milla recorrida"
+          }
+        }
+      }
+    },
+    "costs.costPerMile.label" : {
+      "comment" : "Costs tab: VoiceOver name for the cost-per-mile figure.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cost per mile"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Costo por milla"
+          }
+        }
+      }
+    },
     "costs.empty.none.message" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1703,6 +1775,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aparece cuando el año pasado tenga gastos a esta fecha."
+          }
+        }
+      }
+    },
+    "costs.note.costPerKilometer" : {
+      "comment" : "Costs tab: shown in place of cost per kilometer until the period has two expenses at different odometer readings.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cost per kilometer appears once this period has two expenses at different odometer readings."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El costo por kilómetro aparece cuando este período tenga dos gastos con lecturas de odómetro distintas."
+          }
+        }
+      }
+    },
+    "costs.note.costPerMile" : {
+      "comment" : "Costs tab: shown in place of cost per mile until the period has two expenses at different odometer readings.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cost per mile appears once this period has two expenses at different odometer readings."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El costo por milla aparece cuando este período tenga dos gastos con lecturas de odómetro distintas."
           }
         }
       }

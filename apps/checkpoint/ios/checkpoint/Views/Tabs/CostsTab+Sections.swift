@@ -20,7 +20,8 @@ extension CostsTab {
 
     // MARK: - Hero
 
-    /// The period total, and the monthly average as its one secondary figure.
+    /// The period total; the monthly average and cost per mile beneath it as
+    /// supporting figures.
     func heroSection(_ metrics: CostsMetrics) -> some View {
         ReadoutSection(title: periodFilter.fullName) {
             RollingNumberText(
@@ -37,6 +38,7 @@ extension CostsTab {
             if let line = metrics.averageLine, let amount = metrics.formattedMonthlyAverage {
                 averageText(line, amount: amount)
             }
+            costPerDistanceLine(metrics)
         } action: {
             ShareLink(
                 item: metrics.shareSummary(vehicle: vehicle),
@@ -50,6 +52,22 @@ extension CostsTab {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(L10n.readoutShareCostSummary)
+        }
+    }
+
+    /// Cost per mile driven — a vehicle-health figure, so it sits under the
+    /// total at body weight rather than competing with it. Too little odometer
+    /// data in the period gets a quiet note, never a dash.
+    @ViewBuilder
+    private func costPerDistanceLine(_ metrics: CostsMetrics) -> some View {
+        let unit = DistanceSettings.shared.unit
+        if let amount = metrics.formattedCostPerDistance(in: unit) {
+            Text(L10n.costsCostPerDistance(amount, unit: unit))
+                .font(.brutalistBody)
+                .foregroundStyle(Theme.textSecondary)
+                .accessibilityLabel(L10n.costsLabeledValue(L10n.costsCostPerDistanceLabel(unit), amount))
+        } else {
+            InsufficientDataNote(message: L10n.costsNoteCostPerDistance(unit))
         }
     }
 
