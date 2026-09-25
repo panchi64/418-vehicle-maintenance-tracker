@@ -36,7 +36,7 @@
  * other field below the fold.
  *
  * DEFAULT-DISCLOSED vs HIDDEN (Decision rule 5): everything that makes the
- * entry WORK is on the default path — service, when, odometer, cost, shop,
+ * entry WORK is on the default path — service, when, odometer, cost,
  * next reminder. Category (it has a working default), notes, and receipts
  * make it COMPLETE and live under More Details, whose collapsed row names
  * its contents and the category's current value.
@@ -111,10 +111,8 @@ export function ServiceForm(props: {
 
   const origOdo = orig?.mileage != null ? fmtMileageBare(orig.mileage) : fmtMileageBare(v().currentMileage)
   const origCost = orig?.cost != null ? orig.cost.toFixed(2) : ''
-  const origShop = orig?.vendor ?? ''
   const [odometer, setOdometer] = createSignal(origOdo)
   const [cost, setCost] = createSignal(origCost)
-  const [shop, setShop] = createSignal(origShop)
   const [remind, setRemind] = createSignal(true)
 
   const [dueKind, setDueKind] = createSignal<DueKind>('interval')
@@ -144,8 +142,6 @@ export function ServiceForm(props: {
     }
     return out.slice(0, 3)
   }
-  const recentShops = () =>
-    [...new Set(data().logs.map((l) => l.vendor).filter(Boolean) as string[])].slice(0, 3)
 
   const choose = (n: string, s?: Service) => {
     setName(n)
@@ -233,7 +229,6 @@ export function ServiceForm(props: {
     name() !== orig!.name ||
     odometer() !== origOdo ||
     cost() !== origCost ||
-    shop() !== origShop ||
     customDate() !== origDate ||
     when() !== origWhen ||
     category() !== orig!.category ||
@@ -443,23 +438,6 @@ export function ServiceForm(props: {
               placeholder="0.00"
               numeric
               original={editing ? origCost : undefined}
-            />
-
-            <Field
-              label="Shop"
-              value={shop()}
-              onInput={setShop}
-              placeholder="Where it was done"
-              original={editing ? origShop : undefined}
-              below={
-                <Show when={!shop() && recentShops().length}>
-                  <ChipRow>
-                    <For each={recentShops()}>
-                      {(s) => <Chip variant="plain" label={s} onClick={() => setShop(s)} />}
-                    </For>
-                  </ChipRow>
-                </Show>
-              }
             />
           </FormSection>
 
