@@ -32,10 +32,10 @@ checkpoint-app/
 │   │   │   ├── CostsTab.swift              # Hero total, Trend/Category chart, year comparison, month groups
 │   │   │   └── CostsTab+Analytics.swift    # `CostsMetrics`, derived once per body
 │   │   ├── Vehicle/
-│   │   │   ├── AddVehicleView.swift
+│   │   │   ├── AddVehicleFlow/                  # VehicleFormState + sections shared by Add and Edit (VIN auto-decode, capture)
 │   │   │   ├── EditVehicleView.swift
-│   │   │   ├── EditVehicleVINSection.swift      # VIN input section extracted from EditVehicleView
-│   │   │   ├── EditVehicleOdometerSection.swift  # Odometer section extracted from EditVehicleView
+│   │   │   ├── EditVehicleSections.swift        # Edit-only arrangement (marbete, details disclosure)
+│   │   │   ├── StarterScheduleSheet.swift       # Offered after a vehicle is added (StarterSchedule)
 │   │   │   └── VehiclePickerSheet.swift
 │   │   ├── Service/
 │   │   │   ├── AddService/                    # ServiceLogForm: the one log/complete/edit/schedule form
@@ -69,7 +69,6 @@ checkpoint-app/
 │   │   ├── Onboarding/
 │   │   │   ├── OnboardingIntroView.swift
 │   │   │   ├── OnboardingTourOverlay.swift
-│   │   │   ├── OnboardingTourTransitionCard.swift
 │   │   │   └── OnboardingGetStartedView.swift
 │   │   └── Components/
 │   │       ├── Attachments/    # Photo/document handling
@@ -462,7 +461,6 @@ struct WidgetColors {
 | `ChipRow.swift` | Plain one-of-N chips (13 sentence case, wrap at large type) |
 | `CollapsibleDetailsSection.swift` | "More details" disclosure for completeness-only fields; expansion remembered per form |
 | `DestructiveFormButton.swift` | Delete/Stop Tracking at the end of an edit form or detail screen, never beside Save |
-| `ErrorMessageRow.swift` | ⚠️ Inline error message, still used by the vehicle VIN/odometer sections. Superseded by `FormAdvisory` |
 | `FieldRequirement.swift` | The single required/optional vocabulary (F5), plus `RequiredFieldMarker` |
 | `FormSection.swift` | Titled band of a Decision surface |
 | `FormToolbar.swift` | `.formToolbar(...)`: Cancel + prominent Save in the sheet's toolbar on every data-entry form (F1), dim-not-disabled Save (F2), dismiss protection |
@@ -491,7 +489,6 @@ struct WidgetColors {
 |-----------|---------|
 | `TabRootStack.swift` | A tab's `NavigationStack`, its root chrome (vehicle title menu, Settings, add service), and the `AppRoute` destinations |
 | `EmptyStateView.swift` | Standardized empty state |
-| `StepIndicator.swift` | Step progress indicator |
 
 ## Shell Architecture
 

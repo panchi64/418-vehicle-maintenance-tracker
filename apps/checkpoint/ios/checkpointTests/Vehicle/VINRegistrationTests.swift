@@ -137,6 +137,7 @@ final class VINRegistrationTests: XCTestCase {
 
     private static let validVIN = "1HGBH41JXMN109186"
 
+    @MainActor
     private static func decoded(make: String = "Honda", model: String = "Civic", year: Int? = 2021) -> VINDecodeResult {
         VINDecodeResult(
             make: make, model: model, modelYear: year,
