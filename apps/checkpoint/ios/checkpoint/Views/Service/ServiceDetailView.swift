@@ -23,6 +23,11 @@ struct ServiceDetailView: View {
     @State private var selectedVisit: ServiceVisit?
     @State private var attachmentForDetail: Document?
 
+    // Log deletion from inside this sheet is confirmed rather than undone: the
+    // Undo toast renders at the app root, beneath this sheet.
+    @State private var logPendingDeletion: ServiceLog?
+    @State private var logToConfirmDelete: ServiceLog?
+
     /// Judged by the same effective mileage as the list row that opened this
     /// screen — raw `currentMileage` here let the two disagree.
     private var status: ServiceStatus {
@@ -103,11 +108,35 @@ struct ServiceDetailView: View {
                 didCompleteMark = true
             })
         }
-        .sheet(item: $selectedLog) { log in
+        .sheet(item: $selectedLog, onDismiss: {
+            guard let log = logPendingDeletion else { return }
+            logPendingDeletion = nil
+            ServiceLogDeleteAction.perform(log, offerUndo: false)
+        }) { log in
             NavigationStack {
-                ServiceLogDetailView(log: log)
+                ServiceLogDetailView(
+                    log: log,
+                    onDelete: { logPendingDeletion = $0 },
+                    confirmsDelete: true
+                )
             }
             .environment(appState)
+        }
+        .confirmationDialog(
+            L10n.logDeleteConfirmTitle,
+            isPresented: Binding(
+                get: { logToConfirmDelete != nil },
+                set: { if !$0 { logToConfirmDelete = nil } }
+            ),
+            titleVisibility: .visible,
+            presenting: logToConfirmDelete
+        ) { log in
+            Button(L10n.commonDelete, role: .destructive) {
+                ServiceLogDeleteAction.perform(log, offerUndo: false)
+            }
+            Button(L10n.commonCancel, role: .cancel) { }
+        } message: { _ in
+            Text(L10n.logDeleteConfirmMessage)
         }
         .sheet(item: $selectedVisit) { visit in
             NavigationStack {
@@ -260,6 +289,7 @@ struct ServiceDetailView: View {
                         historyRow(log: log)
                     }
                     .buttonStyle(.plain)
+                    .serviceLogDeleteMenu { logToConfirmDelete = log }
 
                     if log.id != sortedLogs.last?.id {
                         ListDivider(leadingPadding: Spacing.md)

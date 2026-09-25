@@ -106,5 +106,6 @@ extension HomeTab {
             accessibilityLabelText: L10n.rowCompletedAccessibility(name, date),
             onTap: { appState.selectedServiceLog = log }
         )
+        .serviceLogDeleteMenu { ServiceLogDeleteAction.perform(log, offerUndo: true) }
     }
 }

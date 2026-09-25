@@ -57,7 +57,7 @@ struct EditVehicleView: View {
         _name = State(initialValue: vehicle.name)
         _make = State(initialValue: vehicle.make)
         _model = State(initialValue: vehicle.model)
-        _year = State(initialValue: vehicle.year)
+        _year = State(initialValue: vehicle.hasModelYear ? vehicle.year : nil)
         _currentMileage = State(initialValue: vehicle.currentMileage)
         _vin = State(initialValue: vehicle.vin ?? "")
         _licensePlate = State(initialValue: vehicle.licensePlate ?? "")
@@ -68,9 +68,21 @@ struct EditVehicleView: View {
         _marbeteExpirationYear = State(initialValue: vehicle.marbeteExpirationYear)
     }
 
+    /// Same rule as Add Vehicle (`VehicleFormState.blockingReason`): make and
+    /// model identify the vehicle; year is optional because nothing computes
+    /// from it (recall lookups skip a vehicle without one), but one that is
+    /// entered must be plausible.
     private var isFormValid: Bool {
-        !make.isEmpty && !model.isEmpty && year != nil
+        !make.trimmingCharacters(in: .whitespaces).isEmpty
+            && !model.trimmingCharacters(in: .whitespaces).isEmpty
+            && isYearAcceptable
     }
+
+    private var isYearAcceptable: Bool {
+        year.map { Vehicle.isPlausibleModelYear($0) } ?? true
+    }
+
+    private var marbeteRequirement: FieldRequirement { .marbete }
 
     private var detailsFilledCount: Int {
         [vin, licensePlate, tireSize, oilType, notes].filter { !$0.isEmpty }.count
@@ -94,7 +106,7 @@ struct EditVehicleView: View {
                             InstrumentSectionHeader(title: L10n.vehicleDetails)
 
                             if showBasicsError, !isFormValid {
-                                ErrorMessageRow(message: L10n.formVehicleBasicsRequired) {
+                                ErrorMessageRow(message: isYearAcceptable ? L10n.formVehicleBasicsRequired : L10n.vehicleYearOutOfRange) {
                                     showBasicsError = false
                                 }
                             }
@@ -123,8 +135,7 @@ struct EditVehicleView: View {
                                 InstrumentNumberField(
                                     label: L10n.vehicleYear,
                                     value: $year,
-                                    placeholder: L10n.vehicleYearPlaceholder,
-                                    requirement: .required(reason: L10n.formVehicleBasicsRequired)
+                                    placeholder: L10n.vehicleYearPlaceholder
                                 )
                             }
                         }
@@ -139,8 +150,10 @@ struct EditVehicleView: View {
                             isCameraAvailable: isCameraAvailable
                         )
 
-                        // Marbete Section (PR vehicle registration tag)
-                        InstrumentSection(title: "Marbete", tag: L10n.formOptionalTag, chrome: .plain) {
+                        // Marbete Section (PR vehicle registration tag). Optional,
+                        // but filling it schedules renewal reminders — so the tag
+                        // comes with the stated effect ("[OPTIONAL] is a promise").
+                        InstrumentSection(title: L10n.vehicleMarbete, tag: marbeteRequirement.sectionTag, chrome: .plain) {
                             MarbetePicker(
                                 month: $marbeteExpirationMonth,
                                 year: $marbeteExpirationYear
@@ -152,6 +165,10 @@ struct EditVehicleView: View {
                                 .foregroundStyle(Theme.textTertiary)
                                 .tracking(1)
                                 .padding(.leading, 4)
+
+                            if let effect = marbeteRequirement.effectNote {
+                                FormAdvisory.info(effect)
+                            }
                         }
 
                         CollapsibleDetailsSection(
@@ -208,24 +225,8 @@ struct EditVehicleView: View {
                             }
                         }
 
-                        // Delete button
-                        Button {
+                        DestructiveFormButton(title: L10n.vehicleDeleteAction) {
                             showDeleteConfirmation = true
-                        } label: {
-                            HStack {
-                                Image(systemName: "trash")
-                                Text(L10n.vehicleDeleteAction)
-                            }
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(Theme.statusOverdue)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: Theme.buttonHeight)
-                            .background(Theme.statusOverdue.opacity(0.1))
-                            .clipShape(Rectangle())
-                            .overlay(
-                                Rectangle()
-                                    .strokeBorder(Theme.statusOverdue.opacity(0.3), lineWidth: 1)
-                            )
                         }
                     }
                     .padding(Spacing.screenHorizontal)
@@ -365,7 +366,7 @@ struct EditVehicleView: View {
         vehicle.name = name
         vehicle.make = make
         vehicle.model = model
-        vehicle.year = year ?? vehicle.year
+        vehicle.year = year ?? 0
         // F11: an edited odometer is a manual reading — record it (timestamp +
         // snapshot) rather than overwrite the number and leave the estimate
         // engine measuring from a stale date. Unchanged means no new reading.

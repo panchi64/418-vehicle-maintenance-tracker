@@ -57,8 +57,9 @@ struct ServicesTab: View {
     /// urgency sort, status classification per row, search across notes and OCR
     /// text. Derived once and passed down, per the "derive a value once" rule.
     private struct Content {
-        /// Every service, urgency-sorted — the timeline shows log-only ones too.
-        let allServices: [Service]
+        /// Every service matching the search, urgency-sorted — the timeline
+        /// shows log-only ones too, and is not status-filtered.
+        let timelineServices: [Service]
         let filteredServices: [Service]
         let filteredLogs: [ServiceLog]
         let statusOptions: [PickerOption<StatusFilter>]
@@ -68,7 +69,7 @@ struct ServicesTab: View {
     private func makeContent() -> Content {
         guard let vehicle else {
             return Content(
-                allServices: [],
+                timelineServices: [],
                 filteredServices: [],
                 filteredLogs: [],
                 statusOptions: [],
@@ -96,14 +97,14 @@ struct ServicesTab: View {
         if let wanted = appState.servicesTab.statusFilter.serviceStatus {
             filteredServices = zip(tracked, statuses).filter { $0.1 == wanted }.map(\.0)
         }
-        if !searchText.isEmpty {
-            filteredServices = filteredServices.filter {
-                $0.name.localizedCaseInsensitiveContains(searchText)
-            }
-        }
+
+        // The search field sits above both modes, so it narrows both. The
+        // timeline used to receive the unfiltered lists — typing did nothing.
+        let timelineServices = Self.services(allServices, matching: searchText)
+        filteredServices = Self.services(filteredServices, matching: searchText)
 
         return Content(
-            allServices: allServices,
+            timelineServices: timelineServices,
             filteredServices: filteredServices,
             filteredLogs: Self.logs(serviceLogs, matching: searchText),
             statusOptions: [
@@ -114,6 +115,11 @@ struct ServicesTab: View {
             ],
             mileage: mileage
         )
+    }
+
+    private static func services(_ services: [Service], matching searchText: String) -> [Service] {
+        guard !searchText.isEmpty else { return services }
+        return services.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
     }
 
     /// Search across service name, notes, and receipt OCR text. The logs arrive
@@ -230,16 +236,26 @@ struct ServicesTab: View {
                             message: L10n.emptyTimelineMessage
                         )
                         .revealAnimation(delay: 0.2)
+                    } else if content.filteredLogs.isEmpty && !content.timelineServices.contains(where: \.hasDueTracking) {
+                        // A search that matches nothing is not an empty history.
+                        EmptyStateView(
+                            icon: "magnifyingglass",
+                            title: L10n.emptyNoResultsTitle,
+                            message: L10n.emptyNoResultsMessage
+                        )
                     } else {
                         MaintenanceTimeline(
-                            services: content.allServices,
-                            serviceLogs: serviceLogs,
+                            services: content.timelineServices,
+                            serviceLogs: content.filteredLogs,
                             vehicle: vehicle,
                             onServiceTap: { service in
                                 appState.selectedService = service
                             },
                             onLogTap: { log in
                                 appState.selectedServiceLog = log
+                            },
+                            onLogDelete: { log in
+                                ServiceLogDeleteAction.perform(log, offerUndo: true)
                             }
                         )
                         .revealAnimation(delay: 0.2)
@@ -370,6 +386,7 @@ struct ServicesTab: View {
             accessibilityLabelText: "\(name), \(date)",
             onTap: { appState.selectedServiceLog = log }
         )
+        .serviceLogDeleteMenu { ServiceLogDeleteAction.perform(log, offerUndo: true) }
     }
 
     // MARK: - Empty States

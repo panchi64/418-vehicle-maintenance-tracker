@@ -15,81 +15,20 @@ struct VehiclePickerSheet: View {
     @Query private var vehicles: [Vehicle]
 
     @Binding var selectedVehicle: Vehicle?
+
+    /// Requests Add Vehicle. The presenter must act on it only after this sheet
+    /// has dismissed (in its `onDismiss`): presenting a second sheet in the same
+    /// tick as dismissing this one can silently drop it.
     let onAddVehicle: () -> Void
 
-    // State for delete confirmation
+    // Delete is confirmed, not undone. The Undo toast renders at the app root,
+    // beneath this sheet, so it could not be seen — and it restored only the
+    // vehicle row, not the services and history the cascade had deleted.
     @State private var vehicleToDelete: Vehicle?
     @State private var showDeleteConfirmation = false
 
     // State for editing
     @State private var vehicleToEdit: Vehicle?
-
-    // MARK: - Vehicle Snapshot for Undo
-
-    struct VehicleSnapshot {
-        let id: UUID
-        let name: String
-        let make: String
-        let model: String
-        let year: Int
-        let currentMileage: Int
-        let vin: String?
-        let licensePlate: String?
-        let tireSize: String?
-        let oilType: String?
-        let notes: String?
-        let mileageUpdatedAt: Date?
-        let marbeteExpirationMonth: Int?
-        let marbeteExpirationYear: Int?
-        let marbeteNotificationID: String?
-
-        init(from vehicle: Vehicle) {
-            self.id = vehicle.id
-            self.name = vehicle.name
-            self.make = vehicle.make
-            self.model = vehicle.model
-            self.year = vehicle.year
-            self.currentMileage = vehicle.currentMileage
-            self.vin = vehicle.vin
-            self.licensePlate = vehicle.licensePlate
-            self.tireSize = vehicle.tireSize
-            self.oilType = vehicle.oilType
-            self.notes = vehicle.notes
-            self.mileageUpdatedAt = vehicle.mileageUpdatedAt
-            self.marbeteExpirationMonth = vehicle.marbeteExpirationMonth
-            self.marbeteExpirationYear = vehicle.marbeteExpirationYear
-            self.marbeteNotificationID = vehicle.marbeteNotificationID
-        }
-
-        func restore(to modelContext: ModelContext) {
-            let vehicle = Vehicle(
-                name: name,
-                make: make,
-                model: model,
-                year: year,
-                currentMileage: currentMileage,
-                vin: vin,
-                licensePlate: licensePlate,
-                tireSize: tireSize,
-                oilType: oilType,
-                notes: notes,
-                mileageUpdatedAt: mileageUpdatedAt,
-                marbeteExpirationMonth: marbeteExpirationMonth,
-                marbeteExpirationYear: marbeteExpirationYear
-            )
-            // Restore the same ID to maintain references
-            vehicle.id = id
-            vehicle.marbeteNotificationID = marbeteNotificationID
-            modelContext.insert(vehicle)
-        }
-
-        var displayName: String {
-            if name.isEmpty {
-                return "\(year) \(make) \(model)"
-            }
-            return name
-        }
-    }
 
     var body: some View {
         NavigationStack {
@@ -134,15 +73,15 @@ struct VehiclePickerSheet: View {
 
                         // Add vehicle button
                         Button {
-                            dismiss()
                             onAddVehicle()
+                            dismiss()
                         } label: {
                             HStack(spacing: Spacing.sm) {
                                 Image(systemName: "plus.circle.fill")
                                     .font(.system(size: 20))
                                     .foregroundStyle(Theme.accent)
 
-                                Text("Add Vehicle")
+                                Text(L10n.vehicleAdd)
                                     .font(.brutalistBody)
                                     .foregroundStyle(Theme.accent)
 
@@ -180,19 +119,15 @@ struct VehiclePickerSheet: View {
         .presentationDetents([.medium])
         .presentationDragIndicator(.visible)
         .applyGlassBackground()
-        .alert("Delete Vehicle?", isPresented: $showDeleteConfirmation, presenting: vehicleToDelete) { vehicle in
-            Button("Cancel", role: .cancel) {
+        .alert(L10n.vehicleDeleteConfirmTitle, isPresented: $showDeleteConfirmation, presenting: vehicleToDelete) { vehicle in
+            Button(L10n.commonCancel, role: .cancel) {
                 vehicleToDelete = nil
             }
-            Button("Delete", role: .destructive) {
+            Button(L10n.commonDelete, role: .destructive) {
                 deleteVehicle(vehicle)
             }
-        } message: { vehicle in
-            if vehicles.count == 1 {
-                Text("This is your only vehicle. Deleting it will remove all associated services and maintenance history. You'll need to add a new vehicle to continue using Checkpoint.")
-            } else {
-                Text("This will permanently delete \"\(vehicle.displayName)\" and all its services and maintenance history.")
-            }
+        } message: { _ in
+            Text(vehicles.count == 1 ? L10n.vehicleDeleteConfirmMessageLast : L10n.vehicleDeleteConfirmMessage)
         }
         .sheet(item: $vehicleToEdit) { vehicle in
             EditVehicleView(vehicle: vehicle)
@@ -204,9 +139,6 @@ struct VehiclePickerSheet: View {
     private func deleteVehicle(_ vehicle: Vehicle) {
         HapticService.shared.warning()
         AnalyticsService.shared.capture(.vehicleDeleted)
-
-        // Create snapshot for undo
-        let snapshot = VehicleSnapshot(from: vehicle)
 
         let vehicleID = vehicle.id.uuidString
         let isSelectedVehicle = selectedVehicle?.id == vehicle.id
@@ -233,31 +165,6 @@ struct VehiclePickerSheet: View {
         WidgetCenter.shared.reloadAllTimelines()
 
         vehicleToDelete = nil
-
-        // Show toast with undo action
-        ToastService.shared.show(
-            "\(snapshot.displayName) deleted",
-            icon: "trash",
-            style: .info,
-            action: ToastService.ToastAction(
-                label: "UNDO",
-                handler: { @MainActor in
-                    // Restore vehicle from snapshot
-                    snapshot.restore(to: modelContext)
-
-                    // If this was the selected vehicle, reselect it
-                    if isSelectedVehicle {
-                        // Find the restored vehicle by ID
-                        if let restoredVehicle = vehicles.first(where: { $0.id == snapshot.id }) {
-                            selectedVehicle = restoredVehicle
-                        }
-                    }
-
-                    // Reload widget timelines
-                    WidgetCenter.shared.reloadAllTimelines()
-                }
-            )
-        )
     }
 
     private func vehicleRow(_ vehicle: Vehicle) -> some View {
@@ -272,7 +179,7 @@ struct VehiclePickerSheet: View {
                         .foregroundStyle(Theme.textPrimary)
                         .tracking(0.5)
 
-                    Text("\(String(vehicle.year)) \(vehicle.make) \(vehicle.model)")
+                    Text(vehicle.identityLine)
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
                 }

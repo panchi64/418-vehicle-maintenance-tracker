@@ -231,6 +231,7 @@ extension CostsTab {
             ) {
                 appState.selectedServiceLog = log
             }
+            .serviceLogDeleteMenu { ServiceLogDeleteAction.perform(log, offerUndo: true) }
         case .visit(let visit):
             VisitExpenseRow(
                 visit: visit,

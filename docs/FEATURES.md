@@ -51,7 +51,8 @@ v1.0 features are tracked throughout this document. Future versions are outlined
 | Custom service types   | Medium   | ✅     | User-defined categories                              |
 | Attachments            | Medium   | ✅     | Photos, PDFs, receipts                               |
 | Service log detail     | Medium   | ✅     | Tap any history/activity/expense row to view full log details |
-| Edit service log       | Medium   | ✅     | Edit notes and add attachments to existing service logs |
+| Edit service log       | Medium   | ✅     | Edit notes and add attachments to existing service logs. Save enables only on a real change; the odometer reading is required (it anchors mileage reminders). Tests: `ServiceLogEditValuesTests` |
+| Delete service log     | High     | ✅     | Delete from the log detail, its edit form, or a long-press on any log row. Recomputes the service's last-performed values and re-anchors a reminder derived from the deleted log; an emptied visit goes with it. Undo toast where the toast is visible, confirmation inside sheets. Tests: `ServiceLogDeletionTests` |
 | One-off service logging| Medium   | ✅     | "Schedule Recurring" toggle — log without creating a recurring schedule |
 | Forms usability overhaul | High   | ✅     | Essentials-first layout, shared action bar, history reference card, draft autosave/resume, and edit-form change transparency across Add Service, Edit Service, Edit Service Log, Update Mileage, and Vehicle forms. Tests: `ReminderImpactCalculatorTests`, `ServiceFormDraftStoreTests`, `EditServiceViewRescheduleTests`, extended `AddServiceViewTests`/`EditServiceLogViewTests` |
 | Unified service form   | High     | ✅     | One form with **derived intent** — the Record/Remind fork and the tab bar's `[LOG]`/`[SCHEDULE]` expansion are gone. The user answers "when"; a past answer logs, a future one schedules. Repeat interval moves onto the default path, the fire-time projection becomes a readout, and backfill no longer inherits a preset's cadence. Draft schema is versioned (v2). Tests: extended `AddServiceViewTests`, `ServiceFormDraftStoreTests` |
@@ -908,11 +909,13 @@ These features require ongoing server infrastructure and justify an annual subsc
 
 | Feature | Status | Description |
 |---------|--------|-------------|
-| Post-action tip modal | ✅ | Shows after mileage updates, service logging, service completion, cluster completion |
+| Post-action tip modal | ✅ | Shows after service logging, service completion, cluster completion (not mileage updates — upkeep, not value) |
 | Action-count gating | ✅ | Prompt only after 3+ completed actions (not on first use) |
 | Post-tip cooldown | ✅ | 30-day suppression after any tip |
-| Progressive backoff on dismiss | ✅ | Each dismiss raises threshold by 3 actions (capped at 15) |
+| Progressive backoff on dismiss | ✅ | Each dismiss — Not now, Close, or swipe — raises threshold by 3 actions (capped at 15) |
 | Session limit | ✅ | Max one prompt per app session |
+| Prompt spacing and cap | ✅ | At least 30 days between prompts; at most 3 prompts ever for a user who hasn't tipped. Rules in `TipPromptPolicy`. Tests: `TipPromptPolicyTests` |
+| Purchase errors surfaced | ✅ | A failed tip says nothing was charged and to retry, instead of doing nothing |
 | Context-aware messaging | ✅ | Randomized messages: first-time vs returning tipper copy |
 | Tip Jar in Settings | ✅ | Dedicated tip page with all tiers |
 | Gacha theme unlock | ✅ | Every tip unlocks a random rare theme |

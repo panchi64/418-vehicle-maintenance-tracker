@@ -25,6 +25,14 @@
 
 import SwiftUI
 
+extension FieldRequirement {
+    /// Marbete is skippable, but filling it schedules renewal reminders — so
+    /// it is never a bare `.optional`. Shared by Add and Edit Vehicle.
+    static var marbete: FieldRequirement {
+        .optionalWithEffect(effect: L10n.vehicleMarbeteEffect)
+    }
+}
+
 // MARK: - 1. The fast path, first
 
 struct VehicleVINSection: View {
@@ -156,8 +164,15 @@ struct VehicleIdentitySection: View {
             .allowsHitTesting(false)
     }
 
+    /// Make and model are required; year is not (see `VehicleFormState.hasIdentity`).
+    /// So required-ness is marked on the two fields, not on the section — a
+    /// REQUIRED section tag over an optional year field was a false claim (F5).
+    private var identityRequirement: FieldRequirement {
+        .required(reason: L10n.vehicleIdentityRequired)
+    }
+
     var body: some View {
-        FormSection(title: L10n.vehicleDetails, trailing: L10n.formRequiredTag) {
+        FormSection(title: L10n.vehicleDetails) {
             // Two columns at normal type, stacked at large type. A fixed
             // two-column split cannot survive Dynamic Type on a 375pt screen —
             // forcing it crushed "MAKE" to 28pt against a 46pt word.
@@ -175,7 +190,8 @@ struct VehicleIdentitySection: View {
             InstrumentTextField(
                 label: L10n.vehicleModel,
                 text: $formState.model,
-                placeholder: L10n.vehicleModelPlaceholder
+                placeholder: L10n.vehicleModelPlaceholder,
+                requirement: identityRequirement
             )
             .overlay(autoFilled("model"))
         }
@@ -194,7 +210,8 @@ struct VehicleIdentitySection: View {
         InstrumentTextField(
             label: L10n.vehicleMake,
             text: $formState.make,
-            placeholder: L10n.vehicleMakePlaceholder
+            placeholder: L10n.vehicleMakePlaceholder,
+            requirement: identityRequirement
         )
         .overlay(autoFilled("make"))
     }
@@ -257,6 +274,10 @@ struct VehicleDetailsSection: View {
                     .font(.brutalistSecondary)
                     .foregroundStyle(Theme.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
+
+                if let effect = FieldRequirement.marbete.effectNote {
+                    FormAdvisory.info(effect)
+                }
             }
 
             InstrumentTextEditor(

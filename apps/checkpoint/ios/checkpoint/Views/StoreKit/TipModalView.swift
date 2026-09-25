@@ -18,7 +18,14 @@ struct TipModalView: View {
     @Query private var vehicles: [Vehicle]
     @Query private var services: [Service]
 
+    /// True when the app asked (the post-action prompt); false when the user
+    /// opened the tip jar from Settings. Only an app-initiated prompt that is
+    /// closed without a tip grows the backoff.
+    var isPrompt = false
+
     @State private var isRevealed = false
+    @State private var didTip = false
+    @State private var purchaseErrorMessage: String?
 
     private var storeManager: StoreManager { StoreManager.shared }
 
@@ -133,9 +140,16 @@ struct TipModalView: View {
                         await handleTipPurchase(productID)
                     }
 
+                    if let purchaseErrorMessage {
+                        FormAdvisory.caution(purchaseErrorMessage) {
+                            self.purchaseErrorMessage = nil
+                        }
+                        .padding(.horizontal, Spacing.screenHorizontal)
+                    }
+
                     // Dismiss
                     Button {
-                        handleDismiss()
+                        dismiss()
                     } label: {
                         Text("Not now")
                             .font(.brutalistSecondary)
@@ -150,7 +164,7 @@ struct TipModalView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") {
-                        handleDismiss()
+                        dismiss()
                     }
                     .toolbarButtonStyle()
                 }
@@ -162,21 +176,30 @@ struct TipModalView: View {
                 isRevealed = true
             }
         }
+        // Every way out — Not now, Close, or a swipe down — lands here, so a
+        // swipe counts as the dismissal it is. It used to skip the backoff
+        // entirely, so a user who swiped was re-prompted at the base rate.
+        .onDisappear(perform: recordCloseWithoutTip)
     }
 
     // MARK: - Actions
 
-    private func handleDismiss() {
-        let dismissCount = PurchaseSettings.shared.tipPromptDismissCount
-        PurchaseSettings.shared.recordTipPromptDismiss()
-        AnalyticsService.shared.capture(.tipModalDismissed(dismissCount: dismissCount + 1))
-        dismiss()
+    private func recordCloseWithoutTip() {
+        guard !didTip else { return }
+        let settings = PurchaseSettings.shared
+        AnalyticsService.shared.capture(.tipModalDismissed(dismissCount: settings.tipPromptDismissCount + (isPrompt ? 1 : 0)))
+        if isPrompt {
+            settings.recordTipPromptDismiss()
+        }
     }
 
     private func handleTipPurchase(_ productID: StoreManager.ProductID) async {
+        purchaseErrorMessage = nil
+
         #if DEBUG
         if storeManager.tipProducts().isEmpty {
             await storeManager.simulatePurchase(productID)
+            didTip = true
             PurchaseSettings.shared.recordTip()
             dismiss()
             if let theme = ThemeManager.shared.unlockRandomRareTheme() {
@@ -193,6 +216,7 @@ struct TipModalView: View {
             let transaction = try await storeManager.purchase(productID)
             if transaction != nil {
                 AnalyticsService.shared.capture(.purchaseSucceeded(product: productID.rawValue))
+                didTip = true
                 PurchaseSettings.shared.recordTip()
                 dismiss()
                 if let theme = ThemeManager.shared.unlockRandomRareTheme() {
@@ -200,9 +224,17 @@ struct TipModalView: View {
                     try? await Task.sleep(for: .seconds(0.5))
                     appState.unlockedTheme = theme
                 }
+            } else if let storeError = storeManager.purchaseError {
+                // No transaction and no throw: the store could not offer the
+                // product (it sets its own message). A user cancel or a
+                // pending approval leaves `purchaseError` nil and says nothing.
+                purchaseErrorMessage = storeError
             }
         } catch {
             AnalyticsService.shared.capture(.purchaseFailed(product: productID.rawValue, error: error.localizedDescription))
+            // The failure used to be swallowed: the sheet sat there as if the
+            // tap had done nothing. Say that nothing was charged and what to do.
+            purchaseErrorMessage = L10n.tipPurchaseFailed
         }
     }
 }

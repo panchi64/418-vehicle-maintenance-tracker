@@ -17,10 +17,14 @@ extension ContentView {
 
     func centralizedSheets(_ content: some View) -> some View {
         content
-            .sheet(isPresented: $appState.showVehiclePicker) {
+            .sheet(isPresented: $appState.showVehiclePicker, onDismiss: {
+                guard addVehicleAfterPickerDismiss else { return }
+                addVehicleAfterPickerDismiss = false
+                appState.requestAddVehicle(vehicleCount: vehicles.count)
+            }) {
                 VehiclePickerSheet(
                     selectedVehicle: $appState.selectedVehicle,
-                    onAddVehicle: { appState.requestAddVehicle(vehicleCount: vehicles.count) }
+                    onAddVehicle: { addVehicleAfterPickerDismiss = true }
                 )
             }
             .sheet(isPresented: $appState.showAddVehicle, onDismiss: {
@@ -52,9 +56,15 @@ extension ContentView {
                     .environment(appState)
                 }
             }
-            .sheet(item: $appState.selectedServiceLog) { log in
+            // The root sheet dismisses onto the root, where the toast renders,
+            // so deleting from here is immediate with Undo — no confirmation.
+            .sheet(item: $appState.selectedServiceLog, onDismiss: {
+                guard let log = logPendingDeletion else { return }
+                logPendingDeletion = nil
+                ServiceLogDeleteAction.perform(log, offerUndo: true)
+            }) { log in
                 NavigationStack {
-                    ServiceLogDetailView(log: log)
+                    ServiceLogDetailView(log: log, onDelete: { logPendingDeletion = $0 })
                 }
                 .environment(appState)
             }
@@ -132,7 +142,7 @@ extension ContentView {
                 ProPaywallSheet()
             }
             .sheet(isPresented: $appState.showTipModal) {
-                TipModalView()
+                TipModalView(isPrompt: true)
                     .environment(appState)
             }
             // AppState only queues the tip prompt (pure state); the delayed

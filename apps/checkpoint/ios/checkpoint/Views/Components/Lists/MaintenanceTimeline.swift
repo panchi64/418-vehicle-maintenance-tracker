@@ -15,8 +15,15 @@ struct MaintenanceTimeline: View {
     let vehicle: Vehicle
     let onServiceTap: (Service) -> Void
     var onLogTap: ((ServiceLog) -> Void)?
+    var onLogDelete: ((ServiceLog) -> Void)?
 
     private var calendar: Calendar { Calendar.current }
+
+    /// Delete applies to completed rows only — an upcoming row is a service.
+    private func deleteAction(for item: TimelineItem) -> (() -> Void)? {
+        guard item.type == .completed, let log = item.serviceLog, let onLogDelete else { return nil }
+        return { onLogDelete(log) }
+    }
 
     // MARK: - Timeline Items
 
@@ -208,6 +215,7 @@ struct MaintenanceTimeline: View {
                     onServiceTap(service)
                 }
             }
+            .serviceLogDeleteMenu(deleteAction(for: item))
             .accessibilityElement(children: .combine)
             .accessibilityLabel("\(item.type == .completed ? "Completed" : "Upcoming"): \(item.service?.name ?? "Service")")
             .accessibilityHint("Double tap to view details")
