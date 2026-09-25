@@ -1,13 +1,22 @@
 //
-//  GestureInteractionTests.swift
+//  ShellNavigationTests.swift
 //  checkpointUITests
 //
-//  UI tests for gesture interactions - tap vs swipe on cards in swipeable contexts
+//  The app shell: the system tab bar (Home, Services, Costs), the per-tab
+//  navigation stacks details are pushed onto, and the tab-root toolbar
+//  (Settings leading, add-service trailing).
+//
+//  Replaces GestureInteractionTests, which exercised the custom tab bar's
+//  swipe-between-tabs gesture. The system TabView has no such gesture, so a
+//  horizontal swipe must now leave the tab alone.
+//
+//  Labels are the English strings; run under an English simulator locale.
+//  Every test skips rather than fails when onboarding covers the shell.
 //
 
 import XCTest
 
-final class GestureInteractionTests: XCTestCase {
+final class ShellNavigationTests: XCTestCase {
 
     var app: XCUIApplication!
 
@@ -21,181 +30,116 @@ final class GestureInteractionTests: XCTestCase {
         app = nil
     }
 
-    // MARK: - Tap Gesture Tests
+    private var tabBar: XCUIElement { app.tabBars.firstMatch }
 
-    @MainActor
-    func testTapOnCard_OpensServiceDetail() throws {
-        // Skip if no vehicle/services exist (app may be empty on first launch)
-        // Look for any card that might be tappable
-        let homeTab = app.buttons["HOME"]
+    private func tab(_ label: String) -> XCUIElement {
+        tabBar.buttons[label]
+    }
 
-        // Ensure we're on home tab
-        if homeTab.exists && !homeTab.isSelected {
-            homeTab.tap()
-        }
-
-        // Wait for content to load
-        sleep(1)
-
-        // Look for a NextUpCard or any service card
-        // These typically contain service names or status text
-        let serviceCards = app.staticTexts.matching(identifier: "ServiceCard")
-
-        if serviceCards.count > 0 {
-            let firstCard = serviceCards.firstMatch
-            firstCard.tap()
-
-            // Verify navigation occurred (detail view should appear)
-            // Service detail views typically have a "Mark Done" or edit button
-            let detailIndicator = app.buttons["Mark Done"].exists ||
-                                  app.navigationBars.buttons["Edit"].exists ||
-                                  app.staticTexts["SERVICE DETAILS"].exists
-
-            XCTAssertTrue(detailIndicator, "Tapping a card should navigate to detail view")
-        } else {
-            // No services to test - skip gracefully
-            throw XCTSkip("No service cards found to test tap interaction")
+    /// The shell is covered by onboarding on a fresh install.
+    private func requireShell() throws {
+        guard tabBar.waitForExistence(timeout: 5), tabBar.isHittable else {
+            throw XCTSkip("Tab bar not reachable (onboarding is likely showing)")
         }
     }
 
-    // MARK: - Tab Switching Tests
+    // MARK: - Tab bar
 
     @MainActor
-    func testSwipeLeft_SwitchesToNextTab() throws {
-        // Start on Home tab
-        let homeTab = app.buttons["HOME"]
-        if homeTab.exists {
-            homeTab.tap()
-        }
+    func testTabBar_ListsHomeServicesCostsInOrder() throws {
+        try requireShell()
 
-        sleep(1)
-
-        // Get current tab state
-        let servicesTabBefore = app.buttons["SERVICES"].isSelected
-        let costsTabBefore = app.buttons["COSTS"].isSelected
-
-        // Perform swipe left gesture
-        let window = app.windows.firstMatch
-        window.swipeLeft()
-
-        sleep(1)
-
-        // After swiping left from Home, we should be on Costs tab
-        // (tabs are ordered: Services, Home, Costs)
-        let costsTab = app.buttons["COSTS"]
-        if costsTab.exists {
-            XCTAssertTrue(costsTab.isSelected, "Swiping left from Home should switch to Costs tab")
-        }
+        let labels = tabBar.buttons.allElementsBoundByIndex.map(\.label)
+        XCTAssertEqual(labels, ["Home", "Services", "Costs"])
     }
 
     @MainActor
-    func testSwipeRight_SwitchesToPreviousTab() throws {
-        // Start on Home tab
-        let homeTab = app.buttons["HOME"]
-        if homeTab.exists {
-            homeTab.tap()
-        }
+    func testTabBar_HomeIsSelectedAtLaunch() throws {
+        try requireShell()
 
-        sleep(1)
-
-        // Perform swipe right gesture
-        let window = app.windows.firstMatch
-        window.swipeRight()
-
-        sleep(1)
-
-        // After swiping right from Home, we should be on Services tab
-        let servicesTab = app.buttons["SERVICES"]
-        if servicesTab.exists {
-            XCTAssertTrue(servicesTab.isSelected, "Swiping right from Home should switch to Services tab")
-        }
+        XCTAssertTrue(tab("Home").isSelected, "Home is the default tab")
     }
-
-    // MARK: - Swipe on Card Should Not Open Detail
-
-    @MainActor
-    func testSwipeOnCard_DoesNotOpenDetail() throws {
-        // Start on Home tab
-        let homeTab = app.buttons["HOME"]
-        if homeTab.exists {
-            homeTab.tap()
-        }
-
-        sleep(1)
-
-        // Look for any card element
-        // The key test is that swiping changes tabs without opening detail
-        let window = app.windows.firstMatch
-
-        // Perform a horizontal swipe (tab change gesture)
-        window.swipeLeft()
-
-        sleep(1)
-
-        // Verify we changed tabs (not opened a detail view)
-        // If we're in a detail view, there would be a back button or "Mark Done"
-        let isInDetailView = app.navigationBars.buttons.element(boundBy: 0).label == "Back" ||
-                             app.buttons["Mark Done"].exists
-
-        XCTAssertFalse(isInDetailView, "Swiping should switch tabs, not open service detail")
-
-        // Verify we're on Costs tab now (swiped left from Home)
-        let costsTab = app.buttons["COSTS"]
-        if costsTab.exists {
-            XCTAssertTrue(costsTab.isSelected, "Should be on Costs tab after swiping left")
-        }
-    }
-
-    // MARK: - Scroll Tests
-
-    @MainActor
-    func testVerticalScroll_DoesNotSwitchTabs() throws {
-        // Go to Services tab (likely to have scrollable content)
-        let servicesTab = app.buttons["SERVICES"]
-        if servicesTab.exists {
-            servicesTab.tap()
-        }
-
-        sleep(1)
-
-        // Perform vertical scroll
-        let window = app.windows.firstMatch
-        window.swipeUp()
-
-        sleep(1)
-
-        // Should still be on Services tab
-        if servicesTab.exists {
-            XCTAssertTrue(servicesTab.isSelected, "Vertical scroll should not switch tabs")
-        }
-    }
-
-    // MARK: - Tab Bar Direct Tap
 
     @MainActor
     func testTabBarTap_SwitchesToCorrectTab() throws {
-        // Tap Services tab
-        let servicesTab = app.buttons["SERVICES"]
-        if servicesTab.exists {
-            servicesTab.tap()
-            sleep(1)
-            XCTAssertTrue(servicesTab.isSelected, "Tapping Services tab should select it")
-        }
+        try requireShell()
 
-        // Tap Costs tab
-        let costsTab = app.buttons["COSTS"]
-        if costsTab.exists {
-            costsTab.tap()
-            sleep(1)
-            XCTAssertTrue(costsTab.isSelected, "Tapping Costs tab should select it")
+        for label in ["Services", "Costs", "Home"] {
+            tab(label).tap()
+            XCTAssertTrue(tab(label).isSelected, "Tapping \(label) should select it")
         }
+    }
 
-        // Tap Home tab
-        let homeTab = app.buttons["HOME"]
-        if homeTab.exists {
-            homeTab.tap()
-            sleep(1)
-            XCTAssertTrue(homeTab.isSelected, "Tapping Home tab should select it")
+    @MainActor
+    func testHorizontalSwipe_DoesNotSwitchTabs() throws {
+        try requireShell()
+        tab("Home").tap()
+
+        app.windows.firstMatch.swipeLeft()
+
+        XCTAssertTrue(tab("Home").isSelected, "The system tab bar has no swipe-between-tabs gesture")
+    }
+
+    @MainActor
+    func testVerticalScroll_DoesNotSwitchTabs() throws {
+        try requireShell()
+        tab("Services").tap()
+
+        app.windows.firstMatch.swipeUp()
+
+        XCTAssertTrue(tab("Services").isSelected, "Vertical scroll should not switch tabs")
+    }
+
+    // MARK: - Toolbar
+
+    @MainActor
+    func testTabRoot_HasSettingsAndAddServiceInTheNavigationBar() throws {
+        try requireShell()
+
+        for label in ["Home", "Services", "Costs"] {
+            tab(label).tap()
+            XCTAssertTrue(app.buttons["toolbar.settings"].exists, "\(label) root shows Settings")
+            XCTAssertTrue(app.buttons["toolbar.addService"].exists, "\(label) root shows add service")
         }
+    }
+
+    @MainActor
+    func testSettingsButton_PresentsSettingsSheet() throws {
+        try requireShell()
+
+        app.buttons["toolbar.settings"].tap()
+
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
+        app.navigationBars["Settings"].buttons["Done"].tap()
+        XCTAssertTrue(tabBar.waitForExistence(timeout: 3))
+    }
+
+    // MARK: - Push navigation
+
+    @MainActor
+    func testDocumentLibrary_IsPushedOntoTheServicesStack() throws {
+        try requireShell()
+        tab("Services").tap()
+
+        let library = app.buttons["Document library"]
+        guard library.waitForExistence(timeout: 3) else {
+            throw XCTSkip("No vehicle selected, so no document library link")
+        }
+        // The link sits at the bottom of the tab's scroll content.
+        var attempts = 0
+        while !library.isHittable && attempts < 6 {
+            app.swipeUp()
+            attempts += 1
+        }
+        library.tap()
+
+        let documentsBar = app.navigationBars["Documents"]
+        XCTAssertTrue(documentsBar.waitForExistence(timeout: 3), "Documents should push, not present")
+        // Pushed: a back button, and the tab bar is still there.
+        XCTAssertTrue(documentsBar.buttons.element(boundBy: 0).exists)
+        XCTAssertTrue(tab("Services").exists)
+
+        documentsBar.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(documentsBar.waitForNonExistence(timeout: 3), "Back pops to the Services root")
     }
 }
