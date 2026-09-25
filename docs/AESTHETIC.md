@@ -44,7 +44,8 @@ The two-color palette is the **418 house default** — it governs the website an
 
 - **Semantic status color is a [REQUIREMENT], not an exception to apologize for.** Overdue / due-soon / good / neutral must be distinguishable, and the default Checkpoint theme defines `#FF6B6B` / `#F7AD55` / `#38D9A9` / `#A5ADB5` for exactly that. Maintenance urgency is the product's core signal; it outranks palette purity.
 - **Checkpoint is themed.** `Resources/Themes.json` ships **eight** themes with eight different accents, some unlocked via tips. "Never introduce color variations outside these two values" describes the *default* theme, not the app.
-- **Never encode meaning in color alone. [REQUIREMENT]** Status must also carry a label, a shape, or a position. Color-blind users and sunlight both defeat hue-only signals.
+- **Never encode meaning in color alone. [REQUIREMENT]** Status must also carry a label, a shape, or a position. Color-blind users and sunlight both defeat hue-only signals. In Checkpoint this is `StatusTag`: overdue filled square, due soon outlined square, good short rule, always with the word.
+- **Every theme answers for light, dark, and Increase Contrast. [REQUIREMENT]** The app follows the system appearance; it never forces one. A theme is an identity carried into both appearances, not a choice of appearance. Text holds ≥4.5:1 (primary and secondary aim ≥7:1) in every variant — `tools/theme-contrast/` checks it.
 
 Any new color token goes through `ThemeProviding` so every theme answers for it — see [`packages/DesignKit/CLAUDE.md`](../packages/DesignKit/CLAUDE.md).
 
@@ -70,7 +71,8 @@ Monospace signals developer culture, terminal aesthetics, precision, and a rejec
 - **A screen where all content sits within one or two adjacent steps of the scale is a defect**, regardless of how large its largest element is. A 56pt hero above a wall of uniform 11pt text is still a wall.
 
 Guidelines: **[PREFERENCE]**
-- Uppercase for labels, metadata, and system information — but **not** for long user-authored content, where it destroys word-shape recognition and slows reading.
+- Uppercase for field labels, status tags, metadata, and system information — but **not** for long user-authored content, where it destroys word-shape recognition and slows reading.
+- **Section titles are Title Case, untracked, primary ink** (`brutalistSectionTitle`). In the Sep 2026 sketchpad audit, 11pt tracked caps headers vanished in the squint test and read as one more field label; Title Case separates the section tier from the labels under it on four channels. This also matches iOS 26 list and form headers.
 - Sentence case for body copy and conversational content.
 - Never italics (monospace italics break the mechanical rhythm).
 
@@ -112,7 +114,9 @@ On the **website**, break conventions deliberately: logo top-right, navigation b
 
 ### Corners **[PREFERENCE]**
 
-Sharp 90° edges. No `cornerRadius`.
+Sharp 90° edges on content. No `cornerRadius`.
+
+System chrome keeps its own shapes: the Liquid Glass tab bar, bar buttons, sheets, and search field are rounded by the platform, and restyling them costs the user the platform's affordances for a brand gain nobody asked for. The brutalist edge lives in cards, rows, fields, and buttons inside the content.
 
 ### Metadata and system information **[PREFERENCE]**
 

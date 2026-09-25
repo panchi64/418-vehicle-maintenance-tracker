@@ -134,9 +134,9 @@ These are the invariants the code cites. They were previously referenced as `G*`
 
 | ID | Was | Invariant |
 |---|---|---|
-| **F1** | G1 | One shared bottom action bar (`FormActionBar`) for every data-entry form: one primary action, an optional secondary, and a success flash for forms that stay open after saving. Save lives in the same place on every surface. |
-| **F2** | G2 | Disabled-save feedback is uniform: error haptic plus a scroll to the field that blocks it. Callers supply only the scroll target, never their own feedback. |
-| **F3** | G3 | The action bar never rides above the keyboard — it would eat number-pad space and invite accidental saves. Enforced centrally in `FormActionBar` via `KeyboardVisibility`, so no form can opt out. |
+| **F1** | G1 | Save lives in the same place on every data-entry form: the **trailing confirmation action of the navigation bar**, prominent; Cancel is the leading cancellation action (HIG, sheets). One shared toolbar component owns this, so no form places its own. *(Revised Sep 2026: previously a bottom action bar, which cost a keyboard-dismiss tap on every numeric entry and disagreed with every other iOS app.)* |
+| **F2** | G2 | Disabled-save feedback is uniform: Save is dimmed but stays tappable, and the tap produces an error haptic, a scroll to the field that blocks it, and a `.blocking` advisory at that field. Callers supply only the scroll target, never their own feedback. |
+| **F3** | G3 | A form with unsaved changes cannot be lost by accident: swipe-to-dismiss is disabled while dirty, and Cancel asks "Discard changes?" before discarding. *(Revised Sep 2026: previously "the action bar never rides above the keyboard", moot once Save moved to the toolbar.)* |
 | **F4** | G5 | A projection preview must use the same calculation as the save path, and must not render when there is nothing computable. A preview that can disagree with what actually gets scheduled is worse than no preview. |
 | **F5** | G6 | Optional-ness is communicated by one uppercase tracked tag in a section header's trailing slot — subject to the `[OPTIONAL]`-is-a-promise rule in Part 2. |
 | **F6** | G8 | Change transparency: while editing, show a field's original value only for as long as the current value differs from it. Never a permanent badge. |
@@ -146,6 +146,9 @@ These are the invariants the code cites. They were previously referenced as `G*`
 | **F10** | R9 | Form drafts persist so a form survives dismissal or the app being killed. Only real edits produce a draft — a pristine form never overwrites a stored one. Attachments are excluded; they live on disk already. |
 | **F11** | *new* | One mileage-commit path. See Part 2. |
 | **F12** | *new* | One advisory component with an explicit severity level. See Part 2. |
+| **F13** | *new* | **Details push, tasks present.** Anything read and backed out of is pushed onto the tab's navigation stack (back gesture for free); only things filled in and saved or cancelled are sheets. Sheets never stack on sheets for navigation. |
+| **F14** | *new* | **Every row action is reachable two ways.** A swipe action on a list row is also in that row's long-press menu (and, where it matters, on the detail screen). A gesture is never the only door to a function — it's invisible to VoiceOver, Switch Control, and anyone who doesn't know to swipe. |
+| **F15** | *new* | **The shell is the system's.** Tab bar, navigation bars, toolbars, search fields and sheets are native components; brand lives in content. No custom bar backgrounds or sheet backgrounds — they defeat Liquid Glass and the scroll-edge effects. |
 
 Cite these by ID in code comments, and add new ones here before citing them.
 
@@ -187,9 +190,9 @@ A SwiftUI iteration costs ~40 seconds; the sketchpad costs about one. **Resolve 
 
 Recorded so they are not rediscovered as though they were new:
 
-- `ServicesTab` treats Documents as a view mode that then offers "OPEN LIBRARY" to leave for the real documents screen — a content type masquerading as a mode.
-- A skipped service cannot be dismissed without fabricating a log entry, so a returning lapsed user faces permanent red rows.
 - "Due Soon" is user-configured in Settings but treated as absolute wherever it is displayed.
+
+Resolved in the Sep 2026 HIG pass: Documents is a pushed library reached from a row, not a Services mode; a skipped service can be dismissed without fabricating a log.
 
 ## How to extend this document
 
