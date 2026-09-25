@@ -59,15 +59,6 @@ enum L10n {
     static var rowNoDueDate: String { localized("row.noDueDate") }
     static var rowViewDetailsHint: String { localized("row.viewDetailsHint") }
     static var rowServiceFallback: String { localized("row.serviceFallback") }
-    // MARK: - Filter chrome
-
-    static func filterDimension(_ name: String) -> String {
-        String(format: localized("filter.dimension"), name)
-    }
-    static func filterClear(_ name: String) -> String {
-        String(format: localized("filter.clear"), name)
-    }
-
     static var headerOdometer: String { localized("header.odometer") }
     static var headerSpecs: String { localized("header.specs") }
     /// Navigation title when no vehicle is selected.

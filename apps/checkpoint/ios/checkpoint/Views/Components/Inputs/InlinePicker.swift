@@ -12,9 +12,9 @@
 //  Shaped like a field (label, value, rule) so a form reads as one column of
 //  lines rather than a mix of lines and boxes.
 //
-//  Unlike `FilterControl`, the trigger shows the VALUE: this sets a value rather
-//  than narrowing a list, and it is not sharing a row with another control, so a
-//  value-dependent width is safe here.
+//  The trigger shows the VALUE: this sets a value rather than narrowing a list,
+//  and it does not share a row with another control, so a value-dependent width
+//  is safe here.
 //
 
 import SwiftUI

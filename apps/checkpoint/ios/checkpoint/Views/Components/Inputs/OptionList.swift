@@ -2,11 +2,8 @@
 //  OptionList.swift
 //  checkpoint
 //
-//  The option panel shared by `FilterControl` and `InlinePicker`.
-//
-//  Extracted on the second use rather than the third. The two triggers differ —
-//  a filter names its dimension, a form field shows its value — but the list
-//  they open is the same object, and two copies would drift.
+//  The option panel `InlinePicker` opens. (It was shared with the tab filter
+//  trigger until Services and Costs dropped their filter rows.)
 //
 //  Presented as an inline band that pushes content down, NOT as a popover. A
 //  SwiftUI popover draws its own rounded, translucent system chrome, which
