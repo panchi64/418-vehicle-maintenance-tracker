@@ -96,19 +96,6 @@ struct ServiceDetailView: View {
                 didCompleteMark = true
             })
         }
-        .confirmationDialog(
-            L10n.serviceDeleteConfirmTitle,
-            isPresented: $confirmDelete,
-            titleVisibility: .visible
-        ) {
-            Button(L10n.commonDelete, role: .destructive) {
-                deleteAfterPop = true
-                dismiss()
-            }
-            Button(L10n.commonCancel, role: .cancel) {}
-        } message: {
-            Text(L10n.serviceDeleteConfirmMessage)
-        }
         .onDisappear {
             guard deleteAfterPop else { return }
             deleteAfterPop = false
@@ -191,6 +178,20 @@ struct ServiceDetailView: View {
 
             DestructiveFormButton(title: L10n.serviceDeleteAction) {
                 confirmDelete = true
+            }
+            // Centered alert: an iOS 26 confirmation dialog is a popover
+            // with an arrow, which the app avoids for yes/no confirms.
+            .alert(
+                L10n.serviceDeleteConfirmTitle,
+                isPresented: $confirmDelete
+            ) {
+                Button(L10n.commonDelete, role: .destructive) {
+                    deleteAfterPop = true
+                    dismiss()
+                }
+                Button(L10n.commonCancel, role: .cancel) {}
+            } message: {
+                Text(L10n.serviceDeleteConfirmMessage)
             }
         }
         .padding(.top, Spacing.lg)

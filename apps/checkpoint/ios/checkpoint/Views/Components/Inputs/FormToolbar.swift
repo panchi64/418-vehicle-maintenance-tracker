@@ -68,11 +68,9 @@ struct FormToolbar: ViewModifier {
                     .accessibilityIdentifier("form.save")
                 }
             }
-            .confirmationDialog(
-                L10n.formDiscardTitle,
-                isPresented: $isConfirmingDiscard,
-                titleVisibility: .visible
-            ) {
+            // A centered alert, not a confirmation dialog: on iOS 26 the dialog
+            // is a popover with an arrow aimed at whatever it's attached to.
+            .alert(L10n.formDiscardTitle, isPresented: $isConfirmingDiscard) {
                 Button(L10n.formDiscard, role: .destructive) {
                     onDiscard?()
                     dismiss()

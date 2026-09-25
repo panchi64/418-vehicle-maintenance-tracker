@@ -47,13 +47,14 @@ extension View {
         pending: Binding<Vehicle.MarbeteExpiration?>,
         onConfirm: @escaping (Vehicle.MarbeteExpiration) -> Void
     ) -> some View {
-        confirmationDialog(
+        // Alert, so it's centered: a confirmation dialog attached at screen
+        // level is an iOS 26 popover whose arrow points at nothing.
+        alert(
             L10n.homeMarbeteRenewTitle,
             isPresented: Binding(
                 get: { pending.wrappedValue != nil },
                 set: { if !$0 { pending.wrappedValue = nil } }
             ),
-            titleVisibility: .visible,
             presenting: pending.wrappedValue
         ) { expiration in
             Button(L10n.homeMarbeteRenewConfirm(Vehicle.marbeteExpirationLabel(expiration))) {

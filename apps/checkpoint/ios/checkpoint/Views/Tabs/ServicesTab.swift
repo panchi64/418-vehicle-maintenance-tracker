@@ -123,13 +123,15 @@ struct ServicesTab: View {
         .sheet(item: $exportPDFURL) { url in
             ShareSheet(items: [url])
         }
-        .confirmationDialog(
+        // An alert, not a confirmation dialog: deletes start from swipes,
+        // context menus, and the Select bar — no single control to anchor an
+        // iOS 26 popover to, so a dialog here pointed at mid-screen.
+        .alert(
             pendingDelete?.title ?? "",
             isPresented: Binding(
                 get: { pendingDelete != nil },
                 set: { if !$0 { pendingDelete = nil } }
             ),
-            titleVisibility: .visible,
             presenting: pendingDelete
         ) { pending in
             Button(L10n.commonDelete, role: .destructive) {
