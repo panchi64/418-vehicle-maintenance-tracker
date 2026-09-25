@@ -18,21 +18,24 @@ struct WatchWidgetEntry: TimelineEntry {
     let service: WatchWidgetService?
     let isStale: Bool
     let distanceUnit: String  // "MI" or "KM"
+    /// When the phone last synced this snapshot; nil when there is no data.
+    let updatedAt: Date?
 
     static var placeholder: WatchWidgetEntry {
         WatchWidgetEntry(
             date: Date(),
-            vehicleName: "MY VEHICLE",
+            vehicleName: String(localized: "MY VEHICLE"),
             currentMileage: 34500,
             service: WatchWidgetService(
-                name: "Oil Change",
+                name: String(localized: "Oil Change"),
                 status: .dueSoon,
-                dueDescription: "Due in 5 days",
+                dueDescription: "",
                 dueMileage: 35000,
                 daysRemaining: 5
             ),
             isStale: false,
-            distanceUnit: "MI"
+            distanceUnit: "MI",
+            updatedAt: Date()
         )
     }
 
@@ -43,7 +46,8 @@ struct WatchWidgetEntry: TimelineEntry {
             currentMileage: 0,
             service: nil,
             isStale: false,
-            distanceUnit: "MI"
+            distanceUnit: "MI",
+            updatedAt: nil
         )
     }
 }
@@ -67,15 +71,6 @@ enum WatchWidgetStatus: String, Codable {
         case .dueSoon: return WatchWidgetColors.statusDueSoon
         case .good: return WatchWidgetColors.statusGood
         case .neutral: return WatchWidgetColors.statusNeutral
-        }
-    }
-
-    var icon: String {
-        switch self {
-        case .overdue: return "exclamationmark.triangle"
-        case .dueSoon: return "clock"
-        case .good: return "checkmark.circle"
-        case .neutral: return "minus.circle"
         }
     }
 }
@@ -164,7 +159,8 @@ struct WatchWidgetProvider: TimelineProvider {
                 currentMileage: vehicleData.currentMileage,
                 service: firstService,
                 isStale: vehicleData.isStale,
-                distanceUnit: vehicleData.distanceUnitAbbreviation
+                distanceUnit: vehicleData.distanceUnitAbbreviation,
+                updatedAt: vehicleData.updatedAt
             )
         } catch {
             return .empty

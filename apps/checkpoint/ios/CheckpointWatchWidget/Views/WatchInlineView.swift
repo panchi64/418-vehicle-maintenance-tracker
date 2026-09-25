@@ -2,7 +2,7 @@
 //  WatchInlineView.swift
 //  CheckpointWatchWidget
 //
-//  Inline Watch complication: "SERVICE • DUE_INFO"
+//  Inline Watch complication: "OVERDUE OIL CHANGE • 500 MI OVER"
 //  Brutalist: monospace, uppercase
 //
 
@@ -14,36 +14,27 @@ struct WatchInlineView: View {
 
     var body: some View {
         if let service = entry.service {
-            Label {
-                Text("\(service.name.uppercased()) \u{2022} \(formatDue(service.dueDescription))")
-                    .font(.system(.caption, design: .monospaced))
-            } icon: {
-                Image(systemName: service.status.icon)
+            let name = service.name.uppercased()
+            let nameAndDue = "\(name) \u{2022} \(WatchWidgetDisplay.compactDue(for: service, entry: entry))"
+            let word = service.status.label
+            // Inline renders only text and one image: the symbol mirrors the
+            // status shape, and the word leads when there is room.
+            ViewThatFits {
+                line(word.isEmpty ? nameAndDue : "\(word) \(nameAndDue)", status: service.status)
+                line(nameAndDue, status: service.status)
+                line(name, status: service.status)
             }
         } else {
-            Text("— —")
-                .font(.system(.caption, design: .monospaced))
+            Text("NO SERVICES DUE")
         }
     }
 
-    /// Abbreviate due description for inline: "500 miles remaining" → "500 MI"
-    private func formatDue(_ description: String) -> String {
-        let unitAbbrev = entry.distanceUnit
-        let upper = description.uppercased()
-        if upper.contains("MILES") || upper.contains("KILOMETERS") {
-            let number = upper.components(separatedBy: CharacterSet.decimalDigits.inverted)
-                .filter { !$0.isEmpty }
-                .first ?? ""
-            if upper.contains("OVERDUE") {
-                return "\(number) \(unitAbbrev) OVER"
-            } else {
-                return "\(number) \(unitAbbrev)"
-            }
+    private func line(_ text: String, status: WatchWidgetStatus) -> some View {
+        Label {
+            Text(verbatim: text)
+                .font(.system(.body, design: .monospaced))
+        } icon: {
+            Image(systemName: status.symbolName)
         }
-        // Date-based items read as an abstracted period ("DUE MID MAY"); drop the
-        // leading verb so the compact inline slot shows just "MID MAY".
-        return upper
-            .replacingOccurrences(of: "DUE ", with: "")
-            .replacingOccurrences(of: "EXPIRES ", with: "")
     }
 }

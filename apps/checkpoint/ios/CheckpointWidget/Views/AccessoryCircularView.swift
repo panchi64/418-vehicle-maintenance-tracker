@@ -2,7 +2,7 @@
 //  AccessoryCircularView.swift
 //  CheckpointWidget
 //
-//  Circular lock screen widget showing status icon and abbreviated service
+//  Circular Lock Screen widget: status shape over the service's first word
 //  Brutalist-Tech-Modernist aesthetic: uppercase monospace
 //
 
@@ -13,38 +13,33 @@ struct AccessoryCircularView: View {
     let entry: ServiceEntry
 
     var body: some View {
-        if let service = entry.services.first {
-            ZStack {
-                AccessoryWidgetBackground()
-                VStack(spacing: 2) {
-                    Image(systemName: statusIcon(for: service.status))
-                        .font(.system(size: 18, weight: .semibold))
-                    Text(abbreviate(service.name))
-                        .font(.system(size: 9, weight: .medium, design: .monospaced))
+        ZStack {
+            AccessoryWidgetBackground()
+            if let service = entry.services.first {
+                VStack(spacing: 3) {
+                    // Lock Screen rendering is monochrome: the shape is the
+                    // status (filled / outlined square, rule), not a hue.
+                    WidgetStatusMark(status: service.status, size: 12)
+                    Text(Self.abbreviate(service.name))
+                        .font(.system(.caption2, design: .monospaced).weight(.semibold))
+                        .minimumScaleFactor(0.6)
+                        .lineLimit(1)
                 }
-            }
-            .widgetAccentable()
-        } else {
-            ZStack {
-                AccessoryWidgetBackground()
-                Text("—")
-                    .font(.system(size: 16, weight: .medium, design: .monospaced))
+                .padding(.horizontal, 4)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(Text(verbatim: "\(service.name), \(service.status.label)"))
+            } else {
+                Image(systemName: "checkmark")
+                    .font(.title3.weight(.semibold))
+                    .accessibilityLabel(Text("No services due"))
             }
         }
+        .widgetAccentable()
     }
 
-    /// Returns first word: "Oil Change" → "OIL"
-    private func abbreviate(_ name: String) -> String {
+    /// First word: "Oil Change" → "OIL"
+    static func abbreviate(_ name: String) -> String {
         String(name.uppercased().split(separator: " ").first ?? "")
-    }
-
-    private func statusIcon(for status: WidgetServiceStatus) -> String {
-        switch status {
-        case .overdue: return "exclamationmark.triangle"
-        case .dueSoon: return "clock"
-        case .good: return "checkmark.circle"
-        case .neutral: return "minus.circle"
-        }
     }
 }
 

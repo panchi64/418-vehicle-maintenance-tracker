@@ -2,7 +2,7 @@
 //  WatchCircularView.swift
 //  CheckpointWatchWidget
 //
-//  Circular Watch complication: status icon + abbreviated service name
+//  Circular Watch complication: status shape over the service's first word
 //  Brutalist: monospace, uppercase
 //
 
@@ -13,28 +13,25 @@ struct WatchCircularView: View {
     let entry: WatchWidgetEntry
 
     var body: some View {
-        if let service = entry.service {
-            ZStack {
-                AccessoryWidgetBackground()
-                VStack(spacing: 2) {
-                    Image(systemName: service.status.icon)
-                        .font(.system(size: 18, weight: .semibold))
-                    Text(abbreviate(service.name))
-                        .font(.system(size: 9, weight: .medium, design: .monospaced))
+        ZStack {
+            AccessoryWidgetBackground()
+            if let service = entry.service {
+                VStack(spacing: 3) {
+                    WatchWidgetStatusMark(status: service.status, size: 11)
+                    Text(WatchWidgetDisplay.abbreviate(service.name))
+                        .font(.system(.caption2, design: .monospaced).weight(.semibold))
+                        .minimumScaleFactor(0.6)
+                        .lineLimit(1)
                 }
-            }
-            .widgetAccentable()
-        } else {
-            ZStack {
-                AccessoryWidgetBackground()
-                Text("—")
-                    .font(.system(size: 16, weight: .medium, design: .monospaced))
+                .padding(.horizontal, 3)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(Text(verbatim: "\(service.name), \(service.status.label)"))
+            } else {
+                Image(systemName: "checkmark")
+                    .font(.title3.weight(.semibold))
+                    .accessibilityLabel(Text("No services due"))
             }
         }
-    }
-
-    /// Returns first word: "Oil Change" → "OIL"
-    private func abbreviate(_ name: String) -> String {
-        String(name.uppercased().split(separator: " ").first ?? "")
+        .widgetAccentable()
     }
 }
