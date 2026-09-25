@@ -61,17 +61,13 @@ struct ServiceLogDetailView: View {
         }
         .trackScreen(.serviceLogDetail)
         .background(Theme.backgroundPrimary)
-        .navigationTitle("Service Log")
+        .navigationTitle(L10n.servicesLogTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button {
+                Button(L10n.servicesActionEdit) {
                     showEditSheet = true
-                } label: {
-                    Image(systemName: "pencil")
                 }
-                .toolbarButtonStyle()
-                .accessibilityLabel("Edit service log")
             }
         }
         // Delete from the edit form waits for the form to finish dismissing,
@@ -114,13 +110,16 @@ struct ServiceLogDetailView: View {
         .padding(Spacing.xl)
         .glassCardStyle(intensity: .subtle, padding: 0)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(log.service?.name ?? "Service"), \(Formatters.mediumDate.string(from: log.performedDate))")
+        .accessibilityLabel(L10n.readoutEvent(
+            log.service?.name ?? L10n.serviceFallbackName,
+            L10n.spokenDate(log.performedDate)
+        ))
     }
 
     // MARK: - Details Section
 
     private var detailsSection: some View {
-        InstrumentSection(title: "Details") {
+        InstrumentSection(title: L10n.formDetails) {
             VStack(spacing: 0) {
                 if let cost = log.editableCost.flatMap({ Formatters.currency.string(from: $0 as NSDecimalNumber) }) {
                     BrutalistDataRow(label: log.sharedCostVisit != nil ? L10n.editVisitTotal : L10n.formCost, value: cost, padding: Spacing.md)

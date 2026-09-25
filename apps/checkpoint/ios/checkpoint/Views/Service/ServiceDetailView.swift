@@ -2,7 +2,10 @@
 //  ServiceDetailView.swift
 //  checkpoint
 //
-//  Detailed view for a service showing status, actions, and history
+//  One service: where it stands, its schedule, and what has been done.
+//  Pushed (a detail you read and back out of); Edit is in the toolbar,
+//  Delete at the end of the scroll. Sections live in
+//  ServiceDetailView+Sections.swift.
 //
 
 import SwiftUI
@@ -10,8 +13,8 @@ import SwiftData
 
 struct ServiceDetailView: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(AppState.self) private var appState
-    @Query private var services: [Service]
+    @Environment(\.modelContext) private var modelContext
+    @Environment(AppState.self) var appState
 
     @Bindable var service: Service
     let vehicle: Vehicle
@@ -19,59 +22,47 @@ struct ServiceDetailView: View {
     @State private var showEditSheet = false
     @State private var showMarkDoneSheet = false
     @State private var didCompleteMark = false
-
-    // The history row's context-menu delete is confirmed rather than undone.
-    // That dates from this screen being a sheet, with the Undo toast rendering
-    // beneath it; toasts now render above everything, so this could switch to
-    // `ServiceLogDeleteAction.perform(_, offerUndo: true)` like the tabs.
-    @State private var logToConfirmDelete: ServiceLog?
-
-    /// Judged by the same effective mileage as the list row that opened this
-    /// screen — raw `currentMileage` here let the two disagree.
-    private var status: ServiceStatus {
-        service.status(on: vehicle)
-    }
-
-    private var allAttachments: [ServiceAttachment] {
-        (service.logs ?? [])
-            .flatMap { $0.attachments ?? [] }
-            .sorted { $0.createdAt < $1.createdAt }
-    }
+    @State private var confirmDelete = false
+    /// Set when Delete is confirmed; the delete runs once this screen has
+    /// popped, so nothing on its way out reads a deleted model.
+    @State private var deleteAfterPop = false
 
     var body: some View {
+        // Judged by the same effective mileage as the list row that opened
+        // this screen — raw `currentMileage` here let the two disagree.
+        let mileage = vehicle.mileageEstimate
+        let status = service.status(currentMileage: mileage.effective)
+        let logs = (service.logs ?? []).sorted { $0.performedDate > $1.performedDate }
+
         ScrollView {
             VStack(spacing: Spacing.xl) {
-                // Status header card (hide for log-only/neutral services)
+                // Log-only services have no status to headline.
                 if status != .neutral {
-                    statusCard
+                    statusCard(status: status, mileage: mileage)
                 }
 
-                // Due info section (hide for closed/log-only services with no
-                // forward-looking schedule data). Chain-spawn clears intervals
-                // on the closed row, so `hasDueTracking` is the right gate.
+                primaryAction(status: status)
+
+                // Chain-spawn clears intervals on the closed row, so
+                // `hasDueTracking` is the right gate for the schedule.
                 if service.hasDueTracking {
-                    dueInfoSection
+                    scheduleSection
                 }
 
-                // Actions
-                actionButtons
-
-                // Service history
-                if !(service.logs ?? []).isEmpty {
-                    historySection
+                if !logs.isEmpty {
+                    historySection(logs)
+                    insightsSection(logs, mileage: mileage)
                 }
 
-                // Insights (only when there's history)
-                if !(service.logs ?? []).isEmpty {
-                    insightsSection
-                }
-
-                if !allAttachments.isEmpty {
+                let attachments = logs.flatMap { $0.attachments ?? [] }.sorted { $0.createdAt < $1.createdAt }
+                if !attachments.isEmpty {
                     AttachmentSection(
-                        attachments: allAttachments,
+                        attachments: attachments,
                         onSelect: { appState.push(.document($0)) }
                     )
                 }
+
+                endActions
             }
             .padding(.horizontal, Spacing.screenHorizontal)
             .padding(.vertical, Spacing.lg)
@@ -82,20 +73,13 @@ struct ServiceDetailView: View {
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button {
+                Button(L10n.servicesActionEdit) {
                     showEditSheet = true
-                } label: {
-                    Image(systemName: "pencil")
                 }
-                .toolbarButtonStyle()
-                .accessibilityLabel("Edit service")
             }
         }
         .sheet(isPresented: $showEditSheet, onDismiss: {
-            updateAppIcon()
-            updateWidgetData()
-            // Deleted from the edit form: this pushed screen has nothing left
-            // to show, so pop it rather than render a deleted model.
+            // Deleted from the edit form: nothing left to show.
             if service.modelContext == nil || service.isDeleted {
                 dismiss()
             }
@@ -103,8 +87,6 @@ struct ServiceDetailView: View {
             EditServiceView(service: service, vehicle: vehicle)
         }
         .sheet(isPresented: $showMarkDoneSheet, onDismiss: {
-            updateAppIcon()
-            updateWidgetData()
             if didCompleteMark {
                 didCompleteMark = false
                 dismiss()
@@ -115,308 +97,103 @@ struct ServiceDetailView: View {
             })
         }
         .confirmationDialog(
-            L10n.logDeleteConfirmTitle,
-            isPresented: Binding(
-                get: { logToConfirmDelete != nil },
-                set: { if !$0 { logToConfirmDelete = nil } }
-            ),
-            titleVisibility: .visible,
-            presenting: logToConfirmDelete
-        ) { log in
+            L10n.serviceDeleteConfirmTitle,
+            isPresented: $confirmDelete,
+            titleVisibility: .visible
+        ) {
             Button(L10n.commonDelete, role: .destructive) {
-                ServiceLogDeleteAction.perform(log, offerUndo: false)
+                deleteAfterPop = true
+                dismiss()
             }
-            Button(L10n.commonCancel, role: .cancel) { }
-        } message: { _ in
-            Text(L10n.logDeleteConfirmMessage)
+            Button(L10n.commonCancel, role: .cancel) {}
+        } message: {
+            Text(L10n.serviceDeleteConfirmMessage)
+        }
+        .onDisappear {
+            guard deleteAfterPop else { return }
+            deleteAfterPop = false
+            ServiceDeleteAction.delete([service], vehicle: vehicle, in: modelContext)
         }
     }
 
-    // MARK: - Status Card
+    // MARK: - Status
 
-    private var statusCard: some View {
-        VStack(spacing: Spacing.md) {
-            // Status badge (brutalist: square indicator, rectangle background)
-            HStack {
-                Rectangle()
-                    .fill(status.color)
-                    .frame(width: 8, height: 8)
-                    .statusGlow(color: status.color, isActive: status == .overdue || status == .dueSoon)
-                    .accessibilityHidden(true)
-                Text(status.label)
-                    .font(.brutalistLabel)
-                    .foregroundStyle(status.color)
-                    .textCase(.uppercase)
-                    .tracking(1.5)
-            }
-            .padding(.horizontal, Spacing.listItem)
-            .padding(.vertical, 6)
-            .background(status.color.opacity(0.15))
-            .clipShape(Rectangle())
+    /// The hero: status, then how far off it is, then when. The figure keeps
+    /// to one line and scales down rather than breaking mid-word at large
+    /// type ("remain/ing" in a narrow card at AX5).
+    private func statusCard(status: ServiceStatus, mileage: MileageEstimate) -> some View {
+        let urgency = service.urgencyText(currentMileage: mileage.effective)
 
-            // Main urgency display - miles first
-            if let description = service.primaryDescription {
-                Text(description)
+        return VStack(spacing: Spacing.md) {
+            StatusTag(status: status)
+
+            if let urgency {
+                Text(urgency)
                     .font(.brutalistTitle)
                     .foregroundStyle(Theme.textPrimary)
-                    .multilineTextAlignment(.center)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
             }
 
-            // Date info (secondary, only shown if mileage tracking exists)
-            if service.dueMileage != nil, let dateDesc = service.dueDescription {
-                Text(dateDesc)
-                    .font(.brutalistSecondary)
-                    .foregroundStyle(Theme.textSecondary)
-            }
+            Text(service.dueLine)
+                .font(.brutalistSecondary)
+                .foregroundStyle(Theme.textSecondary)
+                .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
-        .padding(Spacing.xl)
+        .padding(Spacing.lg)
         .glassCardStyle(intensity: .subtle, padding: 0)
-        .padding(Spacing.xl)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Status: \(status.label)")
-        .accessibilityValue(service.primaryDescription ?? service.dueDescription ?? "")
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(L10n.readoutStatus(status))
+        .accessibilityValue([urgency, service.dueLine].compactMap { $0 }.joined(separator: ", "))
     }
 
-    // MARK: - Due Info Section
+    // MARK: - Actions
 
-    private var dueInfoSection: some View {
-        InstrumentSection(title: "Schedule") {
-            VStack(spacing: 0) {
-                if let dueDate = service.dueDate {
-                    BrutalistDataRow(label: "Due Date", value: formatDate(dueDate), padding: Spacing.md)
-                    ListDivider(leadingPadding: 0)
-                }
-
-                if let dueMileage = service.dueMileage {
-                    BrutalistDataRow(label: "Due Mileage", value: formatMileage(dueMileage), padding: Spacing.md)
-                    ListDivider(leadingPadding: 0)
-                }
-
-                if let intervalMonths = service.intervalMonths {
-                    BrutalistDataRow(label: "Repeat Every", value: "\(intervalMonths) months", padding: Spacing.md)
-                    ListDivider(leadingPadding: 0)
-                }
-
-                if let intervalMiles = service.intervalMiles {
-                    BrutalistDataRow(label: "Or Every", value: formatMileage(intervalMiles), padding: Spacing.md)
-                    if let notes = service.notes, !notes.isEmpty {
-                        ListDivider(leadingPadding: 0)
-                    }
-                }
-
-                if let notes = service.notes, !notes.isEmpty {
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("NOTES")
-                            .font(.brutalistLabel)
-                            .foregroundStyle(Theme.textTertiary)
-                            .tracking(1)
-                        Text(notes.brutalistMarkdownAttributed)
-                            .font(.brutalistBody)
-                            .foregroundStyle(Theme.textSecondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(Spacing.md)
-                }
+    /// One primary action: complete it, or — for a log-only service — give it
+    /// a schedule.
+    @ViewBuilder
+    private func primaryAction(status: ServiceStatus) -> some View {
+        if status == .neutral {
+            Button {
+                showEditSheet = true
+            } label: {
+                Label(L10n.servicesDetailSetUpReminder, systemImage: "bell.badge")
             }
+            .buttonStyle(.primary)
+        } else {
+            Button {
+                showMarkDoneSheet = true
+            } label: {
+                Label(L10n.servicesActionMarkDone, systemImage: "checkmark.circle.fill")
+            }
+            .buttonStyle(.primary)
         }
     }
 
-    // MARK: - Action Buttons
-
-    private var actionButtons: some View {
+    /// Rarer, heavier actions at the end of the scroll. Stop Tracking takes a
+    /// skipped service off the schedule without inventing a log for it.
+    private var endActions: some View {
         VStack(spacing: Spacing.sm) {
-            if status == .neutral {
+            if service.hasDueTracking {
                 Button {
-                    showEditSheet = true
+                    ServiceDeleteAction.stopTracking(service, vehicle: vehicle)
                 } label: {
-                    HStack {
-                        Image(systemName: "bell.badge")
-                        Text("Set Up Reminder")
-                    }
-                }
-                .buttonStyle(.primary)
-                .accessibilityLabel("Set up reminder")
-                .accessibilityHint("Opens edit form to configure due dates")
-            } else {
-                Button {
-                    showMarkDoneSheet = true
-                } label: {
-                    HStack {
-                        Image(systemName: "checkmark.circle.fill")
-                        Text("Mark as Done")
-                    }
-                }
-                .buttonStyle(.primary)
-                .accessibilityLabel("Mark as done")
-                .accessibilityHint("Opens service completion form")
-            }
-        }
-    }
-
-    // MARK: - History Section
-
-    private var historySection: some View {
-        InstrumentSection(title: "History") {
-            VStack(spacing: 0) {
-                let sortedLogs = (service.logs ?? []).sorted(by: { $0.performedDate > $1.performedDate })
-                ForEach(sortedLogs) { log in
-                    Button {
-                        if let visit = log.visit {
-                            appState.push(.visit(visit))
-                        } else {
-                            appState.push(.serviceLog(log))
-                        }
-                    } label: {
-                        historyRow(log: log)
-                    }
-                    .buttonStyle(.plain)
-                    .serviceLogDeleteMenu { logToConfirmDelete = log }
-
-                    if log.id != sortedLogs.last?.id {
-                        ListDivider(leadingPadding: Spacing.md)
-                    }
-                }
-            }
-        }
-    }
-
-    private func historyRow(log: ServiceLog) -> some View {
-        HStack {
-            AdaptiveStack(horizontalSpacing: Spacing.sm, verticalSpacing: Spacing.xs) {
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: Spacing.xs) {
-                        Text(formatDate(log.performedDate))
-                            .font(.brutalistBody)
-                            .foregroundStyle(Theme.textPrimary)
-
-                        if !(log.attachments ?? []).isEmpty {
-                            Image(systemName: "paperclip")
-                                .font(.caption2.weight(.medium))
-                                .foregroundStyle(Theme.textTertiary)
-                        }
-                    }
-
-                    Text("\(formatMileage(log.mileageAtService))")
-                        .font(.brutalistLabel)
-                        .foregroundStyle(Theme.textTertiary)
-                }
-
-                AdaptiveSpacer()
-
-                if log.visit != nil {
-                    Text("PART OF VISIT")
-                        .font(.brutalistLabel)
-                        .tracking(1)
-                        .foregroundStyle(Theme.textTertiary)
-                } else if let cost = log.formattedCost {
-                    Text(cost)
+                    Label(L10n.servicesActionStopTracking, systemImage: "bell.slash")
                         .font(.brutalistBody)
                         .foregroundStyle(Theme.textSecondary)
+                        .frame(maxWidth: .infinity, minHeight: TouchTarget.minimum)
+                        .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
+                .accessibilityHint(L10n.servicesDetailStopTrackingHint)
             }
 
-            Spacer(minLength: 0)
-
-            Image(systemName: "chevron.right")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(Theme.textTertiary)
-        }
-        .padding(Spacing.md)
-        .contentShape(Rectangle())
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Service on \(formatDate(log.performedDate)), \(formatMileage(log.mileageAtService))")
-        .accessibilityValue(log.visit != nil ? "Part of a Service Visit" : (log.formattedCost ?? "No cost"))
-        .accessibilityHint(log.visit != nil ? "Double tap to view the Service Visit" : "Double tap to view details")
-    }
-
-    // MARK: - Insights Section
-
-    private var insightsSection: some View {
-        let sortedLogs = (service.logs ?? []).sorted(by: { $0.performedDate > $1.performedDate })
-
-        return InstrumentSection(title: "Insights") {
-            VStack(spacing: 0) {
-                // Time since last
-                if let lastLog = sortedLogs.first {
-                    BrutalistDataRow(
-                        label: "Time Since Last",
-                        value: TimeSinceFormatter.full(from: lastLog.performedDate),
-                        padding: Spacing.md
-                    )
-                    ListDivider(leadingPadding: 0)
-
-                    // Miles since last
-                    let milesSince = vehicle.currentMileage - lastLog.mileageAtService
-                    if milesSince >= 0 {
-                        BrutalistDataRow(
-                            label: "Miles Since Last",
-                            value: Formatters.mileage(milesSince),
-                            padding: Spacing.md
-                        )
-                        ListDivider(leadingPadding: 0)
-                    }
-                }
-
-                // Average cost — only counts standalone logs (logs not bound to a
-                // Service Visit). For an un-itemized Service Visit, attributing
-                // the visit total to a single child service would be misleading,
-                // so those logs are excluded here. The visit total still counts
-                // in lifetime totals (see CostsTab analytics).
-                let standaloneLogsWithCost = sortedLogs.filter { $0.visit == nil && $0.cost != nil }
-                if !standaloneLogsWithCost.isEmpty {
-                    let totalCost = standaloneLogsWithCost.compactMap { $0.cost }.reduce(Decimal.zero, +)
-                    let averageCost = totalCost / Decimal(standaloneLogsWithCost.count)
-                    BrutalistDataRow(
-                        label: "Average Cost",
-                        value: Formatters.currency.string(from: averageCost as NSDecimalNumber) ?? "$0",
-                        padding: Spacing.md
-                    )
-                    ListDivider(leadingPadding: 0)
-                }
-
-                // Appears in N Service Visits
-                let visitCount = Set(sortedLogs.compactMap { $0.visit?.id }).count
-                if visitCount > 0 {
-                    BrutalistDataRow(
-                        label: "Appears In Visits",
-                        value: "\(visitCount)",
-                        padding: Spacing.md
-                    )
-                    ListDivider(leadingPadding: 0)
-                }
-
-                // Times serviced
-                BrutalistDataRow(
-                    label: "Times Serviced",
-                    value: "\(sortedLogs.count)",
-                    padding: Spacing.md
-                )
+            DestructiveFormButton(title: L10n.serviceDeleteAction) {
+                confirmDelete = true
             }
         }
-    }
-
-    // MARK: - App Icon
-
-    private func updateAppIcon() {
-        AppIconService.shared.updateIcon(for: vehicle, services: services)
-    }
-
-    // MARK: - Widget Data
-
-    private func updateWidgetData() {
-        WidgetDataService.shared.updateWidget(for: vehicle)
-    }
-
-    // MARK: - Helpers
-
-    private func formatDate(_ date: Date) -> String {
-        Formatters.mediumDate.string(from: date)
-    }
-
-    private func formatMileage(_ miles: Int) -> String {
-        Formatters.mileage(miles)
+        .padding(.top, Spacing.lg)
     }
 }
 
@@ -432,7 +209,7 @@ struct ServiceDetailView: View {
     @Previewable @State var service = Service(
         name: "Oil Change",
         dueDate: Calendar.current.date(byAdding: .day, value: 12, to: .now),
-        dueMileage: 33000,
+        dueMileage: 34500,
         intervalMonths: 6,
         intervalMiles: 5000
     )

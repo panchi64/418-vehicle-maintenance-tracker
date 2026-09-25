@@ -5,48 +5,50 @@
 //  Detail view for a Service Visit — one shop visit, one honest total,
 //  N child service logs.
 //
-//  Phase A renders:
-//    - Header (date, odometer, total)
-//    - Services performed list
-//    - Visit notes (when present)
-//    - Combined attachments from all child logs
+//    - Header: the total (the one primary), then the date
+//    - Details: total, category, odometer, shop
+//    - Services performed: each drills into its own log
+//    - Visit notes, combined attachments
 //
-//  Phases B/C add: per-service amounts when itemized, "Shop charge" residual
-//  line, line items (parts/labor/tax/...), shop name. Phase D adds editing.
+//  Edit opens the log form on the visit's first service: a date or odometer
+//  edit there moves the whole occasion, and its cost field edits the visit's
+//  shared total (EditServiceLogView), so it already is the visit's editor.
 //
 
 import SwiftUI
 import SwiftData
 
 struct ServiceVisitDetailView: View {
+    @Environment(\.dismiss) private var dismiss
     @Environment(AppState.self) private var appState
 
     @Bindable var visit: ServiceVisit
+
+    @State private var logToEdit: ServiceLog?
+    @State private var logPendingDeletion: ServiceLog?
+    @State private var deleteAfterPop: ServiceLog?
 
     private var sortedLogs: [ServiceLog] {
         (visit.logs ?? []).sorted { ($0.service?.name ?? "") < ($1.service?.name ?? "") }
     }
 
-    private var allAttachments: [ServiceAttachment] {
-        sortedLogs
-            .flatMap { $0.attachments ?? [] }
-            .sorted { $0.createdAt < $1.createdAt }
-    }
-
     var body: some View {
+        let logs = sortedLogs
+        let attachments = logs.flatMap { $0.attachments ?? [] }.sorted { $0.createdAt < $1.createdAt }
+
         ScrollView {
             VStack(spacing: Spacing.xl) {
                 header
                 detailsSection
-                servicesSection
+                servicesSection(logs)
 
                 if let notes = visit.notes, !notes.isEmpty {
                     notesSection(notes: notes)
                 }
 
-                if !allAttachments.isEmpty {
+                if !attachments.isEmpty {
                     AttachmentSection(
-                        attachments: allAttachments,
+                        attachments: attachments,
                         onSelect: { appState.push(.document($0)) }
                     )
                 }
@@ -55,8 +57,39 @@ struct ServiceVisitDetailView: View {
             .padding(.vertical, Spacing.lg)
         }
         .background(Theme.backgroundPrimary)
-        .navigationTitle("Service Visit")
+        .navigationTitle(L10n.rowVisitTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if let first = logs.first {
+                ToolbarItem(placement: .primaryAction) {
+                    Button(L10n.servicesActionEdit) {
+                        logToEdit = first
+                    }
+                }
+            }
+        }
+        .sheet(item: $logToEdit, onDismiss: deleteIfRequested) { log in
+            EditServiceLogView(log: log, onDelete: { logPendingDeletion = log })
+        }
+        .onDisappear {
+            guard let log = deleteAfterPop else { return }
+            deleteAfterPop = nil
+            ServiceLogDeleteAction.perform(log, offerUndo: true)
+        }
+    }
+
+    /// Delete from the edit form, once it has dismissed, with Undo. When that
+    /// was the visit's last service the visit goes too — leave its screen.
+    private func deleteIfRequested() {
+        guard let log = logPendingDeletion else { return }
+        logPendingDeletion = nil
+        if visit.serviceCount <= 1 {
+            // Delete once popped, so nothing on its way out reads the visit.
+            deleteAfterPop = log
+            dismiss()
+        } else {
+            ServiceLogDeleteAction.perform(log, offerUndo: true)
+        }
     }
 
     // MARK: - Header
@@ -65,17 +98,14 @@ struct ServiceVisitDetailView: View {
         VStack(spacing: Spacing.sm) {
             ServiceCategoryIcon(category: visit.costCategory)
 
-            Text("SERVICE VISIT")
-                .font(.brutalistLabel)
-                .tracking(1)
-                .foregroundStyle(Theme.textTertiary)
-
             if let formattedTotal = visit.formattedTotalCost {
                 Text(formattedTotal)
                     .font(.brutalistTitle)
                     .foregroundStyle(Theme.textPrimary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
             } else {
-                Text("No cost recorded")
+                Text(L10n.rowNoCostRecorded)
                     .font(.brutalistBody)
                     .foregroundStyle(Theme.textSecondary)
             }
@@ -93,27 +123,27 @@ struct ServiceVisitDetailView: View {
     // MARK: - Details
 
     private var detailsSection: some View {
-        InstrumentSection(title: "Details") {
+        InstrumentSection(title: L10n.formDetails) {
             VStack(spacing: 0) {
                 if let formattedTotal = visit.formattedTotalCost {
-                    BrutalistDataRow(label: "Total", value: formattedTotal, padding: Spacing.md)
-                    ListDivider(leadingPadding: 0)
+                    BrutalistDataRow(label: L10n.servicesVisitTotal, value: formattedTotal, padding: Spacing.md)
+                    ListDivider()
                 }
 
                 if let category = visit.costCategory {
-                    BrutalistDataRow(label: "Category", value: category.displayName, padding: Spacing.md)
-                    ListDivider(leadingPadding: 0)
+                    BrutalistDataRow(label: L10n.formCategory, value: category.displayName, padding: Spacing.md)
+                    ListDivider()
                 }
 
                 BrutalistDataRow(
-                    label: "Mileage",
+                    label: L10n.formMileage,
                     value: Formatters.mileage(visit.mileageAtVisit),
                     padding: Spacing.md
                 )
 
                 if let shopName = visit.shopName, !shopName.isEmpty {
-                    ListDivider(leadingPadding: 0)
-                    BrutalistDataRow(label: "Shop", value: shopName, padding: Spacing.md)
+                    ListDivider()
+                    BrutalistDataRow(label: L10n.servicesVisitShop, value: shopName, padding: Spacing.md)
                 }
             }
         }
@@ -121,69 +151,50 @@ struct ServiceVisitDetailView: View {
 
     // MARK: - Services performed
 
-    private var servicesSection: some View {
-        InstrumentSection(title: "Services Performed (\(sortedLogs.count))") {
+    private func servicesSection(_ logs: [ServiceLog]) -> some View {
+        InstrumentSection(title: L10n.servicesVisitServicesPerformed) {
             VStack(spacing: 0) {
-                ForEach(Array(sortedLogs.enumerated()), id: \.element.id) { index, log in
+                ForEach(logs) { log in
                     serviceRow(log: log)
+                        .padding(.horizontal, Spacing.md)
 
-                    if index < sortedLogs.count - 1 {
-                        ListDivider(leadingPadding: 0)
+                    if log.id != logs.last?.id {
+                        ListDivider()
                     }
                 }
             }
         }
     }
 
+    /// Itemized with a cost: the amount. Otherwise the cost lives in the
+    /// visit's total, and the row says so instead of showing nothing.
     private func serviceRow(log: ServiceLog) -> some View {
-        AdaptiveStack(
-            verticalAlignment: .firstTextBaseline,
-            horizontalSpacing: Spacing.sm,
-            verticalSpacing: Spacing.xs
-        ) {
-            VStack(alignment: .leading, spacing: Spacing.xs) {
-                Text(log.service?.name.uppercased() ?? "—")
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textPrimary)
-
-                if let logNotes = log.notes, !logNotes.isEmpty {
-                    Text(logNotes)
-                        .font(.brutalistSecondary)
-                        .foregroundStyle(Theme.textTertiary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-
-            AdaptiveSpacer()
-
-            Text(perServiceLabel(for: log))
-                .font(.brutalistLabel)
-                .tracking(1)
-                .foregroundStyle(Theme.textTertiary)
+        let name = log.service?.name ?? L10n.rowServiceFallback
+        let itemizedCost = visit.isItemized
+            ? log.cost.flatMap { Formatters.currency.string(from: $0 as NSDecimalNumber) }
+            : nil
+        var metadata: [ServiceEventRow.Metadatum] = []
+        if itemizedCost == nil {
+            let note = visit.isItemized ? L10n.servicesVisitIncluded : L10n.servicesVisitIncludedInTotal
+            metadata.append(.tag(note.uppercased(), color: Theme.textTertiary))
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(Spacing.md)
-        .accessibilityElement(children: .combine)
-    }
-
-    /// Per-service amount label.
-    /// - Itemized + cost set → currency string
-    /// - Itemized + cost nil → "INCLUDED"
-    /// - Un-itemized → "INCLUDED IN VISIT"
-    private func perServiceLabel(for log: ServiceLog) -> String {
-        if visit.isItemized {
-            if let cost = log.cost, let formatted = Formatters.currency.string(from: cost as NSDecimalNumber) {
-                return formatted
-            }
-            return "INCLUDED"
+        if let notes = log.notes, !notes.isEmpty {
+            metadata.append(.detail(notes))
         }
-        return "INCLUDED IN VISIT"
+
+        return ServiceEventRow(
+            indicator: .completed(),
+            title: name,
+            metadata: metadata,
+            amount: itemizedCost.map { .init(text: $0, color: Theme.accent) },
+            onTap: { appState.push(.serviceLog(log)) }
+        )
     }
 
     // MARK: - Notes
 
     private func notesSection(notes: String) -> some View {
-        InstrumentSection(title: "Notes") {
+        InstrumentSection(title: L10n.formNotes) {
             Text(notes.brutalistMarkdownAttributed)
                 .font(.brutalistBody)
                 .foregroundStyle(Theme.textSecondary)
