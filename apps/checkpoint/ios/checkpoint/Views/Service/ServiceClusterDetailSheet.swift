@@ -88,7 +88,7 @@ struct ServiceClusterDetailSheet: View {
     }
 
     private func summaryRow(label: String, value: String, highlight: Bool = false) -> some View {
-        AccessibilityAdaptiveStack {
+        AdaptiveStack(horizontalSpacing: Spacing.sm, verticalSpacing: Spacing.xs) {
             Text(label)
                 .font(.brutalistLabel)
                 .foregroundStyle(Theme.textTertiary)
@@ -143,7 +143,7 @@ struct ServiceClusterDetailSheet: View {
 
             // The status word stacks under the name at accessibility sizes
             // rather than squeezing it to a sliver.
-            AccessibilityAdaptiveStack {
+            AdaptiveStack(horizontalSpacing: Spacing.sm, verticalSpacing: Spacing.xs) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(service.name.uppercased())
                         .font(.brutalistBody)

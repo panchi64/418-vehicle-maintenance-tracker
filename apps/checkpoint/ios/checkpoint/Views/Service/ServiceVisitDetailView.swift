@@ -155,7 +155,11 @@ struct ServiceVisitDetailView: View {
     }
 
     private func serviceRow(log: ServiceLog) -> some View {
-        AccessibilityAdaptiveStack(horizontalAlignment: .firstTextBaseline) {
+        AdaptiveStack(
+            verticalAlignment: .firstTextBaseline,
+            horizontalSpacing: Spacing.sm,
+            verticalSpacing: Spacing.xs
+        ) {
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(log.service?.name.uppercased() ?? "—")
                     .font(.brutalistBody)

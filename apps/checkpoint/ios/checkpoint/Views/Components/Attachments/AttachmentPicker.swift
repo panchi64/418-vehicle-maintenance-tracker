@@ -35,7 +35,7 @@ struct AttachmentPicker: View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             // Three sources side by side; stacked at accessibility sizes,
             // where they no longer fit one row.
-            AccessibilityAdaptiveStack(verticalSpacing: Spacing.sm) {
+            AdaptiveStack(spacing: Spacing.sm) {
                 // Opens the photo LIBRARY, so a library glyph — a camera icon
                 // promised a viewfinder this button never opens.
                 PhotosPicker(selection: $selectedPhotoItem, matching: .images) {

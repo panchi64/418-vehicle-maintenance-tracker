@@ -68,7 +68,7 @@ Monospaced themes use bundled JetBrains Mono via DesignKit; other themes fall ba
 | `brutalistLabel` | 11 Medium | `.caption2` | Labels, uppercased + tracked |
 | `brutalistLabelBold` | 11 Bold | `.caption2` | Emphasized labels |
 
-Horizontal arrangements of text must survive accessibility sizes: switch `HStack` → `VStack` under `dynamicTypeSize.isAccessibilitySize` (`AnyLayout`) or use `ViewThatFits`.
+Horizontal arrangements of text must survive accessibility sizes: use `AdaptiveStack` (an `HStack` that becomes a leading `VStack` at AX sizes, via `AnyLayout`; `spacing:` or separate `horizontalSpacing:`/`verticalSpacing:`) with `AdaptiveSpacer()` in place of `Spacer()`, or `ViewThatFits`. Don't hand-roll another `isAccessibilitySize` switch.
 
 ### The four-step working hierarchy
 
@@ -122,7 +122,7 @@ Glow: `glowRadius` 8 / `glowOpacity` 0.3 · `statusGlowRadius` 12 / `statusGlowO
 
 **Buttons** — `.buttonStyle(.primary)` (filled), `.buttonStyle(.secondary)` (outlined), `.buttonStyle(.instrument)`, `.toolbarButtonStyle(isDisabled:)`
 
-**Structural components** — `InstrumentSection`, `InstrumentSectionHeader`, `BrutalistDataRow`, `AtmosphericBackground`
+**Structural components** — `InstrumentSection`, `InstrumentSectionHeader`, `BrutalistDataRow`, `AtmosphericBackground`, `AdaptiveStack` + `AdaptiveSpacer` (AX-size stacking)
 
 ## `RollingNumberText`
 

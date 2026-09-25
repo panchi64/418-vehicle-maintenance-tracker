@@ -23,7 +23,7 @@ struct ReminderImpactRow: View {
     }
 
     var body: some View {
-        AccessibilityAdaptiveStack {
+        AdaptiveStack(horizontalSpacing: Spacing.sm, verticalSpacing: Spacing.xs) {
             HStack(spacing: Spacing.sm) {
                 Image(systemName: "arrow.right.circle")
                     .font(.footnote.weight(.medium))

@@ -302,7 +302,7 @@ struct ServiceDetailView: View {
 
     private func historyRow(log: ServiceLog) -> some View {
         HStack {
-            AccessibilityAdaptiveStack {
+            AdaptiveStack(horizontalSpacing: Spacing.sm, verticalSpacing: Spacing.xs) {
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: Spacing.xs) {
                         Text(formatDate(log.performedDate))

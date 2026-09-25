@@ -9,7 +9,7 @@ struct SuggestedValueRow: View {
     let onUse: () -> Void
 
     var body: some View {
-        AccessibilityAdaptiveStack {
+        AdaptiveStack(horizontalSpacing: Spacing.sm, verticalSpacing: Spacing.xs) {
             HStack(spacing: Spacing.sm) {
                 Image(systemName: "wand.and.stars")
                     .font(.caption.weight(.medium))

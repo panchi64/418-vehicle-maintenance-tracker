@@ -9456,24 +9456,6 @@
         }
       }
     },
-    "row.outlierAccessibility" : {
-      "comment" : "Appended to a row's VoiceOver label when the amount is a statistical outlier.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ", outlier"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ", atípico"
-          }
-        }
-      }
-    },
     "row.serviceFallback" : {
       "comment" : "Title for a log whose service relationship is missing.",
       "extractionState" : "manual",

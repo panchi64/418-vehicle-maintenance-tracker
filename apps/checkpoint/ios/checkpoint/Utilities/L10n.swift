@@ -87,7 +87,6 @@ enum L10n {
     static var headerSelectVehicleHint: String { localized("header.selectVehicleHint") }
     static var rowNoCostRecorded: String { localized("row.noCostRecorded") }
     static var rowNoTotalRecorded: String { localized("row.noTotalRecorded") }
-    static var rowOutlierAccessibility: String { localized("row.outlierAccessibility") }
     static var rowVisitTitle: String { localized("row.visitTitle") }
     static var rowVisitTag: String { localized("row.visitTag") }
     static func rowVisitTitleCount(_ count: Int) -> String {

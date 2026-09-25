@@ -64,7 +64,7 @@ struct FormActionBar: View {
         } else {
             // Two long titles can't share a row at accessibility sizes; the
             // primary stacks under the secondary, staying nearest the thumb.
-            AccessibilityAdaptiveStack(verticalSpacing: Spacing.sm) {
+            AdaptiveStack(spacing: Spacing.sm) {
                 if let secondaryTitle, let onSecondary {
                     Button(secondaryTitle, action: onSecondary)
                         .buttonStyle(.secondary)

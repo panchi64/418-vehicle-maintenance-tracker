@@ -174,9 +174,10 @@ struct ServiceReminderFields: View {
 
     private var fireTimeReadout: some View {
         let fire = fireTime
-        return AccessibilityAdaptiveStack(
-            horizontalAlignment: .firstTextBaseline,
-            horizontalSpacing: Spacing.md
+        return AdaptiveStack(
+            verticalAlignment: .firstTextBaseline,
+            horizontalSpacing: Spacing.md,
+            verticalSpacing: Spacing.xs
         ) {
             Text(L10n.formFires.uppercased())
                 .font(.brutalistLabel)

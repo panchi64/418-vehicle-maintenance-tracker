@@ -75,7 +75,7 @@ struct EditVehicleVINSection: View {
                     .brutalistBorder()
                 }
 
-                AccessibilityAdaptiveStack {
+                AdaptiveStack(horizontalSpacing: Spacing.sm, verticalSpacing: Spacing.xs) {
                     Text("17-CHARACTER VEHICLE IDENTIFICATION NUMBER")
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)

@@ -17,7 +17,7 @@ struct DraftResumeBanner: View {
                 .font(.brutalistSecondary)
                 .foregroundStyle(Theme.textTertiary)
 
-            AccessibilityAdaptiveStack(verticalSpacing: Spacing.sm) {
+            AdaptiveStack(spacing: Spacing.sm) {
                 Button(L10n.formDraftResume, action: onResume)
                     .buttonStyle(.primary)
 
