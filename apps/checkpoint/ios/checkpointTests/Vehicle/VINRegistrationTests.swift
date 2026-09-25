@@ -135,87 +135,141 @@ final class VINRegistrationTests: XCTestCase {
 
     // MARK: - Auto-Fill Feedback State
 
-    @MainActor
-    func test_vinLookupSucceeded_initialState_isFalse() async {
-        // Given: A new form state
-        let formState = VehicleFormState()
+    private static let validVIN = "1HGBH41JXMN109186"
 
-        // Then: vinLookupSucceeded should be false
-        XCTAssertFalse(formState.vinLookupSucceeded, "Initial vinLookupSucceeded should be false")
+    private static func decoded(make: String = "Honda", model: String = "Civic", year: Int? = 2021) -> VINDecodeResult {
+        VINDecodeResult(
+            make: make, model: model, modelYear: year,
+            engineDescription: "", driveType: "", bodyClass: "", fuelType: "", errorCode: "0"
+        )
     }
 
     @MainActor
-    func test_autoFilledFields_initialState_isEmpty() async {
-        // Given: A new form state
+    func test_vinLookupOutcome_initialState_isNil() {
         let formState = VehicleFormState()
-
-        // Then: autoFilledFields should be empty
-        XCTAssertTrue(formState.autoFilledFields.isEmpty, "Initial autoFilledFields should be empty")
+        XCTAssertNil(formState.vinLookupOutcome)
+        XCTAssertFalse(formState.isAutoFilled(.make))
     }
 
     @MainActor
-    func test_autoFilledFields_canTrackMultipleFields() async {
-        // Given: A form state
+    func test_applyVINLookup_emptyForm_fillsAllThree() {
         let formState = VehicleFormState()
+        formState.vin = Self.validVIN
 
-        // When: Setting auto-filled fields
-        formState.autoFilledFields = ["make", "model", "year"]
-        formState.vinLookupSucceeded = true
+        formState.applyVINLookup(Self.decoded(), for: Self.validVIN)
 
-        // Then: All fields should be tracked
-        XCTAssertEqual(formState.autoFilledFields.count, 3, "Should track 3 auto-filled fields")
-        XCTAssertTrue(formState.autoFilledFields.contains("make"), "Should contain 'make'")
-        XCTAssertTrue(formState.autoFilledFields.contains("model"), "Should contain 'model'")
-        XCTAssertTrue(formState.autoFilledFields.contains("year"), "Should contain 'year'")
-        XCTAssertTrue(formState.vinLookupSucceeded, "vinLookupSucceeded should be true")
+        XCTAssertEqual(formState.make, "Honda")
+        XCTAssertEqual(formState.model, "Civic")
+        XCTAssertEqual(formState.year, 2021)
+        XCTAssertEqual(formState.vinLookupOutcome, .filled([.make, .model, .year]))
+        XCTAssertTrue(formState.usedVINLookup)
+        XCTAssertFalse(formState.isDecodingVIN)
     }
 
     @MainActor
-    func test_autoFilledFields_partialFill() async {
-        // Given: A form state where make is already filled
+    func test_applyVINLookup_neverOverwritesTypedValues() {
         let formState = VehicleFormState()
         formState.make = "Toyota"
 
-        // When: Only model and year are auto-filled
-        formState.autoFilledFields = ["model", "year"]
-        formState.vinLookupSucceeded = true
+        formState.applyVINLookup(Self.decoded(), for: Self.validVIN)
 
-        // Then: Only model and year should be tracked
-        XCTAssertEqual(formState.autoFilledFields.count, 2, "Should track 2 auto-filled fields")
-        XCTAssertFalse(formState.autoFilledFields.contains("make"), "Should not contain 'make' (was already filled)")
-        XCTAssertTrue(formState.autoFilledFields.contains("model"), "Should contain 'model'")
-        XCTAssertTrue(formState.autoFilledFields.contains("year"), "Should contain 'year'")
+        XCTAssertEqual(formState.make, "Toyota", "A lookup must not overwrite what the user typed")
+        XCTAssertEqual(formState.vinLookupOutcome, .filled([.model, .year]))
+        XCTAssertFalse(formState.isAutoFilled(.make))
+        XCTAssertTrue(formState.isAutoFilled(.model))
     }
 
     @MainActor
-    func test_clearAutoFillFeedback_resetsState() async {
-        // Given: A form state with auto-fill feedback active
+    func test_applyVINLookup_everythingFilled_reportsNothingNew() {
         let formState = VehicleFormState()
-        formState.vinLookupSucceeded = true
-        formState.autoFilledFields = ["make", "model", "year"]
+        formState.make = "Toyota"
+        formState.model = "Camry"
+        formState.year = 2020
 
-        // When: Clearing feedback
-        formState.clearAutoFillFeedback()
+        formState.applyVINLookup(Self.decoded(), for: Self.validVIN)
 
-        // Then: State should be reset
-        XCTAssertFalse(formState.vinLookupSucceeded, "vinLookupSucceeded should be false after clear")
-        XCTAssertTrue(formState.autoFilledFields.isEmpty, "autoFilledFields should be empty after clear")
+        XCTAssertEqual(formState.vinLookupOutcome, .nothingNew)
     }
 
     @MainActor
-    func test_clearVINErrors_doesNotAffectAutoFill() async {
-        // Given: A form state with auto-fill feedback and VIN errors
+    func test_vinLookupOutcome_persistsUntilVINChanges() {
+        // The confirmation no longer dismisses on a timer — only a new VIN
+        // makes it stale.
         let formState = VehicleFormState()
-        formState.vinLookupSucceeded = true
-        formState.autoFilledFields = ["make"]
-        formState.vinLookupError = "Network error"
+        formState.applyVINLookup(Self.decoded(), for: Self.validVIN)
+        XCTAssertNotNil(formState.vinLookupOutcome)
 
-        // When: Clearing VIN errors
-        formState.clearVINErrors()
+        formState.vinLookupError = "stale"
+        formState.vinDidChange()
 
-        // Then: Auto-fill state should remain, VIN error should be cleared
-        XCTAssertTrue(formState.vinLookupSucceeded, "Auto-fill state should not be affected")
-        XCTAssertFalse(formState.autoFilledFields.isEmpty, "Auto-filled fields should not be affected")
-        XCTAssertNil(formState.vinLookupError, "VIN lookup error should be cleared")
+        XCTAssertNil(formState.vinLookupOutcome)
+        XCTAssertNil(formState.vinLookupError)
+    }
+
+    // MARK: - Auto-decode trigger
+
+    @MainActor
+    func test_shouldAutoDecodeVIN_validNewVIN_isTrue() {
+        let formState = VehicleFormState()
+        formState.vin = Self.validVIN
+        XCTAssertTrue(formState.shouldAutoDecodeVIN)
+    }
+
+    @MainActor
+    func test_shouldAutoDecodeVIN_partialVIN_isFalse() {
+        let formState = VehicleFormState()
+        formState.vin = "1HGBH41JX"
+        XCTAssertFalse(formState.shouldAutoDecodeVIN)
+    }
+
+    @MainActor
+    func test_shouldAutoDecodeVIN_afterDecode_isFalseForSameVIN() {
+        let formState = VehicleFormState()
+        formState.vin = Self.validVIN
+        formState.applyVINLookup(Self.decoded(), for: Self.validVIN)
+        XCTAssertFalse(formState.shouldAutoDecodeVIN, "One lookup per VIN")
+    }
+
+    @MainActor
+    func test_shouldAutoDecodeVIN_afterFailure_doesNotRetryInALoop() {
+        let formState = VehicleFormState()
+        formState.vin = Self.validVIN
+        formState.beginVINLookup()
+        XCTAssertFalse(formState.shouldAutoDecodeVIN, "No second lookup while one is in flight")
+
+        formState.failVINLookup("Network error", for: Self.validVIN)
+
+        XCTAssertFalse(formState.shouldAutoDecodeVIN)
+        XCTAssertEqual(formState.vinLookupError, "Network error")
+    }
+
+    @MainActor
+    func test_shouldAutoDecodeVIN_editVehicle_doesNotDecodeStoredVIN() {
+        let vehicle = Vehicle(name: "", make: "Honda", model: "Civic", year: 2021, currentMileage: 1000, vin: Self.validVIN)
+        let formState = VehicleFormState(vehicle: vehicle)
+        XCTAssertFalse(formState.shouldAutoDecodeVIN, "Opening Edit must not look the stored VIN up again")
+    }
+
+    // MARK: - Dirty tracking
+
+    @MainActor
+    func test_isDirty_editVehicle_pristineUntilAFieldChanges() {
+        let vehicle = Vehicle(name: "Daily", make: "Honda", model: "Civic", year: 2021, currentMileage: 1000)
+        let formState = VehicleFormState(vehicle: vehicle)
+        XCTAssertFalse(formState.isDirty)
+
+        formState.notes = "New tires"
+        XCTAssertTrue(formState.isDirty)
+
+        formState.notes = ""
+        XCTAssertFalse(formState.isDirty, "Reverting the edit makes the form pristine again")
+    }
+
+    @MainActor
+    func test_isDirty_addVehicle_anyEntryIsDirty() {
+        let formState = VehicleFormState()
+        XCTAssertFalse(formState.isDirty)
+        formState.currentMileage = 12
+        XCTAssertTrue(formState.isDirty)
     }
 }

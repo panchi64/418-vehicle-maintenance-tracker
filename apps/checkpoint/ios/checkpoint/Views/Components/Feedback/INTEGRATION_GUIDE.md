@@ -85,9 +85,7 @@ VStack(alignment: .leading, spacing: Spacing.sm) {
 ```swift
 // Odometer OCR error
 if let error = formState.odometerOCRError {
-    ErrorMessageRow(message: error) {
-        formState.clearOdometerError()
-    }
+    FormAdvisory.caution(error) { formState.clearOdometerError() }
 }
 
 // Feature hint: Odometer OCR
