@@ -14,9 +14,16 @@ struct AddServiceView: View {
     let vehicle: Vehicle
     var seasonalPrefill: SeasonalPrefill?
     var postRecordPrefill: PostRecordPrefill?
+    /// A receipt to read on open (Visual Intelligence).
+    var receiptImage: UIImage?
 
     var body: some View {
-        ServiceLogForm(vehicle: vehicle, seasonalPrefill: seasonalPrefill, postRecordPrefill: postRecordPrefill)
+        ServiceLogForm(
+            vehicle: vehicle,
+            seasonalPrefill: seasonalPrefill,
+            postRecordPrefill: postRecordPrefill,
+            receiptImage: receiptImage
+        )
     }
 }
 

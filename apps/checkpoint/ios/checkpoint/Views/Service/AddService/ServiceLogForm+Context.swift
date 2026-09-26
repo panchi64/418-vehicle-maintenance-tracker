@@ -72,6 +72,7 @@ extension ServiceLogForm {
             model.apply(carryover.draft)
             model.pendingAttachments = carryover.attachments
         }
+        readHandedOverReceipt()
         if let log = model.mode.editing {
             let chronological = Array(serviceLogs.reversed())
             if let index = chronological.firstIndex(where: { $0.id == log.id }) {

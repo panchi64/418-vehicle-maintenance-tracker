@@ -14,6 +14,10 @@ private let attachmentLogger = Logger(category: "Attachments")
 
 struct AttachmentPicker: View {
     @Binding var attachments: [AttachmentData]
+    /// When set, a scanned receipt goes to the host form, which reads it for
+    /// its values and attaches it (`ServiceLogForm`); otherwise the picker
+    /// attaches it with its text itself.
+    var onReceiptScanned: (([UIImage]) -> Void)? = nil
 
     @State private var showPhotoPicker = false
     @State private var showDocumentPicker = false
@@ -69,6 +73,10 @@ struct AttachmentPicker: View {
                 .sheet(isPresented: $showReceiptScanner) {
                     ReceiptScannerView(
                         onImagesScanned: { images in
+                            if let onReceiptScanned {
+                                onReceiptScanned(images)
+                                return
+                            }
                             Task {
                                 await processScannedImages(images)
                             }
@@ -166,11 +174,6 @@ struct AttachmentPicker: View {
         defer { isProcessingOCR = false }
 
         for (index, image) in images.enumerated() {
-            // Compress the image
-            guard let compressedData = ServiceAttachment.compressedImageData(from: image) else {
-                continue
-            }
-
             // Extract text via OCR
             var extractedText: String? = nil
             do {
@@ -181,23 +184,28 @@ struct AttachmentPicker: View {
                 // Continue without extracted text - still save the image
             }
 
-            // Generate thumbnail
-            let thumbnailImage: UIImage?
-            if let thumbData = ServiceAttachment.generateThumbnailData(from: compressedData, mimeType: "image/jpeg") {
-                thumbnailImage = UIImage(data: thumbData)
-            } else {
-                thumbnailImage = image
+            if let attachment = AttachmentData.scannedReceipt(image, page: index + 1, extractedText: extractedText) {
+                attachments.append(attachment)
             }
-
-            let attachment = AttachmentData(
-                data: compressedData,
-                fileName: "receipt_\(Date.now.timeIntervalSince1970)_\(index + 1).jpg",
-                mimeType: "image/jpeg",
-                thumbnailImage: thumbnailImage,
-                extractedText: extractedText
-            )
-            attachments.append(attachment)
         }
+    }
+}
+
+extension AttachmentPicker.AttachmentData {
+    /// A scanned receipt page as an attachment: compressed JPEG, thumbnail,
+    /// and the text read from it (searchable later). Nil when the image
+    /// can't be encoded.
+    static func scannedReceipt(_ image: UIImage, page: Int, extractedText: String?, now: Date = .now) -> Self? {
+        guard let compressedData = ServiceAttachment.compressedImageData(from: image) else { return nil }
+        let thumbnailImage = ServiceAttachment.generateThumbnailData(from: compressedData, mimeType: "image/jpeg")
+            .flatMap(UIImage.init(data:)) ?? image
+        return Self(
+            data: compressedData,
+            fileName: "receipt_\(now.timeIntervalSince1970)_\(page).jpg",
+            mimeType: "image/jpeg",
+            thumbnailImage: thumbnailImage,
+            extractedText: extractedText
+        )
     }
 }
 

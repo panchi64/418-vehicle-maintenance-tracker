@@ -29,7 +29,37 @@ struct ServiceVisitFields: View {
         FormSection(title: L10n.formDetails) {
             odometerField
             costField
+            if model.showsShopField {
+                shopField
+            }
         }
+    }
+
+    // MARK: - Shop (receipts only)
+
+    /// Shown only when a receipt named a shop: it is stored on the visit the
+    /// receipt's save creates, and the form keeps no shop otherwise.
+    @ViewBuilder
+    private var shopField: some View {
+        InstrumentTextField(
+            label: L10n.formShop,
+            text: $model.shopName,
+            placeholder: L10n.formShopPlaceholder,
+            autocapitalization: .words
+        )
+        if model.isSuggested(.shop) {
+            FromReceiptHint(confidence: model.receiptConfidence(.shop))
+        }
+    }
+
+    /// The validator's reason to look again at the odometer, if it gave one.
+    private var odometerCaution: String? {
+        for issue in model.receipt?.draft.issues ?? [] {
+            if case .odometerBelowLastReading(let last) = issue {
+                return L10n.receiptOdometerBelow(Formatters.mileage(last))
+            }
+        }
+        return nil
     }
 
     // MARK: - Odometer
@@ -49,6 +79,10 @@ struct ServiceVisitFields: View {
 
         if let blocker {
             FormAdvisory.blocking(blocker)
+        }
+
+        if model.isSuggested(.odometer) {
+            FromReceiptHint(confidence: model.receiptConfidence(.odometer), caution: odometerCaution)
         }
 
         if let original = model.originalMileage {
@@ -127,6 +161,10 @@ struct ServiceVisitFields: View {
         .onChange(of: model.cost) { _, newValue in
             model.cost = CostValidation.filterCostInput(newValue)
             model.costError = CostValidation.validate(model.cost)
+        }
+
+        if model.isSuggested(.cost) {
+            FromReceiptHint(confidence: model.receiptConfidence(.cost))
         }
 
         if let original = model.originalCost {

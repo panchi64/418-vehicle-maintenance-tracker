@@ -35,6 +35,9 @@ enum ServiceVisitWriter {
         var costCategory: CostCategory = .maintenance
         var shopName: String?
         var notes: String?
+        /// A receipt's printed lines: a breakdown of `totalCost`, never added
+        /// to it (`ExpenseEvent`).
+        var lineItems: [ReceiptLineItem] = []
     }
 
     @discardableResult
@@ -56,6 +59,7 @@ enum ServiceVisitWriter {
             notes: details.notes
         )
         context.insert(visit)
+        insertLineItems(details.lineItems, on: visit, in: context)
 
         // The first child log carries any attachments.
         var firstLog: ServiceLog?
@@ -96,6 +100,40 @@ enum ServiceVisitWriter {
             in: context
         )
         return visit
+    }
+
+    /// Put a single log written by the service form into a visit of its own,
+    /// so a receipt's shop and line items have somewhere to live. The log's
+    /// cost moves to the visit's total — it counts once, as the visit —
+    /// and the log keeps none (the same shape `record` writes).
+    @discardableResult
+    static func wrap(
+        _ log: ServiceLog,
+        shopName: String?,
+        lineItems: [ReceiptLineItem],
+        in context: ModelContext
+    ) -> ServiceVisit {
+        let visit = ServiceVisit(
+            vehicle: log.vehicle,
+            performedDate: log.performedDate,
+            mileageAtVisit: log.mileageAtService,
+            totalCost: log.cost,
+            costCategory: log.cost != nil ? log.costCategory : nil,
+            isItemized: false,
+            shopName: shopName
+        )
+        context.insert(visit)
+        log.visit = visit
+        log.cost = nil
+        log.costCategory = nil
+        insertLineItems(lineItems, on: visit, in: context)
+        return visit
+    }
+
+    static func insertLineItems(_ items: [ReceiptLineItem], on visit: ServiceVisit, in context: ModelContext) {
+        for item in items {
+            context.insert(VisitLineItem(visit: visit, label: item.label, kind: item.kind, amount: item.amount))
+        }
     }
 
     private static func service(

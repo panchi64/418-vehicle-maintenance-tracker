@@ -110,12 +110,20 @@ enum LoggedServiceWriter {
             )
         }
 
+        // A receipt's shop and line items live on a visit (the form itself
+        // keeps neither), so a log read from one gets a visit of its own.
+        var visit: ServiceVisit?
+        if let receipt = model.receiptVisitDetails {
+            visit = ServiceVisitWriter.wrap(log, shopName: receipt.shopName, lineItems: receipt.lineItems, in: context)
+        }
+
         return RecordedServiceUndo(
             change: change,
             log: log,
             attachments: attachments,
             vehicle: vehicle,
-            mileageRevert: mileageRevert
+            mileageRevert: mileageRevert,
+            visit: visit
         )
     }
 }

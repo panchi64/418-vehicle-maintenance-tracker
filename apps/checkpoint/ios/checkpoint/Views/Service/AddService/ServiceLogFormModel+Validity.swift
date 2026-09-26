@@ -21,9 +21,16 @@ extension ServiceLogFormModel {
 
     /// The one case the app genuinely cannot resolve: a backfilled entry
     /// carrying a reading above the current odometer.
+    ///
+    /// Not when the picked date is after the last confirmed reading: that
+    /// reading is simply the newest observation, and it is adopted (and said
+    /// so) like Today's (F11). Found in the sketchpad's receipt flow — a
+    /// receipt from two days ago carries a higher odometer than a week-old
+    /// reading, and the old rule blocked Save on nearly every receipt.
     var hasUnresolvedMileageContradiction: Bool {
         guard isLogging, !mode.isEdit, timing.isBackfill else { return false }
         guard let reading = mileageAtService, reading > vehicle.currentMileage else { return false }
+        if let lastReadingAt = vehicle.mileageUpdatedAt, performedDate >= lastReadingAt { return false }
         return mileageResolution == nil
     }
 

@@ -27,6 +27,11 @@
 //  SAVE IS IN THE TOOLBAR (`formToolbar`). A tap on the dim Save scrolls to the
 //  blocking field and shows why there (F2).
 //
+//  A RECEIPT answers most of the form at once, so "Scan a receipt" is its
+//  first row (`ReceiptScanRow`, resolved in tools/sketchpad). The values land
+//  in their own fields marked "From receipt"; Save confirms them
+//  (`+Receipt`, `ServiceLogFormModel+Receipt`).
+//
 
 import SwiftUI
 import SwiftData
@@ -51,24 +56,31 @@ struct ServiceLogForm: View {
     /// Edit only: asks the presenter to delete the entry once this form has
     /// dismissed. Nil hides Delete Entry.
     var onDelete: (() -> Void)?
+    /// A receipt handed over from outside the form (Visual Intelligence):
+    /// read as soon as the form appears.
+    var receiptImage: UIImage?
 
     @State var model: ServiceLogFormModel
     @State var draftResumeBanner: ServiceFormDraft?
     @State var showBlocker = false
     @State private var attachmentForDetail: Document?
     @State var adjacentLogs: (before: ServiceLog?, after: ServiceLog?) = (nil, nil)
+    @State var showReceiptScanner = false
+    @State var isReadingReceipt = false
 
     init(
         vehicle: Vehicle,
         mode: ServiceLogFormMode = .log,
         seasonalPrefill: SeasonalPrefill? = nil,
         postRecordPrefill: PostRecordPrefill? = nil,
+        receiptImage: UIImage? = nil,
         onSaved: (() -> Void)? = nil,
         onDelete: (() -> Void)? = nil
     ) {
         self.vehicle = vehicle
         self.seasonalPrefill = seasonalPrefill
         self.postRecordPrefill = postRecordPrefill
+        self.receiptImage = receiptImage
         self.onSaved = onSaved
         self.onDelete = onDelete
         _model = State(initialValue: ServiceLogFormModel(vehicle: vehicle, mode: mode))
@@ -139,6 +151,19 @@ struct ServiceLogForm: View {
                                 )
                             }
 
+                            // First: a receipt fills most of what follows.
+                            if offersReceipt {
+                                ReceiptScanRow(
+                                    receipt: model.receipt,
+                                    isReading: isReadingReceipt,
+                                    onScan: { showReceiptScanner = true },
+                                    onClear: {
+                                        model.clearReceipt()
+                                        HapticService.shared.selectionChanged()
+                                    }
+                                )
+                            }
+
                             ServicePickerSection(
                                 model: model,
                                 services: services,
@@ -169,7 +194,11 @@ struct ServiceLogForm: View {
                                     .id(ServiceLogFormModel.BlockingField.due)
                             }
 
-                            ServiceDepthSection(model: model, onSelectAttachment: { attachmentForDetail = $0 })
+                            ServiceDepthSection(
+                                model: model,
+                                onSelectAttachment: { attachmentForDetail = $0 },
+                                onReceiptScanned: model.mode.isEdit ? nil : { readReceipt($0) }
+                            )
 
                             if let onDelete {
                                 DestructiveFormButton(title: L10n.logDeleteAction) {
@@ -227,6 +256,16 @@ struct ServiceLogForm: View {
                 }
                 .trackScreen(screen)
                 .onAppear(perform: prepare)
+                .sheet(isPresented: $showReceiptScanner) {
+                    ReceiptScannerView(
+                        onImagesScanned: { readReceipt($0) },
+                        onCancel: {},
+                        onError: { _ in
+                            ToastService.shared.show(L10n.attachScanFailed, icon: "xmark.circle", style: .error)
+                        }
+                    )
+                    .ignoresSafeArea()
+                }
                 // Pushed on the form's own stack — details push (F13), and a
                 // sheet over this sheet was navigation by stacking.
                 .navigationDestination(item: $attachmentForDetail) { document in

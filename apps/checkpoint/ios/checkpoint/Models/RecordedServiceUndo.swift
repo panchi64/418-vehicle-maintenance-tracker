@@ -23,6 +23,9 @@ struct RecordedServiceUndo {
     let vehicle: Vehicle?
     /// Nil when the save did not adopt the reading as the vehicle's odometer.
     let mileageRevert: MileageCommit.Revert?
+    /// The visit a receipt's shop or line items put the log in, if any.
+    /// Undo deletes it (and, by cascade, its line items).
+    var visit: ServiceVisit? = nil
 
     /// Whether the save left a future reminder in place — a recurring created
     /// service, or a successor spawned by completing a tracked one.
@@ -38,6 +41,7 @@ struct RecordedServiceUndo {
         mileageRevert?.perform(in: context)
         for attachment in attachments { context.delete(attachment) }
         context.delete(log)
+        if let visit { context.delete(visit) }
 
         switch change {
         case .created(let service):

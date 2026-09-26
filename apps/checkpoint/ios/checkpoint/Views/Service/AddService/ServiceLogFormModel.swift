@@ -45,6 +45,13 @@ final class ServiceLogFormModel {
     var isRecurring: Bool = false
     var pendingAttachments: [AttachmentPicker.AttachmentData] = []
 
+    /// A receipt read into the form, and what the form held before it
+    /// (`+Receipt`). Nil until the user scans one.
+    var receipt: ReceiptPrefill?
+    /// The shop a receipt named. The form shows it only then: a shop lives on
+    /// a visit, which only a receipt's save creates.
+    var shopName: String = ""
+
     /// The typed target for a mileage-triggered reminder.
     var nextDueMileage: Int?
     var intervalMonths: Int?

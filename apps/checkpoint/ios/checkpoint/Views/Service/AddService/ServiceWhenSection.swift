@@ -33,6 +33,10 @@ struct ServiceWhenSection: View {
                 )
             }
 
+            if model.isSuggested(.date) {
+                FromReceiptHint(confidence: model.receiptConfidence(.date))
+            }
+
             // F6: while editing, the loaded date for as long as it differs.
             if let original = model.originalDate {
                 OriginalValueHint(text: L10n.editWas(Formatters.shortDate.string(from: original)))

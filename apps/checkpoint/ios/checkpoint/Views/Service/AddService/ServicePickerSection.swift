@@ -76,6 +76,9 @@ struct ServicePickerSection: View {
                 picker
             } else {
                 selectedRow
+                if model.isSuggested(.service) {
+                    FromReceiptHint(confidence: model.receiptConfidence(.service))
+                }
             }
 
             if let contextLine {

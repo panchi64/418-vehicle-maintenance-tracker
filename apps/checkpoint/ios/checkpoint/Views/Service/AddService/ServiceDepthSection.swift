@@ -21,6 +21,9 @@ struct ServiceDepthSection: View {
     @Bindable var model: ServiceLogFormModel
     /// Edit: opens an existing receipt.
     var onSelectAttachment: (Document) -> Void = { _ in }
+    /// A receipt scanned from the attachment row: the form reads it and
+    /// fills itself, as its first-row Scan does.
+    var onReceiptScanned: (([UIImage]) -> Void)?
 
     @State private var isExpanded = false
 
@@ -29,9 +32,18 @@ struct ServiceDepthSection: View {
     }
 
     private var summary: String {
-        model.isLogging
-            ? L10n.formDepthSummary(model.costCategory.displayName)
-            : L10n.formDepthSummarySchedule
+        guard model.isLogging else { return L10n.formDepthSummarySchedule }
+        if receiptItems != nil {
+            return L10n.receiptDepthSummary(model.costCategory.displayName)
+        }
+        return L10n.formDepthSummary(model.costCategory.displayName)
+    }
+
+    /// A read receipt's printed lines, when it had any: completeness, so
+    /// they live here rather than on the default path.
+    private var receiptItems: ServiceReceiptDraft? {
+        guard model.isLogging, let draft = model.receipt?.draft, !draft.lineItems.isEmpty else { return nil }
+        return draft
     }
 
     var body: some View {
@@ -50,6 +62,10 @@ struct ServiceDepthSection: View {
 
                     if !model.mode.isEdit {
                         cadenceFields
+                    }
+
+                    if let receiptItems {
+                        ReceiptLineItemsList(draft: receiptItems)
                     }
 
                     RichNotesEditor(
@@ -71,7 +87,7 @@ struct ServiceDepthSection: View {
                                 .foregroundStyle(Theme.textTertiary)
                                 .tracking(1.5)
 
-                            AttachmentPicker(attachments: $model.pendingAttachments)
+                            AttachmentPicker(attachments: $model.pendingAttachments, onReceiptScanned: onReceiptScanned)
                         }
                     }
                 }
