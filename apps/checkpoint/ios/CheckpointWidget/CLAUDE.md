@@ -52,6 +52,8 @@ The app registers no URL scheme (security invariant), so no `widgetURL`/`Link`. 
 - Hero figure and status tag are `widgetAccentable()`. The cerulean `containerBackground` is removable (StandBy, tinted/clear).
 - System content margins — no `contentMarginsDisabled()`, no manual outer padding.
 - Fonts are text styles (`Font.widget*`); only `WidgetNumeral` uses a size, scaled relative to `.largeTitle`.
+- Fit by stepping down, not wrapping: `WidgetNumeral` picks the largest fixed size that fits via `ViewThatFits`, and service names shrink on one line (`WidgetServiceName`). A free-wrapping `lineLimit(2)` Text won't compress to its offered height and pushes neighbors past the widget's edge.
+- **Never put a `ForEach` inside `ViewThatFits`** — it trips a SwiftUI precondition, the extension crashes on every render, and WidgetKit shows the placeholder indefinitely. List candidates out explicitly.
 - Mileage figures only move on app writes, so `ServiceEntry.updatedAt` drives an "AS OF" cue (always on medium; small/rectangular once it predates today).
 
 ## UserDefaults Best Practices

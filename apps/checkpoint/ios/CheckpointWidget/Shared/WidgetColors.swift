@@ -50,26 +50,3 @@ extension Font {
         .system(.subheadline, design: .monospaced).weight(.semibold)
     }
 }
-
-/// The hero figure of a widget: bold mono at `size`, scaled with Dynamic Type
-/// relative to `.largeTitle`, shrinking to fit rather than truncating.
-struct WidgetNumeral: View {
-    let text: String
-    @ScaledMetric private var size: CGFloat
-
-    init(_ text: String, size: CGFloat) {
-        self.text = text
-        self._size = ScaledMetric(wrappedValue: size, relativeTo: .largeTitle)
-    }
-
-    var body: some View {
-        Text(text)
-            .font(.system(size: size, weight: .bold, design: .monospaced))
-            .monospacedDigit()
-            // Two lines for word values ("MEDIADOS DE / FEB"): they wrap at a
-            // space before scaling. Numbers have no spaces, so they only scale.
-            .multilineTextAlignment(.center)
-            .minimumScaleFactor(0.5)
-            .lineLimit(2)
-    }
-}

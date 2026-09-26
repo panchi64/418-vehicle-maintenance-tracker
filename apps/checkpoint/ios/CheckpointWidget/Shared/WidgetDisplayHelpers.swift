@@ -62,24 +62,31 @@ enum WidgetDisplayHelpers {
     /// four digits in every supported locale ("Mediados de feb 2027"); a label
     /// without one comes back whole.
     static func periodParts(_ period: String) -> (label: String, year: String?) {
-        guard let space = period.lastIndex(of: " ") else { return (period, nil) }
-        let tail = period[period.index(after: space)...]
-        guard tail.count == 4, tail.allSatisfy(\.isNumber) else { return (period, nil) }
-        return (String(period[..<space]), String(tail))
+        guard let (head, tail) = splitAtLastSpace(period),
+              tail.count == 4, tail.allSatisfy(\.isNumber) else { return (period, nil) }
+        return (head, tail)
     }
 
-    /// Unit beside the hero value
-    static func displayUnit(for service: WidgetService, distanceUnit: WidgetDistanceUnit) -> String {
+    /// "MEDIADOS DE FEB" → ("MEDIADOS DE", "FEB"); nil without a space.
+    static func splitAtLastSpace(_ text: String) -> (head: String, tail: String)? {
+        guard let space = text.lastIndex(of: " ") else { return nil }
+        return (String(text[..<space]), String(text[text.index(after: space)...]))
+    }
+
+    /// Unit for the hero value, and whether it sits centered under the value
+    /// rather than beside it. A period's year does ("MID FEB" over "2027"),
+    /// so the period word gets the full width; "MI" and "DAYS" sit beside.
+    static func heroUnit(for service: WidgetService, distanceUnit: WidgetDistanceUnit) -> (text: String, below: Bool) {
         if service.dueMileage != nil {
-            return distanceUnit.uppercaseAbbreviation
+            return (distanceUnit.uppercaseAbbreviation, false)
         } else if let period = service.duePeriod {
             // The period word ("MID MAY") is the value; a year, when the date
             // isn't this year, is the unit.
-            return periodParts(period).year ?? ""
+            return (periodParts(period).year ?? "", true)
         } else if service.daysRemaining != nil {
-            return String(localized: "DAYS")
+            return (String(localized: "DAYS"), false)
         }
-        return ""
+        return ("", false)
     }
 
     /// Compact due phrase for tight slots (inline, circular): "500 MI",

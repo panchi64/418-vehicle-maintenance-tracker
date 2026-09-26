@@ -12,10 +12,6 @@ import WidgetKit
 struct MediumWidgetView: View {
     let entry: ServiceEntry
 
-    private var displayMode: MileageDisplayMode {
-        entry.configuration.mileageDisplayMode
-    }
-
     /// Services after the first (for the right panel)
     private var otherServices: [WidgetService] {
         Array(entry.services.dropFirst().prefix(2))
@@ -52,19 +48,11 @@ struct MediumWidgetView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Spacer(minLength: 0)
 
-                        WidgetHero(
-                            label: WidgetDisplayHelpers.displayLabel(for: service, displayMode: displayMode, currentMileage: entry.currentMileage),
-                            value: WidgetDisplayHelpers.displayValue(for: service, displayMode: displayMode, currentMileage: entry.currentMileage, distanceUnit: entry.distanceUnit),
-                            unit: WidgetDisplayHelpers.displayUnit(for: service, distanceUnit: entry.distanceUnit),
-                            numeralSize: 40
-                        )
+                        WidgetHero(service: service, entry: entry, numeralSize: 40)
 
                         Spacer(minLength: 0)
 
-                        Text(service.name.uppercased())
-                            .font(.widgetBody)
-                            .foregroundStyle(WidgetColors.textPrimary)
-                            .lineLimit(1)
+                        WidgetServiceName(name: service.name, font: .widgetBody)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 }
@@ -98,10 +86,12 @@ struct MediumWidgetView: View {
                     .foregroundStyle(WidgetColors.textTertiary)
                     .tracking(1)
 
-                ForEach(otherServices) { service in
-                    OpenServiceButton(service: service, vehicleID: entry.vehicleID) {
-                        upcomingRow(service)
-                    }
+                // Both rows when they fit; otherwise only the sooner one, so
+                // a row whose due phrase dropped beneath its status (or a
+                // larger text size) doesn't push the panel past the widget.
+                ViewThatFits(in: .vertical) {
+                    upcomingList(otherServices)
+                    upcomingList(Array(otherServices.prefix(1)))
                 }
             }
 
@@ -113,14 +103,21 @@ struct MediumWidgetView: View {
         .padding(.leading, 12)
     }
 
+    private func upcomingList(_ services: [WidgetService]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(services) { service in
+                OpenServiceButton(service: service, vehicleID: entry.vehicleID) {
+                    upcomingRow(service)
+                }
+            }
+        }
+    }
+
     /// Name on top; status word and compact due phrase beneath, so status
     /// reads as shape + word here too.
     private func upcomingRow(_ service: WidgetService) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(service.name.uppercased())
-                .font(.widgetBody)
-                .foregroundStyle(WidgetColors.textPrimary)
-                .lineLimit(1)
+            WidgetServiceName(name: service.name, font: .widgetBody)
 
             // One line when both fit; otherwise the due phrase drops beneath.
             // Sharing a line, a date-based phrase truncated both halves

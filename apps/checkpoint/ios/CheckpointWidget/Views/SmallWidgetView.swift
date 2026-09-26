@@ -12,10 +12,6 @@ import WidgetKit
 struct SmallWidgetView: View {
     let entry: ServiceEntry
 
-    private var displayMode: MileageDisplayMode {
-        entry.configuration.mileageDisplayMode
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             header
@@ -24,19 +20,11 @@ struct SmallWidgetView: View {
                 // Service name + hero figure open that service in the app.
                 OpenServiceButton(service: service, vehicleID: entry.vehicleID) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(service.name.uppercased())
-                            .font(.widgetHeadline)
-                            .foregroundStyle(WidgetColors.textPrimary)
-                            .lineLimit(1)
+                        WidgetServiceName(name: service.name, font: .widgetHeadline)
 
                         Spacer(minLength: 0)
 
-                        WidgetHero(
-                            label: WidgetDisplayHelpers.displayLabel(for: service, displayMode: displayMode, currentMileage: entry.currentMileage),
-                            value: WidgetDisplayHelpers.displayValue(for: service, displayMode: displayMode, currentMileage: entry.currentMileage, distanceUnit: entry.distanceUnit),
-                            unit: WidgetDisplayHelpers.displayUnit(for: service, distanceUnit: entry.distanceUnit),
-                            numeralSize: 34
-                        )
+                        WidgetHero(service: service, entry: entry, numeralSize: 34)
 
                         Spacer(minLength: 0)
                     }
