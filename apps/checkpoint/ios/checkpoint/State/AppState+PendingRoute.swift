@@ -8,6 +8,7 @@
 //
 
 import Foundation
+import UIKit
 
 extension AppState {
 
@@ -81,6 +82,25 @@ extension AppState {
         case .searchDocuments(_, let term):
             documentsSearchSeed = term
             navigate(to: [.documents(vehicle)], on: .home)
+
+        case .logReceipt(_, let captureID):
+            // A capture older than its lifetime has nothing left to read.
+            if let capture = VisualCaptureStore.shared.capture(id: captureID) {
+                showTabRoot(.home)
+                present(.addService(receipt: UIImage(cgImage: capture.image)))
+            } else {
+                showTabRoot(.home)
+            }
+
+        case .mileageReading(_, let reading):
+            mileageReadingSeed = reading
+            showTabRoot(.home)
+            present(.mileageUpdate)
+
+        case .addVehicle(_, let vin):
+            addVehicleVINSeed = vin
+            showTabRoot(.home)
+            requestAddVehicle(vehicleCount: vehicles.count)
         }
     }
 

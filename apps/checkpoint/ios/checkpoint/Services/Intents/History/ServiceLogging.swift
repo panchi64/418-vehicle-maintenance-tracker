@@ -9,9 +9,9 @@
 //      set up exactly as the [+] or Mark Done form would be. Matching a
 //      tracked service, recurrence defaults from a preset or the service's
 //      own cadence, and the odometer rule (F11) are the form's, not a copy.
-//    - several services, or a shop → `ServiceVisitWriter`: one visit, one
-//      total, a log per service, as "Mark all done" writes it. A shop only
-//      has somewhere to live on a visit.
+//    - several services, or a shop or receipt line items → `ServiceVisitWriter`:
+//      one visit, one total, a log per service, as "Mark all done" writes it.
+//      A shop and line items only have somewhere to live on a visit.
 //
 //  Model mutation only. Intents commit through `IntentStore.commit`.
 //
@@ -31,11 +31,21 @@ enum ServiceLogging {
         var mileage: Int?
         var totalCost: Decimal?
         var shop: String?
+        /// A receipt's printed lines: a breakdown of `totalCost`.
+        var lineItems: [ReceiptLineItem] = []
+        /// The receipt itself, attached to the entry.
+        var attachments: [AttachmentPicker.AttachmentData] = []
 
         /// A blank shop name is no shop.
         var shopName: String? {
             let trimmed = shop?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             return trimmed.isEmpty ? nil : trimmed
+        }
+
+        /// Whether the entry needs a visit to hold what was said: a shop, or
+        /// a receipt's line items.
+        var needsVisit: Bool {
+            shopName != nil || !lineItems.isEmpty
         }
     }
 
@@ -48,7 +58,7 @@ enum ServiceLogging {
         in context: ModelContext,
         now: Date = .now
     ) -> [ServiceLog] {
-        if occasion.shopName != nil {
+        if occasion.needsVisit {
             return visitLogs([.tracked(service)], on: vehicle, occasion: occasion, in: context, now: now)
         }
         let model = formModel(for: vehicle, mode: .complete(service), occasion: occasion, now: now)
@@ -70,7 +80,7 @@ enum ServiceLogging {
         guard !names.isEmpty else { return [] }
         let presets = PresetDataService.shared.loadPresets()
 
-        if names.count == 1, occasion.shopName == nil {
+        if names.count == 1, !occasion.needsVisit {
             let model = formModel(for: vehicle, mode: .log, occasion: occasion, now: now)
             model.presets = presets
             model.choose(name: names[0])
@@ -125,6 +135,7 @@ enum ServiceLogging {
         // `LoggedServiceWriter` parses the form's text field; `Decimal`'s
         // description is locale-independent, which `Decimal(string:)` reads.
         if let cost = occasion.totalCost { model.cost = "\(cost)" }
+        model.pendingAttachments = occasion.attachments
         return model
     }
 
@@ -143,8 +154,10 @@ enum ServiceLogging {
                 performedDate: timing.performedDate(explicit: occasion.date ?? now, now: now),
                 mileage: occasion.mileage ?? vehicle.currentMileage,
                 totalCost: occasion.totalCost,
-                shopName: occasion.shopName
+                shopName: occasion.shopName,
+                lineItems: occasion.lineItems
             ),
+            attachments: occasion.attachments,
             in: context
         )
         return visit.logs ?? []

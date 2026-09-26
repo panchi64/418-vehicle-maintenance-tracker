@@ -125,6 +125,7 @@ extension GetMileageIntent: StoreBackedIntent {}
 extension MarkServiceDoneIntent: StoreBackedIntent {}
 extension MarkDoneFromSnippetIntent: StoreBackedIntent {}
 extension LogServiceIntent: StoreBackedIntent {}
+extension LogReceiptIntent: StoreBackedIntent {}
 extension DeleteServiceLogIntent: StoreBackedIntent {}
 extension AddServiceIntent: StoreBackedIntent {}
 extension EditServiceIntent: StoreBackedIntent {}

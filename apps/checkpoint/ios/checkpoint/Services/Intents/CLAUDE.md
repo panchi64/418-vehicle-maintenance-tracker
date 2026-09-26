@@ -10,11 +10,11 @@ Intents/
 ├── IntentStore.swift           # entity → model resolution, default vehicle, commit; IntentError
 ├── IntentDonations.swift       # IntentDonationManager calls from the in-app save paths
 ├── SpotlightIndexer.swift      # CSSearchableIndex.indexAppEntities / deleteAppEntities
-├── CheckpointShortcuts.swift   # AppShortcutsProvider — 9 of Apple's max 10
+├── CheckpointShortcuts.swift   # AppShortcutsProvider — 10 of Apple's max 10 (a new one displaces one)
 ├── L10n+Siri.swift             # spoken sentences + snippet labels, `siri.` keys
 ├── Entities/                   # SwiftData-backed App Entities + AppEnum conformances
 ├── Mileage/                    # UpdateMileageIntent (direct write), GetMileageIntent
-├── History/                    # MarkServiceDone, LogService, DeleteServiceLog + ServiceLogging
+├── History/                    # MarkServiceDone, LogService, LogReceipt, DeleteServiceLog + ServiceLogging
 ├── Schedule/                   # Add / Edit / Snooze / StopTracking / Delete service + ServiceScheduling
 ├── Queries/                    # CheckNextDue, ListUpcoming, ListOverdue, LastServiceQuery,
 │                               #   SpendingSummary + DueServices / SpokenValue helpers
@@ -25,8 +25,13 @@ Intents/
     │                           #   placeholder location-trigger/section types the processor demands
     ├── Photos/                 # iOS 27: image document = asset, vehicle = album; open + save photos
     ├── Files/                  # iOS 18 schema (ships on 26): every document = file; open file
-    └── System/                 # search (26) / searchInApp (27), .system.open per entity, EntityRoutes
+    ├── System/                 # search (26) / searchInApp (27), .system.open per entity, EntityRoutes
+    └── VisualIntelligence/     # IntentValueQuery over SemanticContentDescriptor → VisualCaptureEntity
+                                #   (log receipt / update mileage / add vehicle by VIN), its OpenIntent,
+                                #   .visualIntelligence.semanticContentSearch; VisualCaptureStore (memory)
 ```
+
+Receipt reading itself lives in `Services/Intelligence/` (its own CLAUDE.md).
 
 Notification entity tags live with the notifications (`Services/Notifications/NotificationEntityTags.swift`).
 
@@ -50,6 +55,8 @@ Spanish App Shortcut phrases live in `checkpoint/Resources/AppShortcuts.xcstring
 - **Donate in-app actions only.** `IntentDonations` is called from the app's save paths (Mark Done, [+] log, Mark all done, schedule, mileage sheet). An intent Siri ran is donated by the system.
 - **Spotlight follows data changes.** `SpotlightIndexer.scheduleReindex` runs wherever widget data refreshes and on `IntentStore` commits. Don't add per-write indexing hooks elsewhere.
 - **Tag detail screens** with `.onScreenEntity(_:id:)` so Apple Intelligence can act on "this".
+- **Receipts log like speech.** `LogReceiptIntent` reads the file (`ReceiptExtractionService`, swappable via `makeExtractor` for tests), shows `ServiceRecordSnippetIntent`, and writes through `ServiceLogging` with an `Occasion` that carries the shop, line items and the receipt attachment. Shop or line items → a visit (`Occasion.needsVisit`); the total counts once.
+- **Visual Intelligence opens, never writes.** The value query only classifies and keeps captures in memory (`VisualCaptureStore`, 30 min); tapping a result routes (`.logReceipt`, `.mileageReading`, `.addVehicle`) to the screen that asks. The app may have only one `IntentValueQuery` over `SemanticContentDescriptor`. The Simulator SDK has no VisualIntelligence module, so the query and schema intent sit behind `#if canImport(VisualIntelligence)`.
 
 ## Two `MarkServiceDone` intents, two `VehicleEntity` types
 

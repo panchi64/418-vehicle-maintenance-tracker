@@ -30,7 +30,8 @@ Siri AI and Foundation Models need Apple Intelligence hardware (iPhone 15 Pro an
 | `AppIntentsTesting` (test framework) | 27 | — | ✅ | ✅ |
 | Foundation Models, text in (`SystemLanguageModel`, `@Generable`) | 26 | AI hw | — | ✅ |
 | Foundation Models `Attachment` (image in), `OCRTool`, `BarcodeReaderTool` | 27 | — | — | ✅ |
-| Vision `RecognizeDocumentsRequest` | 26 | ✅ | ✅ | ✅ |
+| Foundation Models `tokenCount(for:)` | 26.4 | AI hw | — | ✅ |
+| Vision `RecognizeDocumentsRequest`, `DetectLensSmudgeRequest` | 26 | ✅ | ✅ | ✅ |
 
 Check at runtime with `SystemLanguageModel.default.availability`. It reports `.unavailable(.deviceNotEligible | .appleIntelligenceNotEnabled | .modelNotReady)`.
 
@@ -122,6 +123,23 @@ Checkpoint's placeholders are `NoLocationTriggerEntity` and `NoSectionEntity`, w
 
 **`AppIntentsTesting`** runs intents out of process, in a live, team-signed app. Apple puts these tests in a **UI testing** target that launches the app. In the unit-test host, lookups fail with "Underlying session was cancelled (transportCancelled)". Command-line simulator builds are ad-hoc signed, so this also needs a signed build. The schema intents are unit-tested directly instead.
 
+## What Checkpoint ships (Phase 4: receipts and documents)
+
+On-device only (no Private Cloud Compute) and free. Code in `Services/Intelligence/` (its CLAUDE.md has the rules).
+
+| Piece | What it does | Tiers |
+|---|---|---|
+| `ReceiptOCRService.scan` | `DetectLensSmudgeRequest` gate → `RecognizeDocumentsRequest` → `ReceiptScan` (lines, tables, detected amounts/dates) | all |
+| `ReceiptTextParser` | Rule-based draft: shop, date, total (labelled, else largest at low confidence), tax (IVU lines summed), odometer, line items, services (EN/ES) | all — the whole reader without Apple Intelligence |
+| `OnDeviceLanguageModel` | `@Generable GeneratedReceipt` over the transcript with `ServiceNameTool`; on 27 also `Attachment` + `OCRTool` (device only); context fitted with `tokenCount` | 26 + AI (image on 27) |
+| `ReceiptDraftValidator` | Merge model with rules (agree → high), then items ≈ total, plausible date, odometer ≥ last reading; `Issue`s shown as cautions | all |
+| `DocumentClassifier` | `DocumentType` from text (`.contentTagging` model), else keywords, else filename; used by the Documents picker and Save Photos | all |
+| Service form | "Scan a receipt" first row; values land in their fields marked "From receipt"; shop and line items go on a visit on save | all |
+| `LogReceiptIntent` (App Shortcut 10/10) | Image or PDF → draft → `ServiceRecordSnippetIntent` confirmation → `ServiceLogging` | all |
+| Visual Intelligence | `CheckpointVisualSearchQuery` → `VisualCaptureEntity` (log receipt / update mileage / add vehicle by VIN) → `OpenVisualCaptureIntent`; `ShowVisualSearchResultsIntent` for "More results" | 26 + AI hardware, device only |
+
+**Share Sheet.** There is no share extension; `LogReceiptIntent`'s file parameter is what makes it a Shortcuts action that accepts images and PDFs, which Shortcuts can show in the Share Sheet.
+
 ## Other signatures confirmed in the SDK
 
 - **`.system.searchInApp`** (27): `ShowInAppSearchResultsIntent` with `static var searchScopes: [StringSearchScope]` and `var criteria: StringSearchCriteria`. On iOS 26, use `.system.search`.
@@ -129,11 +147,16 @@ Checkpoint's placeholders are `NoLocationTriggerEntity` and `NoSectionEntity`, w
 - **`.visualIntelligence.semanticContentSearch`** (26): Xcode's snippet names `VisualIntelligence.SceneDescriptor`, **but that type does not exist in the SDK.** Use `SemanticContentDescriptor` (`labels: [String]`, `pixelBuffer: CVReadOnlyPixelBuffer?`). It conforms to `IntentValueConvertible` only on iOS 27.
 - **`Attachment`** (27):
   - Initializers: `init(_: CGImage)`, `init(_: CIImage)`, `init(_: CVPixelBuffer)`, `init(imageURL:)`, each taking an optional `orientation:`.
-  - **No `UIImage` initializer** — convert with `.cgImage`.
+  - **Correction (Phase 4):** FoundationModels itself has no `UIImage` initializer, but the UIKit cross-import overlay (`_FoundationModels_UIKit`) adds `init(_: UIImage, orientation: UIImage.Orientation?)`. Checkpoint passes a `CGImage` plus its `CGImagePropertyOrientation` anyway, so the same path serves Vision.
   - `.label(_:)`.
   - Conforms to `PromptRepresentable`.
-- **`OCRTool` / `BarcodeReaderTool`** (27, in `_Vision_FoundationModels`): `init(name:description:)`, conforming to `Tool`.
-- **Token budget:** `SystemLanguageModel.contextSize` and `tokenCount(for:)` take prompts, instructions, tools or schemas. Read the size at runtime; don't hard-code it.
+- **`OCRTool` / `BarcodeReaderTool`** (27, in the `_Vision_FoundationModels` cross-import overlay — import Vision and FoundationModels): `init(name:description:)`, conforming to `Tool`. **Not in the Simulator SDK** (Apple: "isn't available in Simulator"), so it's behind `#if canImport(_Vision_FoundationModels)`.
+- **Token budget:** `SystemLanguageModel.contextSize` (back-deployed to 26.0) and `tokenCount(for:)` (**iOS 26.4+**) take prompts, instructions, tools or schemas. Read the size at runtime; don't hard-code it. Below 26.4, estimate.
+- **`Tool.call(arguments:)`** is declared `@concurrent`; a `Tool` is `Sendable`, so it can't touch SwiftData — hand it a snapshot.
+- **`@Generable`** types must be `nonisolated` under the project's default MainActor isolation. `Decimal`, `Int`, `String`, optionals, arrays and enums are all `Generable` on iOS 26.
+- **Vision `RecognizeDocumentsRequest`** (26): `DocumentObservation.document` → `text.transcript`, `text.lines`, `text.detectedData` (`DataDetection` matches: `.moneyAmount(currency, amount: Decimal)`, `.calendarEvent(startDate…)`, with a `range` into the transcript), `tables[].rows[][].content.text`. `textRecognitionOptions.recognitionLanguages` takes `Locale.Language`.
+- **Vision `DetectLensSmudgeRequest`** (26): returns a `SmudgeObservation` whose `confidence` is the probability of a smudge; Apple's sample rejects at ≥ 0.9. Needs an A14 or later.
+- **`VisualIntelligence` is not in the Simulator SDK.** `SemanticContentDescriptor.pixelBuffer` is a `CVReadOnlyPixelBuffer`; read it with `withUnsafeBuffer { CIImage(cvPixelBuffer: $0) }`.
 - **`AppDependencyManager.shared.add(dependency:)`**: the dependency must be `Sendable`. `@Dependency` resolves from the manager only inside the system's perform flow; outside it (unit tests) the value must be set on the intent first, or access traps. `AppDependency.wrappedValue` has a setter for this.
 - **App Shortcuts:** up to 10 per app (Human Interface Guidelines, "App Shortcuts"). Every phrase must contain `\(.applicationName)`. Localized phrases go in `AppShortcuts.xcstrings`; Xcode 27's metadata processor reads that file name and emits `<lang>.lproj/AppShortcuts.strings` plus an NLU model per language.
 - **`requestConfirmation`:** `(conditions:actionName:dialog:)` is iOS 18; the `snippetIntent:` overload is iOS 26. `ConfirmationActionName` has no `.delete`; use the default (`.continue`) with a dialog that names the delete. Outside a Siri/Shortcuts session it throws at once, so the write behind it never runs.

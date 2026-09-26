@@ -17,6 +17,9 @@ struct MileageUpdateSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     let vehicle: Vehicle
+    /// A reading to start from (Visual Intelligence read it off the
+    /// odometer); the user still confirms it with Update.
+    var initialMileage: Int? = nil
     let onSave: (Int) -> Void
 
     @State private var newMileage: Int?
@@ -84,6 +87,11 @@ struct MileageUpdateSheet: View {
                 onSave: { commit(newMileage ?? 0) },
                 onBlocked: { showBlocker = true }
             )
+        }
+        .onAppear {
+            if newMileage == nil, let initialMileage {
+                newMileage = initialMileage
+            }
         }
         .task(id: newMileage) {
             let warning = ServiceFormValidation.mileageWarning(

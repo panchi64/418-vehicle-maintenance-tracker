@@ -82,6 +82,12 @@ struct AddVehicleFlowView: View {
                         }
                     }
                 )
+                // Visual Intelligence read a VIN: start from it.
+                .onChange(of: appState.addVehicleVINSeed, initial: true) { _, seed in
+                    guard let seed else { return }
+                    formState.vin = seed
+                    appState.addVehicleVINSeed = nil
+                }
                 .onChange(of: formState.blockingReason) { _, newValue in
                     if newValue == nil { showBlockingReason = false }
                 }

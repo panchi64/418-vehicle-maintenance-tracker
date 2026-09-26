@@ -48,6 +48,15 @@ enum PendingRoute: Equatable {
     case searchServices(vehicleID: UUID, term: String)
     /// Search the vehicle's Documents library for `term`.
     case searchDocuments(vehicleID: UUID, term: String)
+    /// Visual Intelligence: open the log form on the receipt it captured
+    /// (`VisualCaptureStore`, in memory).
+    case logReceipt(vehicleID: UUID, captureID: UUID)
+    /// Visual Intelligence: open the mileage sheet with the odometer it read,
+    /// in stored miles, for the user to confirm.
+    case mileageReading(vehicleID: UUID, reading: Int)
+    /// Visual Intelligence: open Add Vehicle with the VIN it read. The
+    /// vehicle ID is the one showing; the new vehicle doesn't exist yet.
+    case addVehicle(vehicleID: UUID, vin: String)
 
     /// Open a single service's detail.
     static func service(vehicleID: UUID, serviceID: UUID) -> PendingRoute {
@@ -59,7 +68,8 @@ enum PendingRoute: Equatable {
         case .updateMileage(let id), .costs(let id), .editVehicle(let id), .vehicle(let id):
             return id
         case .services(let id, _), .markDone(let id, _), .serviceLog(let id, _),
-             .visit(let id, _), .document(let id, _), .searchServices(let id, _), .searchDocuments(let id, _):
+             .visit(let id, _), .document(let id, _), .searchServices(let id, _), .searchDocuments(let id, _),
+             .logReceipt(let id, _), .mileageReading(let id, _), .addVehicle(let id, _):
             return id
         }
     }

@@ -29,6 +29,10 @@ nonisolated enum IntentError: Error, Equatable, CustomLocalizedStringResourceCon
     case serviceCannotMove
     /// Nothing in the files handed over was an image.
     case noImages
+    /// A receipt with nothing readable on it.
+    case receiptUnreadable
+    /// A Visual Intelligence result tapped after its capture was dropped.
+    case captureExpired
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
@@ -42,6 +46,8 @@ nonisolated enum IntentError: Error, Equatable, CustomLocalizedStringResourceCon
         case .serviceNeedsDue: "Say when it's due, with a date or how often it repeats."
         case .serviceCannotMove: "A service can't move to another vehicle. Add it to that vehicle instead."
         case .noImages: "Checkpoint can only save images here."
+        case .receiptUnreadable: "Checkpoint couldn't read that receipt. Try a sharper photo, or log it in the app."
+        case .captureExpired: "That capture is no longer available. Try Visual Intelligence again."
         }
     }
 }

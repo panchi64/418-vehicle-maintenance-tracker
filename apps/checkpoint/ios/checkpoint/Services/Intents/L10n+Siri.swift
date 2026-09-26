@@ -257,6 +257,17 @@ extension L10n {
         siri("siri.spend.category", amount, vehicle, category, period)
     }
 
+    // MARK: - Receipts
+
+    /// "Log Oil Change on Daily Driver from this receipt?" — list, vehicle.
+    nonisolated static func siriReceiptConfirm(services: String, vehicle: String) -> String {
+        siri("siri.receipt.confirm", services, vehicle)
+    }
+    /// "Logged Oil Change on Daily Driver from the receipt." — list, vehicle.
+    nonisolated static func siriReceiptSaved(services: String, vehicle: String) -> String {
+        siri("siri.receipt.saved", services, vehicle)
+    }
+
     // MARK: - Snippet labels
 
     nonisolated static var siriSnippetDate: String { siri("siri.snippet.date") }

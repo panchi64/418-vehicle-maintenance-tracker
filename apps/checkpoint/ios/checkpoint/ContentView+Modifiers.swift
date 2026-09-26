@@ -57,12 +57,13 @@ extension ContentView {
                 noVehicleFallback
             }
 
-        case .addService(let seasonal, let postRecord):
+        case .addService(let seasonal, let postRecord, let receipt):
             if let vehicle = currentVehicle {
                 AddServiceView(
                     vehicle: vehicle,
                     seasonalPrefill: seasonal,
-                    postRecordPrefill: postRecord
+                    postRecordPrefill: postRecord,
+                    receiptImage: receipt
                 )
             } else {
                 noVehicleFallback
@@ -72,6 +73,7 @@ extension ContentView {
             if let vehicle = currentVehicle {
                 MileageUpdateSheet(
                     vehicle: vehicle,
+                    initialMileage: appState.mileageReadingSeed,
                     onSave: { newMileage in
                         AnalyticsService.shared.capture(.mileageUpdated(source: .manual))
                         updateMileage(newMileage, for: vehicle)
@@ -80,6 +82,7 @@ extension ContentView {
                 )
                 .trackScreen(.mileageUpdate)
                 .presentationDetents([.medium, .large])
+                .onDisappear { appState.mileageReadingSeed = nil }
             } else {
                 noVehicleFallback
             }

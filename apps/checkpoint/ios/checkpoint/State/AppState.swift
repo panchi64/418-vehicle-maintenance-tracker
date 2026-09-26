@@ -132,6 +132,11 @@ final class AppState {
     /// A search a route asked the Documents library to open with (Siri's
     /// in-app search). `DocumentsView` takes it into its field and clears it.
     var documentsSearchSeed: String?
+    /// An odometer reading a route asked the mileage sheet to open with
+    /// (Visual Intelligence). The sheet takes it and clears it.
+    var mileageReadingSeed: Int?
+    /// A VIN a route asked Add Vehicle to open with (Visual Intelligence).
+    var addVehicleVINSeed: String?
 
     // MARK: - Container Lifecycle
 

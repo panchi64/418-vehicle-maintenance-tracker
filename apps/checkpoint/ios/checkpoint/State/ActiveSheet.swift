@@ -13,12 +13,13 @@
 //
 
 import Foundation
+import UIKit
 
 enum ActiveSheet: Identifiable {
     case vehiclePicker
     case addVehicle
     case editVehicle
-    case addService(seasonal: SeasonalPrefill? = nil, postRecord: PostRecordPrefill? = nil)
+    case addService(seasonal: SeasonalPrefill? = nil, postRecord: PostRecordPrefill? = nil, receipt: UIImage? = nil)
     case mileageUpdate
     case settings
     case proPaywall

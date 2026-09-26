@@ -11,6 +11,16 @@
         }
       }
     },
+    "Add a receipt to ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agregar un recibo a ${applicationName}"
+          }
+        }
+      }
+    },
     "Add a service in ${applicationName}" : {
       "localizations" : {
         "es" : {
@@ -101,6 +111,16 @@
         }
       }
     },
+    "Log a receipt in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrar un recibo en ${applicationName}"
+          }
+        }
+      }
+    },
     "Log a service in ${applicationName}" : {
       "localizations" : {
         "es" : {
@@ -127,6 +147,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Registrar millaje en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Log this receipt in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrar este recibo en ${applicationName}"
           }
         }
       }

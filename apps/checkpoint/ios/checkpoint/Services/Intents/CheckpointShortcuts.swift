@@ -4,8 +4,8 @@
 //
 //  The App Shortcuts: intents that work by voice the moment the app is
 //  installed, with no setup in the Shortcuts app. Apple allows an app up to
-//  10 (Human Interface Guidelines, "App Shortcuts"); these are the nine most
-//  used, in priority order, leaving one slot for a later phase. Every other
+//  10 (Human Interface Guidelines, "App Shortcuts"); these are the ten most
+//  used, in priority order, so a new one must displace one. Every other
 //  intent is still in the Shortcuts app and reachable by Siri through a
 //  user-made shortcut.
 //
@@ -28,6 +28,19 @@ struct CheckpointShortcuts: AppShortcutsProvider {
             ],
             shortTitle: "Log Service",
             systemImageName: "square.and.pencil"
+        )
+
+        // "This receipt": Siri takes the one on screen; from the Share Sheet
+        // or a shortcut, the file handed over.
+        AppShortcut(
+            intent: LogReceiptIntent(),
+            phrases: [
+                "Log this receipt in \(.applicationName)",
+                "Log a receipt in \(.applicationName)",
+                "Add a receipt to \(.applicationName)"
+            ],
+            shortTitle: "Log Receipt",
+            systemImageName: "doc.text.viewfinder"
         )
 
         AppShortcut(
