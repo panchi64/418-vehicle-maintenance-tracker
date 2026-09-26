@@ -100,4 +100,7 @@ The shapes below come from Xcode 27's snippet library (`AppShortcutsEditor.frame
   - Conforms to `PromptRepresentable`.
 - **`OCRTool` / `BarcodeReaderTool`** (27, in `_Vision_FoundationModels`): `init(name:description:)`, conforming to `Tool`.
 - **Token budget:** `SystemLanguageModel.contextSize` and `tokenCount(for:)` take prompts, instructions, tools or schemas. Read the size at runtime; don't hard-code it.
-- **`AppDependencyManager.shared.add(dependency:)`**: the dependency must be `Sendable`.
+- **`AppDependencyManager.shared.add(dependency:)`**: the dependency must be `Sendable`. `@Dependency` resolves from the manager only inside the system's perform flow; outside it (unit tests) the value must be set on the intent first, or access traps. `AppDependency.wrappedValue` has a setter for this.
+- **App Shortcuts:** up to 10 per app (Human Interface Guidelines, "App Shortcuts"). Every phrase must contain `\(.applicationName)`. Localized phrases go in `AppShortcuts.xcstrings`; Xcode 27's metadata processor reads that file name and emits `<lang>.lproj/AppShortcuts.strings` plus an NLU model per language.
+- **`requestConfirmation`:** `(conditions:actionName:dialog:)` is iOS 18; the `snippetIntent:` overload is iOS 26. `ConfirmationActionName` has no `.delete`; use the default (`.continue`) with a dialog that names the delete. Outside a Siri/Shortcuts session it throws at once, so the write behind it never runs.
+- **`RelevantIntent`** (iOS 17) only takes a `WidgetConfigurationIntent` plus a widget kind — it ranks widgets in the Smart Stack, not Siri suggestions. Siri learns from `IntentDonationManager` donations.

@@ -140,7 +140,7 @@ checkpoint-app/
 │   ├── WidgetProvider.swift
 │   ├── VehicleEntity.swift
 │   ├── VehicleEntityQuery.swift
-│   ├── MarkServiceDoneIntent.swift
+│   ├── WidgetMarkDoneIntent.swift
 │   ├── Shared/
 │   │   ├── WidgetColors.swift
 │   │   ├── DistanceUnitWidget.swift
@@ -271,7 +271,12 @@ App Intents, App Entities and Spotlight indexing. See `checkpoint/Services/Inten
 - **Entities** (`Intents/Entities/`): `VehicleEntity`, `ServiceEntity`, `ServiceLogEntity`, `VisitEntity`, `DocumentEntity` are `IndexedEntity` snapshots of SwiftData models (`ModelBackedEntity`); `ServicePresetEntity` reads `PresetDataService`. `CostPeriod`, `CostCategory`, `DocumentType`, `ServiceStatus` conform to `AppEnum` in place.
 - **Spotlight:** `SpotlightIndexer` replaces each entity type in `CSSearchableIndex` wherever widget data refreshes after a change.
 - **Navigation:** intents that open the app set a `PendingRoute` (see Navigation below).
-- **Intents:** `CheckNextDueIntent`, `ListUpcomingServicesIntent` (App Group snapshot via `SiriDataProvider`), `UpdateMileageIntent` (opens the mileage sheet prefilled), registered by `CheckpointShortcuts`.
+- **Intents** (all read and write the store directly, through the same services as the UI; see `Intents/CLAUDE.md`):
+  - Mileage: `UpdateMileageIntent` (records in place, confirms only a misheard-looking reading — `MileageReadingCheck`), `GetMileageIntent`.
+  - History: `MarkServiceDoneIntent`, `LogServiceIntent` (confirmation snippet, then `LoggedServiceWriter` / `ServiceVisitWriter`), `DeleteServiceLogIntent`.
+  - Schedule: `AddServiceIntent`, `EditServiceIntent`, `SnoozeServiceIntent`, `StopTrackingServiceIntent`, `DeleteServiceIntent`. Deletes always confirm.
+  - Queries: `CheckNextDueIntent`, `ListUpcomingServicesIntent`, `ListOverdueIntent` (interactive snippet with Done buttons), `LastServiceQueryIntent`, `SpendingSummaryIntent` (`CostAnalyticsService`).
+  - `CheckpointShortcuts` registers 9 App Shortcuts (Apple's limit is 10); Spanish phrases in `AppShortcuts.xcstrings`. `IntentDonations` donates the in-app equivalents.
 
 ### StoreKit/ (Monetization)
 
@@ -322,7 +327,7 @@ enum AppGroupConstants {
 }
 ```
 
-Used by: `WidgetDataService`, `SiriDataProvider`, `WatchSessionService`, widget extensions.
+Used by: `WidgetDataService`, `WatchSessionService`, widget extensions.
 
 ## Widget Extension (iOS)
 
@@ -340,7 +345,7 @@ Used by: `WidgetDataService`, `SiriDataProvider`, `WatchSessionService`, widget 
 - `WidgetService` — Service data optimized for widget display (name, status, dueDescription)
 - `WidgetServiceStatus` — Mirrors main app's ServiceStatus (overdue, dueSoon, good, neutral)
 - `VehicleEntity` / `VehicleEntityQuery` — App Entity for vehicle selection in widget configuration
-- `MarkServiceDoneIntent` — App Intent for interactive "Done" button
+- `WidgetMarkDoneIntent` — App Intent for the interactive "Done" button (queues; distinct from the app-side `MarkServiceDoneIntent` Siri runs)
 - `PendingWidgetCompletion` — Codable struct queued in shared UserDefaults
 
 ### Widget Colors
@@ -528,10 +533,10 @@ ContentView
 - **StoreManagerTests** — StoreKit purchase flow, entitlements
 - **ToastServiceTests** — Toast notification lifecycle
 
-### Siri Tests
-- **SiriDataProviderTests** — Data loading from App Groups
-- **CheckNextDueIntentTests** — Dialog formatting for next due service
-- **UpdateMileageIntentTests** — Pending mileage update storage
+### Intent Tests (`Services/Intents/`)
+- **IntentTestCase** — in-memory store handed to intents as their `@Dependency` container
+- **MileageIntentTests**, **ServiceLoggingIntentTests**, **ScheduleIntentTests**, **QueryIntentTests** — each intent's write or answer, and that confirming intents write nothing without a yes
+- **AppEntityTests**, **SpotlightIndexerTests**, **IntentDonationsTests**
 
 ### View Tests
 - **HomeTabTests** — Home tab rendering and data display
