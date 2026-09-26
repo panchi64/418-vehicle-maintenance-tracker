@@ -391,6 +391,9 @@ struct DocumentPickerSheet: View {
 
         modelContext.insert(document)
         try? modelContext.save()
+        if serviceLog == nil {
+            IntentDonations.addedDocument(payload.documentType, to: currentVehicle)
+        }
         onSave(document)
         dismiss()
     }

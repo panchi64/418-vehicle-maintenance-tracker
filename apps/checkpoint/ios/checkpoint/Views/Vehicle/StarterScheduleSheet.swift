@@ -77,8 +77,7 @@ struct StarterScheduleSheet: View {
 
     private func prepare() {
         guard items.isEmpty else { return }
-        let existing = (vehicle.services ?? []).map(\.name)
-        items = StarterSchedule.items(from: PresetDataService.shared.loadPresets(), excluding: existing)
+        items = StarterScheduleWriter.offeredItems(for: vehicle)
         initialItems = items
     }
 
@@ -86,19 +85,8 @@ struct StarterScheduleSheet: View {
         let plans = StarterSchedule.plans(for: items, currentMileage: vehicle.currentMileage)
         let categories = Dictionary(uniqueKeysWithValues: items.map { ($0.name, $0.category) })
 
+        StarterScheduleWriter.insert(plans, on: vehicle, in: modelContext)
         for plan in plans {
-            let service = Service(
-                name: plan.name,
-                dueDate: plan.dueDate,
-                dueMileage: plan.dueMileage,
-                lastPerformed: plan.lastPerformed,
-                lastMileage: plan.lastMileage,
-                intervalMonths: plan.intervalMonths,
-                intervalMiles: plan.intervalMiles,
-                isRecurring: true
-            )
-            service.vehicle = vehicle
-            modelContext.insert(service)
             AnalyticsService.shared.capture(.serviceScheduled(
                 isPreset: true,
                 category: categories[plan.name],
@@ -106,7 +94,6 @@ struct StarterScheduleSheet: View {
             ))
         }
 
-        DerivedSurfaces.refresh(for: vehicle)
         HapticService.shared.success()
         ToastService.shared.show(L10n.vehicleStarterToastAdded(plans.count), icon: "clock", style: .success)
         dismiss()

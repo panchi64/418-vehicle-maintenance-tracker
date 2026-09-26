@@ -232,8 +232,8 @@ struct RecallSheetView: View {
                 {
                     let prefill = SeasonalPrefill(
                         reminderID: "recall_\(recall.campaignNumber)",
-                        serviceName: L10n.recallPlannedServiceName(recall.component.localizedCapitalized),
-                        dueDate: Calendar.current.date(byAdding: .day, value: 7, to: .now) ?? .now,
+                        serviceName: recall.plannedServiceName,
+                        dueDate: recall.plannedServiceDueDate(),
                         intervalMonths: 0
                     )
                     handler(prefill)

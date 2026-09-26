@@ -80,7 +80,7 @@ final class LogReceiptIntentTests: IntentTestCase {
             context.beginPage()
             "RECEIPT".draw(at: CGPoint(x: 72, y: 72))
         }
-        let image = LogReceiptIntent.image(from: pdf)
+        let image = DocumentImport.image(from: pdf)
         XCTAssertNotNil(image)
         XCTAssertGreaterThan(image?.size.height ?? 0, image?.size.width ?? 0)
     }

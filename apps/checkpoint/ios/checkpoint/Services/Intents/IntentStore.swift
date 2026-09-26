@@ -33,6 +33,19 @@ nonisolated enum IntentError: Error, Equatable, CustomLocalizedStringResourceCon
     case receiptUnreadable
     /// A Visual Intelligence result tapped after its capture was dropped.
     case captureExpired
+    /// Recalls are looked up by make, model and year.
+    case recallsNeedIdentity
+    /// NHTSA couldn't be reached and nothing was cached.
+    case recallsUnavailable
+    /// Renewing needs a marbete month on file.
+    case noMarbete
+    /// Find Document matched nothing.
+    case noMatchingDocument
+    /// Add Document was handed something that is neither an image nor a PDF.
+    case unsupportedDocument
+    /// A vehicle with no service history has nothing to export.
+    case nothingToExport
+    case exportFailed
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
@@ -48,6 +61,13 @@ nonisolated enum IntentError: Error, Equatable, CustomLocalizedStringResourceCon
         case .noImages: "Checkpoint can only save images here."
         case .receiptUnreadable: "Checkpoint couldn't read that receipt. Try a sharper photo, or log it in the app."
         case .captureExpired: "That capture is no longer available. Try Visual Intelligence again."
+        case .recallsNeedIdentity: "Add this vehicle's make, model and year in Checkpoint to check its recalls."
+        case .recallsUnavailable: "Checkpoint couldn't reach NHTSA to check recalls. Try again later."
+        case .noMarbete: "There's no marbete date for this vehicle. Add it in Edit Vehicle first."
+        case .noMatchingDocument: "Checkpoint has no document like that. Add it from the Documents library."
+        case .unsupportedDocument: "Checkpoint can save photos and PDFs as documents."
+        case .nothingToExport: "There's no service history to export yet."
+        case .exportFailed: "Checkpoint couldn't create the PDF. Try exporting from the Services tab."
         }
     }
 }

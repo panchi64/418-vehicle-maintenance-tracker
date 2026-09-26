@@ -16,6 +16,9 @@ import SwiftData
 @available(iOS 27, *)
 @AppIntent(schema: .system.open)
 struct OpenVehicleIntent {
+    /// `SwitchVehicleIntent` is the Shortcuts action on both versions.
+    static let isAssistantOnly = true
+
     @Dependency var container: ModelContainer
     var target: VehicleEntity
 

@@ -26,6 +26,33 @@ struct VehicleFields: Equatable {
 }
 
 extension VehicleFields {
+    /// The fields a VIN decode can fill.
+    enum DecodedField: Hashable {
+        case make, model, year
+    }
+
+    /// Fill only the make, model and year still empty from a VIN decode — a
+    /// lookup never overwrites what the user typed or said — and return which
+    /// it filled. The vehicle forms and `VehicleService.fillingFromVIN` share
+    /// this rule.
+    @discardableResult
+    mutating func fillEmpty(from result: VINDecodeResult) -> Set<DecodedField> {
+        var filled: Set<DecodedField> = []
+        if make.trimmingCharacters(in: .whitespaces).isEmpty, !result.make.isEmpty {
+            make = result.make
+            filled.insert(.make)
+        }
+        if model.trimmingCharacters(in: .whitespaces).isEmpty, !result.model.isEmpty {
+            model = result.model
+            filled.insert(.model)
+        }
+        if year == nil, let decodedYear = result.modelYear {
+            year = decodedYear
+            filled.insert(.year)
+        }
+        return filled
+    }
+
     /// The values `vehicle` holds now.
     init(vehicle: Vehicle) {
         self.init(

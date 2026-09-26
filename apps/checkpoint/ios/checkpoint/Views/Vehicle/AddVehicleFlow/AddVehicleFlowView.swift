@@ -110,6 +110,7 @@ struct AddVehicleFlowView: View {
         // The odometer is required and Save is blocked without it, so the
         // fields always carry a mileage here.
         let vehicle = VehicleService.create(formState.fields, in: modelContext)
+        IntentDonations.addedVehicle()
         appState.selectVehicle(vehicle)
         HapticService.shared.success()
         ToastService.shared.show(L10n.toastVehicleSaved, icon: "checkmark.circle", style: .success)

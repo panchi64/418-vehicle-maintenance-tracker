@@ -70,47 +70,30 @@ struct SaveDocumentPhotosIntent {
 @MainActor
 enum PhotoImport {
 
-    struct File {
-        let data: Data
-        let fileName: String
-    }
+    typealias File = DocumentImport.File
 
-    /// Insert a document per file that decodes as an image, with the text
-    /// Vision reads from it, typed from that text (`DocumentClassifier`: the
-    /// on-device model, else keywords) and else from its name, as the
-    /// Documents picker types one. Files that aren't images are skipped.
+    /// Insert a document per file that decodes as an image, read, typed and
+    /// saved as `DocumentImport` does (Add Document's path). Files that
+    /// aren't images — PDFs included, which aren't photos — are skipped.
     static func importImages(
         _ files: [File],
         to vehicle: Vehicle,
         in context: ModelContext,
         now: Date = .now,
-        recognizeText: @MainActor (UIImage) async -> String? = PhotoImport.recognizeText(in:),
+        recognizeText: DocumentImport.TextReader = DocumentImport.recognizeText(in:),
         classifier: DocumentClassifier? = nil
     ) async -> [Document] {
         let classifier = classifier ?? DocumentClassifier()
         var documents: [Document] = []
-        for (index, file) in files.enumerated() {
-            guard let image = UIImage(data: file.data) else { continue }
-            let fileName = file.fileName.isEmpty
-                ? "photo_\(Int(now.timeIntervalSince1970))_\(index + 1).jpg"
-                : file.fileName
-            let text = await recognizeText(image)
-            guard let document = Document.fromImage(
-                image,
-                fileName: fileName,
-                documentType: await classifier.classify(text: text, fileName: fileName),
-                vehicles: [vehicle]
-            ) else { continue }
-            document.extractedText = text
-            context.insert(document)
-            documents.append(document)
+        for (index, file) in files.enumerated() where UIImage(data: file.data) != nil {
+            guard let reading = await DocumentImport.read(file, recognizeText: recognizeText) else { continue }
+            let type = await classifier.classify(text: reading.text, fileName: file.fileName)
+            if let document = DocumentImport.insert(
+                reading, fileName: file.fileName, type: type, on: vehicle, in: context, now: now, index: index + 1
+            ) {
+                documents.append(document)
+            }
         }
         return documents
-    }
-
-    /// The receipt scanner's OCR. A photo with no readable text is still
-    /// saved, just without any.
-    static func recognizeText(in image: UIImage) async -> String? {
-        try? await ReceiptOCRService.shared.extractText(from: image).text
     }
 }

@@ -15,7 +15,6 @@
 //
 
 import AppIntents
-import PDFKit
 import SwiftData
 import UIKit
 import UniformTypeIdentifiers
@@ -106,7 +105,7 @@ struct LogReceiptIntent: AppIntent {
     /// an image or PDF, or nothing useful can be read from it.
     @MainActor
     static func read(_ data: Data, for vehicle: Vehicle) async throws -> Reading {
-        guard let image = image(from: data) else { throw IntentError.receiptUnreadable }
+        guard let image = DocumentImport.image(from: data) else { throw IntentError.receiptUnreadable }
         let result: ReceiptExtractionService.Result
         do {
             result = try await makeExtractor().extract(from: image, context: ReceiptExtractionService.context(for: vehicle))
@@ -146,16 +145,5 @@ struct LogReceiptIntent: AppIntent {
         let logs = ServiceLogging.log(names, on: vehicle, occasion: occasion, in: context)
         try IntentStore.commit(vehicle, in: context)
         return logs
-    }
-
-    /// The file as an image: a photo as is, a PDF's first page rendered at
-    /// reading resolution.
-    static func image(from data: Data) -> UIImage? {
-        if let image = UIImage(data: data) { return image }
-        guard let page = PDFDocument(data: data)?.page(at: 0) else { return nil }
-        let bounds = page.bounds(for: .mediaBox)
-        let scale = 2_000 / max(bounds.width, bounds.height, 1)
-        let size = CGSize(width: bounds.width * scale, height: bounds.height * scale)
-        return page.thumbnail(of: size, for: .mediaBox)
     }
 }

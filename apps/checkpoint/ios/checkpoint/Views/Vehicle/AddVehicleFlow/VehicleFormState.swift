@@ -22,9 +22,7 @@ final class VehicleFormState {
         case nothingNew
     }
 
-    enum Field: Hashable {
-        case make, model, year
-    }
+    typealias Field = VehicleFields.DecodedField
 
     /// Every value the form writes to the vehicle. Compared against the
     /// baseline it was opened with to decide what Cancel would discard.
@@ -208,19 +206,7 @@ final class VehicleFormState {
         lastDecodedVIN = Self.normalized(decodedVIN)
         usedVINLookup = true
 
-        var filled: Set<Field> = []
-        if make.trimmingCharacters(in: .whitespaces).isEmpty, !result.make.isEmpty {
-            make = result.make
-            filled.insert(.make)
-        }
-        if model.trimmingCharacters(in: .whitespaces).isEmpty, !result.model.isEmpty {
-            model = result.model
-            filled.insert(.model)
-        }
-        if year == nil, let decodedYear = result.modelYear {
-            year = decodedYear
-            filled.insert(.year)
-        }
+        let filled = fields.fillEmpty(from: result)
         vinLookupOutcome = filled.isEmpty ? .nothingNew : .filled(filled)
     }
 

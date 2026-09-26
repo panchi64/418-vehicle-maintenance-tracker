@@ -54,6 +54,27 @@ enum VehicleService {
         return vehicle
     }
 
+    /// `fields` with the make, model and year it left empty filled from its
+    /// VIN's NHTSA decode — what the forms do as a VIN is typed, for callers
+    /// with no form (Siri, Shortcuts). Values already given win. Without a
+    /// VIN, or with every field already filled, nothing is looked up.
+    /// Throws `NHTSAError` (invalid VIN, offline, …).
+    static func fillingFromVIN(
+        _ fields: VehicleFields,
+        using client: any NHTSAClient = NHTSAService.shared
+    ) async throws -> VehicleFields {
+        let vin = fields.vin.trimmingCharacters(in: .whitespaces)
+        guard !vin.isEmpty else { return fields }
+        var filled = fields
+        filled.vin = vin.uppercased()
+        let needsLookup = fields.make.trimmingCharacters(in: .whitespaces).isEmpty
+            || fields.model.trimmingCharacters(in: .whitespaces).isEmpty
+            || fields.year == nil
+        guard needsLookup else { return filled }
+        filled.fillEmpty(from: try await client.decodeVIN(filled.vin))
+        return filled
+    }
+
     /// Write `fields` onto `vehicle`, then refresh everything derived from it:
     /// marbete and service reminders (they quote the name and mileage), the
     /// app icon, and the widget snapshot.

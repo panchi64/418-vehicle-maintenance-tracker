@@ -17,6 +17,7 @@ extension HomeTab {
     func renewMarbete(of vehicle: Vehicle, to expiration: Vehicle.MarbeteExpiration) {
         guard let previous = vehicle.marbeteExpiration else { return }
         MarbeteRenewal.apply(expiration, to: vehicle)
+        IntentDonations.renewedMarbete(on: vehicle)
         HapticService.shared.success()
 
         ToastService.shared.show(
@@ -28,16 +29,6 @@ extension HomeTab {
                 HapticService.shared.selectionChanged()
             }
         )
-    }
-}
-
-/// The model change plus the surfaces computed from it.
-private enum MarbeteRenewal {
-    static func apply(_ expiration: Vehicle.MarbeteExpiration, to vehicle: Vehicle) {
-        vehicle.applyMarbeteExpiration(expiration)
-        try? vehicle.modelContext?.save()
-        NotificationService.shared.scheduleMarbeteNotifications(for: vehicle)
-        WidgetDataService.shared.updateWidget(for: vehicle)
     }
 }
 

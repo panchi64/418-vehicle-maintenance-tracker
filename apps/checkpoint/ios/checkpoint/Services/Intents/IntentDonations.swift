@@ -44,6 +44,24 @@ enum IntentDonations {
         donate(AddServiceIntent(vehicle: service.vehicle.map { VehicleEntity(model: $0) }, name: service.name))
     }
 
+    /// After Add Vehicle. No parameters: a repeat is a different car.
+    static func addedVehicle() {
+        donate(AddVehicleIntent())
+    }
+
+    /// After Mark Renewed on the marbete — a yearly habit Siri can suggest.
+    static func renewedMarbete(on vehicle: Vehicle) {
+        let intent = RenewMarbeteIntent()
+        intent.vehicle = VehicleEntity(model: vehicle)
+        donate(intent)
+    }
+
+    /// After adding a document to a vehicle's library (not a receipt
+    /// attached to a log — that's part of logging).
+    static func addedDocument(_ type: DocumentType, to vehicle: Vehicle) {
+        donate(AddDocumentIntent(vehicle: VehicleEntity(model: vehicle), type: type))
+    }
+
     private static func donate(_ intent: some AppIntent) {
         IntentDonationManager.shared.donate(intent: intent)
     }

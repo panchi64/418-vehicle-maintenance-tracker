@@ -19,11 +19,12 @@
 import Foundation
 
 extension L10n {
-    nonisolated private static func siri(_ key: String) -> String {
+    /// Also used by the other `L10n+Siri*` files (vehicles, documents).
+    nonisolated static func siri(_ key: String) -> String {
         NSLocalizedString(key, comment: "")
     }
 
-    nonisolated private static func siri(_ key: String, _ arguments: CVarArg...) -> String {
+    nonisolated static func siri(_ key: String, _ arguments: CVarArg...) -> String {
         String(format: siri(key), arguments: arguments)
     }
 

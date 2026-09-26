@@ -260,6 +260,676 @@
         "es" : { "stringUnit" : { "state" : "translated", "value" : "Registré %1$@ en %2$@ con el recibo." } }
       }
     },
+    "siri.vehicle.scheduleAsk" : {
+      "comment" : "Add Vehicle's one question, which also confirms it. %1$@ is the vehicle, %2$@ and %3$@ two services of the starter schedule.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add %1$@ to Checkpoint with the usual maintenance schedule, like %2$@ and %3$@?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Añado %1$@ a Checkpoint con el mantenimiento habitual, como %2$@ y %3$@?" } }
+      }
+    },
+    "siri.vehicle.addedWithSchedule" : {
+      "comment" : "After Add Vehicle saves the vehicle and its starter schedule. %@ is the vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Added %@ to Checkpoint, with its maintenance schedule." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Agregué %@ a Checkpoint, con su plan de mantenimiento." } }
+      }
+    },
+    "siri.detail.licensePlate" : {
+      "comment" : "Get Vehicle Details. %1$@ is the vehicle, %2$@ the plate.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@'s license plate is %2$@." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "La tablilla de %1$@ es %2$@." } }
+      }
+    },
+    "siri.detail.vin" : {
+      "comment" : "Get Vehicle Details. %1$@ is the vehicle, %2$@ the VIN.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@'s VIN is %2$@." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "El VIN de %1$@ es %2$@." } }
+      }
+    },
+    "siri.detail.oilType" : {
+      "comment" : "Get Vehicle Details. %1$@ is the vehicle, %2$@ the oil type (e.g. 0W-20).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ takes %2$@ oil." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ usa aceite %2$@." } }
+      }
+    },
+    "siri.detail.tireSize" : {
+      "comment" : "Get Vehicle Details. %1$@ is the vehicle, %2$@ the tire size.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@'s tire size is %2$@." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "El tamaño de goma de %1$@ es %2$@." } }
+      }
+    },
+    "siri.detail.marbete" : {
+      "comment" : "Get Vehicle Details, marbete not yet expired. %1$@ is the vehicle, %2$@ the month (e.g. March 2027).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@'s marbete expires at the end of %2$@." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "El marbete de %1$@ vence a finales de %2$@." } }
+      }
+    },
+    "siri.detail.missing.licensePlate" : {
+      "comment" : "Get Vehicle Details with no plate on file. %@ is the vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint doesn't have %@'s license plate. Add it in Edit Vehicle." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint no tiene la tablilla de %@. Añádela en Editar vehículo." } }
+      }
+    },
+    "siri.detail.missing.vin" : {
+      "comment" : "Get Vehicle Details with no VIN on file. %@ is the vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint doesn't have %@'s VIN. Add it in Edit Vehicle." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint no tiene el VIN de %@. Añádelo en Editar vehículo." } }
+      }
+    },
+    "siri.detail.missing.oilType" : {
+      "comment" : "Get Vehicle Details with no oil type on file. %@ is the vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint doesn't have %@'s oil type. Add it in Edit Vehicle." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint no tiene el tipo de aceite de %@. Añádelo en Editar vehículo." } }
+      }
+    },
+    "siri.detail.missing.tireSize" : {
+      "comment" : "Get Vehicle Details with no tire size on file. %@ is the vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint doesn't have %@'s tire size. Add it in Edit Vehicle." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint no tiene el tamaño de goma de %@. Añádelo en Editar vehículo." } }
+      }
+    },
+    "siri.detail.missing.marbete" : {
+      "comment" : "Get Vehicle Details with no marbete month on file. %@ is the vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "There's no marbete date for %@. Add it in Edit Vehicle." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%@ no tiene fecha de marbete. Añádela en Editar vehículo." } }
+      }
+    },
+    "siri.detail.fact.licensePlate" : {
+      "comment" : "One fact in Get Vehicle Details' everything-on-file answer. %@ is the plate.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "License plate: %@." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tablilla: %@." } }
+      }
+    },
+    "siri.detail.fact.vin" : {
+      "comment" : "One fact in Get Vehicle Details' everything-on-file answer. %@ is the VIN.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "VIN: %@." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "VIN: %@." } }
+      }
+    },
+    "siri.detail.fact.oilType" : {
+      "comment" : "One fact in Get Vehicle Details' everything-on-file answer. %@ is the oil type.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Oil: %@." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Aceite: %@." } }
+      }
+    },
+    "siri.detail.fact.tireSize" : {
+      "comment" : "One fact in Get Vehicle Details' everything-on-file answer. %@ is the tire size.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tires: %@." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Gomas: %@." } }
+      }
+    },
+    "siri.detail.fact.marbete" : {
+      "comment" : "One fact in Get Vehicle Details' everything-on-file answer. %@ is the marbete month.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Marbete through %@." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Marbete hasta %@." } }
+      }
+    },
+    "siri.detail.summary" : {
+      "comment" : "Get Vehicle Details with no detail asked. %1$@ is the vehicle, %2$@ the facts, each a sentence.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Here's what Checkpoint has for %1$@. %2$@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Esto es lo que Checkpoint tiene de %1$@. %2$@" } }
+      }
+    },
+    "siri.detail.nothing" : {
+      "comment" : "Get Vehicle Details with nothing on file. %@ is the vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint doesn't have %@'s plate, VIN, oil or tire size yet. Add them in Edit Vehicle." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint aún no tiene la tablilla, el VIN, el aceite ni el tamaño de goma de %@. Añádelos en Editar vehículo." } }
+      }
+    },
+    "siri.marbete.expired" : {
+      "comment" : "Get Vehicle Details, marbete expired. %1$@ is the vehicle, %2$@ the month.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@'s marbete expired at the end of %2$@. Once it's renewed, tell Checkpoint." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "El marbete de %1$@ venció a finales de %2$@. Cuando lo renueves, díselo a Checkpoint." } }
+      }
+    },
+    "siri.marbete.renewConfirm" : {
+      "comment" : "Renew Marbete asks first. %1$@ is the vehicle, %2$@ the month it moves to.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mark %1$@'s marbete renewed through %2$@?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Marco el marbete de %1$@ como renovado hasta %2$@?" } }
+      }
+    },
+    "siri.marbete.renewed" : {
+      "comment" : "After Renew Marbete. %1$@ is the vehicle, %2$@ the new month.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Done. %1$@'s marbete now runs through %2$@." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Listo. El marbete de %1$@ ahora es válido hasta %2$@." } }
+      }
+    },
+    "siri.recalls.none" : {
+      "comment" : "Check Recalls found none open. %@ is the vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No open recalls for %@." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%@ no tiene retiros abiertos." } }
+      }
+    },
+    "siri.recalls.one" : {
+      "comment" : "Check Recalls found one. %1$@ is the vehicle, %2$@ the recalled component.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ has an open recall: %2$@." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ tiene un retiro abierto: %2$@." } }
+      }
+    },
+    "siri.recalls.many" : {
+      "comment" : "Check Recalls found several. %1$@ is the vehicle, %2$d the count, %3$@ the components.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ has %2$d open recalls: %3$@." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ tiene %2$d retiros abiertos: %3$@." } }
+      }
+    },
+    "siri.recalls.parkIt" : {
+      "comment" : "Appended when a recall is park-it. %@ is the recall sentence.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%@ NHTSA advises not to drive it until it's repaired." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%@ La NHTSA recomienda no conducirlo hasta que se repare." } }
+      }
+    },
+    "siri.recalls.offerOne" : {
+      "comment" : "Check Recalls offers to plan one recall. %@ is the recall sentence.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%@ Add it as a planned service?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%@ ¿Lo añado como servicio planificado?" } }
+      }
+    },
+    "siri.recalls.offerMany" : {
+      "comment" : "Check Recalls offers to plan several recalls. %@ is the recall sentence.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%@ Add them as planned services?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%@ ¿Los añado como servicios planificados?" } }
+      }
+    },
+    "siri.recalls.notPlanned" : {
+      "comment" : "Check Recalls after Not Now.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "OK. They're still on the recall card in Checkpoint." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Está bien. Siguen en la tarjeta de retiros de Checkpoint." } }
+      }
+    },
+    "siri.recalls.plannedNone" : {
+      "comment" : "Check Recalls: every recall already had its planned service. %@ is the vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Those recalls are already on %@'s schedule." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Esos retiros ya están en el plan de %@." } }
+      }
+    },
+    "siri.recalls.plannedOne" : {
+      "comment" : "Check Recalls added one planned service. %@ is the vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Added a planned service for %@'s recall." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añadí un servicio planificado para el retiro de %@." } }
+      }
+    },
+    "siri.recalls.plannedMany" : {
+      "comment" : "Check Recalls added several planned services. %1$d is the count, %2$@ the vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Added %1$d planned services for %2$@'s recalls." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añadí %1$d servicios planificados para los retiros de %2$@." } }
+      }
+    },
+    "siri.snippet.recallsNone" : {
+      "comment" : "Check Recalls snippet headline, none open.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No open recalls" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin retiros abiertos" } }
+      }
+    },
+    "siri.snippet.recallsOne" : {
+      "comment" : "Check Recalls snippet headline, one open.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "1 open recall" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "1 retiro abierto" } }
+      }
+    },
+    "siri.snippet.recallsMany" : {
+      "comment" : "Check Recalls snippet headline. %d is the count.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%d open recalls" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%d retiros abiertos" } }
+      }
+    },
+    "siri.snippet.planned" : {
+      "comment" : "Tag on a recall already added as a planned service.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "PLANNED" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "PLANIFICADO" } }
+      }
+    },
+    "siri.document.saved" : {
+      "comment" : "After Add Document. %1$@ is the document type (e.g. Insurance), %2$@ the vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Saved it to %2$@'s documents as %1$@." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Lo guardé en los documentos de %2$@ como %1$@." } }
+      }
+    },
+    "siri.document.found" : {
+      "comment" : "Find Document, over the document. %1$@ is the document type, %2$@ the vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Here's %2$@'s %1$@ document." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Aquí tienes el documento de %1$@ de %2$@." } }
+      }
+    },
+    "siri.snippet.documentCaption" : {
+      "comment" : "Find Document snippet caption. %1$@ is the document type, %2$@ the vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ · %2$@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ · %2$@" } }
+      }
+    },
+    "siri.history.exportedOne" : {
+      "comment" : "Export Service History, one entry. %@ is the vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Here's %@'s service history: 1 entry." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Aquí está el historial de servicio de %@: 1 registro." } }
+      }
+    },
+    "siri.history.exportedMany" : {
+      "comment" : "Export Service History. %1$@ is the vehicle, %2$d the entry count.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Here's %1$@'s service history: %2$d entries." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Aquí está el historial de servicio de %1$@: %2$d registros." } }
+      }
+    },
+    "Add Document" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add Document" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añadir documento" } }
+      }
+    },
+    "Save a photo or PDF to a vehicle's documents, such as an insurance card or registration. Checkpoint reads it and suggests its type." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Save a photo or PDF to a vehicle's documents, such as an insurance card or registration. Checkpoint reads it and suggests its type." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Guarda una foto o PDF en los documentos de un vehículo, como la tarjeta del seguro o el registro. Checkpoint lo lee y sugiere su tipo." } }
+      }
+    },
+    "A photo or PDF" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "A photo or PDF" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Una foto o PDF" } }
+      }
+    },
+    "Leave empty for Checkpoint to tell from the document." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Leave empty for Checkpoint to tell from the document." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Déjalo vacío para que Checkpoint lo deduzca del documento." } }
+      }
+    },
+    "What kind of document is it?" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "What kind of document is it?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Qué tipo de documento es?" } }
+      }
+    },
+    "Add ${file} to ${vehicle}'s documents" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add ${file} to ${vehicle}'s documents" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añadir ${file} a los documentos de ${vehicle}" } }
+      }
+    },
+    "Add Vehicle" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add Vehicle" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añadir vehículo" } }
+      }
+    },
+    "Add a vehicle by its make and model, or by its VIN, which Checkpoint looks up. Checkpoint can add the usual maintenance schedule too." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add a vehicle by its make and model, or by its VIN, which Checkpoint looks up. Checkpoint can add the usual maintenance schedule too." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añade un vehículo por su marca y modelo, o por su VIN, que Checkpoint busca. Checkpoint también puede añadir el mantenimiento habitual." } }
+      }
+    },
+    "The 17-character VIN. Checkpoint fills in the make, model and year from it." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The 17-character VIN. Checkpoint fills in the make, model and year from it." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "El VIN de 17 caracteres. Checkpoint completa la marca, el modelo y el año con él." } }
+      }
+    },
+    "Nickname" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Nickname" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Apodo" } }
+      }
+    },
+    "Add Maintenance Schedule" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add Maintenance Schedule" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añadir plan de mantenimiento" } }
+      }
+    },
+    "Add the common services with their usual intervals. Leave empty to be asked." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add the common services with their usual intervals. Leave empty to be asked." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añade los servicios comunes con sus intervalos habituales. Déjalo vacío para que te pregunte." } }
+      }
+    },
+    "What year is it?" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "What year is it?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿De qué año es?" } }
+      }
+    },
+    "Checkpoint couldn't look up that VIN. What's the make?" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint couldn't look up that VIN. What's the make?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint no pudo buscar ese VIN. ¿Cuál es la marca?" } }
+      }
+    },
+    "What's the make?" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "What's the make?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Cuál es la marca?" } }
+      }
+    },
+    "What's the model?" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "What's the model?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Cuál es el modelo?" } }
+      }
+    },
+    "Add with Schedule" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add with Schedule" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añadir con plan" } }
+      }
+    },
+    "Add Vehicle Only" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add Vehicle Only" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Solo el vehículo" } }
+      }
+    },
+    "Add ${year} ${make} ${model}" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add ${year} ${make} ${model}" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añadir ${year} ${make} ${model}" } }
+      }
+    },
+    "Check Recalls" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Check Recalls" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Revisar retiros" } }
+      }
+    },
+    "Check a vehicle for open safety recalls from NHTSA, and add them as planned services" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Check a vehicle for open safety recalls from NHTSA, and add them as planned services" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Revisa si un vehículo tiene retiros de seguridad abiertos de la NHTSA y añádelos como servicios planificados" } }
+      }
+    },
+    "Add as Planned" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add as Planned" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añadir como planificado" } }
+      }
+    },
+    "Not Now" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Not Now" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ahora no" } }
+      }
+    },
+    "Check recalls on ${vehicle}" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Check recalls on ${vehicle}" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Revisar retiros de ${vehicle}" } }
+      }
+    },
+    "Export Service History" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Export Service History" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Exportar historial de servicio" } }
+      }
+    },
+    "Create a PDF of a vehicle's service history, to share or save" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Create a PDF of a vehicle's service history, to share or save" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Crea un PDF del historial de servicio de un vehículo para compartirlo o guardarlo" } }
+      }
+    },
+    "Export the service history of ${vehicle}" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Export the service history of ${vehicle}" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Exportar el historial de servicio de ${vehicle}" } }
+      }
+    },
+    "Find Document" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Find Document" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Buscar documento" } }
+      }
+    },
+    "Find a vehicle document, such as the insurance card or registration, and show it" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Find a vehicle document, such as the insurance card or registration, and show it" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Busca un documento del vehículo, como la tarjeta del seguro o el registro, y muéstralo" } }
+      }
+    },
+    "Which document?" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Which document?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Qué documento?" } }
+      }
+    },
+    "Containing" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Containing" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Que contenga" } }
+      }
+    },
+    "Text the document contains, such as a policy number or a shop's name" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Text the document contains, such as a policy number or a shop's name" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Texto que contiene el documento, como un número de póliza o el nombre de un taller" } }
+      }
+    },
+    "Find ${type} of ${vehicle}" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Find ${type} of ${vehicle}" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Buscar ${type} de ${vehicle}" } }
+      }
+    },
+    "Vehicle Detail" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Vehicle Detail" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Detalle del vehículo" } }
+      }
+    },
+    "Get Vehicle Details" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Get Vehicle Details" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ver detalles del vehículo" } }
+      }
+    },
+    "Get a vehicle's license plate, VIN, oil type, tire size or marbete expiration" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Get a vehicle's license plate, VIN, oil type, tire size or marbete expiration" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Consulta la tablilla, el VIN, el tipo de aceite, el tamaño de goma o el vencimiento del marbete de un vehículo" } }
+      }
+    },
+    "Detail" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Detail" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Detalle" } }
+      }
+    },
+    "Leave empty for everything on file." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Leave empty for everything on file." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Déjalo vacío para ver todo lo guardado." } }
+      }
+    },
+    "Get ${detail} of ${vehicle}" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Get ${detail} of ${vehicle}" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ver ${detail} de ${vehicle}" } }
+      }
+    },
+    "Renew Marbete" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Renew Marbete" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Renovar marbete" } }
+      }
+    },
+    "Record that you renewed a vehicle's marbete. It moves to the same month next year." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Record that you renewed a vehicle's marbete. It moves to the same month next year." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Registra que renovaste el marbete de un vehículo. Pasa al mismo mes del próximo año." } }
+      }
+    },
+    "Renew the marbete of ${vehicle}" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Renew the marbete of ${vehicle}" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Renovar el marbete de ${vehicle}" } }
+      }
+    },
+    "Switch Vehicle" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Switch Vehicle" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cambiar de vehículo" } }
+      }
+    },
+    "Open Checkpoint on a vehicle, making it the one Checkpoint shows" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Open Checkpoint on a vehicle, making it the one Checkpoint shows" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Abre Checkpoint en un vehículo y lo convierte en el que Checkpoint muestra" } }
+      }
+    },
+    "Switch to ${vehicle}" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Switch to ${vehicle}" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cambiar a ${vehicle}" } }
+      }
+    },
+    "Checkpoint Screen" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint Screen" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Pantalla de Checkpoint" } }
+      }
+    },
+    "Scan Receipt" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Scan Receipt" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Escanear recibo" } }
+      }
+    },
+    "Open in Checkpoint" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Open in Checkpoint" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Abrir en Checkpoint" } }
+      }
+    },
+    "Open Checkpoint to update the mileage, scan a receipt, or log a service on the vehicle it's showing" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Open Checkpoint to update the mileage, scan a receipt, or log a service on the vehicle it's showing" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Abre Checkpoint para actualizar el millaje, escanear un recibo o registrar un servicio en el vehículo que muestra" } }
+      }
+    },
+    "Screen" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Screen" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Pantalla" } }
+      }
+    },
+    "Add this vehicle's make, model and year in Checkpoint to check its recalls." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add this vehicle's make, model and year in Checkpoint to check its recalls." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añade la marca, el modelo y el año de este vehículo en Checkpoint para revisar sus retiros." } }
+      }
+    },
+    "Checkpoint couldn't reach NHTSA to check recalls. Try again later." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint couldn't reach NHTSA to check recalls. Try again later." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint no pudo conectar con la NHTSA para revisar retiros. Inténtalo más tarde." } }
+      }
+    },
+    "There's no marbete date for this vehicle. Add it in Edit Vehicle first." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "There's no marbete date for this vehicle. Add it in Edit Vehicle first." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Este vehículo no tiene fecha de marbete. Añádela primero en Editar vehículo." } }
+      }
+    },
+    "Checkpoint has no document like that. Add it from the Documents library." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint has no document like that. Add it from the Documents library." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint no tiene un documento así. Añádelo desde la biblioteca de Documentos." } }
+      }
+    },
+    "Checkpoint can save photos and PDFs as documents." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint can save photos and PDFs as documents." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint puede guardar fotos y PDF como documentos." } }
+      }
+    },
+    "There's no service history to export yet." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "There's no service history to export yet." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Aún no hay historial de servicio para exportar." } }
+      }
+    },
+    "Checkpoint couldn't create the PDF. Try exporting from the Services tab." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint couldn't create the PDF. Try exporting from the Services tab." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint no pudo crear el PDF. Intenta exportarlo desde la pestaña Servicios." } }
+      }
+    },
     "Log Receipt" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Log Receipt" } },

@@ -20,5 +20,8 @@ final class IntentDonationsTests: IntentTestCase {
         IntentDonations.loggedServices(["Oil Change"], on: vehicle)
         IntentDonations.loggedServices([], on: vehicle)
         IntentDonations.addedService(oil)
+        IntentDonations.addedVehicle()
+        IntentDonations.addedDocument(.insurance, to: vehicle)
+        IntentDonations.renewedMarbete(on: vehicle)
     }
 }

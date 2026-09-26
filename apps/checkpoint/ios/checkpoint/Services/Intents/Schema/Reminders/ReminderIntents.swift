@@ -248,10 +248,7 @@ struct CreateVehicleListIntent {
     /// limit unless Pro. Make, model and odometer are left for the app.
     @MainActor
     static func addVehicle(named name: String, in context: ModelContext, isPro: Bool) throws -> Vehicle {
-        let count = try context.fetchCount(FetchDescriptor<Vehicle>())
-        guard !VehicleService.requiresPro(toAddTo: count, isPro: isPro) else {
-            throw IntentError.vehicleLimitReached
-        }
+        try AddVehicleIntent.checkLimit(in: context, isPro: isPro)
         var fields = VehicleFields()
         fields.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
         return VehicleService.create(fields, in: context)

@@ -157,6 +157,18 @@ nonisolated struct CacheEntry<T: Sendable>: Sendable {
 
 extension CacheEntry: Codable where T: Codable {}
 
+// MARK: - Client seam
+
+/// What the app asks NHTSA. `NHTSAService` is the real client; tests of the
+/// code that asks (`VehicleService.fillingFromVIN`, the vehicle intents)
+/// hand in a stub instead of going to the network.
+nonisolated protocol NHTSAClient: Sendable {
+    func decodeVIN(_ vin: String) async throws -> VINDecodeResult
+    func fetchRecalls(make: String, model: String, year: Int) async throws -> [RecallInfo]
+}
+
+extension NHTSAService: NHTSAClient {}
+
 // MARK: - Service
 
 actor NHTSAService {
