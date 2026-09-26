@@ -5,7 +5,7 @@
 //  Notification.Name extensions for app-wide events.
 //
 //  Notification *responses* don't go through here: they are stored as a
-//  `NotificationRoute` so a cold launch can't drop them. See NotificationRoute.swift.
+//  `PendingRoute` so a cold launch can't drop them. See State/PendingRoute.swift.
 //
 
 import Foundation

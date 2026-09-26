@@ -1,26 +1,25 @@
 //
-//  AppState+NotificationRoute.swift
+//  AppState+PendingRoute.swift
 //  checkpoint
 //
-//  Turns a `NotificationRoute` — where a tapped notification or one of its
-//  foreground buttons asked to go — into navigation state. Every route first
-//  closes whatever sheet is up, then switches tab, then pushes or presents.
+//  Turns a `PendingRoute` — where a notification, widget or intent asked to
+//  go — into navigation state. Every route first closes whatever sheet is up,
+//  then switches tab, then pushes or presents.
 //
 
 import Foundation
 
 extension AppState {
 
-    func apply(_ route: NotificationRoute, vehicles: [Vehicle], now: Date = Date()) {
-        // A route for a vehicle deleted since the notification was scheduled
-        // has nowhere to go.
+    func apply(_ route: PendingRoute, vehicles: [Vehicle], now: Date = Date()) {
+        // A route for a vehicle deleted since it was requested has nowhere to go.
         guard let vehicle = vehicles.first(where: { $0.id == route.vehicleID }) else { return }
         selectVehicle(vehicle)
 
         switch route {
-        case .updateMileage:
+        case .updateMileage(_, let prefilled):
             showTabRoot(.home)
-            present(.mileageUpdate())
+            present(.mileageUpdate(prefilled: prefilled))
 
         case .costs:
             showTabRoot(.costs)
@@ -28,6 +27,9 @@ extension AppState {
         case .editVehicle:
             // `present` closes any sheet already up before this one shows.
             present(.editVehicle)
+
+        case .vehicle:
+            showTabRoot(.home)
 
         case .services(_, let serviceIDs):
             let services = Self.services(serviceIDs, in: vehicle)
@@ -48,14 +50,35 @@ extension AppState {
             } else {
                 present(.markDone(MarkDoneRequest(services: services, vehicle: vehicle)))
             }
+
+        // A detail deleted since falls back to the tab it would have opened on.
+        case .serviceLog(_, let logID):
+            if let log = (vehicle.serviceLogs ?? []).first(where: { $0.id == logID }) {
+                navigate(to: .serviceLog(log), on: .services)
+            } else {
+                showTabRoot(.services)
+            }
+
+        case .visit(_, let visitID):
+            if let visit = (vehicle.serviceVisits ?? []).first(where: { $0.id == visitID }) {
+                navigate(to: .visit(visit), on: .costs)
+            } else {
+                showTabRoot(.costs)
+            }
+
+        case .document(_, let documentID):
+            if let document = (vehicle.documents ?? []).first(where: { $0.id == documentID }) {
+                // Over the library, so Back lands where the document lives.
+                navigate(to: [.documents(vehicle), .document(document)], on: .home)
+            } else {
+                showTabRoot(.home)
+            }
         }
     }
 
     /// Close any sheet, bring `tab` forward, and pop it to its root.
     private func showTabRoot(_ tab: Tab) {
-        dismissSheet()
-        selectedTab = tab
-        paths[tab] = []
+        navigate(to: [], on: tab)
     }
 
     private static func services(_ ids: [UUID], in vehicle: Vehicle) -> [Service] {

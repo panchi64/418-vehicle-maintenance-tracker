@@ -11,8 +11,9 @@
 //  `perform()` there. `perform()` stores a typed route in App Group defaults —
 //  the same bridge `PendingWidgetCompletion` uses — and posts
 //  `widgetRouteQueued`; the app takes the route on that post or on its next
-//  activation, whichever lands first, and hands it to the notification-route
-//  navigation it already has.
+//  activation, whichever lands first, and moves it into the app's one route
+//  store (`PendingRouteStore`, State/PendingRoute.swift), which notifications
+//  and intents feed too.
 //
 //  Compiled into BOTH the app and widget targets (SharedEntities group): the
 //  system must find the intent type in the app to run it there.

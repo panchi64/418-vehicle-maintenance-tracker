@@ -61,8 +61,6 @@ extension ContentView {
         updateWidgetData()
         // Refresh mileage reminders and yearly roundups with the latest data
         schedulePeriodicNotifications()
-        // Check for pending Siri mileage update
-        handlePendingSiriMileageUpdate()
         // Process pending widget service completions
         processPendingWidgetCompletions()
         // Open a service tapped on the widget (after completions, so a row the
@@ -81,8 +79,8 @@ extension ContentView {
             // transition. A Control Center pull-down, Siri overlay, or system
             // alert resigns the app to .inactive without ever hitting
             // .background; returning to .active must re-run the per-activation
-            // work (e.g. draining a PendingMileageUpdate a Siri intent queued
-            // while the app was up). A full background transition also passes
+            // work (e.g. draining a widget route or completion queued while
+            // the app was up). A full background transition also passes
             // through .inactive first, so this still covers that case.
             isForegroundActive = false
         case .background:
@@ -306,36 +304,6 @@ extension ContentView {
         }
     }
 
-    // MARK: - Siri Integration
-
-    /// Handle pending mileage update from Siri intent
-    func handlePendingSiriMileageUpdate() {
-        let pending = PendingMileageUpdate.shared
-        guard pending.hasPendingUpdate,
-              let vehicleIDString = pending.vehicleID,
-              let mileage = pending.mileage else {
-            return
-        }
-
-        // Clear the pending update immediately to avoid re-processing
-        pending.clear()
-
-        // Find the vehicle by ID
-        guard let vehicleID = UUID(uuidString: vehicleIDString),
-              let vehicle = vehicles.first(where: { $0.id == vehicleID }) else {
-            return
-        }
-
-        // Select the vehicle if it's not already selected
-        if currentVehicle?.id != vehicleID {
-            appState.selectVehicle(vehicle)
-        }
-
-        // Navigate to home and show mileage update with prefilled value
-        appState.selectedTab = .home
-        appState.present(.mileageUpdate(prefilled: mileage))
-    }
-
     // MARK: - Widget Completions
 
     /// Process pending service completions from the widget "Done" button
@@ -343,12 +311,13 @@ extension ContentView {
         WidgetDataService.shared.processPendingWidgetCompletions(context: modelContext)
     }
 
-    /// Open the service a widget row tap asked for (`OpenServiceIntent`) by
-    /// handing it to the notification-route navigation, which already opens a
-    /// single service's detail and ignores vehicles deleted since.
+    /// Move the service a widget row tap asked for (`OpenServiceIntent`) from
+    /// its App Group queue into the app's one route store, whose navigation
+    /// already opens a single service's detail and ignores vehicles deleted
+    /// since.
     func consumePendingWidgetRoute() {
         guard let route = PendingWidgetRoute.take() else { return }
-        NotificationService.shared.pendingRoute = .services(vehicleID: route.vehicleID, serviceIDs: [route.serviceID])
+        PendingRouteStore.shared.route = .service(vehicleID: route.vehicleID, serviceID: route.serviceID)
     }
 
     // MARK: - Mileage Update

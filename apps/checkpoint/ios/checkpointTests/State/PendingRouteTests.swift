@@ -1,10 +1,11 @@
 //
-//  NotificationRouteTests.swift
+//  PendingRouteTests.swift
 //  checkpointTests
 //
-//  Where tapping a notification, or one of its foreground buttons, takes the
-//  user. The delegate stores a route; `AppState.apply` turns it into
-//  navigation whenever ContentView is on screen, including after a cold launch.
+//  Where a notification (or one of its foreground buttons), a widget row, or
+//  an intent takes the user. Each stores a route; `AppState.apply` turns it
+//  into navigation whenever ContentView is on screen, including after a cold
+//  launch.
 //
 
 import XCTest
@@ -12,7 +13,7 @@ import UserNotifications
 @testable import checkpoint
 
 @MainActor
-final class NotificationRouteTests: XCTestCase {
+final class PendingRouteTests: XCTestCase {
 
     private var appState: AppState!
     private var vehicle: Vehicle!
@@ -102,6 +103,28 @@ final class NotificationRouteTests: XCTestCase {
         XCTAssertEqual(appState.activeSheet?.id, ActiveSheet.mileageUpdate().id)
     }
 
+    func test_apply_updateMileage_carriesPrefilledReading() {
+        appState.apply(.updateMileage(vehicleID: vehicle.id, prefilled: 52_000), vehicles: [vehicle])
+
+        guard case .mileageUpdate(let prefilled) = appState.activeSheet else {
+            return XCTFail("Expected the mileage sheet")
+        }
+        XCTAssertEqual(prefilled, 52_000)
+    }
+
+    func test_apply_vehicle_selectsItOnHomeRoot() {
+        let services = addServices(dueInDays: [3])
+        appState.selectVehicle(vehicle)
+        appState.selectedTab = .services
+        appState.paths[.home] = [.service(services[0])]
+
+        appState.apply(.vehicle(vehicleID: vehicle.id), vehicles: [vehicle, other])
+
+        XCTAssertEqual(appState.selectedVehicle?.id, vehicle.id)
+        XCTAssertEqual(appState.selectedTab, .home)
+        XCTAssertEqual(appState.paths[.home], [])
+    }
+
     func test_apply_editVehicle_opensVehicleEditor() {
         appState.apply(.editVehicle(vehicleID: vehicle.id), vehicles: [vehicle])
 
@@ -129,6 +152,66 @@ final class NotificationRouteTests: XCTestCase {
 
         XCTAssertEqual(appState.selectedTab, .services)
         XCTAssertEqual(appState.paths[.services], [])
+    }
+
+    func test_serviceRoute_isASingleServiceTap() {
+        let serviceID = UUID()
+        XCTAssertEqual(
+            PendingRoute.service(vehicleID: vehicle.id, serviceID: serviceID),
+            .services(vehicleID: vehicle.id, serviceIDs: [serviceID])
+        )
+    }
+
+    // MARK: - History and documents
+
+    func test_apply_serviceLog_pushesItOnServices() {
+        let log = ServiceLog(vehicle: vehicle, performedDate: .now, mileageAtService: 1_000)
+        vehicle.serviceLogs = [log]
+
+        appState.apply(.serviceLog(vehicleID: vehicle.id, logID: log.id), vehicles: [vehicle])
+
+        XCTAssertEqual(appState.selectedTab, .services)
+        XCTAssertEqual(appState.paths[.services], [.serviceLog(log)])
+    }
+
+    func test_apply_visit_pushesItOnCosts() {
+        let visit = ServiceVisit(vehicle: vehicle, totalCost: 120)
+        vehicle.serviceVisits = [visit]
+
+        appState.apply(.visit(vehicleID: vehicle.id, visitID: visit.id), vehicles: [vehicle])
+
+        XCTAssertEqual(appState.selectedTab, .costs)
+        XCTAssertEqual(appState.paths[.costs], [.visit(visit)])
+    }
+
+    func test_apply_document_pushesItOverTheLibrary() {
+        let document = Document(fileName: "insurance.pdf", mimeType: "application/pdf", documentType: .insurance)
+        vehicle.documents = [document]
+
+        appState.apply(.document(vehicleID: vehicle.id, documentID: document.id), vehicles: [vehicle])
+
+        XCTAssertEqual(appState.selectedTab, .home)
+        XCTAssertEqual(appState.paths[.home], [.documents(vehicle), .document(document)])
+    }
+
+    func test_apply_deletedDetail_opensItsTabRoot() {
+        appState.apply(.serviceLog(vehicleID: vehicle.id, logID: UUID()), vehicles: [vehicle])
+        XCTAssertEqual(appState.selectedTab, .services)
+        XCTAssertEqual(appState.paths[.services], [])
+
+        appState.apply(.visit(vehicleID: vehicle.id, visitID: UUID()), vehicles: [vehicle])
+        XCTAssertEqual(appState.selectedTab, .costs)
+        XCTAssertEqual(appState.paths[.costs], [])
+    }
+
+    // MARK: - Store
+
+    func test_store_take_returnsRouteOnce() {
+        let store = PendingRouteStore()
+        store.route = .costs(vehicleID: vehicle.id)
+
+        XCTAssertEqual(store.take(), .costs(vehicleID: vehicle.id))
+        XCTAssertNil(store.take(), "A route navigates once")
     }
 
     // MARK: - Mark as Done

@@ -84,7 +84,7 @@ extension NotificationService: UNUserNotificationCenterDelegate {
 
         switch response.actionIdentifier {
         case Self.updateMileageActionID, UNNotificationDefaultActionIdentifier:
-            pendingRoute = .updateMileage(vehicleID: vehicleID)
+            PendingRouteStore.shared.route = .updateMileage(vehicleID: vehicleID)
 
         case Self.remindLaterActionID:
             await addSnooze(MileageReminderScheduler.snoozeRequest(for: response.notification.request))
@@ -105,7 +105,7 @@ extension NotificationService: UNUserNotificationCenterDelegate {
 
         switch response.actionIdentifier {
         case Self.viewCostsActionID, UNNotificationDefaultActionIdentifier:
-            pendingRoute = .costs(vehicleID: vehicleID)
+            PendingRouteStore.shared.route = .costs(vehicleID: vehicleID)
 
         default:
             break
@@ -135,7 +135,7 @@ extension NotificationService: UNUserNotificationCenterDelegate {
             await addSnooze(MarbeteNotificationScheduler.snoozeRequest(for: response.notification.request))
 
         case UNNotificationDefaultActionIdentifier:
-            pendingRoute = .editVehicle(vehicleID: vehicleID)
+            PendingRouteStore.shared.route = .editVehicle(vehicleID: vehicleID)
 
         default:
             break
@@ -151,18 +151,18 @@ extension NotificationService: UNUserNotificationCenterDelegate {
         _ response: UNNotificationResponse,
         userInfo: [AnyHashable: Any]
     ) async {
-        let serviceIDs = NotificationRoute.serviceIDs(from: ServiceNotificationScheduler.referencedServiceIDs(in: userInfo))
+        let serviceIDs = PendingRoute.serviceIDs(from: ServiceNotificationScheduler.referencedServiceIDs(in: userInfo))
         guard !serviceIDs.isEmpty, let vehicleID = Self.vehicleID(in: userInfo) else { return }
 
         switch response.actionIdentifier {
         case Self.markDoneActionID:
-            pendingRoute = .markDone(vehicleID: vehicleID, serviceIDs: serviceIDs)
+            PendingRouteStore.shared.route = .markDone(vehicleID: vehicleID, serviceIDs: serviceIDs)
 
         case Self.snoozeActionID:
             await addSnooze(ServiceNotificationScheduler.snoozeRequest(for: response.notification.request))
 
         case UNNotificationDefaultActionIdentifier:
-            pendingRoute = .services(vehicleID: vehicleID, serviceIDs: serviceIDs)
+            PendingRouteStore.shared.route = .services(vehicleID: vehicleID, serviceIDs: serviceIDs)
 
         default:
             break

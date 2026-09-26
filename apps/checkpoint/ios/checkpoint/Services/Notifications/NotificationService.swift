@@ -24,10 +24,6 @@ final class NotificationService: NSObject {
     /// `checkAuthorizationStatus()` and `requestAuthorization()`.
     private(set) var permission: NotificationPermission = .notAsked
 
-    /// Navigation a notification response asked for, waiting for `ContentView`
-    /// to act on it and clear it. See `NotificationRoute`.
-    var pendingRoute: NotificationRoute?
-
     private let notificationCenter = UNUserNotificationCenter.current()
 
     /// Pending debounce task for a coalesced budget enforcement. Replaced

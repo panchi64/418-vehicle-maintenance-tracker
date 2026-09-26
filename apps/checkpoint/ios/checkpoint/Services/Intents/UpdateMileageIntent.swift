@@ -8,7 +8,6 @@
 //
 
 import AppIntents
-import SwiftUI
 
 /// Intent to update vehicle mileage via Siri
 /// Opens the app for user confirmation before saving
@@ -41,33 +40,10 @@ struct UpdateMileageIntent: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        // Store the pending update for the app to process
-        PendingMileageUpdate.shared.vehicleID = vehicle.id.uuidString
-        PendingMileageUpdate.shared.mileage = mileage
+        // The app opens on the mileage sheet with this reading filled in,
+        // for the user to confirm (`PendingRoute`).
+        PendingRouteStore.shared.route = .updateMileage(vehicleID: vehicle.id, prefilled: mileage)
 
         return .result(dialog: "Opening Checkpoint to update \(vehicle.name) to \(mileage) miles.")
     }
-}
-
-// MARK: - Pending Mileage Update Storage
-
-/// Singleton to hold pending mileage update from Siri
-/// The app reads this on launch to pre-fill the mileage update sheet
-@MainActor
-final class PendingMileageUpdate {
-    static let shared = PendingMileageUpdate()
-
-    var vehicleID: String?
-    var mileage: Int?
-
-    var hasPendingUpdate: Bool {
-        vehicleID != nil && mileage != nil
-    }
-
-    func clear() {
-        vehicleID = nil
-        mileage = nil
-    }
-
-    private init() {}
 }

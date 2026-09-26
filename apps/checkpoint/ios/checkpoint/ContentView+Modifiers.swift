@@ -243,15 +243,15 @@ extension ContentView {
         appState.selectedTab = .home
     }
 
-    // MARK: - Notification Routing
+    // MARK: - Pending Routes
 
     func notificationHandlers(_ content: some View) -> some View {
         content
-            // `initial: true` picks up a route stored while the app was still
-            // launching from the notification tap.
-            .onChange(of: NotificationService.shared.pendingRoute, initial: true) { _, route in
-                guard let route else { return }
-                NotificationService.shared.pendingRoute = nil
+            // The one consumer of `PendingRoute`s — notifications, widget rows,
+            // intents. `initial: true` picks up a route stored while the app
+            // was still launching from the tap or the intent.
+            .onChange(of: PendingRouteStore.shared.route, initial: true) {
+                guard let route = PendingRouteStore.shared.take() else { return }
                 appState.apply(route, vehicles: vehicles)
             }
             // A widget row tap runs `OpenServiceIntent` in this process, which
