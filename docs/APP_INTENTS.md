@@ -51,8 +51,8 @@ Apple's rules come from [Making actions and content discoverable by Apple Intell
 | System (`searchInApp`, `open`) | ✅ | every entity | **Adopt** |
 | Visual intelligence | ✅ (camera) | receipt / odometer / VIN recognition | **Adopt** |
 | Files | Shortcuts only | documents library, including PDFs; `openFile`, `file` | **Adopt** (cheap) |
-| Notes | ✅ | vehicle and service notes; today these are single text fields, not note objects | Only if notes become first-class |
-| Calendar | ✅ | scheduled shop appointments; Checkpoint has no appointment concept, and due dates are already reminders | Only if appointments are added |
+| Notes | ✅ | new `VehicleNote` = note, vehicle = folder; `createNote`, `updateNote` | **Adopt** once vehicle notes ship |
+| Calendar | ✅ | new `Appointment` (a scheduled shop visit) = event, vehicle = calendar; `createEvent`, `updateEvent`, `deleteEvent`. Service due dates stay reminders, not events. | **Adopt** once appointments ship |
 | Maps, Camera, Clock, Mail, Messages, Phone, Audio, Assistant | ✅ | none; Checkpoint isn't a navigation, camera, clock or messaging app | No |
 | Books, Browser, Journaling, Presentation, Reader, Spreadsheet, Whiteboard, Word processor | Shortcuts only | none | No |
 
