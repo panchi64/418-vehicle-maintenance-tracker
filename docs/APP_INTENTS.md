@@ -140,7 +140,34 @@ On-device only (no Private Cloud Compute) and free. Code in `Services/Intelligen
 
 **Share Sheet.** There is no share extension; `LogReceiptIntent`'s file parameter is what makes it a Shortcuts action that accepts images and PDFs, which Shortcuts can show in the Share Sheet.
 
+## What Checkpoint ships (Phase 5: remaining surfaces)
+
+All iOS 26, every device tier. Code in `Services/Intents/Vehicles/`, `Documents/`, `History/` and `CheckpointWidget/`.
+
+| Piece | What it does | Notes |
+|---|---|---|
+| `AddVehicleIntent` | Make/model/year or a VIN (decoded by `VehicleService.fillingFromVIN` over `NHTSAClient`), odometer asked, then one `requestChoice`: with the starter schedule (`StarterScheduleWriter`, the sheet's defaults) or without | Free limit checked first; dismissing the choice saves nothing. A failed lookup asks for the make |
+| `SwitchVehicleIntent` | Opens the app on a vehicle's Home | `.foreground` intent, not `OpenIntent` (one per target type); iOS 27's `OpenVehicleIntent` is now `isAssistantOnly` |
+| `GetVehicleDetailsIntent` | Plate, VIN, oil, tires, marbete (`VehicleDetail` enum), or everything on file | Returns the value as a `String` for shortcuts; says what's missing and where to add it |
+| `RenewMarbeteIntent` | Same month next year (`Vehicle.renewedMarbeteExpiration`), confirmed, written by `MarbeteRenewal` | Home's Mark Renewed donates it |
+| `CheckRecallsIntent` | NHTSA recalls filtered as Home shows them (`RecallVisibility`), `RecallsSnippetView`, then `requestChoice` to add unplanned ones as planned services | Planned = the recall sheet's one-off service (`RecallInfo.plannedServiceName`, due in 7 days) + status `.scheduled` |
+| `AddDocumentIntent` | Image or PDF → `DocumentImport` (Vision, or the PDF's text layer, else its first page) → `DocumentClassifier`; asks the type only when nothing matched | No confirmation (additive); no document deletes by voice |
+| `FindDocumentIntent` | Newest document by type and/or text, the showing vehicle first; `DocumentSnippetView` shows it; returns `DocumentEntity` | App Shortcut; `DocumentEntity` is `Transferable` (PDF or JPEG), so "share my registration" and Mail chains work |
+| `ExportServiceHistoryIntent` | The Services tab's PDF as an `IntentFile` | Chains in Shortcuts |
+| Controls | Update Mileage, Scan Receipt, Log Service (`ControlWidgetButton` + `OpenCheckpointScreenIntent`) | Route through `PendingWidgetRoute` (`.screen`) → `PendingRoute.updateMileage` / `.scanReceipt` / `.logService` on the showing vehicle |
+| Siri tips | `ScreenSiriTip` (Apple's `SiriTipView`) last on Home (Check Next Due), the mileage sheet (Update Mileage), Costs (Spending), Documents (Find Document) | One per screen, dismissed for good; placement resolved in tools/sketchpad |
+
+**App Shortcuts (still 10).** Find Document took List Upcoming Services' slot: Check Next Due's snippet already lists everything coming up (it took the "coming up" phrases), Find Document is the traffic-stop case, and the Documents tip needs an App Shortcut to show at all. Recalls and export stay Shortcuts/Siri AI actions.
+
+**Donations added:** Add Vehicle (no parameters: a repeat is a different car), a document added to the library (vehicle + type), Mark Renewed.
+
 ## Other signatures confirmed in the SDK
+
+- **`requestChoice(between:dialog:)`** (iOS 26) returns the chosen `IntentChoiceOption`; choosing `.cancel` (or a `.cancel`-styled option) throws. Use it for a question whose "no" should let the intent finish — `requestConfirmation` throws on "no".
+- **Controls opening the app** (WidgetKit, "Creating controls to perform actions across the system"): the action is an `OpenIntent`, and the intent must be a member of both the app and the widget extension. `ControlWidgetButton` is iOS 18. Any control can go on the Action button.
+- **`OpenIntent` targets must be unique.** `appintentsmetadataprocessor` halts with "OpenIntent targets should be unique" when two open the same entity type.
+- **`SiriTipView(intent:isVisible:)`** (iOS 16) shows the App Shortcut phrase for the intent, and is empty when the intent isn't an App Shortcut. `ShortcutsLink` (iOS 16) opens the app's page in Shortcuts.
+- **`Transferable.exported(as:)` / `exportedContentTypes(_:)`** are iOS 18.2; `.exportingCondition` keeps a representation to the documents it fits.
 
 - **`.system.searchInApp`** (27): `ShowInAppSearchResultsIntent` with `static var searchScopes: [StringSearchScope]` and `var criteria: StringSearchCriteria`. On iOS 26, use `.system.search`.
 - **`.system.open`** (27): `OpenIntent` with `var target: some AppEntity`.

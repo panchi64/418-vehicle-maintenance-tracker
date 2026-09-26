@@ -14,12 +14,18 @@ Intents/
 ├── L10n+Siri.swift             # spoken sentences + snippet labels, `siri.` keys
 ├── Entities/                   # SwiftData-backed App Entities + AppEnum conformances
 ├── Mileage/                    # UpdateMileageIntent (direct write), GetMileageIntent
-├── History/                    # MarkServiceDone, LogService, LogReceipt, DeleteServiceLog + ServiceLogging
+├── Vehicles/                   # AddVehicle (VIN via NHTSAClient, starter schedule), SwitchVehicle,
+│                               #   GetVehicleDetails (+ VehicleDetail enum), RenewMarbete, CheckRecalls
+├── Documents/                  # AddDocument, FindDocument, DocumentImport (image/PDF → document),
+│                               #   DocumentEntity+Transfer (Transferable export)
+├── History/                    # MarkServiceDone, LogService, LogReceipt, DeleteServiceLog,
+│                               #   ExportServiceHistory + ServiceLogging
 ├── Schedule/                   # Add / Edit / Snooze / StopTracking / Delete service + ServiceScheduling
-├── Queries/                    # CheckNextDue, ListUpcoming, ListOverdue, LastServiceQuery,
+├── Queries/                    # CheckNextDue, ListUpcoming (not an App Shortcut), ListOverdue, LastServiceQuery,
 │                               #   SpendingSummary + DueServices / SpokenValue helpers
 ├── Snippets/                   # DueServicesSnippetIntent (+ Done button intent),
-│                               #   ServiceRecordSnippetIntent (confirmation), SpendingSnippetView
+│                               #   ServiceRecordSnippetIntent (confirmation), SpendingSnippetView,
+│                               #   RecallsSnippetView, DocumentSnippetView
 └── Schema/                     # Apple Intelligence schema types (docs/APP_INTENTS.md has the map)
     ├── Reminders/              # iOS 27: service = reminder, vehicle = list; ReminderMapping;
     │                           #   placeholder location-trigger/section types the processor demands
@@ -35,7 +41,9 @@ Receipt reading itself lives in `Services/Intelligence/` (its own CLAUDE.md).
 
 Notification entity tags live with the notifications (`Services/Notifications/NotificationEntityTags.swift`).
 
-Spanish App Shortcut phrases live in `checkpoint/Resources/AppShortcuts.xcstrings`, keyed by the English phrase. Everything else is in `Localizable.xcstrings`: intent/parameter/entity labels as extracted literals, spoken sentences as manual `siri.*` keys.
+Spanish App Shortcut phrases live in `checkpoint/Resources/AppShortcuts.xcstrings`, keyed by the English phrase. Everything else is in `Localizable.xcstrings`: intent/parameter/entity labels as extracted literals, spoken sentences as manual `siri.*` keys (accessors in `L10n+Siri`, `Vehicles/L10n+SiriVehicles`, `Documents/L10n+SiriDocuments`).
+
+The Controls (Update Mileage, Scan Receipt, Log Service) live in `CheckpointWidget/CheckpointControls.swift`; their `OpenCheckpointScreenIntent` is in the shared `PendingWidgetRoute.swift`. The in-app Siri tips are `Views/Components/Cards/ScreenSiriTip.swift`.
 
 ## Rules
 
@@ -43,7 +51,7 @@ Spanish App Shortcut phrases live in `checkpoint/Resources/AppShortcuts.xcstring
 - **`perform()` is `@MainActor`.** Intent structs are nonisolated (the `AppIntent` protocol is), so mark `perform()` and any static helper that touches models `@MainActor`, then use `container.mainContext`.
 - **Resolve and commit through `IntentStore`.** A missing vehicle parameter means the vehicle the app has selected (`IntentStore.vehicle(for:in:)`). Every write ends in `IntentStore.commit(vehicle, in:)` — derived surfaces (`DerivedSurfaces`: reminders, icon, widget), an explicit save (the process may suspend before autosave), and a Spotlight pass. Writes whose action already refreshed use `IntentStore.save`.
 - **Call services, not views.** Writes go through the same code the UI uses: `LoggedServiceWriter` (fed a `ServiceLogFormModel` by `ServiceLogging`), `ServiceVisitWriter`, `ServiceCompletionService`, `MileageUpdateAction`, `Service.apply(_ ServiceEdit)`, `ServiceDeleteAction`, `ServiceLogDeleteAction`, `CostAnalyticsService`. If an intent needs logic that lives in a view, extract it into a service first, with tests.
-- **Ask before the irreversible.** Deletes (`DeleteServiceIntent`, `DeleteServiceLogIntent`, voice deletes are services and logs only), Stop Tracking, Mark Done and Log Service — and their schema twins, Update Reminder when it completes and Delete Reminders — call `requestConfirmation` before writing; Mark Done and Log Service show `ServiceRecordSnippetIntent` so a misheard value is visible. Update Mileage asks only when `MileageReadingCheck` flags the reading. Keep the write in a static function the tests can call; `perform()` itself can't pass a confirmation in a unit test.
+- **Ask before the irreversible.** Deletes (`DeleteServiceIntent`, `DeleteServiceLogIntent`, voice deletes are services and logs only — no vehicle or document deletes), Stop Tracking, Renew Marbete, Mark Done and Log Service — and their schema twins, Update Reminder when it completes and Delete Reminders — call `requestConfirmation` before writing; Mark Done and Log Service show `ServiceRecordSnippetIntent` so a misheard value is visible. Update Mileage asks only when `MileageReadingCheck` flags the reading. Keep the write in a static function the tests can call; `perform()` itself can't pass a confirmation in a unit test.
 - **Distances are spoken in the user's unit.** Convert with `DistanceSettings.shared.unit.toMiles` on the way in; format with `SpokenValue` on the way out.
 - **Dialogs are whole `siri.*` sentences** built from `SpokenValue`-formatted values — never concatenated. Add EN and ES for every new key.
 - **Entities are Sendable snapshots.** A `ModelSnapshotEntity` is built on the main actor from one model (`init(model:)`) and fetched only through `entities(ids:in:)` / `entities(matching:in:)` / `models(ids:in:)`. IDs are the model's `UUID`. Queries hop to the main actor through `EntityFetch`. `ModelBackedEntity` adds `IndexedEntity`: those are the ones Spotlight indexes.
@@ -52,10 +60,15 @@ Spanish App Shortcut phrases live in `checkpoint/Resources/AppShortcuts.xcstring
 - **Enums conform in place.** `CostPeriod`, `CostCategory`, `DocumentType`, `ServiceStatus` are `nonisolated` with only their L10n/theme members `@MainActor`, so they can be `AppEnum`s. Raw values are persisted by saved shortcuts — never rename one.
 - **Navigation goes through `PendingRoute`.** An intent that opens the app sets `PendingRouteStore.shared.route` (`checkpoint/State/PendingRoute.swift`); `ContentView` is its one consumer. **No URL schemes** (security invariant).
 - **Snippets follow SURFACE_DOCTRINE.** One primary element per snippet (two channels, never color alone — `StatusTag` for status), theme tokens and brutalist fonts only. A snippet with buttons is a `SnippetIntent`; its buttons run hidden (`isDiscoverable = false`) intents, and the system re-runs the snippet's `perform()` afterwards.
-- **Donate in-app actions only.** `IntentDonations` is called from the app's save paths (Mark Done, [+] log, Mark all done, schedule, mileage sheet). An intent Siri ran is donated by the system.
+- **Donate in-app actions only.** `IntentDonations` is called from the app's save paths (Mark Done, [+] log, Mark all done, schedule, mileage sheet, Add Vehicle, a document added to the library, Mark Renewed). An intent Siri ran is donated by the system.
 - **Spotlight follows data changes.** `SpotlightIndexer.scheduleReindex` runs wherever widget data refreshes and on `IntentStore` commits. Don't add per-write indexing hooks elsewhere.
 - **Tag detail screens** with `.onScreenEntity(_:id:)` so Apple Intelligence can act on "this".
 - **Receipts log like speech.** `LogReceiptIntent` reads the file (`ReceiptExtractionService`, swappable via `makeExtractor` for tests), shows `ServiceRecordSnippetIntent`, and writes through `ServiceLogging` with an `Occasion` that carries the shop, line items and the receipt attachment. Shop or line items → a visit (`Occasion.needsVisit`); the total counts once.
+- **Network through `NHTSAClient`.** Add Vehicle (VIN → `VehicleService.fillingFromVIN`) and Check Recalls reach NHTSA through a swappable static `nhtsa` client (`NHTSAService.shared` by default); tests stub it. A failed VIN lookup never blocks: Siri asks for the make instead.
+- **A question that can be declined uses `requestChoice`.** `requestConfirmation` throws on "no"; Add Vehicle's "with the usual schedule?" and Check Recalls' "add as planned?" are two real options (iOS 26 `requestChoice`), and neither option is `.cancel` (that one throws). Add Vehicle asks before it writes, so dismissing the question saves nothing.
+- **Files out are `IntentFile`s or `Transferable` entities.** Export Service History returns the PDF; `DocumentEntity` exports its bytes (`DocumentEntity+Transfer`, read through `IntentDependencies.container` because the system calls it outside any perform flow), so Find Document chains into Share/Mail.
+- **One `OpenIntent` per target type.** The metadata processor rejects two ("OpenIntent targets should be unique"). A second way to open the same entity is a plain `.foreground` intent (`SwitchVehicleIntent`).
+- **Siri tips need App Shortcuts.** `SiriTipView` shows nothing for an intent outside `CheckpointShortcuts`; the tips use Check Next Due, Update Mileage, Spending Summary and Find Document.
 - **Visual Intelligence opens, never writes.** The value query only classifies and keeps captures in memory (`VisualCaptureStore`, 30 min); tapping a result routes (`.logReceipt`, `.mileageReading`, `.addVehicle`) to the screen that asks. The app may have only one `IntentValueQuery` over `SemanticContentDescriptor`. The Simulator SDK has no VisualIntelligence module, so the query and schema intent sit behind `#if canImport(VisualIntelligence)`.
 
 ## Two `MarkServiceDone` intents, two `VehicleEntity` types
@@ -66,7 +79,7 @@ The app's `VehicleEntity` (here) is SwiftData-backed and indexed. The widget ext
 
 ## Tests
 
-`checkpointTests/Services/Intents/IntentTestCase` registers an in-memory container (CloudKit off — with it on, the iOS 27 simulator traps on the first save) as the dependency, selects one vehicle and pins miles. `runUnanswered` runs a confirming intent with no one to answer, to prove nothing is written before a yes. iOS 27 schema tests skip below 27; run them on an iOS 27 simulator too.
+`checkpointTests/Services/Intents/IntentTestCase` registers an in-memory container (CloudKit off — with it on, the iOS 27 simulator traps on the first save) as the dependency, selects one vehicle and pins miles. `runUnanswered` runs a confirming intent with no one to answer, to prove nothing is written before a yes. `StubNHTSA` (in `VehicleIntentTests`) stands in for the network: hand it to `VehicleService.fillingFromVIN`, `AddVehicleIntent.identify`, `CheckRecallsIntent.openRecalls`, or set `CheckRecallsIntent.nhtsa` / `AddVehicleIntent.nhtsa` (and restore it). iOS 27 schema tests skip below 27; run them on an iOS 27 simulator too.
 
 `AppIntentsTesting` (iOS 27) can't run in this unit-test target. It drives the intents out of process, so it needs a UI-testing target that launches a team-signed app. Not set up yet; see docs/APP_INTENTS.md.
 

@@ -44,7 +44,11 @@ The medium widget includes a "Done" button (checkmark) on the most urgent servic
 
 ## Tap → Service Detail (no URL scheme)
 
-The app registers no URL scheme (security invariant), so no `widgetURL`/`Link`. Service rows and heroes wrap in `OpenServiceButton` → `OpenServiceIntent` (`supportedModes = .foreground`, runs in the app). It stores a `PendingWidgetRoute` in the App Group and posts `PendingWidgetRoute.queuedNotification`; `ContentView.consumePendingWidgetRoute()` takes it (on that post or on `enterForeground`) and moves it into the app's one route store (`PendingRouteStore.shared.route = .service(...)`, see `checkpoint/State/PendingRoute.swift`), which notifications and intents feed too. `Shared/PendingWidgetRoute.swift` is compiled into both targets (SharedEntities group in the pbxproj).
+The app registers no URL scheme (security invariant), so no `widgetURL`/`Link`. Service rows and heroes wrap in `OpenServiceButton` → `OpenServiceIntent` (`supportedModes = .foreground`, runs in the app). It stores a `PendingWidgetRoute` (`.service` destination) in the App Group and posts `PendingWidgetRoute.queuedNotification`; `ContentView.consumePendingWidgetRoute()` takes it (on that post or on `enterForeground`) and moves it into the app's one route store (`PendingRouteStore.shared.route = .service(...)`, see `checkpoint/State/PendingRoute.swift`), which notifications and intents feed too. `Shared/PendingWidgetRoute.swift` is compiled into both targets (SharedEntities group in the pbxproj).
+
+## Controls (Control Center, Lock Screen, Action button)
+
+`CheckpointControls.swift`: Update Mileage, Scan Receipt and Log Service, each a `ControlWidgetButton` built by one `ScreenControl.configuration(...)` and listed in `CheckpointWidgetBundle` (gallery order = bundle order). Their action is `OpenCheckpointScreenIntent`, an `OpenIntent` over the `CheckpointScreen` enum — Apple's way for a control to open its app, which requires the intent in both targets, so it lives in the shared `Shared/PendingWidgetRoute.swift`. `perform()` queues `PendingWidgetRoute(destination: .screen(...))`; the app maps it onto the vehicle it's showing (`PendingRoute.init(_:currentVehicleID:)` → `.updateMileage` / `.scanReceipt` / `.logService`). A control has no state, so no value provider. Strings are in both this target's `Localizable.xcstrings` (gallery) and the app's (intent metadata). `CheckpointScreen` raw values are persisted — never rename one.
 
 ## Configuration Vehicle Entity
 
