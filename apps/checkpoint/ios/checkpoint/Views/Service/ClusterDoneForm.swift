@@ -11,14 +11,20 @@
 //
 //  Same shape and conventions as `ServiceLogForm` (toolbar Save, dismiss
 //  protection, F11 odometer adoption stated before save), minus the service
-//  picker: the services are the cluster's.
+//  picker: the services are the cluster's, or a booked appointment's.
+//
+//  From an appointment ("Log Visit") the form starts on the appointment's day
+//  and shows its shop, which goes on the visit (`AppointmentCompletion`).
 //
 
 import SwiftUI
 import SwiftData
 
 struct ClusterDoneForm: View {
-    let cluster: ServiceCluster
+    let services: [Service]
+    let vehicle: Vehicle
+    /// An appointment's day and shop; nil for a suggested cluster.
+    let prefill: VisitPrefill?
     var onSaved: (() -> Void)?
 
     @Environment(\.dismiss) private var dismiss
@@ -26,21 +32,36 @@ struct ClusterDoneForm: View {
     @Environment(AppState.self) private var appState
     @Query private var allServices: [Service]
 
-    @State private var performedDate = Date()
+    @State private var performedDate: Date
     @State private var mileage: Int?
     @State private var costInput = ""
     @State private var costError: String?
     @State private var costCategory: CostCategory = .maintenance
+    @State private var shopName: String
     @State private var notes = ""
     @State private var pendingAttachments: [AttachmentPicker.AttachmentData] = []
     @State private var showBlocker = false
 
-    private var vehicle: Vehicle { cluster.vehicle }
+    init(cluster: ServiceCluster, onSaved: (() -> Void)? = nil) {
+        self.init(services: cluster.services, vehicle: cluster.vehicle, prefill: nil, onSaved: onSaved)
+    }
+
+    init(services: [Service], vehicle: Vehicle, prefill: VisitPrefill?, onSaved: (() -> Void)? = nil) {
+        self.services = services
+        self.vehicle = vehicle
+        self.prefill = prefill
+        self.onSaved = onSaved
+        _performedDate = State(initialValue: prefill?.performedDate ?? Date())
+        _shopName = State(initialValue: prefill?.shopName ?? "")
+    }
 
     private var isDirty: Bool {
-        !Calendar.current.isDateInToday(performedDate)
+        let dateChanged = prefill.map { performedDate != $0.performedDate }
+            ?? !Calendar.current.isDateInToday(performedDate)
+        return dateChanged
             || mileage != vehicle.currentMileage
             || !costInput.isEmpty
+            || shopName != (prefill?.shopName ?? "")
             || !notes.isEmpty
             || !pendingAttachments.isEmpty
     }
@@ -87,9 +108,9 @@ struct ClusterDoneForm: View {
     // MARK: - Sections
 
     private var servicesSection: some View {
-        FormSection(title: L10n.formServicesCount(cluster.serviceCount)) {
+        FormSection(title: L10n.formServicesCount(services.count)) {
             VStack(alignment: .leading, spacing: 0) {
-                ForEach(cluster.services, id: \.id) { service in
+                ForEach(services, id: \.id) { service in
                     VStack(alignment: .leading, spacing: 2) {
                         Text(service.name)
                             .font(.brutalistBodyEmphasis)
@@ -147,6 +168,16 @@ struct ClusterDoneForm: View {
             if let costError {
                 FormAdvisory.caution(costError) { self.costError = nil }
             }
+
+            // Only from an appointment, which named the shop: it goes on the
+            // visit. A suggested cluster keeps its resolved shape.
+            if prefill?.shopName != nil {
+                InstrumentTextField(
+                    label: L10n.formShop,
+                    text: $shopName,
+                    placeholder: L10n.formShopPlaceholder
+                )
+            }
         }
     }
 
@@ -183,20 +214,22 @@ struct ClusterDoneForm: View {
         AnalyticsService.shared.capture(.serviceClusterMarkAllDone)
 
         let cost = Decimal(string: costInput)
+        let shop = shopName.trimmingCharacters(in: .whitespacesAndNewlines)
         ServiceVisitWriter.record(
-            cluster.services.map { .tracked($0) },
+            services.map { .tracked($0) },
             on: vehicle,
             details: ServiceVisitWriter.Details(
                 performedDate: performedDate,
                 mileage: mileage,
                 totalCost: cost,
                 costCategory: costCategory,
+                shopName: shop.isEmpty ? nil : shop,
                 notes: notes.isEmpty ? nil : notes
             ),
             attachments: pendingAttachments,
             in: modelContext
         )
-        IntentDonations.loggedServices(cluster.services.map(\.name), on: vehicle)
+        IntentDonations.loggedServices(services.map(\.name), on: vehicle)
 
         AppIconService.shared.updateIcon(for: vehicle, services: allServices)
         WidgetDataService.shared.updateWidget(for: vehicle)

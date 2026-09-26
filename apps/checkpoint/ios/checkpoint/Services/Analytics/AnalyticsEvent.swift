@@ -29,6 +29,9 @@ enum AnalyticsEvent {
         case mileageUpdate = "mileage_update"
         case serviceLogDetail = "service_log_detail"
         case editServiceLog = "edit_service_log"
+        case appointmentForm = "appointment_form"
+        case vehicleNotes = "vehicle_notes"
+        case vehicleNoteForm = "vehicle_note_form"
     }
 
     // MARK: - Tab Names

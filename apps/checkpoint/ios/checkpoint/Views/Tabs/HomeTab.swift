@@ -4,12 +4,13 @@
 //
 //  Home — a Readout. "What does this car need from me, and can I do it now?"
 //
-//  FIXED ORDER, ALWAYS THE SAME FIVE BLOCKS:
+//  FIXED ORDER, ALWAYS THE SAME SIX BLOCKS:
 //    0. Vehicle band   odometer (tap → update; stale tag) | specs ⌄
 //    1. Next Up        THE hero, ending in Mark Done (marbete: Mark Renewed)
-//    2. Suggestions    at most ONE: the visit cluster or a seasonal item
-//    3. Upcoming       the next 3 after Next Up
-//    4. Recent         the last 3 logs
+//    2. Shop Visit     the next booked appointment: Directions, Log Visit
+//    3. Suggestions    at most ONE: the visit cluster or a seasonal item
+//    4. Upcoming       the next 3 after Next Up
+//    5. Recent         the last 3 logs
 //
 //  Sparse data never removes a section and never renders an apology card: an
 //  empty section is its header plus one quiet `InsufficientDataNote`, so a new
@@ -34,6 +35,7 @@ struct HomeTab: View {
     @Query var services: [Service]
     @Query private var serviceLogs: [ServiceLog]
     @Query private var recallAcknowledgments: [RecallAcknowledgment]
+    @Query private var appointments: [Appointment]
 
     // Cluster state
     @State var primaryCluster: ServiceCluster? = nil
@@ -61,9 +63,14 @@ struct HomeTab: View {
                 sort: \.performedDate,
                 order: .reverse
             )
+            _appointments = Query(
+                filter: #Predicate<Appointment> { $0.vehicle?.id == vehicleID },
+                sort: \.startDate
+            )
         } else {
             _services = Query(filter: #Predicate<Service> { _ in false })
             _serviceLogs = Query(filter: #Predicate<ServiceLog> { _ in false })
+            _appointments = Query(filter: #Predicate<Appointment> { _ in false })
         }
     }
 
@@ -96,6 +103,8 @@ struct HomeTab: View {
         let recentLogs: [ServiceLog]
         let suggestion: HomeSuggestion?
         let mileage: MileageEstimate
+        /// Booked visits, soonest first.
+        let appointments: [Appointment]
     }
 
     private func makeContent(for vehicle: Vehicle) -> Content {
@@ -125,7 +134,9 @@ struct HomeTab: View {
                 clusteringEnabled: ClusteringSettings.shared.isEnabled,
                 seasonal: activeSeasonalReminders
             ),
-            mileage: mileage
+            mileage: mileage,
+            // Already start-sorted and vehicle-scoped by the query.
+            appointments: appointments.filter(\.isScheduled)
         )
     }
 
@@ -171,7 +182,8 @@ struct HomeTab: View {
             vehicle: vehicle,
             onMileageTap: { appState.present(.mileageUpdate) },
             onEdit: { appState.present(.editVehicle) },
-            onDocumentsTap: { appState.push(.documents(vehicle)) }
+            onDocumentsTap: { appState.push(.documents(vehicle)) },
+            onNotesTap: { appState.push(.notes(vehicle)) }
         )
         .onScreenEntity(VehicleEntity.self, id: vehicle.id)
 
@@ -190,6 +202,9 @@ struct HomeTab: View {
             nextUpSection(content, vehicle: vehicle)
                 .tourTarget(.homeNextUp, active: onboardingState.currentPhase.isTour)
                 .revealAnimation(delay: 0.1)
+
+            appointmentSection(content, vehicle: vehicle)
+                .revealAnimation(delay: 0.125)
 
             suggestionSection(content.suggestion)
                 .revealAnimation(delay: 0.15)

@@ -54,6 +54,16 @@ extension NotificationService: UNUserNotificationCenterDelegate {
             return
         }
 
+        // A shop-visit reminder opens the appointment.
+        if notificationType == AppointmentNotificationScheduler.userInfoType {
+            if response.actionIdentifier == UNNotificationDefaultActionIdentifier,
+               let vehicleID = Self.vehicleID(in: userInfo),
+               let appointmentID = (userInfo["appointmentID"] as? String).flatMap(UUID.init(uuidString:)) {
+                PendingRouteStore.shared.route = .appointment(vehicleID: vehicleID, appointmentID: appointmentID)
+            }
+            return
+        }
+
         // Handle service due notifications (default)
         await handleServiceDueResponse(response, userInfo: userInfo)
     }

@@ -48,9 +48,11 @@ final class ServiceLogFormModel {
     /// A receipt read into the form, and what the form held before it
     /// (`+Receipt`). Nil until the user scans one.
     var receipt: ReceiptPrefill?
-    /// The shop a receipt named. The form shows it only then: a shop lives on
-    /// a visit, which only a receipt's save creates.
+    /// The shop a receipt or a booked appointment named. The form shows it
+    /// only then: a shop lives on a visit, which only those saves create.
     var shopName: String = ""
+    /// Opened from an appointment's Log Visit: its shop goes on a visit.
+    var carriesAppointmentShop = false
 
     /// The typed target for a mileage-triggered reminder.
     var nextDueMileage: Int?

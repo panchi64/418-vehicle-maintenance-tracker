@@ -15,4 +15,6 @@ enum AppRoute: Hashable {
     case visit(ServiceVisit)
     case document(Document)
     case documents(Vehicle)
+    /// The vehicle's notes, pinned first.
+    case notes(Vehicle)
 }

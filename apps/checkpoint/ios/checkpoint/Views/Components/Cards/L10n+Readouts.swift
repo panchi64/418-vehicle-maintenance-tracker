@@ -98,8 +98,10 @@ extension L10n {
     static var readoutUpdateRecallStatus: String { readout("readout.updateRecallStatus") }
 
     // Vehicle specs panel
-    static var readoutVehicleNotes: String { readout("readout.vehicleNotes") }
-    static var readoutReadFullNotesHint: String { readout("readout.readFullNotesHint") }
+    static var readoutNotesNone: String { readout("readout.notesNone") }
+    static func readoutNotesSaved(_ count: Int) -> String {
+        String(format: readout("readout.notesSaved"), count)
+    }
     static var readoutEditVehicleSpecs: String { readout("readout.editVehicleSpecs") }
     static var readoutAddVehicleSpecs: String { readout("readout.addVehicleSpecs") }
     static var readoutCopyHint: String { readout("readout.copyHint") }

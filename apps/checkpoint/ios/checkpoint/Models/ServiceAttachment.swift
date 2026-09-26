@@ -55,6 +55,10 @@ final class ServiceAttachment: Identifiable {
     /// only annotating one side.
     var vehicles: [Vehicle]?
 
+    /// The vehicle note this file is attached to (V2), if any. The
+    /// relationship metadata lives on `VehicleNote.attachments`.
+    var vehicleNote: VehicleNote?
+
     /// Computed property to check if this is an image
     var isImage: Bool {
         mimeType.hasPrefix("image/")

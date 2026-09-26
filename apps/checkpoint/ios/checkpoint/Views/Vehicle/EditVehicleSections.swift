@@ -21,14 +21,16 @@ struct EditVehicleMarbeteSection: View {
     }
 }
 
-/// Reference values nothing computes from — VIN, plate, specs, notes — in
-/// the Details disclosure, which opens by itself once any of them is filled.
+/// Reference values nothing computes from — VIN, plate, specs — in the
+/// Details disclosure, which opens by itself once any of them is filled.
+/// Notes are not here: a vehicle has a list of them now, edited from its
+/// Notes screen (Home → specs → Notes).
 struct EditVehicleDetailsSection: View {
     @Bindable var formState: VehicleFormState
 
     private var filledCount: Int {
         let fields = formState.fields
-        return [fields.vin, fields.licensePlate, fields.tireSize, fields.oilType, fields.notes]
+        return [fields.vin, fields.licensePlate, fields.tireSize, fields.oilType]
             .filter { !$0.isEmpty }
             .count
     }
@@ -44,14 +46,6 @@ struct EditVehicleDetailsSection: View {
 
                 FormSection(title: L10n.vehicleSpecifications, trailing: L10n.formOptionalTag) {
                     VehicleSpecFields(formState: formState)
-                }
-
-                FormSection(title: L10n.vehicleNotes) {
-                    InstrumentTextEditor(
-                        label: nil,
-                        text: $formState.notes,
-                        placeholder: L10n.vehicleNotesPlaceholder
-                    )
                 }
             }
         }

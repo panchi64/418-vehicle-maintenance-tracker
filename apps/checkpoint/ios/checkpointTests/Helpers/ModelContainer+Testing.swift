@@ -20,7 +20,7 @@ extension ModelContainer {
     nonisolated static func inMemoryForTesting() -> ModelContainer {
         do {
             return try ModelContainer(
-                for: Schema(versionedSchema: CheckpointSchemaV1.self),
+                for: Schema(versionedSchema: CheckpointSchemaCurrent.self),
                 configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
             )
         } catch {

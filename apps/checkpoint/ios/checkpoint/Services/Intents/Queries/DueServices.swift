@@ -57,6 +57,11 @@ enum SpokenValue {
         Formatters.mediumDate.string(from: date)
     }
 
+    /// "9:30 AM" / "9:30", in the user's clock style.
+    static func time(_ date: Date) -> String {
+        date.formatted(date: .omitted, time: .shortened)
+    }
+
     /// Stored miles in the user's unit: "45,200 mi" or "72,742 km".
     static func mileage(_ miles: Int) -> String {
         Formatters.mileage(miles)

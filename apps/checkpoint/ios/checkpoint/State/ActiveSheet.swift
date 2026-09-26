@@ -38,6 +38,12 @@ enum ActiveSheet: Identifiable {
     case clusterMarkDone(ServiceCluster)
     /// Offered after a vehicle is added: common services with default intervals.
     case starterSchedule(Vehicle)
+    /// Book a shop visit (`preselected`: services to start with) or edit one.
+    case appointment(AppointmentEditorRequest)
+    /// An appointment's Log Visit: the service form prefilled from it.
+    case completeAppointment(Appointment)
+    /// Add a note to a vehicle, or edit one.
+    case vehicleNote(VehicleNoteEditorRequest)
 
     var id: String {
         switch self {
@@ -54,6 +60,9 @@ enum ActiveSheet: Identifiable {
         case .clusterDetail(let cluster): return "clusterDetail-\(cluster.id)"
         case .clusterMarkDone(let cluster): return "clusterMarkDone-\(cluster.id)"
         case .starterSchedule(let vehicle): return "starterSchedule-\(vehicle.id)"
+        case .appointment(let request): return "appointment-\(request.id)"
+        case .completeAppointment(let appointment): return "completeAppointment-\(appointment.id)"
+        case .vehicleNote(let request): return "vehicleNote-\(request.id)"
         }
     }
 
@@ -61,8 +70,40 @@ enum ActiveSheet: Identifiable {
     /// the app swaps its `ModelContainer`.
     var retainsModels: Bool {
         switch self {
-        case .markDone, .clusterDetail, .clusterMarkDone, .starterSchedule: return true
+        case .markDone, .clusterDetail, .clusterMarkDone, .starterSchedule,
+             .appointment, .completeAppointment, .vehicleNote:
+            return true
         default: return false
         }
     }
+}
+
+/// What the appointment sheet opens on.
+struct AppointmentEditorRequest: Identifiable {
+    enum Target {
+        /// Book a visit, starting with these services ticked.
+        case new(Vehicle, preselected: [Service])
+        case edit(Appointment)
+    }
+
+    let id = UUID()
+    let target: Target
+
+    var vehicle: Vehicle? {
+        switch target {
+        case .new(let vehicle, _): vehicle
+        case .edit(let appointment): appointment.vehicle
+        }
+    }
+}
+
+/// What the note sheet opens on.
+struct VehicleNoteEditorRequest: Identifiable {
+    enum Target {
+        case new(Vehicle)
+        case edit(VehicleNote)
+    }
+
+    let id = UUID()
+    let target: Target
 }

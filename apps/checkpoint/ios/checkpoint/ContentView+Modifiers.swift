@@ -135,6 +135,40 @@ extension ContentView {
 
         case .starterSchedule(let vehicle):
             StarterScheduleSheet(vehicle: vehicle)
+
+        case .appointment(let request):
+            if let vehicle = request.vehicle {
+                AppointmentFormView(request: request, vehicle: vehicle)
+            } else {
+                noVehicleFallback
+            }
+
+        case .completeAppointment(let appointment):
+            if let vehicle = appointment.vehicle {
+                appointmentCompletionForm(appointment, vehicle: vehicle)
+            } else {
+                noVehicleFallback
+            }
+
+        case .vehicleNote(let request):
+            VehicleNoteFormView(request: request)
+        }
+    }
+
+    /// Log Visit: the service form, prefilled from the appointment. Saving
+    /// the record closes the appointment.
+    @ViewBuilder
+    private func appointmentCompletionForm(_ appointment: Appointment, vehicle: Vehicle) -> some View {
+        let completion = AppointmentCompletion(appointment: appointment)
+        let onSaved = {
+            AppointmentService.markCompleted(appointment)
+            try? modelContext.save()
+        }
+        switch completion.form {
+        case .visit(let services):
+            ClusterDoneForm(services: services, vehicle: vehicle, prefill: completion.visitPrefill, onSaved: onSaved)
+        case .log:
+            ServiceLogForm(vehicle: vehicle, visitPrefill: completion.visitPrefill, onSaved: onSaved)
         }
     }
 

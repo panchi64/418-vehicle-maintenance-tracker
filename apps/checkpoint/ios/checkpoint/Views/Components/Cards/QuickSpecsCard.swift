@@ -2,7 +2,8 @@
 //  QuickSpecsCard.swift
 //  checkpoint
 //
-//  Vehicle reference detail — plate, VIN, tires, oil, marbete, notes, documents.
+//  Vehicle reference detail — plate, VIN, tires, oil, marbete, and the doors
+//  to its notes and documents.
 //
 //  Presented as a panel expanding from `VehicleSummaryBand`'s SPECS cell at the
 //  top of Home, collapsed by default. This is *identity* data, not maintenance
@@ -21,31 +22,12 @@ struct QuickSpecsCard: View {
     let vehicle: Vehicle
     let onEdit: () -> Void
     let onDocumentsTap: () -> Void
+    let onNotesTap: () -> Void
 
-    @State private var showFullNotes = false
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private var hasAnySpecs: Bool {
-        vehicle.vin != nil || vehicle.licensePlate != nil || vehicle.tireSize != nil || vehicle.oilType != nil || !(vehicle.notes ?? "").isEmpty || vehicle.hasMarbeteExpiration
-    }
-
-    private var hasNotes: Bool {
-        !(vehicle.notes ?? "").isEmpty
-    }
-
-    /// Truncated notes for preview display (first ~50 chars)
-    private var truncatedNotes: String? {
-        guard let notes = vehicle.notes, !notes.isEmpty else { return nil }
-        if notes.count <= 50 {
-            return notes
-        }
-        return String(notes.prefix(50)) + "..."
-    }
-
-    /// Whether notes are long enough to be truncated
-    private var isNotesTruncated: Bool {
-        guard let notes = vehicle.notes else { return false }
-        return notes.count > 50
+        vehicle.vin != nil || vehicle.licensePlate != nil || vehicle.tireSize != nil || vehicle.oilType != nil || vehicle.hasMarbeteExpiration
     }
 
     // No header row of its own: the disclosure trigger lives in VehicleSummaryBand.
@@ -104,56 +86,10 @@ struct QuickSpecsCard: View {
                             marbeteBlock(expiration: formatted, status: vehicle.marbeteStatus)
                         }
 
-                        // Notes section
-                        if hasNotes {
-                            VStack(alignment: .leading, spacing: 0) {
-                                // Separator
-                                Rectangle()
-                                    .fill(Theme.gridLine)
-                                    .frame(height: 2)
-                                    .padding(.bottom, Spacing.sm)
-
-                                // Notes label
-                                Text(L10n.specsNotes)
-                                    .font(.brutalistLabel)
-                                    .foregroundStyle(Theme.textTertiary)
-                                    .tracking(1)
-                                    .padding(.bottom, 4)
-
-                                // Notes content - tappable when truncated
-                                if isNotesTruncated {
-                                    Button {
-                                        showFullNotes = true
-                                    } label: {
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text(truncatedNotes ?? "")
-                                                .font(.brutalistBody)
-                                                .foregroundStyle(Theme.textPrimary)
-                                                .lineLimit(3)
-                                                .multilineTextAlignment(.leading)
-
-                                            Text(L10n.specsReadMore)
-                                                .font(.brutalistLabel)
-                                                .foregroundStyle(Theme.accent)
-                                                .tracking(1)
-                                        }
-                                        .contentShape(Rectangle())
-                                    }
-                                    .buttonStyle(.plain)
-                                    .accessibilityLabel(L10n.readoutVehicleNotes)
-                                    .accessibilityValue(truncatedNotes ?? "")
-                                    .accessibilityHint(L10n.readoutReadFullNotesHint)
-                                } else {
-                                    Text(truncatedNotes ?? "")
-                                        .font(.brutalistBody)
-                                        .foregroundStyle(Theme.textPrimary)
-                                        .lineLimit(3)
-                                }
-                            }
-                        }
-
-                        // Documents row — always shown so users can add docs
-                        // even on a brand-new vehicle with no other specs.
+                        // Notes and Documents rows — always shown so users can
+                        // start either library even on a brand-new vehicle
+                        // with no other specs.
+                        notesRow
                         documentsRow
 
                         // Empty state
@@ -199,9 +135,6 @@ struct QuickSpecsCard: View {
         // No border: this reads as a continuation of the header above it, not a
         // second card. Fade-only transition per AESTHETIC.md (Motion).
         .transition(.opacity)
-        .sheet(isPresented: $showFullNotes) {
-            FullNotesView(notes: vehicle.notes ?? "")
-        }
     }
 
     /// Documents library entry point. Always visible in the expanded card so
@@ -209,18 +142,52 @@ struct QuickSpecsCard: View {
     /// and other vehicle files.
     private var documentsRow: some View {
         let count = vehicle.documents?.count ?? 0
-        return Button {
-            onDocumentsTap()
-        } label: {
+        return libraryRow(
+            count: count,
+            label: L10n.documentsRowQuickSpecs,
+            preview: nil,
+            action: onDocumentsTap
+        )
+        .accessibilityLabel(L10n.documentsTitle)
+        .accessibilityValue(count == 0 ? L10n.readoutDocumentsNone : L10n.readoutDocumentsSaved(count))
+    }
+
+    /// The vehicle's notes. Replaced the single notes preview: a vehicle has
+    /// a list of notes now, so this is a door to them, shaped like Documents,
+    /// with the first pinned note's title so the one kept for reference is
+    /// still glanceable here.
+    private var notesRow: some View {
+        let notes = vehicle.sortedNotes
+        let preview = notes.first { $0.isPinned }.map(\.displayTitle)
+        return libraryRow(
+            count: notes.count,
+            label: L10n.notesRowQuickSpecs,
+            preview: preview,
+            action: onNotesTap
+        )
+        .accessibilityLabel(L10n.notesTitle)
+        .accessibilityValue(notes.isEmpty ? L10n.readoutNotesNone : L10n.readoutNotesSaved(notes.count))
+    }
+
+    /// A count, its label, an optional one-line preview, and a chevron: the
+    /// door to one of the vehicle's libraries.
+    private func libraryRow(count: Int, label: String, preview: String?, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
             HStack(alignment: .center, spacing: Spacing.sm) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(verbatim: count == 0 ? "—" : "\(count)")
                         .font(.brutalistHeading)
                         .foregroundStyle(Theme.textPrimary)
-                    Text(L10n.documentsRowQuickSpecs.uppercased())
+                    Text(label.uppercased())
                         .font(.brutalistLabel)
                         .foregroundStyle(Theme.textTertiary)
                         .tracking(2)
+                    if let preview, !preview.isEmpty {
+                        Text(preview)
+                            .font(.brutalistSecondary)
+                            .foregroundStyle(Theme.textSecondary)
+                            .lineLimit(1)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -233,8 +200,6 @@ struct QuickSpecsCard: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(L10n.documentsTitle)
-        .accessibilityValue(count == 0 ? L10n.readoutDocumentsNone : L10n.readoutDocumentsSaved(count))
     }
 
     /// Copy a spec value to the pasteboard, with haptic + toast feedback naming the field.
@@ -341,43 +306,6 @@ struct QuickSpecsCard: View {
     }
 }
 
-// MARK: - Full Notes View
-
-struct FullNotesView: View {
-    let notes: String
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                Text(notes)
-                    .font(.brutalistBody)
-                    .foregroundStyle(Theme.textPrimary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(Spacing.md)
-            }
-            .background(Theme.backgroundPrimary)
-            .navigationTitle(L10n.vehicleNotes)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(Theme.textSecondary)
-                            .minimumTouchTarget()
-                    }
-                    .accessibilityLabel(L10n.readoutClose)
-                }
-            }
-        }
-        .presentationDetents([.medium, .large])
-        .presentationDragIndicator(.visible)
-    }
-}
-
 #Preview {
     ZStack {
         AtmosphericBackground()
@@ -398,7 +326,8 @@ struct FullNotesView: View {
                         notes: "This car has a slight vibration at highway speeds above 70mph. The dealer mentioned it could be related to the alignment or tire balance. Need to get it checked at the next service appointment. Also, the rear passenger window makes a clicking noise when going down."
                     ),
                     onEdit: { print("Edit tapped") },
-                    onDocumentsTap: { print("Documents tapped") }
+                    onDocumentsTap: { print("Documents tapped") },
+                    onNotesTap: { print("Notes tapped") }
                 )
 
                 // With partial specs
@@ -412,7 +341,8 @@ struct FullNotesView: View {
                         vin: "JM1NDAL79L0123456"
                     ),
                     onEdit: { print("Edit tapped") },
-                    onDocumentsTap: { print("Documents tapped") }
+                    onDocumentsTap: { print("Documents tapped") },
+                    onNotesTap: { print("Notes tapped") }
                 )
 
                 // With no specs
@@ -425,7 +355,8 @@ struct FullNotesView: View {
                         currentMileage: 1500
                     ),
                     onEdit: { print("Edit tapped") },
-                    onDocumentsTap: { print("Documents tapped") }
+                    onDocumentsTap: { print("Documents tapped") },
+                    onNotesTap: { print("Notes tapped") }
                 )
             }
             .padding(Spacing.screenHorizontal)

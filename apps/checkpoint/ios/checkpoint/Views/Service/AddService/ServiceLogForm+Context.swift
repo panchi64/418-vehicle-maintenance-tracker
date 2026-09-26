@@ -12,7 +12,7 @@ extension ServiceLogForm {
 
     /// Opened with values already in it (seasonal, "Schedule next", Duplicate).
     var hasExplicitPrefill: Bool {
-        seasonalPrefill != nil || postRecordPrefill != nil || duplicating != nil
+        seasonalPrefill != nil || postRecordPrefill != nil || visitPrefill != nil || duplicating != nil
     }
 
     /// The stored draft this form reads and writes (F10), or nil when it has
@@ -59,6 +59,7 @@ extension ServiceLogForm {
         model.presets = PresetDataService.shared.loadPresets()
         if let seasonalPrefill { model.applySeasonalPrefill(seasonalPrefill) }
         if let postRecordPrefill { model.applyPostRecordPrefill(postRecordPrefill) }
+        if let visitPrefill { model.apply(visit: visitPrefill) }
         if let duplicating { model.applyTemplate(from: duplicating) }
         if let draftScope {
             draftResumeBanner = ServiceFormDraftStore.load(draftScope)

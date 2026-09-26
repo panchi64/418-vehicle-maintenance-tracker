@@ -122,18 +122,30 @@ extension ServiceLogFormModel {
         }
     }
 
-    /// Whether the form shows the shop field: only for a receipt that named
-    /// one, while logging.
+    /// Whether the form shows the shop field: only for a receipt or an
+    /// appointment that named one, while logging.
     var showsShopField: Bool {
-        isLogging && receipt?.draft.shopName != nil
+        isLogging && (carriesAppointmentShop || receipt?.draft.shopName != nil)
+    }
+
+    /// Start from a booked appointment: its day and its shop
+    /// (`AppointmentCompletion`).
+    func apply(visit prefill: VisitPrefill, now: Date = .now) {
+        let timing = ServiceLogging.timing(for: prefill.performedDate, now: now)
+        self.timing = timing
+        if timing == .earlier { customDate = prefill.performedDate }
+        if let shop = prefill.shopName {
+            shopName = shop
+            carriesAppointmentShop = true
+        }
     }
 
     /// The shop and line items a save puts on a visit, or nil when the entry
     /// has neither (it stays a standalone log, as always).
     var receiptVisitDetails: (shopName: String?, lineItems: [ReceiptLineItem])? {
-        guard let receipt, isLogging, !mode.isEdit else { return nil }
+        guard receipt != nil || carriesAppointmentShop, isLogging, !mode.isEdit else { return nil }
         let shop = shopName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let items = receipt.draft.lineItems
+        let items = receipt?.draft.lineItems ?? []
         guard !shop.isEmpty || !items.isEmpty else { return nil }
         return (shop.isEmpty ? nil : shop, items)
     }

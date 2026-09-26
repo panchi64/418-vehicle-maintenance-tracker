@@ -30,6 +30,10 @@ final class Service: Identifiable {
     @Relationship(deleteRule: .cascade, inverse: \ServiceLog.service)
     var logs: [ServiceLog]? = []
 
+    /// Shop visits booked for this service (V2). The relationship metadata
+    /// lives on `Appointment.services`.
+    var appointments: [Appointment]?
+
     init(
         name: String,
         dueDate: Date? = nil,

@@ -65,6 +65,8 @@ final class SpotlightIndexer {
             try await replace(with: ServiceLogEntity.entities(in: context))
             try await replace(with: VisitEntity.entities(in: context))
             try await replace(with: DocumentEntity.entities(in: context))
+            try await replace(with: AppointmentEntity.entities(in: context))
+            try await replace(with: VehicleNoteEntity.entities(in: context))
         } catch {
             spotlightLogger.error("Spotlight reindex failed: \(error.localizedDescription)")
         }

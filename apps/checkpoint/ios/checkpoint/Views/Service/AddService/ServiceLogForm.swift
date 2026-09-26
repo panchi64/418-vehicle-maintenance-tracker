@@ -46,6 +46,8 @@ struct ServiceLogForm: View {
     let vehicle: Vehicle
     var seasonalPrefill: SeasonalPrefill?
     var postRecordPrefill: PostRecordPrefill?
+    /// A booked appointment's day and shop (Log Visit with no linked services).
+    var visitPrefill: VisitPrefill?
     var duplicating: ServiceLog?
     /// Duplicate only: what the user entered before choosing this vehicle.
     var carryover: ServiceLogCarryover?
@@ -76,6 +78,7 @@ struct ServiceLogForm: View {
         mode: ServiceLogFormMode = .log,
         seasonalPrefill: SeasonalPrefill? = nil,
         postRecordPrefill: PostRecordPrefill? = nil,
+        visitPrefill: VisitPrefill? = nil,
         receiptImage: UIImage? = nil,
         opensReceiptScanner: Bool = false,
         onSaved: (() -> Void)? = nil,
@@ -84,6 +87,7 @@ struct ServiceLogForm: View {
         self.vehicle = vehicle
         self.seasonalPrefill = seasonalPrefill
         self.postRecordPrefill = postRecordPrefill
+        self.visitPrefill = visitPrefill
         self.receiptImage = receiptImage
         self.opensReceiptScanner = opensReceiptScanner
         self.onSaved = onSaved

@@ -50,6 +50,9 @@ extension NotificationService {
         ServiceNotificationScheduler.cancelNotifications(for: vehicle)
         MileageReminderScheduler.cancelMileageReminder(for: vehicle)
         MarbeteNotificationScheduler.cancelMarbeteNotifications(for: vehicle)
+        for appointment in vehicle.appointments ?? [] {
+            AppointmentNotificationScheduler.cancel(appointmentID: appointment.id)
+        }
         // Roundup IDs are per-year; only the previous or current year can be pending
         let currentYear = Calendar.current.component(.year, from: .now)
         YearlyRoundupScheduler.cancelYearlyRoundup(for: vehicle, year: currentYear - 1)

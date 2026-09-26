@@ -35,6 +35,9 @@ struct InstrumentTextField: View {
     /// A unit that leads the value — the currency symbol on a cost field. Set
     /// at 13pt like a suffix, so it annotates the number without competing.
     var prefix: String?
+    /// Take the keyboard when the field appears — for the one field a form
+    /// can't default (a new appointment's shop).
+    var focusOnAppear = false
 
     @FocusState private var isFocused: Bool
 
@@ -55,6 +58,9 @@ struct InstrumentTextField: View {
             }
 
             FieldEffectNote(requirement: requirement)
+        }
+        .task {
+            if focusOnAppear { isFocused = true }
         }
     }
 

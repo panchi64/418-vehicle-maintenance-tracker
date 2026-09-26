@@ -63,6 +63,10 @@ enum PendingRoute: Equatable {
     /// Open the service form with the receipt scanner up (the Scan Receipt
     /// Control).
     case scanReceipt(vehicleID: UUID)
+    /// Open a booked shop visit (its reminder, Siri, Spotlight).
+    case appointment(vehicleID: UUID, appointmentID: UUID)
+    /// Open one vehicle note, over the vehicle's Notes list.
+    case vehicleNote(vehicleID: UUID, noteID: UUID)
 
     /// Open a single service's detail.
     static func service(vehicleID: UUID, serviceID: UUID) -> PendingRoute {
@@ -93,7 +97,8 @@ enum PendingRoute: Equatable {
             return id
         case .services(let id, _), .markDone(let id, _), .serviceLog(let id, _),
              .visit(let id, _), .document(let id, _), .searchServices(let id, _), .searchDocuments(let id, _),
-             .logReceipt(let id, _), .mileageReading(let id, _), .addVehicle(let id, _):
+             .logReceipt(let id, _), .mileageReading(let id, _), .addVehicle(let id, _),
+             .appointment(let id, _), .vehicleNote(let id, _):
             return id
         }
     }

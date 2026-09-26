@@ -1114,6 +1114,378 @@
         "es" : { "stringUnit" : { "state" : "translated", "value" : "Esa visita ya no está en Checkpoint." } }
       }
     },
+    "That appointment is no longer in Checkpoint." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "That appointment is no longer in Checkpoint." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Esa cita ya no está en Checkpoint." } }
+      }
+    },
+    "Say which shop the appointment is at." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Say which shop the appointment is at." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Di en qué taller es la cita." } }
+      }
+    },
+    "There's no shop appointment booked. Book one in Checkpoint first." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "There's no shop appointment booked. Book one in Checkpoint first." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "No hay citas en el taller. Reserva una en Checkpoint primero." } }
+      }
+    },
+    "That appointment is already completed or cancelled." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "That appointment is already completed or cancelled." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Esa cita ya se completó o se canceló." } }
+      }
+    },
+    "An appointment can't move to another vehicle. Book one for that vehicle instead." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "An appointment can't move to another vehicle. Book one for that vehicle instead." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Una cita no puede pasar a otro vehículo. Reserva una para ese vehículo." } }
+      }
+    },
+    "That note is no longer in Checkpoint." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "That note is no longer in Checkpoint." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Esa nota ya no está en Checkpoint." } }
+      }
+    },
+    "A note can't move to another vehicle. Add it to that vehicle instead." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "A note can't move to another vehicle. Add it to that vehicle instead." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Una nota no puede pasar a otro vehículo. Añádela a ese vehículo." } }
+      }
+    },
+    "Say what the note should say." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Say what the note should say." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Di qué debe decir la nota." } }
+      }
+    },
+    "Checkpoint has no note like that." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint has no note like that." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint no tiene una nota así." } }
+      }
+    },
+    "Schedule Shop Appointment" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Schedule Shop Appointment" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Programar cita en el taller" } }
+      }
+    },
+    "Book a visit at a shop for a vehicle. Checkpoint reminds you the day before and an hour before." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Book a visit at a shop for a vehicle. Checkpoint reminds you the day before and an hour before." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Reserva una visita a un taller para un vehículo. Checkpoint te lo recuerda el día antes y una hora antes." } }
+      }
+    },
+    "Which shop?" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Which shop?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Qué taller?" } }
+      }
+    },
+    "Date and Time" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Date and Time" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Fecha y hora" } }
+      }
+    },
+    "When is the appointment?" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "When is the appointment?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Cuándo es la cita?" } }
+      }
+    },
+    "Tracked services the visit is for." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tracked services the visit is for." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Los servicios de la visita." } }
+      }
+    },
+    "Address" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Address" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Dirección" } }
+      }
+    },
+    "Note" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Note" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Nota" } }
+      }
+    },
+    "What to ask or remember at the shop." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "What to ask or remember at the shop." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Qué preguntar o recordar en el taller." } }
+      }
+    },
+    "Book ${vehicle} at ${shop} on ${date}" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Book ${vehicle} at ${shop} on ${date}" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Reservar ${vehicle} en ${shop} el ${date}" } }
+      }
+    },
+    "Reschedule Shop Appointment" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reschedule Shop Appointment" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cambiar cita en el taller" } }
+      }
+    },
+    "Move a booked shop visit to a new date and time. Its reminders move with it." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Move a booked shop visit to a new date and time. Its reminders move with it." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Mueve una cita en el taller a otra fecha y hora. Sus recordatorios se mueven con ella." } }
+      }
+    },
+    "Appointment" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Appointment" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cita" } }
+      }
+    },
+    "Leave empty for the next one on the vehicle Checkpoint is showing." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Leave empty for the next one on the vehicle Checkpoint is showing." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Déjalo vacío para la próxima del vehículo que muestra Checkpoint." } }
+      }
+    },
+    "New Date and Time" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "New Date and Time" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Nueva fecha y hora" } }
+      }
+    },
+    "When should it be?" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "When should it be?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Para cuándo?" } }
+      }
+    },
+    "Move ${appointment} to ${date}" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Move ${appointment} to ${date}" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Mover ${appointment} al ${date}" } }
+      }
+    },
+    "Cancel Shop Appointment" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancel Shop Appointment" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cancelar cita en el taller" } }
+      }
+    },
+    "Cancel a booked shop visit and its reminders. Checkpoint asks first." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancel a booked shop visit and its reminders. Checkpoint asks first." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cancela una cita en el taller y sus recordatorios. Checkpoint pregunta antes." } }
+      }
+    },
+    "Cancel ${appointment}" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancel ${appointment}" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cancelar ${appointment}" } }
+      }
+    },
+    "Add Vehicle Note" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add Vehicle Note" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añadir nota del vehículo" } }
+      }
+    },
+    "Save a note to a vehicle, such as a part number or what the shop recommended, with optional photos or PDFs." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Save a note to a vehicle, such as a part number or what the shop recommended, with optional photos or PDFs." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Guarda una nota en un vehículo, como un número de pieza o lo que recomendó el taller, con fotos o PDF opcionales." } }
+      }
+    },
+    "What should the note say?" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "What should the note say?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Qué debe decir la nota?" } }
+      }
+    },
+    "Leave empty to use the first line." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Leave empty to use the first line." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Déjalo vacío para usar la primera línea." } }
+      }
+    },
+    "Pinned" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pinned" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Fijada" } }
+      }
+    },
+    "Attachments" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Attachments" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Adjuntos" } }
+      }
+    },
+    "Add ${text} to ${vehicle}'s notes" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add ${text} to ${vehicle}'s notes" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añadir ${text} a las notas de ${vehicle}" } }
+      }
+    },
+    "Find Vehicle Note" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Find Vehicle Note" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Buscar nota del vehículo" } }
+      }
+    },
+    "Find a vehicle note by what it says and read it back." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Find a vehicle note by what it says and read it back." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Busca una nota del vehículo por lo que dice y la lee." } }
+      }
+    },
+    "Search" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Search" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Buscar" } }
+      }
+    },
+    "What's the note about?" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "What's the note about?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿De qué trata la nota?" } }
+      }
+    },
+    "Leave empty to search every vehicle, the one Checkpoint is showing first." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Leave empty to search every vehicle, the one Checkpoint is showing first." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Déjalo vacío para buscar en todos los vehículos, primero el que muestra Checkpoint." } }
+      }
+    },
+    "Find the ${query} note" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Find the ${query} note" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Buscar la nota ${query}" } }
+      }
+    },
+    "Shop Appointment" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Shop Appointment" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cita en el taller" } }
+      }
+    },
+    "%lld shop appointments" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld shop appointments" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%lld citas en el taller" } }
+      }
+    },
+    "Starts" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Starts" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Empieza" } }
+      }
+    },
+    "Ends" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Ends" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Termina" } }
+      }
+    },
+    "Vehicle Note" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Vehicle Note" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Nota del vehículo" } }
+      }
+    },
+    "%lld vehicle notes" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld vehicle notes" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%lld notas del vehículo" } }
+      }
+    },
+    "Created" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Created" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Creada" } }
+      }
+    },
+    "Modified" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Modified" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Modificada" } }
+      }
+    },
+    "Appointment Status" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Appointment Status" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Estado de la cita" } }
+      }
+    },
+    "Scheduled" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Scheduled" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Programada" } }
+      }
+    },
+    "Completed" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Completed" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Completada" } }
+      }
+    },
+    "Cancelled" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancelled" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cancelada" } }
+      }
+    },
+    "Confirmed" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Confirmed" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Confirmada" } }
+      }
+    },
+    "Tentative" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tentative" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Provisional" } }
+      }
+    },
+    "This" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Esta" } }
+      }
+    },
+    "Future" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Future" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Futuras" } }
+      }
+    },
+    "All" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "All" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Todas" } }
+      }
+    },
+    "Accepted" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Accepted" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Aceptada" } }
+      }
+    },
+    "Declined" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Declined" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Rechazada" } }
+      }
+    },
+    "Person" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Person" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Persona" } }
+      }
+    },
     "%@" : {
 
     },
@@ -12297,22 +12669,592 @@
         }
       }
     },
-    "readout.readFullNotesHint" : {
-      "comment" : "VoiceOver hint: opens the full vehicle notes.",
+    "readout.notesNone" : {
+      "comment" : "VoiceOver value for the Notes row in the specs panel when the vehicle has none.",
       "extractionState" : "manual",
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens the full notes"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abre las notas completas"
-          }
-        }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "None yet" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ninguna todavía" } }
+      }
+    },
+    "readout.notesSaved" : {
+      "comment" : "VoiceOver value for the Notes row in the specs panel. %d is the number of notes.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%d saved" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%d guardadas" } }
+      }
+    },
+    "home.shopVisit" : {
+      "comment" : "Home section title for the next booked shop appointment.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Shop Visit" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cita en el taller" } }
+      }
+    },
+    "home.shopVisit.empty" : {
+      "comment" : "Home Shop Visit section with nothing booked.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No shop visit booked." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "No hay cita en el taller." } }
+      }
+    },
+    "appointment.book" : {
+      "comment" : "Section action: book a shop appointment.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Book" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Reservar" } }
+      }
+    },
+    "appointment.editHint" : {
+      "comment" : "VoiceOver hint on an appointment.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Opens the appointment to change it" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Abre la cita para cambiarla" } }
+      }
+    },
+    "appointment.directions" : {
+      "comment" : "Button: driving directions to the shop in Maps.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Directions" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cómo llegar" } }
+      }
+    },
+    "appointment.directionsFailed" : {
+      "comment" : "Toast when Maps found nothing for the shop.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Maps couldn't find that shop. Add its address." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Mapas no encontró ese taller. Añade su dirección." } }
+      }
+    },
+    "appointment.logVisit" : {
+      "comment" : "Button: log the appointment's services as done.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Log Visit" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Registrar visita" } }
+      }
+    },
+    "appointment.rowLine" : {
+      "comment" : "A later appointment on Home. %1$@ is the date and time, %2$@ the shop.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ · %2$@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ · %2$@" } }
+      }
+    },
+    "appointment.timing.tomorrow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tomorrow" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Mañana" } }
+      }
+    },
+    "appointment.timing.inDays" : {
+      "comment" : "%d is days until the appointment (2 or more).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "In %d days" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "En %d días" } }
+      }
+    },
+    "appointment.timing.today" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Today" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Hoy" } }
+      }
+    },
+    "appointment.timing.notLogged" : {
+      "comment" : "Tag on an appointment whose time has passed and that hasn't been logged.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Not logged yet" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin registrar" } }
+      }
+    },
+    "appointment.form.titleNew" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Book Shop Visit" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Reservar cita" } }
+      }
+    },
+    "appointment.form.titleEdit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Shop Visit" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cita en el taller" } }
+      }
+    },
+    "appointment.shop" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Shop" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Taller" } }
+      }
+    },
+    "appointment.shop.placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Firestone, the dealer…" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Firestone, el concesionario…" } }
+      }
+    },
+    "appointment.shop.required" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Name the shop. It's how the visit is found, and what Maps searches." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Indica el taller. Así se encuentra la cita, y es lo que busca Mapas." } }
+      }
+    },
+    "appointment.shop.suggestionHint" : {
+      "comment" : "VoiceOver hint on a shop used before.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Uses this shop" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Usa este taller" } }
+      }
+    },
+    "appointment.when" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "When" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cuándo" } }
+      }
+    },
+    "appointment.sameDayCaution" : {
+      "comment" : "Caution: another visit booked that day. %1$@ is its shop, %2$@ its time.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ is already booked at %2$@ that day." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ya tienes cita en %1$@ a las %2$@ ese día." } }
+      }
+    },
+    "appointment.reminders" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reminders" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Recordatorios" } }
+      }
+    },
+    "appointment.reminders.none" : {
+      "comment" : "Both reminder times (day before, hour before) have already passed.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "None: it's less than an hour away" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ninguno: falta menos de una hora" } }
+      }
+    },
+    "appointment.services" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Services" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Servicios" } }
+      }
+    },
+    "appointment.services.empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No tracked services yet. Log Visit will ask what was done." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Aún no hay servicios. Registrar visita preguntará qué se hizo." } }
+      }
+    },
+    "appointment.address" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Address" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Dirección" } }
+      }
+    },
+    "appointment.address.placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Street, town" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Calle, pueblo" } }
+      }
+    },
+    "appointment.note" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Note" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Nota" } }
+      }
+    },
+    "appointment.note.placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "What to ask or mention at the counter" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Qué preguntar o mencionar en el mostrador" } }
+      }
+    },
+    "appointment.cancel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancel Appointment" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cancelar cita" } }
+      }
+    },
+    "appointment.keep" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Keep It" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Mantenerla" } }
+      }
+    },
+    "appointment.cancel.confirmTitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancel this appointment?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Cancelar esta cita?" } }
+      }
+    },
+    "appointment.cancel.confirmMessage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Its reminders are removed too." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "También se quitan sus recordatorios." } }
+      }
+    },
+    "appointment.toast.booked" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Shop visit booked" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cita reservada" } }
+      }
+    },
+    "appointment.toast.updated" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Shop visit updated" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cita actualizada" } }
+      }
+    },
+    "appointment.toast.cancelled" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Shop visit cancelled" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cita cancelada" } }
+      }
+    },
+    "appointment.shopFallback" : {
+      "comment" : "Name for an appointment with no shop entered.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Shop visit" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cita en el taller" } }
+      }
+    },
+    "appointment.eventServicesLine" : {
+      "comment" : "Last line of an appointment's note as a Calendar event. %@ is the list of services.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Services: %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Servicios: %@" } }
+      }
+    },
+    "notification.appointment.title.tomorrow" : {
+      "comment" : "Appointment reminder, the day before. Functional status title (docs/NOTIFICATION_TONE.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Shop Visit: Tomorrow" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cita en el taller: mañana" } }
+      }
+    },
+    "notification.appointment.title.hour" : {
+      "comment" : "Appointment reminder, an hour before.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Shop Visit: 1 Hour" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cita en el taller: 1 hora" } }
+      }
+    },
+    "notification.appointment.body.tomorrow" : {
+      "comment" : "The vehicle speaks. %1$@ vehicle, %2$@ shop, %3$@ time.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ is booked at %2$@ tomorrow, %3$@. It would like to keep that slot." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ tiene cita en %2$@ mañana, %3$@. Prefiere no perder el turno." } }
+      }
+    },
+    "notification.appointment.body.hour" : {
+      "comment" : "The vehicle speaks. %1$@ vehicle, %2$@ shop, %3$@ time.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ is due at %2$@ at %3$@. Keys, wallet, car." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ debe estar en %2$@ a las %3$@. Llaves, cartera, carro." } }
+      }
+    },
+    "notes.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Notes" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Notas" } }
+      }
+    },
+    "notes.rowQuickSpecs" : {
+      "comment" : "Label under the notes count in the specs panel (shown uppercased).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Notes" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Notas" } }
+      }
+    },
+    "notes.empty.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No Notes" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin notas" } }
+      }
+    },
+    "notes.empty.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Keep part numbers, paint codes and what the shop said here." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Guarda aquí números de pieza, códigos de pintura y lo que dijo el taller." } }
+      }
+    },
+    "notes.add" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add Note" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añadir nota" } }
+      }
+    },
+    "notes.pinned" : {
+      "comment" : "Notes list section of pinned notes.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pinned" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Fijadas" } }
+      }
+    },
+    "notes.all" : {
+      "comment" : "Notes list section of the notes that aren't pinned.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Other Notes" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Otras notas" } }
+      }
+    },
+    "notes.searchPlaceholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Search notes" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Buscar notas" } }
+      }
+    },
+    "notes.delete.confirmTitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Delete this note?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Eliminar esta nota?" } }
+      }
+    },
+    "notes.delete.confirmMessage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Its photos and files stay in Documents." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sus fotos y archivos se quedan en Documentos." } }
+      }
+    },
+    "notes.pin" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pin" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Fijar" } }
+      }
+    },
+    "notes.unpin" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Unpin" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "No fijar" } }
+      }
+    },
+    "notes.pinnedA11y" : {
+      "comment" : "VoiceOver label for the pin mark on a pinned note.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pinned" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Fijada" } }
+      }
+    },
+    "notes.untitled" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Untitled" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin título" } }
+      }
+    },
+    "notes.metaWithAttachments" : {
+      "comment" : "A note's meta line. %1$@ is the date, %2$@ the attachment count.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ · %2$@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ · %2$@" } }
+      }
+    },
+    "noteForm.titleNew" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "New Note" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Nueva nota" } }
+      }
+    },
+    "noteForm.titleEdit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Edit Note" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Editar nota" } }
+      }
+    },
+    "noteForm.note" : {
+      "comment" : "Note sheet section holding the title and text.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Note" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Nota" } }
+      }
+    },
+    "noteForm.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Title" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Título" } }
+      }
+    },
+    "noteForm.title.placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Paint code, brake pads…" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Código de pintura, frenos…" } }
+      }
+    },
+    "noteForm.needsText" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add a title, some text or a file." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Añade un título, texto o un archivo." } }
+      }
+    },
+    "noteForm.text" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Text" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Texto" } }
+      }
+    },
+    "noteForm.text.placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "What to remember" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Qué recordar" } }
+      }
+    },
+    "noteForm.removeAttachment" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Remove from Note" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Quitar de la nota" } }
+      }
+    },
+    "noteForm.attachmentsHint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "A file removed from the note stays in Documents." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Un archivo que quitas de la nota se queda en Documentos." } }
+      }
+    },
+    "noteForm.pinned" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pin to Top" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Fijar arriba" } }
+      }
+    },
+    "noteForm.pinnedA11y" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pin this note to the top of the list" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Fijar esta nota arriba en la lista" } }
+      }
+    },
+    "noteForm.delete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Delete Note" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Eliminar nota" } }
+      }
+    },
+    "siri.appointment.booked" : {
+      "comment" : "Schedule Appointment. %1$@ vehicle, %2$@ shop, %3$@ date, %4$@ time.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Booked %1$@ at %2$@ on %3$@ at %4$@." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Reservé %1$@ en %2$@ el %3$@ a las %4$@." } }
+      }
+    },
+    "siri.appointment.moved" : {
+      "comment" : "Reschedule Appointment. %1$@ vehicle, %2$@ shop, %3$@ date, %4$@ time.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Moved %1$@'s %2$@ appointment to %3$@ at %4$@." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Moví la cita de %1$@ en %2$@ al %3$@ a las %4$@." } }
+      }
+    },
+    "siri.appointment.cancelAsk" : {
+      "comment" : "Cancel Appointment confirmation. %1$@ vehicle, %2$@ shop, %3$@ date, %4$@ time.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancel %1$@'s %2$@ appointment on %3$@ at %4$@?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Cancelar la cita de %1$@ en %2$@ el %3$@ a las %4$@?" } }
+      }
+    },
+    "siri.appointment.cancelled" : {
+      "comment" : "%1$@ vehicle, %2$@ shop.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancelled %1$@'s %2$@ appointment." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cancelé la cita de %1$@ en %2$@." } }
+      }
+    },
+    "siri.note.saved" : {
+      "comment" : "%@ vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Saved a note to %@." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Guardé una nota en %@." } }
+      }
+    },
+    "siri.note.savedPinned" : {
+      "comment" : "%@ vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Saved a pinned note to %@." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Guardé una nota fijada en %@." } }
+      }
+    },
+    "siri.note.found" : {
+      "comment" : "Find Note. %1$@ title, %2$@ vehicle, %3$@ the note's first line.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%1$@, on %2$@: %3$@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%1$@, en %2$@: %3$@" } }
+      }
+    },
+    "siri.note.foundTitleOnly" : {
+      "comment" : "Find Note, a note with no text beyond its title. %1$@ title, %2$@ vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Here's %1$@, on %2$@." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Aquí está %1$@, en %2$@." } }
       }
     },
     "readout.recallCountOne" : {
@@ -12473,24 +13415,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@, %2$@"
-          }
-        }
-      }
-    },
-    "readout.vehicleNotes" : {
-      "comment" : "VoiceOver label for the vehicle notes preview.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vehicle notes"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Notas del vehículo"
           }
         }
       }
@@ -16844,23 +17768,6 @@
         }
       }
     },
-    "specs.notes" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "NOTES"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "NOTAS"
-          }
-        }
-      }
-    },
     "specs.oil" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -16891,23 +17798,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "TABLILLA"
-          }
-        }
-      }
-    },
-    "specs.readMore" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "TAP TO READ MORE"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "TOCA PARA LEER MÁS"
           }
         }
       }

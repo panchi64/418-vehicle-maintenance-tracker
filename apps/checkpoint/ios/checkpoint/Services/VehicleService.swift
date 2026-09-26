@@ -51,6 +51,9 @@ enum VehicleService {
         }
 
         context.insert(vehicle)
+        // Add Vehicle's notes become the vehicle's first, pinned note — the
+        // same legacy note a migrated V1 field becomes, mirrored in `notes`.
+        VehicleNoteMigration.reconcile(vehicle, in: context)
         return vehicle
     }
 
@@ -93,7 +96,8 @@ enum VehicleService {
         vehicle.licensePlate = nilIfEmpty(fields.licensePlate)
         vehicle.tireSize = nilIfEmpty(fields.tireSize)
         vehicle.oilType = nilIfEmpty(fields.oilType)
-        vehicle.notes = nilIfEmpty(fields.notes)
+        // Notes are edited as notes now (`VehicleNoteService`); `notes` is
+        // their mirror and never written from the vehicle form.
 
         let hadMarbete = vehicle.hasMarbeteExpiration
         vehicle.marbeteExpirationMonth = fields.marbeteExpirationMonth

@@ -157,6 +157,8 @@ struct AppRouteDestination: View {
             DocumentDetailView(document: document)
         case .documents(let vehicle):
             DocumentsView(vehicle: vehicle)
+        case .notes(let vehicle):
+            VehicleNotesView(vehicle: vehicle)
         }
     }
 }

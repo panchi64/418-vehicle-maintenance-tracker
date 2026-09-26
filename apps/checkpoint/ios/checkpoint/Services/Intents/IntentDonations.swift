@@ -62,6 +62,18 @@ enum IntentDonations {
         donate(AddDocumentIntent(vehicle: VehicleEntity(model: vehicle), type: type))
     }
 
+    /// After booking a shop visit in-app.
+    static func bookedAppointment(on vehicle: Vehicle, shop: String) {
+        donate(ScheduleAppointmentIntent(vehicle: VehicleEntity(model: vehicle), shop: shop))
+    }
+
+    /// After adding a vehicle note in-app.
+    static func addedNote(to vehicle: Vehicle) {
+        let intent = AddVehicleNoteIntent()
+        intent.vehicle = VehicleEntity(model: vehicle)
+        donate(intent)
+    }
+
     private static func donate(_ intent: some AppIntent) {
         IntentDonationManager.shared.donate(intent: intent)
     }

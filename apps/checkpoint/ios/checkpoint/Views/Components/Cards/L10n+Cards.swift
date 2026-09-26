@@ -20,8 +20,6 @@ extension L10n {
     static var specsVIN: String { cards("specs.vin") }
     static var specsTires: String { cards("specs.tires") }
     static var specsOil: String { cards("specs.oil") }
-    static var specsNotes: String { cards("specs.notes") }
-    static var specsReadMore: String { cards("specs.readMore") }
     static var specsEmpty: String { cards("specs.empty") }
     static var specsEdit: String { cards("specs.edit") }
     static var specsAdd: String { cards("specs.add") }

@@ -23,7 +23,10 @@ final class Vehicle: Identifiable {
     var tireSize: String?
     var oilType: String?
 
-    // Notes
+    /// The single notes field of V1. Superseded by `vehicleNotes`, but kept
+    /// and mirrored from the pinned note migrated out of it: older app
+    /// versions sync the same CloudKit container and still read and write it
+    /// (`VehicleNoteMigration`). Never remove — CloudKit fields are forever.
     var notes: String?
 
     // Mileage tracking
@@ -52,6 +55,15 @@ final class Vehicle: Identifiable {
     /// removes documents that no longer belong anywhere.
     @Relationship(deleteRule: .nullify, inverse: \ServiceAttachment.vehicles)
     var documents: [ServiceAttachment]? = []
+
+    /// Booked shop visits (V2).
+    @Relationship(deleteRule: .cascade, inverse: \Appointment.vehicle)
+    var appointments: [Appointment]? = []
+
+    /// Notes about the vehicle (V2). Their attachments stay in the Documents
+    /// library when a note goes (`VehicleNote.attachments` nullifies).
+    @Relationship(deleteRule: .cascade, inverse: \VehicleNote.vehicle)
+    var vehicleNotes: [VehicleNote]? = []
 
     var displayName: String {
         if name.isEmpty {

@@ -70,6 +70,8 @@ final class SpotlightIndexerTests: XCTestCase {
             // Nothing stored: the type is cleared and nothing is indexed.
             .delete("VisitEntity"),
             .delete("DocumentEntity"),
+            .delete("AppointmentEntity"),
+            .delete("VehicleNoteEntity"),
         ])
     }
 

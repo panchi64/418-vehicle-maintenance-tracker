@@ -81,12 +81,13 @@ extension Document {
 
     /// Sweep documents that no longer belong anywhere. Called after a vehicle
     /// is deleted or after the last vehicle link is removed in the UI. A doc
-    /// is orphaned when it has no vehicles AND no service log.
+    /// is orphaned when it has no vehicles, no service log and no note.
     @MainActor
     static func purgeOrphans(in context: ModelContext) {
         do {
             let candidates = try context.fetch(FetchDescriptor<Document>())
-            for doc in candidates where (doc.vehicles?.isEmpty ?? true) && doc.serviceLog == nil {
+            for doc in candidates
+            where (doc.vehicles?.isEmpty ?? true) && doc.serviceLog == nil && doc.vehicleNote == nil {
                 context.delete(doc)
             }
             try context.save()

@@ -46,6 +46,22 @@ nonisolated enum IntentError: Error, Equatable, CustomLocalizedStringResourceCon
     /// A vehicle with no service history has nothing to export.
     case nothingToExport
     case exportFailed
+    case appointmentNotFound
+    /// A booking needs a shop to be named by.
+    case appointmentNeedsShop
+    /// Reschedule or cancel with nothing booked.
+    case noAppointments
+    /// Only a scheduled visit can be moved or cancelled.
+    case appointmentClosed
+    /// An appointment belongs to its vehicle; it can't be re-homed.
+    case appointmentCannotMove
+    case noteNotFound
+    /// A note belongs to its vehicle; it can't be re-homed.
+    case noteCannotMove
+    /// A note with no title and no text.
+    case noteNeedsText
+    /// Find Note matched nothing.
+    case noMatchingNote
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
@@ -68,6 +84,15 @@ nonisolated enum IntentError: Error, Equatable, CustomLocalizedStringResourceCon
         case .unsupportedDocument: "Checkpoint can save photos and PDFs as documents."
         case .nothingToExport: "There's no service history to export yet."
         case .exportFailed: "Checkpoint couldn't create the PDF. Try exporting from the Services tab."
+        case .appointmentNotFound: "That appointment is no longer in Checkpoint."
+        case .appointmentNeedsShop: "Say which shop the appointment is at."
+        case .noAppointments: "There's no shop appointment booked. Book one in Checkpoint first."
+        case .appointmentClosed: "That appointment is already completed or cancelled."
+        case .appointmentCannotMove: "An appointment can't move to another vehicle. Book one for that vehicle instead."
+        case .noteNotFound: "That note is no longer in Checkpoint."
+        case .noteCannotMove: "A note can't move to another vehicle. Add it to that vehicle instead."
+        case .noteNeedsText: "Say what the note should say."
+        case .noMatchingNote: "Checkpoint has no note like that."
         }
     }
 }
@@ -131,6 +156,28 @@ enum IntentStore {
             throw IntentError.documentNotFound
         }
         return document
+    }
+
+    static func appointment(id: UUID, in context: ModelContext) throws -> Appointment {
+        guard let appointment = try AppointmentEntity.models(ids: [id], in: context).first else {
+            throw IntentError.appointmentNotFound
+        }
+        return appointment
+    }
+
+    /// A scheduled appointment by ID — the only kind that can be moved or
+    /// cancelled.
+    static func scheduledAppointment(id: UUID, in context: ModelContext) throws -> Appointment {
+        let appointment = try appointment(id: id, in: context)
+        guard appointment.isScheduled else { throw IntentError.appointmentClosed }
+        return appointment
+    }
+
+    static func note(id: UUID, in context: ModelContext) throws -> VehicleNote {
+        guard let note = try VehicleNoteEntity.models(ids: [id], in: context).first else {
+            throw IntentError.noteNotFound
+        }
+        return note
     }
 
     static func logs(_ entities: [ServiceLogEntity], in context: ModelContext) throws -> [ServiceLog] {

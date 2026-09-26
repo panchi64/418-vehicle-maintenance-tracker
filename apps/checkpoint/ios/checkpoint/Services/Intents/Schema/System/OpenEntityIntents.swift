@@ -83,6 +83,58 @@ struct OpenDocumentIntent {
 
 @available(iOS 27, *)
 @AppIntent(schema: .system.open)
+struct OpenAppointmentIntent {
+    @Dependency var container: ModelContainer
+    var target: AppointmentEntity
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        EntityRoutes.open(try EntityRoutes.appointment(target.id, in: container.mainContext))
+        return .result()
+    }
+}
+
+@available(iOS 27, *)
+@AppIntent(schema: .system.open)
+struct OpenAppointmentEventIntent {
+    @Dependency var container: ModelContainer
+    var target: AppointmentEventEntity
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        EntityRoutes.open(try EntityRoutes.appointment(target.id, in: container.mainContext))
+        return .result()
+    }
+}
+
+@available(iOS 27, *)
+@AppIntent(schema: .system.open)
+struct OpenVehicleNoteIntent {
+    @Dependency var container: ModelContainer
+    var target: VehicleNoteEntity
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        EntityRoutes.open(try EntityRoutes.vehicleNote(target.id, in: container.mainContext))
+        return .result()
+    }
+}
+
+@available(iOS 27, *)
+@AppIntent(schema: .system.open)
+struct OpenVehicleNoteSchemaIntent {
+    @Dependency var container: ModelContainer
+    var target: VehicleNoteSchemaEntity
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        EntityRoutes.open(try EntityRoutes.vehicleNote(target.id, in: container.mainContext))
+        return .result()
+    }
+}
+
+@available(iOS 27, *)
+@AppIntent(schema: .system.open)
 struct OpenServiceReminderIntent {
     @Dependency var container: ModelContainer
     var target: ServiceReminderEntity

@@ -39,7 +39,7 @@ struct checkpointApp: App {
         // Built from the versioned schema so schema changes ship as staged
         // migrations via CheckpointMigrationPlan rather than implicit
         // lightweight migration. See CheckpointSchema.swift.
-        let schema = Schema(versionedSchema: CheckpointSchemaV1.self)
+        let schema = Schema(versionedSchema: CheckpointSchemaCurrent.self)
 
         let storeURL = AppGroupConstants.iPhoneWidgetContainerURL?.appendingPathComponent("checkpoint.store")
 

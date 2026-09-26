@@ -28,6 +28,7 @@ extension ServiceNotificationScheduler {
         for vehicle in vehicles {
             await rescheduleNotificationsAwaitingAdds(for: vehicle)
         }
+        await AppointmentNotificationScheduler.performLaunchMaintenance(for: vehicles)
         // Rescheduling every vehicle × service × interval plus marbete/mileage/
         // roundup can exceed the OS's 64-request cap; keep only the soonest.
         // The awaited adds above ensure this trims the settled pending set, not

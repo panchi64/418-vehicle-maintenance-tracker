@@ -24,6 +24,19 @@ struct ServiceMigrationService {
         backfillIsRecurring(in: context)
         backfillDocumentVehicles(in: context)
         backfillStrandedVisitCosts(in: context)
+        reconcileLegacyVehicleNotes(in: context)
+    }
+
+    /// Keep each vehicle's pinned legacy note in step with the V1 notes
+    /// field. The V1→V2 migration stage did this once; an older client
+    /// syncing the field in can undo it at any time, so it runs every launch.
+    @MainActor
+    static func reconcileLegacyVehicleNotes(in context: ModelContext) {
+        do {
+            try VehicleNoteMigration.reconcile(in: context)
+        } catch {
+            migrationLogger.error("Legacy vehicle-note reconcile failed: \(error.localizedDescription)")
+        }
     }
 
     /// Move costs stranded on the child logs of an un-itemized visit onto the

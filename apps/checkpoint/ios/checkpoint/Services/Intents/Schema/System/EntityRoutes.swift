@@ -52,6 +52,18 @@ enum EntityRoutes {
         return .document(vehicleID: vehicle.id, documentID: document.id)
     }
 
+    static func appointment(_ id: UUID, in context: ModelContext) throws -> PendingRoute {
+        let appointment = try IntentStore.appointment(id: id, in: context)
+        guard let vehicle = appointment.vehicle else { throw IntentError.appointmentNotFound }
+        return .appointment(vehicleID: vehicle.id, appointmentID: appointment.id)
+    }
+
+    static func vehicleNote(_ id: UUID, in context: ModelContext) throws -> PendingRoute {
+        let note = try IntentStore.note(id: id, in: context)
+        guard let vehicle = note.vehicle else { throw IntentError.noteNotFound }
+        return .vehicleNote(vehicleID: vehicle.id, noteID: note.id)
+    }
+
     /// Hand `route` to the app. `ContentView` applies it once it is on screen.
     static func open(_ route: PendingRoute) {
         PendingRouteStore.shared.route = route

@@ -42,6 +42,7 @@ struct VehicleSummaryBand: View {
     var onMileageTap: (() -> Void)?
     let onEdit: () -> Void
     let onDocumentsTap: () -> Void
+    let onNotesTap: () -> Void
 
     /// Collapsed by default, so the panel costs nothing until asked for.
     @State private var isSpecsExpanded = false
@@ -58,7 +59,8 @@ struct VehicleSummaryBand: View {
                 QuickSpecsCard(
                     vehicle: vehicle,
                     onEdit: onEdit,
-                    onDocumentsTap: onDocumentsTap
+                    onDocumentsTap: onDocumentsTap,
+                    onNotesTap: onNotesTap
                 )
             }
         }
@@ -289,7 +291,8 @@ private struct SummaryCell: View {
             vehicle: Vehicle.sampleVehicle,
             onMileageTap: {},
             onEdit: {},
-            onDocumentsTap: {}
+            onDocumentsTap: {},
+            onNotesTap: {}
         )
     }
     .preferredColorScheme(.dark)

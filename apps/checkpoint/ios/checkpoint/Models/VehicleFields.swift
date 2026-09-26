@@ -20,6 +20,8 @@ struct VehicleFields: Equatable {
     var licensePlate = ""
     var tireSize = ""
     var oilType = ""
+    /// Add Vehicle only: becomes the vehicle's first, pinned note. Edit
+    /// Vehicle doesn't write it — notes are edited as notes.
     var notes = ""
     var marbeteExpirationMonth: Int?
     var marbeteExpirationYear: Int?

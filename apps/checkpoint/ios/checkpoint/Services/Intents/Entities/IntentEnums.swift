@@ -56,6 +56,18 @@ nonisolated extension DocumentType: AppEnum {
     }
 }
 
+nonisolated extension AppointmentStatus: AppEnum {
+    static var typeDisplayRepresentation: TypeDisplayRepresentation { "Appointment Status" }
+
+    static var caseDisplayRepresentations: [AppointmentStatus: DisplayRepresentation] {
+        [
+            .scheduled: "Scheduled",
+            .completed: "Completed",
+            .cancelled: "Cancelled",
+        ]
+    }
+}
+
 nonisolated extension ServiceStatus: AppEnum {
     static var typeDisplayRepresentation: TypeDisplayRepresentation { "Service Status" }
 

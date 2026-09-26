@@ -109,6 +109,21 @@ extension AppState {
         case .scanReceipt:
             showTabRoot(.home)
             present(.addService(scansReceipt: true))
+
+        // Appointments live on Home; a closed or deleted one lands there too.
+        case .appointment(_, let appointmentID):
+            showTabRoot(.home)
+            if let appointment = (vehicle.appointments ?? []).first(where: { $0.id == appointmentID }),
+               appointment.isScheduled {
+                present(.appointment(AppointmentEditorRequest(target: .edit(appointment))))
+            }
+
+        case .vehicleNote(_, let noteID):
+            // Over the Notes list, so closing the note lands where it lives.
+            navigate(to: [.notes(vehicle)], on: .home)
+            if let note = (vehicle.vehicleNotes ?? []).first(where: { $0.id == noteID }) {
+                present(.vehicleNote(VehicleNoteEditorRequest(target: .edit(note))))
+            }
         }
     }
 
