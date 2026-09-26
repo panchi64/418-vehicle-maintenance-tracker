@@ -51,6 +51,26 @@
         }
       }
     },
+    "Find a document in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar un documento en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Find my ${type} in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar mi ${type} en ${applicationName}"
+          }
+        }
+      }
+    },
     "Find my last service in ${applicationName}" : {
       "localizations" : {
         "es" : {
@@ -97,16 +117,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le di servicio a mi carro en ${applicationName}"
-          }
-        }
-      }
-    },
-    "List upcoming services in ${applicationName}" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ver próximos servicios en ${applicationName}"
           }
         }
       }
@@ -217,6 +227,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ver los gastos de mi carro en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Show my ${type} in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar mi ${type} en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Show my car documents in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar los documentos de mi carro en ${applicationName}"
           }
         }
       }

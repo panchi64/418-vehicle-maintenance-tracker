@@ -59,6 +59,8 @@ struct ServiceLogForm: View {
     /// A receipt handed over from outside the form (Visual Intelligence):
     /// read as soon as the form appears.
     var receiptImage: UIImage?
+    /// Open with the receipt scanner up (the Scan Receipt Control), once.
+    var opensReceiptScanner = false
 
     @State var model: ServiceLogFormModel
     @State var draftResumeBanner: ServiceFormDraft?
@@ -67,6 +69,7 @@ struct ServiceLogForm: View {
     @State var adjacentLogs: (before: ServiceLog?, after: ServiceLog?) = (nil, nil)
     @State var showReceiptScanner = false
     @State var isReadingReceipt = false
+    @State var didOpenRequestedScanner = false
 
     init(
         vehicle: Vehicle,
@@ -74,6 +77,7 @@ struct ServiceLogForm: View {
         seasonalPrefill: SeasonalPrefill? = nil,
         postRecordPrefill: PostRecordPrefill? = nil,
         receiptImage: UIImage? = nil,
+        opensReceiptScanner: Bool = false,
         onSaved: (() -> Void)? = nil,
         onDelete: (() -> Void)? = nil
     ) {
@@ -81,6 +85,7 @@ struct ServiceLogForm: View {
         self.seasonalPrefill = seasonalPrefill
         self.postRecordPrefill = postRecordPrefill
         self.receiptImage = receiptImage
+        self.opensReceiptScanner = opensReceiptScanner
         self.onSaved = onSaved
         self.onDelete = onDelete
         _model = State(initialValue: ServiceLogFormModel(vehicle: vehicle, mode: mode))

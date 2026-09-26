@@ -19,7 +19,14 @@ enum ActiveSheet: Identifiable {
     case vehiclePicker
     case addVehicle
     case editVehicle
-    case addService(seasonal: SeasonalPrefill? = nil, postRecord: PostRecordPrefill? = nil, receipt: UIImage? = nil)
+    /// `receipt`: an image to read on open (Visual Intelligence).
+    /// `scansReceipt`: open with the receipt scanner up (Scan Receipt Control).
+    case addService(
+        seasonal: SeasonalPrefill? = nil,
+        postRecord: PostRecordPrefill? = nil,
+        receipt: UIImage? = nil,
+        scansReceipt: Bool = false
+    )
     case mileageUpdate
     case settings
     case proPaywall

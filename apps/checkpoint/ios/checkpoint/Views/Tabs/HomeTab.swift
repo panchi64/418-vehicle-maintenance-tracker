@@ -199,6 +199,12 @@ struct HomeTab: View {
 
             recentSection(content)
                 .revealAnimation(delay: 0.25)
+
+            // The screen's one Siri tip: last, outside every section, once
+            // something is due for "what's due" to answer.
+            if content.nextUp != nil {
+                ScreenSiriTip(.home, intent: CheckNextDueIntent())
+            }
         }
         .padding(.horizontal, Spacing.screenHorizontal)
         .padding(.top, Spacing.lg)

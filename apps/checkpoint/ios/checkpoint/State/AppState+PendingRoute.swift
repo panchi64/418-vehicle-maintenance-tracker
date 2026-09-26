@@ -101,6 +101,14 @@ extension AppState {
             addVehicleVINSeed = vin
             showTabRoot(.home)
             requestAddVehicle(vehicleCount: vehicles.count)
+
+        case .logService:
+            showTabRoot(.home)
+            present(.addService())
+
+        case .scanReceipt:
+            showTabRoot(.home)
+            present(.addService(scansReceipt: true))
         }
     }
 

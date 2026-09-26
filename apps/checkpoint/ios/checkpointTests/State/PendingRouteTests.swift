@@ -103,6 +103,30 @@ final class PendingRouteTests: XCTestCase {
         XCTAssertEqual(appState.activeSheet?.id, ActiveSheet.mileageUpdate.id)
     }
 
+    // The Log Service and Scan Receipt Controls.
+
+    func test_apply_logService_opensTheServiceFormOnHome() {
+        appState.selectedTab = .costs
+        appState.apply(.logService(vehicleID: vehicle.id), vehicles: [vehicle])
+
+        XCTAssertEqual(appState.selectedTab, .home)
+        guard case .addService(_, _, let receipt, let scansReceipt) = appState.activeSheet else {
+            return XCTFail("Expected the service form")
+        }
+        XCTAssertNil(receipt)
+        XCTAssertFalse(scansReceipt)
+    }
+
+    func test_apply_scanReceipt_opensTheServiceFormWithTheScanner() {
+        appState.apply(.scanReceipt(vehicleID: vehicle.id), vehicles: [vehicle])
+
+        XCTAssertIdentical(appState.selectedVehicle, vehicle)
+        guard case .addService(_, _, _, let scansReceipt) = appState.activeSheet else {
+            return XCTFail("Expected the service form")
+        }
+        XCTAssertTrue(scansReceipt)
+    }
+
     func test_apply_vehicle_selectsItOnHomeRoot() {
         let services = addServices(dueInDays: [3])
         appState.selectVehicle(vehicle)

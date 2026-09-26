@@ -57,13 +57,14 @@ extension ContentView {
                 noVehicleFallback
             }
 
-        case .addService(let seasonal, let postRecord, let receipt):
+        case .addService(let seasonal, let postRecord, let receipt, let scansReceipt):
             if let vehicle = currentVehicle {
                 AddServiceView(
                     vehicle: vehicle,
                     seasonalPrefill: seasonal,
                     postRecordPrefill: postRecord,
-                    receiptImage: receipt
+                    receiptImage: receipt,
+                    opensReceiptScanner: scansReceipt
                 )
             } else {
                 noVehicleFallback

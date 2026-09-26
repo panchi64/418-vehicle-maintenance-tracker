@@ -17,8 +17,9 @@
 //  (Security Posture, apps/checkpoint/ios/CLAUDE.md); an ID that no longer
 //  resolves — deleted since — goes nowhere.
 //
-//  Out-of-process sources can't reach this store: the widget extension
-//  queues `PendingWidgetRoute` in the App Group, and ContentView moves it here.
+//  Out-of-process sources can't reach this store: the widget extension (its
+//  rows and Controls) queues `PendingWidgetRoute` in the App Group, and
+//  ContentView moves it here.
 //
 
 import Foundation
@@ -57,15 +58,38 @@ enum PendingRoute: Equatable {
     /// Visual Intelligence: open Add Vehicle with the VIN it read. The
     /// vehicle ID is the one showing; the new vehicle doesn't exist yet.
     case addVehicle(vehicleID: UUID, vin: String)
+    /// Open the service form to log what was done (the Log Service Control).
+    case logService(vehicleID: UUID)
+    /// Open the service form with the receipt scanner up (the Scan Receipt
+    /// Control).
+    case scanReceipt(vehicleID: UUID)
 
     /// Open a single service's detail.
     static func service(vehicleID: UUID, serviceID: UUID) -> PendingRoute {
         .services(vehicleID: vehicleID, serviceIDs: [serviceID])
     }
 
+    /// Where a widget or Control tap lands. A widget row names its service;
+    /// a Control's screen opens on the vehicle the app is showing, so with
+    /// no vehicle there is nowhere to go.
+    init?(_ widgetRoute: PendingWidgetRoute, currentVehicleID: UUID?) {
+        switch widgetRoute.destination {
+        case .service(let vehicleID, let serviceID):
+            self = .service(vehicleID: vehicleID, serviceID: serviceID)
+        case .screen(let screen):
+            guard let vehicleID = currentVehicleID else { return nil }
+            switch screen {
+            case .updateMileage: self = .updateMileage(vehicleID: vehicleID)
+            case .scanReceipt: self = .scanReceipt(vehicleID: vehicleID)
+            case .logService: self = .logService(vehicleID: vehicleID)
+            }
+        }
+    }
+
     var vehicleID: UUID {
         switch self {
-        case .updateMileage(let id), .costs(let id), .editVehicle(let id), .vehicle(let id):
+        case .updateMileage(let id), .costs(let id), .editVehicle(let id), .vehicle(let id),
+             .logService(let id), .scanReceipt(let id):
             return id
         case .services(let id, _), .markDone(let id, _), .serviceLog(let id, _),
              .visit(let id, _), .document(let id, _), .searchServices(let id, _), .searchDocuments(let id, _),

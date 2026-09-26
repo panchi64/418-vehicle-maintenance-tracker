@@ -86,6 +86,10 @@ struct CostsTab: View {
                     .costsListRow()
 
                     expenseSections(metrics)
+
+                    // The screen's one Siri tip, after the expenses.
+                    ScreenSiriTip(.costs, intent: SpendingSummaryIntent())
+                        .costsListRow()
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)

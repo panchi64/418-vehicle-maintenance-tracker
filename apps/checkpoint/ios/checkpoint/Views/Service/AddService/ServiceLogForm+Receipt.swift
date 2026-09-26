@@ -55,8 +55,13 @@ extension ServiceLogForm {
         }
     }
 
-    /// The Visual Intelligence door: read the handed-over receipt once.
+    /// The outside doors, once each: Visual Intelligence hands over a
+    /// receipt to read; the Scan Receipt Control asks for the scanner.
     func readHandedOverReceipt() {
+        if opensReceiptScanner, !didOpenRequestedScanner, offersReceipt {
+            didOpenRequestedScanner = true
+            showReceiptScanner = true
+        }
         guard let receiptImage, model.receipt == nil, !isReadingReceipt, model.pendingAttachments.isEmpty else { return }
         readReceipt([receiptImage])
     }

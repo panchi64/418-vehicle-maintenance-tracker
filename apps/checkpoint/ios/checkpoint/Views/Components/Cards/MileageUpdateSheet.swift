@@ -72,6 +72,11 @@ struct MileageUpdateSheet: View {
                         if isProcessingOCR {
                             processingView
                         }
+
+                        // Next time, by voice. Last, below everything the
+                        // sheet asks for.
+                        ScreenSiriTip(.mileageUpdate, intent: UpdateMileageIntent())
+                            .padding(.top, Spacing.md)
                     }
                     .padding(Spacing.screenHorizontal)
                     .padding(.top, Spacing.lg)

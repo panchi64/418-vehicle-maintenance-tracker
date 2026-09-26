@@ -311,13 +311,14 @@ extension ContentView {
         WidgetDataService.shared.processPendingWidgetCompletions(context: modelContext)
     }
 
-    /// Move the service a widget row tap asked for (`OpenServiceIntent`) from
-    /// its App Group queue into the app's one route store, whose navigation
-    /// already opens a single service's detail and ignores vehicles deleted
+    /// Move what a widget row (`OpenServiceIntent`) or a Control
+    /// (`OpenCheckpointScreenIntent`) asked for from its App Group queue into
+    /// the app's one route store, whose navigation ignores vehicles deleted
     /// since.
     func consumePendingWidgetRoute() {
-        guard let route = PendingWidgetRoute.take() else { return }
-        PendingRouteStore.shared.route = .service(vehicleID: route.vehicleID, serviceID: route.serviceID)
+        guard let widgetRoute = PendingWidgetRoute.take(),
+              let route = PendingRoute(widgetRoute, currentVehicleID: currentVehicle?.id) else { return }
+        PendingRouteStore.shared.route = route
     }
 
     // MARK: - Mileage Update

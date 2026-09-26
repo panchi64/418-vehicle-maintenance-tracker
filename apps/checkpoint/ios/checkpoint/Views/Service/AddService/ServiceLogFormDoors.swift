@@ -16,13 +16,16 @@ struct AddServiceView: View {
     var postRecordPrefill: PostRecordPrefill?
     /// A receipt to read on open (Visual Intelligence).
     var receiptImage: UIImage?
+    /// Open with the receipt scanner up (the Scan Receipt Control).
+    var opensReceiptScanner = false
 
     var body: some View {
         ServiceLogForm(
             vehicle: vehicle,
             seasonalPrefill: seasonalPrefill,
             postRecordPrefill: postRecordPrefill,
-            receiptImage: receiptImage
+            receiptImage: receiptImage,
+            opensReceiptScanner: opensReceiptScanner
         )
     }
 }

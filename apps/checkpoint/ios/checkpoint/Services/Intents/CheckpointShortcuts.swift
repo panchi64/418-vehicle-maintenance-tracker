@@ -7,7 +7,11 @@
 //  10 (Human Interface Guidelines, "App Shortcuts"); these are the ten most
 //  used, in priority order, so a new one must displace one. Every other
 //  intent is still in the Shortcuts app and reachable by Siri through a
-//  user-made shortcut.
+//  user-made shortcut (and, on iOS 27 with Apple Intelligence, by Siri AI).
+//
+//  The in-app Siri tips (`ScreenSiriTip`) show these phrases, and
+//  `SiriTipView` shows nothing for an intent that isn't here: keep Check
+//  Next Due, Update Mileage, Spending and Find Document.
 //
 //  Every phrase names the app (`\(.applicationName)`), as App Shortcuts
 //  require. Spanish phrases live in `AppShortcuts.xcstrings`, keyed by these
@@ -66,13 +70,19 @@ struct CheckpointShortcuts: AppShortcutsProvider {
             systemImageName: "speedometer"
         )
 
+        // Its snippet lists everything coming up, so it also takes the
+        // "coming up" phrases List Upcoming Services had before Find
+        // Document took its slot.
         AppShortcut(
             intent: CheckNextDueIntent(),
             phrases: [
                 "What's due on my car in \(.applicationName)",
                 "Check my car maintenance in \(.applicationName)",
                 "What maintenance is due in \(.applicationName)",
-                "What's next on my car in \(.applicationName)"
+                "What's next on my car in \(.applicationName)",
+                "What maintenance is coming up in \(.applicationName)",
+                "What services are due in \(.applicationName)",
+                "Show upcoming maintenance in \(.applicationName)"
             ],
             shortTitle: "Check Next Due",
             systemImageName: "car.fill"
@@ -100,16 +110,20 @@ struct CheckpointShortcuts: AppShortcutsProvider {
             systemImageName: "plus.circle"
         )
 
+        // At a traffic stop or a shop counter: the card, without unlocking
+        // into the app. Took List Upcoming Services' slot (Check Next Due's
+        // snippet already lists what's coming up); it is also the Documents
+        // screen's Siri tip, which needs an App Shortcut to show.
         AppShortcut(
-            intent: ListUpcomingServicesIntent(),
+            intent: FindDocumentIntent(),
             phrases: [
-                "What maintenance is coming up in \(.applicationName)",
-                "List upcoming services in \(.applicationName)",
-                "Show upcoming maintenance in \(.applicationName)",
-                "What services are due in \(.applicationName)"
+                "Show my \(\.$type) in \(.applicationName)",
+                "Find my \(\.$type) in \(.applicationName)",
+                "Show my car documents in \(.applicationName)",
+                "Find a document in \(.applicationName)"
             ],
-            shortTitle: "Upcoming Services",
-            systemImageName: "list.bullet"
+            shortTitle: "Find Document",
+            systemImageName: "doc.text.magnifyingglass"
         )
 
         AppShortcut(

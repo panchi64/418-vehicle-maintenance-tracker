@@ -142,6 +142,15 @@ struct DocumentsView: View {
                     .servicesListHeader()
                 }
             }
+
+            // The screen's one Siri tip, after the library. Not while
+            // selecting: it isn't a document.
+            if !groups.isEmpty, !isSelecting {
+                ScreenSiriTip(.documents, intent: FindDocumentIntent())
+                    .servicesListRow()
+                    .listRowSeparator(.hidden)
+                    .selectionDisabled()
+            }
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)

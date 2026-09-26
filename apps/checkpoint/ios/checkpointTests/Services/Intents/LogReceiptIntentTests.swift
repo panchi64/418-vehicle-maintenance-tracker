@@ -231,7 +231,7 @@ final class VisualSearchTests: IntentTestCase {
 
         appState.apply(.logReceipt(vehicleID: vehicle.id, captureID: capture.id), vehicles: [vehicle])
         XCTAssertEqual(appState.activeSheet?.id, "addService")
-        if case .addService(_, _, let receipt) = appState.activeSheet {
+        if case .addService(_, _, let receipt, _) = appState.activeSheet {
             XCTAssertNotNil(receipt)
         } else {
             XCTFail("Expected the log form")
