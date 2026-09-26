@@ -73,7 +73,7 @@ struct PendingWidgetCompletion: Codable {
 
     /// Remove only the completions whose `serviceID` is in `serviceIDs`, leaving
     /// the rest of the queue intact. Re-reads the current queue before writing so
-    /// entries the widget's `MarkServiceDoneIntent` enqueued after the caller
+    /// entries the widget's `WidgetMarkDoneIntent` enqueued after the caller
     /// snapshotted its work-set aren't clobbered. Clears the key entirely when
     /// nothing remains so an empty queue leaves no stale data behind.
     static func remove(serviceIDs: Set<String>) {

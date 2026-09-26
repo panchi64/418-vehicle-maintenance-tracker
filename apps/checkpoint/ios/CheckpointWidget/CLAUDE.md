@@ -37,7 +37,7 @@ The medium widget includes a "Done" button (checkmark) on the most urgent servic
 
 **Flow:**
 1. User taps checkmark button on medium widget
-2. `MarkServiceDoneIntent` executes as an App Intent
+2. `WidgetMarkDoneIntent` executes as an App Intent
 3. Completion is queued as `PendingWidgetCompletion` in shared UserDefaults
 4. Widget timeline reloads to reflect pending state
 5. When main app comes to foreground, `WidgetDataService.processPendingWidgetCompletions()` creates the actual `ServiceLog` entry

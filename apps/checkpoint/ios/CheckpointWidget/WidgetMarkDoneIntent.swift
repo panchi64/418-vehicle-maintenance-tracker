@@ -1,18 +1,23 @@
 //
-//  MarkServiceDoneIntent.swift
+//  WidgetMarkDoneIntent.swift
 //  CheckpointWidget
 //
 //  AppIntent for the interactive widget "Done" button
 //  Writes a pending completion to App Group UserDefaults for the main app to process
+//
+//  Runs in the widget process, which can't open the app's store, so it
+//  queues. Siri and Shortcuts use the app's own `MarkServiceDoneIntent`,
+//  which writes directly; this one takes raw identifiers and stays hidden.
 //
 
 import AppIntents
 import WidgetKit
 import Foundation
 
-struct MarkServiceDoneIntent: AppIntent {
+struct WidgetMarkDoneIntent: AppIntent {
     static var title: LocalizedStringResource = "Mark Service Done"
     static var description = IntentDescription("Mark a vehicle service as completed from the widget")
+    static let isDiscoverable = false
 
     @Parameter(title: "Service ID")
     var serviceID: String

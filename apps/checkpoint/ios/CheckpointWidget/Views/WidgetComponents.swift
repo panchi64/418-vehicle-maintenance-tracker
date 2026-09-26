@@ -159,7 +159,7 @@ struct WidgetServiceName: View {
 
 // MARK: - Done Button
 
-/// Logs the most urgent service from the widget (`MarkServiceDoneIntent`).
+/// Logs the most urgent service from the widget (`WidgetMarkDoneIntent`).
 /// Shown only for due-soon and overdue services with an ID and a vehicle.
 struct WidgetDoneButton: View {
     let service: WidgetService
@@ -171,7 +171,7 @@ struct WidgetDoneButton: View {
         if let serviceID = service.serviceID,
            let vehicleID = entry.vehicleID,
            service.status == .dueSoon || service.status == .overdue {
-            Button(intent: MarkServiceDoneIntent(
+            Button(intent: WidgetMarkDoneIntent(
                 serviceID: serviceID,
                 vehicleID: vehicleID,
                 mileage: entry.currentMileage
