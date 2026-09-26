@@ -38,6 +38,7 @@ struct MileageReminderScheduler {
             "vehicleID": vehicleID.uuidString,
             "type": "mileageReminder"
         ]
+        content.tagEntities(vehicleID: vehicleID)
 
         let trigger = NotificationHelpers.calendarTrigger(for: reminderDate)
 

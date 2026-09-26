@@ -67,6 +67,18 @@ extension Document {
         return doc
     }
 
+    /// Whether a library search for `query` finds this document: its name,
+    /// notes, scanned text or type. An empty query finds everything.
+    @MainActor
+    func matches(_ query: String) -> Bool {
+        let query = query.trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else { return true }
+        return fileName.localizedCaseInsensitiveContains(query)
+            || (notes?.localizedCaseInsensitiveContains(query) ?? false)
+            || (extractedText?.localizedCaseInsensitiveContains(query) ?? false)
+            || documentType.displayName.localizedCaseInsensitiveContains(query)
+    }
+
     /// Sweep documents that no longer belong anywhere. Called after a vehicle
     /// is deleted or after the last vehicle link is removed in the UI. A doc
     /// is orphaned when it has no vehicles AND no service log.

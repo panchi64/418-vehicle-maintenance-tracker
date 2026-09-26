@@ -77,6 +77,7 @@ struct MarbeteNotificationScheduler {
             // Carried so Remind Tomorrow can reword the banner without the model.
             "vehicleName": vehicleName
         ]
+        content.tagEntities(vehicleID: vehicleID)
 
         let resolvedTrigger = trigger ?? NotificationHelpers.calendarTrigger(for: notificationDate)
 

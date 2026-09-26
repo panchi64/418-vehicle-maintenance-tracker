@@ -19,6 +19,16 @@ nonisolated enum IntentError: Error, Equatable, CustomLocalizedStringResourceCon
     case vehicleNotFound
     case serviceNotFound
     case serviceLogNotFound
+    case visitNotFound
+    case documentNotFound
+    /// A free user already keeps `VehicleService.freeVehicleLimit` vehicles.
+    case vehicleLimitReached
+    /// A new service with no due date, mileage or cadence would never come due.
+    case serviceNeedsDue
+    /// A service's history belongs to its vehicle; it can't be re-homed.
+    case serviceCannotMove
+    /// Nothing in the files handed over was an image.
+    case noImages
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
@@ -26,6 +36,12 @@ nonisolated enum IntentError: Error, Equatable, CustomLocalizedStringResourceCon
         case .vehicleNotFound: "That vehicle is no longer in Checkpoint."
         case .serviceNotFound: "That service is no longer in Checkpoint."
         case .serviceLogNotFound: "That service log is no longer in Checkpoint."
+        case .visitNotFound: "That visit is no longer in Checkpoint."
+        case .documentNotFound: "That document is no longer in Checkpoint."
+        case .vehicleLimitReached: "Adding more vehicles needs Checkpoint Pro. Open Checkpoint to upgrade."
+        case .serviceNeedsDue: "Say when it's due, with a date or how often it repeats."
+        case .serviceCannotMove: "A service can't move to another vehicle. Add it to that vehicle instead."
+        case .noImages: "Checkpoint can only save images here."
         }
     }
 }
@@ -41,8 +57,18 @@ enum IntentStore {
         in context: ModelContext,
         defaults: UserDefaults = .standard
     ) throws -> Vehicle {
-        if let entity {
-            guard let vehicle = try VehicleEntity.models(ids: [entity.id], in: context).first else {
+        try vehicle(id: entity?.id, in: context, defaults: defaults)
+    }
+
+    /// `vehicle(for:)` by ID, for entity types other than `VehicleEntity`
+    /// that stand for a vehicle (the iOS 27 list and album schema types).
+    static func vehicle(
+        id: UUID?,
+        in context: ModelContext,
+        defaults: UserDefaults = .standard
+    ) throws -> Vehicle {
+        if let id {
+            guard let vehicle = try VehicleEntity.models(ids: [id], in: context).first else {
                 throw IntentError.vehicleNotFound
             }
             return vehicle
@@ -54,16 +80,31 @@ enum IntentStore {
     }
 
     static func service(_ entity: ServiceEntity, in context: ModelContext) throws -> Service {
-        guard let service = try ServiceEntity.models(ids: [entity.id], in: context).first else {
+        try service(id: entity.id, in: context)
+    }
+
+    static func service(id: UUID, in context: ModelContext) throws -> Service {
+        guard let service = try ServiceEntity.models(ids: [id], in: context).first else {
             throw IntentError.serviceNotFound
         }
         return service
     }
 
     static func services(_ entities: [ServiceEntity], in context: ModelContext) throws -> [Service] {
-        let services = try ServiceEntity.models(ids: entities.map(\.id), in: context)
-        guard !services.isEmpty || entities.isEmpty else { throw IntentError.serviceNotFound }
+        try services(ids: entities.map(\.id), in: context)
+    }
+
+    static func services(ids: [UUID], in context: ModelContext) throws -> [Service] {
+        let services = try ServiceEntity.models(ids: ids, in: context)
+        guard !services.isEmpty || ids.isEmpty else { throw IntentError.serviceNotFound }
         return services
+    }
+
+    static func document(id: UUID, in context: ModelContext) throws -> Document {
+        guard let document = try DocumentEntity.models(ids: [id], in: context).first else {
+            throw IntentError.documentNotFound
+        }
+        return document
     }
 
     static func logs(_ entities: [ServiceLogEntity], in context: ModelContext) throws -> [ServiceLog] {

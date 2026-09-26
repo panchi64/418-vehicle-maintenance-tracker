@@ -73,6 +73,14 @@ extension AppState {
             } else {
                 showTabRoot(.home)
             }
+
+        case .searchServices(_, let term):
+            showTabRoot(.services)
+            servicesTab.searchText = term
+
+        case .searchDocuments(_, let term):
+            documentsSearchSeed = term
+            navigate(to: [.documents(vehicle)], on: .home)
         }
     }
 

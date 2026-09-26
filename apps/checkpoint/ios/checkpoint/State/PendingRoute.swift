@@ -44,6 +44,10 @@ enum PendingRoute: Equatable {
     case visit(vehicleID: UUID, visitID: UUID)
     /// Open one document, over the vehicle's Documents library.
     case document(vehicleID: UUID, documentID: UUID)
+    /// Search the Services tab for `term` (Siri's in-app search).
+    case searchServices(vehicleID: UUID, term: String)
+    /// Search the vehicle's Documents library for `term`.
+    case searchDocuments(vehicleID: UUID, term: String)
 
     /// Open a single service's detail.
     static func service(vehicleID: UUID, serviceID: UUID) -> PendingRoute {
@@ -55,7 +59,7 @@ enum PendingRoute: Equatable {
         case .updateMileage(let id), .costs(let id), .editVehicle(let id), .vehicle(let id):
             return id
         case .services(let id, _), .markDone(let id, _), .serviceLog(let id, _),
-             .visit(let id, _), .document(let id, _):
+             .visit(let id, _), .document(let id, _), .searchServices(let id, _), .searchDocuments(let id, _):
             return id
         }
     }

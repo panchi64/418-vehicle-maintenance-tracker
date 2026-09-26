@@ -44,13 +44,7 @@ struct DocumentsView: View {
     }
 
     private func groupedDocuments(_ documents: [Document]) -> [(type: DocumentType, docs: [Document])] {
-        let query = searchText.trimmingCharacters(in: .whitespaces)
-        let matches = query.isEmpty ? documents : documents.filter { doc in
-            doc.fileName.localizedCaseInsensitiveContains(query)
-                || (doc.notes?.localizedCaseInsensitiveContains(query) ?? false)
-                || (doc.extractedText?.localizedCaseInsensitiveContains(query) ?? false)
-                || doc.documentType.displayName.localizedCaseInsensitiveContains(query)
-        }
+        let matches = documents.filter { $0.matches(searchText) }
         return DocumentType.listOrder.compactMap { type in
             let docs = matches
                 .filter { $0.documentType == type }
@@ -89,6 +83,11 @@ struct DocumentsView: View {
         .navigationTitle(L10n.documentsTitle)
         .navigationBarTitleDisplayMode(.inline)
         .searchable(text: $searchText, prompt: L10n.documentsSearchPlaceholder)
+        .onChange(of: appState.documentsSearchSeed, initial: true) { _, seed in
+            guard let seed else { return }
+            searchText = seed
+            appState.documentsSearchSeed = nil
+        }
         .toolbar { toolbarItems(hasDocuments: !documents.isEmpty) }
         .toolbar(isSelecting ? .hidden : .automatic, for: .tabBar)
         .onChange(of: documents.isEmpty) { _, isEmpty in

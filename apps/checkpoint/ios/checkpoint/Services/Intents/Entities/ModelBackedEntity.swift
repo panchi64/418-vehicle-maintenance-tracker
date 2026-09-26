@@ -12,7 +12,7 @@
 import AppIntents
 import SwiftData
 
-nonisolated protocol ModelBackedEntity: IndexedEntity where ID == UUID {
+nonisolated protocol ModelSnapshotEntity: AppEntity where ID == UUID {
     associatedtype Model: PersistentModel
 
     /// Snapshot `model`. Main actor: it reads SwiftData relationships.
@@ -26,7 +26,12 @@ nonisolated protocol ModelBackedEntity: IndexedEntity where ID == UUID {
     var searchableText: [String] { get }
 }
 
-extension ModelBackedEntity {
+/// A snapshot entity Spotlight indexes. The iOS 27 schema types
+/// (`Schema/`) are snapshots too, but stay out of the index: each wraps a
+/// model an indexed entity already covers, and would list it twice.
+nonisolated protocol ModelBackedEntity: ModelSnapshotEntity, IndexedEntity {}
+
+extension ModelSnapshotEntity {
     @MainActor
     static func entities(ids: [UUID]? = nil, in context: ModelContext) throws -> [Self] {
         try models(ids: ids, in: context).map(Self.init(model:))
@@ -62,7 +67,7 @@ extension IntentCurrencyAmount {
 /// never does.
 @MainActor
 enum EntityFetch {
-    static func entities<Entity: ModelBackedEntity>(
+    static func entities<Entity: ModelSnapshotEntity>(
         _ type: Entity.Type,
         ids: [UUID]? = nil,
         in container: ModelContainer
@@ -70,7 +75,7 @@ enum EntityFetch {
         try Entity.entities(ids: ids, in: container.mainContext)
     }
 
-    static func entities<Entity: ModelBackedEntity>(
+    static func entities<Entity: ModelSnapshotEntity>(
         _ type: Entity.Type,
         matching text: String,
         in container: ModelContainer

@@ -129,6 +129,9 @@ final class AppState {
 
     var recall = RecallState()
     var servicesTab = ServicesTabState()
+    /// A search a route asked the Documents library to open with (Siri's
+    /// in-app search). `DocumentsView` takes it into its field and clears it.
+    var documentsSearchSeed: String?
 
     // MARK: - Container Lifecycle
 

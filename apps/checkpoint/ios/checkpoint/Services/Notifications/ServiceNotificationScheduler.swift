@@ -108,6 +108,7 @@ struct ServiceNotificationScheduler {
             userInfo["serviceID"] = only.uuidString
         }
         content.userInfo = userInfo
+        content.tagEntities(serviceIDs: bundle.serviceIDs, vehicleID: vehicle.id)
 
         let resolvedTrigger = trigger ?? NotificationHelpers.calendarTrigger(for: bundle.notificationDate)
         let identifier = bundleNotificationID(
@@ -136,6 +137,10 @@ struct ServiceNotificationScheduler {
         content.userInfo = userInfo
         content.sound = .default
         content.categoryIdentifier = NotificationService.serviceDueCategoryID
+        content.tagEntities(
+            serviceIDs: PendingRoute.serviceIDs(from: serviceIDs),
+            vehicleID: (userInfo["vehicleID"] as? String).flatMap(UUID.init(uuidString:))
+        )
 
         let names = userInfo["serviceNames"] as? [String] ?? []
         if let vehicleName = userInfo["vehicleName"] as? String, !names.isEmpty, names.count == serviceIDs.count {
@@ -170,6 +175,7 @@ struct ServiceNotificationScheduler {
             "serviceNames": [service.name],
             "vehicleName": vehicle.displayName
         ]
+        content.tagEntities(serviceIDs: [service.id], vehicleID: vehicle.id)
         return NotificationHelpers.snoozeRequest(
             identifier: snoozeNotificationID(baseID: baseNotificationID(for: service)), content: content, now: now
         )

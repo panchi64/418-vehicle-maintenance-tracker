@@ -224,6 +224,27 @@ extension L10n {
             : siri("siri.deleteLog.doneMany", count)
     }
 
+    // MARK: - Reminders, Photos (iOS 27 schemas)
+
+    /// "Due at 50,000 mi" — a reminder note's due-mileage line.
+    nonisolated static func siriReminderNoteDue(_ mileage: String) -> String {
+        siri("siri.reminder.noteDue", mileage)
+    }
+    /// "Every 5,000 mi" — a reminder note's interval line.
+    nonisolated static func siriReminderNoteEvery(_ mileage: String) -> String {
+        siri("siri.reminder.noteEvery", mileage)
+    }
+    /// "Added Weekend Car to Checkpoint." — vehicle.
+    nonisolated static func siriVehicleAdded(_ vehicle: String) -> String {
+        siri("siri.vehicle.added", vehicle)
+    }
+    /// "Saved the photo to Daily Driver's documents." / "Saved 3 photos …".
+    nonisolated static func siriPhotosSaved(count: Int, vehicle: String) -> String {
+        count == 1
+            ? siri("siri.photos.savedOne", vehicle)
+            : siri("siri.photos.savedMany", count, vehicle)
+    }
+
     // MARK: - Spending
 
     /// "You've spent $1,234 on Daily Driver — Year to Date." — amount,

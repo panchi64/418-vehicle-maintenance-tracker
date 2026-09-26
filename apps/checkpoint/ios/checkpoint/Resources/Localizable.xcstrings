@@ -4,6 +4,118 @@
     "" : {
 
     },
+    "A service can't move to another vehicle. Add it to that vehicle instead." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "A service can't move to another vehicle. Add it to that vehicle instead." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Un servicio no puede pasar a otro vehículo. Agrégalo a ese vehículo." } }
+      }
+    },
+    "Adding more vehicles needs Checkpoint Pro. Open Checkpoint to upgrade." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Adding more vehicles needs Checkpoint Pro. Open Checkpoint to upgrade." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Para agregar más vehículos necesitas Checkpoint Pro. Abre Checkpoint para mejorar tu plan." } }
+      }
+    },
+    "Arrive" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Arrive" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Llegar" } }
+      }
+    },
+    "Checkpoint can only save images here." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint can only save images here." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Aquí Checkpoint solo puede guardar imágenes." } }
+      }
+    },
+    "Custom" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Custom" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Personalizado" } }
+      }
+    },
+    "Depart" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Depart" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Salir" } }
+      }
+    },
+    "Original" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Original" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Original" } }
+      }
+    },
+    "Photo" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Photo" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Foto" } }
+      }
+    },
+    "Say when it's due, with a date or how often it repeats." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Say when it's due, with a date or how often it repeats." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Di cuándo vence, con una fecha o cada cuánto se repite." } }
+      }
+    },
+    "siri.photos.savedMany" : {
+      "comment" : "After Siri saves several photos as documents. %1$ld is the count, %2$@ the vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Saved %1$ld photos to %2$@'s documents." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Guardé %1$ld fotos en los documentos de %2$@." } }
+      }
+    },
+    "siri.photos.savedOne" : {
+      "comment" : "After Siri saves one photo as a document. %@ is the vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Saved the photo to %@'s documents." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Guardé la foto en los documentos de %@." } }
+      }
+    },
+    "siri.reminder.noteDue" : {
+      "comment" : "Line in a service's Reminders-schema note. %@ is a mileage with its unit, e.g. \"50,000 mi\".",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Due at %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Vence a los %@" } }
+      }
+    },
+    "siri.reminder.noteEvery" : {
+      "comment" : "Line in a service's Reminders-schema note. %@ is a distance interval with its unit, e.g. \"5,000 mi\".",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Every %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cada %@" } }
+      }
+    },
+    "siri.vehicle.added" : {
+      "comment" : "After Siri adds a vehicle (Reminders schema's Create List). %@ is the vehicle name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Added %@ to Checkpoint." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Agregué %@ a Checkpoint." } }
+      }
+    },
+    "Standard" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Standard" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Estándar" } }
+      }
+    },
+    "That document is no longer in Checkpoint." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "That document is no longer in Checkpoint." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ese documento ya no está en Checkpoint." } }
+      }
+    },
+    "That visit is no longer in Checkpoint." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "That visit is no longer in Checkpoint." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Esa visita ya no está en Checkpoint." } }
+      }
+    },
     "%@" : {
 
     },

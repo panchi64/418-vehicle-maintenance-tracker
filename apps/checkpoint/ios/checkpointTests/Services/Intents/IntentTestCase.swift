@@ -29,10 +29,13 @@ class IntentTestCase: XCTestCase {
 
     override func setUp() {
         super.setUp()
+        // No CloudKit: with the app's iCloud entitlement an in-memory store
+        // still mirrors by default, and on the iOS 27 simulator (no iCloud
+        // account) its first save traps ("No eligible connection available").
         container = try! ModelContainer(
             for: Vehicle.self, Service.self, ServiceLog.self, ServiceVisit.self,
             ServiceAttachment.self, VisitLineItem.self, MileageSnapshot.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         )
         context = container.mainContext
         IntentDependencies.register(container)
@@ -139,6 +142,10 @@ extension CheckNextDueIntent: StoreBackedIntent {}
 extension ListOverdueIntent: StoreBackedIntent {}
 extension LastServiceQueryIntent: StoreBackedIntent {}
 extension SpendingSummaryIntent: StoreBackedIntent {}
+extension SearchCheckpointIntent: StoreBackedIntent {}
+extension OpenDocumentFileIntent: StoreBackedIntent {}
+@available(iOS 27, *) extension UpdateServiceReminderIntent: StoreBackedIntent {}
+@available(iOS 27, *) extension DeleteServiceRemindersIntent: StoreBackedIntent {}
 
 extension IntentTestCase {
     /// `intent`, reading and writing this test's store.

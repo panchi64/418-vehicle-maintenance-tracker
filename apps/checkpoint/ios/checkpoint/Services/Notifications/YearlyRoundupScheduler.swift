@@ -66,6 +66,7 @@ struct YearlyRoundupScheduler {
             "year": year,
             "type": "yearlyRoundup"
         ]
+        content.tagEntities(vehicleID: vehicleID)
 
         let trigger = NotificationHelpers.calendarTrigger(for: notificationDate, hour: 10)
 
