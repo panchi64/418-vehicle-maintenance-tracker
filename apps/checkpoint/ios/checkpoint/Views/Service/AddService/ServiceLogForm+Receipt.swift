@@ -14,9 +14,10 @@ import SwiftUI
 extension ServiceLogForm {
 
     /// Whether the receipt row shows: a new or completed entry that
-    /// happened. Not for "Not done yet", and not when editing history.
+    /// happened, on a device with the document camera. Not for "Not done
+    /// yet", and not when editing history.
     var offersReceipt: Bool {
-        !model.mode.isEdit && model.isLogging
+        !model.mode.isEdit && model.isLogging && ReceiptScannerView.isAvailable
     }
 
     func readReceipt(_ images: [UIImage]) {

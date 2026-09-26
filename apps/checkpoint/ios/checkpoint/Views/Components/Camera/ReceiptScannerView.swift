@@ -10,6 +10,11 @@ import VisionKit
 
 /// SwiftUI wrapper for VNDocumentCameraViewController
 struct ReceiptScannerView: UIViewControllerRepresentable {
+    /// Whether this device has the document camera. Creating the scanner
+    /// where it doesn't (the Simulator, an iPad app on a Mac) raises an
+    /// uncaught exception, so every way in checks this first.
+    static var isAvailable: Bool { VNDocumentCameraViewController.isSupported }
+
     /// Callback with scanned images (one per page)
     let onImagesScanned: ([UIImage]) -> Void
     /// Callback when user cancels scanning

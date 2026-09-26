@@ -107,11 +107,13 @@ struct DocumentPickerSheet: View {
     private var sourceChooser: some View {
         ScrollView {
             VStack(spacing: Spacing.md) {
-                sourceButton(
-                    icon: "doc.viewfinder",
-                    label: L10n.documentsSourceCamera,
-                    action: { showScanner = true }
-                )
+                if ReceiptScannerView.isAvailable {
+                    sourceButton(
+                        icon: "doc.viewfinder",
+                        label: L10n.documentsSourceCamera,
+                        action: { showScanner = true }
+                    )
+                }
 
                 sourceButton(
                     icon: "photo.on.rectangle",

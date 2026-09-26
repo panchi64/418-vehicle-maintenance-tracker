@@ -63,30 +63,32 @@ struct AttachmentPicker: View {
                     })
                 }
 
-                Button {
-                    showReceiptScanner = true
-                } label: {
-                    AttachmentSourceLabel(icon: "receipt", title: L10n.attachSourceReceipt, isBusy: isProcessingOCR)
-                }
-                .buttonStyle(.plain)
-                .disabled(isProcessingOCR)
-                .sheet(isPresented: $showReceiptScanner) {
-                    ReceiptScannerView(
-                        onImagesScanned: { images in
-                            if let onReceiptScanned {
-                                onReceiptScanned(images)
-                                return
+                if ReceiptScannerView.isAvailable {
+                    Button {
+                        showReceiptScanner = true
+                    } label: {
+                        AttachmentSourceLabel(icon: "receipt", title: L10n.attachSourceReceipt, isBusy: isProcessingOCR)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(isProcessingOCR)
+                    .sheet(isPresented: $showReceiptScanner) {
+                        ReceiptScannerView(
+                            onImagesScanned: { images in
+                                if let onReceiptScanned {
+                                    onReceiptScanned(images)
+                                    return
+                                }
+                                Task {
+                                    await processScannedImages(images)
+                                }
+                            },
+                            onCancel: {},
+                            onError: { error in
+                                attachmentLogger.error("Receipt scan failed: \(error.localizedDescription)")
+                                ToastService.shared.show(L10n.attachScanFailed, icon: "xmark.circle", style: .error)
                             }
-                            Task {
-                                await processScannedImages(images)
-                            }
-                        },
-                        onCancel: {},
-                        onError: { error in
-                            attachmentLogger.error("Receipt scan failed: \(error.localizedDescription)")
-                            ToastService.shared.show(L10n.attachScanFailed, icon: "xmark.circle", style: .error)
-                        }
-                    )
+                        )
+                    }
                 }
 
                 AdaptiveSpacer()
