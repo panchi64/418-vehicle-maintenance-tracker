@@ -63,6 +63,7 @@ struct ServiceLogDetailView: View {
         .background(Theme.backgroundPrimary)
         .navigationTitle(L10n.servicesLogTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .onScreenEntity(ServiceLogEntity.self, id: log.id)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button(L10n.servicesActionEdit) {

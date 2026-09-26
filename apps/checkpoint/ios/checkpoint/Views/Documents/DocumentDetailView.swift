@@ -73,6 +73,7 @@ struct DocumentDetailView: View {
         }
         .navigationTitle(L10n.documentsTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .onScreenEntity(DocumentEntity.self, id: document.id)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Menu {

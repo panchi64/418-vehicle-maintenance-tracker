@@ -42,10 +42,10 @@ struct UpdateMileageIntent: AppIntent {
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
         // Store the pending update for the app to process
-        PendingMileageUpdate.shared.vehicleID = vehicle.id
+        PendingMileageUpdate.shared.vehicleID = vehicle.id.uuidString
         PendingMileageUpdate.shared.mileage = mileage
 
-        return .result(dialog: "Opening Checkpoint to update \(vehicle.displayName) to \(mileage) miles.")
+        return .result(dialog: "Opening Checkpoint to update \(vehicle.name) to \(mileage) miles.")
     }
 }
 

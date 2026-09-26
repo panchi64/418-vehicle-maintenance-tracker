@@ -71,6 +71,7 @@ struct ServiceDetailView: View {
         .background(Theme.backgroundPrimary)
         .navigationTitle(service.name)
         .navigationBarTitleDisplayMode(.large)
+        .onScreenEntity(ServiceEntity.self, id: service.id)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button(L10n.servicesActionEdit) {

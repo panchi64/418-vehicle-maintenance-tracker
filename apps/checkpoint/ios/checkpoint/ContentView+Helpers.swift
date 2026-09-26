@@ -290,6 +290,9 @@ extension ContentView {
 
         // Publish odometers to the cross-product App Group for Biombo.
         VehicleSharingService.publish(vehicles)
+
+        // Keep Spotlight's vehicles, services, history and documents current.
+        SpotlightIndexer.shared.scheduleReindex(from: modelContext.container)
     }
 
     // MARK: - Companion App (Biombo) Odometer Sync

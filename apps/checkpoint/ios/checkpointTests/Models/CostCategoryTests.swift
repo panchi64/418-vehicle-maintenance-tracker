@@ -33,11 +33,13 @@ final class CostCategoryTests: XCTestCase {
 
     // MARK: - Display Name Tests
 
+    /// Names and colors read the main-actor `L10n` and theme, so they are
+    /// resolved before the (nonisolated) assertion autoclosures.
+    @MainActor
     func testDisplayNames() {
-        // Then
-        XCTAssertEqual(CostCategory.maintenance.displayName, "Maintenance")
-        XCTAssertEqual(CostCategory.repair.displayName, "Repair")
-        XCTAssertEqual(CostCategory.upgrade.displayName, "Upgrade")
+        let names = [CostCategory.maintenance, .repair, .upgrade].map(\.displayName)
+
+        XCTAssertEqual(names, ["Maintenance", "Repair", "Upgrade"])
     }
 
     // MARK: - Icon Tests
@@ -51,11 +53,12 @@ final class CostCategoryTests: XCTestCase {
 
     // MARK: - Color Tests
 
+    @MainActor
     func testColors() {
-        // Then - just verify colors are not nil/clear
-        XCTAssertNotNil(CostCategory.maintenance.color)
-        XCTAssertNotNil(CostCategory.repair.color)
-        XCTAssertNotNil(CostCategory.upgrade.color)
+        // Then - just verify every category resolves a color
+        let colors = CostCategory.allCases.map(\.color)
+
+        XCTAssertEqual(colors.count, CostCategory.allCases.count)
     }
 
     // MARK: - Codable Tests

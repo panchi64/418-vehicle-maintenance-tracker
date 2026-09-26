@@ -131,6 +131,9 @@ struct checkpointApp: App {
 
         // Widget snapshots re-serialize from this container on remote CloudKit changes
         WidgetDataService.shared.modelContainer = container
+
+        // App Intents and entity queries read this container (`@Dependency`)
+        IntentDependencies.register(container)
     }
 
     var body: some Scene {
@@ -171,6 +174,7 @@ struct checkpointApp: App {
                     modelContainer = newContainer
                     WatchSessionService.shared.modelContainer = newContainer
                     WidgetDataService.shared.modelContainer = newContainer
+                    IntentDependencies.register(newContainer)
                 }
         }
         .modelContainer(modelContainer)

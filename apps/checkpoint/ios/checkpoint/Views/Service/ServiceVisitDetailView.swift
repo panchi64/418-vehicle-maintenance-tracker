@@ -59,6 +59,7 @@ struct ServiceVisitDetailView: View {
         .background(Theme.backgroundPrimary)
         .navigationTitle(L10n.rowVisitTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .onScreenEntity(VisitEntity.self, id: visit.id)
         .toolbar {
             if let first = logs.first {
                 ToolbarItem(placement: .primaryAction) {

@@ -33,8 +33,6 @@
 		5ADUEP0012F3000000036D71B /* DuePeriodFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADUEP0022F3000000036D71B /* DuePeriodFormatter.swift */; };
 		5APWCP0012F3000000036D71B /* PendingWidgetCompletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5APWCP0022F3000000036D71B /* PendingWidgetCompletion.swift */; };
 		5APWRT0012F3000000036D71B /* PendingWidgetRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5APWRT0022F3000000036D71B /* PendingWidgetRoute.swift */; };
-		5ASIRI0012F3000000036D71B /* VehicleEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ASIRI0022F3000000036D71B /* VehicleEntity.swift */; };
-		5ASIRI0032F3000000036D71B /* VehicleEntityQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ASIRI0042F3000000036D71B /* VehicleEntityQuery.swift */; };
 		5AWAGR0012F3000000036D71B /* WidgetAppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AWAGR0022F3000000036D71B /* WidgetAppGroup.swift */; };
 		5AWLOC0012F3000000036D71B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5AWLOC0022F3000000036D71B /* Localizable.xcstrings */; };
 		5AWMLC0012F3000000036D71B /* WatchMileageControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AWMLC0022F3000000036D71B /* WatchMileageControls.swift */; };
@@ -139,8 +137,6 @@
 		5ADUEP0022F3000000036D71B /* DuePeriodFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DuePeriodFormatter.swift; path = checkpoint/Utilities/DuePeriodFormatter.swift; sourceTree = SOURCE_ROOT; };
 		5APWCP0022F3000000036D71B /* PendingWidgetCompletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PendingWidgetCompletion.swift; path = CheckpointWidget/Shared/PendingWidgetCompletion.swift; sourceTree = SOURCE_ROOT; };
 		5APWRT0022F3000000036D71B /* PendingWidgetRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PendingWidgetRoute.swift; path = CheckpointWidget/Shared/PendingWidgetRoute.swift; sourceTree = SOURCE_ROOT; };
-		5ASIRI0022F3000000036D71B /* VehicleEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VehicleEntity.swift; path = CheckpointWidget/VehicleEntity.swift; sourceTree = SOURCE_ROOT; };
-		5ASIRI0042F3000000036D71B /* VehicleEntityQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VehicleEntityQuery.swift; path = CheckpointWidget/VehicleEntityQuery.swift; sourceTree = SOURCE_ROOT; };
 		5AWAGR0022F3000000036D71B /* WidgetAppGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WidgetAppGroup.swift; path = CheckpointWidget/Shared/WidgetAppGroup.swift; sourceTree = SOURCE_ROOT; };
 		5AWLOC0022F3000000036D71B /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		5AWMLC0022F3000000036D71B /* WatchMileageControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchMileageControls.swift; sourceTree = "<group>"; };
@@ -382,8 +378,6 @@
 		5ASIRI0052F3000000036D71B /* SharedEntities */ = {
 			isa = PBXGroup;
 			children = (
-				5ASIRI0022F3000000036D71B /* VehicleEntity.swift */,
-				5ASIRI0042F3000000036D71B /* VehicleEntityQuery.swift */,
 				5ADUEP0022F3000000036D71B /* DuePeriodFormatter.swift */,
 				5ADSTU0022F3000000036D71B /* DistanceUnit.swift */,
 				5APWCP0022F3000000036D71B /* PendingWidgetCompletion.swift */,
@@ -710,8 +704,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5ASIRI0012F3000000036D71B /* VehicleEntity.swift in Sources */,
-				5ASIRI0032F3000000036D71B /* VehicleEntityQuery.swift in Sources */,
 				5APWCP0012F3000000036D71B /* PendingWidgetCompletion.swift in Sources */,
 				5AWAGR0012F3000000036D71B /* WidgetAppGroup.swift in Sources */,
 				5APWRT0012F3000000036D71B /* PendingWidgetRoute.swift in Sources */,

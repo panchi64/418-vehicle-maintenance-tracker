@@ -7,7 +7,8 @@
 
 import SwiftUI
 
-nonisolated enum ServiceStatus {
+/// String-backed so App Intents can expose it as an `AppEnum`.
+nonisolated enum ServiceStatus: String, CaseIterable, Sendable {
     case overdue
     case dueSoon
     case good

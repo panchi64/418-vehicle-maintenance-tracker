@@ -25,7 +25,7 @@ struct CheckNextDueIntent: AppIntent {
     }
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        let data = SiriDataProvider.loadServiceData(for: vehicle?.id)
+        let data = SiriDataProvider.loadServiceData(for: vehicle?.id.uuidString)
 
         guard let serviceData = data else {
             return .result(dialog: "I couldn't find any vehicle data. Please open Checkpoint to set up your vehicles.")

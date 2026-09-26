@@ -2,32 +2,27 @@
 //  VehicleEntityQuery.swift
 //  CheckpointWidget
 //
-//  EntityQuery for fetching vehicles from App Group UserDefaults
-//  This file should be added to BOTH the main app and widget targets in Xcode
+//  EntityQuery for fetching vehicles from App Group UserDefaults.
+//  Widget target only — the app has its own SwiftData-backed `VehicleEntity`
+//  (checkpoint/Services/Intents/Entities/).
 //
 
 import AppIntents
 
-#if !MAIN_APP_TARGET
 // MARK: - Vehicle List Item
 
-/// Lightweight vehicle data for widget/Siri configuration stored in App Group UserDefaults
-/// Only defined here for the widget target - main app uses WidgetDataService.VehicleListItem
+/// Lightweight vehicle data for widget configuration, written by the app's
+/// `WidgetDataService.updateVehicleList` (which declares the same shape).
 struct VehicleListItem: Codable, Sendable {
     let id: String
     let displayName: String
 }
-#endif
 
 // MARK: - Vehicle Entity Query
 
-/// Query to fetch vehicles for widget configuration picker and Siri intents
+/// Query to fetch vehicles for the widget configuration picker
 struct VehicleEntityQuery: EntityQuery {
-    #if MAIN_APP_TARGET
-    private let vehicleListKey = AppGroupConstants.vehicleListKey
-    #else
     private let vehicleListKey = WidgetAppGroup.vehicleListKey
-    #endif
 
     /// Pseudo-entity representing "use the app's current vehicle selection"
     private static let matchAppEntity = VehicleEntity(id: "match-app", displayName: "Match App")
@@ -51,12 +46,7 @@ struct VehicleEntityQuery: EntityQuery {
     }
 
     private func loadVehicles() -> [VehicleEntity] {
-        #if MAIN_APP_TARGET
-        let appGroupDefaults = AppGroupConstants.iPhoneWidgetDefaults()
-        #else
-        let appGroupDefaults = WidgetAppGroup.defaults()
-        #endif
-        guard let userDefaults = appGroupDefaults,
+        guard let userDefaults = WidgetAppGroup.defaults(),
               let data = userDefaults.data(forKey: vehicleListKey) else {
             return []
         }

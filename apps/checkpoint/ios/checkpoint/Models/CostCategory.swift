@@ -8,13 +8,17 @@
 import Foundation
 import SwiftUI
 
-enum CostCategory: String, Codable, CaseIterable {
+/// `nonisolated` so App Intents can use it as an `AppEnum` (see
+/// `Services/Intents/Entities/IntentEnums.swift`); only the members that read
+/// the main-actor `L10n` and theme are main-actor bound.
+nonisolated enum CostCategory: String, Codable, CaseIterable, Sendable {
     case maintenance  // Scheduled/preventive maintenance
     case repair       // Unplanned fixes
     case upgrade      // Improvements/accessories
 
     /// Canonical, localized category name — one concept, one name, on rows,
     /// forms and the Costs tab's category chart alike.
+    @MainActor
     var displayName: String {
         switch self {
         case .maintenance: return L10n.categoryMaintenance
@@ -31,6 +35,7 @@ enum CostCategory: String, Codable, CaseIterable {
         }
     }
 
+    @MainActor
     var color: Color {
         switch self {
         case .maintenance: return Theme.statusGood

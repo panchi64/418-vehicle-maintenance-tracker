@@ -105,6 +105,9 @@ final class WidgetDataService {
 
         // One reload after all snapshots are rewritten (avoids N reloads).
         WidgetCenter.shared.reloadAllTimelines()
+
+        // Another device's edits reach Spotlight the same way.
+        SpotlightIndexer.shared.scheduleReindex(from: container)
     }
 
     /// Returns the vehicle-specific widget data key

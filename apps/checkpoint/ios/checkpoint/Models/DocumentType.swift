@@ -8,7 +8,10 @@
 import Foundation
 import SwiftUI
 
-enum DocumentType: String, Codable, CaseIterable, Identifiable {
+/// `nonisolated` so App Intents can use it as an `AppEnum` (see
+/// `Services/Intents/Entities/IntentEnums.swift`); only the members that read
+/// the main-actor `L10n` and theme are main-actor bound.
+nonisolated enum DocumentType: String, Codable, CaseIterable, Identifiable, Sendable {
     case registration
     case insurance
     case title
@@ -20,6 +23,7 @@ enum DocumentType: String, Codable, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    @MainActor
     var displayName: String {
         switch self {
         case .registration: return L10n.documentTypeRegistration
@@ -46,6 +50,7 @@ enum DocumentType: String, Codable, CaseIterable, Identifiable {
         }
     }
 
+    @MainActor
     var accentColor: Color {
         switch self {
         case .registration: return Theme.accent
