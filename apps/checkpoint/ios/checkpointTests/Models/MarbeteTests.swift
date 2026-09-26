@@ -17,8 +17,7 @@ final class MarbeteTests: XCTestCase {
     @MainActor
     override func setUp() {
         super.setUp()
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        modelContainer = try! ModelContainer(for: Vehicle.self, configurations: config)
+        modelContainer = .inMemoryForTesting()
         modelContext = modelContainer.mainContext
     }
 

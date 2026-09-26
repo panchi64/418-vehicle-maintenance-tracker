@@ -18,11 +18,7 @@ final class ServiceVisitWriterTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        container = try! ModelContainer(
-            for: Vehicle.self, Service.self, ServiceLog.self, ServiceVisit.self,
-            ServiceAttachment.self, VisitLineItem.self, MileageSnapshot.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-        )
+        container = .inMemoryForTesting()
         context = container.mainContext
         vehicle = Vehicle(name: "Daily", make: "Honda", model: "Civic", year: 2020, currentMileage: 45_000)
         vehicle.mileageUpdatedAt = Date(timeIntervalSinceNow: -86_400)

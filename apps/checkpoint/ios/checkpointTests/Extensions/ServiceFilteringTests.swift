@@ -17,11 +17,7 @@ final class ServiceFilteringTests: XCTestCase {
     @MainActor
     override func setUp() {
         super.setUp()
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        modelContainer = try! ModelContainer(
-            for: Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self, ServiceAttachment.self,
-            configurations: config
-        )
+        modelContainer = .inMemoryForTesting()
         modelContext = modelContainer.mainContext
     }
 

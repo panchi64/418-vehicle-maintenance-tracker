@@ -18,11 +18,7 @@ final class RecallAckStateTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        modelContainer = try! ModelContainer(
-            for: RecallAcknowledgment.self,
-            configurations: config
-        )
+        modelContainer = .inMemoryForTesting()
         modelContext = modelContainer.mainContext
         store = RecallAckStore(context: modelContext)
     }

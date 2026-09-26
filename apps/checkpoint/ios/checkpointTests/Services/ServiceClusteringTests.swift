@@ -18,11 +18,7 @@ final class ServiceClusteringServiceTests: XCTestCase {
     @MainActor
     override func setUp() {
         super.setUp()
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        modelContainer = try! ModelContainer(
-            for: Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self,
-            configurations: config
-        )
+        modelContainer = .inMemoryForTesting()
         modelContext = modelContainer.mainContext
 
         // Reset ClusteringSettings to defaults for each test
@@ -549,11 +545,7 @@ final class ServiceClusterTests: XCTestCase {
     @MainActor
     override func setUp() {
         super.setUp()
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        modelContainer = try! ModelContainer(
-            for: Vehicle.self, Service.self,
-            configurations: config
-        )
+        modelContainer = .inMemoryForTesting()
         modelContext = modelContainer.mainContext
     }
 

@@ -52,11 +52,7 @@ final class AppStateTests: XCTestCase {
 
     @MainActor
     func testPush_AppendsToTheVisibleTabsStack() async throws {
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let modelContainer = try ModelContainer(
-            for: Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self, ServiceAttachment.self, ServicePreset.self,
-            configurations: config
-        )
+        let modelContainer = ModelContainer.inMemoryForTesting()
         let log = ServiceLog(performedDate: .now, mileageAtService: 32000, cost: 45.99)
         modelContainer.mainContext.insert(log)
 
@@ -170,11 +166,7 @@ final class AppStateTests: XCTestCase {
     @MainActor
     func testSelectedVehicle_CanBeSet() async throws {
         // Given
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let modelContainer = try ModelContainer(
-            for: Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self, ServiceAttachment.self, ServicePreset.self,
-            configurations: config
-        )
+        let modelContainer = ModelContainer.inMemoryForTesting()
         let modelContext = modelContainer.mainContext
 
         let appState = AppState()
@@ -200,11 +192,7 @@ final class AppStateTests: XCTestCase {
     @MainActor
     func testSelectedVehicle_CanBeCleared() async throws {
         // Given
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let modelContainer = try ModelContainer(
-            for: Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self, ServiceAttachment.self, ServicePreset.self,
-            configurations: config
-        )
+        let modelContainer = ModelContainer.inMemoryForTesting()
         let modelContext = modelContainer.mainContext
 
         let appState = AppState()
@@ -229,11 +217,7 @@ final class AppStateTests: XCTestCase {
     @MainActor
     func testPrepareForContainerSwap_ClearsRetainedModelReferences() async throws {
         // Given
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let modelContainer = try ModelContainer(
-            for: Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self, ServiceAttachment.self, ServicePreset.self, ServiceVisit.self,
-            configurations: config
-        )
+        let modelContainer = ModelContainer.inMemoryForTesting()
         let modelContext = modelContainer.mainContext
 
         let vehicle = Vehicle(make: "Toyota", model: "Camry", year: 2022)

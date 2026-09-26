@@ -21,12 +21,7 @@ final class AppEntityTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        modelContainer = try! ModelContainer(
-            for: Vehicle.self, Service.self, ServiceLog.self, ServiceVisit.self,
-            ServiceAttachment.self, VisitLineItem.self, MileageSnapshot.self,
-            configurations: config
-        )
+        modelContainer = .inMemoryForTesting()
         modelContext = modelContainer.mainContext
         vehicle = Vehicle(
             name: "Daily", make: "Honda", model: "Civic", year: 2020, currentMileage: 45_000,

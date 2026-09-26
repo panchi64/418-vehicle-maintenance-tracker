@@ -255,11 +255,7 @@ final class EditServiceLogViewTests: XCTestCase {
 
     @MainActor
     func testHistoryExclusion_MedianCostIgnoresEditedLog() {
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let container = try! ModelContainer(
-            for: Vehicle.self, Service.self, ServiceLog.self,
-            configurations: config
-        )
+        let container = ModelContainer.inMemoryForTesting()
         let context = container.mainContext
         let vehicle = Vehicle(name: "Daily", make: "T", model: "C", year: 2020, currentMileage: 30000)
         context.insert(vehicle)

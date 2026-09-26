@@ -22,12 +22,7 @@ final class CSVImportServiceTests: XCTestCase {
         service = CSVImportService.shared
         service.reset()
 
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        modelContainer = try! ModelContainer(
-            for: Vehicle.self, Service.self, ServiceLog.self,
-            ServiceAttachment.self, MileageSnapshot.self,
-            configurations: config
-        )
+        modelContainer = .inMemoryForTesting()
         modelContext = modelContainer.mainContext
     }
 

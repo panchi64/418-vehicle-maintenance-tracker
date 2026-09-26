@@ -24,12 +24,7 @@ final class CostAnalyticsServiceTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        modelContainer = try! ModelContainer(
-            for: Vehicle.self, Service.self, ServiceLog.self, ServiceVisit.self,
-            ServiceAttachment.self, VisitLineItem.self,
-            configurations: config
-        )
+        modelContainer = .inMemoryForTesting()
         modelContext = modelContainer.mainContext
         vehicle = Vehicle(name: "Test", make: "Toyota", model: "Camry", year: 2022, currentMileage: 30_000)
         modelContext.insert(vehicle)

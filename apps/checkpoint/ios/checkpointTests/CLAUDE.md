@@ -19,7 +19,7 @@ checkpointTests/
 
 ## Test Setup Pattern
 
-All tests use in-memory ModelContainer to avoid disk I/O:
+All tests build their store with `ModelContainer.inMemoryForTesting()` (`Helpers/ModelContainer+Testing.swift`): in-memory, full app schema, CloudKit off. Never hand-roll `ModelConfiguration(isStoredInMemoryOnly: true)` — the iCloud entitlement makes it mirror to CloudKit, which traps on the first save on iOS 27 simulators.
 
 ```swift
 import XCTest
@@ -32,11 +32,7 @@ final class VehicleTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        modelContainer = try! ModelContainer(
-            for: Vehicle.self, Service.self, ServiceLog.self,
-            configurations: config
-        )
+        modelContainer = .inMemoryForTesting()
         modelContext = modelContainer.mainContext
     }
 

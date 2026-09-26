@@ -19,11 +19,7 @@ final class ServiceLogHistoryTests: XCTestCase {
     @MainActor
     override func setUp() {
         super.setUp()
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        modelContainer = try! ModelContainer(
-            for: Vehicle.self, Service.self, ServiceLog.self,
-            configurations: config
-        )
+        modelContainer = .inMemoryForTesting()
         modelContext = modelContainer.mainContext
         vehicle = Vehicle(name: "Daily", make: "Toyota", model: "Camry", year: 2022, currentMileage: 32500)
         otherVehicle = Vehicle(name: "Project", make: "Mazda", model: "MX-5", year: 1999, currentMileage: 80000)

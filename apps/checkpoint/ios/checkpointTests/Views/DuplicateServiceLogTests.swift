@@ -19,11 +19,7 @@ final class DuplicateServiceLogTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        container = try! ModelContainer(
-            for: Vehicle.self, Service.self, ServiceLog.self, ServiceAttachment.self, MileageSnapshot.self,
-            configurations: config
-        )
+        container = .inMemoryForTesting()
         context = container.mainContext
     }
 

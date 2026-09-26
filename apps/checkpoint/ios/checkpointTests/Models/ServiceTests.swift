@@ -348,11 +348,7 @@ final class ServiceTests: XCTestCase {
         UserDefaults.standard.removeObject(forKey: "recurringBackfillV1Completed")
         defer { UserDefaults.standard.removeObject(forKey: "recurringBackfillV1Completed") }
 
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let container = try ModelContainer(
-            for: Vehicle.self, Service.self, ServiceLog.self, MileageSnapshot.self, ServiceAttachment.self,
-            configurations: config
-        )
+        let container = ModelContainer.inMemoryForTesting()
         let context = container.mainContext
 
         let withIntervals = Service(name: "Oil Change", intervalMonths: 6)

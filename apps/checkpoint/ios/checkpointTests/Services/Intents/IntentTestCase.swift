@@ -29,14 +29,7 @@ class IntentTestCase: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        // No CloudKit: with the app's iCloud entitlement an in-memory store
-        // still mirrors by default, and on the iOS 27 simulator (no iCloud
-        // account) its first save traps ("No eligible connection available").
-        container = try! ModelContainer(
-            for: Vehicle.self, Service.self, ServiceLog.self, ServiceVisit.self,
-            ServiceAttachment.self, VisitLineItem.self, MileageSnapshot.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
-        )
+        container = .inMemoryForTesting()
         context = container.mainContext
         IntentDependencies.register(container)
 
