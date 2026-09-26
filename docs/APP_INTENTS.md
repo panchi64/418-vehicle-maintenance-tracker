@@ -22,7 +22,9 @@ Siri AI and Foundation Models need Apple Intelligence hardware (iPhone 15 Pro an
 | `AppDependencyManager` / `@Dependency` | 16 | ✅ | ✅ | ✅ |
 | Visual Intelligence: `IntentValueQuery` over `SemanticContentDescriptor` | 26 | AI hw | — | ✅ |
 | Schema `.system.search` (deprecated in 27) | 18 | ✅ | ✅ | ✅ |
-| Schemas `.system.searchInApp`, `.system.open`, `.reminders.*` | 27 | — | ✅ | ✅ |
+| Schemas `.files.*`, `.photos.album` / `.albumType` / `.assetType` / `.filterType` | 18 | ✅ | ✅ | ✅ |
+| Schemas `.system.searchInApp`, `.system.open`, `.reminders.*`, `.photos.asset` | 27 | — | ✅ | ✅ |
+| `.photos.openAsset`, `.photos.search` (deprecated in 27: use `.system.open` / `.system.searchInApp`) | 18 | ✅ | ✅ | ✅ |
 | `RelevantEntities`, `IndexedEntityQuery`, `LongRunningIntent`, `allowedExecutionTargets` | 27 | — | ✅ | ✅ |
 | `UNNotificationContent.appEntityIdentifiers` | 27 | — | ✅ | ✅ |
 | `AppIntentsTesting` (test framework) | 27 | — | ✅ | ✅ |
@@ -82,11 +84,43 @@ The shapes below come from Xcode 27's snippet library (`AppShortcutsEditor.frame
 - A month interval becomes `recurrence` (`Calendar.RecurrenceRule.monthly(interval:)`).
 - Mileage-based due and interval values have no schema field. They go in `note` and on the non-schema `ServiceEntity`.
 - `isCompleted = true` runs `ServiceCompletionService`, which logs the service and schedules the next occurrence.
-- Checkpoint has no sections, groups or location triggers. The `locationTrigger` property is `nil`. If the macro still insists on a `LocationTriggerEntity` type existing, add one whose query returns nothing — check this at build time.
+- Checkpoint has no sections, groups or location triggers. The `locationTrigger` property is always `nil`.
+
+**What the metadata processor required (Xcode 27 build, checked 2026-09-25).** Swift compiles a schema type that leaves fields out; `appintentsmetadataprocessor` then halts the export:
+- `Missing required property 'locationTrigger' from AppSchemaEntity 'reminders.reminder'` — so a `.reminders.locationTrigger` entity (and its `.reminders.locationTriggerEvent` enum) has to exist.
+- `Missing required parameter 'section' from AppSchemaIntent 'reminders.createReminder'` — so a `.reminders.section` entity has to exist, even though `createSection` isn't adopted.
+- `AppSchemaIntent … requires 'NoLocationTriggerEntity' to conform to 'IndexedEntity', 'UniqueAppEntity', 'TransientAppEntity', provide a default 'EntityStringQuery', or provide an 'IntentValueQuery'` — every entity a schema intent takes needs a string query.
+- `.photos.asset` needs the *long* snippet: `aperture`, `exposure`, `saturation`, `warmth`, `filter` (a `.photos.filterType` enum) and `isPortraitModeEnabled`, all declared and `nil`.
+- The `images: [IntentFile]` parameter expands to `@Parameter(supportedContentTypes: [.image])`, so the file needs `import UniformTypeIdentifiers`.
+- Assigning a macro-wrapped property in `init` needs `self` complete, so plain `let` properties are set first.
+
+Checkpoint's placeholders are `NoLocationTriggerEntity` and `NoSectionEntity`, whose queries return nothing.
 
 **iOS 26 coexistence**
 - The schema types are **separate `@available(iOS 27, *)` types**, e.g. `ServiceReminderEntity` and `VehicleListEntity`.
 - They wrap the same store adapter as the iOS 26 `ServiceEntity` / `VehicleEntity`. A schema macro can't be added conditionally to a type that already exists on iOS 26.
+- Create, update and delete overlap Add / Edit / Mark Done / Delete Service, so they set `isAssistantOnly = true` and Shortcuts lists each action once. `createList` (add a vehicle) has no twin and is visible.
+
+## What Checkpoint ships (Phase 3)
+
+| Schema | Type | Maps to | Notes |
+|---|---|---|---|
+| `.reminders.reminder` / `.list` / `.listType` | `ServiceReminderEntity`, `VehicleListEntity`, `ReminderListType` | service, vehicle | Field mapping in `ReminderMapping` |
+| `.reminders.createReminder` / `updateReminder` / `deleteReminders` / `createList` | `CreateServiceReminderIntent`, `UpdateServiceReminderIntent`, `DeleteServiceRemindersIntent`, `CreateVehicleListIntent` | `ServiceScheduling`, `Service.apply`, `ServiceLogging.markDone`, `DeleteServiceIntent.delete`, `VehicleService` | Completing and deleting ask first; Create List respects the free vehicle limit |
+| `.photos.asset` / `.album` (+ enums) | `DocumentPhotoEntity`, `VehicleAlbumEntity` | image documents, vehicle | PDFs aren't photos |
+| `.system.open` over photos | `OpenDocumentPhotoIntent` | document detail | Not `.photos.openAsset`, which 27 deprecates |
+| `.photos.createAssets` | `SaveDocumentPhotosIntent` | new image documents, with OCR text | Extra `album` parameter (Shortcuts only) picks the vehicle. No `deleteAssets`: document deletes stay in-app |
+| `.files.file` / `.openFile` | `DocumentFileEntity`, `OpenDocumentFileIntent` | every document | iOS 18 schema, so available on iOS 26. IDs are draft `FileEntityIdentifier`s carrying the UUID: documents live in SwiftData, not on disk |
+| `.system.search` (26) / `.searchInApp` (27) | `SearchCheckpointIntent`, `SearchInCheckpointIntent` | Services tab or Documents search | The 27 one is `isAssistantOnly` |
+| `.system.open` | `Open{Vehicle, ServiceDetail, ServiceLog, Visit, Document, ServiceReminder, VehicleList}Intent` | `PendingRoute` via `EntityRoutes` | One intent per target type |
+
+**Notifications.** `SERVICE_DUE`, `MILEAGE_REMINDER`, `MARBETE_DUE` and `YEARLY_ROUNDUP` content is tagged with `appEntityIdentifiers` on iOS 27 (`NotificationEntityTags`): the services as `ServiceEntity` and `ServiceReminderEntity`, then the vehicle as `VehicleEntity`.
+
+**`RelevantEntities` is not adopted.** Its only context in the SDK is `AppEntityContext.audio(.nowPlaying)`, and Apple documents it as "donate your app's songs, albums, artists, and other media items to play during workouts". Nothing in Checkpoint fits. Revisit if a later SDK adds a non-media context.
+
+**Spotlight.** The schema types are not indexed. Each wraps a model an indexed iOS 26 entity already covers, so indexing both would list every service and document twice. Siri resolves them through their `EntityStringQuery`.
+
+**`AppIntentsTesting`** runs intents out of process, in a live, team-signed app. Apple puts these tests in a **UI testing** target that launches the app. In the unit-test host, lookups fail with "Underlying session was cancelled (transportCancelled)". Command-line simulator builds are ad-hoc signed, so this also needs a signed build. The schema intents are unit-tested directly instead.
 
 ## Other signatures confirmed in the SDK
 

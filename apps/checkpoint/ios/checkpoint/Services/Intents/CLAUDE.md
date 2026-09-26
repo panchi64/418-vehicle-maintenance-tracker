@@ -18,9 +18,17 @@ Intents/
 ├── Schedule/                   # Add / Edit / Snooze / StopTracking / Delete service + ServiceScheduling
 ├── Queries/                    # CheckNextDue, ListUpcoming, ListOverdue, LastServiceQuery,
 │                               #   SpendingSummary + DueServices / SpokenValue helpers
-└── Snippets/                   # DueServicesSnippetIntent (+ Done button intent),
-                                #   ServiceRecordSnippetIntent (confirmation), SpendingSnippetView
+├── Snippets/                   # DueServicesSnippetIntent (+ Done button intent),
+│                               #   ServiceRecordSnippetIntent (confirmation), SpendingSnippetView
+└── Schema/                     # Apple Intelligence schema types (docs/APP_INTENTS.md has the map)
+    ├── Reminders/              # iOS 27: service = reminder, vehicle = list; ReminderMapping;
+    │                           #   placeholder location-trigger/section types the processor demands
+    ├── Photos/                 # iOS 27: image document = asset, vehicle = album; open + save photos
+    ├── Files/                  # iOS 18 schema (ships on 26): every document = file; open file
+    └── System/                 # search (26) / searchInApp (27), .system.open per entity, EntityRoutes
 ```
+
+Notification entity tags live with the notifications (`Services/Notifications/NotificationEntityTags.swift`).
 
 Spanish App Shortcut phrases live in `checkpoint/Resources/AppShortcuts.xcstrings`, keyed by the English phrase. Everything else is in `Localizable.xcstrings`: intent/parameter/entity labels as extracted literals, spoken sentences as manual `siri.*` keys.
 
@@ -30,10 +38,12 @@ Spanish App Shortcut phrases live in `checkpoint/Resources/AppShortcuts.xcstring
 - **`perform()` is `@MainActor`.** Intent structs are nonisolated (the `AppIntent` protocol is), so mark `perform()` and any static helper that touches models `@MainActor`, then use `container.mainContext`.
 - **Resolve and commit through `IntentStore`.** A missing vehicle parameter means the vehicle the app has selected (`IntentStore.vehicle(for:in:)`). Every write ends in `IntentStore.commit(vehicle, in:)` — derived surfaces (`DerivedSurfaces`: reminders, icon, widget), an explicit save (the process may suspend before autosave), and a Spotlight pass. Writes whose action already refreshed use `IntentStore.save`.
 - **Call services, not views.** Writes go through the same code the UI uses: `LoggedServiceWriter` (fed a `ServiceLogFormModel` by `ServiceLogging`), `ServiceVisitWriter`, `ServiceCompletionService`, `MileageUpdateAction`, `Service.apply(_ ServiceEdit)`, `ServiceDeleteAction`, `ServiceLogDeleteAction`, `CostAnalyticsService`. If an intent needs logic that lives in a view, extract it into a service first, with tests.
-- **Ask before the irreversible.** Deletes (`DeleteServiceIntent`, `DeleteServiceLogIntent`, voice deletes are services and logs only), Stop Tracking, Mark Done and Log Service call `requestConfirmation` before writing; Mark Done and Log Service show `ServiceRecordSnippetIntent` so a misheard value is visible. Update Mileage asks only when `MileageReadingCheck` flags the reading. Keep the write in a static function the tests can call; `perform()` itself can't pass a confirmation in a unit test.
+- **Ask before the irreversible.** Deletes (`DeleteServiceIntent`, `DeleteServiceLogIntent`, voice deletes are services and logs only), Stop Tracking, Mark Done and Log Service — and their schema twins, Update Reminder when it completes and Delete Reminders — call `requestConfirmation` before writing; Mark Done and Log Service show `ServiceRecordSnippetIntent` so a misheard value is visible. Update Mileage asks only when `MileageReadingCheck` flags the reading. Keep the write in a static function the tests can call; `perform()` itself can't pass a confirmation in a unit test.
 - **Distances are spoken in the user's unit.** Convert with `DistanceSettings.shared.unit.toMiles` on the way in; format with `SpokenValue` on the way out.
 - **Dialogs are whole `siri.*` sentences** built from `SpokenValue`-formatted values — never concatenated. Add EN and ES for every new key.
-- **Entities are Sendable snapshots.** A `ModelBackedEntity` is built on the main actor from one model (`init(model:)`) and fetched only through `entities(ids:in:)` / `entities(matching:in:)` / `models(ids:in:)`. IDs are the model's `UUID`. Queries hop to the main actor through `EntityFetch`.
+- **Entities are Sendable snapshots.** A `ModelSnapshotEntity` is built on the main actor from one model (`init(model:)`) and fetched only through `entities(ids:in:)` / `entities(matching:in:)` / `models(ids:in:)`. IDs are the model's `UUID`. Queries hop to the main actor through `EntityFetch`. `ModelBackedEntity` adds `IndexedEntity`: those are the ones Spotlight indexes.
+- **Schema types are separate types over the same models.** A schema macro can't be applied to a type that exists on iOS 26, so each iOS 27 schema entity is its own `@available(iOS 27, *)` `ModelSnapshotEntity` whose `models(ids:in:)` delegates to the iOS 26 entity's (same UUID for the same record). Schema types aren't indexed, which would list every record twice. A schema intent that duplicates an iOS 26 intent sets `isAssistantOnly = true`. Leave unsupported schema properties `nil`, but declare them: the metadata processor rejects a schema type missing any (see docs/APP_INTENTS.md).
+- **Opening goes through `EntityRoutes`.** Every open and search intent resolves an ID to a `PendingRoute` there, so a record opens on the same screen whichever entity type named it.
 - **Enums conform in place.** `CostPeriod`, `CostCategory`, `DocumentType`, `ServiceStatus` are `nonisolated` with only their L10n/theme members `@MainActor`, so they can be `AppEnum`s. Raw values are persisted by saved shortcuts — never rename one.
 - **Navigation goes through `PendingRoute`.** An intent that opens the app sets `PendingRouteStore.shared.route` (`checkpoint/State/PendingRoute.swift`); `ContentView` is its one consumer. **No URL schemes** (security invariant).
 - **Snippets follow SURFACE_DOCTRINE.** One primary element per snippet (two channels, never color alone — `StatusTag` for status), theme tokens and brutalist fonts only. A snippet with buttons is a `SnippetIntent`; its buttons run hidden (`isDiscoverable = false`) intents, and the system re-runs the snippet's `perform()` afterwards.
@@ -49,7 +59,9 @@ The app's `VehicleEntity` (here) is SwiftData-backed and indexed. The widget ext
 
 ## Tests
 
-`checkpointTests/Services/Intents/IntentTestCase` registers an in-memory container as the dependency, selects one vehicle and pins miles. `runUnanswered` runs a confirming intent with no one to answer, to prove nothing is written before a yes. `AppIntentsTesting` is iOS 27-only — not used yet.
+`checkpointTests/Services/Intents/IntentTestCase` registers an in-memory container (CloudKit off — with it on, the iOS 27 simulator traps on the first save) as the dependency, selects one vehicle and pins miles. `runUnanswered` runs a confirming intent with no one to answer, to prove nothing is written before a yes. iOS 27 schema tests skip below 27; run them on an iOS 27 simulator too.
+
+`AppIntentsTesting` (iOS 27) can't run in this unit-test target. It drives the intents out of process, so it needs a UI-testing target that launches a team-signed app. Not set up yet; see docs/APP_INTENTS.md.
 
 ## Entitlements
 
