@@ -1,0 +1,316 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Add a maintenance reminder in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agregar un recordatorio de mantenimiento en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Add a service in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agregar un servicio en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Check my car maintenance in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revisar el mantenimiento de mi carro en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Check my mileage in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver mi millaje en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Find my last service in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar mi último servicio en ${applicationName}"
+          }
+        }
+      }
+    },
+    "How many miles are on my car in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuántas millas tiene mi carro en ${applicationName}"
+          }
+        }
+      }
+    },
+    "How much have I spent in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuánto he gastado en ${applicationName}"
+          }
+        }
+      }
+    },
+    "I finished a service in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminé un servicio en ${applicationName}"
+          }
+        }
+      }
+    },
+    "I got my car serviced in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le di servicio a mi carro en ${applicationName}"
+          }
+        }
+      }
+    },
+    "List upcoming services in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver próximos servicios en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Log a service in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrar un servicio en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Log maintenance in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrar mantenimiento en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Log mileage in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrar millaje en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Mark a service done in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcar un servicio como hecho en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Mark maintenance done in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcar mantenimiento como hecho en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Record a service in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anotar un servicio en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Record mileage in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anotar millaje en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Schedule a service in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programar un servicio en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Show my car spending in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver los gastos de mi carro en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Show upcoming maintenance in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar el próximo mantenimiento en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Update mileage in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizar millaje en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Update my car mileage in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizar el millaje de mi carro en ${applicationName}"
+          }
+        }
+      }
+    },
+    "What have I spent on my car in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qué he gastado en mi carro en ${applicationName}"
+          }
+        }
+      }
+    },
+    "What maintenance is coming up in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qué mantenimiento viene en ${applicationName}"
+          }
+        }
+      }
+    },
+    "What maintenance is due in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qué mantenimiento toca en ${applicationName}"
+          }
+        }
+      }
+    },
+    "What services are due in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qué servicios tocan en ${applicationName}"
+          }
+        }
+      }
+    },
+    "What's due on my car in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qué le toca a mi carro en ${applicationName}"
+          }
+        }
+      }
+    },
+    "What's my mileage in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuál es mi millaje en ${applicationName}"
+          }
+        }
+      }
+    },
+    "What's next on my car in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qué sigue para mi carro en ${applicationName}"
+          }
+        }
+      }
+    },
+    "When did I last service my car in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuándo le di servicio a mi carro por última vez en ${applicationName}"
+          }
+        }
+      }
+    },
+    "When was my last maintenance in ${applicationName}" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuándo fue mi último mantenimiento en ${applicationName}"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

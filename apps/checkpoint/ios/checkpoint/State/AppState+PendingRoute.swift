@@ -17,9 +17,9 @@ extension AppState {
         selectVehicle(vehicle)
 
         switch route {
-        case .updateMileage(_, let prefilled):
+        case .updateMileage:
             showTabRoot(.home)
-            present(.mileageUpdate(prefilled: prefilled))
+            present(.mileageUpdate)
 
         case .costs:
             showTabRoot(.costs)

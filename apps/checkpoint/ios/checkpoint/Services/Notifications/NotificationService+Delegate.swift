@@ -63,8 +63,9 @@ extension NotificationService: UNUserNotificationCenterDelegate {
     /// Register a Remind Tomorrow request here, in the delegate, rather than
     /// posting for the UI to handle. The action runs without opening the app,
     /// so there may be no scene to receive a post — which is how both snooze
-    /// buttons came to do nothing.
-    private func addSnooze(_ request: UNNotificationRequest?) async {
+    /// buttons came to do nothing. `SnoozeServiceIntent` adds its request
+    /// through here too, for the same budget enforcement.
+    func addSnooze(_ request: UNNotificationRequest?) async {
         guard let request else { return }
         do {
             try await UNUserNotificationCenter.current().add(request)

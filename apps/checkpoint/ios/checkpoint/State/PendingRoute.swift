@@ -24,9 +24,9 @@
 import Foundation
 
 enum PendingRoute: Equatable {
-    /// Open the mileage update sheet — from the mileage reminder, or with a
-    /// reading a Siri intent heard (`prefilled`).
-    case updateMileage(vehicleID: UUID, prefilled: Int? = nil)
+    /// Open the mileage update sheet, from the mileage reminder. (Siri's
+    /// Update Mileage records directly and never opens it.)
+    case updateMileage(vehicleID: UUID)
     /// Open the Costs tab (yearly roundup, Shortcuts).
     case costs(vehicleID: UUID)
     /// Open the service, or the Services tab for a bundle of several.
@@ -52,7 +52,7 @@ enum PendingRoute: Equatable {
 
     var vehicleID: UUID {
         switch self {
-        case .updateMileage(let id, _), .costs(let id), .editVehicle(let id), .vehicle(let id):
+        case .updateMileage(let id), .costs(let id), .editVehicle(let id), .vehicle(let id):
             return id
         case .services(let id, _), .markDone(let id, _), .serviceLog(let id, _),
              .visit(let id, _), .document(let id, _):

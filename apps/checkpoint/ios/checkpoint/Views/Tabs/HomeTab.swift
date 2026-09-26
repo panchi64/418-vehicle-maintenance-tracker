@@ -169,7 +169,7 @@ struct HomeTab: View {
         // the large title collapses rather than pinning ~55pt of chrome.
         VehicleSummaryBand(
             vehicle: vehicle,
-            onMileageTap: { appState.present(.mileageUpdate()) },
+            onMileageTap: { appState.present(.mileageUpdate) },
             onEdit: { appState.present(.editVehicle) },
             onDocumentsTap: { appState.push(.documents(vehicle)) }
         )

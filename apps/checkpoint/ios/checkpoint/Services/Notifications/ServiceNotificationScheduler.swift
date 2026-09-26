@@ -151,6 +151,30 @@ struct ServiceNotificationScheduler {
         )
     }
 
+    /// "Remind Tomorrow" for one service without a banner to replay — asked
+    /// for by voice. The same request the banner's button leaves behind for a
+    /// one-service reminder: snooze copy, the payload its actions read, 9 AM
+    /// tomorrow, and a snooze identifier so the next rebuild keeps it while
+    /// the service is still due.
+    static func snoozeRequest(for service: Service, vehicle: Vehicle, now: Date = Date()) -> UNNotificationRequest {
+        let content = UNMutableNotificationContent()
+        content.title = ServiceReminderCopy.snoozeTitle(serviceNames: [service.name])
+        content.body = ServiceReminderCopy.snoozeBody(serviceNames: [service.name], vehicleName: vehicle.displayName)
+        content.sound = .default
+        content.categoryIdentifier = NotificationService.serviceDueCategoryID
+        content.userInfo = [
+            "serviceIDs": [service.id.uuidString],
+            "serviceID": service.id.uuidString,
+            "vehicleID": vehicle.id.uuidString,
+            "daysBeforeDue": 0,
+            "serviceNames": [service.name],
+            "vehicleName": vehicle.displayName
+        ]
+        return NotificationHelpers.snoozeRequest(
+            identifier: snoozeNotificationID(baseID: baseNotificationID(for: service)), content: content, now: now
+        )
+    }
+
     // MARK: - Occurrences
 
     /// Every reminder the vehicle's services want, across all lead times.

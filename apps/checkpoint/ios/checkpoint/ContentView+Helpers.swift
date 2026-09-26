@@ -325,6 +325,7 @@ extension ContentView {
     func updateMileage(_ newMileage: Int, for vehicle: Vehicle) {
         // Records the reading and restarts the mileage reminder.
         MileageUpdateAction.record(newMileage, for: vehicle, in: modelContext)
+        IntentDonations.updatedMileage(on: vehicle)
 
         // Update app icon based on new mileage affecting service status
         updateAppIcon()

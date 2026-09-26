@@ -19,8 +19,7 @@ enum ActiveSheet: Identifiable {
     case addVehicle
     case editVehicle
     case addService(seasonal: SeasonalPrefill? = nil, postRecord: PostRecordPrefill? = nil)
-    /// `prefilled` carries a Siri intent's reading.
-    case mileageUpdate(prefilled: Int? = nil)
+    case mileageUpdate
     case settings
     case proPaywall
     case tipModal

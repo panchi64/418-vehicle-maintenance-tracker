@@ -52,6 +52,10 @@ extension ServiceLogForm {
         if target == nil, model.isRecurring {
             ServiceNotificationScheduler.rescheduleNotifications(for: vehicle)
         }
+        switch undo.change {
+        case .completed(_, _, let successor): IntentDonations.markedDone(successor: successor)
+        case .created: IntentDonations.loggedServices([model.serviceName], on: vehicle)
+        }
         showLoggedToast(undo: undo)
     }
 
@@ -120,6 +124,7 @@ extension ServiceLogForm {
         service.vehicle = vehicle
         modelContext.insert(service)
         ServiceNotificationScheduler.rescheduleNotifications(for: vehicle)
+        IntentDonations.addedService(service)
 
         // Says when it will come back, rather than a bare "saved".
         let message: String

@@ -7,6 +7,134 @@
     "%@" : {
 
     },
+    "%@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %@"
+          }
+        }
+      }
+    },
+    "%lld documents" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld documents"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld documentos"
+          }
+        }
+      }
+    },
+    "%lld service logs" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld service logs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld registros de servicio"
+          }
+        }
+      }
+    },
+    "%lld service types" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld service types"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld tipos de servicio"
+          }
+        }
+      }
+    },
+    "%lld service visits" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld service visits"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld visitas al taller"
+          }
+        }
+      }
+    },
+    "%lld services" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld services"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld servicios"
+          }
+        }
+      }
+    },
+    "%lld vehicles" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld vehicles"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld vehículos"
+          }
+        }
+      }
+    },
+    "A service from Checkpoint's list, with its usual interval" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A service from Checkpoint's list, with its usual interval"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un servicio de la lista de Checkpoint, con su intervalo habitual"
+          }
+        }
+      }
+    },
     "a11y.attachment.count_plural" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -398,6 +526,70 @@
         }
       }
     },
+    "Add ${preset} to ${vehicle}" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add ${preset} to ${vehicle}"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agregar ${preset} a ${vehicle}"
+          }
+        }
+      }
+    },
+    "Add a vehicle in Checkpoint first." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a vehicle in Checkpoint first."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primero agrega un vehículo en Checkpoint."
+          }
+        }
+      }
+    },
+    "Add Service" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add Service"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agregar servicio"
+          }
+        }
+      }
+    },
+    "Added" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Added"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agregado"
+          }
+        }
+      }
+    },
     "addvehicle.basics" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -639,6 +831,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nota"
+          }
+        }
+      }
+    },
+    "All Time" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All Time"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo el tiempo"
+          }
+        }
+      }
+    },
+    "Any service name, when it isn't in the list" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Any service name, when it isn't in the list"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cualquier nombre de servicio, si no está en la lista"
           }
         }
       }
@@ -898,6 +1122,22 @@
         }
       }
     },
+    "Category" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Category"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Categoría"
+          }
+        }
+      }
+    },
     "category.maintenance" : {
       "comment" : "Cost category. Canonical name — reused by the Costs tab category filter.",
       "extractionState" : "manual",
@@ -946,6 +1186,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mejora"
+          }
+        }
+      }
+    },
+    "Change a scheduled service's name, due date, due mileage or interval" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change a scheduled service's name, due date, due mileage or interval"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambia el nombre, la fecha de vencimiento, el millaje de vencimiento o el intervalo de un servicio programado"
           }
         }
       }
@@ -1590,6 +1846,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ver todo"
+          }
+        }
+      }
+    },
+    "Cost" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cost"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Costo"
+          }
+        }
+      }
+    },
+    "Cost Category" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cost Category"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Categoría de costo"
           }
         }
       }
@@ -2397,6 +2685,102 @@
         }
       }
     },
+    "Date" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fecha"
+          }
+        }
+      }
+    },
+    "Delete ${entities}" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete ${entities}"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar ${entities}"
+          }
+        }
+      }
+    },
+    "Delete entries from a vehicle's service history. Checkpoint asks before deleting." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete entries from a vehicle's service history. Checkpoint asks before deleting."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elimina entradas del historial de servicio de un vehículo. Checkpoint pregunta antes de eliminar."
+          }
+        }
+      }
+    },
+    "Delete Service" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete Service"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar servicio"
+          }
+        }
+      }
+    },
+    "Delete Service Log" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete Service Log"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar registro de servicio"
+          }
+        }
+      }
+    },
+    "Delete services and their history. Checkpoint asks before deleting." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete services and their history. Checkpoint asks before deleting."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elimina servicios y su historial. Checkpoint pregunta antes de eliminar."
+          }
+        }
+      }
+    },
     "desc.completedViaWidget" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2733,6 +3117,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Unidad de distancia"
+          }
+        }
+      }
+    },
+    "Document" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Document"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Documento"
+          }
+        }
+      }
+    },
+    "Document Type" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Document Type"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipo de documento"
           }
         }
       }
@@ -3655,6 +4071,54 @@
         }
       }
     },
+    "Due Date" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Due Date"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fecha de vencimiento"
+          }
+        }
+      }
+    },
+    "Due Mileage" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Due Mileage"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Millaje de vencimiento"
+          }
+        }
+      }
+    },
+    "Due Services" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Due Services"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servicios pendientes"
+          }
+        }
+      }
+    },
     "DUE SOON" : {
       "localizations" : {
         "en" : {
@@ -3667,6 +4131,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "PRÓXIMO"
+          }
+        }
+      }
+    },
+    "Due Soon" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Due Soon"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence pronto"
           }
         }
       }
@@ -3756,6 +4236,22 @@
         }
       }
     },
+    "e.g. oil change" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "e.g. oil change"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "p. ej. cambio de aceite"
+          }
+        }
+      }
+    },
     "Early %@" : {
       "localizations" : {
         "en" : {
@@ -3768,6 +4264,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Principios de %@"
+          }
+        }
+      }
+    },
+    "Edit ${service}" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit ${service}"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar ${service}"
+          }
+        }
+      }
+    },
+    "Edit Service" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit Service"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar servicio"
           }
         }
       }
@@ -3956,6 +4484,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sin vehículo"
+          }
+        }
+      }
+    },
+    "Estimated Mileage" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimated Mileage"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Millaje estimado"
+          }
+        }
+      }
+    },
+    "Every (Distance)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every (Distance)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada (distancia)"
+          }
+        }
+      }
+    },
+    "Every (Months)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every (Months)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada (meses)"
           }
         }
       }
@@ -4294,6 +4870,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "EXPORTAR HISTORIAL DE SERVICIOS"
+          }
+        }
+      }
+    },
+    "Find Last Service" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find Last Service"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar último servicio"
+          }
+        }
+      }
+    },
+    "Find when a service was last done on your vehicle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find when a service was last done on your vehicle"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Averigua cuándo se hizo un servicio por última vez en tu vehículo"
           }
         }
       }
@@ -5928,6 +6536,86 @@
         }
       }
     },
+    "Get a service's reminder again tomorrow morning" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get a service's reminder again tomorrow morning"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recibe el recordatorio de un servicio otra vez mañana por la mañana"
+          }
+        }
+      }
+    },
+    "Get Mileage" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get Mileage"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver millaje"
+          }
+        }
+      }
+    },
+    "Get Spending Summary" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get Spending Summary"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver resumen de gastos"
+          }
+        }
+      }
+    },
+    "Get the mileage on ${vehicle}" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get the mileage on ${vehicle}"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver el millaje de ${vehicle}"
+          }
+        }
+      }
+    },
+    "Get Vehicle Mileage" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get Vehicle Mileage"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver millaje del vehículo"
+          }
+        }
+      }
+    },
     "header.odometer" : {
       "comment" : "Label on Home's odometer cell.",
       "extractionState" : "manual",
@@ -5978,6 +6666,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "FICHA"
+          }
+        }
+      }
+    },
+    "Hear how much you've spent on a vehicle over a period, optionally for one category" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hear how much you've spent on a vehicle over a period, optionally for one category"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escucha cuánto has gastado en un vehículo en un período, opcionalmente en una categoría"
+          }
+        }
+      }
+    },
+    "Hear which services are overdue on your vehicle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hear which services are overdue on your vehicle"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escucha qué servicios están vencidos en tu vehículo"
+          }
+        }
+      }
+    },
+    "Hear your vehicle's current mileage, estimated from your driving pace when the last reading is old" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hear your vehicle's current mileage, estimated from your driving pace when the last reading is old"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escucha el millaje actual de tu vehículo, estimado según tu ritmo de manejo si la última lectura es vieja"
           }
         }
       }
@@ -6677,22 +7413,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nada más programado."
-          }
-        }
-      }
-    },
-    "I couldn't find any vehicle data. Please open Checkpoint to set up your vehicles." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "I couldn't find any vehicle data. Please open Checkpoint to set up your vehicles."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No encontré datos de vehículos. Abre Checkpoint para añadir tus vehículos."
           }
         }
       }
@@ -7615,6 +8335,150 @@
         }
       }
     },
+    "In your distance unit" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In your distance unit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En tu unidad de distancia"
+          }
+        }
+      }
+    },
+    "Inspection" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inspection"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inspección"
+          }
+        }
+      }
+    },
+    "Insurance" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insurance"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguro"
+          }
+        }
+      }
+    },
+    "Interval (Miles)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Interval (Miles)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intervalo (millas)"
+          }
+        }
+      }
+    },
+    "Interval (Months)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Interval (Months)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intervalo (meses)"
+          }
+        }
+      }
+    },
+    "Last 12 Months" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last 12 Months"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Últimos 12 meses"
+          }
+        }
+      }
+    },
+    "Last 30 Days" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last 30 Days"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Últimos 30 días"
+          }
+        }
+      }
+    },
+    "Last Performed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last Performed"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última vez realizado"
+          }
+        }
+      }
+    },
+    "Last Service" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last Service"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Último servicio"
+          }
+        }
+      }
+    },
     "Late %@" : {
       "localizations" : {
         "en" : {
@@ -7627,6 +8491,102 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Finales de %@"
+          }
+        }
+      }
+    },
+    "Leave empty for every category" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leave empty for every category"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déjalo vacío para todas las categorías"
+          }
+        }
+      }
+    },
+    "Leave empty for the vehicle Checkpoint is showing." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leave empty for the vehicle Checkpoint is showing."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déjalo vacío para el vehículo que muestra Checkpoint."
+          }
+        }
+      }
+    },
+    "License Plate" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "License Plate"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tablilla"
+          }
+        }
+      }
+    },
+    "Line Items" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Line Items"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partidas"
+          }
+        }
+      }
+    },
+    "List Overdue Services" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List Overdue Services"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver servicios vencidos"
+          }
+        }
+      }
+    },
+    "List overdue services on ${vehicle}" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List overdue services on ${vehicle}"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver servicios vencidos de ${vehicle}"
           }
         }
       }
@@ -7679,6 +8639,54 @@
         }
       }
     },
+    "Log ${services} on ${vehicle}" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log ${services} on ${vehicle}"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrar ${services} en ${vehicle}"
+          }
+        }
+      }
+    },
+    "Log a scheduled service as done, with optional cost, mileage and shop" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log a scheduled service as done, with optional cost, mileage and shop"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra un servicio programado como hecho, con costo, millaje y taller opcionales"
+          }
+        }
+      }
+    },
+    "Log Service" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log Service"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrar servicio"
+          }
+        }
+      }
+    },
     "log.delete.action" : {
       "comment" : "Destructive action that deletes a completed service log entry.",
       "extractionState" : "manual",
@@ -7693,6 +8701,70 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Eliminar registro"
+          }
+        }
+      }
+    },
+    "Maintenance" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maintenance"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantenimiento"
+          }
+        }
+      }
+    },
+    "Make" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marca"
+          }
+        }
+      }
+    },
+    "Manual" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manual"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manual"
+          }
+        }
+      }
+    },
+    "Marbete Expiration" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marbete Expiration"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vencimiento del marbete"
           }
         }
       }
@@ -7846,6 +8918,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Estado del marbete: %@"
+          }
+        }
+      }
+    },
+    "Mark ${service} done" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mark ${service} done"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcar ${service} como hecho"
+          }
+        }
+      }
+    },
+    "Mark Done" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mark Done"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcar hecho"
+          }
+        }
+      }
+    },
+    "Mark Service Done" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mark Service Done"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcar servicio como hecho"
           }
         }
       }
@@ -8037,6 +9157,38 @@
         }
       }
     },
+    "Model" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Model"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modelo"
+          }
+        }
+      }
+    },
+    "Name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombre"
+          }
+        }
+      }
+    },
     "nav.manageVehicles" : {
       "comment" : "Navigation title menu item that opens the vehicle picker to edit, delete, or reorder vehicles.",
       "extractionState" : "manual",
@@ -8051,6 +9203,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gestionar vehículos…"
+          }
+        }
+      }
+    },
+    "New Name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Name"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombre nuevo"
           }
         }
       }
@@ -8157,18 +9325,34 @@
         }
       }
     },
-    "No services are scheduled for %@." : {
+    "Not Scheduled" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No services are scheduled for %@."
+            "value" : "Not Scheduled"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No hay servicios programados para %@."
+            "value" : "Sin programar"
+          }
+        }
+      }
+    },
+    "Notes" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notes"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notas"
           }
         }
       }
@@ -8957,6 +10141,22 @@
         }
       }
     },
+    "Oil Type" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oil Type"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipo de aceite"
+          }
+        }
+      }
+    },
     "ON TRACK" : {
       "localizations" : {
         "en" : {
@@ -8969,6 +10169,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "AL DÍA"
+          }
+        }
+      }
+    },
+    "On Track" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On Track"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Al día"
           }
         }
       }
@@ -9484,23 +10700,49 @@
       }
     },
     "Open a service in Checkpoint from the widget" : {
-
-    },
-    "Open Service" : {
-
-    },
-    "Opening Checkpoint to update %@ to %lld miles." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Opening Checkpoint to update %1$@ to %2$lld miles."
+            "value" : "Open a service in Checkpoint from the widget"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Abriendo Checkpoint para actualizar %1$@ a %2$lld millas."
+            "value" : "Abre un servicio en Checkpoint desde el widget"
+          }
+        }
+      }
+    },
+    "Open Service" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Service"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir servicio"
+          }
+        }
+      }
+    },
+    "Other" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otro"
           }
         }
       }
@@ -9537,6 +10779,22 @@
         }
       }
     },
+    "Period" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Period"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Período"
+          }
+        }
+      }
+    },
     "picker.linkVehicles" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9567,6 +10825,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Seleccionar vehículo"
+          }
+        }
+      }
+    },
+    "Put a service on your vehicle's schedule, from a preset or by name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put a service on your vehicle's schedule, from a preset or by name"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agrega un servicio al calendario de tu vehículo, de la lista o por nombre"
           }
         }
       }
@@ -10672,6 +11946,86 @@
         }
       }
     },
+    "Receipt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Receipt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recibo"
+          }
+        }
+      }
+    },
+    "Record services you had done, with optional date, mileage, total cost and shop" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record services you had done, with optional date, mileage, total cost and shop"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra servicios que te hicieron, con fecha, millaje, costo total y taller opcionales"
+          }
+        }
+      }
+    },
+    "Record the current odometer reading on your vehicle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record the current odometer reading on your vehicle"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra la lectura actual del odómetro de tu vehículo"
+          }
+        }
+      }
+    },
+    "Recorded Mileage" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recorded Mileage"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Millaje registrado"
+          }
+        }
+      }
+    },
+    "Registration" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registration"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registro"
+          }
+        }
+      }
+    },
     "REMAINING" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -10685,6 +12039,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "RESTANTES"
+          }
+        }
+      }
+    },
+    "Remind me about ${service} tomorrow" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remind me about ${service} tomorrow"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recordarme ${service} mañana"
+          }
+        }
+      }
+    },
+    "Remind Me Tomorrow" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remind Me Tomorrow"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recordarme mañana"
+          }
+        }
+      }
+    },
+    "Repair" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repair"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reparación"
           }
         }
       }
@@ -10988,6 +12390,22 @@
         }
       }
     },
+    "Scheduled Services" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scheduled Services"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servicios programados"
+          }
+        }
+      }
+    },
     "seasonal.acCheck.detail" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11260,8 +12678,133 @@
         }
       }
     },
+    "Service" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Service"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servicio"
+          }
+        }
+      }
+    },
     "Service ID" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Service ID"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ID del servicio"
+          }
+        }
+      }
+    },
+    "Service Log" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Service Log"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registro de servicio"
+          }
+        }
+      }
+    },
+    "Service Logs" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Service Logs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registros de servicio"
+          }
+        }
+      }
+    },
+    "Service Record" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Service Record"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registro de servicio"
+          }
+        }
+      }
+    },
+    "Service Status" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Service Status"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estado del servicio"
+          }
+        }
+      }
+    },
+    "Service Type" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Service Type"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipo de servicio"
+          }
+        }
+      }
+    },
+    "Service Visit" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Service Visit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visita al taller"
+          }
+        }
+      }
     },
     "service.delete.action" : {
       "extractionState" : "manual",
@@ -11395,6 +12938,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cambio de aceite, rotación de gomas…"
+          }
+        }
+      }
+    },
+    "Services" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Services"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servicios"
+          }
+        }
+      }
+    },
+    "Services Shown" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Services Shown"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servicios mostrados"
           }
         }
       }
@@ -13055,6 +14630,379 @@
         }
       }
     },
+    "Shop" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shop"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taller"
+          }
+        }
+      }
+    },
+    "siri.add.exists" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ is already on the schedule for %2$@, due %3$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ ya está en el calendario de %2$@; vence %3$@."
+          }
+        }
+      }
+    },
+    "siri.add.saved" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Added %1$@ to %2$@, due %3$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agregué %1$@ a %2$@; vence %3$@."
+          }
+        }
+      }
+    },
+    "siri.deleteLog.confirmMany" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete %ld service log entries? This can't be undone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eliminar %ld entradas del historial de servicio? No se puede deshacer."
+          }
+        }
+      }
+    },
+    "siri.deleteLog.confirmOne" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete the %1$@ entry from %2$@? This can't be undone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eliminar la entrada de %1$@ del %2$@? No se puede deshacer."
+          }
+        }
+      }
+    },
+    "siri.deleteLog.doneMany" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deleted %ld entries."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminé %ld entradas."
+          }
+        }
+      }
+    },
+    "siri.deleteLog.doneOne" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deleted the %1$@ entry from %2$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminé la entrada de %1$@ del %2$@."
+          }
+        }
+      }
+    },
+    "siri.deleteService.confirmMany" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete %ld services and their service history? This can't be undone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eliminar %ld servicios y su historial de servicio? No se puede deshacer."
+          }
+        }
+      }
+    },
+    "siri.deleteService.confirmOne" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete %@ and its service history? This can't be undone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eliminar %@ y su historial de servicio? No se puede deshacer."
+          }
+        }
+      }
+    },
+    "siri.deleteService.doneMany" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deleted %ld services."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminé %ld servicios."
+          }
+        }
+      }
+    },
+    "siri.deleteService.doneOne" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deleted %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminé %@."
+          }
+        }
+      }
+    },
+    "siri.done.confirm" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mark %1$@ done on %2$@?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Marcar %1$@ como hecho en %2$@?"
+          }
+        }
+      }
+    },
+    "siri.done.notTracked" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ isn't on the schedule for %2$@, so there's nothing to mark done. Log it instead."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ no está en el calendario de %2$@, así que no hay nada que marcar. Regístralo en su lugar."
+          }
+        }
+      }
+    },
+    "siri.done.saved" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marked %1$@ done on %2$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marqué %1$@ como hecho en %2$@."
+          }
+        }
+      }
+    },
+    "siri.done.savedNext" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marked %1$@ done on %2$@. Next due %3$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marqué %1$@ como hecho en %2$@. El próximo vence %3$@."
+          }
+        }
+      }
+    },
+    "siri.due.both" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ or at %2$@, whichever comes first"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "el %1$@ o a las %2$@, lo que llegue primero"
+          }
+        }
+      }
+    },
+    "siri.due.date" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "el %@"
+          }
+        }
+      }
+    },
+    "siri.due.mileage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "at %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "a las %@"
+          }
+        }
+      }
+    },
+    "siri.edit.saved" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Updated %1$@. It's due %2$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualicé %1$@. Vence %2$@."
+          }
+        }
+      }
+    },
+    "siri.edit.savedUnscheduled" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Updated %@. It isn't scheduled."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualicé %@. No está programado."
+          }
+        }
+      }
+    },
+    "siri.last.found" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You last did %1$@ on %2$@ on %3$@, at %4$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La última vez que hiciste %1$@ en %2$@ fue el %3$@, a %4$@."
+          }
+        }
+      }
+    },
+    "siri.last.none" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I couldn't find %1$@ in %2$@'s service history."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No encontré %1$@ en el historial de servicio de %2$@."
+          }
+        }
+      }
+    },
     "siri.list.intro" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13102,6 +15050,176 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ está vencido"
+          }
+        }
+      }
+    },
+    "siri.list.none" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No services are scheduled for %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay servicios programados para %@."
+          }
+        }
+      }
+    },
+    "siri.log.confirm" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log %1$@ on %2$@?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Registrar %1$@ en %2$@?"
+          }
+        }
+      }
+    },
+    "siri.log.saved" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logged %1$@ on %2$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registré %1$@ en %2$@."
+          }
+        }
+      }
+    },
+    "siri.mileage.confirmJump" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That's %1$@ more than the %3$@ on file for %2$@. Save %4$@?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son %1$@ más que las %3$@ registradas para %2$@. ¿Guardar %4$@?"
+          }
+        }
+      }
+    },
+    "siri.mileage.confirmLower" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ has %2$@ on file. Change it down to %3$@?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ tiene %2$@ registradas. ¿Bajarlo a %3$@?"
+          }
+        }
+      }
+    },
+    "siri.mileage.current" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ is at %2$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ marca %2$@."
+          }
+        }
+      }
+    },
+    "siri.mileage.estimated" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ is probably around %2$@ by now, at about %3$@ a day. The last reading was %4$@ on %5$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ debe andar por %2$@, a unas %3$@ al día. La última lectura fue %4$@ el %5$@."
+          }
+        }
+      }
+    },
+    "siri.mileage.none" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ has no odometer reading yet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ todavía no tiene lectura del odómetro."
+          }
+        }
+      }
+    },
+    "siri.mileage.recorded" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ was at %2$@ on %3$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ marcaba %2$@ el %3$@."
+          }
+        }
+      }
+    },
+    "siri.mileage.updated" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ is now at %2$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ ahora marca %2$@."
           }
         }
       }
@@ -13174,6 +15292,57 @@
         }
       }
     },
+    "siri.overdue.many" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$ld services are overdue on %2$@: %3$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$ld servicios están vencidos en %2$@: %3$@."
+          }
+        }
+      }
+    },
+    "siri.overdue.none" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing is overdue on %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay nada vencido en %@."
+          }
+        }
+      }
+    },
+    "siri.overdue.one" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ is overdue on %2$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ está vencido en %2$@."
+          }
+        }
+      }
+    },
     "siri.single.comingUp" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13242,70 +15411,257 @@
         }
       }
     },
-    "siri.status.comingUp" : {
+    "siri.snippet.caption" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Coming up"
+            "value" : "%1$@ · %2$@"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Se acerca"
+            "value" : "%1$@ · %2$@"
           }
         }
       }
     },
-    "siri.status.dueSoon" : {
+    "siri.snippet.cost" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Due soon"
+            "value" : "COST"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vence pronto"
+            "value" : "COSTO"
           }
         }
       }
     },
-    "siri.status.overdue" : {
+    "siri.snippet.date" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Overdue"
+            "value" : "DATE"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vencido"
+            "value" : "FECHA"
           }
         }
       }
     },
-    "siri.status.scheduled" : {
+    "siri.snippet.done" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Scheduled"
+            "value" : "DONE"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Programado"
+            "value" : "HECHO"
+          }
+        }
+      }
+    },
+    "siri.snippet.expenses" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "EXPENSES"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GASTOS"
+          }
+        }
+      }
+    },
+    "siri.snippet.nothingDue" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing is due."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay nada pendiente."
+          }
+        }
+      }
+    },
+    "siri.snippet.odometer" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ODOMETER"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ODÓMETRO"
+          }
+        }
+      }
+    },
+    "siri.snippet.shop" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SHOP"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TALLER"
+          }
+        }
+      }
+    },
+    "siri.snooze.notDue" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ isn't due yet, so there's nothing to snooze. Checkpoint will remind you when it is."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ todavía no vence, así que no hay nada que posponer. Checkpoint te avisará cuando venza."
+          }
+        }
+      }
+    },
+    "siri.snooze.saved" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I'll remind you about %@ tomorrow morning."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Te recordaré %@ mañana por la mañana."
+          }
+        }
+      }
+    },
+    "siri.spend.category" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You've spent %1$@ on %2$@ for %3$@ — %4$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Llevas %1$@ gastados en %2$@ en %3$@ — %4$@."
+          }
+        }
+      }
+    },
+    "siri.spend.total" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You've spent %1$@ on %2$@ — %3$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Llevas %1$@ gastados en %2$@ — %3$@."
+          }
+        }
+      }
+    },
+    "siri.stop.confirm" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop tracking %1$@ on %2$@? Its service history stays."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Dejar de seguir %1$@ en %2$@? Su historial de servicio se queda."
+          }
+        }
+      }
+    },
+    "siri.stop.notTracked" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ isn't being tracked."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ no se está siguiendo."
+          }
+        }
+      }
+    },
+    "siri.stop.saved" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stopped tracking %@. Its service history stays in Checkpoint."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dejé de seguir %@. Su historial de servicio se queda en Checkpoint."
           }
         }
       }
@@ -13476,6 +15832,86 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "VIN"
+          }
+        }
+      }
+    },
+    "Spending" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spending"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gastos"
+          }
+        }
+      }
+    },
+    "Spending on ${vehicle} for ${period}" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spending on ${vehicle} for ${period}"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gastos de ${vehicle} en ${period}"
+          }
+        }
+      }
+    },
+    "Status" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Status"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estado"
+          }
+        }
+      }
+    },
+    "Stop tracking ${service}" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop tracking ${service}"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dejar de seguir ${service}"
+          }
+        }
+      }
+    },
+    "Stop Tracking Service" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop Tracking Service"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dejar de seguir servicio"
           }
         }
       }
@@ -14011,50 +16447,130 @@
         }
       }
     },
-    "The current mileage reading" : {
+    "Take a service off the schedule. Its history stays." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The current mileage reading"
+            "value" : "Take a service off the schedule. Its history stays."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La lectura actual del millaje"
+            "value" : "Saca un servicio del calendario. Su historial se queda."
           }
         }
       }
     },
-    "The vehicle to check" : {
+    "Text" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The vehicle to check"
+            "value" : "Text"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El vehículo a revisar"
+            "value" : "Texto"
           }
         }
       }
     },
-    "The vehicle to update" : {
+    "That service is no longer in Checkpoint." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The vehicle to update"
+            "value" : "That service is no longer in Checkpoint."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El vehículo a actualizar"
+            "value" : "Ese servicio ya no está en Checkpoint."
+          }
+        }
+      }
+    },
+    "That service log is no longer in Checkpoint." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That service log is no longer in Checkpoint."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ese registro de servicio ya no está en Checkpoint."
+          }
+        }
+      }
+    },
+    "That vehicle is no longer in Checkpoint." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That vehicle is no longer in Checkpoint."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ese vehículo ya no está en Checkpoint."
+          }
+        }
+      }
+    },
+    "The odometer at the service, in your distance unit" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The odometer at the service, in your distance unit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El odómetro al momento del servicio, en tu unidad de distancia"
+          }
+        }
+      }
+    },
+    "The odometer reading, in your distance unit" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The odometer reading, in your distance unit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La lectura del odómetro, en tu unidad de distancia"
+          }
+        }
+      }
+    },
+    "The vehicle to update. Leave empty for the vehicle Checkpoint is showing." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The vehicle to update. Leave empty for the vehicle Checkpoint is showing."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El vehículo a actualizar. Déjalo vacío para el vehículo que muestra Checkpoint."
           }
         }
       }
@@ -14894,6 +17410,38 @@
         }
       }
     },
+    "Tire Size" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tire Size"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tamaño de goma"
+          }
+        }
+      }
+    },
+    "Title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Title"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Título"
+          }
+        }
+      }
+    },
     "toast.copied" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -15151,6 +17699,54 @@
         }
       }
     },
+    "Total" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total"
+          }
+        }
+      }
+    },
+    "Total Cost" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total Cost"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Costo total"
+          }
+        }
+      }
+    },
+    "Type" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipo"
+          }
+        }
+      }
+    },
     "unit.kilometers" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -15219,6 +17815,22 @@
         }
       }
     },
+    "Upcoming" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upcoming"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximos"
+          }
+        }
+      }
+    },
     "Upcoming Services" : {
       "localizations" : {
         "en" : {
@@ -15251,34 +17863,18 @@
         }
       }
     },
-    "Update mileage on ${vehicle} to ${mileage} miles" : {
+    "Update mileage on ${vehicle} to ${mileage}" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Update mileage on ${vehicle} to ${mileage} miles"
+            "value" : "Update mileage on ${vehicle} to ${mileage}"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Actualizar el millaje de ${vehicle} a ${mileage} millas"
-          }
-        }
-      }
-    },
-    "Update the current mileage on your vehicle" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Update the current mileage on your vehicle"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Actualiza el millaje actual de tu vehículo"
+            "value" : "Actualizar el millaje de ${vehicle} a ${mileage}"
           }
         }
       }
@@ -15295,6 +17891,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Actualizar millaje del vehículo"
+          }
+        }
+      }
+    },
+    "Upgrade" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upgrade"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejora"
           }
         }
       }
@@ -15401,7 +18013,20 @@
       }
     },
     "Vehicle ID" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vehicle ID"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ID del vehículo"
+          }
+        }
+      }
     },
     "vehicle.add" : {
       "extractionState" : "manual",
@@ -16226,50 +18851,306 @@
         }
       }
     },
-    "What is the current mileage?" : {
+    "Vehicles" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "What is the current mileage?"
+            "value" : "Vehicles"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¿Cuál es el millaje actual?"
+            "value" : "Vehículos"
           }
         }
       }
     },
-    "Which vehicle would you like to check?" : {
+    "VIN" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Which vehicle would you like to check?"
+            "value" : "VIN"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¿Qué vehículo quieres revisar?"
+            "value" : "VIN"
           }
         }
       }
     },
-    "Which vehicle would you like to update?" : {
+    "Warranty" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Which vehicle would you like to update?"
+            "value" : "Warranty"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¿Qué vehículo quieres actualizar?"
+            "value" : "Garantía"
+          }
+        }
+      }
+    },
+    "What does the odometer read?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What does the odometer read?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Qué marca el odómetro?"
+          }
+        }
+      }
+    },
+    "What was done, e.g. Oil Change, Tire Rotation" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What was done, e.g. Oil Change, Tire Rotation"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo que se hizo, p. ej. cambio de aceite, rotación de gomas"
+          }
+        }
+      }
+    },
+    "When is it due?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When is it due?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cuándo vence?"
+          }
+        }
+      }
+    },
+    "When it was done. Leave empty for today." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When it was done. Leave empty for today."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuándo se hizo. Déjalo vacío para hoy."
+          }
+        }
+      }
+    },
+    "When should it be due?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When should it be due?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cuándo debe vencer?"
+          }
+        }
+      }
+    },
+    "When was ${service} last done on ${vehicle}" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When was ${service} last done on ${vehicle}"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuándo se hizo ${service} por última vez en ${vehicle}"
+          }
+        }
+      }
+    },
+    "Which entry do you want to delete?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which entry do you want to delete?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Qué entrada quieres eliminar?"
+          }
+        }
+      }
+    },
+    "Which service did you do?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which service did you do?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Qué servicio hiciste?"
+          }
+        }
+      }
+    },
+    "Which service do you want to add?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which service do you want to add?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Qué servicio quieres agregar?"
+          }
+        }
+      }
+    },
+    "Which service do you want to change?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which service do you want to change?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Qué servicio quieres cambiar?"
+          }
+        }
+      }
+    },
+    "Which service do you want to delete?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which service do you want to delete?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Qué servicio quieres eliminar?"
+          }
+        }
+      }
+    },
+    "Which service should Checkpoint stop tracking?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which service should Checkpoint stop tracking?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Qué servicio debe dejar de seguir Checkpoint?"
+          }
+        }
+      }
+    },
+    "Which service?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which service?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Qué servicio?"
+          }
+        }
+      }
+    },
+    "Which services did you do?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which services did you do?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Qué servicios hiciste?"
+          }
+        }
+      }
+    },
+    "Year" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Year"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Año"
+          }
+        }
+      }
+    },
+    "Year to Date" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Year to Date"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En lo que va del año"
           }
         }
       }

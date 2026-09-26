@@ -100,16 +100,7 @@ final class PendingRouteTests: XCTestCase {
         appState.apply(.updateMileage(vehicleID: vehicle.id), vehicles: [vehicle])
 
         XCTAssertEqual(appState.selectedTab, .home)
-        XCTAssertEqual(appState.activeSheet?.id, ActiveSheet.mileageUpdate().id)
-    }
-
-    func test_apply_updateMileage_carriesPrefilledReading() {
-        appState.apply(.updateMileage(vehicleID: vehicle.id, prefilled: 52_000), vehicles: [vehicle])
-
-        guard case .mileageUpdate(let prefilled) = appState.activeSheet else {
-            return XCTFail("Expected the mileage sheet")
-        }
-        XCTAssertEqual(prefilled, 52_000)
+        XCTAssertEqual(appState.activeSheet?.id, ActiveSheet.mileageUpdate.id)
     }
 
     func test_apply_vehicle_selectsItOnHomeRoot() {

@@ -48,8 +48,12 @@ extension ModelBackedEntity {
 extension IntentCurrencyAmount {
     /// A stored cost as Siri should say it. Costs are stored in US dollars,
     /// the currency every in-app formatter uses (`Formatters.currency`).
+    nonisolated static func stored(_ amount: Decimal) -> IntentCurrencyAmount {
+        IntentCurrencyAmount(amount: amount, currencyCode: "USD")
+    }
+
     nonisolated static func stored(_ amount: Decimal?) -> IntentCurrencyAmount? {
-        amount.map { IntentCurrencyAmount(amount: $0, currencyCode: "USD") }
+        amount.map { stored($0) }
     }
 }
 

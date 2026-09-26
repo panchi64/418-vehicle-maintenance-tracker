@@ -280,20 +280,6 @@ final class AppStateTests: XCTestCase {
         XCTAssertEqual(appState.activeSheet?.id, ActiveSheet.addVehicle.id)
     }
 
-    // MARK: - Sheet Payload Tests
-
-    @MainActor
-    func testMileageUpdateSheet_CarriesTheSiriReading() async {
-        let appState = AppState()
-
-        appState.present(.mileageUpdate(prefilled: 42_000))
-
-        guard case .mileageUpdate(let prefilled) = appState.activeSheet else {
-            return XCTFail("Expected the mileage update sheet")
-        }
-        XCTAssertEqual(prefilled, 42_000)
-    }
-
     // MARK: - Recall State Storage Tests
 
     @MainActor

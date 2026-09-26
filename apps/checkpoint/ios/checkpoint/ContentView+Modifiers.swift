@@ -68,11 +68,10 @@ extension ContentView {
                 noVehicleFallback
             }
 
-        case .mileageUpdate(let prefilled):
+        case .mileageUpdate:
             if let vehicle = currentVehicle {
                 MileageUpdateSheet(
                     vehicle: vehicle,
-                    prefilledMileage: prefilled,
                     onSave: { newMileage in
                         AnalyticsService.shared.capture(.mileageUpdated(source: .manual))
                         updateMileage(newMileage, for: vehicle)

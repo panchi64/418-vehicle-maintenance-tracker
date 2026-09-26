@@ -196,6 +196,7 @@ struct ClusterDoneForm: View {
             attachments: pendingAttachments,
             in: modelContext
         )
+        IntentDonations.loggedServices(cluster.services.map(\.name), on: vehicle)
 
         AppIconService.shared.updateIcon(for: vehicle, services: allServices)
         WidgetDataService.shared.updateWidget(for: vehicle)

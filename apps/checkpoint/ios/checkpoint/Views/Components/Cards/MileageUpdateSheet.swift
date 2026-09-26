@@ -17,14 +17,7 @@ struct MileageUpdateSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     let vehicle: Vehicle
-    let prefilledMileage: Int?
     let onSave: (Int) -> Void
-
-    init(vehicle: Vehicle, prefilledMileage: Int? = nil, onSave: @escaping (Int) -> Void) {
-        self.vehicle = vehicle
-        self.prefilledMileage = prefilledMileage
-        self.onSave = onSave
-    }
 
     @State private var newMileage: Int?
     @State private var showCamera = false
@@ -87,17 +80,10 @@ struct MileageUpdateSheet: View {
                 subtitle: vehicle.displayName,
                 saveTitle: L10n.commonUpdate,
                 canSave: hasReading && !isProcessingOCR,
-                isDirty: newMileage != nil && newMileage != prefilledMileage,
+                isDirty: newMileage != nil,
                 onSave: { commit(newMileage ?? 0) },
                 onBlocked: { showBlocker = true }
             )
-        }
-        .onAppear {
-            // A Siri reading prefills; otherwise the field starts empty so the
-            // user enters the actual reading rather than accepting a guess.
-            if let prefilled = prefilledMileage {
-                newMileage = prefilled
-            }
         }
         .task(id: newMileage) {
             let warning = ServiceFormValidation.mileageWarning(
