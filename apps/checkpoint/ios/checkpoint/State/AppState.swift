@@ -44,9 +44,15 @@ final class AppState {
 
     /// Replace a tab's stack with one destination and bring that tab forward.
     func navigate(to route: AppRoute, on tab: Tab) {
+        navigate(to: [route], on: tab)
+    }
+
+    /// Close any sheet, bring `tab` forward, and replace its stack with
+    /// `routes` (empty = the tab's root).
+    func navigate(to routes: [AppRoute], on tab: Tab) {
         dismissSheet()
         selectedTab = tab
-        paths[tab] = [route]
+        paths[tab] = routes
     }
 
     // MARK: - Root Sheet
@@ -171,7 +177,7 @@ final class AppState {
     // MARK: - Monetization
 
     func requestAddVehicle(vehicleCount: Int) {
-        if vehicleCount >= 3 && !StoreManager.shared.isPro {
+        if VehicleService.requiresPro(toAddTo: vehicleCount, isPro: StoreManager.shared.isPro) {
             present(.proPaywall)
             AnalyticsService.shared.capture(.vehicleLimitReached(vehicleCount: vehicleCount))
         } else {

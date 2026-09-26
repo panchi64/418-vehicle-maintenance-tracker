@@ -12,23 +12,6 @@ import SwiftUI
 
 @Observable
 final class VehicleFormState {
-    /// Every value the form writes to the vehicle. Compared against the
-    /// baseline it was opened with to decide what Cancel would discard.
-    struct Fields: Equatable {
-        var name = ""
-        var make = ""
-        var model = ""
-        var year: Int?
-        var currentMileage: Int?
-        var vin = ""
-        var licensePlate = ""
-        var tireSize = ""
-        var oilType = ""
-        var notes = ""
-        var marbeteExpirationMonth: Int?
-        var marbeteExpirationYear: Int?
-    }
-
     /// What the last VIN lookup did to the form. Stays until the VIN changes:
     /// the confirmation is information the user may want to reread, not a
     /// flash that dismisses itself on a timer.
@@ -43,8 +26,10 @@ final class VehicleFormState {
         case make, model, year
     }
 
-    var fields: Fields
-    private let baseline: Fields
+    /// Every value the form writes to the vehicle. Compared against the
+    /// baseline it was opened with to decide what Cancel would discard.
+    var fields: VehicleFields
+    private let baseline: VehicleFields
 
     // MARK: - Field accessors
 
@@ -131,26 +116,13 @@ final class VehicleFormState {
 
     /// A blank form (Add Vehicle).
     init() {
-        fields = Fields()
-        baseline = Fields()
+        fields = VehicleFields()
+        baseline = VehicleFields()
     }
 
     /// A form opened on an existing vehicle (Edit Vehicle).
     init(vehicle: Vehicle) {
-        let loaded = Fields(
-            name: vehicle.name,
-            make: vehicle.make,
-            model: vehicle.model,
-            year: vehicle.hasModelYear ? vehicle.year : nil,
-            currentMileage: vehicle.currentMileage,
-            vin: vehicle.vin ?? "",
-            licensePlate: vehicle.licensePlate ?? "",
-            tireSize: vehicle.tireSize ?? "",
-            oilType: vehicle.oilType ?? "",
-            notes: vehicle.notes ?? "",
-            marbeteExpirationMonth: vehicle.marbeteExpirationMonth,
-            marbeteExpirationYear: vehicle.marbeteExpirationYear
-        )
+        let loaded = VehicleFields(vehicle: vehicle)
         fields = loaded
         baseline = loaded
         // The stored VIN already produced the stored make/model/year; opening

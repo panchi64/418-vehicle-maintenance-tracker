@@ -85,7 +85,7 @@ final class CostsMetricsTests: XCTestCase {
 
     /// Logs are handed to `CostsMetrics` newest-first, matching the query.
     @MainActor
-    private func metrics(_ logs: [ServiceLog], period: CostsTab.PeriodFilter = .allTime) -> CostsMetrics {
+    private func metrics(_ logs: [ServiceLog], period: CostPeriod = .allTime) -> CostsMetrics {
         CostsMetrics(
             logs: logs.sorted { $0.performedDate > $1.performedDate },
             period: period,
@@ -166,7 +166,7 @@ final class CostsMetricsTests: XCTestCase {
 
     @MainActor
     func test_periodFilter_rawValuesStayStableForAnalytics() {
-        XCTAssertEqual(CostsTab.PeriodFilter.allCases.map(\.rawValue), ["Month", "YTD", "Year", "All"])
+        XCTAssertEqual(CostPeriod.allCases.map(\.rawValue), ["Month", "YTD", "Year", "All"])
     }
 
     @MainActor

@@ -2,8 +2,10 @@
 //  CostsTab+Analytics.swift
 //  checkpoint
 //
-//  The Costs tab's numbers, derived in one pass. The value types they're
-//  made of (`ExpenseEvent`, `CostMonth`, …) live in `CostsTab+Values.swift`.
+//  The Costs tab's numbers, derived in one pass. The expense rules (visit
+//  dedup, period scoping, bucket totals) are `CostAnalyticsService`'s, shared
+//  with App Intents; the tab's own value types (`CostMonth`, …) live in
+//  `CostsTab+Values.swift`.
 //
 
 import Foundation
@@ -20,7 +22,7 @@ import Foundation
 /// - Computed is fine for arithmetic or formatting over already-stored values
 ///   (`CostsTab+Insights.swift`).
 struct CostsMetrics {
-    let period: CostsTab.PeriodFilter
+    let period: CostPeriod
 
     /// Whether the vehicle has *any* costed expense, in any period. False puts
     /// the tab in its empty state instead of a screen of zeros.
@@ -70,22 +72,20 @@ struct CostsMetrics {
     ///   vehicle by the caller's query, so this does not re-filter them.
     init(
         logs: [ServiceLog],
-        period: CostsTab.PeriodFilter,
+        period: CostPeriod,
         calendar: Calendar = .current,
         now: Date = .now
     ) {
         self.period = period
         self.hasAnyLog = !logs.isEmpty
 
-        let allCosted = Self.expenseEvents(from: logs).filter(\.hasCost)
+        let allCosted = CostAnalyticsService.costedEvents(from: logs)
         self.hasAnyExpense = !allCosted.isEmpty
 
         let periodStart = period.startDate(now: now, calendar: calendar)
-        let events = allCosted.filter { event in
-            event.date <= now && periodStart.map { event.date >= $0 } ?? true
-        }
+        let events = CostAnalyticsService.events(allCosted, in: period, now: now, calendar: calendar)
         self.events = events
-        let totalSpent = events.reduce(Decimal(0)) { $0 + $1.amount }
+        let totalSpent = CostAnalyticsService.total(of: events)
         self.totalSpent = totalSpent
 
         // MARK: Averages and the month span
@@ -103,11 +103,10 @@ struct CostsMetrics {
         } ?? 1
 
         if period == .last30Days {
-            let yearAgo = CostsTab.PeriodFilter.last12Months.startDate(now: now, calendar: calendar) ?? now
-            let lastYear = allCosted.filter { $0.date >= yearAgo && $0.date <= now }
+            let lastYear = CostAnalyticsService.events(allCosted, in: .last12Months, now: now, calendar: calendar)
             self.monthlyAverage = lastYear.isEmpty
                 ? nil
-                : lastYear.reduce(Decimal(0)) { $0 + $1.amount } / 12
+                : CostAnalyticsService.total(of: lastYear) / 12
         } else {
             self.monthlyAverage = events.isEmpty ? nil : totalSpent / Decimal(monthsSpanned)
         }
@@ -132,10 +131,7 @@ struct CostsMetrics {
 
         // MARK: Buckets
 
-        var byBucket: [CostBucket: Decimal] = [:]
-        for event in events {
-            byBucket[event.bucket, default: 0] += event.amount
-        }
+        let byBucket = CostAnalyticsService.totalsByBucket(events)
         let totalDouble = NSDecimalNumber(decimal: totalSpent).doubleValue
         self.bucketShares = byBucket
             .map { bucket, amount in
@@ -174,24 +170,6 @@ struct CostsMetrics {
     }
 
     // MARK: - Helpers
-
-    /// Visits once, logs that belong to a visit absorbed into it, newest first.
-    private static func expenseEvents(from logs: [ServiceLog]) -> [ExpenseEvent] {
-        var seenVisitIDs: Set<UUID> = []
-        var built: [ExpenseEvent] = []
-        built.reserveCapacity(logs.count)
-        for log in logs {
-            if let visit = log.visit {
-                guard seenVisitIDs.insert(visit.id).inserted else { continue }
-                built.append(.visit(visit))
-            } else {
-                built.append(.standalone(log))
-            }
-        }
-        // A visit's date can differ from the log that pulled it in, so arrival
-        // order doesn't guarantee the events are sorted.
-        return built.sorted { $0.date > $1.date }
-    }
 
     /// The distance cost per mile divides by: from the oldest to the newest
     /// costed event's odometer reading (the calculation the stats grid used).

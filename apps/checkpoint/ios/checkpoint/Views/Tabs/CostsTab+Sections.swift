@@ -8,7 +8,7 @@ extension CostsTab {
     /// full period name spoken.
     var periodPicker: some View {
         Picker(L10n.costsPeriodPickerLabel, selection: $periodFilter) {
-            ForEach(PeriodFilter.allCases) { period in
+            ForEach(CostPeriod.allCases) { period in
                 Text(period.shortName)
                     .accessibilityLabel(period.fullName)
                     .tag(period)

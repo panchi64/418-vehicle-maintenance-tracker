@@ -112,38 +112,7 @@ struct EditVehicleView: View {
         VehicleCapture.recordVINScanConfirmation(formState)
         AnalyticsService.shared.capture(.vehicleEdited)
 
-        let fields = formState.fields
-        vehicle.name = fields.name
-        vehicle.make = fields.make
-        vehicle.model = fields.model
-        vehicle.year = fields.year ?? 0
-        // F11: an edited odometer is a manual reading — record it (timestamp +
-        // snapshot) rather than overwrite the number and leave the estimate
-        // engine measuring from a stale date. Unchanged means no new reading.
-        if let mileage = fields.currentMileage, mileage != vehicle.currentMileage {
-            vehicle.recordMileage(mileage, source: .manual, in: modelContext)
-        }
-        vehicle.vin = fields.vin.isEmpty ? nil : fields.vin
-        vehicle.licensePlate = fields.licensePlate.isEmpty ? nil : fields.licensePlate
-        vehicle.tireSize = fields.tireSize.isEmpty ? nil : fields.tireSize
-        vehicle.oilType = fields.oilType.isEmpty ? nil : fields.oilType
-        vehicle.notes = fields.notes.isEmpty ? nil : fields.notes
-
-        let hadMarbete = vehicle.hasMarbeteExpiration
-        vehicle.marbeteExpirationMonth = fields.marbeteExpirationMonth
-        vehicle.marbeteExpirationYear = fields.marbeteExpirationYear
-        if vehicle.hasMarbeteExpiration {
-            NotificationService.shared.scheduleMarbeteNotifications(for: vehicle)
-        } else if hadMarbete {
-            NotificationService.shared.cancelMarbeteNotifications(for: vehicle)
-        }
-
-        // Refresh pending service reminders so they pick up edits
-        // (name, mileage) instead of firing with stale content
-        NotificationService.shared.rescheduleNotifications(for: vehicle)
-
-        AppIconService.shared.updateIcon(for: vehicle, services: services)
-        WidgetDataService.shared.updateWidget(for: vehicle)
+        VehicleService.update(vehicle, with: formState.fields, in: modelContext)
         ToastService.shared.show(L10n.toastVehicleUpdated, icon: "checkmark", style: .success)
         dismiss()
     }

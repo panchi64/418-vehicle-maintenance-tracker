@@ -29,7 +29,7 @@ struct CostsTab: View {
     let onboardingState: OnboardingState
     @Query var serviceLogs: [ServiceLog]
 
-    @State var periodFilter: PeriodFilter = .yearToDate
+    @State var periodFilter: CostPeriod = .yearToDate
     @State var chartMode: ChartMode = .trend
 
     /// Scopes the log fetch to `vehicle` at the database level and lets the store

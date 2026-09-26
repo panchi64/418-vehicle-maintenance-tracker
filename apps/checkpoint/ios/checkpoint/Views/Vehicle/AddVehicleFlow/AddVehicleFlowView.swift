@@ -101,30 +101,9 @@ struct AddVehicleFlowView: View {
             hasNickname: !formState.name.isEmpty
         ))
 
-        // `currentMileage` is force-unwrappable in spirit — the odometer is
-        // required and Save is blocked without it — but the fallback stays
-        // rather than trapping.
-        let vehicle = Vehicle(
-            name: formState.name,
-            make: formState.make,
-            model: formState.model,
-            year: formState.year ?? 0,
-            currentMileage: formState.currentMileage ?? 0,
-            vin: formState.vin.isEmpty ? nil : formState.vin,
-            licensePlate: formState.licensePlate.isEmpty ? nil : formState.licensePlate,
-            tireSize: formState.tireSize.isEmpty ? nil : formState.tireSize,
-            oilType: formState.oilType.isEmpty ? nil : formState.oilType,
-            notes: formState.notes.isEmpty ? nil : formState.notes
-        )
-
-        // Marbete
-        vehicle.marbeteExpirationMonth = formState.marbeteExpirationMonth
-        vehicle.marbeteExpirationYear = formState.marbeteExpirationYear
-        if vehicle.hasMarbeteExpiration {
-            NotificationService.shared.scheduleMarbeteNotifications(for: vehicle)
-        }
-
-        modelContext.insert(vehicle)
+        // The odometer is required and Save is blocked without it, so the
+        // fields always carry a mileage here.
+        let vehicle = VehicleService.create(formState.fields, in: modelContext)
         appState.selectVehicle(vehicle)
         HapticService.shared.success()
         ToastService.shared.show(L10n.toastVehicleSaved, icon: "checkmark.circle", style: .success)
