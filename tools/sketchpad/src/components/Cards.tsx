@@ -33,11 +33,12 @@
  * invalid and, on device, makes the inner target ambiguous. The card body
  * still pushes the detail view; Mark Done is a separate target.
  */
-import { For } from 'solid-js'
+import { For, Show } from 'solid-js'
 import { Body, Emphasis, Heading, Hero, Label, Secondary } from '../ui/Text'
 import { dueLine, STATUS_COLOR, StatusTag } from './status'
 import { fmtMileageBare, type Service, type Vehicle } from '../data/fixtures'
 import { isMarbete, remaining } from '../data/scenario'
+import { sortedNotes, type VehicleNote } from '../data/visits'
 
 export function NextUpCard(props: {
   service: Service
@@ -136,11 +137,22 @@ const MONTHS = [
  * because the strip already showed them; they are here for completeness and for
  * the narrow screens where the strip truncates.
  */
-export function QuickSpecsPanel(props: { vehicle: Vehicle; onEdit?: () => void }) {
+export function QuickSpecsPanel(props: {
+  vehicle: Vehicle
+  notes: VehicleNote[]
+  documentCount: number
+  onEdit?: () => void
+  onOpenNotes?: () => void
+  onOpenDocuments?: () => void
+}) {
+  /* The newest pinned note is the preview; with nothing pinned there is none.
+     Falling back to the newest note would preview whatever was edited last
+     (in the fixtures, a parts list), which the user never chose to see on
+     Home. Pinning is that choice. */
+  const pinned = () => sortedNotes(props.notes).pinned[0]
   const rows = () => {
     const v = props.vehicle
     return [
-      ['VIN', v.vin],
       ['Transmission', v.transmission ?? '—'],
       ['Drivetrain', v.drivetrain ?? '—'],
       ['Fuel', v.fuelType ?? '—'],
@@ -163,6 +175,16 @@ export function QuickSpecsPanel(props: { vehicle: Vehicle; onEdit?: () => void }
         'border-bottom': 'var(--border-width) solid var(--grid-line)',
       }}
     >
+      {/* The VIN is the panel's primary: first, and at 20pt on its own line
+          (size + position). It had no declared primary before; marking the
+          VIN row 15 Medium in the right-aligned column was tried first and
+          vanished under the squint — weight alone inside a table of values. */}
+      <div style={{ display: 'flex', 'flex-direction': 'column', gap: '2px', 'padding-bottom': 'var(--space-xs)' }}>
+        <Label>VIN</Label>
+        <Heading rank="primary" style={{ 'word-break': 'break-all' }}>
+          {props.vehicle.vin}
+        </Heading>
+      </div>
       <For each={rows()}>
         {([label, value]) => (
           <div
@@ -179,6 +201,15 @@ export function QuickSpecsPanel(props: { vehicle: Vehicle; onEdit?: () => void }
         )}
       </For>
 
+      {/* Destinations, not specs: count + label + chevron, one row each, the
+          app's QuickSpecsCard.documentsRow shape. Notes replaces the single
+          free-text notes preview that used to sit here. */}
+      <div style={{ display: 'flex', 'flex-direction': 'column', 'border-top': '1px solid var(--grid-line)', 'margin-top': 'var(--space-xs)' }}>
+        <LibraryRow label="Documents" count={props.documentCount} onClick={props.onOpenDocuments} />
+        <div style={{ height: '1px', background: 'var(--grid-line)' }} />
+        <LibraryRow label="Notes" count={props.notes.length} preview={pinned()?.title} onClick={props.onOpenNotes} />
+      </div>
+
       <button
         onClick={props.onEdit}
         style={{ 'min-height': 'var(--touch-target)', display: 'flex', 'align-items': 'center' }}
@@ -191,3 +222,50 @@ export function QuickSpecsPanel(props: { vehicle: Vehicle; onEdit?: () => void }
   )
 }
 
+
+/**
+ * A destination row inside the specs panel: count + label on one baseline
+ * ("3 NOTES"), chevron trailing, and an optional one-line preview. Its own
+ * section for the audit, like a list row: the count is its primary, on size
+ * (20 vs 11/13) and weight.
+ *
+ * The app's documentsRow stacks the count over the label. With a preview
+ * under that it was three lines (~70pt) for one destination; on one baseline
+ * it is two, and "3 NOTES" reads as a phrase. PORT NOTE: move Documents to the
+ * same shape so the two rows stay one component.
+ */
+function LibraryRow(props: { label: string; count: number; preview?: string; onClick?: () => void }) {
+  return (
+    <button
+      data-section={`Library: ${props.label}`}
+      onClick={props.onClick}
+      style={{
+        display: 'flex',
+        'align-items': 'center',
+        gap: 'var(--space-sm)',
+        width: '100%',
+        'min-height': 'var(--touch-target)',
+        padding: 'var(--space-sm) 0',
+        'text-align': 'left',
+      }}
+    >
+      <div style={{ flex: '1 1 auto', 'min-width': '0', display: 'flex', 'flex-direction': 'column', gap: '2px' }}>
+        <div style={{ display: 'flex', 'align-items': 'baseline', gap: 'var(--space-sm)' }}>
+          <Heading rank="primary">{props.count === 0 ? '—' : props.count}</Heading>
+          <Label tracking={2}>{props.label}</Label>
+        </div>
+        <Show when={props.preview}>
+          <Secondary
+            as="div"
+            style={{ 'white-space': 'nowrap', overflow: 'hidden', 'text-overflow': 'ellipsis', width: '100%' }}
+          >
+            {props.preview}
+          </Secondary>
+        </Show>
+      </div>
+      <Body color="accent" style={{ flex: '0 0 auto' }}>
+        ›
+      </Body>
+    </button>
+  )
+}

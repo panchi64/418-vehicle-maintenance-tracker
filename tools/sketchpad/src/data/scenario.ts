@@ -21,12 +21,24 @@ import {
   type ServiceLog,
   type Vehicle,
 } from './fixtures'
+import {
+  appointmentsFull,
+  appointmentsLaterToday,
+  appointmentsToday,
+  notesFull,
+  notesSparse,
+  type Appointment,
+  type VehicleNote,
+} from './visits'
 
 export interface Scenario {
-  id: 'full' | 'marbete' | 'sparse' | 'fresh' | 'empty'
+  id: 'full' | 'marbete' | 'visitToday' | 'sparse' | 'fresh' | 'empty'
   vehicle?: Vehicle
   services: Service[]
   logs: ServiceLog[]
+  /** Booked shop visits, any order — Home shows the soonest upcoming. */
+  appointments: Appointment[]
+  notes: VehicleNote[]
   /** At most one — Home's Suggestions section never holds more. */
   suggestion?: { title: string; detail: string; action: string }
 }
@@ -36,6 +48,8 @@ const full: Scenario = {
   vehicle,
   services,
   logs: serviceLogs,
+  appointments: appointmentsFull,
+  notes: notesFull,
   // The cluster and seasonal suggestions used to be two sections; they are one
   // slot now, and the more actionable one wins it.
   suggestion: {
@@ -56,7 +70,11 @@ const marbete: Scenario = {
         : s,
   ),
   suggestion: undefined,
+  appointments: appointmentsLaterToday,
 }
+
+/** The car is at the shop right now: started 1 h ago, 4 services, 2 more booked, no notes. */
+const visitToday: Scenario = { ...full, id: 'visitToday', appointments: appointmentsToday, notes: [] }
 
 const sparse: Scenario = {
   id: 'sparse',
@@ -86,14 +104,16 @@ const sparse: Scenario = {
       vendor: 'Toyota de Puerto Rico',
     },
   ],
+  appointments: [],
+  notes: notesSparse,
 }
 
 /** A vehicle and nothing else — the first minute after Add Vehicle. */
-const fresh: Scenario = { id: 'fresh', vehicle: { ...vehicle, mileageUpdatedAt: ago(0) }, services: [], logs: [] }
+const fresh: Scenario = { id: 'fresh', vehicle: { ...vehicle, mileageUpdatedAt: ago(0) }, services: [], logs: [], appointments: [], notes: [] }
 
-const empty: Scenario = { id: 'empty', services: [], logs: [] }
+const empty: Scenario = { id: 'empty', services: [], logs: [], appointments: [], notes: [] }
 
-export const scenarios = { full, marbete, sparse, fresh, empty }
+export const scenarios = { full, marbete, visitToday, sparse, fresh, empty }
 
 const ScenarioContext = createContext<() => Scenario>(() => full)
 export const ScenarioProvider = ScenarioContext.Provider

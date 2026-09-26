@@ -1,12 +1,16 @@
 /*
  * Home — Readout. "What does this car need from me, and can I do it now?"
  *
- * FIXED ORDER, ALWAYS THE SAME FIVE BLOCKS (Readout rule 2):
+ * FIXED ORDER, ALWAYS THE SAME SIX BLOCKS (Readout rule 2):
  *
  *   0. Vehicle band      odometer (tap → update; stale tag) | specs ⌄
+ *                        (the specs panel ends in Documents › and Notes ›)
  *   1. Next up           THE hero: status word, remaining figure, due line,
  *                        and a primary MARK DONE. The marbete takes this slot
  *                        when it is the most urgent item.
+ *   1b. Shop Visit       the soonest booked visit: when (primary) · shop ·
+ *                        tag + services; [Directions] [Log Visit]. Empty is
+ *                        one quiet line. See components/ShopVisitSection.tsx.
  *   2. Suggestions       at most ONE item — the cluster ("do X on the same
  *                        visit") and seasonal suggestions used to be separate
  *                        sections that could both show; they share one slot,
@@ -37,6 +41,8 @@ import { InsufficientDataNote } from '../ui/FormAdvisory'
 import { Emphasis, Label, Secondary } from '../ui/Text'
 import { Screen } from './Screen'
 import { SiriTip } from '../components/SiriTip'
+import { ShopVisitSection } from '../components/ShopVisitSection'
+import type { Appointment } from '../data/visits'
 import { sortedByUrgency, useScenario } from '../data/scenario'
 import { NavBar, type TabId } from '../components/TabBar'
 import type { Service } from '../data/fixtures'
@@ -46,6 +52,10 @@ export function HomeTab(props: {
   onAdd: () => void
   onNavigate: (tab: TabId) => void
   onMarkDone: (service: Service) => void
+  onBook: (preselectServiceId?: string) => void
+  onEditAppointment: (a: Appointment) => void
+  onLogVisit: (a: Appointment) => void
+  onOpenNotes: () => void
   specsExpanded: boolean
   onToggleSpecs: () => void
 }) {
@@ -69,7 +79,12 @@ export function HomeTab(props: {
           onToggleSpecs={props.onToggleSpecs}
         />
         <Show when={props.specsExpanded}>
-          <QuickSpecsPanel vehicle={data().vehicle!} />
+          <QuickSpecsPanel
+            vehicle={data().vehicle!}
+            notes={data().notes}
+            documentCount={data().logs.length > 3 ? 3 : 0}
+            onOpenNotes={props.onOpenNotes}
+          />
         </Show>
       </div>
 
@@ -86,6 +101,13 @@ export function HomeTab(props: {
           />
         )}
       </Show>
+
+      {/* 1b. Shop Visit — fixed, directly under the hero it must not out-shout. */}
+      <ShopVisitSection
+        onBook={() => props.onBook(nextUp()?.id)}
+        onEdit={props.onEditAppointment}
+        onLogVisit={props.onLogVisit}
+      />
 
       {/* 2. Suggestions — one slot. */}
       <ReadoutSection

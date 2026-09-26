@@ -13,6 +13,10 @@ import { AddVehicle } from './screens/AddVehicle'
 import { ScenarioProvider, scenarios, type Scenario } from './data/scenario'
 import type { Service, ServiceLog } from './data/fixtures'
 import { sampleReceipt, type ReceiptDraft } from './data/receipt'
+import { AppointmentForm } from './screens/AppointmentForm'
+import { NotesList } from './screens/NotesList'
+import { NoteSheet } from './screens/NoteSheet'
+import { appointmentsFull, notesFull, type Appointment, type VehicleNote } from './data/visits'
 
 /**
  * Where the frame is. Tabs sit inside the shell; forms and Add Vehicle are
@@ -24,6 +28,9 @@ type Route =
   | { kind: 'tab'; tab: TabId }
   | { kind: 'form'; mode: FormMode; service?: Service; log?: ServiceLog; receipt?: ReceiptDraft }
   | { kind: 'vehicle' }
+  | { kind: 'appointment'; appointment?: Appointment; preselect?: string; start?: Date }
+  | { kind: 'notes' }
+  | { kind: 'note'; note?: VehicleNote }
 
 interface ScreenDef {
   id: string
@@ -34,6 +41,8 @@ interface ScreenDef {
   budget?: number
   /** The default path the budget is measured along. */
   path?: string
+  /** Open Home's specs panel on entry. */
+  specs?: boolean
 }
 
 const SCREENS: ScreenDef[] = [
@@ -95,6 +104,46 @@ const SCREENS: ScreenDef[] = [
     path: 'Cost field (type) → Save; Save stays dim until something changes',
   },
   { id: 'vehicle', label: 'Add vehicle', scenario: 'full', start: { kind: 'vehicle' }, budget: 8 },
+  // --- Shop visits -------------------------------------------------------
+  {
+    id: 'home-visit-today',
+    label: 'Home — shop visit started 1 h ago, 4 services, +2',
+    scenario: 'visitToday',
+    start: { kind: 'tab', tab: 'home' },
+  },
+  {
+    id: 'flow-book',
+    label: 'Flow: book a shop visit from Home',
+    scenario: 'full',
+    start: { kind: 'tab', tab: 'home' },
+    budget: 6,
+    path: '[Book] → (Shop autofocused: type “toy”) → Toyota de Puerto Rico → Date field (type) → Save = 4; 3 if tomorrow 9:00 is right; 6 on device with a compact DatePicker (date, day, tap away).',
+  },
+  {
+    id: 'form-appointment-edit',
+    label: 'Form: edit a shop visit',
+    scenario: 'full',
+    start: { kind: 'appointment', appointment: appointmentsFull[0] },
+  },
+  {
+    id: 'form-appointment-clash',
+    label: 'Form: book on a day that already has a visit',
+    scenario: 'full',
+    start: { kind: 'appointment', start: new Date('2026-07-27T14:00:00') },
+  },
+  // --- Notes ---------------------------------------------------------------
+  { id: 'home-specs', label: 'Home — specs open (Documents, Notes)', scenario: 'full', start: { kind: 'tab', tab: 'home' }, specs: true },
+  { id: 'notes', label: 'Notes', scenario: 'full', start: { kind: 'notes' } },
+  { id: 'notes-empty', label: 'Notes — none', scenario: 'visitToday', start: { kind: 'notes' } },
+  {
+    id: 'flow-note',
+    label: 'Flow: add a pinned note with a photo',
+    scenario: 'full',
+    start: { kind: 'tab', tab: 'home' },
+    budget: 6,
+    path: 'Specs strip → Notes › → [+] → (title autofocused: type) → Pin → Add Photo or File → Save (+ system picker: source, shutter, Use Photo)',
+  },
+  { id: 'form-note-edit', label: 'Form: edit a note', scenario: 'full', start: { kind: 'note', note: notesFull[0] } },
 ]
 
 const DEVICES = [
@@ -133,6 +182,7 @@ export function App() {
   createEffect(() => {
     applyTheme(theme(), { scheme: scheme(), highContrast: highContrast() })
     document.documentElement.style.setProperty('--type-scale', String(typeScale()))
+    document.documentElement.dataset.largeType = String(typeScale() >= 1.5)
     document.documentElement.dataset.headers = headers()
   })
 
@@ -152,6 +202,7 @@ export function App() {
     const def = SCREENS.find((s) => s.id === id) ?? SCREENS[0]
     setScreenId(def.id)
     setRoute({ ...def.start }) // a fresh object, so a keyed form remounts
+    setSpecsExpanded(!!def.specs)
     setTaps(0)
   }
 
@@ -347,6 +398,31 @@ export function App() {
                   <AddVehicle onClose={home} />
                 </Match>
 
+                <Match when={route().kind === 'appointment' && (route() as Extract<Route, { kind: 'appointment' }>)} keyed>
+                  {(r) => (
+                    <AppointmentForm
+                      appointment={r.appointment}
+                      preselectServiceId={r.preselect}
+                      initialStart={r.start}
+                      onClose={home}
+                    />
+                  )}
+                </Match>
+
+                <Match when={route().kind === 'note' && (route() as Extract<Route, { kind: 'note' }>)} keyed>
+                  {(r) => <NoteSheet note={r.note} onClose={() => setRoute({ kind: 'notes' })} />}
+                </Match>
+
+                <Match when={route().kind === 'notes'}>
+                  <NotesList
+                    onBack={home}
+                    onAdd={() => setRoute({ kind: 'note' })}
+                    onOpen={(note) => setRoute({ kind: 'note', note })}
+                    revealActions={revealActions()}
+                  />
+                  <TabBar selected="home" onSelect={(tab) => setRoute({ kind: 'tab', tab })} />
+                </Match>
+
                 <Match when={route().kind === 'tab' && (route() as Extract<Route, { kind: 'tab' }>)}>
                   {(r) => (
                     <>
@@ -360,6 +436,15 @@ export function App() {
                             onAdd={openAdd}
                             onNavigate={(tab) => setRoute({ kind: 'tab', tab })}
                             onMarkDone={(service) => setRoute({ kind: 'form', mode: 'complete', service })}
+                            onBook={(preselect) => setRoute({ kind: 'appointment', preselect })}
+                            onEditAppointment={(appointment) => setRoute({ kind: 'appointment', appointment })}
+                            onLogVisit={(a) => {
+                              // Stand-in: the port's log form takes the whole visit
+                              // (shop + every linked service); here, its first service.
+                              const service = scenario().services.find((s) => s.id === a.serviceIds[0])
+                              setRoute({ kind: 'form', mode: service ? 'complete' : 'log', service })
+                            }}
+                            onOpenNotes={() => setRoute({ kind: 'notes' })}
                             specsExpanded={specsExpanded()}
                             onToggleSpecs={() => setSpecsExpanded(!specsExpanded())}
                           />

@@ -151,6 +151,65 @@ export function NavBar(props: {
   )
 }
 
+/**
+ * A pushed screen's bar (F13: details push): back leading, [+] trailing, a
+ * large title that is the screen's name, and an optional `.searchable` field
+ * whose input is live so a list can be filtered in the sketch.
+ */
+export function PushedNavBar(props: {
+  title: string
+  back: string
+  onBack?: () => void
+  onAdd?: () => void
+  search?: { placeholder: string; value: string; onInput: (v: string) => void }
+}) {
+  return (
+    <div style={{ flex: '0 0 auto', background: 'var(--background-primary)' }}>
+      <div style={{ display: 'flex', 'align-items': 'center', height: '44px', padding: '0 var(--space-sm)' }}>
+        <button
+          onClick={props.onBack}
+          style={{ 'min-height': 'var(--touch-target)', display: 'flex', 'align-items': 'center', gap: '2px' }}
+        >
+          <Body color="accent">‹ {props.back}</Body>
+        </button>
+        <div style={{ flex: '1 1 auto' }} />
+        <Show when={props.onAdd}>
+          <BarButton label="Add" glyph="+" prominent onClick={props.onAdd} />
+        </Show>
+      </div>
+      <div style={{ padding: '0 var(--space-screen-h)', 'min-height': '52px', display: 'flex', 'align-items': 'center' }}>
+        <Title lines={1} as="div">
+          {props.title}
+        </Title>
+      </div>
+      <Show when={props.search}>
+        {(s) => (
+          <div style={{ padding: '0 var(--space-screen-h) var(--space-sm)' }}>
+            <div
+              style={{
+                display: 'flex',
+                'align-items': 'center',
+                gap: 'var(--space-sm)',
+                height: '36px',
+                padding: '0 var(--space-sm)',
+                background: 'var(--background-subtle)',
+              }}
+            >
+              <Label tracking={0}>⌕</Label>
+              <input
+                value={s().value}
+                placeholder={s().placeholder}
+                onInput={(e) => s().onInput(e.currentTarget.value)}
+                style={{ flex: '1 1 auto', 'min-width': '0', font: 'var(--font-body)', color: 'var(--text-primary)' }}
+              />
+            </div>
+          </div>
+        )}
+      </Show>
+    </div>
+  )
+}
+
 export function TabBar(props: { selected: TabId; onSelect: (id: TabId) => void }) {
   return (
     <nav

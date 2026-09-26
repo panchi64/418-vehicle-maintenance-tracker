@@ -193,6 +193,14 @@ interface FieldProps {
   /** Advisory or helper content rendered adjacent to the control that resolves it. */
   below?: JSX.Element
   autofocus?: boolean
+  /**
+   * Wraps and grows instead of scrolling sideways. `true` starts at one line;
+   * a number is the minimum line count (a note body). Use it for any value
+   * that can be long: a 50-character shop name in a single-line field put
+   * the end of the name off-screen at 1.0x, and at 2x the whole field showed
+   * about eight characters of it.
+   */
+  multiline?: boolean | number
 }
 
 export function Field(props: FieldProps) {
@@ -243,20 +251,48 @@ export function Field(props: FieldProps) {
         <Show when={props.prefix}>
           <Body color="secondary">{props.prefix}</Body>
         </Show>
-        <input
-          value={props.value}
-          onFocus={props.onFocus}
-          placeholder={props.placeholder}
-          inputMode={props.numeric ? 'numeric' : undefined}
-          autofocus={props.autofocus}
-          onInput={(e) => props.onInput?.(e.currentTarget.value)}
-          style={{
-            flex: '1 1 auto',
-            font: 'var(--font-body)',
-            color: 'var(--text-primary)',
-            'min-width': '0',
-          }}
-        />
+        <Show
+          when={props.multiline}
+          fallback={
+            <input
+              value={props.value}
+              onFocus={props.onFocus}
+              placeholder={props.placeholder}
+              inputMode={props.numeric ? 'numeric' : undefined}
+              autofocus={props.autofocus}
+              onInput={(e) => props.onInput?.(e.currentTarget.value)}
+              style={{
+                flex: '1 1 auto',
+                font: 'var(--font-body)',
+                color: 'var(--text-primary)',
+                'min-width': '0',
+              }}
+            />
+          }
+        >
+          {/* TextField(axis: .vertical): grows a line at a time instead of
+              scrolling a long value sideways out of sight. */}
+          <textarea
+            value={props.value}
+            onFocus={props.onFocus}
+            placeholder={props.placeholder}
+            autofocus={props.autofocus}
+            rows={props.multiline === true ? 1 : (props.multiline as number)}
+            onInput={(e) => props.onInput?.(e.currentTarget.value)}
+            style={{
+              flex: '1 1 auto',
+              font: 'var(--font-body)',
+              color: 'var(--text-primary)',
+              'min-width': '0',
+              padding: 'var(--space-sm) 0',
+              background: 'transparent',
+              border: 'none',
+              resize: 'none',
+              'field-sizing': 'content',
+              'min-height': `calc(${props.multiline === true ? 1 : (props.multiline as number)} * 15px * 1.35 * var(--type-scale) + var(--space-md))`,
+            } as JSX.CSSProperties}
+          />
+        </Show>
         {/* 13pt, not 15. A unit annotation set at the same size as the value it
             annotates competes with it; "mi" is not as important as "33,417". */}
         <Show when={props.suffix}>

@@ -79,7 +79,13 @@ export function FormToolbar(props: FormToolbarProps) {
           'min-width': '0',
         }}
       >
-        <Emphasis lines={1} as="div">
+        {/* nowrap + ellipsis, not a line clamp: a clamp can only cut between
+            words, so at 2x on 375pt "Complete" alone (144pt) overflowed its
+            127pt column. A nav title truncates like the system's does. */}
+        <Emphasis
+          as="div"
+          style={{ 'white-space': 'nowrap', overflow: 'hidden', 'text-overflow': 'ellipsis', 'max-width': '100%' }}
+        >
           {props.title}
         </Emphasis>
         <Show when={props.subtitle}>

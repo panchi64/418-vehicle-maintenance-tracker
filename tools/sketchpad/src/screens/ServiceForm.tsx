@@ -71,6 +71,7 @@ import { Chip, ChipRow, Field, InlinePicker, Toggle } from '../ui/Controls'
 import { FormSection, FormSubgroup } from '../ui/FormSection'
 import { FormAdvisory } from '../ui/FormAdvisory'
 import { FormToolbar, revealBlocker } from '../ui/FormToolbar'
+import { DepthDisclosure } from '../ui/DepthDisclosure'
 import { Body, Emphasis, Label, Secondary } from '../ui/Text'
 import { remainingText, StatusTag } from '../components/status'
 import {
@@ -142,7 +143,6 @@ export function ServiceForm(props: {
   const [dueKind, setDueKind] = createSignal<DueKind>('interval')
   const [dueValue, setDueValue] = createSignal('')
 
-  const [depthOpen, setDepthOpen] = createSignal(false)
   const [category, setCategory] = createSignal<CostCategory>(orig?.category ?? 'maintenance')
   const [notes, setNotes] = createSignal('')
 
@@ -556,6 +556,7 @@ export function ServiceForm(props: {
                 label="Shop"
                 value={shop()}
                 onInput={setShop}
+                multiline
                 below={
                   <Show when={suggested('shop', shop())}>
                     <FromReceipt confidence={receipt()!.confidence.shop} />
@@ -620,54 +621,15 @@ export function ServiceForm(props: {
         </Show>
 
         {/* ---------- 5. DEPTH — what makes it complete ---------- */}
-        <div>
-          <button
-            onClick={() => setDepthOpen(!depthOpen())}
-            aria-expanded={depthOpen()}
-            style={{
-              display: 'flex',
-              'align-items': 'center',
-              gap: 'var(--space-sm)',
-              width: '100%',
-              'min-height': '54px',
-              'border-bottom': 'var(--border-width) solid var(--grid-line)',
-            }}
-          >
-            <div style={{ display: 'flex', 'flex-direction': 'column', gap: '2px', flex: '1 1 auto', 'min-width': '0' }}>
-              <Body color="accent">{depthOpen() ? 'Fewer details' : 'More details'}</Body>
-              <Show when={!depthOpen()}>
-                <Secondary color="tertiary" lines={1} as="div">
-                  {later()
-                    ? 'Notes'
-                    : receipt()?.lineItems.length
-                      ? `${categoryLabels[category()]} · ${receipt()!.lineItems.length} receipt items · notes`
-                      : `${categoryLabels[category()]} · notes · receipt`}
-                </Secondary>
-              </Show>
-            </div>
-            <span
-              aria-hidden="true"
-              style={{
-                font: 'var(--font-heading)',
-                color: 'var(--accent)',
-                transform: depthOpen() ? 'rotate(180deg)' : 'none',
-                transition: 'transform var(--anim-medium) ease-out',
-              }}
-            >
-              ⌄
-            </span>
-          </button>
-
-          <Show when={depthOpen()}>
-            <div
-              style={{
-                display: 'flex',
-                'flex-direction': 'column',
-                gap: 'var(--space-md)',
-                'padding-top': 'var(--space-md)',
-                animation: 'fade-in var(--anim-medium) ease-out',
-              }}
-            >
+        <DepthDisclosure
+          summary={
+            later()
+              ? 'Notes'
+              : receipt()?.lineItems.length
+                ? `${categoryLabels[category()]} · ${receipt()!.lineItems.length} receipt items · notes`
+                : `${categoryLabels[category()]} · notes · receipt`
+          }
+        >
               <Show when={!later()}>
                 <InlinePicker
                   label="Category"
@@ -733,9 +695,7 @@ export function ServiceForm(props: {
                   <Body color="secondary">Attach a receipt</Body>
                 </button>
               </Show>
-            </div>
-          </Show>
-        </div>
+        </DepthDisclosure>
 
         {/* Destructive, last, and only where there is something to delete. */}
         <Show when={editing}>

@@ -142,8 +142,25 @@ select:focus-visible {
   border-bottom-color: var(--accent) !important;
 }
 
-input::placeholder {
+input::placeholder,
+textarea::placeholder {
   color: var(--text-tertiary);
+}
+
+/* One line at normal sizes, two once type is large — SwiftUI's
+   `.lineLimit(dynamicTypeSize >= .xxxLarge ? 2 : 1)`. A note title held to
+   one line kept ~12 characters at 2x ("Costco tire qu…"), which no longer
+   identifies the note; two lines at 1x made rows of uneven height. The
+   harness sets `data-large-type` on :root from the Dynamic Type slider. */
+.clamp-1-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+:root[data-large-type='true'] .clamp-1-2 {
+  -webkit-line-clamp: 2;
 }
 
 /* --- Section headers: the one harness-switchable typographic decision ----

@@ -45,7 +45,7 @@ Plus a theme switcher over all eight themes, a light/dark + Increase Contrast sw
 
 - **Type distribution panel** — the histogram below, live, for whatever the frame shows.
 - **Section headers switch** — Title Case vs UPPERCASE for the section tier only (`SectionTitle`, `--section-*` in `base.css`). Title Case is the resolved choice; the switch stays so the comparison can be re-run.
-- **Scenarios** (`src/data/scenario.ts`) — full, marbete-most-urgent, sparse, fresh (vehicle, no services), empty. Screens read data through `useScenario()`, so sparse-data rules are checked, not assumed.
+- **Scenarios** (`src/data/scenario.ts`) — full, marbete-most-urgent, visitToday (shop visit started 1 h ago, no notes), sparse, fresh (vehicle, no services), empty. Screens read data through `useScenario()`, so sparse-data rules are checked, not assumed.
 - **Flows** — a `SCREENS` entry can start on one screen and be measured through in-frame navigation (Mark Done → form → Save). In-frame navigation never resets the tap counter; picking an entry does.
 - **Reveal row actions** — draws each row's swipe actions, so the action set per row is visible in review.
 
@@ -153,9 +153,11 @@ src/
   theme/themes.ts     reads the real Themes.json, applies as CSS variables
   data/fixtures.ts    sample data — deliberately not a happy path
   data/scenario.ts    scenarios + urgency sort + month grouping, via useScenario()
-  ui/                 primitives: Text (incl. SectionTitle), Controls, ReadoutSection, FormAdvisory, FormToolbar
-  components/         status (StatusTag/StatusMark), VehicleBand, Rows, Cards, TabBar (chrome stand-ins)
-  screens/            HomeTab, ServicesTab, CostsTab, ServiceForm, AddVehicle
+  data/visits.ts      appointments + vehicle notes fixtures and their formatters
+  ui/                 primitives: Text (incl. SectionTitle), Controls, ReadoutSection, FormAdvisory, FormToolbar,
+                      DepthDisclosure ("More details"), CheckRow
+  components/         status (StatusTag/StatusMark), VehicleBand, Rows, Cards, ShopVisitSection, TabBar (chrome stand-ins)
+  screens/            HomeTab, ServicesTab, CostsTab, ServiceForm, AddVehicle, AppointmentForm, NotesList, NoteSheet
   harness/            Inspector (audit), harness.css — chrome around the frame
 ```
 
@@ -175,6 +177,8 @@ The resolved decisions:
 - `ServiceForm` — one unified form with **derived intent**. No Record/Remind mode switch: the user answers "when", and a past answer means logging while a future answer means scheduling. The repeat interval is on the default path because it is what makes a reminder fire; notes and receipts are in depth because they only make an entry complete.
 - `ServiceForm` — **reading a receipt** (Sep 2026). "Scan a receipt" is the form's first row, because the receipt answers most of it. Values land in their own fields with a "From receipt" note (the F6 shape: gone once edited); a low-confidence value gets a `.caution` beside its field; one `.info` line with `[Clear]` says what was filled; Save confirms. Line items are depth. Running the flow found a real rule bug: a hand-dated entry newer than the last odometer reading was treated as backfill and raised a Save-blocking contradiction on nearly every receipt — fixed in the app's `hasUnresolvedMileageContradiction`.
 - `SiriTip` — **a screen's one Siri tip goes last** (Sep 2026), after every section, carrying no rank. It is the least important thing on the screen; placed first it would be the first thing read on every visit, and inside a section it would compete with that section's primary. It shows only once the screen has something its phrase acts on, and dismisses for good. Home and Costs model it; the app also puts one last on the mileage sheet and Documents (`ScreenSiriTip`). The stand-in mimics Apple's `SiriTipView` only for its footprint — the app uses the system view.
+- `ShopVisitSection` / `AppointmentForm` — **Home's Shop Visit section sits directly under Next Up and must not out-shout it** (Sep 2026). Primary is the when at 20pt (never Hero size, never enclosed — both made a second Next Up under the squint); actions are brackets. The form's services are `CheckRow`s, not chips: filled chips out-shouted Shop and When. Running the form found that the default (tomorrow 9:00) has usually lost its day-before reminder, so the readout says so.
+- `NotesList` / `NoteSheet` — **notes are a pushed list from the specs panel's Notes row** (Sep 2026); attachments are default-path on the sheet because a photographed quote *is* the note. Long names and titles use `Field multiline` (grows, never scrolls sideways) and `.clamp-1-2` (one line, two at large type).
 - `TabBar` — a single `[+]`, not the two-way `[LOG]`/`[SCHEDULE]` expansion. Since the iOS 26 shell, the `[+]` is a trailing toolbar item and the tab bar holds tabs only; `TabBar.tsx` is now plain stand-ins for system chrome, not a design.
 - `ServicesTab` / `CostsTab` — *(superseded Sep 2026: Services has no control row, just status groups then month history; Costs keeps only the period control. `FilterControl` was deleted.)* **One** control row instead of two-to-four. A segmented control for the dimension that changes what the screen *is* (mode, period), and a `FilterControl` for refinement. The scrolling chip rows they replace hid options off the right edge — "On track" was cut to "ON TR…", and three of six Costs categories were off-screen — which fails recognition-over-recall outright.
 - `FilterControl` — the trigger is labelled with the **dimension**, never the selected value. Labelling it with the value widened it on selection and crushed the segmented control beside it until `ALL` collided with the trigger; any control whose width depends on its own value cannot share a fixed row. The active value gets `ActiveFilterBar`, a row that exists only while a filter is on — a consequence of the user's action rather than permanent chrome, and it replaces the old always-present filter-indicator row.

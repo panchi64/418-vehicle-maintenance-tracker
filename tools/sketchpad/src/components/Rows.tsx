@@ -51,7 +51,7 @@ export interface RowChrome {
   onClick?: () => void
 }
 
-function RowShell(props: RowChrome & { section: string; children: JSX.Element }) {
+export function RowShell(props: RowChrome & { section: string; children: JSX.Element }) {
   return (
     <div style={{ display: 'flex', 'align-items': 'stretch', width: '100%', overflow: 'hidden' }}>
       <button
