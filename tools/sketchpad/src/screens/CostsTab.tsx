@@ -38,6 +38,7 @@ import { ReadoutSection } from '../ui/ReadoutSection'
 import { InsufficientDataNote } from '../ui/FormAdvisory'
 import { Body, Emphasis, Heading, Hero, Label, SectionTitle, Secondary } from '../ui/Text'
 import { Screen } from './Screen'
+import { SiriTip } from '../components/SiriTip'
 import { groupByMonth, useScenario } from '../data/scenario'
 import {
   categoryLabels,
@@ -274,6 +275,9 @@ export function CostsTab(props: { title: string; onAdd: () => void }) {
             )}
           </For>
         </Show>
+
+        {/* The screen's one Siri tip: last, after the month groups. */}
+        <SiriTip phrase="How much have I spent in Checkpoint" />
       </Screen>
     </>
   )

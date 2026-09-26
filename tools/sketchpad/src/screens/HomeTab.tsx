@@ -36,6 +36,7 @@ import { ReadoutSection } from '../ui/ReadoutSection'
 import { InsufficientDataNote } from '../ui/FormAdvisory'
 import { Emphasis, Label, Secondary } from '../ui/Text'
 import { Screen } from './Screen'
+import { SiriTip } from '../components/SiriTip'
 import { sortedByUrgency, useScenario } from '../data/scenario'
 import { NavBar, type TabId } from '../components/TabBar'
 import type { Service } from '../data/fixtures'
@@ -151,6 +152,12 @@ export function HomeTab(props: {
           </Show>
         }
       />
+
+      {/* 5. The screen's one Siri tip — last, outside every section, and only
+             once there is something due for the phrase to answer. */}
+      <Show when={sorted().length}>
+        <SiriTip phrase="What's due on my car in Checkpoint" />
+      </Show>
     </Screen>
     </>
   )
