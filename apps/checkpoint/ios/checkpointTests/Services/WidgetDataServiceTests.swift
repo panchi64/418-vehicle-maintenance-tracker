@@ -363,9 +363,14 @@ final class WidgetDataServiceTests: XCTestCase {
     func test_periodPhrase() {
         let midMay = DuePeriodFormatter.Period(isOverdue: false, label: "Mid May")
         let overdue = DuePeriodFormatter.Period(isOverdue: true, label: "Overdue")
-        XCTAssertEqual(WidgetDataService.periodPhrase(midMay, phraseFormat: "Due %@", overdueWord: "Overdue"), "Due mid may")
+        // Only the leading word lowers; the month keeps its case.
+        XCTAssertEqual(WidgetDataService.periodPhrase(midMay, phraseFormat: "Due %@", overdueWord: "Overdue"), "Due mid May")
         XCTAssertEqual(WidgetDataService.periodPhrase(overdue, phraseFormat: "Due %@", overdueWord: "Overdue"), "Overdue")
-        XCTAssertEqual(WidgetDataService.periodPhrase(midMay, phraseFormat: "Expires %@", overdueWord: "Expired"), "Expires mid may")
+        XCTAssertEqual(WidgetDataService.periodPhrase(midMay, phraseFormat: "Expires %@", overdueWord: "Expired"), "Expires mid May")
+        let nextYear = DuePeriodFormatter.Period(isOverdue: false, label: "Mid Feb 2027")
+        XCTAssertEqual(WidgetDataService.periodPhrase(nextYear, phraseFormat: "Due %@", overdueWord: "Overdue"), "Due mid Feb 2027")
+        let spanish = DuePeriodFormatter.Period(isOverdue: false, label: "Mediados de feb 2027")
+        XCTAssertEqual(WidgetDataService.periodPhrase(spanish, phraseFormat: "Vence %@", overdueWord: "Vencido"), "Vence mediados de feb 2027")
         XCTAssertEqual(WidgetDataService.periodPhrase(overdue, phraseFormat: "Expires %@", overdueWord: "Expired"), "Expired")
     }
 

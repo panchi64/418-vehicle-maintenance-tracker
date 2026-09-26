@@ -421,9 +421,10 @@ final class ServiceDetailViewTests: XCTestCase {
         // When: Getting the primary description
         let description = service.primaryDescription
 
-        // Then: Should read from the localized "remaining" format
+        // Then: Should read from the localized "remaining" format, the number
+        // grouped as everywhere else ("5,000", not "5000")
         let unit = DistanceSettings.shared.unit
-        XCTAssertEqual(description, L10n.descDistanceRemaining("\(unit.fromMiles(5000))", unit.fullName))
+        XCTAssertEqual(description, L10n.descDistanceRemaining(Formatters.mileageNumber(5000), unit.fullName))
     }
 
     func testPrimaryDescription_MilesOverdue() {
@@ -437,7 +438,7 @@ final class ServiceDetailViewTests: XCTestCase {
 
         // Then: Should read from the localized "overdue" format
         let unit = DistanceSettings.shared.unit
-        XCTAssertEqual(description, L10n.descDistanceOverdue("\(unit.fromMiles(1000))", unit.fullName))
+        XCTAssertEqual(description, L10n.descDistanceOverdue(Formatters.mileageNumber(1000), unit.fullName))
     }
 
     func testPrimaryDescription_NilWhenNoDueTracking() {

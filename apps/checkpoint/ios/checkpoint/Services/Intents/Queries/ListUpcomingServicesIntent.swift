@@ -44,7 +44,7 @@ struct ListUpcomingServicesIntent: AppIntent {
         let items = rows.map { row in
             row.status == .overdue
                 ? L10n.siriListItemOverdue(row.name)
-                : L10n.siriListItem(row.name, due: row.due.lowercased())
+                : L10n.siriListItem(row.name, due: DuePeriodFormatter.midSentence(row.due))
         }
         return L10n.siriListIntro(vehicle: vehicle.displayName, list: SpokenValue.list(items))
     }

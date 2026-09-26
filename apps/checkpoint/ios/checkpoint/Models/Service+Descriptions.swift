@@ -57,13 +57,14 @@ extension Service {
         if let dueMileage = dueMileage, let vehicle = vehicle {
             let milesRemaining = dueMileage - vehicle.currentMileage
             let unit = DistanceSettings.shared.unit
-            let displayRemaining = unit.fromMiles(abs(milesRemaining))
+            // Grouped the way every other distance is ("5,000"), in the user's unit.
+            let displayRemaining = Formatters.mileageNumber(abs(milesRemaining))
             if milesRemaining < 0 {
-                return L10n.descDistanceOverdue("\(displayRemaining)", unit.fullName)
+                return L10n.descDistanceOverdue(displayRemaining, unit.fullName)
             } else if milesRemaining == 0 {
                 return L10n.descDueNow
             } else {
-                return L10n.descDistanceRemaining("\(displayRemaining)", unit.fullName)
+                return L10n.descDistanceRemaining(displayRemaining, unit.fullName)
             }
         }
         return dueDescription  // Fallback to date-based for services without mileage tracking
