@@ -34,9 +34,31 @@ Check at runtime with `SystemLanguageModel.default.availability`. It reports `.u
 
 `@AssistantIntent` / `@AssistantEntity` are deprecated. Use `@AppIntent(schema:)` / `@AppEntity(schema:)`.
 
+## Which schema domains Checkpoint adopts
+
+Apple's rules come from [Making actions and content discoverable by Apple Intelligence](https://developer.apple.com/documentation/appintents/making-actions-and-content-discoverable-by-apple-intelligence).
+
+- **Mix domains freely.** An app can adopt schemas from several domains. Apple's own example is a houseplant-journaling app that uses both Notes and Photos.
+- **Only real matches.** Apply a schema only where the content genuinely matches what the domain is for.
+- **All-or-nothing only for Mail, Clock and Messages.** Every other domain, Reminders included, lets you adopt just the schemas that fit.
+- **Unused fields can be empty.** Set schema properties the app doesn't support to `nil`.
+- **Extra fields are Shortcuts-only.** Additional optional properties are visible in Shortcuts but ignored by Apple Intelligence.
+
+| Domain | Siri AI? | Checkpoint mapping | Verdict |
+|---|---|---|---|
+| Reminders | ✅ | service = reminder, vehicle = list | **Adopt** |
+| Photos | ✅ | image documents and receipts = assets, vehicle = album; `openAsset`, `createAssets` ("save this photo to Checkpoint"), `deleteAssets` stays in-app | **Adopt** for image documents |
+| System (`searchInApp`, `open`) | ✅ | every entity | **Adopt** |
+| Visual intelligence | ✅ (camera) | receipt / odometer / VIN recognition | **Adopt** |
+| Files | Shortcuts only | documents library, including PDFs; `openFile`, `file` | **Adopt** (cheap) |
+| Notes | ✅ | vehicle and service notes; today these are single text fields, not note objects | Only if notes become first-class |
+| Calendar | ✅ | scheduled shop appointments; Checkpoint has no appointment concept, and due dates are already reminders | Only if appointments are added |
+| Maps, Camera, Clock, Mail, Messages, Phone, Audio, Assistant | ✅ | none; Checkpoint isn't a navigation, camera, clock or messaging app | No |
+| Books, Browser, Journaling, Presentation, Reader, Spreadsheet, Whiteboard, Word processor | Shortcuts only | none | No |
+
 ## Reminders schema (iOS 27)
 
-This is the only Siri AI domain that fits maintenance: **a service is a reminder and a vehicle is a list.** Xcode checks at build time that the whole domain is adopted. The shapes below come from Xcode 27's snippet library (`AppShortcutsEditor.framework/.../IDEAppShortcutsEditor.codesnippets`); property names are the contract.
+The shapes below come from Xcode 27's snippet library (`AppShortcutsEditor.framework/.../IDEAppShortcutsEditor.codesnippets`); property names are the contract. **Only the schemas that fit are adopted.** Sections, groups and `createSection` are skipped, because Reminders isn't an all-or-nothing domain.
 
 - **`.reminders.reminder` entity**
   - Required: `title`, `note: AttributedString?`, `tags: Set<String>`, `urls: [URL]`, `dueDate: DateComponents?`, `recurrence: Calendar.RecurrenceRule?`, `isCompleted`, `isFlagged: Bool?`, `creationDate?`, `completionDate?`, `list: ListEntity`, `locationTrigger: LocationTriggerEntity?`.
@@ -60,7 +82,7 @@ This is the only Siri AI domain that fits maintenance: **a service is a reminder
 - A month interval becomes `recurrence` (`Calendar.RecurrenceRule.monthly(interval:)`).
 - Mileage-based due and interval values have no schema field. They go in `note` and on the non-schema `ServiceEntity`.
 - `isCompleted = true` runs `ServiceCompletionService`, which logs the service and schedules the next occurrence.
-- Checkpoint has no sections, groups or location triggers. Those types exist only to satisfy the domain: their queries return nothing, and creating one throws a clear "not supported" error.
+- Checkpoint has no sections, groups or location triggers. The `locationTrigger` property is `nil`. If the macro still insists on a `LocationTriggerEntity` type existing, add one whose query returns nothing — check this at build time.
 
 **iOS 26 coexistence**
 - The schema types are **separate `@available(iOS 27, *)` types**, e.g. `ServiceReminderEntity` and `VehicleListEntity`.
