@@ -180,6 +180,28 @@ final class ServiceLoggingIntentTests: IntentTestCase {
         XCTAssertEqual(ServiceLogging.timing(for: calendar.date(byAdding: .day, value: 2, to: now), now: now), .today)
     }
 
+    func test_logServiceIntent_pickedServicesDecideTheVehicle() throws {
+        let oil = addService("Oil Change")
+        XCTAssertEqual(try LogServiceIntent.vehicle(for: [oil], named: nil, in: context).id, vehicle.id)
+        XCTAssertEqual(try LogServiceIntent.vehicle(for: [], named: nil, in: context).id, vehicle.id)
+    }
+
+    func test_logServiceIntent_servicesOfAnotherVehicle_areRefused() throws {
+        let other = Vehicle(name: "Truck", make: "Ford", model: "F-150", year: 2018, currentMileage: 80_000)
+        context.insert(other)
+        let oil = addService("Oil Change")
+        let rotation = addService("Tire Rotation", to: other)
+
+        // Two vehicles' services in one entry.
+        XCTAssertThrowsError(try LogServiceIntent.vehicle(for: [oil, rotation], named: nil, in: context)) {
+            XCTAssertEqual($0 as? IntentError, .serviceCannotMove)
+        }
+        // A service picked on one vehicle, the entry named for another.
+        XCTAssertThrowsError(try LogServiceIntent.vehicle(for: [oil], named: VehicleEntity(model: other), in: context)) {
+            XCTAssertEqual($0 as? IntentError, .serviceCannotMove)
+        }
+    }
+
     func test_logServiceIntent_neverWritesWithoutAnAnswer() async {
         let intent = LogServiceIntent()
         intent.services = ["Oil Change"]

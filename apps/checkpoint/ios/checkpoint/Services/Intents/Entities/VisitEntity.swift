@@ -79,7 +79,10 @@ struct VisitEntity: ModelBackedEntity {
         vehicleName = visit.vehicle?.displayName ?? ""
         performedDate = visit.performedDate
         mileage = visit.mileageAtVisit
-        total = .stored(visit.totalCost)
+        // The Costs tab's figure (`ExpenseEvent`): the entered total, or an
+        // itemized visit's breakdown when none was entered.
+        let amount = ExpenseEvent.visit(visit).amount
+        total = visit.totalCost != nil || amount > 0 ? .stored(amount) : nil
         category = visit.costCategory
         serviceNames = (visit.logs ?? []).compactMap { $0.service?.name }.sorted()
         lineItems = (visit.lineItems ?? [])

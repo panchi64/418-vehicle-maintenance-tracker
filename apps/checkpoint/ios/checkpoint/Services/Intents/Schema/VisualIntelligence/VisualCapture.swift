@@ -112,9 +112,13 @@ enum VisualCaptureClassifier {
     nonisolated static func cgImage(from buffer: CVReadOnlyPixelBuffer) -> CGImage? {
         buffer.withUnsafeBuffer { pixelBuffer in
             let image = CIImage(cvPixelBuffer: pixelBuffer)
-            return CIContext().createCGImage(image, from: image.extent)
+            return imageContext.createCGImage(image, from: image.extent)
         }
     }
+
+    /// One Core Image context for every frame: a context is costly to make
+    /// and safe to share (`CIContext` is Sendable).
+    nonisolated private static let imageContext = CIContext()
 }
 
 // MARK: - Search

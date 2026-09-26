@@ -88,7 +88,8 @@ struct MileageUpdateSheet: View {
                 subtitle: vehicle.displayName,
                 saveTitle: L10n.commonUpdate,
                 canSave: hasReading && !isProcessingOCR,
-                isDirty: newMileage != nil,
+                // A seeded reading the user hasn't touched is nothing to lose.
+                isDirty: newMileage != nil && newMileage != initialMileage,
                 onSave: { commit(newMileage ?? 0) },
                 onBlocked: { showBlocker = true }
             )

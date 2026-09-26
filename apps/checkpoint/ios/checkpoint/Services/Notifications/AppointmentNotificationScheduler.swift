@@ -103,8 +103,10 @@ enum AppointmentNotificationScheduler {
     }
 
     /// Launch pass: drop orphans, then reschedule every scheduled visit so
-    /// banners pick up renames and moves synced from other devices.
-    static func performLaunchMaintenance(for vehicles: [Vehicle]) async {
+    /// banners pick up renames and moves synced from other devices. The adds
+    /// are awaited: the caller trims the pending set to the OS budget next,
+    /// and must see these in it.
+    static func performLaunchMaintenance(for vehicles: [Vehicle], now: Date = .now) async {
         let scheduled = vehicles.flatMap { Appointment.scheduled($0.appointments ?? []) }
         let scheduledIDs = Set(scheduled.map(\.id))
         let center = UNUserNotificationCenter.current()
@@ -115,7 +117,14 @@ enum AppointmentNotificationScheduler {
             center.removePendingNotificationRequests(withIdentifiers: orphans)
         }
         for appointment in scheduled {
-            schedule(for: appointment)
+            center.removePendingNotificationRequests(withIdentifiers: requestIDs(appointmentID: appointment.id))
+            for request in requests(for: appointment, now: now) {
+                do {
+                    try await center.add(request)
+                } catch {
+                    appointmentNotificationLogger.error("Failed to schedule appointment reminder: \(error.localizedDescription)")
+                }
+            }
         }
     }
 }

@@ -62,8 +62,7 @@ struct LogServiceIntent: AppIntent {
     func perform() async throws -> some IntentResult & ReturnsValue<[ServiceLogEntity]> & ProvidesDialog {
         let context = container.mainContext
         let scheduled = try IntentStore.services(scheduledServices ?? [], in: context)
-        // A picked service decides the vehicle; otherwise the phrase does.
-        let vehicle = try scheduled.first?.vehicle ?? IntentStore.vehicle(for: self.vehicle, in: context)
+        let vehicle = try Self.vehicle(for: scheduled, named: self.vehicle, in: context)
 
         let names = ServiceLogging.names(
             in: scheduled.map(\.name) + (services ?? []),
@@ -98,6 +97,21 @@ struct LogServiceIntent: AppIntent {
                 vehicle: vehicle.displayName
             ))
         )
+    }
+
+    /// The vehicle the entry goes on. Picked services decide it, so they must
+    /// all be on one vehicle — the named one, if any: they are logged by
+    /// name there, and on another vehicle a name would complete or create
+    /// the wrong service. With none picked, the named or showing vehicle.
+    @MainActor
+    static func vehicle(for scheduled: [Service], named entity: VehicleEntity?, in context: ModelContext) throws -> Vehicle {
+        guard let first = scheduled.first else { return try IntentStore.vehicle(for: entity, in: context) }
+        let vehicle = try IntentStore.vehicle(of: first)
+        let isOneVehicle = scheduled.allSatisfy { $0.vehicle?.id == vehicle.id }
+        guard isOneVehicle, entity.map({ $0.id == vehicle.id }) ?? true else {
+            throw IntentError.serviceCannotMove
+        }
+        return vehicle
     }
 
     @MainActor

@@ -85,7 +85,7 @@ final class ReceiptExtractionService {
                 imageOrientation: orientation
             ))
             let model = Self.draft(from: reading, context: context)
-            let merged = ReceiptDraftValidator.merge(model: model, rules: rules)
+            let merged = ReceiptDraftValidator.merge(model: model, rules: rules, calendar: context.calendar)
             return ReceiptDraftValidator.validate(merged, context: context)
         } catch {
             extractionLogger.info("On-device model couldn't read the receipt, using rules: \(error.localizedDescription)")

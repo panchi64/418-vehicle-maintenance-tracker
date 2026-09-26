@@ -152,6 +152,24 @@ final class AppEntityTests: XCTestCase {
         XCTAssertEqual(entity.lineItems, ["Labor"])
     }
 
+    func test_visitEntity_itemizedWithoutTotal_reportsTheCostsTabFigure() {
+        let visit = ServiceVisit(vehicle: vehicle, totalCost: nil, isItemized: true)
+        modelContext.insert(visit)
+        let log = ServiceLog(vehicle: vehicle, performedDate: .now, mileageAtService: 45_000, cost: 80)
+        log.visit = visit
+        modelContext.insert(log)
+
+        XCTAssertEqual(VisitEntity(model: visit).total?.amount, ExpenseEvent.visit(visit).amount)
+        XCTAssertEqual(VisitEntity(model: visit).total?.amount, 80)
+    }
+
+    func test_visitEntity_noCost_hasNoTotal() {
+        let visit = ServiceVisit(vehicle: vehicle, totalCost: nil)
+        modelContext.insert(visit)
+
+        XCTAssertNil(VisitEntity(model: visit).total)
+    }
+
     func test_visitEntity_noShop_usesVisitTitle() {
         let visit = ServiceVisit(vehicle: vehicle, totalCost: 50)
         modelContext.insert(visit)

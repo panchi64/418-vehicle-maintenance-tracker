@@ -17,6 +17,16 @@ import Foundation
 nonisolated struct ServiceNameMatcher: Sendable {
     /// The vehicle's service names first, then the preset catalog.
     let candidates: [String]
+    /// The candidates longest first, each with its normalized form. Built
+    /// once: every line of a receipt is matched against all of them.
+    private let byLength: [(name: String, normalized: String)]
+
+    init(candidates: [String]) {
+        self.candidates = candidates
+        byLength = candidates
+            .sorted { $0.count > $1.count }
+            .map { (name: $0, normalized: Self.normalize($0)) }
+    }
 
     /// The Checkpoint name for `text`, or nil when nothing fits.
     func match(_ text: String) -> String? {
@@ -25,9 +35,8 @@ nonisolated struct ServiceNameMatcher: Sendable {
 
         // 1. A known name printed as is. Longest first, so "Cabin Air Filter"
         //    wins over "Air Filter".
-        let byLength = candidates.sorted { $0.count > $1.count }
-        if let direct = byLength.first(where: { Self.contains(normalized, phrase: Self.normalize($0)) }) {
-            return direct
+        if let direct = byLength.first(where: { Self.contains(normalized, phrase: $0.normalized) }) {
+            return direct.name
         }
 
         // 2. A shop's wording for a catalog service, EN or ES.

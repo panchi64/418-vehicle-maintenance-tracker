@@ -8,7 +8,8 @@
 //  - title ⇄ shop name. Siri may say "oil change at Firestone": a place's
 //    common name wins as the shop when there is one, and tracked service
 //    names found in the title link those services.
-//  - note ⇄ note, with the linked services on a last line ("Services: …").
+//  - note ⇄ note, with the linked services on a last line ("Services: …")
+//    that is stripped again when a note comes back.
 //  - status: scheduled → confirmed, cancelled → cancelled; a completed visit
 //    stays confirmed (it happened).
 //  - alarms: the reminders' fire dates (`Appointment.reminderDates`).
@@ -31,10 +32,24 @@ enum CalendarMapping {
     nonisolated static func note(note: String?, serviceNames: [String]) -> String? {
         var parts: [String] = []
         if let note, !note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { parts.append(note) }
-        if !serviceNames.isEmpty {
-            parts.append(L10n.appointmentEventServicesLine(ListFormatter.localizedString(byJoining: serviceNames)))
-        }
+        if let line = servicesLine(serviceNames) { parts.append(line) }
         return parts.isEmpty ? nil : parts.joined(separator: "\n")
+    }
+
+    /// The appointment note an event note stands for: the services line this
+    /// app appended is dropped, so writing a note back never stores it twice.
+    nonisolated static func appointmentNote(fromEventNote note: String, serviceNames: [String]) -> String {
+        var text = note.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let line = servicesLine(serviceNames), text.hasSuffix(line) {
+            text = String(text.dropLast(line.count)).trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        return text
+    }
+
+    /// "Services: Oil Change and Tire Rotation", or nil with none linked.
+    nonisolated private static func servicesLine(_ serviceNames: [String]) -> String? {
+        guard !serviceNames.isEmpty else { return nil }
+        return L10n.appointmentEventServicesLine(ListFormatter.localizedString(byJoining: serviceNames))
     }
 
     @MainActor

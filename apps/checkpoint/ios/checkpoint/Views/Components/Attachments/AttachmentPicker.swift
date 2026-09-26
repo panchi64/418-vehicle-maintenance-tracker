@@ -203,7 +203,7 @@ extension AttachmentPicker.AttachmentData {
             .flatMap(UIImage.init(data:)) ?? image
         return Self(
             data: compressedData,
-            fileName: "receipt_\(now.timeIntervalSince1970)_\(page).jpg",
+            fileName: "receipt_\(Int(now.timeIntervalSince1970))_\(page).jpg",
             mimeType: "image/jpeg",
             thumbnailImage: thumbnailImage,
             extractedText: extractedText

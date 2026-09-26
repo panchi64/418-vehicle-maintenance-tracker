@@ -11,7 +11,8 @@ Intelligence/
 ├── OnDeviceLanguageModel.swift      # the real session: @Generable types, ServiceNameTool,
 │                                    #   Attachment + OCRTool on iOS 27, context budget
 ├── ServiceReceiptDraft.swift        # the draft: fields, per-field confidence, issues; ReceiptContext
-├── ReceiptTextParser.swift          # rule-based reader (the fallback, and the model's cross-check)
+├── ReceiptTextParser.swift          # rule-based reader (the fallback, and the model's cross-check);
+│                                    #   +LineItems (items, kinds), +Values (money, dates)
 ├── ReceiptDraftValidator.swift      # arithmetic/date/odometer checks + merging model with rules
 ├── ReceiptExtractionService.swift   # photo → Vision → rules (+ model) → validated draft
 ├── ServiceNameMatcher.swift         # receipt wording (EN/ES) → the vehicle's service or preset name

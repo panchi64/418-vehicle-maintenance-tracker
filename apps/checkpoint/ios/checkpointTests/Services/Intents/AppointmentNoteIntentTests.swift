@@ -233,6 +233,26 @@ final class AppointmentNoteIntentTests: IntentTestCase {
         }
     }
 
+    func test_calendar_updateEvent_noteRoundTrip_keepsOneServicesLine() throws {
+        guard #available(iOS 27, *) else { throw XCTSkip("Calendar schema types are iOS 27") }
+        let oil = addService("Oil Change", dueInDays: 5)
+        let appointment = try ScheduleAppointmentIntent.book(
+            AppointmentFields(shopName: "Midas", startDate: inDays(2), note: "Bring the coupon", serviceIDs: [oil.id]),
+            on: vehicle, in: context
+        )
+        // Siri edits the event note it read, services line and all.
+        let eventNote = try XCTUnwrap(AppointmentEventEntity(model: appointment).note.map { String($0.characters) })
+        UpdateAppointmentEventIntent.apply(
+            title: nil, startDate: nil, endDate: nil,
+            note: "Ask about the brakes\n" + eventNote, location: nil, to: appointment
+        )
+
+        XCTAssertEqual(appointment.note, "Ask about the brakes\nBring the coupon")
+        let services = L10n.appointmentEventServicesLine("Oil Change")
+        let next = try XCTUnwrap(AppointmentEventEntity(model: appointment).note.map { String($0.characters) })
+        XCTAssertEqual(next.components(separatedBy: services).count - 1, 1, "The services line appears once")
+    }
+
     func test_calendarMapping_placeNameWinsAsTheShop() throws {
         guard #available(iOS 27, *) else { throw XCTSkip("Calendar schema types are iOS 27") }
         let place = PlaceDescriptorFixture.firestone

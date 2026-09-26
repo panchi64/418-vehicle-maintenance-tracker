@@ -53,7 +53,9 @@ struct ServiceLogForm: View {
     var carryover: ServiceLogCarryover?
     /// Duplicate only, with more than one vehicle: where the entry goes.
     var vehicleChoice: ServiceLogVehicleChoice?
-    /// After a successful save (Mark Done's presenter pops its detail).
+    /// After a save that recorded history (Mark Done's presenter pops its
+    /// detail; an appointment's Log Visit closes the appointment). Not after
+    /// a "Not done yet" save, which only schedules.
     var onSaved: (() -> Void)?
     /// Edit only: asks the presenter to delete the entry once this form has
     /// dismissed. Nil hides Delete Entry.

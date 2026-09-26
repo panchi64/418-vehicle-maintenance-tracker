@@ -98,8 +98,12 @@ extension AppState {
             present(.mileageUpdate)
 
         case .addVehicle(_, let vin):
-            addVehicleVINSeed = vin
             showTabRoot(.home)
+            // Seeded only when Add Vehicle opens: behind the paywall nothing
+            // would take it, and a later Add Vehicle would start from it.
+            if !VehicleService.requiresPro(toAddTo: vehicles.count, isPro: StoreManager.shared.isPro) {
+                addVehicleVINSeed = vin
+            }
             requestAddVehicle(vehicleCount: vehicles.count)
 
         case .logService:

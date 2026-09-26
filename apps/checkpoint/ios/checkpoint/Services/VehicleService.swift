@@ -108,12 +108,9 @@ enum VehicleService {
             NotificationService.shared.cancelMarbeteNotifications(for: vehicle)
         }
 
-        // Refresh pending service reminders so they pick up edits
-        // (name, mileage) instead of firing with stale content
-        NotificationService.shared.rescheduleNotifications(for: vehicle)
-
-        AppIconService.shared.updateIcon(for: vehicle, services: vehicle.services ?? [])
-        WidgetDataService.shared.updateWidget(for: vehicle)
+        // Service reminders pick up the edits (name, mileage) instead of
+        // firing with stale content; the icon and widget follow.
+        DerivedSurfaces.refresh(for: vehicle)
     }
 
     private static func nilIfEmpty(_ value: String) -> String? {

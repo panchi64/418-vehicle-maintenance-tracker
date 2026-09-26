@@ -106,8 +106,8 @@ struct UpdateAppointmentEventIntent {
         )
     }
 
-    /// The write: only the fields Siri gave change. A new start without a
-    /// new end keeps the visit's length.
+    /// The write: only the fields Siri gave change, in one update. A new
+    /// start without a new end keeps the visit's length.
     @MainActor
     static func apply(
         title: String?,
@@ -117,14 +117,20 @@ struct UpdateAppointmentEventIntent {
         location: AppointmentLocation?,
         to appointment: Appointment
     ) {
-        if let startDate, endDate == nil {
-            AppointmentService.reschedule(appointment, to: startDate)
-        }
         var fields = AppointmentFields(appointment: appointment)
         if let title { fields.shopName = CalendarMapping.shopName(title: title, location: location) }
-        if let startDate, endDate != nil { fields.startDate = startDate }
+        if let startDate {
+            if endDate == nil { fields.move(to: startDate) } else { fields.startDate = startDate }
+        }
         if let endDate { fields.endDate = endDate }
-        if let note { fields.note = note }
+        if let note {
+            // Siri edits the event note, which ends in the services line this
+            // app wrote; only what the user wrote goes back.
+            fields.note = CalendarMapping.appointmentNote(
+                fromEventNote: note,
+                serviceNames: appointment.sortedServices.map(\.name)
+            )
+        }
         if let location {
             let place = CalendarMapping.place(from: location)
             fields.address = place.address

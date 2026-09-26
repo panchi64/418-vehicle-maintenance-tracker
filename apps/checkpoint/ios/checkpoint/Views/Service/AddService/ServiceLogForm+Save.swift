@@ -24,7 +24,9 @@ extension ServiceLogForm {
         WidgetDataService.shared.updateWidget(for: vehicle)
         clearDraft()
         if !model.mode.isEdit { appState.recordCompletedAction() }
-        onSaved?()
+        // A "Not done yet" save records nothing, so the presenters waiting
+        // on a record (Mark Done's pop, an appointment's Log Visit) don't run.
+        if model.mode.isEdit || model.isLogging { onSaved?() }
         dismiss()
     }
 

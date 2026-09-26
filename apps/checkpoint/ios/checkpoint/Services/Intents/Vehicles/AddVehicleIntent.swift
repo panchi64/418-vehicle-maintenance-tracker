@@ -163,9 +163,12 @@ struct AddVehicleIntent: AppIntent {
         try checkLimit(in: context, isPro: isPro)
         let vehicle = VehicleService.create(fields, in: context)
         if withSchedule {
+            // The writer refreshes what derives from the schedule it adds.
             StarterScheduleWriter.insert(StarterScheduleWriter.defaultPlans(for: vehicle, now: now), on: vehicle, in: context)
+            try IntentStore.save(context)
+        } else {
+            try IntentStore.commit(vehicle, in: context)
         }
-        try IntentStore.commit(vehicle, in: context)
         return vehicle
     }
 

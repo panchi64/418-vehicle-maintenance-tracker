@@ -92,7 +92,12 @@ nonisolated enum ReceiptDraftValidator {
     /// Agreement raises a field to high confidence; a value only the model
     /// found stays medium; where the model found nothing, the rules' value
     /// fills in with the rules' own confidence. Validate afterwards.
-    static func merge(model: ServiceReceiptDraft, rules: ServiceReceiptDraft) -> ServiceReceiptDraft {
+    /// `calendar` is the one the dates were read in (`ReceiptContext`).
+    static func merge(
+        model: ServiceReceiptDraft,
+        rules: ServiceReceiptDraft,
+        calendar: Calendar = .current
+    ) -> ServiceReceiptDraft {
         var merged = model
         merged.source = .onDeviceModel
 
@@ -116,7 +121,7 @@ nonisolated enum ReceiptDraftValidator {
         (merged.odometer, merged.confidence.odometer) = combine(
             model.odometer, rules.odometer, rulesConfidence: rules.confidence.odometer
         )
-        let sameDay = model.date.flatMap { m in rules.date.map { Calendar.current.isDate(m, inSameDayAs: $0) } } ?? false
+        let sameDay = model.date.flatMap { m in rules.date.map { calendar.isDate(m, inSameDayAs: $0) } } ?? false
         if sameDay {
             merged.confidence.date = .high
         } else if model.date == nil {

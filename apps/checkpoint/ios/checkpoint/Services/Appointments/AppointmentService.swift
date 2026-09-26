@@ -73,6 +73,14 @@ nonisolated struct AppointmentFields: Equatable, Sendable {
     var isValid: Bool {
         !shopName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
+
+    /// Move the visit to start at `start`, keeping its length.
+    mutating func move(to start: Date) {
+        if let end = endDate, end > startDate {
+            endDate = start.addingTimeInterval(end.timeIntervalSince(startDate))
+        }
+        startDate = start
+    }
 }
 
 @MainActor
@@ -101,10 +109,7 @@ enum AppointmentService {
     /// Move a visit to a new time, keeping its length.
     static func reschedule(_ appointment: Appointment, to start: Date) {
         var fields = AppointmentFields(appointment: appointment)
-        if let end = appointment.endDate, end > appointment.startDate {
-            fields.endDate = start.addingTimeInterval(end.timeIntervalSince(appointment.startDate))
-        }
-        fields.startDate = start
+        fields.move(to: start)
         update(appointment, with: fields)
     }
 
