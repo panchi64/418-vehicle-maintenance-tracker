@@ -323,14 +323,13 @@ extension ContentView {
     // MARK: - Mileage Update
 
     func updateMileage(_ newMileage: Int, for vehicle: Vehicle) {
-        vehicle.recordMileage(newMileage, source: .manual, in: modelContext)
+        // Records the reading and restarts the mileage reminder.
+        MileageUpdateAction.record(newMileage, for: vehicle, in: modelContext)
 
         // Update app icon based on new mileage affecting service status
         updateAppIcon()
         // Update widget data
         updateWidgetData()
-        // Reschedule mileage reminder for 14 days from now
-        NotificationService.shared.scheduleMileageReminder(for: vehicle, lastUpdateDate: .now)
         // Not a tip-prompt action: an odometer update is upkeep the app asks
         // of the user, not something it did for them (see TipPromptPolicy).
     }

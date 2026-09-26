@@ -54,25 +54,23 @@ struct EditServiceView: View {
             || notes != loadedNotes
     }
 
-    /// Explicit values always win; an interval is only allowed to re-derive a
-    /// due when the user actually changed that interval in this edit AND the
-    /// service has a real completion anchor. Never fabricates an anchor from
-    /// `.now` — otherwise a notes-only save would silently shift the schedule,
-    /// and clearing a due date/mileage would be impossible on a recurring
-    /// service (the interval would immediately re-populate it).
-    var proposedSchedule: ReminderImpactCalculator.Schedule {
-        let effectiveMonths = isRecurring ? intervalMonths : nil
-        let effectiveMiles = isRecurring ? intervalMiles : nil
-        let monthsChanged = effectiveMonths != loadedIntervalMonths
-        let milesChanged = effectiveMiles != loadedIntervalMiles
-        return ReminderImpactCalculator.projected(
-            intervalMonths: (monthsChanged && service.lastPerformed != nil) ? effectiveMonths : nil,
-            intervalMiles: (milesChanged && service.lastMileage != nil) ? effectiveMiles : nil,
-            anchorDate: service.lastPerformed ?? .distantPast,
-            anchorMileage: service.lastMileage ?? 0,
+    /// The service as Save would leave it.
+    var edit: ServiceEdit {
+        ServiceEdit(
+            name: serviceName,
             explicitDueDate: hasDueDate ? dueDate : nil,
-            explicitDueMileage: dueMileage
+            explicitDueMileage: dueMileage,
+            intervalMonths: intervalMonths,
+            intervalMiles: intervalMiles,
+            isRecurring: isRecurring,
+            notes: notes.isEmpty ? nil : notes
         )
+    }
+
+    /// See `Service.proposedSchedule(for:)`: explicit values win, and a
+    /// changed interval re-derives a due only from a real completion anchor.
+    var proposedSchedule: ReminderImpactCalculator.Schedule {
+        service.proposedSchedule(for: edit)
     }
 
     var body: some View {

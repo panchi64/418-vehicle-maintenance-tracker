@@ -43,8 +43,6 @@ enum ServiceLogDeleteAction {
 
     private static func refreshDerivedSurfaces(for vehicle: Vehicle?) {
         guard let vehicle else { return }
-        ServiceNotificationScheduler.rescheduleNotifications(for: vehicle)
-        AppIconService.shared.updateIcon(for: vehicle, services: vehicle.services ?? [])
-        WidgetDataService.shared.updateWidget(for: vehicle)
+        DerivedSurfaces.refresh(for: vehicle)
     }
 }

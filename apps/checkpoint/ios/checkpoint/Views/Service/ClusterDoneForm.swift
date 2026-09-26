@@ -183,51 +183,17 @@ struct ClusterDoneForm: View {
         AnalyticsService.shared.capture(.serviceClusterMarkAllDone)
 
         let cost = Decimal(string: costInput)
-        let visit = ServiceVisit(
-            vehicle: vehicle,
-            performedDate: performedDate,
-            mileageAtVisit: mileage,
-            totalCost: cost,
-            costCategory: cost != nil ? costCategory : nil,
-            isItemized: false,
-            shopName: nil,
-            notes: notes.isEmpty ? nil : notes
-        )
-        modelContext.insert(visit)
-
-        // The first child log carries any attachments.
-        var firstLog: ServiceLog?
-        for service in cluster.services {
-            let log = ServiceLog(
-                service: service,
-                vehicle: vehicle,
-                performedDate: performedDate,
-                mileageAtService: mileage,
-                cost: nil,
-                costCategory: nil,
-                notes: nil
-            )
-            log.visit = visit
-            modelContext.insert(log)
-            if firstLog == nil { firstLog = log }
-
-            ServiceCompletionService.completeService(
-                service,
+        ServiceVisitWriter.record(
+            cluster.services.map { .tracked($0) },
+            on: vehicle,
+            details: ServiceVisitWriter.Details(
                 performedDate: performedDate,
                 mileage: mileage,
-                in: modelContext
-            )
-        }
-        if let firstLog {
-            ServiceCompletionService.insertAttachments(pendingAttachments, on: firstLog, in: modelContext)
-        }
-
-        // F11: one commit path, gated on the reading being the newest.
-        MileageCommit.commitIfNewest(
-            reading: mileage,
-            observedAt: performedDate,
-            source: .serviceCompletion,
-            for: vehicle,
+                totalCost: cost,
+                costCategory: costCategory,
+                notes: notes.isEmpty ? nil : notes
+            ),
+            attachments: pendingAttachments,
             in: modelContext
         )
 

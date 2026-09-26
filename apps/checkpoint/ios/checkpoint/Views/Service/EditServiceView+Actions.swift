@@ -36,17 +36,7 @@ extension EditServiceView {
         HapticService.shared.success()
         AnalyticsService.shared.capture(.serviceEdited)
 
-        service.name = serviceName
-        let schedule = proposedSchedule
-        service.dueDate = schedule.dueDate
-        service.dueMileage = schedule.dueMileage
-        service.intervalMonths = isRecurring ? intervalMonths : nil
-        service.intervalMiles = isRecurring ? intervalMiles : nil
-        service.isRecurring = isRecurring && Service.hasIntervalPolicy(
-            intervalMonths: intervalMonths,
-            intervalMiles: intervalMiles
-        )
-        service.notes = notes.isEmpty ? nil : notes
+        service.apply(edit)
 
         // The rebuild is the whole operation — it purges the vehicle's pending
         // set before re-adding.

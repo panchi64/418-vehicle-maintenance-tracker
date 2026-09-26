@@ -106,7 +106,7 @@ struct StarterScheduleSheet: View {
             ))
         }
 
-        ServiceDeleteAction.refreshDerivedSurfaces(for: vehicle)
+        DerivedSurfaces.refresh(for: vehicle)
         HapticService.shared.success()
         ToastService.shared.show(L10n.vehicleStarterToastAdded(plans.count), icon: "clock", style: .success)
         dismiss()

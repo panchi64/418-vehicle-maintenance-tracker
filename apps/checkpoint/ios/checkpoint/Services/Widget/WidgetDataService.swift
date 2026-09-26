@@ -274,7 +274,7 @@ final class WidgetDataService {
                 serviceID: service.id.uuidString,
                 name: service.name,
                 status: statusString(for: status),
-                dueDescription: serviceDueDescription(for: service, effectiveDue: effectiveDue),
+                dueDescription: Self.dueDescription(for: service, effectiveDue: effectiveDue),
                 dueMileage: service.dueMileage,
                 daysRemaining: daysRemaining,
                 duePeriod: Self.duePeriod(for: effectiveDue),
@@ -453,7 +453,7 @@ final class WidgetDataService {
         do {
             try context.save()
             // Remove only the completions this pass handled. A blanket clear would
-            // erase completions the widget's MarkServiceDoneIntent enqueued mid-drain
+            // erase completions the widget's WidgetMarkDoneIntent enqueued mid-drain
             // (a separate process), silently losing them. A failed save removes
             // nothing, so everything reprocesses next foreground.
             PendingWidgetCompletion.remove(serviceIDs: processedServiceIDs)
@@ -482,7 +482,7 @@ final class WidgetDataService {
     /// Due text for the shared payload: mileage phrasing for mileage-tracked
     /// services, otherwise an abstracted month period ("Due mid May" / "Overdue")
     /// so widget, watch, and Siri read consistently with the Next Up card.
-    private func serviceDueDescription(for service: Service, effectiveDue: Date?) -> String {
+    static func dueDescription(for service: Service, effectiveDue: Date?) -> String {
         if service.dueMileage != nil {
             return service.primaryDescription ?? L10n.descScheduled
         }
