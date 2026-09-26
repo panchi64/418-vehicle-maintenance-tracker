@@ -12,6 +12,7 @@ import { ServiceForm, type FormMode } from './screens/ServiceForm'
 import { AddVehicle } from './screens/AddVehicle'
 import { ScenarioProvider, scenarios, type Scenario } from './data/scenario'
 import type { Service, ServiceLog } from './data/fixtures'
+import { sampleReceipt, type ReceiptDraft } from './data/receipt'
 
 /**
  * Where the frame is. Tabs sit inside the shell; forms and Add Vehicle are
@@ -21,7 +22,7 @@ import type { Service, ServiceLog } from './data/fixtures'
  */
 type Route =
   | { kind: 'tab'; tab: TabId }
-  | { kind: 'form'; mode: FormMode; service?: Service; log?: ServiceLog }
+  | { kind: 'form'; mode: FormMode; service?: Service; log?: ServiceLog; receipt?: ReceiptDraft }
   | { kind: 'vehicle' }
 
 interface ScreenDef {
@@ -68,6 +69,22 @@ const SCREENS: ScreenDef[] = [
     start: { kind: 'tab', tab: 'home' },
     budget: 4,
     path: '[+] → a service → Not done yet → Save',
+  },
+  {
+    id: 'flow-receipt',
+    label: 'Flow: log a service from a receipt',
+    scenario: 'full',
+    start: { kind: 'tab', tab: 'home' },
+    budget: 3,
+    path: '[+] → Scan a receipt → Save (+2 taps in the system camera: shutter, Save)',
+  },
+  {
+    id: 'form-receipt',
+    label: 'Form: opened from a receipt (Share / Visual Intelligence)',
+    scenario: 'full',
+    start: { kind: 'form', mode: 'log', receipt: sampleReceipt },
+    budget: 1,
+    path: 'Save — every value is already in its field, marked From receipt',
   },
   {
     id: 'form-edit',
@@ -323,7 +340,7 @@ export function App() {
                 {/* Keyed: each form route is a fresh form. Unkeyed, going from one
                     form route to another kept the first form's state. */}
                 <Match when={route().kind === 'form' && (route() as Extract<Route, { kind: 'form' }>)} keyed>
-                  {(r) => <ServiceForm mode={r.mode} service={r.service} log={r.log} onClose={home} />}
+                  {(r) => <ServiceForm mode={r.mode} service={r.service} log={r.log} receipt={r.receipt} onClose={home} />}
                 </Match>
 
                 <Match when={route().kind === 'vehicle'}>

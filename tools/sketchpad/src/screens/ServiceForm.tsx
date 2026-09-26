@@ -43,6 +43,27 @@
  *
  * SAVE IS IN THE TOOLBAR (FormToolbar). A tap on the dim Save scrolls to the
  * blocking field and shows why there (F2).
+ *
+ * READING A RECEIPT (Sep 2026). The receipt answers most of the form at once —
+ * service, when, odometer, total, shop — so its entry point sits FIRST, as a
+ * quiet row shaped like the More details trigger (accent 15 + tertiary 13
+ * summary), where the draft-resume banner already sits for the same reason:
+ * both refill the form. Tried and rejected:
+ *   - `[Scan receipt]` in the Details header: in the log door the open service
+ *     picker pushes Details below the fold, so the fastest path was hidden.
+ *   - A "Receipt" readout section with the total as its primary: the total then
+ *     appeared twice (there and in Cost) — two affordances for one value
+ *     (Decision rule 7), and the readout outranked the decision.
+ * Resolved: values land IN their own fields, each with a "From receipt" note
+ * beneath it (the F6 shape: provenance shown only while the value is unchanged —
+ * edit it and the note goes). A low-confidence value gets a .caution instead,
+ * next to the field that resolves it. One .info line says what the system did,
+ * with [Clear] to put the form back. Save confirms — no extra "use these" tap.
+ * Shop joins Details only when the receipt names one (it is stored on the
+ * visit); line items are completeness, so they live under More details with
+ * the one-line reconciliation against the total.
+ *   Log from a receipt   3 in-frame  [+] → Scan a receipt → Save
+ *                        (+2 in the system camera: shutter, Save)
  */
 import type { JSX } from 'solid-js'
 import { createMemo, createSignal, For, Show } from 'solid-js'
@@ -65,6 +86,7 @@ import {
   type ServiceLog,
 } from '../data/fixtures'
 import { isMarbete, sortedByUrgency, useScenario } from '../data/scenario'
+import { kindLabels, sampleReceipt, type Confidence, type ReceiptDraft } from '../data/receipt'
 
 export type FormMode = 'log' | 'complete' | 'edit'
 
@@ -92,6 +114,8 @@ export function ServiceForm(props: {
   service?: Service
   /** edit: the log being edited. */
   log?: ServiceLog
+  /** Open with a receipt already read (the Visual Intelligence / Share door). */
+  receipt?: ReceiptDraft
   onClose?: () => void
 }) {
   const data = useScenario()
@@ -127,6 +151,52 @@ export function ServiceForm(props: {
   let scrollRef: HTMLDivElement | undefined
 
   const later = () => when() === 'later'
+
+  // --- Receipt: values land in their own fields, marked until edited -----
+  const [receipt, setReceipt] = createSignal<ReceiptDraft>()
+  const [shop, setShop] = createSignal('')
+  type Snapshot = { name: string; linked?: Service; pickerOpen: boolean; when: When; customDate: string; odometer: string; cost: string }
+  let beforeReceipt: Snapshot | undefined
+  const receiptValue = {
+    name: () => receipt()?.serviceName ?? '',
+    date: () => (receipt()?.date ? fmtDate(receipt()!.date!) : ''),
+    odometer: () => (receipt()?.odometer != null ? fmtMileageBare(receipt()!.odometer!) : ''),
+    cost: () => (receipt()?.total != null ? receipt()!.total!.toFixed(2) : ''),
+    shop: () => receipt()?.shopName ?? '',
+  }
+  /** A field is SUGGESTED while it still holds exactly what the receipt said. */
+  const suggested = (field: keyof typeof receiptValue, current: string) =>
+    receipt() != null && receiptValue[field]() !== '' && current === receiptValue[field]()
+
+  const applyReceipt = (r: ReceiptDraft) => {
+    beforeReceipt = { name: name(), linked: linked(), pickerOpen: pickerOpen(), when: when(), customDate: customDate(), odometer: odometer(), cost: cost() }
+    setReceipt(r)
+    if (r.serviceName && props.mode === 'log') {
+      choose(r.serviceName, data().services.find((s) => s.name === r.serviceName))
+    }
+    if (r.date) {
+      setWhen('date')
+      setCustomDate(fmtDate(r.date))
+    }
+    if (r.odometer != null) setOdometer(fmtMileageBare(r.odometer))
+    if (r.total != null) setCost(r.total.toFixed(2))
+    setShop(r.shopName ?? '')
+  }
+  const clearReceipt = () => {
+    const b = beforeReceipt
+    setReceipt(undefined)
+    setShop('')
+    if (!b) return
+    setName(b.name)
+    setLinked(b.linked)
+    setPickerOpen(b.pickerOpen)
+    setWhen(b.when)
+    setCustomDate(b.customDate)
+    setOdometer(b.odometer)
+    setCost(b.cost)
+  }
+  const lineSum = () => (receipt()?.lineItems ?? []).reduce((sum, l) => sum + (l.kind === 'discount' ? -l.amount : l.amount), 0)
+  const itemsAddUp = () => receipt()?.total == null || Math.abs(lineSum() - receipt()!.total!) < 0.02
 
   // --- Picker content: due now → recent → browse ------------------------
   const dueNow = () =>
@@ -169,13 +239,21 @@ export function ServiceForm(props: {
   const estimate = () =>
     v().currentMileage + Math.round(((today.getTime() - v().mileageUpdatedAt.getTime()) / DAY) * MILES_PER_DAY)
   const confirmedAge = () => Math.round((today.getTime() - v().mileageUpdatedAt.getTime()) / DAY)
+  /* A hand-picked date AFTER the last confirmed reading is not backfill in the
+     sense that matters: its reading is the newest observation, so it is adopted
+     (and said so) like Today's. Found by the receipt flow — a receipt from two
+     days ago carries a higher odometer than a nine-day-old reading, and the old
+     rule raised a contradiction that blocked Save on nearly every receipt. */
+  const pickedDate = () => new Date(customDate())
+  const newerThanLastReading = () =>
+    when() !== 'date' || (!Number.isNaN(pickedDate().getTime()) && pickedDate() >= v().mileageUpdatedAt)
   const wouldAdopt = () => {
     const r = entered()
-    return !later() && r != null && r > v().currentMileage && !isBackfill()
+    return !later() && r != null && r > v().currentMileage && (!isBackfill() || newerThanLastReading())
   }
   const contradiction = () => {
     const r = entered()
-    return !later() && r != null && isBackfill() && r > v().currentMileage && !mileageResolution()
+    return !later() && r != null && isBackfill() && !newerThanLastReading() && r > v().currentMileage && !mileageResolution()
   }
 
   // --- Projection (F4: same calculation as the save path) ---------------
@@ -250,6 +328,9 @@ export function ServiceForm(props: {
     return x.name ? `${x.name} · ${x.year} ${x.model}` : `${x.year} ${x.make} ${x.model}`
   }
 
+  // After `choose` exists: the receipt door opens already filled.
+  if (props.receipt) applyReceipt(props.receipt)
+
   const whenChips: { value: When; label: string }[] = [
     { value: 'today', label: 'Today' },
     { value: 'yesterday', label: 'Yesterday' },
@@ -285,17 +366,27 @@ export function ServiceForm(props: {
           padding: 'var(--space-md) var(--space-screen-h) var(--space-xxl)',
         }}
       >
+        {/* ---------- 0. RECEIPT — first, because it answers most of the form ---------- */}
+        <Show when={!editing && !later()}>
+          <ReceiptRow receipt={receipt()} onScan={() => applyReceipt(sampleReceipt)} onClear={clearReceipt} />
+        </Show>
+
         {/* ---------- 1. SERVICE ---------- */}
         <FormSection title="Service">
           {blockerAt('service')}
           <Show
             when={pickerOpen()}
             fallback={
-              <SelectedService
-                name={name()}
-                onChange={() => setPickerOpen(true)}
-                locked={props.mode === 'complete'}
-              />
+              <>
+                <SelectedService
+                  name={name()}
+                  onChange={() => setPickerOpen(true)}
+                  locked={props.mode === 'complete'}
+                />
+                <Show when={props.mode === 'log' && suggested('name', name())}>
+                  <FromReceipt confidence={receipt()!.confidence.service} />
+                </Show>
+              </>
             }
           >
             <Field
@@ -376,7 +467,18 @@ export function ServiceForm(props: {
             </For>
           </ChipRow>
           <Show when={when() === 'date'}>
-            <Field label="Date" value={customDate()} onInput={setCustomDate} placeholder="Aug 14, 2025" original={editing ? origDate : undefined} />
+            <Field
+              label="Date"
+              value={customDate()}
+              onInput={setCustomDate}
+              placeholder="Aug 14, 2025"
+              original={editing ? origDate : undefined}
+              below={
+                <Show when={suggested('date', customDate())}>
+                  <FromReceipt confidence={receipt()!.confidence.date} />
+                </Show>
+              }
+            />
           </Show>
         </FormSection>
 
@@ -396,6 +498,9 @@ export function ServiceForm(props: {
               original={editing ? origOdo : undefined}
               below={
                 <>
+                  <Show when={suggested('odometer', odometer())}>
+                    <FromReceipt confidence={receipt()!.confidence.odometer} />
+                  </Show>
                   <Show when={!editing && !wouldAdopt() && !contradiction()}>
                     <div style={{ display: 'flex', 'align-items': 'baseline', gap: 'var(--space-sm)', 'flex-wrap': 'wrap' }}>
                       <Secondary color="tertiary">
@@ -438,7 +543,26 @@ export function ServiceForm(props: {
               placeholder="0.00"
               numeric
               original={editing ? origCost : undefined}
+              below={
+                <Show when={suggested('cost', cost())}>
+                  <FromReceipt confidence={receipt()!.confidence.total} />
+                </Show>
+              }
             />
+
+            {/* Only when the receipt names one: the form keeps no shop otherwise. */}
+            <Show when={receiptValue.shop()}>
+              <Field
+                label="Shop"
+                value={shop()}
+                onInput={setShop}
+                below={
+                  <Show when={suggested('shop', shop())}>
+                    <FromReceipt confidence={receipt()!.confidence.shop} />
+                  </Show>
+                }
+              />
+            </Show>
           </FormSection>
 
           {/* ---------- 4a. NEXT — the reminder this entry leaves behind ----------
@@ -513,7 +637,11 @@ export function ServiceForm(props: {
               <Body color="accent">{depthOpen() ? 'Fewer details' : 'More details'}</Body>
               <Show when={!depthOpen()}>
                 <Secondary color="tertiary" lines={1} as="div">
-                  {later() ? 'Notes' : `${categoryLabels[category()]} · notes · receipt`}
+                  {later()
+                    ? 'Notes'
+                    : receipt()?.lineItems.length
+                      ? `${categoryLabels[category()]} · ${receipt()!.lineItems.length} receipt items · notes`
+                      : `${categoryLabels[category()]} · notes · receipt`}
                 </Secondary>
               </Show>
             </div>
@@ -550,6 +678,46 @@ export function ServiceForm(props: {
                     label: categoryLabels[c],
                   }))}
                 />
+              </Show>
+              {/* A breakdown of the total, never added on top of it. */}
+              <Show when={!later() && receipt()?.lineItems.length}>
+                <FormSubgroup title="Receipt items">
+                  <div style={{ display: 'flex', 'flex-direction': 'column' }}>
+                    <For each={receipt()!.lineItems}>
+                      {(item) => (
+                        <div
+                          style={{
+                            display: 'flex',
+                            'align-items': 'baseline',
+                            gap: 'var(--space-sm)',
+                            'min-height': 'var(--touch-target)',
+                            'padding-top': 'var(--space-sm)',
+                            'border-bottom': '1px solid var(--grid-line)',
+                          }}
+                        >
+                          <div style={{ display: 'flex', 'flex-direction': 'column', flex: '1 1 auto', 'min-width': '0' }}>
+                            <Body lines={1}>{item.label}</Body>
+                            <Secondary color="tertiary">{kindLabels[item.kind]}</Secondary>
+                          </div>
+                          <Body style={{ flex: '0 0 auto' }}>
+                            {item.kind === 'discount' ? '−' : ''}${item.amount.toFixed(2)}
+                          </Body>
+                        </div>
+                      )}
+                    </For>
+                  </div>
+                  <Show
+                    when={itemsAddUp()}
+                    fallback={
+                      <FormAdvisory
+                        severity="caution"
+                        message={`The items add up to $${lineSum().toFixed(2)}, not the $${receipt()!.total!.toFixed(2)} total. The total is what's saved.`}
+                      />
+                    }
+                  >
+                    <Secondary color="tertiary">Adds up to the total. Only the total counts toward your costs.</Secondary>
+                  </Show>
+                </FormSubgroup>
               </Show>
               <Field label="Notes" value={notes()} onInput={setNotes} placeholder="Used full synthetic" />
               <Show when={!later()}>
@@ -620,5 +788,64 @@ function SelectedService(props: { name: string; locked?: boolean; onChange: () =
         </button>
       </Show>
     </div>
+  )
+}
+
+/**
+ * The receipt door, first in the form. Before a scan it is shaped like the
+ * More details trigger — an offer, not a section. After, it becomes the one
+ * .info line that says what the system filled in, with [Clear] beside it.
+ */
+function ReceiptRow(props: { receipt?: ReceiptDraft; onScan: () => void; onClear: () => void }) {
+  return (
+    <Show
+      when={props.receipt}
+      fallback={
+        <button
+          onClick={props.onScan}
+          style={{
+            display: 'flex',
+            'flex-direction': 'column',
+            gap: '2px',
+            'min-height': '54px',
+            'justify-content': 'center',
+            'border-bottom': 'var(--border-width) solid var(--grid-line)',
+            'text-align': 'left',
+          }}
+        >
+          <Body color="accent">Scan a receipt</Body>
+          <Secondary color="tertiary" lines={1} as="div">
+            Fills the date, odometer, total and shop
+          </Secondary>
+        </button>
+      }
+    >
+      <div style={{ display: 'flex', 'align-items': 'flex-start', gap: 'var(--space-sm)' }}>
+        <div style={{ flex: '1 1 auto', 'min-width': '0' }}>
+          <FormAdvisory severity="info" message="Filled in from your receipt. Check the values marked From receipt, then save." />
+        </div>
+        <button onClick={props.onClear} style={{ 'min-height': 'var(--touch-target)', padding: '0 var(--space-xs)', flex: '0 0 auto' }}>
+          <Label color="accent" tracking={1}>
+            [Clear]
+          </Label>
+        </button>
+      </div>
+    </Show>
+  )
+}
+
+/**
+ * Provenance under a field, the F6 shape: shown only while the value is still
+ * the receipt's. A value the reader was unsure of is a .caution instead — the
+ * user must look at it, and it sits beside the field that fixes it.
+ */
+function FromReceipt(props: { confidence: Confidence }) {
+  return (
+    <Show
+      when={props.confidence !== 'low'}
+      fallback={<FormAdvisory severity="caution" message="Hard to read on the receipt — check this value." />}
+    >
+      <Secondary color="tertiary">From receipt</Secondary>
+    </Show>
   )
 }
