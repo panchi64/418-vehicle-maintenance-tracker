@@ -13,6 +13,8 @@ Every `#Preview` in this directory hot-reloads in roughly a second in Xcode. Rea
 ```
 Views/
 ├── Tabs/                # Home, Services, Costs
+├── Appointments/        # Home's Shop Visit section + the appointment sheet (sketchpad: AppointmentForm)
+├── Notes/               # Vehicle notes list (AppRoute.notes) + note sheet (sketchpad: NotesList, NoteSheet)
 ├── Vehicle/             # Vehicle CRUD
 ├── Service/             # Service CRUD + completion sheets
 ├── Settings/            # Settings, CSV import

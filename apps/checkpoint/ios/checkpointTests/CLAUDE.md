@@ -44,6 +44,10 @@ final class VehicleTests: XCTestCase {
 }
 ```
 
+## Store fixtures
+
+`Fixtures/` holds on-disk stores written by shipped app versions (`CheckpointV1.store`, from a Simulator, rollback-journal mode so it is one file). `CheckpointMigrationTests` copies one to a temp directory and opens it with `CheckpointMigrationPlan`, which proves the frozen schema versions still match real stores. Add a fixture for each schema version you ship.
+
 ## Test Naming Convention
 
 Use descriptive names following the pattern:

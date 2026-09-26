@@ -7,6 +7,9 @@ This directory contains all service classes that handle business logic, external
 ```
 Services/
 ├── Analytics/           # PostHog analytics (opt-out, privacy-respecting)
+├── Appointments/        # AppointmentService (the one write path), AppointmentCompletion (Log Visit prefill),
+│                        #   AppointmentDirections (PlaceDescriptor → Maps)
+├── Notes/               # VehicleNoteService (the one write path), VehicleNoteMigration (legacy Vehicle.notes mirror)
 ├── Export/              # PDF generation for service history
 ├── Notifications/       # Local notification management (modular architecture)
 ├── OCR/                 # Vision framework services (odometer, VIN, receipts/documents → ReceiptScan)

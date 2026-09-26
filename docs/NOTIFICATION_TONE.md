@@ -60,6 +60,15 @@ Service notifications remain utilitarian—clear status updates without personal
 | 7 days before | `Marbete Status: 7 Days` | `[Vehicle] is starting to worry about that marbete.` |
 | 1 day before | `Marbete Status: URGENT` | `[Vehicle] expires tomorrow. Legally speaking.` |
 
+### Shop Appointments
+
+A booked visit reminds twice: the day before and an hour before (`AppointmentNotificationScheduler`). Tapping opens the appointment.
+
+| Trigger | Title | Body |
+|---------|-------|------|
+| 1 day before | `Shop Visit: Tomorrow` | `[Vehicle] is booked at [Shop] tomorrow, [time]. It would like to keep that slot.` |
+| 1 hour before | `Shop Visit: 1 Hour` | `[Vehicle] is due at [Shop] at [time]. Keys, wallet, car.` |
+
 ## Tone Escalation Pattern
 
 For time-sensitive notifications (like Marbete), follow this escalation:

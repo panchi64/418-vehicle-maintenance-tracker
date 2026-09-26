@@ -159,7 +159,7 @@ checkpoint-app/
 
 ### Vehicle
 - `name`, `make`, `model`, `year`, `currentMileage`, `vin`
-- Has many: services, serviceLogs, mileageSnapshots
+- Has many: services, serviceLogs, mileageSnapshots, serviceVisits, appointments, vehicleNotes; documents (many-to-many)
 - Key computed properties: `effectiveMileage`, `dailyMilesPace`, `paceConfidence`, `allUpcomingItems`, `nextUpItem`
 
 ### Service
@@ -172,6 +172,19 @@ checkpoint-app/
 - Records completed service instances
 - `performedDate`, `mileageAtService`, `cost`, `notes`
 - Links to both `Service` and `Vehicle`
+
+### Appointment (schema V2)
+- A booked shop visit: `startDate`, optional `endDate` (an hour by default), `shopName`, optional `address` / `latitude` / `longitude`, `note`, status (scheduled / completed / cancelled, stored as a String)
+- Belongs to a Vehicle; linked services are many-to-many (`Service.appointments`)
+- One write path, `AppointmentService`; reminders the day before and an hour before (`AppointmentNotificationScheduler`); directions via `AppointmentDirections` (GeoToolbox `PlaceDescriptor` → `MKMapItemRequest`, else a Maps search for the shop)
+- Log Visit opens the visit form (linked services) or the log door (none), prefilled with the day and shop (`AppointmentCompletion`); saving the record completes the appointment
+
+### VehicleNote (schema V2)
+- `title`, `body`, `isPinned`, `createdAt`, `modifiedAt`; attachments are Documents (`ServiceAttachment.vehicleNote`) also linked to the vehicle
+- Replaces `Vehicle.notes`, which stays as the mirror of the migrated "legacy" note for older app versions (`VehicleNoteMigration`)
+
+### Schema versions
+- `CheckpointSchemaV1` is frozen (nested copies of the shipped models); `CheckpointSchemaV2` adds the two models above; `CheckpointMigrationPlan` has one custom stage (lightweight change + legacy-note reconcile). Rules for CloudKit-safe changes are in `CheckpointSchema.swift`.
 
 ### MileageSnapshot
 - Mileage reading for pace calculation
@@ -247,6 +260,7 @@ State machine in `OnboardingState` (`@Observable @MainActor`):
   - `MileageReminderScheduler` — Bi-weekly mileage update reminders
   - `MarbeteNotificationScheduler` — PR vehicle registration expiration
   - `YearlyRoundupScheduler` — Annual cost summary (January 2nd)
+  - `AppointmentNotificationScheduler` — Shop visit reminders (day before, hour before); deterministic IDs, orphans swept at launch
 - **Categories:** `SERVICE_DUE`, `MILEAGE_REMINDER`, `MARBETE_DUE`, `YEARLY_ROUNDUP`
 - **Service reminders are bundled and vehicle-scoped.** `ServiceReminderBundle`
   groups a vehicle's reminders by (fire day, lead time), so services coming due
@@ -276,6 +290,7 @@ App Intents, App Entities and Spotlight indexing. See `checkpoint/Services/Inten
   - History: `MarkServiceDoneIntent`, `LogServiceIntent` (confirmation snippet, then `LoggedServiceWriter` / `ServiceVisitWriter`), `DeleteServiceLogIntent`.
   - Schedule: `AddServiceIntent`, `EditServiceIntent`, `SnoozeServiceIntent`, `StopTrackingServiceIntent`, `DeleteServiceIntent`. Deletes always confirm.
   - Queries: `CheckNextDueIntent`, `ListUpcomingServicesIntent`, `ListOverdueIntent` (interactive snippet with Done buttons), `LastServiceQueryIntent`, `SpendingSummaryIntent` (`CostAnalyticsService`).
+  - Appointments and notes: `ScheduleAppointmentIntent`, `RescheduleAppointmentIntent`, `CancelAppointmentIntent` (confirms), `AddVehicleNoteIntent`, `FindNoteIntent`; iOS 27 Calendar (appointment = event) and Notes (note = note, vehicle = folder) schema twins.
   - `CheckpointShortcuts` registers 9 App Shortcuts (Apple's limit is 10); Spanish phrases in `AppShortcuts.xcstrings`. `IntentDonations` donates the in-app equivalents.
 
 ### StoreKit/ (Monetization)
@@ -428,7 +443,7 @@ struct WidgetColors {
 | `MileageUpdateSheet.swift` | Update Mileage sheet |
 | `NextUpCard.swift` | Home hero: closer trigger, status tag, due line, and a filled Mark Done (marbete: Mark Renewed) |
 | `NextUpReadout.swift` | Decides what the Next Up hero says (miles vs days, whichever is closer at pace) |
-| `QuickSpecsCard.swift` | Vehicle specs panel |
+| `QuickSpecsCard.swift` | Vehicle specs panel, with the Notes and Documents rows |
 | `ReadoutSection.swift` | Section shell for readout surfaces: header + one required primary slot + supporting slot. Makes "one primary per section" the default |
 | `RecallAlertCard.swift` | NHTSA recall warning on Home |
 | `RecallCardStyle.swift` | Shared recall border/background treatment |
@@ -516,6 +531,9 @@ ContentView
 - **MarbeteTests** — Expiration date calculation, status computation, days remaining
 - **CostCategoryTests** — Category enum properties
 - **SeasonalReminderTests** — Display window calculation, zone filtering, active reminders
+- **CheckpointMigrationTests** — V1 → V2 on disk, from a real V1 store fixture (`Fixtures/CheckpointV1.store`)
+- **AppointmentTests** — Time rules, write path, Log Visit prefill, reminder requests (pure), directions place
+- **VehicleNoteTests** — Display/order/search, write path, legacy-note mirror and reconcile
 
 ### Service Tests
 - **CSVImportServiceTests** — Format auto-detection, row parsing, malformed data handling
@@ -537,6 +555,7 @@ ContentView
 - **IntentTestCase** — in-memory store handed to intents as their `@Dependency` container
 - **MileageIntentTests**, **ServiceLoggingIntentTests**, **ScheduleIntentTests**, **QueryIntentTests** — each intent's write or answer, and that confirming intents write nothing without a yes
 - **AppEntityTests**, **SpotlightIndexerTests**, **IntentDonationsTests**
+- **AppointmentNoteIntentTests** — appointment and note intents, and their iOS 27 Calendar/Notes schema twins
 
 ### View Tests
 - **HomeTabTests** — Home tab rendering and data display
@@ -557,7 +576,6 @@ ContentView
 - **OdometerCaptureViewTests** — OCR capture flow
 - **OCRConfirmationViewTests** — OCR result confirmation
 - **RecallAlertCardTests** — Recall card display
-- **QuickSpecsCardTests** — Vehicle specs card
 - **ServiceTypePickerTests** — Service type selection
 
 ### Design System Tests

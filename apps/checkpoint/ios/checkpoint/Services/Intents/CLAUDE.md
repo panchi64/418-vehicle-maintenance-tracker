@@ -21,6 +21,8 @@ Intents/
 ├── History/                    # MarkServiceDone, LogService, LogReceipt, DeleteServiceLog,
 │                               #   ExportServiceHistory + ServiceLogging
 ├── Schedule/                   # Add / Edit / Snooze / StopTracking / Delete service + ServiceScheduling
+├── Appointments/               # Schedule / Reschedule / Cancel (asks) shop appointment + AppointmentResolution
+├── Notes/                      # AddVehicleNote, FindNote (no note deletes by voice)
 ├── Queries/                    # CheckNextDue, ListUpcoming (not an App Shortcut), ListOverdue, LastServiceQuery,
 │                               #   SpendingSummary + DueServices / SpokenValue helpers
 ├── Snippets/                   # DueServicesSnippetIntent (+ Done button intent),
@@ -31,6 +33,9 @@ Intents/
     │                           #   placeholder location-trigger/section types the processor demands
     ├── Photos/                 # iOS 27: image document = asset, vehicle = album; open + save photos
     ├── Files/                  # iOS 18 schema (ships on 26): every document = file; open file
+    ├── Calendar/               # iOS 27: appointment = event, vehicle = calendar; CalendarMapping;
+    │                           #   placeholder attendee type the processor demands
+    ├── Notes/                  # iOS 27: vehicle note = note, vehicle = folder; placeholder account
     ├── System/                 # search (26) / searchInApp (27), .system.open per entity, EntityRoutes
     └── VisualIntelligence/     # IntentValueQuery over SemanticContentDescriptor → VisualCaptureEntity
                                 #   (log receipt / update mileage / add vehicle by VIN), its OpenIntent,
@@ -51,7 +56,7 @@ The Controls (Update Mileage, Scan Receipt, Log Service) live in `CheckpointWidg
 - **`perform()` is `@MainActor`.** Intent structs are nonisolated (the `AppIntent` protocol is), so mark `perform()` and any static helper that touches models `@MainActor`, then use `container.mainContext`.
 - **Resolve and commit through `IntentStore`.** A missing vehicle parameter means the vehicle the app has selected (`IntentStore.vehicle(for:in:)`). Every write ends in `IntentStore.commit(vehicle, in:)` — derived surfaces (`DerivedSurfaces`: reminders, icon, widget), an explicit save (the process may suspend before autosave), and a Spotlight pass. Writes whose action already refreshed use `IntentStore.save`.
 - **Call services, not views.** Writes go through the same code the UI uses: `LoggedServiceWriter` (fed a `ServiceLogFormModel` by `ServiceLogging`), `ServiceVisitWriter`, `ServiceCompletionService`, `MileageUpdateAction`, `Service.apply(_ ServiceEdit)`, `ServiceDeleteAction`, `ServiceLogDeleteAction`, `CostAnalyticsService`. If an intent needs logic that lives in a view, extract it into a service first, with tests.
-- **Ask before the irreversible.** Deletes (`DeleteServiceIntent`, `DeleteServiceLogIntent`, voice deletes are services and logs only — no vehicle or document deletes), Stop Tracking, Renew Marbete, Mark Done and Log Service — and their schema twins, Update Reminder when it completes and Delete Reminders — call `requestConfirmation` before writing; Mark Done and Log Service show `ServiceRecordSnippetIntent` so a misheard value is visible. Update Mileage asks only when `MileageReadingCheck` flags the reading. Keep the write in a static function the tests can call; `perform()` itself can't pass a confirmation in a unit test.
+- **Ask before the irreversible.** Deletes (`DeleteServiceIntent`, `DeleteServiceLogIntent`, voice deletes are services and logs only — no vehicle, document or note deletes; cancelling a shop appointment, `CancelAppointmentIntent` and the Calendar `deleteEvent`, asks too), Stop Tracking, Renew Marbete, Mark Done and Log Service — and their schema twins, Update Reminder when it completes and Delete Reminders — call `requestConfirmation` before writing; Mark Done and Log Service show `ServiceRecordSnippetIntent` so a misheard value is visible. Update Mileage asks only when `MileageReadingCheck` flags the reading. Keep the write in a static function the tests can call; `perform()` itself can't pass a confirmation in a unit test.
 - **Distances are spoken in the user's unit.** Convert with `DistanceSettings.shared.unit.toMiles` on the way in; format with `SpokenValue` on the way out.
 - **Dialogs are whole `siri.*` sentences** built from `SpokenValue`-formatted values — never concatenated. Add EN and ES for every new key.
 - **Entities are Sendable snapshots.** A `ModelSnapshotEntity` is built on the main actor from one model (`init(model:)`) and fetched only through `entities(ids:in:)` / `entities(matching:in:)` / `models(ids:in:)`. IDs are the model's `UUID`. Queries hop to the main actor through `EntityFetch`. `ModelBackedEntity` adds `IndexedEntity`: those are the ones Spotlight indexes.

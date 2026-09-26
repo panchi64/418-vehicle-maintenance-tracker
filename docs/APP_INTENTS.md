@@ -54,8 +54,8 @@ Apple's rules come from [Making actions and content discoverable by Apple Intell
 | System (`searchInApp`, `open`) | ✅ | every entity | **Adopt** |
 | Visual intelligence | ✅ (camera) | receipt / odometer / VIN recognition | **Adopt** |
 | Files | Shortcuts only | documents library, including PDFs; `openFile`, `file` | **Adopt** (cheap) |
-| Notes | ✅ | new `VehicleNote` = note, vehicle = folder; `createNote`, `updateNote` | **Adopt** once vehicle notes ship |
-| Calendar | ✅ | new `Appointment` (a scheduled shop visit) = event, vehicle = calendar; `createEvent`, `updateEvent`, `deleteEvent`. Service due dates stay reminders, not events. | **Adopt** once appointments ship |
+| Notes | ✅ | `VehicleNote` = note, vehicle = folder; `createNote`, `updateNote` (no note deletes by voice) | **Adopted** (Phase 6) |
+| Calendar | ✅ | `Appointment` (a booked shop visit) = event, vehicle = calendar; `createEvent`, `updateEvent`, `deleteEvent` (cancels, after asking). Service due dates stay reminders, not events. | **Adopted** (Phase 6) |
 | Maps, Camera, Clock, Mail, Messages, Phone, Audio, Assistant | ✅ | none; Checkpoint isn't a navigation, camera, clock or messaging app | No |
 | Books, Browser, Journaling, Presentation, Reader, Spreadsheet, Whiteboard, Word processor | Shortcuts only | none | No |
 
@@ -160,6 +160,32 @@ All iOS 26, every device tier. Code in `Services/Intents/Vehicles/`, `Documents/
 **App Shortcuts (still 10).** Find Document took List Upcoming Services' slot: Check Next Due's snippet already lists everything coming up (it took the "coming up" phrases), Find Document is the traffic-stop case, and the Documents tip needs an App Shortcut to show at all. Recalls and export stay Shortcuts/Siri AI actions.
 
 **Donations added:** Add Vehicle (no parameters: a repeat is a different car), a document added to the library (vehicle + type), Mark Renewed.
+
+## What Checkpoint ships (Phase 6: shop appointments and vehicle notes)
+
+New models in `CheckpointSchemaV2` (`Appointment`, `VehicleNote`; see Models/CLAUDE.md for the migration). Code in `Services/Appointments/`, `Services/Notes/`, `Services/Intents/Appointments/`, `Notes/`, `Schema/Calendar/`, `Schema/Notes/`.
+
+| Piece | What it does | Notes |
+|---|---|---|
+| `ScheduleAppointmentIntent` | Shop + date (asked when missing), optional services, address, note → `AppointmentService.schedule` | No confirmation (additive). Reminders the day before and an hour before |
+| `RescheduleAppointmentIntent` | The named appointment, else the next one on the showing vehicle → new start, same length | No confirmation (the old time is one edit away) |
+| `CancelAppointmentIntent` | Same resolution → `requestConfirmation` → status `cancelled` (kept, not deleted) | The one voice "delete" in this phase |
+| `AddVehicleNoteIntent` | Text (asked), title, pinned, image/PDF files (read by `DocumentImport`, kept as Documents on the note) | No note deletes by voice |
+| `FindNoteIntent` | Best match: title beats text, the showing vehicle first; reads the first line | Returns `VehicleNoteEntity` |
+| `AppointmentEntity`, `VehicleNoteEntity` | `IndexedEntity`, Spotlight-indexed; `.onScreenEntity` on Home's appointment card and each Notes row | `.system.open` on 27 via `EntityRoutes` → `PendingRoute.appointment` / `.vehicleNote` |
+| `.calendar.calendar` / `.event` (+ `eventStatus`, `eventSpan`, `attendee`, `attendeeStatus`, `attendeeType`, `EventLocation`/`EventAlarm` unions) | `VehicleCalendarEntity`, `AppointmentEventEntity`; `CalendarMapping` | Organizers and attendees always empty (`NoAttendeeEntity`, a query that finds nothing); alarms = the two reminder dates; location = `PlaceDescriptor` (coordinate + address, shop as common name) |
+| `.calendar.createEvent` / `updateEvent` / `deleteEvent` | `CreateAppointmentEventIntent`, `UpdateAppointmentEventIntent`, `DeleteAppointmentEventIntent` — all `isAssistantOnly` | Title → shop (a place's common name wins); tracked service names in the title link those services. Delete cancels after asking. Moving to another vehicle's calendar is refused |
+| `.notes.folder` / `.note` / `.account` | `VehicleFolderEntity`, `VehicleNoteSchemaEntity`, `NoNotesAccountEntity` (placeholder) | Snapshot `attachments` are empty: the files are Documents and export through `DocumentEntity` |
+| `.notes.createNote` / `updateNote` | `CreateVehicleNoteIntent` (`isAssistantOnly`), `UpdateVehicleNoteIntent` | Update has no content field in the schema, so only title, pin and more files |
+| Notifications | Appointment reminders tagged with `AppointmentEntity`, `AppointmentEventEntity` (27) and the vehicle | Tone: docs/NOTIFICATION_TONE.md |
+
+**App Shortcuts: unchanged (still 10).** No slot was swapped. Booking and note-taking are rare next to logging, mileage and "what's due", and every new intent is still a Shortcuts action and, on iOS 27, reachable by Siri AI through the Calendar and Notes schemas without a phrase.
+
+**What the SDK and metadata processor required (Xcode 27, checked 2026-09-26).**
+- Calendar and Notes schemas are iOS 27 (`anyAppleOS 27.0`); GeoToolbox `PlaceDescriptor` and `MKMapItemRequest(placeDescriptor:)` are iOS 26.
+- `.calendar.deleteEvent` takes one `entity`, so it can't conform to `DeleteIntent` (which takes `entities`).
+- `.calendar.attendeeType` accepts a `person` case; the snippet library leaves its cases as a placeholder.
+- `IntentPerson` has no `displayName`; the placeholder attendee shows a fixed label.
 
 ## Other signatures confirmed in the SDK
 
