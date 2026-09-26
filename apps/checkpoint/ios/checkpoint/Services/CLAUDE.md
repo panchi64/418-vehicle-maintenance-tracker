@@ -9,7 +9,8 @@ Services/
 ├── Analytics/           # PostHog analytics (opt-out, privacy-respecting)
 ├── Export/              # PDF generation for service history
 ├── Notifications/       # Local notification management (modular architecture)
-├── OCR/                 # Vision framework services (odometer, VIN)
+├── OCR/                 # Vision framework services (odometer, VIN, receipts/documents → ReceiptScan)
+├── Intelligence/        # On-device receipt reading + document typing (see Intelligence/CLAUDE.md)
 ├── Intents/             # App Intents, App Entities, Spotlight (see Intents/CLAUDE.md)
 ├── Import/              # CSV import from competitor apps
 ├── Sync/                # iCloud & data sync

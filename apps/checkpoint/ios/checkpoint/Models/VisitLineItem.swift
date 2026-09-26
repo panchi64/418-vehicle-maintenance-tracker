@@ -35,7 +35,9 @@ final class VisitLineItem: Identifiable {
     }
 }
 
-enum VisitLineItemKind: String, Codable, CaseIterable {
+/// `nonisolated` so receipt reading (`Services/Intelligence`) can carry it in
+/// its Sendable drafts; only `displayName` reads the main-actor `L10n`.
+nonisolated enum VisitLineItemKind: String, Codable, CaseIterable, Sendable {
     case parts
     case labor
     case supplies

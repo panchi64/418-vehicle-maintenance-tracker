@@ -4,6 +4,334 @@
     "" : {
 
     },
+    "receipt.scan.title" : {
+      "comment" : "The service form's first row: scan a shop receipt to fill the form.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Scan a receipt" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Escanear un recibo" } }
+      }
+    },
+    "receipt.scan.summary" : {
+      "comment" : "Under Scan a receipt: what reading one fills in.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Fills the date, odometer, total and shop" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Llena la fecha, el odómetro, el total y el taller" } }
+      }
+    },
+    "receipt.reading" : {
+      "comment" : "While the receipt is being read.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reading the receipt…" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Leyendo el recibo…" } }
+      }
+    },
+    "receipt.filled" : {
+      "comment" : "Info line after a receipt filled the form.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Filled in from your receipt. Check the values marked From receipt, then save." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Completado con tu recibo. Revisa los valores marcados Del recibo y guarda." } }
+      }
+    },
+    "receipt.clear" : {
+      "comment" : "Button: put the form back as it was before the receipt.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Clear" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Borrar" } }
+      }
+    },
+    "receipt.clear.a11y" : {
+      "comment" : "VoiceOver label for Clear.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Clear the receipt's values" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Borrar los valores del recibo" } }
+      }
+    },
+    "receipt.fromReceipt" : {
+      "comment" : "Note under a field that still holds the receipt's value.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "From receipt" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Del recibo" } }
+      }
+    },
+    "receipt.checkValue" : {
+      "comment" : "Caution under a field the receipt reader was unsure of.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Hard to read on the receipt — check this value." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Difícil de leer en el recibo: revisa este valor." } }
+      }
+    },
+    "receipt.odometerBelow" : {
+      "comment" : "Caution under the odometer. %@ is the reading on file, e.g. 45,210 mi.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Lower than the reading on file (%@) — check the receipt." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Es menor que la lectura registrada (%@): revisa el recibo." } }
+      }
+    },
+    "receipt.items.title" : {
+      "comment" : "More details: the receipt's printed lines.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Receipt items" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Partidas del recibo" } }
+      }
+    },
+    "receipt.items.addUp" : {
+      "comment" : "Under the receipt items when they add up to the total.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Adds up to the total. Only the total counts toward your costs." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Suman el total. Solo el total cuenta en tus gastos." } }
+      }
+    },
+    "receipt.items.dontAddUp" : {
+      "comment" : "Caution when the receipt items don't add up. %1$@ is their sum, %2$@ the total.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The items add up to %1$@, not the %2$@ total. The total is what's saved." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Las partidas suman %1$@, no el total de %2$@. Se guarda el total." } }
+      }
+    },
+    "receipt.depthSummary" : {
+      "comment" : "More details' collapsed summary with receipt items. %@ is the cost category.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%@ · receipt items · notes" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "%@ · partidas del recibo · notas" } }
+      }
+    },
+    "form.shop" : {
+      "comment" : "Service form field label for a receipt's shop.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Shop" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Taller" } }
+      }
+    },
+    "form.shop.placeholder" : {
+      "comment" : "Shop field placeholder.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Shop name" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Nombre del taller" } }
+      }
+    },
+    "receipt.tooBlurry" : {
+      "comment" : "Toast when a receipt photo is too blurred to read.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "That photo is too blurry to read. It's attached; try again in better light or enter the values yourself." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "La foto está muy borrosa para leerla. Quedó adjunta; inténtalo con mejor luz o ingresa los valores tú." } }
+      }
+    },
+    "receipt.nothingRead" : {
+      "comment" : "Toast when nothing useful was read from a receipt.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Couldn't find a total, date or odometer on that receipt. It's attached; enter the values yourself." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "No se encontró total, fecha ni odómetro en ese recibo. Quedó adjunto; ingresa los valores tú." } }
+      }
+    },
+    "visual.logReceipt" : {
+      "comment" : "Visual Intelligence result title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Log this receipt" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Registrar este recibo" } }
+      }
+    },
+    "visual.updateMileage" : {
+      "comment" : "Visual Intelligence result title. %@ is the reading, e.g. 45,210 miles.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Update mileage to %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Actualizar millaje a %@" } }
+      }
+    },
+    "visual.addVehicle" : {
+      "comment" : "Visual Intelligence result title. %@ is the VIN.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add vehicle %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Agregar vehículo %@" } }
+      }
+    },
+    "visual.onVehicle" : {
+      "comment" : "Visual Intelligence result subtitle. %@ is the vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint · %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint · %@" } }
+      }
+    },
+    "visual.inCheckpoint" : {
+      "comment" : "Visual Intelligence result subtitle for adding a vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "In Checkpoint" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "En Checkpoint" } }
+      }
+    },
+    "lineItem.parts" : {
+      "comment" : "Receipt line kind.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Parts" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Piezas" } }
+      }
+    },
+    "lineItem.labor" : {
+      "comment" : "Receipt line kind.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Labor" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Mano de obra" } }
+      }
+    },
+    "lineItem.supplies" : {
+      "comment" : "Receipt line kind.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Supplies" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Materiales" } }
+      }
+    },
+    "lineItem.fees" : {
+      "comment" : "Receipt line kind.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Fees" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cargos" } }
+      }
+    },
+    "lineItem.tax" : {
+      "comment" : "Receipt line kind.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tax" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Impuesto" } }
+      }
+    },
+    "lineItem.tip" : {
+      "comment" : "Receipt line kind.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tip" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Propina" } }
+      }
+    },
+    "lineItem.discount" : {
+      "comment" : "Receipt line kind.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Discount" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Descuento" } }
+      }
+    },
+    "lineItem.other" : {
+      "comment" : "Receipt line kind.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Other" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Otro" } }
+      }
+    },
+    "siri.receipt.confirm" : {
+      "comment" : "Log Receipt's confirmation. %1$@ is the services, %2$@ the vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Log %1$@ on %2$@ from this receipt?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Registrar %1$@ en %2$@ con este recibo?" } }
+      }
+    },
+    "siri.receipt.saved" : {
+      "comment" : "After Log Receipt saves. %1$@ is the services, %2$@ the vehicle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Logged %1$@ on %2$@ from the receipt." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Registré %1$@ en %2$@ con el recibo." } }
+      }
+    },
+    "Log Receipt" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Log Receipt" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Registrar recibo" } }
+      }
+    },
+    "Read a shop receipt and log the services on it, with its date, mileage, total and shop. Checkpoint shows what it read and asks before saving." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Read a shop receipt and log the services on it, with its date, mileage, total and shop. Checkpoint shows what it read and asks before saving." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Lee un recibo del taller y registra los servicios que muestra, con su fecha, millaje, total y taller. Checkpoint muestra lo que leyó y pregunta antes de guardar." } }
+      }
+    },
+    "A photo or PDF of the receipt" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "A photo or PDF of the receipt" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Una foto o PDF del recibo" } }
+      }
+    },
+    "Which receipt?" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Which receipt?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Qué recibo?" } }
+      }
+    },
+    "What was done, when the receipt doesn't say" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "What was done, when the receipt doesn't say" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Lo que se hizo, si el recibo no lo dice" } }
+      }
+    },
+    "Log ${receipt} on ${vehicle}" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Log ${receipt} on ${vehicle}" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Registrar ${receipt} en ${vehicle}" } }
+      }
+    },
+    "Which services does this receipt cover?" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Which services does this receipt cover?" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Qué servicios cubre este recibo?" } }
+      }
+    },
+    "Checkpoint couldn't read that receipt. Try a sharper photo, or log it in the app." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint couldn't read that receipt. Try a sharper photo, or log it in the app." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint no pudo leer ese recibo. Intenta con una foto más nítida o regístralo en la app." } }
+      }
+    },
+    "That capture is no longer available. Try Visual Intelligence again." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "That capture is no longer available. Try Visual Intelligence again." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Esa captura ya no está disponible. Vuelve a intentarlo con Inteligencia Visual." } }
+      }
+    },
+    "Checkpoint Action" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Checkpoint Action" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Acción de Checkpoint" } }
+      }
+    },
+    "Log in Checkpoint" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Log in Checkpoint" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Registrar en Checkpoint" } }
+      }
+    },
+    "Capture" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Capture" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Captura" } }
+      }
+    },
     "A service can't move to another vehicle. Add it to that vehicle instead." : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "A service can't move to another vehicle. Add it to that vehicle instead." } },

@@ -16,6 +16,7 @@
 
 import SwiftUI
 import SwiftData
+import PDFKit
 import PhotosUI
 import UniformTypeIdentifiers
 import os
@@ -171,13 +172,13 @@ struct DocumentPickerSheet: View {
             }
 
             let fileName = "photo_\(Int(Date.now.timeIntervalSince1970)).jpg"
-            pendingPayload = PendingDocument(
+            present(PendingDocument(
                 source: .image(image),
                 fileName: fileName,
-                documentType: DocumentType.suggestedType(forFileName: fileName),
+                documentType: defaultDocumentType(for: fileName),
                 notes: "",
                 linkedVehicleIDs: defaultLinkedVehicleIDs()
-            )
+            ))
         } catch {
             documentPickerLogger.error("Failed loading photo: \(error.localizedDescription)")
         }
@@ -231,7 +232,7 @@ struct DocumentPickerSheet: View {
             }
 
             if let payload {
-                await MainActor.run { pendingPayload = payload }
+                await MainActor.run { present(payload) }
             }
         }
     }
@@ -245,25 +246,50 @@ struct DocumentPickerSheet: View {
         // silently dropped. Single-page scans stay as a JPEG image.
         if images.count > 1, let pdfData = multiPagePDF(from: images) {
             let fileName = "scan_\(Int(Date.now.timeIntervalSince1970)).pdf"
-            pendingPayload = PendingDocument(
+            present(PendingDocument(
                 source: .pdf(pdfData),
                 fileName: fileName,
                 documentType: defaultDocumentType(for: fileName),
                 notes: "",
                 linkedVehicleIDs: defaultLinkedVehicleIDs()
-            )
+            ))
             return
         }
 
         guard let first = images.first else { return }
         let fileName = "scan_\(Int(Date.now.timeIntervalSince1970)).jpg"
-        pendingPayload = PendingDocument(
+        present(PendingDocument(
             source: .image(first),
             fileName: fileName,
             documentType: defaultDocumentType(for: fileName),
             notes: "",
             linkedVehicleIDs: defaultLinkedVehicleIDs()
-        )
+        ))
+    }
+
+    /// Open the review step, then type the document from its text once
+    /// Vision has read it (`DocumentClassifier`) — unless the user has
+    /// already chosen a type by then. A receipt for a service log stays one.
+    private func present(_ payload: PendingDocument) {
+        pendingPayload = payload
+        guard serviceLog == nil else { return }
+        let fileName = payload.fileName
+        let suggested = payload.documentType
+        Task {
+            let text: String?
+            switch payload.source {
+            case .image(let image):
+                text = try? await ReceiptOCRService.shared.extractText(from: image).text
+            case .pdf(let data):
+                text = PDFDocument(data: data)?.string
+            }
+            let type = await DocumentClassifier().classify(text: text, fileName: fileName)
+            guard type != suggested, var current = pendingPayload,
+                  current.fileName == fileName, current.documentType == suggested
+            else { return }
+            current.documentType = type
+            pendingPayload = current
+        }
     }
 
     private func multiPagePDF(from images: [UIImage]) -> Data? {
@@ -514,6 +540,11 @@ private struct DocumentReviewForm: View {
             var updated = payload
             updated.documentType = newValue
             onUpdate(updated)
+        }
+        // The type read from the document's text arrives after the form
+        // opens; the sheet only sends it while the user hasn't picked one.
+        .onChange(of: payload.documentType) { _, newValue in
+            if documentType != newValue { documentType = newValue }
         }
     }
 

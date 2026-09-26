@@ -149,6 +149,8 @@
 				DesignSystem/CLAUDE.md,
 				Models/CLAUDE.md,
 				Services/CLAUDE.md,
+				Services/Intelligence/CLAUDE.md,
+				Services/Intents/CLAUDE.md,
 				Views/CLAUDE.md,
 			);
 			target = 5AAAA9262F2084320002A8C6 /* checkpoint */;

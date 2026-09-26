@@ -75,29 +75,33 @@ enum PhotoImport {
         let fileName: String
     }
 
-    /// Insert a document per file that decodes as an image, typed from its
-    /// name the way the Documents picker types one, with the text Vision
-    /// reads from it. Files that aren't images are skipped.
+    /// Insert a document per file that decodes as an image, with the text
+    /// Vision reads from it, typed from that text (`DocumentClassifier`: the
+    /// on-device model, else keywords) and else from its name, as the
+    /// Documents picker types one. Files that aren't images are skipped.
     static func importImages(
         _ files: [File],
         to vehicle: Vehicle,
         in context: ModelContext,
         now: Date = .now,
-        recognizeText: @MainActor (UIImage) async -> String? = PhotoImport.recognizeText(in:)
+        recognizeText: @MainActor (UIImage) async -> String? = PhotoImport.recognizeText(in:),
+        classifier: DocumentClassifier? = nil
     ) async -> [Document] {
+        let classifier = classifier ?? DocumentClassifier()
         var documents: [Document] = []
         for (index, file) in files.enumerated() {
             guard let image = UIImage(data: file.data) else { continue }
             let fileName = file.fileName.isEmpty
                 ? "photo_\(Int(now.timeIntervalSince1970))_\(index + 1).jpg"
                 : file.fileName
+            let text = await recognizeText(image)
             guard let document = Document.fromImage(
                 image,
                 fileName: fileName,
-                documentType: DocumentType.suggestedType(forFileName: fileName),
+                documentType: await classifier.classify(text: text, fileName: fileName),
                 vehicles: [vehicle]
             ) else { continue }
-            document.extractedText = await recognizeText(image)
+            document.extractedText = text
             context.insert(document)
             documents.append(document)
         }
