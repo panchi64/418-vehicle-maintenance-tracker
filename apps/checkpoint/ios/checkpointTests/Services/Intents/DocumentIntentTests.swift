@@ -189,4 +189,24 @@ final class DocumentIntentTests: IntentTestCase {
             XCTAssertEqual(error as? IntentError, .nothingToExport)
         }
     }
+
+    // MARK: - Intent files
+
+    func test_contents_inMemoryFile_isItsData() {
+        let png = pngData()
+        let file = IntentFile(data: png, filename: "reg.png", type: .png)
+        XCTAssertEqual(file.contents, png)
+        XCTAssertEqual(DocumentImport.File(file).data, png)
+        XCTAssertEqual(DocumentImport.File(file).fileName, "reg.png")
+    }
+
+    func test_contents_fileOnDisk_isReadFromItsURL() throws {
+        let png = pngData()
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID().uuidString).png")
+        try png.write(to: url)
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        let file = IntentFile(fileURL: url, filename: "receipt.png", type: .png)
+        XCTAssertEqual(file.contents, png)
+    }
 }

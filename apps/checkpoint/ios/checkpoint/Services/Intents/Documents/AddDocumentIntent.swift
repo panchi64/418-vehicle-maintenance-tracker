@@ -64,7 +64,7 @@ struct AddDocumentIntent: AppIntent {
         let context = container.mainContext
         let vehicle = try IntentStore.vehicle(for: self.vehicle, in: context)
         let fileName = file.filename
-        guard let reading = await DocumentImport.read(DocumentImport.File(data: file.data, fileName: fileName)) else {
+        guard let reading = await DocumentImport.read(DocumentImport.File(file)) else {
             throw IntentError.unsupportedDocument
         }
 

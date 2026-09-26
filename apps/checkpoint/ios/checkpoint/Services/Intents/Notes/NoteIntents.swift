@@ -56,7 +56,7 @@ struct AddVehicleNoteIntent: AppIntent {
         let vehicle = try IntentStore.vehicle(for: self.vehicle, in: context)
         var readings: [(DocumentImport.Reading, String)] = []
         for file in files ?? [] {
-            if let reading = await DocumentImport.read(DocumentImport.File(data: file.data, fileName: file.filename)) {
+            if let reading = await DocumentImport.read(DocumentImport.File(file)) {
                 readings.append((reading, file.filename))
             }
         }

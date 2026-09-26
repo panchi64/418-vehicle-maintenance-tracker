@@ -51,7 +51,7 @@ struct SaveDocumentPhotosIntent {
         let context = container.mainContext
         let vehicle = try IntentStore.vehicle(id: album?.id, in: context)
         let documents = await PhotoImport.importImages(
-            files.map { PhotoImport.File(data: $0.data, fileName: $0.filename) },
+            files.map { PhotoImport.File($0) },
             to: vehicle,
             in: context
         )

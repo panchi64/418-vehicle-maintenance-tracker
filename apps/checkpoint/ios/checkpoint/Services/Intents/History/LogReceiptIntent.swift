@@ -60,7 +60,7 @@ struct LogReceiptIntent: AppIntent {
     func perform() async throws -> some IntentResult & ReturnsValue<[ServiceLogEntity]> & ProvidesDialog {
         let context = container.mainContext
         let vehicle = try IntentStore.vehicle(for: self.vehicle, in: context)
-        let reading = try await Self.read(receipt.data, for: vehicle)
+        let reading = try await Self.read(receipt.contents, for: vehicle)
 
         let spoken = (services ?? []).isEmpty ? reading.draft.serviceNames : (services ?? [])
         let names = ServiceLogging.names(in: spoken, knownNames: ServiceLogging.knownNames(on: vehicle))
