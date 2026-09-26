@@ -122,7 +122,8 @@ final class ServiceHistoryPDFService {
 
     // MARK: - Snapshot Building (MainActor)
 
-    private func buildExportData(
+    /// Internal (not private) so tests can check the figures the PDF prints.
+    func buildExportData(
         for vehicle: Vehicle,
         serviceLogs: [ServiceLog],
         options: ExportOptions
@@ -145,10 +146,12 @@ final class ServiceHistoryPDFService {
         }
         detailParts.append(Formatters.mileage(vehicle.effectiveMileage))
 
-        // Per-log entries (dates/costs/mileage formatted here on the main actor)
+        // Per-log entries (dates/costs/mileage formatted here on the main actor).
+        // A row shows only the cost attributable to it: an un-itemized visit's
+        // money lives in its total, which the Total line counts once.
         let logs: [PDFExportData.LogEntry] = sortedLogs.map { log in
             var costString: String?
-            if let cost = log.cost, cost > 0 {
+            if let cost = log.attributableCost, cost > 0 {
                 costString = Formatters.currency.string(from: cost as NSDecimalNumber) ?? "$\(cost)"
             }
             return PDFExportData.LogEntry(
@@ -160,9 +163,9 @@ final class ServiceHistoryPDFService {
             )
         }
 
-        // Total. Uses honestTotalCost() so a Service Visit holding four services
-        // contributes its real total once, not four divided shares (the original bug).
-        let totalCost = sortedLogs.honestTotalCost()
+        // Total. The Costs tab's rule (CostAnalyticsService): a Service Visit
+        // holding four services contributes its entered total once.
+        let totalCost = CostAnalyticsService.totalSpent(on: sortedLogs)
         let totalString = Formatters.currency.string(from: totalCost as NSDecimalNumber) ?? "$0.00"
         let serviceCountString = L10n.exportServiceCount(sortedLogs.count)
 

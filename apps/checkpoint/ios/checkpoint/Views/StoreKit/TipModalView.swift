@@ -30,9 +30,10 @@ struct TipModalView: View {
     private var storeManager: StoreManager { StoreManager.shared }
 
     private var stats: TipPromptStats {
-        // Use visit-aware totals: visits count once, standalone logs count once.
-        let totalCost = serviceLogs.honestTotalCost()
-        let eventCount = serviceLogs.distinctVisitCount()
+        // The Costs tab's rule: a visit counts once, standalone logs count once.
+        let costedEvents = CostAnalyticsService.costedEvents(from: serviceLogs)
+        let totalCost = CostAnalyticsService.total(of: costedEvents)
+        let eventCount = costedEvents.count
         let oldestLog = serviceLogs.map(\.performedDate).min()
         let selectedVehicle = appState.selectedVehicle
 

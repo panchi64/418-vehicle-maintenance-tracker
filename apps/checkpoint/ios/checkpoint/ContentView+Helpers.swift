@@ -362,11 +362,12 @@ extension ContentView {
             }
 
             // Calculate previous year's total cost for yearly roundup
-            let vehicleLogs = logsByVehicleID[vehicle.id] ?? []
-            let previousYearLogs = vehicleLogs.filter {
-                calendar.component(.year, from: $0.performedDate) == previousYear
-            }
-            let previousYearCost = previousYearLogs.honestTotalCost()
+            // Same rule as the Costs tab: a visit counts once.
+            let previousYearCost = CostAnalyticsService.totalSpent(
+                on: logsByVehicleID[vehicle.id] ?? [],
+                inYear: previousYear,
+                calendar: calendar
+            )
 
             // Schedule yearly roundup if there's data
             NotificationService.shared.scheduleYearlyRoundup(

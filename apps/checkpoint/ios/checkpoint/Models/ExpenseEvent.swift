@@ -46,10 +46,16 @@ enum ExpenseEvent: Identifiable {
         }
     }
 
+    /// A visit's entered total is its whole cost — the itemized services and
+    /// line items are a breakdown of it, never added on top. An itemized
+    /// visit saved without a total falls back to that breakdown's sum, so its
+    /// priced items still count (once) instead of vanishing.
     var amount: Decimal {
         switch self {
         case .standalone(let log): return log.cost ?? 0
-        case .visit(let visit): return visit.totalCost ?? 0
+        case .visit(let visit):
+            if let total = visit.totalCost { return total }
+            return visit.isItemized ? visit.itemizedSum : 0
         }
     }
 

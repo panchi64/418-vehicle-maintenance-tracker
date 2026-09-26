@@ -2,10 +2,11 @@
 //  CostAnalyticsService.swift
 //  checkpoint
 //
-//  Spend figures shared by the Costs tab (`CostsMetrics`) and the App Intents
-//  that answer "how much did I spend on the Civic this year?". One
-//  implementation of the rules, so Siri can never quote a number the screen
-//  disagrees with:
+//  Spend figures shared by the Costs tab (`CostsMetrics`), the App Intents
+//  that answer "how much did I spend on the Civic this year?", the yearly
+//  roundup notification, the PDF export and the tip prompt. One
+//  implementation of the rules, so no surface can quote a number the Costs
+//  tab disagrees with:
 //
 //    - a Service Visit counts once, however many services it holds
 //      (`ExpenseEvent`);
@@ -75,6 +76,23 @@ enum CostAnalyticsService {
             byBucket[event.bucket, default: 0] += event.amount
         }
         return byBucket
+    }
+
+    /// What was spent on `logs` — each visit once — inside `interval`
+    /// (start inclusive, end exclusive), or across all of them when nil.
+    /// Unlike a `CostPeriod`, a fixed interval ignores the clock, so the
+    /// yearly roundup and the PDF export see every event they were handed.
+    static func totalSpent(on logs: [ServiceLog], during interval: DateInterval? = nil) -> Decimal {
+        let costed = costedEvents(from: logs)
+        guard let interval else { return total(of: costed) }
+        return total(of: costed.filter { $0.date >= interval.start && $0.date < interval.end })
+    }
+
+    /// What was spent on `logs` in calendar `year` — the yearly roundup's figure.
+    static func totalSpent(on logs: [ServiceLog], inYear year: Int, calendar: Calendar = .current) -> Decimal {
+        guard let dayInYear = calendar.date(from: DateComponents(year: year, month: 1, day: 1)),
+              let interval = calendar.dateInterval(of: .year, for: dayInYear) else { return 0 }
+        return totalSpent(on: logs, during: interval)
     }
 
     /// What was spent on `logs` during `period`, in `category` when one is
