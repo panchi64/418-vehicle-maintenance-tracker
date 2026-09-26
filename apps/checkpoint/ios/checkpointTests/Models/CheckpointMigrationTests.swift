@@ -31,14 +31,17 @@ final class CheckpointMigrationTests: XCTestCase {
         try super.tearDownWithError()
     }
 
-    /// Open `url` the way the app does (versioned schema + plan), CloudKit off.
+    /// Open `url` the way the app does (versioned schema + plan, then the
+    /// post-launch note reconcile), CloudKit off.
     private func openCurrent(at url: URL) throws -> ModelContainer {
         let schema = Schema(versionedSchema: CheckpointSchemaCurrent.self)
-        return try ModelContainer(
+        let container = try ModelContainer(
             for: schema,
             migrationPlan: CheckpointMigrationPlan.self,
             configurations: ModelConfiguration(schema: schema, url: url, cloudKitDatabase: .none)
         )
+        ServiceMigrationService.reconcileLegacyVehicleNotes(in: container.mainContext)
+        return container
     }
 
     private func fixtureCopy() throws -> URL {

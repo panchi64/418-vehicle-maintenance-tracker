@@ -28,8 +28,9 @@ struct ServiceMigrationService {
     }
 
     /// Keep each vehicle's pinned legacy note in step with the V1 notes
-    /// field. The V1→V2 migration stage did this once; an older client
-    /// syncing the field in can undo it at any time, so it runs every launch.
+    /// field. This is the V1→V2 data migration (the stage itself is
+    /// lightweight); an older client syncing the field in can undo it at any
+    /// time, so it runs every launch.
     @MainActor
     static func reconcileLegacyVehicleNotes(in context: ModelContext) {
         do {

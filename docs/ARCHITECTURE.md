@@ -184,7 +184,7 @@ checkpoint-app/
 - Replaces `Vehicle.notes`, which stays as the mirror of the migrated "legacy" note for older app versions (`VehicleNoteMigration`)
 
 ### Schema versions
-- `CheckpointSchemaV1` is frozen (nested copies of the shipped models); `CheckpointSchemaV2` adds the two models above; `CheckpointMigrationPlan` has one custom stage (lightweight change + legacy-note reconcile). Rules for CloudKit-safe changes are in `CheckpointSchema.swift`.
+- `CheckpointSchemaV1` is frozen (nested copies of the shipped models); `CheckpointSchemaV2` adds the two models above; `CheckpointMigrationPlan` has one lightweight stage; the legacy-note reconcile runs post-launch. Rules for CloudKit-safe changes are in `CheckpointSchema.swift`.
 
 ### MileageSnapshot
 - Mileage reading for pace calculation

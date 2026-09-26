@@ -21,7 +21,7 @@ This directory contains all SwiftData model classes that define the app's data s
 `CheckpointSchema.swift` holds the rules (read its header before touching a model). In short:
 - **V1 is frozen** in `CheckpointSchemaV1.swift` as nested copies of the shipped models — never edit it. A new version freezes the previous one the same way; two versions listing the same live classes hash alike.
 - **CloudKit: additive only.** Never remove or rename a stored property (older app versions sync the same container). New attributes optional or defaulted, relationships optional with inverses, no `.unique`.
-- **V1 → V2** is one custom stage: lightweight schema change, then `VehicleNoteMigration.reconcile` turns each `Vehicle.notes` into a pinned legacy note (ID derived from the vehicle's). `Vehicle.notes` stays as its mirror for V1 clients; the same reconcile runs every launch (`ServiceMigrationService`) because an old client can write the field any time.
+- **V1 → V2** is one lightweight stage (no `.custom` stages: undocumented on a CloudKit store). The post-launch `VehicleNoteMigration.reconcile` turns each `Vehicle.notes` into a pinned legacy note (ID derived from the vehicle's). `Vehicle.notes` stays as its mirror for V1 clients; the reconcile runs every launch (`ServiceMigrationService`) because an old client can write the field any time.
 - `CheckpointMigrationTests` opens a real V1 store (`checkpointTests/Fixtures/CheckpointV1.store`). Add a fixture for each shipped version.
 - New record types must be deployed to the CloudKit production schema before release.
 

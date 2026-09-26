@@ -17,9 +17,10 @@
 //    even one the app stops using (`Vehicle.notes`).
 //  - Every attribute optional or defaulted, relationships optional with an
 //    inverse, no `.unique`, no `.deny` (SwiftData's CloudKit limitations).
-//  - A stage's data work must be idempotent and safe to repeat after sync:
-//    each device migrates its own store, and an older client can write the
-//    old shape at any time. Pair it with a post-launch reconcile.
+//  - Keep stages lightweight. Data work goes in an idempotent post-launch
+//    reconcile (`ServiceMigrationService`), not a `.custom` stage: each
+//    device migrates its own store, an older client can write the old shape
+//    at any time, and custom stages on a CloudKit store are undocumented.
 //  - Deploy the new record types to the CloudKit production schema (CloudKit
 //    Console → Deploy Schema Changes) before the release ships.
 //
@@ -66,23 +67,15 @@ enum CheckpointMigrationPlan: SchemaMigrationPlan {
         [migrateV1toV2]
     }
 
-    /// The schema change is additive (lightweight). After it, each vehicle's
-    /// single notes field becomes its pinned note. The same reconcile runs
-    /// after every launch, for notes an older client syncs in later.
+    /// The schema change is additive, so the stage is lightweight. Turning
+    /// each vehicle's notes field into its pinned note is left to the
+    /// post-launch reconcile (`ServiceMigrationService`), which runs every
+    /// launch anyway for notes an older client syncs in later.
     ///
-    /// SwiftData runs the stage inside `ModelContainer.init`, on the thread
-    /// that opens the store — the main thread, in the app and in tests — and
-    /// the models are main-actor types.
+    /// Not a custom stage: Apple documents no support for `.custom` stages on
+    /// a CloudKit-synced store, and a failed open silently falls back to a
+    /// local-only container (`checkpointApp.createContainer`).
     static var migrateV1toV2: MigrationStage {
-        .custom(
-            fromVersion: CheckpointSchemaV1.self,
-            toVersion: CheckpointSchemaV2.self,
-            willMigrate: nil,
-            didMigrate: { context in
-                try MainActor.assumeIsolated {
-                    try VehicleNoteMigration.reconcile(in: context)
-                }
-            }
-        )
+        .lightweight(fromVersion: CheckpointSchemaV1.self, toVersion: CheckpointSchemaV2.self)
     }
 }
