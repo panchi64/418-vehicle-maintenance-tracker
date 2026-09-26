@@ -25,7 +25,7 @@
 - `docs/AESTHETIC.md` — visual identity across 418 products. Rules are tagged `[REQUIREMENT]` or `[PREFERENCE]`; cite the tag when you cite the rule.
 - `docs/BIOMBO_IMPLEMENTATION_PLAN.md` — active implementation plan
 - `docs/FUEL_PRICE_TRACKER.md` — original Biombo feature spec
-- `docs/ARCHITECTURE.md`, `docs/FEATURES.md` — Checkpoint reference
+- `docs/ARCHITECTURE.md` — Checkpoint reference
 - `docs/APP_INTENTS.md` — Siri / App Intents / on-device model availability by iOS version and device tier (SDK-verified). Read before adding any intent, entity, or Foundation Models call.
 
 ## UI work
@@ -65,7 +65,3 @@ This file is intentionally small. **Go to the scoped CLAUDE.md for the directory
 ## Concurrency rule (Swift)
 
 Never use `nonisolated(unsafe)` or `@unchecked Sendable`. For static constants with `Sendable` types, use `nonisolated static let`.
-
-## Feature tracking
-
-`docs/FEATURES.md` tracks Checkpoint feature status. When shipping a new feature: mark `✅`, add tests, commit both together.
