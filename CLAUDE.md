@@ -26,6 +26,7 @@
 - `docs/BIOMBO_IMPLEMENTATION_PLAN.md` — active implementation plan
 - `docs/FUEL_PRICE_TRACKER.md` — original Biombo feature spec
 - `docs/ARCHITECTURE.md`, `docs/FEATURES.md` — Checkpoint reference
+- `docs/APP_INTENTS.md` — Siri / App Intents / on-device model availability by iOS version and device tier (SDK-verified). Read before adding any intent, entity, or Foundation Models call.
 
 ## UI work
 
