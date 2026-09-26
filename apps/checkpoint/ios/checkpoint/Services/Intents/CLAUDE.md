@@ -1,53 +1,43 @@
-# Siri - Voice Command Integration
+# Intents — Siri, Shortcuts, Spotlight
 
-This directory contains App Intents for Siri voice commands and Shortcuts integration.
+App Intents, App Entities and Spotlight indexing. `docs/APP_INTENTS.md` (repo root) is the SDK-verified reference for what exists on which iOS version and device tier — check it (or the SDK `.swiftinterface`, or developer.apple.com) before using an App Intents API. Minimum deployment is iOS 26; anything iOS 27-only is `@available(iOS 27, *)`.
 
-## Architecture
+## Layout
 
 ```
-Siri/
-├── CheckNextDueIntent.swift       # "What's due on my car?"
-├── ListUpcomingServicesIntent.swift # "What maintenance is coming up?"
-├── UpdateMileageIntent.swift      # "Update mileage to X miles"
-├── CheckpointShortcuts.swift      # AppShortcutsProvider with phrases
-└── SiriDataProvider.swift         # Reads data from App Groups
+Intents/
+├── IntentDependencies.swift    # registers the app's ModelContainer for @Dependency
+├── SpotlightIndexer.swift      # CSSearchableIndex.indexAppEntities / deleteAppEntities
+├── Entities/
+│   ├── ModelBackedEntity.swift # shared shape + fetch path for SwiftData-backed entities
+│   ├── VehicleEntity.swift     # + VehicleEntityQuery
+│   ├── ServiceEntity.swift
+│   ├── ServiceLogEntity.swift
+│   ├── VisitEntity.swift
+│   ├── DocumentEntity.swift    # Document = ServiceAttachment; OCR text indexed
+│   ├── ServicePresetEntity.swift  # PresetDataService catalog, not indexed
+│   ├── IntentEnums.swift       # AppEnum conformances of the app's own enums
+│   └── View+OnScreenEntity.swift  # .appEntityIdentifier wrapper for detail screens
+├── CheckNextDueIntent.swift, ListUpcomingServicesIntent.swift  # read SiriDataProvider snapshots
+├── UpdateMileageIntent.swift   # opens the mileage sheet prefilled
+├── CheckpointShortcuts.swift   # AppShortcutsProvider (max 10 shortcuts)
+├── SiriDataProvider.swift      # App Group snapshot reader (legacy read path)
+└── L10n+Siri.swift             # spoken sentences, `siri.` keys
 ```
 
-## Data Flow
+## Rules
 
-### Read-Only Intents (CheckNextDue, ListUpcoming)
-```
-Main App                          Shared Storage                    Siri
-┌────────────────┐              ┌────────────────┐              ┌────────────────┐
-│ Data changes   │─────────────>│ App Groups     │<─────────────│ Siri Intent    │
-│ WidgetData     │   writes     │ UserDefaults   │    reads     │ reads data,    │
-│ Service        │              │                │              │ returns dialog │
-└────────────────┘              └────────────────┘              └────────────────┘
-```
+- **One data path.** Intents run in the app process. Read and write through `@Dependency var container: ModelContainer` (registered by `IntentDependencies.register` at launch and again on the container swap in `checkpointApp`). Never open a second container. Only out-of-process code (widget, Controls) reads App Group snapshots.
+- **Call services, not views.** Writes go through the same services the UI uses (`VehicleService`, `ServiceCompletionService`, `LoggedServiceWriter`, `MileageCommit`, …); spend figures through `CostAnalyticsService`. If an intent needs logic that lives in a view, extract it into a service first, with tests.
+- **Entities are Sendable snapshots.** A `ModelBackedEntity` is built on the main actor from one model (`init(model:)`) and fetched only through `entities(ids:in:)` / `entities(matching:in:)` — queries, the indexer and tests share that path. IDs are the model's `UUID`. Queries hop to the main actor through `EntityFetch`.
+- **Enums conform in place.** `CostPeriod`, `CostCategory`, `DocumentType`, `ServiceStatus` are `nonisolated` with only their L10n/theme members `@MainActor`, so they can be `AppEnum`s. Raw values are persisted by saved shortcuts — never rename one.
+- **Navigation goes through `PendingRoute`.** An intent that opens the app sets `PendingRouteStore.shared.route` (`checkpoint/State/PendingRoute.swift`); `ContentView` is its one consumer. Notifications and the widget's `PendingWidgetRoute` feed the same store. **No URL schemes** (security invariant).
+- **Spotlight follows data changes.** `SpotlightIndexer.scheduleReindex` runs wherever widget data refreshes (`ContentView.updateWidgetData`, `WidgetDataService`'s CloudKit remote-change pass). Don't add per-write indexing hooks.
+- **Tag detail screens** with `.onScreenEntity(_:id:)` so Apple Intelligence can act on "this".
 
-### Write Intent (UpdateMileage)
-```
-Siri                              App (Foreground)
-┌────────────────┐              ┌────────────────────────────────┐
-│ "Update to     │─────────────>│ Opens with mileage pre-filled  │
-│  52,000 miles" │  opens app   │ User confirms → SwiftData save │
-└────────────────┘              └────────────────────────────────┘
-```
+## Two `VehicleEntity` types
 
-## Key Types
-
-- `SiriDataProvider` — Static methods to read vehicle/service data from App Groups
-- `CheckNextDueIntent` — Returns dialog with most urgent service
-- `ListUpcomingServicesIntent` — Returns dialog listing 1-3 upcoming services
-- `UpdateMileageIntent` — Opens app with mileage pre-filled (`openAppWhenRun = true`), stores in `PendingMileageUpdate.shared`
-
-## Shared Entities
-
-VehicleEntity and VehicleEntityQuery are defined in `CheckpointWidget/` and must be added to **both** the main app and widget targets in Xcode. They provide vehicle selection in Siri intent parameters and widget configuration.
-
-## Integration Points
-
-- **ContentView** — Checks `PendingMileageUpdate.shared` on foreground activation, shows `MileageUpdateSheet` with the prefilled mileage (stored on `AppState.siriPrefilledMileage`)
+The app's `VehicleEntity` (here) is SwiftData-backed and indexed. The widget extension has its own snapshot-backed `VehicleEntity` in `CheckpointWidget/` for its configuration picker; it is not compiled into the app. The widget's keeps its name because saved widget configurations reference it.
 
 ## Entitlements
 

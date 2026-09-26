@@ -97,7 +97,7 @@ checkpoint-app/
 │   │   ├── Import/           # CSV import (Fuelly, Drivvo, Simply Auto)
 │   │   ├── Notifications/    # Local notification management
 │   │   ├── OCR/              # Vision framework services
-│   │   ├── Siri/             # Siri voice commands & Shortcuts
+│   │   ├── Intents/          # App Intents, App Entities, Spotlight
 │   │   ├── StoreKit/         # StoreKit 2 purchase engine
 │   │   ├── Sync/             # iCloud & data sync
 │   │   ├── Utilities/        # Single-purpose services
@@ -263,25 +263,15 @@ State machine in `OnboardingState` (`@Observable @MainActor`):
 - `VINOCRService` — 17-character VIN validation, handles common OCR mistakes (0/O, 1/I)
 - `OdometerImagePreprocessor` — Grayscale, contrast enhancement, adaptive thresholding
 
-### Siri/ (Voice Commands & Shortcuts)
+### Intents/ (Siri, Shortcuts, Spotlight)
 
-App Intents-based Siri integration with 3 intents and a data provider:
+App Intents, App Entities and Spotlight indexing. See `checkpoint/Services/Intents/CLAUDE.md` for the architecture and `docs/APP_INTENTS.md` for SDK-verified availability.
 
-| Component | Purpose |
-|-----------|---------|
-| `CheckNextDueIntent` | "What's due on my car?" — Returns dialog with most urgent service |
-| `ListUpcomingServicesIntent` | "What maintenance is coming up?" — Lists up to 3 upcoming services |
-| `UpdateMileageIntent` | "Update mileage to X miles" — Opens app with mileage pre-filled |
-| `CheckpointShortcuts` | `AppShortcutsProvider` registering phrases for all 3 intents |
-| `SiriDataProvider` | Reads vehicle/service data from App Groups (mirrors widget data access) |
-
-**Data flow:** Siri intents read from the same App Group UserDefaults that widgets use. Read-only intents (`CheckNextDue`, `ListUpcoming`) return `IntentDialog` directly. The write intent (`UpdateMileage`) sets `openAppWhenRun = true` and stores pending data in `PendingMileageUpdate.shared` for the app to process on launch.
-
-**Key types:**
-- `SiriServiceData` — Vehicle name, ID, mileage, and services array
-- `SiriService` — Name, status, due description, days remaining
-- `SiriServiceStatus` — `.overdue`, `.dueSoon`, `.good`, `.neutral` with `dialogPrefix`
-- `PendingMileageUpdate` — `@MainActor` singleton holding vehicleID and mileage from Siri
+- **Data path:** intents run in the app process and read the app's `ModelContainer` through `@Dependency` (`IntentDependencies.register`, called at launch and on the onboarding → CloudKit container swap).
+- **Entities** (`Intents/Entities/`): `VehicleEntity`, `ServiceEntity`, `ServiceLogEntity`, `VisitEntity`, `DocumentEntity` are `IndexedEntity` snapshots of SwiftData models (`ModelBackedEntity`); `ServicePresetEntity` reads `PresetDataService`. `CostPeriod`, `CostCategory`, `DocumentType`, `ServiceStatus` conform to `AppEnum` in place.
+- **Spotlight:** `SpotlightIndexer` replaces each entity type in `CSSearchableIndex` wherever widget data refreshes after a change.
+- **Navigation:** intents that open the app set a `PendingRoute` (see Navigation below).
+- **Intents:** `CheckNextDueIntent`, `ListUpcomingServicesIntent` (App Group snapshot via `SiriDataProvider`), `UpdateMileageIntent` (opens the mileage sheet prefilled), registered by `CheckpointShortcuts`.
 
 ### StoreKit/ (Monetization)
 
@@ -506,7 +496,7 @@ ContentView
 - **Tab roots** share one chrome (`TabRootStack`): the vehicle name is the inline navigation title, with `.toolbarTitleMenu` to switch vehicle (checkmark on current), add a vehicle, or manage vehicles (the picker sheet). Settings is the leading toolbar item (it shows the sync-error glyph when there is one); add service is the one prominent trailing item.
 - **Details are pushed, tasks are sheets.** `AppRoute` (service, service log, visit, document, documents library) is pushed onto the visible tab's path in `AppState.paths`; `appState.push(_:)`. Add/edit forms, mileage update, vehicle picker/add/edit, paywall, tip modal and theme reveal are sheets.
 - **One root sheet.** `AppState.activeSheet: ActiveSheet?` drives a single `.sheet(item:)`. `present(_:)` replaces whatever is up — if a sheet is on screen, it dismisses and the new one is queued until that sheet's `onDismiss` — so "dismiss then present in the same tick" cannot drop a sheet. `presentWhenIdle(_:)` waits instead of interrupting (tip prompt). Onboarding's full-screen covers stay separate, driven by `OnboardingState`.
-- **Notification routes** (`AppState+NotificationRoute`) close any sheet, switch tab, and push or present. Switching vehicle (`selectVehicle`) pops every stack.
+- **Pending routes** (`PendingRoute` in `PendingRouteStore`, applied by `AppState+PendingRoute`) are the one way outside callers — notifications, widget rows (via the `PendingWidgetRoute` App Group queue), intents — navigate: close any sheet, switch tab, and push or present. Switching vehicle (`selectVehicle`) pops every stack.
 - **Tour spotlights** are content only. Targets report window-space frames through `TourSpotlightRegistry` in the environment — preferences don't cross the system `TabView`/`NavigationStack` — and the root overlay converts them.
 
 ## Test Coverage
@@ -556,7 +546,7 @@ ContentView
 - **EditServiceLogViewTests** — Log editing
 - **VehiclePickerSheetTests** — Vehicle selection
 - **VehicleHeaderTests** — Odometer formatting and mileage update (now `VehicleSummaryBand`)
-- **AppStateTests** / **NotificationRouteTests** — Per-tab paths, the sheet router's queue, notification routing
+- **AppStateTests** / **PendingRouteTests** — Per-tab paths, the sheet router's queue, notification/widget/intent routing
 
 ### Component Tests
 - **OdometerCaptureViewTests** — OCR capture flow

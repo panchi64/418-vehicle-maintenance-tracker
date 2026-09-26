@@ -44,7 +44,11 @@ The medium widget includes a "Done" button (checkmark) on the most urgent servic
 
 ## Tap → Service Detail (no URL scheme)
 
-The app registers no URL scheme (security invariant), so no `widgetURL`/`Link`. Service rows and heroes wrap in `OpenServiceButton` → `OpenServiceIntent` (`supportedModes = .foreground`, runs in the app). It stores a `PendingWidgetRoute` in the App Group and posts `PendingWidgetRoute.queuedNotification`; `ContentView.consumePendingWidgetRoute()` takes it (on that post or on `enterForeground`) and sets `NotificationService.pendingRoute = .services(...)`, reusing notification navigation. `Shared/PendingWidgetRoute.swift` is compiled into both targets (SharedEntities group in the pbxproj).
+The app registers no URL scheme (security invariant), so no `widgetURL`/`Link`. Service rows and heroes wrap in `OpenServiceButton` → `OpenServiceIntent` (`supportedModes = .foreground`, runs in the app). It stores a `PendingWidgetRoute` in the App Group and posts `PendingWidgetRoute.queuedNotification`; `ContentView.consumePendingWidgetRoute()` takes it (on that post or on `enterForeground`) and moves it into the app's one route store (`PendingRouteStore.shared.route = .service(...)`, see `checkpoint/State/PendingRoute.swift`), which notifications and intents feed too. `Shared/PendingWidgetRoute.swift` is compiled into both targets (SharedEntities group in the pbxproj).
+
+## Configuration Vehicle Entity
+
+`VehicleEntity` / `VehicleEntityQuery` here are **widget-target only** and snapshot-backed (the App Group vehicle list, plus the "Match App" pseudo-entity). The app has its own, richer SwiftData-backed `VehicleEntity` in `checkpoint/Services/Intents/Entities/`. Keep the widget type's name: saved widget configurations reference it, and the two never share a target.
 
 ## Rendering Modes & Type
 

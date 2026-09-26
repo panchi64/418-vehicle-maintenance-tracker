@@ -10,7 +10,7 @@ Services/
 ├── Export/              # PDF generation for service history
 ├── Notifications/       # Local notification management (modular architecture)
 ├── OCR/                 # Vision framework services (odometer, VIN)
-├── Siri/                # Siri voice commands & Shortcuts (see Siri/CLAUDE.md)
+├── Intents/             # App Intents, App Entities, Spotlight (see Intents/CLAUDE.md)
 ├── Import/              # CSV import from competitor apps
 ├── Sync/                # iCloud & data sync
 ├── Utilities/           # Single-purpose services (NHTSA, app icons, presets)
