@@ -11,7 +11,9 @@
 //
 //  The in-app Siri tips (`ScreenSiriTip`) show these phrases, and
 //  `SiriTipView` shows nothing for an intent that isn't here: keep Check
-//  Next Due, Update Mileage, Spending and Find Document.
+//  Next Due, Update Mileage, Spending and Find Document. A tip shows its
+//  shortcut's first phrase as written, so that phrase must not carry a
+//  parameter.
 //
 //  Every phrase names the app (`\(.applicationName)`), as App Shortcuts
 //  require. Spanish phrases live in `AppShortcuts.xcstrings`, keyed by these
@@ -113,13 +115,14 @@ struct CheckpointShortcuts: AppShortcutsProvider {
         // At a traffic stop or a shop counter: the card, without unlocking
         // into the app. Took List Upcoming Services' slot (Check Next Due's
         // snippet already lists what's coming up); it is also the Documents
-        // screen's Siri tip, which needs an App Shortcut to show.
+        // screen's Siri tip, which needs an App Shortcut to show. With a
+        // `\(\.$type)` phrase first, the tip read "Show my ${type}…".
         AppShortcut(
             intent: FindDocumentIntent(),
             phrases: [
+                "Show my car documents in \(.applicationName)",
                 "Show my \(\.$type) in \(.applicationName)",
                 "Find my \(\.$type) in \(.applicationName)",
-                "Show my car documents in \(.applicationName)",
                 "Find a document in \(.applicationName)"
             ],
             shortTitle: "Find Document",
