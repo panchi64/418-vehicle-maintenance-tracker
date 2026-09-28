@@ -122,7 +122,7 @@ actor OdometerOCRService {
 
         for preprocessed in preprocessedImages {
             do {
-                let observations = try await performTextRecognition(
+                let observations = try performTextRecognition(
                     on: preprocessed.image,
                     orientation: cgOrientation
                 )
@@ -207,50 +207,33 @@ actor OdometerOCRService {
 
     // MARK: - Private Methods
 
-    /// Performs Vision text recognition on the image
+    /// Performs Vision text recognition on the image.
+    ///
+    /// `perform` is synchronous, so the results are read straight off the
+    /// request. A completion handler bridged to a continuation resumed twice
+    /// when Vision both reported the error to the handler and threw it (a
+    /// 2×2 image on the iPad simulator), which traps.
     private func performTextRecognition(
         on cgImage: CGImage,
         orientation: CGImagePropertyOrientation = .up
-    ) async throws -> [VNRecognizedTextObservation] {
-        try await withCheckedThrowingContinuation { continuation in
-            let request = VNRecognizeTextRequest { request, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                    return
-                }
+    ) throws -> [VNRecognizedTextObservation] {
+        let request = VNRecognizeTextRequest()
 
-                guard let observations = request.results as? [VNRecognizedTextObservation] else {
-                    continuation.resume(returning: [])
-                    return
-                }
+        // Configure for accurate recognition (best for odometer readings)
+        request.recognitionLevel = .accurate
+        request.usesLanguageCorrection = false
+        request.recognitionLanguages = ["en-US"]
 
-                continuation.resume(returning: observations)
-            }
+        // Filter out small text noise (minimum 2% of image height)
+        request.minimumTextHeight = 0.02
 
-            // Configure for accurate recognition (best for odometer readings)
-            request.recognitionLevel = .accurate
-            request.usesLanguageCorrection = false
-            request.recognitionLanguages = ["en-US"]
+        // Custom words to help recognize odometer-related text
+        request.customWords = ["km", "mi", "miles", "KM", "MI", "ODO", "ODOMETER"]
+        request.revision = VNRecognizeTextRequestRevision3
 
-            // Filter out small text noise (minimum 2% of image height)
-            request.minimumTextHeight = 0.02
-
-            // Custom words to help recognize odometer-related text
-            request.customWords = ["km", "mi", "miles", "KM", "MI", "ODO", "ODOMETER"]
-
-            // Use latest revision for best accuracy (iOS 16+)
-            if #available(iOS 16.0, *) {
-                request.revision = VNRecognizeTextRequestRevision3
-            }
-
-            let handler = VNImageRequestHandler(cgImage: cgImage, orientation: orientation, options: [:])
-
-            do {
-                try handler.perform([request])
-            } catch {
-                continuation.resume(throwing: error)
-            }
-        }
+        let handler = VNImageRequestHandler(cgImage: cgImage, orientation: orientation, options: [:])
+        try handler.perform([request])
+        return request.results ?? []
     }
 
     /// Extracts potential mileage values from recognized text observations (Phase 2: topCandidates(3))
