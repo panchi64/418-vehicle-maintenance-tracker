@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, Match, onCleanup, Show, Switch } from 'solid-js'
+import { createEffect, createMemo, createSignal, For, Match, onCleanup, Show, Switch, type JSX } from 'solid-js'
 import './styles/base.css'
 import './harness/harness.css'
 
@@ -17,6 +17,9 @@ import { AppointmentForm } from './screens/AppointmentForm'
 import { NotesList } from './screens/NotesList'
 import { NoteSheet } from './screens/NoteSheet'
 import { appointmentsFull, notesFull, type Appointment, type VehicleNote } from './data/visits'
+import { READABLE_WIDTH, SIDEBAR_DOCK_MIN_WIDTH, SizeClassProvider, sizeClassFor } from './layout/sizeClass'
+import { TABS } from './layout/tabs'
+import { RegularShell } from './components/Sidebar'
 
 /**
  * Where the frame is. Tabs sit inside the shell; forms and Add Vehicle are
@@ -150,7 +153,15 @@ const DEVICES = [
   { id: 'se', label: 'iPhone SE — 375×667', w: 375, h: 667 },
   { id: '17', label: 'iPhone 17 — 393×852', w: 393, h: 852 },
   { id: '17pm', label: 'iPhone 17 Pro Max — 440×956', w: 440, h: 956 },
-] as const
+  { id: 'duo-outer', label: 'iPhone Duo outer — 466×678', w: 466, h: 678 },
+  { id: 'duo-inner', label: 'iPhone Duo inner — 669×951 (regular)', w: 669, h: 951, fold: true },
+  { id: 'ipad11', label: 'iPad 11″ — 834×1210 (regular)', w: 834, h: 1210 },
+  { id: 'ipad13', label: 'iPad 13″ — 1032×1376 (regular)', w: 1032, h: 1376 },
+  { id: 'ipad13-land', label: 'iPad 13″ landscape — 1376×1032 (regular)', w: 1376, h: 1032 },
+] as const satisfies readonly { id: string; label: string; w: number; h: number; fold?: boolean }[]
+
+type Device = (typeof DEVICES)[number]
+const hasFold = (d: Device) => 'fold' in d && d.fold
 
 export function App() {
   const [themeId, setThemeId] = createSignal(defaultTheme.id)
@@ -169,11 +180,17 @@ export function App() {
   const [revealActions, setRevealActions] = createSignal(false)
   const [specsExpanded, setSpecsExpanded] = createSignal(false)
   const [taps, setTaps] = createSignal(0)
+  const [showFold, setShowFold] = createSignal(true)
+  const [sidebarOpen, setSidebarOpen] = createSignal(false)
 
   let frameRef: HTMLDivElement | undefined
 
   const theme = () => themes.find((t) => t.id === themeId()) ?? defaultTheme
-  const device = () => DEVICES.find((d) => d.id === deviceId()) ?? DEVICES[1]
+  const device = (): Device => DEVICES.find((d) => d.id === deviceId()) ?? DEVICES[1]
+  // Derived once here; screens read it through SizeClassProvider.
+  const sizeClass = createMemo(() => sizeClassFor(device().w))
+  const regular = () => sizeClass() === 'regular'
+  const sidebarDocked = () => device().w >= SIDEBAR_DOCK_MIN_WIDTH
   const current = () => SCREENS.find((s) => s.id === screenId()) ?? SCREENS[0]
   const scenario = () => scenarios[current().scenario]
 
@@ -192,17 +209,26 @@ export function App() {
   )
   const hist = useTypeHistogram(() => frameRef)
 
-  const [viewportH, setViewportH] = createSignal(window.innerHeight)
-  const onResize = () => setViewportH(window.innerHeight)
+  const [viewport, setViewport] = createSignal({ w: window.innerWidth, h: window.innerHeight })
+  const onResize = () => setViewport({ w: window.innerWidth, h: window.innerHeight })
   window.addEventListener('resize', onResize)
   onCleanup(() => window.removeEventListener('resize', onResize))
-  const fit = () => Math.min(1, (viewportH() - 56) / device().h)
+  // +BEZEL: the bezel sits outside the logical size (harness.css). iPads fit by width too.
+  const BEZEL = 20
+  const PANEL_WIDTH = 288 // .hz grid column in harness.css
+  const fit = () =>
+    Math.min(
+      1,
+      (viewport().h - 56) / (device().h + BEZEL),
+      (viewport().w - PANEL_WIDTH - 56) / (device().w + BEZEL),
+    )
 
   const goToScreen = (id: string) => {
     const def = SCREENS.find((s) => s.id === id) ?? SCREENS[0]
     setScreenId(def.id)
     setRoute({ ...def.start }) // a fresh object, so a keyed form remounts
     setSpecsExpanded(!!def.specs)
+    setSidebarOpen(false)
     setTaps(0)
   }
 
@@ -213,6 +239,67 @@ export function App() {
     const v = scenario().vehicle
     return v ? v.name || `${v.year} ${v.make} ${v.model}` : 'Checkpoint'
   }
+  /** A docked sidebar carries the vehicle name, so the tab's large title is the tab's own. */
+  const tabTitle = (tab: TabId) =>
+    regular() && sidebarDocked() ? (TABS.find((t) => t.id === tab)?.label ?? vehicleTitle()) : vehicleTitle()
+  const selectTab = (tab: TabId) => setRoute({ kind: 'tab', tab })
+
+  /**
+   * The tab chrome: a bottom tab bar at compact, the sidebar at regular.
+   * Compact renders exactly as it did before regular width existed.
+   */
+  const TabChrome = (p: { tab: TabId; children: JSX.Element }) => (
+    <Show
+      when={regular()}
+      fallback={
+        <>
+          {p.children}
+          <TabBar selected={p.tab} onSelect={selectTab} />
+        </>
+      }
+    >
+      <RegularShell
+        vehicleTitle={vehicleTitle()}
+        selected={p.tab}
+        onSelect={selectTab}
+        docked={sidebarDocked()}
+        open={sidebarOpen()}
+        onOpenChange={setSidebarOpen}
+      >
+        {p.children}
+      </RegularShell>
+    </Show>
+  )
+
+  /**
+   * Readable width at regular: forms and pushed screens sit in a column capped
+   * at READABLE_WIDTH. A sheet also dims what is around it — the footprint of
+   * an iPad form sheet.
+   */
+  const Readable = (p: { sheet?: boolean; children: JSX.Element }) => (
+    <Show when={regular()} fallback={p.children}>
+      <div
+        style={{
+          display: 'flex',
+          'justify-content': 'center',
+          flex: '1 1 auto',
+          'min-height': '0',
+          background: p.sheet ? 'var(--background-subtle)' : undefined,
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            'flex-direction': 'column',
+            width: `min(100%, ${READABLE_WIDTH}px)`,
+            background: 'var(--background-primary)',
+          }}
+        >
+          {p.children}
+        </div>
+      </div>
+    </Show>
+  )
 
   return (
     <div class="hz">
@@ -311,6 +398,16 @@ export function App() {
           >
             <For each={DEVICES}>{(d) => <option value={d.id}>{d.label}</option>}</For>
           </select>
+          <p class="hz-hint">
+            Size class: <strong>{sizeClass()}</strong>
+            {regular() ? ` — sidebar ${sidebarDocked() ? 'docked' : 'collapsed (◧ opens it)'}` : ''}
+          </p>
+          <Show when={hasFold(device())}>
+            <label class="hz-check">
+              <input type="checkbox" checked={showFold()} onChange={(e) => setShowFold(e.currentTarget.checked)} />
+              Show fold line
+            </label>
+          </Show>
         </div>
 
         <div class="hz-group">
@@ -385,54 +482,70 @@ export function App() {
           onClick={() => setTaps((n) => n + 1)}
         >
           <div class="hz-app">
+            <SizeClassProvider value={sizeClass}>
             <ScenarioProvider value={scenario}>
               <StatusBar />
               <Switch>
                 {/* Keyed: each form route is a fresh form. Unkeyed, going from one
                     form route to another kept the first form's state. */}
                 <Match when={route().kind === 'form' && (route() as Extract<Route, { kind: 'form' }>)} keyed>
-                  {(r) => <ServiceForm mode={r.mode} service={r.service} log={r.log} receipt={r.receipt} onClose={home} />}
+                  {(r) => (
+                    <Readable sheet>
+                      <ServiceForm mode={r.mode} service={r.service} log={r.log} receipt={r.receipt} onClose={home} />
+                    </Readable>
+                  )}
                 </Match>
 
                 <Match when={route().kind === 'vehicle'}>
-                  <AddVehicle onClose={home} />
+                  <Readable sheet>
+                    <AddVehicle onClose={home} />
+                  </Readable>
                 </Match>
 
                 <Match when={route().kind === 'appointment' && (route() as Extract<Route, { kind: 'appointment' }>)} keyed>
                   {(r) => (
-                    <AppointmentForm
-                      appointment={r.appointment}
-                      preselectServiceId={r.preselect}
-                      initialStart={r.start}
-                      onClose={home}
-                    />
+                    <Readable sheet>
+                      <AppointmentForm
+                        appointment={r.appointment}
+                        preselectServiceId={r.preselect}
+                        initialStart={r.start}
+                        onClose={home}
+                      />
+                    </Readable>
                   )}
                 </Match>
 
                 <Match when={route().kind === 'note' && (route() as Extract<Route, { kind: 'note' }>)} keyed>
-                  {(r) => <NoteSheet note={r.note} onClose={() => setRoute({ kind: 'notes' })} />}
+                  {(r) => (
+                    <Readable sheet>
+                      <NoteSheet note={r.note} onClose={() => setRoute({ kind: 'notes' })} />
+                    </Readable>
+                  )}
                 </Match>
 
                 <Match when={route().kind === 'notes'}>
-                  <NotesList
-                    onBack={home}
-                    onAdd={() => setRoute({ kind: 'note' })}
-                    onOpen={(note) => setRoute({ kind: 'note', note })}
-                    revealActions={revealActions()}
-                  />
-                  <TabBar selected="home" onSelect={(tab) => setRoute({ kind: 'tab', tab })} />
+                  <TabChrome tab="home">
+                    <Readable>
+                      <NotesList
+                        onBack={home}
+                        onAdd={() => setRoute({ kind: 'note' })}
+                        onOpen={(note) => setRoute({ kind: 'note', note })}
+                        revealActions={revealActions()}
+                      />
+                    </Readable>
+                  </TabChrome>
                 </Match>
 
                 <Match when={route().kind === 'tab' && (route() as Extract<Route, { kind: 'tab' }>)}>
                   {(r) => (
-                    <>
+                    <TabChrome tab={r().tab}>
                       <Switch>
                         <Match when={r().tab === 'home' && !scenario().vehicle}>
                           <HomeEmpty onAdd={() => setRoute({ kind: 'vehicle' })} />
                         </Match>
                         <Match when={r().tab === 'home'}>
                           <HomeTab
-                            title={vehicleTitle()}
+                            title={tabTitle('home')}
                             onAdd={openAdd}
                             onNavigate={(tab) => setRoute({ kind: 'tab', tab })}
                             onMarkDone={(service) => setRoute({ kind: 'form', mode: 'complete', service })}
@@ -450,19 +563,41 @@ export function App() {
                           />
                         </Match>
                         <Match when={r().tab === 'services'}>
-                          <ServicesTab title={vehicleTitle()} onAdd={openAdd} revealActions={revealActions()} />
+                          <ServicesTab
+                            title={tabTitle('services')}
+                            onAdd={openAdd}
+                            revealActions={revealActions()}
+                            onMarkDone={(service) => setRoute({ kind: 'form', mode: 'complete', service })}
+                          />
                         </Match>
                         <Match when={r().tab === 'costs'}>
-                          <CostsTab title={vehicleTitle()} onAdd={openAdd} />
+                          <CostsTab title={tabTitle('costs')} onAdd={openAdd} />
                         </Match>
                       </Switch>
-                      <TabBar selected={r().tab} onSelect={(tab) => setRoute({ kind: 'tab', tab })} />
-                    </>
+                    </TabChrome>
                   )}
                 </Match>
               </Switch>
             </ScenarioProvider>
+            </SizeClassProvider>
           </div>
+          {/* Harness overlay, not app content: where the Duo's hinge is. */}
+          <Show when={hasFold(device()) && showFold()}>
+            <div
+              aria-hidden="true"
+              data-harness="fold"
+              style={{
+                position: 'absolute',
+                top: '0',
+                bottom: '0',
+                left: `${device().w / 2}px`,
+                width: '0',
+                'border-left': '1px dashed #f472b6',
+                'pointer-events': 'none',
+                'z-index': '50',
+              }}
+            />
+          </Show>
         </div>
       </main>
     </div>

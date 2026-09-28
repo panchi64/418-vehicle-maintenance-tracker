@@ -49,11 +49,29 @@ export interface RowChrome {
   selected?: boolean
   onToggleSelect?: () => void
   onClick?: () => void
+  /** Regular width: this row's detail is showing in the column beside the list. */
+  current?: boolean
 }
+
+/* The highlight bleeds 8pt past the row on each side with a box-shadow rather
+   than padding, so selecting a row never shifts its text. */
+const CURRENT_BLEED = '8px'
 
 export function RowShell(props: RowChrome & { section: string; children: JSX.Element }) {
   return (
-    <div style={{ display: 'flex', 'align-items': 'stretch', width: '100%', overflow: 'hidden' }}>
+    <div
+      aria-current={props.current ? 'true' : undefined}
+      style={{
+        display: 'flex',
+        'align-items': 'stretch',
+        width: '100%',
+        overflow: 'hidden',
+        background: props.current ? 'var(--background-subtle)' : undefined,
+        'box-shadow': props.current
+          ? `-${CURRENT_BLEED} 0 0 var(--background-subtle), ${CURRENT_BLEED} 0 0 var(--background-subtle)`
+          : undefined,
+      }}
+    >
       <button
         data-section={props.section}
         onClick={() => (props.selecting ? props.onToggleSelect?.() : props.onClick?.())}

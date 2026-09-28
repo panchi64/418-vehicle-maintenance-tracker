@@ -17,19 +17,19 @@
  * The [+] moved here from the old custom tab bar. On iOS 26 the tab bar is a
  * system control that should hold tabs only; an add action is a toolbar item,
  * and there is exactly one of it (Phase 4: no LOG / SCHEDULE fork).
+ *
+ * At regular width the tab bar is replaced by the sidebar (Sidebar.tsx);
+ * NavBar then gains the leading sidebar toggle and, while the sidebar is
+ * docked, drops its vehicle menu to it.
  */
 import { createSignal, For, Show } from 'solid-js'
 import { Body, Label, Title } from '../ui/Text'
 import { Backdrop, OptionList } from '../ui/OptionList'
 import { vehicles } from '../data/fixtures'
+import { TABS, type TabId } from '../layout/tabs'
+import { SidebarToggle, useSidebar } from './Sidebar'
 
-export type TabId = 'home' | 'services' | 'costs'
-
-const TABS: { id: TabId; label: string }[] = [
-  { id: 'home', label: 'Home' },
-  { id: 'services', label: 'Services' },
-  { id: 'costs', label: 'Costs' },
-]
+export type { TabId }
 
 export function StatusBar() {
   return <div aria-hidden="true" style={{ height: '54px', flex: '0 0 auto' }} />
@@ -76,6 +76,9 @@ export function NavBar(props: {
   search?: string
 }) {
   const [menuOpen, setMenuOpen] = createSignal(false)
+  // Docked sidebar owns the vehicle switcher; the title is then the tab name.
+  const sidebar = useSidebar()
+  const hasMenu = () => !sidebar()?.docked
 
   return (
     <div style={{ flex: '0 0 auto', background: 'var(--background-primary)' }}>
@@ -88,6 +91,7 @@ export function NavBar(props: {
           padding: '0 var(--space-sm)',
         }}
       >
+        <SidebarToggle />
         <BarButton label="Settings" glyph="⚙" onClick={props.onSettings} />
         <div style={{ flex: '1 1 auto' }} />
         <Show when={props.extra}>
@@ -99,8 +103,8 @@ export function NavBar(props: {
       {/* Large title + title menu (`.toolbarTitleMenu`). */}
       <div class="vh-identity" style={{ position: 'relative', padding: '0 var(--space-screen-h)' }}>
         <button
-          onClick={() => setMenuOpen(!menuOpen())}
-          aria-label="Switch vehicle"
+          onClick={() => hasMenu() && setMenuOpen(!menuOpen())}
+          aria-label={hasMenu() ? 'Switch vehicle' : undefined}
           style={{
             display: 'flex',
             'align-items': 'baseline',
@@ -112,9 +116,11 @@ export function NavBar(props: {
           <Title class="vh-name" lines={1} as="div" style={{ 'min-width': '0' }}>
             {props.title}
           </Title>
-          <span aria-hidden="true" style={{ font: 'var(--font-heading)', color: 'var(--accent)' }}>
-            ⌄
-          </span>
+          <Show when={hasMenu()}>
+            <span aria-hidden="true" style={{ font: 'var(--font-heading)', color: 'var(--accent)' }}>
+              ⌄
+            </span>
+          </Show>
         </button>
         <Show when={menuOpen()}>
           <Backdrop onClick={() => setMenuOpen(false)} />

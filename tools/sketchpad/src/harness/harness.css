@@ -219,6 +219,10 @@
 .hz-device {
   position: relative;
   flex: 0 0 auto;
+  /* The bezel sits OUTSIDE the logical size. Under the global border-box it
+     ate 20pt of width: a "393pt" iPhone rendered at 373, and the Duo's
+     669pt inner display fell below the regular-width threshold. */
+  box-sizing: content-box;
   overflow: hidden;
   border: 10px solid #24242e;
   box-shadow: 0 24px 70px rgb(0 0 0 / 0.55);

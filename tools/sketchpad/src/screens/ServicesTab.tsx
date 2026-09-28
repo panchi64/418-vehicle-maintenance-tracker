@@ -29,6 +29,10 @@
  *
  * EDIT MODE. `Select` in the toolbar; rows grow a leading square; a bottom
  * toolbar replaces the tab bar with the bulk actions and their counts.
+ *
+ * REGULAR WIDTH. This whole scroll is the 334pt list column of a ListDetail;
+ * a row's detail (ServiceDetail / ExpenseDetail) shows beside it instead of
+ * pushing, and the row stays highlighted.
  */
 import { createSignal, For, Show } from 'solid-js'
 import { ExpenseRow, RowList, ServiceRow } from '../components/Rows'
@@ -37,7 +41,10 @@ import { ReadoutSection } from '../ui/ReadoutSection'
 import { Body, Emphasis, Label, Secondary } from '../ui/Text'
 import { Screen } from './Screen'
 import { groupByMonth, sortedByUrgency, useScenario } from '../data/scenario'
-import type { ServiceStatus } from '../data/fixtures'
+import type { Service, ServiceStatus } from '../data/fixtures'
+import { useSizeClass } from '../layout/sizeClass'
+import { ListDetail } from '../components/SplitView'
+import { ExpenseDetail, ServiceDetail } from './Details'
 
 const GROUPS: ServiceStatus[] = ['overdue', 'dueSoon', 'good', 'neutral']
 
@@ -53,6 +60,7 @@ export function ServicesTab(props: {
   title: string
   onAdd: () => void
   revealActions: boolean
+  onMarkDone?: (service: Service) => void
 }) {
   const data = useScenario()
   const [selecting, setSelecting] = createSignal(false)
@@ -72,14 +80,41 @@ export function ServicesTab(props: {
   const months = () => groupByMonth(data().logs)
   const isEmpty = () => !data().services.length && !data().logs.length
 
+  // Regular width: the row whose detail shows beside the list.
+  const sizeClass = useSizeClass()
+  const regular = () => sizeClass() === 'regular'
+  const [current, setCurrent] = createSignal<string>()
+
   const chrome = (id: string) => ({
     selecting: selecting(),
     selected: selected().has(id),
     onToggleSelect: () => toggle(id),
     revealActions: props.revealActions,
+    current: regular() && current() === id,
+    onClick: () => setCurrent(id),
   })
 
+  const detail = () => {
+    const id = current()
+    if (!regular() || !id) return undefined
+    const service = data().services.find((s) => s.id === id)
+    if (service) return <ServiceDetail service={service} onMarkDone={() => props.onMarkDone?.(service)} />
+    const log = data().logs.find((l) => l.id === id)
+    return log ? <ExpenseDetail log={log} /> : undefined
+  }
+
   return (
+    <Show when={regular() && !isEmpty()} fallback={list()}>
+      <ListDetail
+        list={list()}
+        detail={detail()}
+        placeholder={{ title: 'No Service Selected', message: 'Pick a service or a log to see it here.' }}
+      />
+    </Show>
+  )
+
+  function list() {
+    return (
     <>
       <NavBar
         title={props.title}
@@ -168,7 +203,8 @@ export function ServicesTab(props: {
             background: 'var(--background-elevated)',
             position: 'relative',
             'z-index': '1',
-            'margin-bottom': '-83px',
+            // Covers the tab bar; at regular width there is none to cover.
+            'margin-bottom': regular() ? undefined : '-83px',
           }}
         >
           <button style={{ 'min-height': 'var(--touch-target)' }} aria-disabled={!selected().size}>
@@ -180,7 +216,8 @@ export function ServicesTab(props: {
         </div>
       </Show>
     </>
-  )
+    )
+  }
 }
 
 /** First run: one message, one action. */

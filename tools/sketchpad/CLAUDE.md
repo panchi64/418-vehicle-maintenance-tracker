@@ -48,6 +48,22 @@ Plus a theme switcher over all eight themes, a light/dark + Increase Contrast sw
 - **Scenarios** (`src/data/scenario.ts`) — full, marbete-most-urgent, visitToday (shop visit started 1 h ago, no notes), sparse, fresh (vehicle, no services), empty. Screens read data through `useScenario()`, so sparse-data rules are checked, not assumed.
 - **Flows** — a `SCREENS` entry can start on one screen and be measured through in-frame navigation (Mark Done → form → Save). In-frame navigation never resets the tap counter; picking an entry does.
 - **Reveal row actions** — draws each row's swipe actions, so the action set per row is visible in review.
+- **Devices** — iPhone SE / 17 / 17 Pro Max, iPhone Duo outer (466×678) and inner (669×951), iPad 11″ (834×1210), iPad 13″ portrait (1032×1376) and landscape (1376×1032). The frame's logical size is the device's point size; the 10px bezel sits outside it (`box-sizing: content-box` on `.hz-device` — under the global border-box it had been eating 20pt, so a "393pt" phone rendered at 373). On the Duo inner display, **Show fold line** draws the hinge at x = 334.5.
+
+## Regular width
+
+`sizeClass` (`src/layout/sizeClass.ts`) is derived once in `App` from the device width — **regular at ≥ 669pt** — and read through `useSizeClass()`, like SwiftUI's `horizontalSizeClass`. Compact renders exactly as the phone layout; every regular-width branch is a `Show when={regular}` with the compact tree as its fallback. The settled numbers live in that file:
+
+| | Value | Why |
+|---|---|---|
+| Sidebar | 260pt, **docked only at ≥ 1100pt** (iPad 13″ landscape); otherwise collapsed behind a leading ◧ that opens it as an overlay | Always docked, it left the Duo 409pt for list + detail and put the fold through the list |
+| List column (Services, Costs) | **334pt** | Half the Duo's inner width, so the divider sits on the fold |
+| Readable width | **680pt**, centered | Detail columns, forms (as sheets), pushed screens |
+| Home | **two equal columns**, 32pt gutter; stack below 152pt × type scale | 1:1 centres the gutter on the Duo's fold; 3:2 put it through Next Up |
+
+Home's primary column is band (+ specs) → Next Up → Shop Visit; the secondary is Suggestions → Upcoming → Recent → Siri tip — the compact order, column-major. With the sidebar docked it carries the vehicle name and switcher, so the tabs' large titles become the tab names. Chrome stand-ins: `components/Sidebar.tsx` (`RegularShell`), `components/SplitView.tsx` (`ListDetail`, `ReadableColumn`); detail columns in `screens/Details.tsx`.
+
+**The fold.** Two-column layouts put a gutter or divider on it. Single-pane content — forms, Notes, Home stacked at 2× — runs across it, as it would on any book-style foldable; the timing chips and centred sheet titles are what land on it.
 
 ## Declaring hierarchy
 
@@ -156,8 +172,10 @@ src/
   data/visits.ts      appointments + vehicle notes fixtures and their formatters
   ui/                 primitives: Text (incl. SectionTitle), Controls, ReadoutSection, FormAdvisory, FormToolbar,
                       DepthDisclosure ("More details"), CheckRow
-  components/         status (StatusTag/StatusMark), VehicleBand, Rows, Cards, ShopVisitSection, TabBar (chrome stand-ins)
-  screens/            HomeTab, ServicesTab, CostsTab, ServiceForm, AddVehicle, AppointmentForm, NotesList, NoteSheet
+  layout/             sizeClass (+ regular-width constants), tabs
+  components/         status (StatusTag/StatusMark), VehicleBand, Rows, Cards, ShopVisitSection,
+                      TabBar / Sidebar / SplitView (chrome stand-ins)
+  screens/            HomeTab, ServicesTab, CostsTab, Details, ServiceForm, AddVehicle, AppointmentForm, NotesList, NoteSheet
   harness/            Inspector (audit), harness.css — chrome around the frame
 ```
 

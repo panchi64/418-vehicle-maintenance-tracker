@@ -29,6 +29,10 @@
  * SPARSE DATA: the hero always renders (a total of one expense is still a
  * total). The chart and the comparison each collapse to ONE quiet line saying
  * what will make them appear — never a card whose only content is absence.
+ *
+ * REGULAR WIDTH. The readout above is the 334pt list column; an expense row
+ * shows ExpenseDetail beside it. The chart holds at 294pt; the cost is that
+ * the wide column is a placeholder until a row is picked.
  */
 import { createMemo, createSignal, For, Show } from 'solid-js'
 import { Chip, ChipRow, SegmentedControl } from '../ui/Controls'
@@ -40,6 +44,9 @@ import { Body, Emphasis, Heading, Hero, Label, SectionTitle, Secondary } from '.
 import { Screen } from './Screen'
 import { SiriTip } from '../components/SiriTip'
 import { groupByMonth, useScenario } from '../data/scenario'
+import { useSizeClass } from '../layout/sizeClass'
+import { ListDetail } from '../components/SplitView'
+import { ExpenseDetail } from './Details'
 import {
   categoryLabels,
   fmtCurrency,
@@ -145,7 +152,25 @@ export function CostsTab(props: { title: string; onAdd: () => void }) {
     return { y, thisYear, last, pct: Math.round(((thisYear - last) / last) * 100) }
   }
 
+  // Regular width: list | detail. The whole readout is the list column; an
+  // expense row shows its detail beside it.
+  const sizeClass = useSizeClass()
+  const regular = () => sizeClass() === 'regular'
+  const [current, setCurrent] = createSignal<string>()
+  const currentLog = () => (regular() ? data().logs.find((l) => l.id === current()) : undefined)
+
   return (
+    <Show when={regular()} fallback={readout()}>
+      <ListDetail
+        list={readout()}
+        detail={currentLog() ? <ExpenseDetail log={currentLog()!} /> : undefined}
+        placeholder={{ title: 'No Expense Selected', message: 'Pick an expense to see it here.' }}
+      />
+    </Show>
+  )
+
+  function readout() {
+    return (
     <>
       <NavBar title={props.title} onAdd={props.onAdd} />
       <Screen>
@@ -268,7 +293,14 @@ export function CostsTab(props: { title: string; onAdd: () => void }) {
                 trailing={fmtCurrency(m.total)}
                 primary={
                   <RowList each={m.logs}>
-                    {(log) => <ExpenseRow log={log} dateStyle="day" />}
+                    {(log) => (
+                      <ExpenseRow
+                        log={log}
+                        dateStyle="day"
+                        current={regular() && current() === log.id}
+                        onClick={() => setCurrent(log.id)}
+                      />
+                    )}
                   </RowList>
                 }
               />
@@ -280,7 +312,8 @@ export function CostsTab(props: { title: string; onAdd: () => void }) {
         <SiriTip phrase="How much have I spent in Checkpoint" />
       </Screen>
     </>
-  )
+    )
+  }
 }
 
 function TrendBars(props: { months: { date: Date; total: number }[] }) {

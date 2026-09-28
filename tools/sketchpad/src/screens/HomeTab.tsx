@@ -18,6 +18,23 @@
  *   3. Upcoming          the next 3 after Next Up, dense two-line rows
  *   4. Recent            the last 3 logs
  *
+ * REGULAR WIDTH (Duo inner, iPad): the same order, reflowed into two equal
+ * columns rather than stretched. Reading order is column-major, so the
+ * sequence above is unchanged:
+ *
+ *   ┌ primary ─────────────┐ ┌ secondary ───────────┐
+ *   │ 0 band (+ specs)     │ │ 2 Suggestions        │
+ *   │ 1 Next Up            │ │ 3 Upcoming           │
+ *   │ 1b Shop Visit        │ │ 4 Recent             │
+ *   │                      │ │   Siri tip (last)    │
+ *   └──────────────────────┘ └──────────────────────┘
+ *
+ * The primary column is "what needs me now" (state + the one action); the
+ * secondary is "what's around it". 1:1, not weighted: the hero shrinks to its
+ * column (22cqi), and an equal split with a 32pt gutter centres the gutter on
+ * the Duo's fold (334.5pt), so no section straddles it. A weighted 3:2 split
+ * put the fold through the Next Up card.
+ *
  * What was removed, and why:
  *   - The odometer caution ADVISORY above the hero. It pushed the hero down
  *     on exactly the days a stale reading made the hero least trustworthy,
@@ -32,7 +49,7 @@
  * shape they will recognise later, instead of one that grows new sections
  * under them.
  */
-import { Show } from 'solid-js'
+import { Show, type JSX } from 'solid-js'
 import { NextUpCard, QuickSpecsPanel } from '../components/Cards'
 import { VehicleBand } from '../components/VehicleBand'
 import { ExpenseRow, RowList, ServiceRow } from '../components/Rows'
@@ -46,6 +63,7 @@ import type { Appointment } from '../data/visits'
 import { sortedByUrgency, useScenario } from '../data/scenario'
 import { NavBar, type TabId } from '../components/TabBar'
 import type { Service } from '../data/fixtures'
+import { useSizeClass } from '../layout/sizeClass'
 
 export function HomeTab(props: {
   title: string
@@ -60,128 +78,183 @@ export function HomeTab(props: {
   onToggleSpecs: () => void
 }) {
   const data = useScenario()
+  const sizeClass = useSizeClass()
   // Derived once and passed down (Views/CLAUDE.md: one derivation per body).
   const sorted = () => sortedByUrgency(data().services, data().vehicle!)
   const nextUp = () => sorted()[0] as Service | undefined
   const upcoming = () => sorted().slice(1, 4)
   const recent = () => data().logs.slice(0, 3)
 
+  // Each block is a function so the compact and regular layouts can place the
+  // same sections without sharing DOM nodes.
+  const band = () => (
+    /* Full-bleed at compact, and inside the scroll: it scrolls away with the
+       content as the large title collapses. At regular width it bleeds to the
+       leading edge only — its trailing edge stops at the primary column, short
+       of the fold. */
+    <div
+      style={{
+        margin:
+          sizeClass() === 'regular'
+            ? 'calc(var(--space-md) * -1) 0 0 calc(var(--space-screen-h) * -1)'
+            : 'calc(var(--space-md) * -1) calc(var(--space-screen-h) * -1) 0',
+      }}
+    >
+      <VehicleBand vehicle={data().vehicle!} specsExpanded={props.specsExpanded} onToggleSpecs={props.onToggleSpecs} />
+      <Show when={props.specsExpanded}>
+        <QuickSpecsPanel
+          vehicle={data().vehicle!}
+          notes={data().notes}
+          documentCount={data().logs.length > 3 ? 3 : 0}
+          onOpenNotes={props.onOpenNotes}
+        />
+      </Show>
+    </div>
+  )
+
+  /* 1. The hero. One per screen. */
+  const hero = () => (
+    <Show when={nextUp()} fallback={<InsufficientDataNote message="Nothing scheduled. Add a service with [+]." />}>
+      {(s) => <NextUpCard service={s()} vehicle={data().vehicle!} onMarkDone={() => props.onMarkDone(s())} />}
+    </Show>
+  )
+
+  /* 1b. Shop Visit — fixed, directly under the hero it must not out-shout. */
+  const shopVisit = () => (
+    <ShopVisitSection
+      onBook={() => props.onBook(nextUp()?.id)}
+      onEdit={props.onEditAppointment}
+      onLogVisit={props.onLogVisit}
+    />
+  )
+
+  /* 2. Suggestions — one slot. */
+  const suggestions = () => (
+    <ReadoutSection
+      title="Suggestions"
+      primary={
+        <Show when={data().suggestion} fallback={<InsufficientDataNote message="Nothing to suggest right now." />}>
+          {(sg) => (
+            <div style={{ display: 'flex', 'flex-direction': 'column', 'align-items': 'flex-start', gap: '2px' }}>
+              <Emphasis as="div">{sg().title}</Emphasis>
+              <Secondary color="tertiary" as="div">
+                {sg().detail}
+              </Secondary>
+              {/* A bracket link, not an outlined button: the hero's Mark Done
+                  is the screen's one filled action, and a boxed button here
+                  competed with it in the squint test. */}
+              <button style={{ 'min-height': 'var(--touch-target)', display: 'flex', 'align-items': 'center' }}>
+                <Label color="accent" tracking={1}>
+                  [{sg().action}]
+                </Label>
+              </button>
+            </div>
+          )}
+        </Show>
+      }
+    />
+  )
+
+  /* 3. Upcoming — the three after Next Up. "View all" lands on Services'
+        Due/Upcoming list, which contains every row shown here. */
+  const upcomingSection = () => (
+    <ReadoutSection
+      title="Upcoming"
+      action={{ label: 'View all', onClick: () => props.onNavigate('services') }}
+      primary={
+        <Show when={upcoming().length} fallback={<InsufficientDataNote message="Nothing else scheduled." />}>
+          <RowList each={upcoming()}>
+            {(s) => <ServiceRow service={s} vehicle={data().vehicle!} actions={['Edit', 'Mark Done']} />}
+          </RowList>
+        </Show>
+      }
+    />
+  )
+
+  /* 4. Recent — "View all" lands on Services' History, never on Costs:
+        a maintenance-history list must not point at a financial view. */
+  const recentSection = () => (
+    <ReadoutSection
+      title="Recent"
+      action={{ label: 'View all', onClick: () => props.onNavigate('services') }}
+      primary={
+        <Show when={recent().length} fallback={<InsufficientDataNote message="Completed services appear here." />}>
+          <RowList each={recent()}>{(log) => <ExpenseRow log={log} />}</RowList>
+        </Show>
+      }
+    />
+  )
+
+  /* 5. The screen's one Siri tip — last, outside every section, and only
+        once there is something due for the phrase to answer. */
+  const siriTip = () => (
+    <Show when={sorted().length}>
+      <SiriTip phrase="What's due on my car in Checkpoint" />
+    </Show>
+  )
+
   return (
     <>
-    <NavBar title={props.title} onAdd={props.onAdd} />
-    <Screen>
-      {/* Full-bleed, and inside the scroll: it scrolls away with the content
-          as the large title collapses, rather than pinning ~55pt of chrome. */}
-      <div style={{ margin: 'calc(var(--space-md) * -1) calc(var(--space-screen-h) * -1) 0' }}>
-        <VehicleBand
-          vehicle={data().vehicle!}
-          specsExpanded={props.specsExpanded}
-          onToggleSpecs={props.onToggleSpecs}
-        />
-        <Show when={props.specsExpanded}>
-          <QuickSpecsPanel
-            vehicle={data().vehicle!}
-            notes={data().notes}
-            documentCount={data().logs.length > 3 ? 3 : 0}
-            onOpenNotes={props.onOpenNotes}
-          />
+      <NavBar title={props.title} onAdd={props.onAdd} />
+      <Screen>
+        <Show
+          when={sizeClass() === 'regular'}
+          fallback={
+            <>
+              {band()}
+              {hero()}
+              {shopVisit()}
+              {suggestions()}
+              {upcomingSection()}
+              {recentSection()}
+              {siriTip()}
+            </>
+          }
+        >
+          {/* Two equal columns while each stays ≥ 152pt × type scale; below
+              that they stack, in the same order. On the Duo that is at 2×:
+              at 299pt a 40pt Shop Visit time and the band's two cells no
+              longer fit. */}
+          <div
+            style={{
+              display: 'grid',
+              'grid-template-columns': 'repeat(auto-fit, minmax(calc(152px * var(--type-scale)), 1fr))',
+              gap: 'var(--space-lg) var(--space-xl)',
+              'align-items': 'start',
+            }}
+          >
+            <HomeColumn>
+              {band()}
+              {hero()}
+              {shopVisit()}
+            </HomeColumn>
+            <HomeColumn>
+              {suggestions()}
+              {upcomingSection()}
+              {recentSection()}
+              {siriTip()}
+            </HomeColumn>
+          </div>
         </Show>
-      </div>
-
-      {/* 1. The hero. One per screen. */}
-      <Show
-        when={nextUp()}
-        fallback={<InsufficientDataNote message="Nothing scheduled. Add a service with [+]." />}
-      >
-        {(s) => (
-          <NextUpCard
-            service={s()}
-            vehicle={data().vehicle!}
-            onMarkDone={() => props.onMarkDone(s())}
-          />
-        )}
-      </Show>
-
-      {/* 1b. Shop Visit — fixed, directly under the hero it must not out-shout. */}
-      <ShopVisitSection
-        onBook={() => props.onBook(nextUp()?.id)}
-        onEdit={props.onEditAppointment}
-        onLogVisit={props.onLogVisit}
-      />
-
-      {/* 2. Suggestions — one slot. */}
-      <ReadoutSection
-        title="Suggestions"
-        primary={
-          <Show
-            when={data().suggestion}
-            fallback={<InsufficientDataNote message="Nothing to suggest right now." />}
-          >
-            {(sg) => (
-              <div style={{ display: 'flex', 'flex-direction': 'column', 'align-items': 'flex-start', gap: '2px' }}>
-                <Emphasis as="div">{sg().title}</Emphasis>
-                <Secondary color="tertiary" as="div">
-                  {sg().detail}
-                </Secondary>
-                {/* A bracket link, not an outlined button: the hero's Mark Done
-                    is the screen's one filled action, and a boxed button here
-                    competed with it in the squint test. */}
-                <button style={{ 'min-height': 'var(--touch-target)', display: 'flex', 'align-items': 'center' }}>
-                  <Label color="accent" tracking={1}>
-                    [{sg().action}]
-                  </Label>
-                </button>
-              </div>
-            )}
-          </Show>
-        }
-      />
-
-      {/* 3. Upcoming — the three after Next Up. "View all" lands on Services'
-             Due/Upcoming list, which contains every row shown here. */}
-      <ReadoutSection
-        title="Upcoming"
-        action={{ label: 'View all', onClick: () => props.onNavigate('services') }}
-        primary={
-          <Show
-            when={upcoming().length}
-            fallback={<InsufficientDataNote message="Nothing else scheduled." />}
-          >
-            <RowList each={upcoming()}>
-              {(s) => (
-                <ServiceRow
-                  service={s}
-                  vehicle={data().vehicle!}
-                  actions={['Edit', 'Mark Done']}
-                />
-              )}
-            </RowList>
-          </Show>
-        }
-      />
-
-      {/* 4. Recent — "View all" lands on Services' History, never on Costs:
-             a maintenance-history list must not point at a financial view. */}
-      <ReadoutSection
-        title="Recent"
-        action={{ label: 'View all', onClick: () => props.onNavigate('services') }}
-        primary={
-          <Show
-            when={recent().length}
-            fallback={<InsufficientDataNote message="Completed services appear here." />}
-          >
-            <RowList each={recent()}>{(log) => <ExpenseRow log={log} />}</RowList>
-          </Show>
-        }
-      />
-
-      {/* 5. The screen's one Siri tip — last, outside every section, and only
-             once there is something due for the phrase to answer. */}
-      <Show when={sorted().length}>
-        <SiriTip phrase="What's due on my car in Checkpoint" />
-      </Show>
-    </Screen>
+      </Screen>
     </>
+  )
+}
+
+/** One regular-width column: Screen's own rhythm, and its own container so the hero sizes to it. */
+function HomeColumn(props: { children: JSX.Element }) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        'flex-direction': 'column',
+        gap: 'var(--space-lg)',
+        'min-width': '0',
+        'container-type': 'inline-size',
+      }}
+    >
+      {props.children}
+    </div>
   )
 }
 
