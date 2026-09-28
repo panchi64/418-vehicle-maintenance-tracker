@@ -2,14 +2,18 @@
 # requires-python = ">=3.11"
 # dependencies = []
 # ///
-"""Contrast gate for Checkpoint's Themes.json.
+"""Contrast gate for Checkpoint's Themes.json and Biombo's tokens.json.
 
-Every theme ships four color sets — light, dark, and an Increase Contrast
-variant of each. This checks every theme x variant against WCAG 2.x contrast
-ratios and exits non-zero if anything fails.
+Every Checkpoint theme ships four color sets — light, dark, and an Increase
+Contrast variant of each. This checks every theme x variant against WCAG 2.x
+contrast ratios and exits non-zero if anything fails. Biombo's gate lives in
+`biombo_contrast.py` (declared pairs, see its docstring). By default both run,
+but Biombo is skipped while its tokens file doesn't exist yet.
 
-    uv run tools/theme-contrast/check_contrast.py            # table + exit code
-    uv run tools/theme-contrast/check_contrast.py --verbose  # also list each failure
+    uv run tools/theme-contrast/check_contrast.py                     # both gates + exit code
+    uv run tools/theme-contrast/check_contrast.py --verbose           # also list each failure
+    uv run tools/theme-contrast/check_contrast.py --target checkpoint # one gate only
+    uv run tools/theme-contrast/check_contrast.py --target biombo
 
 Colors with alpha are composited before measuring: foreground tokens over the
 ground they sit on, `surfaceInstrument` (the card fill) over `backgroundPrimary`.
@@ -36,6 +40,9 @@ import math
 import sys
 from pathlib import Path
 
+import biombo_contrast
+from wcag import oklab, over, parse, ratio
+
 REPO = Path(__file__).resolve().parents[2]
 THEMES = REPO / "apps/checkpoint/ios/checkpoint/Resources/Themes.json"
 
@@ -48,50 +55,6 @@ STATUS = ["statusOverdue", "statusDueSoon", "statusGood", "statusNeutral"]
 BASE_VARIANTS = ["light", "dark"]
 HC_OF = {"lightHighContrast": "light", "darkHighContrast": "dark"}
 VARIANTS = ["light", "lightHighContrast", "dark", "darkHighContrast"]
-
-RGBA = tuple[float, float, float, float]
-
-
-def parse(hex_: str) -> RGBA:
-    h = hex_.lstrip("#")
-    if len(h) not in (6, 8):
-        raise ValueError(f"bad hex {hex_!r}")
-    r, g, b = (int(h[i:i + 2], 16) / 255 for i in (0, 2, 4))
-    a = int(h[6:8], 16) / 255 if len(h) == 8 else 1.0
-    return (r, g, b, a)
-
-
-def over(fg: RGBA, bg: RGBA) -> RGBA:
-    """Source-over composite onto an opaque ground."""
-    a = fg[3]
-    return (fg[0] * a + bg[0] * (1 - a), fg[1] * a + bg[1] * (1 - a), fg[2] * a + bg[2] * (1 - a), 1.0)
-
-
-def _lin(c: float) -> float:
-    return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
-
-
-def luminance(c: RGBA) -> float:
-    return 0.2126 * _lin(c[0]) + 0.7152 * _lin(c[1]) + 0.0722 * _lin(c[2])
-
-
-def ratio(a: RGBA, b: RGBA) -> float:
-    la, lb = luminance(a), luminance(b)
-    hi, lo = max(la, lb), min(la, lb)
-    return (hi + 0.05) / (lo + 0.05)
-
-
-def oklab(c: RGBA) -> tuple[float, float, float]:
-    r, g, b = (_lin(x) for x in c[:3])
-    l_ = math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b)
-    m_ = math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b)
-    s_ = math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b)
-    return (
-        0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_,
-        1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_,
-        0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_,
-    )
-
 
 def resolve(theme: dict) -> dict[str, dict[str, str]]:
     """Mirror of ThemeAppearances' decode: bases are complete, HC sets are overrides."""
@@ -167,10 +130,25 @@ COLUMNS = [
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--verbose", action="store_true")
-    parser.add_argument("--themes", type=Path, default=THEMES)
+    parser.add_argument("--themes", type=Path, default=THEMES, help="Checkpoint Themes.json")
+    parser.add_argument("--tokens", type=Path, default=biombo_contrast.TOKENS, help="Biombo tokens.json")
+    parser.add_argument("--pairs", type=Path, default=biombo_contrast.PAIRS, help="Biombo pair list")
+    parser.add_argument("--target", choices=["all", "checkpoint", "biombo"], default="all")
     args = parser.parse_args()
 
-    themes = json.loads(args.themes.read_text())
+    code = 0
+    if args.target in ("all", "checkpoint"):
+        code |= check_checkpoint(args.themes, args.verbose)
+    # Biombo's palette is still being explored; `all` skips it until its tokens land in the repo.
+    if args.target == "biombo" or (args.target == "all" and args.tokens.exists()):
+        if args.target == "all":
+            print("\n## Biombo\n")
+        code |= biombo_contrast.check(args.tokens, args.pairs, args.verbose)
+    return code
+
+
+def check_checkpoint(path: Path, verbose: bool) -> int:
+    themes = json.loads(path.read_text())
     failures: list[str] = []
     header = "| theme | variant | " + " | ".join(label for _, label in COLUMNS) + " | result |"
     rows = [header, "|" + "---|" * (len(COLUMNS) + 3)]
@@ -200,7 +178,7 @@ def main() -> int:
     print("\n".join(rows))
     if failures:
         print(f"\n{len(failures)} failure(s)")
-        if args.verbose:
+        if verbose:
             print("\n".join(f"  {f}" for f in failures))
         return 1
     print("\nAll themes pass.")

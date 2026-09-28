@@ -1,0 +1,122 @@
+{
+  "sourceLanguage" : "es",
+  "strings" : {
+    "Cómo están mis lugares en ${applicationName}" : {
+      "localizations" : {
+        "en" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "How are my places in ${applicationName}",
+              "How is ${place} in ${applicationName}"
+            ]
+          }
+        },
+        "es" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Cómo están mis lugares en ${applicationName}",
+              "Cómo está ${place} en ${applicationName}"
+            ]
+          }
+        }
+      }
+    },
+    "Dónde hay gasolina barata en ${applicationName}" : {
+      "localizations" : {
+        "en" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Where's cheap gas in ${applicationName}",
+              "Find gas in ${applicationName}"
+            ]
+          }
+        },
+        "es" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Dónde hay gasolina barata en ${applicationName}",
+              "Busca gasolina en ${applicationName}"
+            ]
+          }
+        }
+      }
+    },
+    "Pregúntale a ${applicationName} si hay luz" : {
+      "localizations" : {
+        "en" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Ask ${applicationName} if there's power",
+              "Ask ${applicationName} if there's ${service}",
+              "Is there ${service} according to ${applicationName}"
+            ]
+          }
+        },
+        "es" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Pregúntale a ${applicationName} si hay luz",
+              "Pregúntale a ${applicationName} si hay ${service}",
+              "¿Hay ${service} según ${applicationName}?"
+            ]
+          }
+        }
+      }
+    },
+    "Reporta en ${applicationName}" : {
+      "localizations" : {
+        "en" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Report in ${applicationName}",
+              "Report in ${applicationName} that ${condition}",
+              "Tell ${applicationName} that ${condition}",
+              "Let ${applicationName} know that ${condition}"
+            ]
+          }
+        },
+        "es" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Reporta en ${applicationName}",
+              "Reporta en ${applicationName} que ${condition}",
+              "Avisa en ${applicationName} que ${condition}",
+              "Dile a ${applicationName} que ${condition}"
+            ]
+          }
+        }
+      }
+    },
+    "Vigila un lugar en ${applicationName}" : {
+      "localizations" : {
+        "en" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Watch a place in ${applicationName}",
+              "Start watching a place in ${applicationName}"
+            ]
+          }
+        },
+        "es" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Vigila un lugar en ${applicationName}",
+              "Empieza a vigilar un lugar en ${applicationName}"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

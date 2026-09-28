@@ -1,0 +1,27 @@
+{
+  "sourceLanguage" : "es",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "App name on the Home Screen",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Biombo" } }
+      }
+    },
+    "NSCameraUsageDescription" : {
+      "comment" : "Camera permission prompt: only to photograph a gas station's price sign",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Biombo uses the camera only if you want to photograph a gas station's price sign." } }
+      }
+    },
+    "NSLocationWhenInUseUsageDescription" : {
+      "comment" : "Location permission prompt: When In Use only, to show what's nearby",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Biombo uses your location to show what's happening near you: power, water, roads and gas." } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

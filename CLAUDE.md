@@ -7,8 +7,7 @@
 **Apps:**
 - `apps/checkpoint/ios/` — Checkpoint iOS app (SwiftUI, SwiftData). See `apps/checkpoint/ios/CLAUDE.md`.
 - `apps/checkpoint/web/` — Checkpoint marketing site (SolidJS, Cloudflare). See `apps/checkpoint/web/CLAUDE.md`.
-- `apps/biombo/ios/` — Biombo iOS app (PR gas prices). See `apps/biombo/ios/CLAUDE.md` once scaffolded.
-- `apps/biombo/backend/` — Biombo Node/TS + Postgres backend. See `apps/biombo/backend/CLAUDE.md`.
+- `apps/biombo/` — Biombo, a map of everyday life in Puerto Rico. **Greenfield rebuild: the iOS UI is being built first, on sample data.** The legacy gas-price app was deleted. All of Biombo's docs (design, product, legacy plan and spec) live in `apps/biombo/docs/`, separate from Checkpoint's. See `apps/biombo/CLAUDE.md`.
 
 **Shared packages:**
 - `packages/DesignKit/` — Swift design system (`ThemeProviding` protocol, tokens, modifiers). See `packages/DesignKit/CLAUDE.md`.
@@ -17,14 +16,12 @@
 
 **Internal tooling:**
 - `tools/sketchpad/` — **SolidJS recreation of Checkpoint's UI, for settling layouts before writing SwiftUI.** Reads the real `Themes.json` and JetBrains Mono, so it renders what the app renders. Ships nothing. Run `tools/sketchpad/dev.sh`. See `tools/sketchpad/CLAUDE.md`.
-- `tools/theme-contrast/` — WCAG contrast gate for `Themes.json` across every theme × light/dark × Increase Contrast. Run `uv run tools/theme-contrast/check_contrast.py` after any palette change; it exits non-zero on failure.
+- `tools/theme-contrast/` — WCAG contrast gate for Checkpoint's `Themes.json` (every theme × light/dark × Increase Contrast). Run `uv run tools/theme-contrast/check_contrast.py` after any palette change; it exits non-zero on failure. It can also check Biombo: pass `--target biombo --tokens <tokens.json> --pairs <contrast-pairs.json>` (see `biombo_contrast.py`).
 - `tools/depth-backdrops/` — Local web app (Python/FastAPI + React/WebGL) that generates the cerulean depth-map backdrops behind device mockups in App Store screenshots. Run `tools/depth-backdrops/dev.sh`. See `tools/depth-backdrops/CLAUDE.md`.
 
-**Docs:**
-- `docs/SURFACE_DOCTRINE.md` — **read before designing or changing any screen.** Surface classes, visual hierarchy, disclosure rules, the `F*` invariants cited in code comments.
-- `docs/AESTHETIC.md` — visual identity across 418 products. Rules are tagged `[REQUIREMENT]` or `[PREFERENCE]`; cite the tag when you cite the rule.
-- `docs/BIOMBO_IMPLEMENTATION_PLAN.md` — active implementation plan
-- `docs/FUEL_PRICE_TRACKER.md` — original Biombo feature spec
+**Docs (`docs/` is Checkpoint's; Biombo's are in `apps/biombo/docs/`):**
+- `docs/SURFACE_DOCTRINE.md` — **read before designing or changing any Checkpoint screen.** Surface classes, visual hierarchy, disclosure rules, the `F*` invariants cited in code comments.
+- `docs/AESTHETIC.md` — Checkpoint's visual identity (app and website). Rules are tagged `[REQUIREMENT]` or `[PREFERENCE]`; cite the tag when you cite the rule.
 - `docs/ARCHITECTURE.md` — Checkpoint reference
 - `docs/APP_INTENTS.md` — Siri / App Intents / on-device model availability by iOS version and device tier (SDK-verified). Read before adding any intent, entity, or Foundation Models call.
 
@@ -52,7 +49,6 @@ This file is intentionally small. **Go to the scoped CLAUDE.md for the directory
 - Checkpoint iOS: `xcodebuild build -project apps/checkpoint/ios/checkpoint.xcodeproj -scheme checkpoint -destination 'platform=iOS Simulator,name=iPhone 17'`
 - Checkpoint web: `npm run dev` from `apps/checkpoint/web/`
 - Biombo iOS: `xcodebuild build -project apps/biombo/ios/Biombo.xcodeproj -scheme Biombo -destination 'platform=iOS Simulator,name=iPhone 17'`
-- Biombo backend: `npm run dev` from `apps/biombo/backend/`
 - DesignKit: `swift build` from `packages/DesignKit/`
 - Localization: `swift build` from `packages/Localization/`
 - VehicleSharing: `swift test` from `packages/VehicleSharing/`

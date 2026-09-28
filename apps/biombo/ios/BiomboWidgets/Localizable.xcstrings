@@ -1,0 +1,295 @@
+{
+  "sourceLanguage": "es",
+  "strings": {
+    "%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@"
+          }
+        }
+      }
+    },
+    "%@ · %@": {
+      "comment": "Inline gas widget: the price per unit, then the station",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "Abre Biombo en Reportar, donde estás.": {
+      "comment": "Control description: open Quick Report",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens Biombo on Report, where you are."
+          }
+        }
+      }
+    },
+    "Abre Biombo para reportar donde estás o ver los lugares que vigilas.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens Biombo to report where you are or see the places you watch."
+          }
+        }
+      }
+    },
+    "Abrir en Biombo": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open in Biombo"
+          }
+        }
+      }
+    },
+    "Actualizado %@": {
+      "comment": "Widget: when the answer was last said, a clock time",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updated %@"
+          }
+        }
+      }
+    },
+    "Avisa que no hay luz donde estás, con Deshacer.": {
+      "comment": "Control description: report no power, with undo",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reports no power where you are, with Undo."
+          }
+        }
+      }
+    },
+    "Avisa que volvió la luz donde estás, con Deshacer.": {
+      "comment": "Control description: report power back, with undo",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reports the power is back where you are, with Undo."
+          }
+        }
+      }
+    },
+    "Casa de Mamá": {
+      "comment": "Widget gallery example: a watched place's name",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mom's house"
+          }
+        }
+      }
+    },
+    "Escoge cuál de tus lugares vigilados muestra el widget.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose which of your watched places the widget shows."
+          }
+        }
+      }
+    },
+    "Gasolina cerca": {
+      "comment": "Gas widget name",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gas nearby"
+          }
+        }
+      }
+    },
+    "Gasolina cerca: sin reportes recientes.": {
+      "comment": "Gas widget, VoiceOver: nothing current",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gas nearby: no recent reports."
+          }
+        }
+      }
+    },
+    "La gasolina más barata cerca de ti, o dónde hay en una emergencia.": {
+      "comment": "Gas widget description",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The cheapest gas near you, or where there's gas in an emergency."
+          }
+        }
+      }
+    },
+    "Lugar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Place"
+          }
+        }
+      }
+    },
+    "Lugar vigilado": {
+      "comment": "Watched place widget name",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watched place"
+          }
+        }
+      }
+    },
+    "Lugares que vigilas": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Places you watch"
+          }
+        }
+      }
+    },
+    "No hay luz aquí": {
+      "comment": "Control: report no power where you are",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No power here"
+          }
+        }
+      }
+    },
+    "Oficial · LUMA": {
+      "comment": "Widget gallery example: the source of a line",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Official · LUMA"
+          }
+        }
+      }
+    },
+    "Pantalla": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Screen"
+          }
+        }
+      }
+    },
+    "Pantalla de Biombo": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biombo screen"
+          }
+        }
+      }
+    },
+    "Reportar": {
+      "comment": "Control: open Quick Report",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report"
+          }
+        }
+      }
+    },
+    "Si hay luz, agua y carreteras en un lugar que vigilas.": {
+      "comment": "Watched place widget description",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whether there's power, water and clear roads at a place you watch."
+          }
+        }
+      }
+    },
+    "Sin luz desde las 3:10 p. m.": {
+      "comment": "Widget gallery example: a power outage line",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No power since 3:10 PM"
+          }
+        }
+      }
+    },
+    "Sin reportes recientes": {
+      "comment": "Widget: nothing current to show",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No recent reports"
+          }
+        }
+      }
+    },
+    "Todo normal": {
+      "comment": "Watch list row: nothing changed at this place",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All normal"
+          }
+        }
+      }
+    },
+    "Vigila un lugar en Biombo para verlo aquí.": {
+      "comment": "Watched place widget: nothing watched yet",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch a place in Biombo to see it here."
+          }
+        }
+      }
+    },
+    "Volvió la luz": {
+      "comment": "Control: report power is back where you are",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Power's back"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

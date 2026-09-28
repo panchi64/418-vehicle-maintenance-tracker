@@ -1,6 +1,6 @@
 # Aesthetic Philosophy — 418 Studio
 
-This document defines the **visual identity** shared across 418 Studio products: the Checkpoint website, the Checkpoint iOS app, and Biombo.
+This document defines the **visual identity** of Checkpoint: the Checkpoint website and the Checkpoint iOS app. Biombo has its own design docs under `apps/biombo/docs/`.
 
 It covers what things *look* like. It does **not** cover how screens are structured, how information is ranked, or how forms behave — those are usability concerns and they live in [`SURFACE_DOCTRINE.md`](SURFACE_DOCTRINE.md). Read that one before designing any screen.
 
@@ -40,7 +40,7 @@ Depth comes from opacity levels of the off-white (100%, 90%, 70%, 40%) rather th
 
 ### Where the two-color rule applies, and where it doesn't
 
-The two-color palette is the **418 house default** — it governs the website and Biombo's default provider (`AestheticBrutalistTheme`). It is **not** a platform-wide constraint:
+The two-color palette is the **418 house default** — it governs the website. It is **not** a platform-wide constraint:
 
 - **Semantic status color is a [REQUIREMENT], not an exception to apologize for.** Overdue / due-soon / good / neutral must be distinguishable, and the default Checkpoint theme defines `#FF6B6B` / `#F7AD55` / `#38D9A9` / `#A5ADB5` for exactly that. Maintenance urgency is the product's core signal; it outranks palette purity.
 - **Checkpoint is themed.** `Resources/Themes.json` ships **eight** themes with eight different accents, some unlocked via tips. "Never introduce color variations outside these two values" describes the *default* theme, not the app.

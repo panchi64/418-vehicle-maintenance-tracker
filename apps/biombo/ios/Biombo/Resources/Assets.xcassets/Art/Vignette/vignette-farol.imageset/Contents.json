@@ -1,0 +1,92 @@
+{
+  "images": [
+    {
+      "filename": "vignette-farol-light@2x.png",
+      "idiom": "universal",
+      "scale": "2x"
+    },
+    {
+      "filename": "vignette-farol-light@3x.png",
+      "idiom": "universal",
+      "scale": "3x"
+    },
+    {
+      "filename": "vignette-farol-dark@2x.png",
+      "idiom": "universal",
+      "scale": "2x",
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ]
+    },
+    {
+      "filename": "vignette-farol-dark@3x.png",
+      "idiom": "universal",
+      "scale": "3x",
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ]
+    },
+    {
+      "filename": "vignette-farol-hc-light@2x.png",
+      "idiom": "universal",
+      "scale": "2x",
+      "appearances": [
+        {
+          "appearance": "contrast",
+          "value": "high"
+        }
+      ]
+    },
+    {
+      "filename": "vignette-farol-hc-light@3x.png",
+      "idiom": "universal",
+      "scale": "3x",
+      "appearances": [
+        {
+          "appearance": "contrast",
+          "value": "high"
+        }
+      ]
+    },
+    {
+      "filename": "vignette-farol-hc-dark@2x.png",
+      "idiom": "universal",
+      "scale": "2x",
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        },
+        {
+          "appearance": "contrast",
+          "value": "high"
+        }
+      ]
+    },
+    {
+      "filename": "vignette-farol-hc-dark@3x.png",
+      "idiom": "universal",
+      "scale": "3x",
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        },
+        {
+          "appearance": "contrast",
+          "value": "high"
+        }
+      ]
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

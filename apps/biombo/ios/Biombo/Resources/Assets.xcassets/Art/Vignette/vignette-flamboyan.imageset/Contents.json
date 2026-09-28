@@ -1,0 +1,92 @@
+{
+  "images": [
+    {
+      "filename": "vignette-flamboyan-light@2x.png",
+      "idiom": "universal",
+      "scale": "2x"
+    },
+    {
+      "filename": "vignette-flamboyan-light@3x.png",
+      "idiom": "universal",
+      "scale": "3x"
+    },
+    {
+      "filename": "vignette-flamboyan-dark@2x.png",
+      "idiom": "universal",
+      "scale": "2x",
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ]
+    },
+    {
+      "filename": "vignette-flamboyan-dark@3x.png",
+      "idiom": "universal",
+      "scale": "3x",
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ]
+    },
+    {
+      "filename": "vignette-flamboyan-hc-light@2x.png",
+      "idiom": "universal",
+      "scale": "2x",
+      "appearances": [
+        {
+          "appearance": "contrast",
+          "value": "high"
+        }
+      ]
+    },
+    {
+      "filename": "vignette-flamboyan-hc-light@3x.png",
+      "idiom": "universal",
+      "scale": "3x",
+      "appearances": [
+        {
+          "appearance": "contrast",
+          "value": "high"
+        }
+      ]
+    },
+    {
+      "filename": "vignette-flamboyan-hc-dark@2x.png",
+      "idiom": "universal",
+      "scale": "2x",
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        },
+        {
+          "appearance": "contrast",
+          "value": "high"
+        }
+      ]
+    },
+    {
+      "filename": "vignette-flamboyan-hc-dark@3x.png",
+      "idiom": "universal",
+      "scale": "3x",
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        },
+        {
+          "appearance": "contrast",
+          "value": "high"
+        }
+      ]
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}
