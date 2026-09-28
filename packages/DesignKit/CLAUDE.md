@@ -12,6 +12,7 @@ Shared design system for 418 Studio iOS apps. Codifies the brutalist philosophy 
 - **`Providers/AestheticBrutalistTheme`** — Biombo's default provider. Cerulean `#0033BE` + Off-White `#F5F0DC`, `.monospaced` font design, dark only.
 - **`glassCard`** — system materials already adapt to light/dark; under Increase Contrast the plate goes to `.opaque` so card text never depends on what scrolls beneath it.
 - **`Spacing`** — 4pt base scale. Values mirror Checkpoint's current `Spacing` enum exactly so the eventual extraction is a source-level no-op.
+- **`readableContentWidth()` / `readableListMargins()`** (`Modifiers/ReadableContentWidth.swift`) — cap content at `DKSpacing.readableWidth` (680) at regular width; no-ops at compact width.
 - **`Color(hex:)`** extension — utility ported from Checkpoint.
 - **`Resources/Fonts/JetBrainsMono-{Light,Regular,Medium,Bold}.ttf`** — bundled here so every app in the monorepo can use the same brutalist typeface. Registered lazily via `DesignKitFonts.registerAll()` on first font access (see `FontRegistration.swift`).
 - **`DesignKitFonts.jetBrainsMono(weight:size:)`** / `jetBrainsMono(weight:textStyle:)` (`Typography.swift`) — namespaced accessors. Use the `textStyle:` variant for Dynamic-Type scaling.

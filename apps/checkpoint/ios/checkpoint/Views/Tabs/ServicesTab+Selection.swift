@@ -2,7 +2,7 @@
 //  ServicesTab+Selection.swift
 //  checkpoint
 //
-//  Edit mode. Select (in the shared toolbar, `TabRootStack`) turns the list's
+//  Edit mode. Select (in the shared toolbar, `TabRootActions`) turns the list's
 //  edit mode on; rows grow the system selection circle, and a bottom toolbar
 //  replaces the tab bar with the bulk actions and their counts:
 //
@@ -24,7 +24,10 @@ extension ServicesTab {
             let services = content.services.filter { selection.contains(.service($0.id)) }
 
             ToolbarItem(placement: .bottomBar) {
-                Button(L10n.servicesActionMarkDoneCount(services.count)) {
+                ToolbarTextButton(
+                    L10n.servicesActionMarkDoneCount(services.count),
+                    systemImage: "checkmark.circle"
+                ) {
                     guard let vehicle else { return }
                     appState.present(.markDone(MarkDoneRequest(services: services, vehicle: vehicle)))
                     appState.servicesTab.setSelecting(false)
@@ -33,7 +36,11 @@ extension ServicesTab {
             }
             ToolbarSpacer(.flexible, placement: .bottomBar)
             ToolbarItem(placement: .bottomBar) {
-                Button(L10n.servicesActionDeleteCount(selection.count), role: .destructive) {
+                ToolbarTextButton(
+                    L10n.servicesActionDeleteCount(selection.count),
+                    systemImage: "trash",
+                    role: .destructive
+                ) {
                     pendingDelete = .selection(count: selection.count)
                 }
                 .disabled(selection.isEmpty)
@@ -42,14 +49,17 @@ extension ServicesTab {
     }
 }
 
-/// Select / Done for the Services tab root. Shown by `TabRootStack` only while
+/// Select / Done for the Services tab root. Shown by `TabRootActions` only while
 /// the list has something to select.
 struct ServicesSelectButton: View {
     @Environment(AppState.self) private var appState
 
     var body: some View {
         let isSelecting = appState.servicesTab.isSelecting
-        Button(isSelecting ? L10n.commonDone : L10n.servicesActionSelect) {
+        ToolbarTextButton(
+            isSelecting ? L10n.commonDone : L10n.servicesActionSelect,
+            systemImage: isSelecting ? "checkmark" : "checkmark.circle"
+        ) {
             appState.servicesTab.setSelecting(!isSelecting)
         }
         .accessibilityIdentifier("toolbar.servicesSelect")

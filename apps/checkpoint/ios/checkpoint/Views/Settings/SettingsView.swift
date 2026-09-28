@@ -49,6 +49,7 @@ struct SettingsView: View {
                     }
                     .padding(Spacing.screenHorizontal)
                     .padding(.top, Spacing.lg)
+                    .readableContentWidth()
                 }
             }
             .trackScreen(.settings)

@@ -2,8 +2,9 @@
 //  ContentView.swift
 //  checkpoint
 //
-//  Root shell: the system TabView, one NavigationStack per tab
-//  (`TabRootStack`), the single root sheet router, and the onboarding surfaces.
+//  Root shell: the system TabView, one NavigationStack per tab, or list | detail
+//  columns at regular width (`TabColumnsStack`), the single root sheet router,
+//  and the onboarding surfaces.
 //
 
 import SwiftUI
@@ -88,23 +89,42 @@ struct ContentView: View {
     private var tabs: some View {
         TabView(selection: $appState.selectedTab) {
             SwiftUI.Tab(Tab.home.title, systemImage: Tab.home.icon, value: Tab.home) {
-                TabRootStack(tab: .home, vehicles: vehicles) {
+                TabColumnsStack(tab: .home, vehicles: vehicles) {
                     HomeTab(vehicle: appState.selectedVehicle, onboardingState: onboardingState)
                 }
             }
             SwiftUI.Tab(Tab.services.title, systemImage: Tab.services.icon, value: Tab.services) {
-                TabRootStack(tab: .services, vehicles: vehicles) {
+                TabColumnsStack(tab: .services, vehicles: vehicles) {
                     ServicesTab(vehicle: appState.selectedVehicle, onboardingState: onboardingState)
                 }
             }
             SwiftUI.Tab(Tab.costs.title, systemImage: Tab.costs.icon, value: Tab.costs) {
-                TabRootStack(tab: .costs, vehicles: vehicles) {
+                TabColumnsStack(tab: .costs, vehicles: vehicles) {
                     CostsTab(vehicle: appState.selectedVehicle, onboardingState: onboardingState)
                 }
             }
         }
+        // iPad: a top tab bar that adapts to a sidebar, opening as the sidebar.
+        .tabViewStyle(.sidebarAdaptable)
+        .defaultAdaptableTabBarPlacement(.sidebar)
+        .modifier(RegularWidthTabBarPlacement())
         .tabBarMinimizeBehavior(.onScrollDown)
         .tint(Theme.accent)
+    }
+}
+
+/// iPhone at regular width (the Duo unfolded) prefers the sidebar too. Only
+/// there: compact iPhone keeps its bottom tab bar exactly as before.
+/// `defaultTabBarPlacement` is iOS 27.
+private struct RegularWidthTabBarPlacement: ViewModifier {
+    @Environment(\.horizontalSizeClass) private var sizeClass
+
+    func body(content: Content) -> some View {
+        if #available(iOS 27.0, *) {
+            content.defaultTabBarPlacement(sizeClass == .regular ? .sidebar : .automatic)
+        } else {
+            content
+        }
     }
 }
 

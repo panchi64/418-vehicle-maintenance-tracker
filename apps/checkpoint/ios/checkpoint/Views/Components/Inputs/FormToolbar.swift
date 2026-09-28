@@ -51,13 +51,15 @@ struct FormToolbar: ViewModifier {
             .interactiveDismissDisabled(isDirty)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(L10n.commonCancel, action: cancel)
+                    ToolbarTextButton(L10n.commonCancel, systemImage: "xmark", action: cancel)
                         .accessibilityIdentifier("form.cancel")
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(action: save) {
-                        Text(isSaving ? L10n.formSaving : saveTitle)
-                    }
+                    ToolbarTextButton(
+                        isSaving ? L10n.formSaving : saveTitle,
+                        systemImage: "checkmark",
+                        action: save
+                    )
                     .buttonStyle(.glassProminent)
                     .tint(Theme.accent)
                     .opacity(canSave ? 1 : 0.4)

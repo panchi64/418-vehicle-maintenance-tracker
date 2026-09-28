@@ -77,6 +77,7 @@ struct OnboardingGetStartedView: View {
             }
             .padding(.horizontal, Spacing.screenHorizontal)
             .padding(.bottom, Spacing.xl)
+            .readableContentWidth()
             .scrollingWhenTooTall()
         }
         .preferredColorScheme(.dark)

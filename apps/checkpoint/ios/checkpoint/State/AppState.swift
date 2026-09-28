@@ -19,7 +19,7 @@ final class AppState {
 
     /// Each tab's NavigationStack path. Held here, not in the tabs, so a
     /// notification route can switch tab and push in one state change.
-    var paths: [Tab: [AppRoute]] = [:]
+    var paths: [Tab: [AppRoute]] = [:] { didSet { NSLog("EXPPATH %@", String(describing: paths.mapValues(\.count))); if (paths[.services]?.count ?? 0) >= 1 { for f in Thread.callStackSymbols.prefix(70).dropFirst(6) { NSLog("EXPSTACK %@", f) } } } } //EXP
 
     /// Switch vehicle from the UI. Every stack is popped to its root, since the
     /// details on them belong to the previous vehicle.

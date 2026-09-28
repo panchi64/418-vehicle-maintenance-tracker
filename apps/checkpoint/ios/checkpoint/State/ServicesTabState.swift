@@ -16,7 +16,7 @@ struct ServicesTabState {
     var searchText = ""
 
     /// Edit mode, entered from the toolbar's Select. Lives here rather than in
-    /// the tab so the shared toolbar (`TabRootStack`) can toggle it.
+    /// the tab so the shared toolbar (`TabRootActions`) can toggle it.
     var isSelecting = false
     var selection: Set<ServicesSelectionID> = []
 

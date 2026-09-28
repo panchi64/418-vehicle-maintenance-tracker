@@ -61,6 +61,7 @@ struct VehicleNotesView: View {
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
+                .readableListMargins()
                 .overlay {
                     if matches.isEmpty {
                         ContentUnavailableView.search(text: searchText)
@@ -73,10 +74,7 @@ struct VehicleNotesView: View {
         .searchable(text: $searchText, prompt: L10n.notesSearchPlaceholder)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button(action: addNote) {
-                    Image(systemName: "plus")
-                }
-                .accessibilityLabel(L10n.notesAdd)
+                Button(L10n.notesAdd, systemImage: "plus", action: addNote)
             }
         }
         .alert(L10n.notesDeleteConfirmTitle, isPresented: Binding(

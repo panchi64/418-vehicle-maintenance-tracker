@@ -23,6 +23,9 @@ final class ShellNavigationTests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
         app = XCUIApplication()
+        // A returning user (read from the argument domain): skips onboarding
+        // and seeds the sample garage when the store is empty.
+        app.launchArguments += ["-hasCompletedOnboarding", "YES"]
         app.launch()
     }
 
@@ -122,24 +125,30 @@ final class ShellNavigationTests: XCTestCase {
         tab("Services").tap()
 
         let library = app.buttons["Document library"]
-        guard library.waitForExistence(timeout: 3) else {
-            throw XCTSkip("No vehicle selected, so no document library link")
-        }
-        // The link sits at the bottom of the tab's scroll content.
+        // The link sits at the bottom of a lazy list, past the history: it
+        // exists only once scrolled near.
         var attempts = 0
-        while !library.isHittable && attempts < 6 {
-            app.swipeUp()
+        while !(library.exists && library.isHittable) && attempts < 25 {
+            app.swipeUp(velocity: .fast)
             attempts += 1
+        }
+        guard library.exists else {
+            throw XCTSkip("No vehicle selected, so no document library link")
         }
         library.tap()
 
         let documentsBar = app.navigationBars["Documents"]
         XCTAssertTrue(documentsBar.waitForExistence(timeout: 3), "Documents should push, not present")
         // Pushed: a back button, and the tab bar is still there.
-        XCTAssertTrue(documentsBar.buttons.element(boundBy: 0).exists)
+        let back = documentsBar.buttons["BackButton"]
+        XCTAssertTrue(back.exists)
         XCTAssertTrue(tab("Services").exists)
 
-        documentsBar.buttons.element(boundBy: 0).tap()
-        XCTAssertTrue(documentsBar.waitForNonExistence(timeout: 3), "Back pops to the Services root")
+        // Let the push finish: a tap mid-transition is dropped.
+        let hittable = expectation(for: NSPredicate(format: "isHittable == true"), evaluatedWith: back)
+        wait(for: [hittable], timeout: 3)
+        back.tap()
+        sleep(2); print("EXPDUMP\n" + app.debugDescription) //EXP
+        XCTAssertTrue(documentsBar.waitForNonExistence(timeout: 5), "Back pops to the Services root")
     }
 }

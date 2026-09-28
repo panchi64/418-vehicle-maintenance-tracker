@@ -64,6 +64,7 @@ struct EditVehicleView: View {
                         .padding(.horizontal, Spacing.screenHorizontal)
                         .padding(.top, Spacing.md)
                         .padding(.bottom, Spacing.xxl)
+                        .readableContentWidth()
                     }
                 }
                 .keyboardDismissToolbar()

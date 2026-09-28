@@ -26,6 +26,7 @@ import SwiftData
 
 struct CostsTab: View {
     @Environment(AppState.self) var appState
+    @Environment(\.openRoute) var openRoute
     let onboardingState: OnboardingState
     @Query var serviceLogs: [ServiceLog]
 

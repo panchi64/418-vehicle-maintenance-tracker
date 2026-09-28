@@ -55,6 +55,7 @@ struct ServiceVisitDetailView: View {
             }
             .padding(.horizontal, Spacing.screenHorizontal)
             .padding(.vertical, Spacing.lg)
+            .readableContentWidth()
         }
         .background(Theme.backgroundPrimary)
         .navigationTitle(L10n.rowVisitTitle)
@@ -63,7 +64,7 @@ struct ServiceVisitDetailView: View {
         .toolbar {
             if let first = logs.first {
                 ToolbarItem(placement: .primaryAction) {
-                    Button(L10n.servicesActionEdit) {
+                    ToolbarTextButton(L10n.servicesActionEdit, systemImage: "pencil") {
                         logToEdit = first
                     }
                 }

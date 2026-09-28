@@ -496,7 +496,10 @@ struct WidgetColors {
 ### Components/Navigation/
 | Component | Purpose |
 |-----------|---------|
-| `TabRootStack.swift` | A tab's `NavigationStack`, its root chrome (vehicle title menu, Settings, add service), and the `AppRoute` destinations |
+| `TabColumnsStack.swift` | A tab's navigation: one `NavigationStack` at compact width (and Home), list-and-detail `NavigationSplitView` for Services/Costs at regular width — both over `AppState.paths[tab]` |
+| `TabRootChrome.swift` | Root chrome (vehicle title menu, Settings ⌘,) and `TabRootActions` (Select, add service ⌘N) |
+| `RouteLink.swift` | `RouteLink`, `openRoute` and the column environment: rows open details without knowing the size class |
+| `AppRouteDestination.swift` | The screen for each `AppRoute` |
 | `EmptyStateView.swift` | Standardized empty state |
 
 ## Shell Architecture
@@ -507,14 +510,15 @@ System shell, brand content: navigation chrome is native (tab bar, navigation ba
 ContentView
 ├── ContentView+Modifiers.swift  sheet router · onboarding covers + tour overlay · notification routing
 ├── ToastWindowInstaller         toasts in a passthrough window above sheets
-└── TabView(selection: appState.selectedTab)   .tabBarMinimizeBehavior(.onScrollDown), tinted accent
-    ├── Home      → TabRootStack → HomeTab     (VehicleSummaryBand, Next Up, …)
-    ├── Services  → TabRootStack → ServicesTab (.searchable, status groups, Select mode)
-    └── Costs     → TabRootStack → CostsTab
+└── TabView(selection: appState.selectedTab)   .sidebarAdaptable (iPad sidebar), .tabBarMinimizeBehavior(.onScrollDown)
+    ├── Home      → TabColumnsStack → HomeTab     (VehicleSummaryBand, Next Up, …)
+    ├── Services  → TabColumnsStack → ServicesTab (.searchable, status groups, Select mode)
+    └── Costs     → TabColumnsStack → CostsTab
 ```
 
-- **Tab roots** share one chrome (`TabRootStack`): the vehicle name is the inline navigation title, with `.toolbarTitleMenu` to switch vehicle (checkmark on current), add a vehicle, or manage vehicles (the picker sheet). Settings is the leading toolbar item (it shows the sync-error glyph when there is one); add service is the one prominent trailing item.
+- **Tab roots** share one chrome (`.tabRootChrome`): the vehicle name is the inline navigation title, with `.toolbarTitleMenu` to switch vehicle (checkmark on current), add a vehicle, or manage vehicles (the picker sheet). Settings is the leading toolbar item (it shows the sync-error glyph when there is one); add service is the one prominent trailing item.
 - **Details are pushed, tasks are sheets.** `AppRoute` (service, service log, visit, document, documents library) is pushed onto the visible tab's path in `AppState.paths`; `appState.push(_:)`. Add/edit forms, mileage update, vehicle picker/add/edit, paywall, tip modal and theme reveal are sheets.
+- **Regular width** (iPad, the Duo's inner display): Services and Costs show list | detail. The detail column is a stack over the same `paths[tab]` (first screen's back button hidden), so folding keeps what was open. From the list, a column-root route (`AppRoute.isColumnRoot(for:)`) replaces the detail (`AppState.open(_:from:on:)`); everything else pushes.
 - **One root sheet.** `AppState.activeSheet: ActiveSheet?` drives a single `.sheet(item:)`. `present(_:)` replaces whatever is up — if a sheet is on screen, it dismisses and the new one is queued until that sheet's `onDismiss` — so "dismiss then present in the same tick" cannot drop a sheet. `presentWhenIdle(_:)` waits instead of interrupting (tip prompt). Onboarding's full-screen covers stay separate, driven by `OnboardingState`.
 - **Pending routes** (`PendingRoute` in `PendingRouteStore`, applied by `AppState+PendingRoute`) are the one way outside callers — notifications, widget rows (via the `PendingWidgetRoute` App Group queue), intents — navigate: close any sheet, switch tab, and push or present. Switching vehicle (`selectVehicle`) pops every stack.
 - **Tour spotlights** are content only. Targets report window-space frames through `TourSpotlightRegistry` in the environment — preferences don't cross the system `TabView`/`NavigationStack` — and the root overlay converts them.

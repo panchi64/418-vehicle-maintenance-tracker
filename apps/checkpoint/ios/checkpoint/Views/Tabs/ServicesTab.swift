@@ -29,6 +29,7 @@ import SwiftData
 struct ServicesTab: View {
     @Environment(AppState.self) var appState
     @Environment(\.modelContext) var modelContext
+    @Environment(\.openRoute) private var openRouteEXP //EXP
     let onboardingState: OnboardingState
     @Query private var services: [Service]
     @Query var serviceLogs: [ServiceLog]
@@ -217,14 +218,14 @@ struct ServicesTab: View {
     /// from the bottom of the tab, which is what they always were.
     private func referenceSection(vehicle: Vehicle) -> some View {
         Section {
-            NavigationLink(value: AppRoute.documents(vehicle)) {
+            Button { openRouteEXP(.documents(vehicle)) } label: { //EXP
                 Label(L10n.servicesDocumentLibrary, systemImage: "doc.on.doc")
                     .font(.brutalistBodyEmphasis)
                     .foregroundStyle(Theme.textPrimary)
                     .frame(minHeight: TouchTarget.minimum, alignment: .leading)
             }
             .selectionDisabled()
-            .servicesListRow()
+            .servicesListRow(opening: .documents(vehicle))
         } header: {
             InstrumentSectionHeader(title: L10n.servicesReference) {
                 if !serviceLogs.isEmpty {

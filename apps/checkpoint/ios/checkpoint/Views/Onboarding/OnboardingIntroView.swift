@@ -35,7 +35,9 @@ struct OnboardingIntroView: View {
                 .padding(.horizontal, Spacing.screenHorizontal)
                 .padding(.top, Spacing.md)
 
+                // Skip stays in the screen's corner; the reading column is capped.
                 welcomeContent
+                    .readableContentWidth()
 
                 Button {
                     onStartTour()
@@ -44,6 +46,7 @@ struct OnboardingIntroView: View {
                 }
                 .buttonStyle(.primary)
                 .padding(.horizontal, Spacing.screenHorizontal)
+                .readableContentWidth()
                 .padding(.bottom, Spacing.xxl)
             }
         }

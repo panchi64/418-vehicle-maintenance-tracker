@@ -66,6 +66,7 @@ struct ServiceDetailView: View {
             }
             .padding(.horizontal, Spacing.screenHorizontal)
             .padding(.vertical, Spacing.lg)
+            .readableContentWidth()
         }
         .trackScreen(.serviceDetail)
         .background(Theme.backgroundPrimary)
@@ -74,7 +75,7 @@ struct ServiceDetailView: View {
         .onScreenEntity(ServiceEntity.self, id: service.id)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button(L10n.servicesActionEdit) {
+                ToolbarTextButton(L10n.servicesActionEdit, systemImage: "pencil") {
                     showEditSheet = true
                 }
             }

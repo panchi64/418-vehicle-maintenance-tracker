@@ -22,22 +22,31 @@ import SwiftUI
 
 /// The system `List` with the brand's row geometry: flush with the section
 /// header, theme hairlines, content over the tab's own background.
-enum ServicesListRow {
-    static let insets = EdgeInsets(
-        top: 0,
-        leading: Spacing.screenHorizontal,
-        bottom: 0,
-        trailing: Spacing.screenHorizontal
-    )
+///
+/// Inside a list marked `.readableListMargins()` (a regular-width library such
+/// as Documents or Notes), rows and headers add `readableListInset` per side so
+/// the content sits in a centered readable column. Elsewhere it is 0.
+private struct ServicesListInsets: ViewModifier {
+    @Environment(\.readableListInset) private var readableInset
+
+    func body(content: Content) -> some View {
+        let side = Spacing.screenHorizontal + readableInset
+        content.listRowInsets(EdgeInsets(top: 0, leading: side, bottom: 0, trailing: side))
+    }
 }
 
 extension View {
-    func servicesListRow() -> some View {
+    /// `opening` is the route the row opens, highlighted while it is the
+    /// detail beside the list at regular width.
+    func servicesListRow(opening route: AppRoute? = nil) -> some View {
         self
-            .listRowInsets(ServicesListRow.insets)
-            .listRowBackground(Color.clear)
+            .modifier(ServicesListInsets())
+            .columnRowBackground(for: route)
             .listRowSeparatorTint(Theme.gridLine)
             .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
+            // Ends with the content, so a readable-width row's hairline stops
+            // at the column; at 20pt insets this is where it already ended.
+            .alignmentGuide(.listRowSeparatorTrailing) { $0[.trailing] }
     }
 
     /// A section header in the list: the brand's Title Case header, not the
@@ -46,7 +55,7 @@ extension View {
         self
             .textCase(nil)
             .padding(.top, Spacing.lg)
-            .listRowInsets(ServicesListRow.insets)
+            .modifier(ServicesListInsets())
     }
 }
 
@@ -55,7 +64,7 @@ extension ServicesTab {
     // MARK: - Service rows
 
     func serviceRow(_ service: Service, mileage: MileageEstimate, vehicle: Vehicle) -> some View {
-        NavigationLink(value: AppRoute.service(service)) {
+        RouteLink(.service(service)) {
             ServiceRow(
                 service: service,
                 currentMileage: mileage.effective,
@@ -64,7 +73,7 @@ extension ServicesTab {
             )
         }
         .tag(ServicesSelectionID.service(service.id))
-        .servicesListRow()
+        .servicesListRow(opening: .service(service))
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             markDoneButton(service, vehicle: vehicle)
             editButton { sheet = .editService(service) }
@@ -106,11 +115,11 @@ extension ServicesTab {
     // MARK: - Log rows
 
     func logRow(_ log: ServiceLog, vehicle: Vehicle) -> some View {
-        NavigationLink(value: AppRoute.serviceLog(log)) {
+        RouteLink(.serviceLog(log)) {
             historyRow(log)
         }
         .tag(ServicesSelectionID.log(log.id))
-        .servicesListRow()
+        .servicesListRow(opening: .serviceLog(log))
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             deleteLogButton(log)
             editButton { sheet = .editLog(log) }

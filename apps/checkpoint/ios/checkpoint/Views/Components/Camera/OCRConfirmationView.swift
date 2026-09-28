@@ -117,6 +117,7 @@ struct OCRConfirmationView: View {
                     }
                     .padding(Spacing.screenHorizontal)
                     .padding(.top, Spacing.lg)
+                    .readableContentWidth()
                 }
             }
             .keyboardDismissToolbar()

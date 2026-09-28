@@ -80,6 +80,7 @@ struct MileageUpdateSheet: View {
                     }
                     .padding(Spacing.screenHorizontal)
                     .padding(.top, Spacing.lg)
+                    .readableContentWidth()
                 }
             }
             .keyboardDismissToolbar()

@@ -189,6 +189,7 @@ struct EditServiceView: View {
                         }
                         .padding(Spacing.screenHorizontal)
                         .padding(.bottom, Spacing.xxl)
+                        .readableContentWidth()
                     }
                 }
                 .keyboardDismissToolbar()

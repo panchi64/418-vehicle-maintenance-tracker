@@ -1,16 +1,16 @@
 //
-//  TabRootStack.swift
+//  TabRootChrome.swift
 //  checkpoint
 //
-//  One tab's navigation stack and the chrome every tab root shares. System
-//  shell, brand content: the bar, title, menu and buttons are native, so they
-//  sit where iOS users look for them (AESTHETIC.md: "Native placement wins"
-//  for apps); the theme, JetBrains Mono and readout styling stay in the content
-//  underneath.
+//  The chrome every tab root shares, in a stack or in a split view's list
+//  column. System shell, brand content: the bar, title, menu and buttons are
+//  native, so they sit where iOS users look for them (AESTHETIC.md: "Native
+//  placement wins" for apps); the theme, JetBrains Mono and readout styling
+//  stay in the content underneath.
 //
 //    ⚙  │        Daily Driver ⌄        │  [+]
 //   Settings    title menu: switch,       add service — the one
-//               add, manage vehicles      prominent action
+//     ⌘,        add, manage vehicles      prominent action, ⌘N
 //
 //  The vehicle name is the title, and switching lives in its title menu. That
 //  replaced `VehicleHeader`, a custom band above every tab that carried the
@@ -20,10 +20,10 @@
 
 import SwiftUI
 
-struct TabRootStack<Root: View>: View {
+private struct TabRootChrome: ViewModifier {
     let tab: Tab
     let vehicles: [Vehicle]
-    @ViewBuilder let root: () -> Root
+    let includesActions: Bool
 
     @Environment(AppState.self) private var appState
 
@@ -39,21 +39,13 @@ struct TabRootStack<Root: View>: View {
         }
     }
 
-    var body: some View {
-        NavigationStack(path: Binding(
-            get: { appState.paths[tab] ?? [] },
-            set: { appState.paths[tab] = $0 }
-        )) {
-            root()
-                .background { AtmosphericBackground() }
-                .navigationTitle(appState.selectedVehicle?.displayName ?? L10n.headerSelectVehicleAccessibility)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbarTitleMenu { vehicleMenu }
-                .toolbar { rootToolbar }
-                .navigationDestination(for: AppRoute.self) { route in
-                    AppRouteDestination(route: route)
-                }
-        }
+    func body(content: Content) -> some View {
+        content
+            .background { AtmosphericBackground() }
+            .navigationTitle(appState.selectedVehicle?.displayName ?? L10n.headerSelectVehicleAccessibility)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarTitleMenu { vehicleMenu }
+            .toolbar { rootToolbar }
     }
 
     // MARK: - Title menu
@@ -102,14 +94,30 @@ struct TabRootStack<Root: View>: View {
             } label: {
                 // A sync problem shows on the way into Settings, where it is
                 // explained, rather than as a second button beside it.
-                Image(systemName: syncError?.systemImage ?? "gearshape")
+                // A titled Label, drawn icon-only: see `ToolbarTextButton`.
+                Label(L10n.settingsTitle, systemImage: syncError?.systemImage ?? "gearshape")
                     .foregroundStyle(syncError?.iconColor ?? Theme.textSecondary)
             }
-            .accessibilityLabel(L10n.settingsTitle)
+            .keyboardShortcut(",", modifiers: .command)
             .accessibilityValue(syncError == nil ? "" : L10n.toastSyncError)
             .accessibilityIdentifier("toolbar.settings")
         }
 
+        if includesActions {
+            TabRootActions(tab: tab, appState: appState)
+        }
+    }
+}
+
+/// The trailing actions: Select (Services) and the prominent add. In a stack
+/// they end the root's bar. Beside a list they end the DETAIL column's bar
+/// instead: on iPad the floating tab bar sits over the list column's trailing
+/// edge, and the window's trailing edge is where iPad puts the primary action.
+struct TabRootActions: ToolbarContent {
+    let tab: Tab
+    let appState: AppState
+
+    var body: some ToolbarContent {
         // Services only: Select enters its list's edit mode, before [+].
         if tab == .services && appState.servicesTab.hasSelectableContent {
             ToolbarItem(placement: .topBarTrailing) {
@@ -124,59 +132,22 @@ struct TabRootStack<Root: View>: View {
                 HapticService.shared.lightImpact()
                 appState.present(.addService())
             } label: {
-                Image(systemName: "plus")
+                Label(L10n.tabBarAddService, systemImage: "plus")
             }
             .buttonStyle(.glassProminent)
             .tint(Theme.accent)
             .disabled(appState.selectedVehicle == nil)
-            .accessibilityLabel(L10n.tabBarAddService)
+            .keyboardShortcut("n", modifiers: .command)
             .accessibilityIdentifier("toolbar.addService")
         }
     }
 }
 
-// MARK: - Destinations
-
-/// The screen for each pushed `AppRoute`.
-struct AppRouteDestination: View {
-    let route: AppRoute
-
-    @Environment(AppState.self) private var appState
-
-    var body: some View {
-        switch route {
-        case .service(let service):
-            if let vehicle = service.vehicle ?? appState.selectedVehicle {
-                ServiceDetailView(service: service, vehicle: vehicle)
-            }
-        case .serviceLog(let log):
-            ServiceLogDestination(log: log)
-        case .visit(let visit):
-            ServiceVisitDetailView(visit: visit)
-        case .document(let document):
-            DocumentDetailView(document: document)
-        case .documents(let vehicle):
-            DocumentsView(vehicle: vehicle)
-        case .notes(let vehicle):
-            VehicleNotesView(vehicle: vehicle)
-        }
-    }
-}
-
-/// A pushed log detail that deletes its log only after it has popped: a model
-/// deleted while its screen is still animating away can be read by a view that
-/// no longer has it. Deletion offers Undo — the toast renders above everything.
-private struct ServiceLogDestination: View {
-    let log: ServiceLog
-
-    @State private var pendingDeletion: ServiceLog?
-
-    var body: some View {
-        ServiceLogDetailView(log: log, onDelete: { pendingDeletion = $0 })
-            .onDisappear {
-                guard let log = pendingDeletion else { return }
-                pendingDeletion = nil
-                ServiceLogDeleteAction.perform(log, offerUndo: true)
-            }
+extension View {
+    /// A tab root's title, vehicle menu, toolbar and background. A split
+    /// view's list column passes `includesActions: false` and puts
+    /// `TabRootActions` on its detail column.
+    func tabRootChrome(_ tab: Tab, vehicles: [Vehicle], includesActions: Bool = true) -> some View {
+        modifier(TabRootChrome(tab: tab, vehicles: vehicles, includesActions: includesActions))
     }
 }

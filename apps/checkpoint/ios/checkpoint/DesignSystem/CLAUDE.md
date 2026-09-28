@@ -159,6 +159,10 @@ Glow: `glowRadius` 8 / `glowOpacity` 0.3 · `statusGlowRadius` 12 / `statusGlowO
 
 **Buttons** — `.buttonStyle(.primary)` (filled), `.buttonStyle(.secondary)` (outlined), `.buttonStyle(.instrument)`, `.toolbarButtonStyle(isDisabled:)`
 
+**Toolbar items need a title *and* a system image** — regular-width vertical toolbars (the foldable's inner display) drop title-only and custom-view items. Icon-only: `Button(title, systemImage:)` / a `Label` (the bar draws the icon). Text-looking: `ToolbarTextButton(title, systemImage:role:action:)`, which carries the symbol but draws `.titleOnly`.
+
+**Regular width** (DesignKit) — `.readableContentWidth()` caps a scroll view's *content* at `DKSpacing.readableWidth` (680, padding included) and centers it; apply after the content's padding, never to the scroll view or background. A plain `List` uses `.readableListMargins()` instead, which publishes `\.readableListInset` for `servicesListRow()` / `servicesListHeader()` to add to their insets. Both are no-ops at compact width.
+
 **Status** — `StatusTag(status:)` (shape + word; the default) and `StatusMark(status:)` (shape only, when the word is already adjacent). Overdue = filled square, due soon = outlined square, good = short rule. Never draw status as a bare colored dot.
 
 **Structural components** — `InstrumentSection`, `InstrumentSectionHeader`, `BrutalistDataRow`, `AtmosphericBackground`, `AdaptiveStack` + `AdaptiveSpacer` (AX-size stacking)

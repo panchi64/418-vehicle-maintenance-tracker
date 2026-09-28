@@ -37,6 +37,7 @@ struct ServiceClusterDetailSheet: View {
                     }
                     .padding(.horizontal, Spacing.screenHorizontal)
                     .padding(.vertical, Spacing.lg)
+                    .readableContentWidth()
                 }
             }
             .navigationTitle(L10n.clusterTitle)

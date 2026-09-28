@@ -154,6 +154,7 @@ struct DocumentsView: View {
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
+        .readableListMargins()
         .environment(\.editMode, Binding(
             get: { isSelecting ? .active : .inactive },
             set: { setSelecting($0.isEditing) }
@@ -206,7 +207,10 @@ struct DocumentsView: View {
     private func toolbarItems(hasDocuments: Bool) -> some ToolbarContent {
         if hasDocuments {
             ToolbarItem(placement: .primaryAction) {
-                Button(isSelecting ? L10n.documentsSelectionDoneAction : L10n.documentsSelectAction) {
+                ToolbarTextButton(
+                    isSelecting ? L10n.documentsSelectionDoneAction : L10n.documentsSelectAction,
+                    systemImage: isSelecting ? "checkmark" : "checkmark.circle"
+                ) {
                     setSelecting(!isSelecting)
                 }
             }
@@ -214,25 +218,29 @@ struct DocumentsView: View {
 
         if !isSelecting {
             ToolbarItem(placement: .primaryAction) {
-                Button {
+                Button(L10n.documentsAdd, systemImage: "plus") {
                     showAddSheet = true
-                } label: {
-                    Image(systemName: "plus")
                 }
-                .accessibilityLabel(L10n.documentsAdd)
             }
         }
 
         if isSelecting {
             ToolbarItem(placement: .bottomBar) {
-                Button(L10n.documentsShareCount(selectedIDs.count)) {
+                ToolbarTextButton(
+                    L10n.documentsShareCount(selectedIDs.count),
+                    systemImage: "square.and.arrow.up"
+                ) {
                     share(selectedDocuments)
                 }
                 .disabled(selectedIDs.isEmpty)
             }
             ToolbarSpacer(.flexible, placement: .bottomBar)
             ToolbarItem(placement: .bottomBar) {
-                Button(L10n.documentsDeleteCount(selectedIDs.count), role: .destructive) {
+                ToolbarTextButton(
+                    L10n.documentsDeleteCount(selectedIDs.count),
+                    systemImage: "trash",
+                    role: .destructive
+                ) {
                     showBulkDeleteConfirmation = true
                 }
                 .disabled(selectedIDs.isEmpty)

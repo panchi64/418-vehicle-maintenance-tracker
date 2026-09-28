@@ -58,6 +58,7 @@ struct ServiceLogDetailView: View {
             }
             .padding(.horizontal, Spacing.screenHorizontal)
             .padding(.vertical, Spacing.lg)
+            .readableContentWidth()
         }
         .trackScreen(.serviceLogDetail)
         .background(Theme.backgroundPrimary)
@@ -66,7 +67,7 @@ struct ServiceLogDetailView: View {
         .onScreenEntity(ServiceLogEntity.self, id: log.id)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button(L10n.servicesActionEdit) {
+                ToolbarTextButton(L10n.servicesActionEdit, systemImage: "pencil") {
                     showEditSheet = true
                 }
             }

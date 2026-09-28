@@ -13,4 +13,8 @@ public enum DKSpacing {
     public static let xl: CGFloat = 32
     public static let xxl: CGFloat = 48
     public static let tabBarOffset: CGFloat = 56
+    /// Widest a column of reading content grows (including its own screen
+    /// padding) at regular width — iPad, the foldable's inner display. Close
+    /// to UIKit's readable content guide. See `readableContentWidth()`.
+    public static let readableWidth: CGFloat = 680
 }

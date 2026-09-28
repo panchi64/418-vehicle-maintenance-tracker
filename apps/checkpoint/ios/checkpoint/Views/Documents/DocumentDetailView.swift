@@ -69,6 +69,7 @@ struct DocumentDetailView: View {
                 }
                 .padding(.horizontal, Spacing.screenHorizontal)
                 .padding(.vertical, Spacing.lg)
+                .readableContentWidth()
             }
         }
         .navigationTitle(L10n.documentsTitle)
@@ -91,10 +92,9 @@ struct DocumentDetailView: View {
                         Label(L10n.documentsDeleteAction, systemImage: "trash")
                     }
                 } label: {
-                    Image(systemName: "ellipsis.circle")
+                    Label(L10n.documentsMoreActions, systemImage: "ellipsis.circle")
                 }
                 .toolbarButtonStyle()
-                .accessibilityLabel(L10n.documentsMoreActions)
             }
         }
         .quickLookPreview($previewURL)

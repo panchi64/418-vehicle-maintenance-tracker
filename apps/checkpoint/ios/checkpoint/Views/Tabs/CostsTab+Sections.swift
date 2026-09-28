@@ -191,7 +191,7 @@ extension CostsTab {
                                     ListDivider()
                                 }
                             }
-                            .costsListRow(top: 0, bottom: 0)
+                            .costsListRow(top: 0, bottom: 0, opening: event.route)
                     }
                 }
             }
@@ -203,7 +203,7 @@ extension CostsTab {
         switch event {
         case .standalone(let log):
             ExpenseRow(log: log, isAnomalous: isAnomalous) {
-                appState.push(.serviceLog(log))
+                openRoute(event.route)
             }
             // Swipe and long-press reach the same Delete (with undo).
             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -216,8 +216,18 @@ extension CostsTab {
             .serviceLogDeleteMenu { ServiceLogDeleteAction.perform(log, offerUndo: true) }
         case .visit(let visit):
             VisitExpenseRow(visit: visit, isAnomalous: isAnomalous) {
-                appState.push(.visit(visit))
+                openRoute(event.route)
             }
+        }
+    }
+}
+
+private extension ExpenseEvent {
+    /// The detail an expense row opens.
+    var route: AppRoute {
+        switch self {
+        case .standalone(let log): return .serviceLog(log)
+        case .visit(let visit): return .visit(visit)
         }
     }
 }
@@ -227,7 +237,11 @@ extension CostsTab {
 extension View {
     /// The brutalist row: screen-edge insets, no system background or
     /// separator (rows draw their own 1pt rule).
-    func costsListRow(top: CGFloat = Spacing.md, bottom: CGFloat = Spacing.md) -> some View {
+    func costsListRow(
+        top: CGFloat = Spacing.md,
+        bottom: CGFloat = Spacing.md,
+        opening route: AppRoute? = nil
+    ) -> some View {
         self
             .listRowInsets(EdgeInsets(
                 top: top,
@@ -235,7 +249,7 @@ extension View {
                 bottom: bottom,
                 trailing: Spacing.screenHorizontal
             ))
-            .listRowBackground(Color.clear)
+            .columnRowBackground(for: route)
             .listRowSeparator(.hidden)
     }
 }
